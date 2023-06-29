@@ -25,7 +25,6 @@ Nitori = Client(
     config.NITORI_TOKEN,
     client_id = config.NITORI_ID,
     application_id = config.NITORI_ID,
-    intents = IntentFlag().update_by_keys(message_content = False),
     extensions = 'slash',
     random_error_message_getter = random_error_message_getter,
 )

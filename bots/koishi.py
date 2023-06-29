@@ -7,7 +7,7 @@ from scarletio.utils.trace import render_exception_into
 import config
 from bot_utils.constants import CHANNEL__SUPPORT__DEFAULT_TEST
 from bot_utils.event_payload_analyzer import guess_event_payload_structure, render_payload_states
-from bot_utils.tools import EmojiDeleteWaitfor, MessageDeleteWaitfor, RoleDeleteWaitfor, RoleEditWaitfor
+from bot_utils.tools import EmojiDeleteWaitfor, MessageDeleteWaitfor, RoleDeleteWaitfor, RoleUpdateWaitfor
 
 
 Koishi = Client(
@@ -34,7 +34,7 @@ Koishi = Client(
 Koishi.events(MessageDeleteWaitfor)
 Koishi.events(RoleDeleteWaitfor)
 Koishi.events(EmojiDeleteWaitfor)
-Koishi.events(RoleEditWaitfor)
+Koishi.events(RoleUpdateWaitfor)
 
 
 @Koishi.events(overwrite = True)

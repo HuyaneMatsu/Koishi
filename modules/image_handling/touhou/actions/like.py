@@ -4,8 +4,8 @@ from ...image_handler import ImageDetail
 
 from ..character import freeze
 from ..characters import (
-    FUTATSUIWA_MAMIZOU, JUNKO, KAKU_SEIGA, KAZAMI_YUUKA, KOMEIJI_KOISHI, RUMIA, SAIGYOUJI_YUYUKO, YAGOKORO_EIRIN,
-    YAKUMO_YUKARI
+    FUTATSUIWA_MAMIZOU, INABA_TEWI, JUNKO, KAKU_SEIGA, KAZAMI_YUUKA, KOMEIJI_KOISHI, RUMIA, SAIGYOUJI_YUYUKO,
+    YAGOKORO_EIRIN, YAKUMO_YUKARI
 )
 
 # Images from: https://safebooru.org/index.php?page=post&s=list&tags=2girls+pocky_kiss+touhou
@@ -49,6 +49,10 @@ TOUHOU_ACTION_LIKE = [
         freeze(KAKU_SEIGA),
     ),
     ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1124044845602848768/tewi-older-0000.png',
+        freeze(INABA_TEWI),
+    ),
+    ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683128563355668/yukari-japanese-goblin-0000.png',
         freeze(YAKUMO_YUKARI),
     ),
@@ -79,6 +83,10 @@ TOUHOU_ACTION_LIKE = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683104991354941/yukari-older-0006.png',
         freeze(YAKUMO_YUKARI),
+    ),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1124044846064214138/yukari-yuyuko-older-0000.png',
+        freeze(YAKUMO_YUKARI, SAIGYOUJI_YUYUKO),
     ),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683105435955271/yuuka-older-0000.png',

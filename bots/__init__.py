@@ -4,6 +4,7 @@ import config
 
 if config.MARISA_MODE:
     from .marisa import *
+    from .sakuya import *
     
     
     COMMAND_CLIENT = Marisa
@@ -15,6 +16,7 @@ if config.MARISA_MODE:
         'MAIN_CLIENT',
         'SLASH_CLIENT',
         *marisa.__all__,
+        *sakuya.__all__,
     )
     
 

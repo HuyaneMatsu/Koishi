@@ -92,6 +92,15 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ---
 
+### `tewi-older-0000`
+
+- Artist:  *unknown*
+- Edit: *unknown*
+
+
+- Character: **Inaba Tewi**
+- Source: **Touhou**
+
 ### `yukari-japanese-goblin-0000`
 
 - Artist:  *unknown*
@@ -176,6 +185,17 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 
 - Character: **Yakumo Yukari**
+- Source: **Touhou**
+
+---
+
+### `yukari-yuyuko-older-0000`
+
+- Artist:  *unknown*
+- Edit: *unknown*
+
+
+- Character: **Yakumo Yukari** & **Saigyouji Yuyuko**
 - Source: **Touhou**
 
 ---

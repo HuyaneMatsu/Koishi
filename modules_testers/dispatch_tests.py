@@ -65,8 +65,8 @@ class dispatch_tester:
     
     
     @classmethod
-    async def client_edit(self, client, old):
-        Task(KOKORO, self.old_events['client_edit'](client, old))
+    async def client_update(self, client, old):
+        Task(KOKORO, self.old_events['client_update'](client, old))
         if self.channel is None:
             return
         
@@ -94,8 +94,8 @@ class dispatch_tester:
     
     
     @classmethod
-    async def message_edit(self, client, message, old):
-        Task(KOKORO, self.old_events['message_edit'](client, message, old))
+    async def message_update(self, client, message, old):
+        Task(KOKORO, self.old_events['message_update'](client, message, old))
         if self.channel is None:
             return
         
@@ -348,8 +348,8 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout = 120.)
 
     @classmethod
-    async def user_edit(self, client, user, old):
-        Task(KOKORO, self.old_events['user_edit'](client, user, old))
+    async def user_update(self, client, user, old):
+        Task(KOKORO, self.old_events['user_update'](client, user, old))
         if self.channel is None:
             return
         
@@ -361,8 +361,8 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout = 120.)
     
     @classmethod
-    async def guild_user_edit(self, client, user, guild, old):
-        Task(KOKORO, self.old_events['guild_user_edit'](client, user, old, guild))
+    async def guild_user_update(self, client, user, guild, old):
+        Task(KOKORO, self.old_events['guild_user_update'](client, user, old, guild))
         if self.channel is None:
             return
         
@@ -402,9 +402,9 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout = 120.)
 
     @classmethod
-    async def channel_edit(self, client, channel, old):
+    async def channel_update(self, client, channel, old):
         print(client, channel, old)
-        Task(KOKORO, self.old_events['channel_edit'](client, channel, old))
+        Task(KOKORO, self.old_events['channel_update'](client, channel, old))
         if self.channel is None:
             return
         
@@ -480,8 +480,8 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout = 120.)
         
     @classmethod
-    async def emoji_edit(self, client, emoji, old):
-        Task(KOKORO, self.old_events['emoji_edit'](client, emoji, old))
+    async def emoji_update(self, client, emoji, old):
+        Task(KOKORO, self.old_events['emoji_update'](client, emoji, old))
         if self.channel is None:
             return
     
@@ -529,8 +529,8 @@ class dispatch_tester:
         await Closer(client, self.channel, embed, timeout = 120.)
     
     @classmethod
-    async def sticker_edit(self, client, sticker, old):
-        Task(KOKORO, self.old_events['sticker_edit'](client, sticker, old))
+    async def sticker_update(self, client, sticker, old):
+        Task(KOKORO, self.old_events['sticker_update'](client, sticker, old))
         if self.channel is None:
             return
         
@@ -586,9 +586,9 @@ class dispatch_tester:
     #guild_sync
     
     @classmethod
-    async def guild_edit(self, client, guild, old):
+    async def guild_update(self, client, guild, old):
         
-        Task(KOKORO, self.old_events['guild_edit'](client, guild, old))
+        Task(KOKORO, self.old_events['guild_update'](client, guild, old))
         if self.channel is None:
             return
         
@@ -696,7 +696,7 @@ class dispatch_tester:
     #Auto dispatched:
     #guild_user_chunk
     #Need integration:
-    #integration_edit
+    #integration_update
 
     @classmethod
     async def role_create(self, client,role):
@@ -720,8 +720,8 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout = 120.)
 
     @classmethod
-    async def role_edit(self, client, role, old):
-        Task(KOKORO, self.old_events['role_edit'](client, role, old))
+    async def role_update(self, client, role, old):
+        Task(KOKORO, self.old_events['role_update'](client, role, old))
         if self.channel is None:
             return
         
@@ -830,8 +830,8 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout = 120.)
     
     @classmethod
-    async def client_edit_settings(self, client, old):
-        Task(KOKORO, self.old_events['client_edit_settings'](client, old))
+    async def client_update_settings(self, client, old):
+        Task(KOKORO, self.old_events['client_update_settings'](client, old))
         if self.channel is None:
             return
         
@@ -891,13 +891,13 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout = 120.)
     
     @classmethod
-    async def integration_edit(self, client, guild, integration):
-        Task(KOKORO, self.old_events['integration_edit'](client, guild, integration))
+    async def integration_update(self, client, guild, integration):
+        Task(KOKORO, self.old_events['integration_update'](client, guild, integration))
         if self.channel is None:
             return
         
         text = [integration]
-        text.insert(0, f'integration_edit at {guild.name} ({guild.id}):')
+        text.insert(0, f'integration_update at {guild.name} ({guild.id}):')
         pages = [Embed(description = chunk) for chunk in cchunkify(text)]
         
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -955,8 +955,8 @@ class dispatch_tester:
     
     
     @classmethod
-    async def stage_edit(self, client, stage, old_attributes):
-        Task(KOKORO, self.old_events['stage_edit'](client, stage))
+    async def stage_update(self, client, stage, old_attributes):
+        Task(KOKORO, self.old_events['stage_update'](client, stage))
         
         text = [
             f'Stage: {stage.id}'
@@ -1085,12 +1085,12 @@ class dispatch_tester:
         await Closer(client, self.channel, Embed('auto_moderation_rule_create', repr(rule)))
 
     @classmethod
-    async def auto_moderation_rule_edit(self, client, rule, changes):
-        Task(KOKORO, self.old_events['auto_moderation_rule_edit'](client, rule, changes))
+    async def auto_moderation_rule_update(self, client, rule, changes):
+        Task(KOKORO, self.old_events['auto_moderation_rule_update'](client, rule, changes))
         if self.channel is None:
             return
         
-        await Closer(client, self.channel, Embed('auto_moderation_rule_edit', f'{rule!r}\n\n{changes!r}'))
+        await Closer(client, self.channel, Embed('auto_moderation_rule_update', f'{rule!r}\n\n{changes!r}'))
 
     @classmethod
     async def auto_moderation_rule_delete(self, client, rule):
@@ -1154,52 +1154,52 @@ async def switch_description(client, message):
             'The list of defined testers:\n'
             '- `channel_create`\n'
             '- `channel_delete`\n'
-            '- `channel_edit`\n'
+            '- `channel_update`\n'
             '- `channel_pin_update`\n'
-            '- `client_edit_settings`\n'
-            '- `client_edit`\n'
+            '- `client_update_settings`\n'
+            '- `client_update`\n'
             '- `embed_update`\n'
             '- `emoji_create`\n'
             '- `emoji_delete`\n'
-            '- `emoji_edit`\n'
+            '- `emoji_update`\n'
             '- `guild_ban_add`\n'
             '- `guild_ban_delete`\n'
             '- `guild_create`\n'
             '- `guild_delete`\n'
-            '- `guild_edit`\n'
+            '- `guild_update`\n'
             '- `guild_user_add`\n'
             '- `guild_user_delete`\n'
             '- `invite_create`\n'
             '- `invite_delete`\n'
             '- `message_delete`\n'
-            '- `message_edit`\n'
+            '- `message_update`\n'
             '- `reaction_clear`\n'
             '- `reaction_delete_emoji`\n'
             '- `role_create`\n'
             '- `role_delete`\n'
-            '- `role_edit`\n'
+            '- `role_update`\n'
             '- `typing`\n'
-            '- `user_edit`\n'
+            '- `user_update`\n'
             '- `user_presence_update`\n'
-            '- `guild_user_edit`\n'
+            '- `guild_user_update`\n'
             '- `user_voice_join`\n'
             '- `user_voice_leave`\n'
             '- `user_voice_update`\n'
             '- `integration_create`\n'
             '- `integration_delete`\n'
-            '- `integration_edit`\n'
+            '- `integration_update`\n'
             '- `integration_update`\n'
             '- `webhook_update`\n'
             '- `application_command_permission_update`\n'
             '- `stage_create`\n'
-            '- `stage_edit`\n'
+            '- `stage_update`\n'
             '- `stage_delete`\n'
             '- `sticker_create`\n'
             '- `sticker_delete`\n'
-            '- `sticker_edit`\n'
+            '- `sticker_update`\n'
             '- `auto_moderation_action_execution`\n'
             '- `auto_moderation_rule_create`\n'
-            '- `auto_moderation_rule_edit`\n'
+            '- `auto_moderation_rule_update`\n'
             '- `auto_moderation_rule_delete`\n'
             '- `soundboard_sound_create`\n'
             '- `soundboard_sound_delete`\n'

@@ -1,15 +1,17 @@
 __all__ = ()
 
-from hata import Client, Permission, Channel, ChannelType, CHANNELS
+from hata import CHANNELS, Channel, ChannelType, Client, Permission
 from hata.ext.slash import P, abort
 
 from bot_utils.constants import GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT
-from .configuration.operations import delete_automation_configuration_of, \
-    get_automation_configuration_for, set_automation_configuration, get_log_satori_channel
+from bots import SLASH_CLIENT
+
+from .configuration.operations import (
+    delete_automation_configuration_of, get_automation_configuration_for, get_log_satori_channel,
+    set_automation_configuration
+)
 from .configuration.satori import clear_satori_channel, discover_satori_channel
 
-
-SLASH_CLIENT: Client
 
 
 def check_user_permissions(event):
@@ -110,7 +112,7 @@ AUTOMATION_COMMANDS = SLASH_CLIENT.interactions(
     None,
     name = 'automation',
     description = 'Automate logging with koishi ',
-    guild = [GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT],
+    guild = [GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT, 866746184990720020],
     required_permissions = Permission().update_by_keys(administrator = True),
 )
 

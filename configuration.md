@@ -30,6 +30,9 @@ NITORI_ID = 0                   # bot id (int) for Nitori
 RENES_TOKEN = ''                # bot token (str) for Renes
 RENES_ID = 0                    # bot id (int) for Renes
 
+SAKUYA_TOKEN = ''               # bot token (str) for Sakuya
+SAKUYA_ID = 0                   # bot id (int) for Sakuya
+
 AUDIO_PLAY_POSSIBLE = False     # Whether FFmpeg and other voice requirement as satisfied
 AUDIO_PATH = None               # path for local audio files, can be None
 HATA_PATH = None                # path to Hata if Any (str or None)

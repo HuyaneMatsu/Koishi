@@ -19,7 +19,7 @@ from bot_utils.chesuto import (
     CARDS_BY_NAME, CHESUTO_FOLDER, Card, EMBED_NAME_LENGTH, PROTECTED_FILE_NAMES, Rarity, get_card
 )
 from bot_utils.constants import COLOR__FLAN_HELP, PATH__KOISHI, PREFIX__FLAN
-from bot_utils.tools import MessageDeleteWaitfor, MessageEditWaitfor
+from bot_utils.tools import MessageDeleteWaitfor, MessageUpdateWaitfor
 from bot_utils.utils import category_name_rule
 
 
@@ -29,7 +29,6 @@ Flan = Client(
     activity = Activity('Chesuto development', activity_type = ActivityType.watching),
     status = 'idle',
     application_id = config.FLAN_ID,
-    intents = IntentFlag().update_by_keys(message_content = False),
     extensions = ('command_utils', 'commands_v2',),
     default_category_name = 'GENERAL COMMANDS',
     category_name_rule = category_name_rule,
@@ -152,7 +151,7 @@ def get_auto_bgm_name(name):
 
 
 Flan.events(MessageDeleteWaitfor)
-Flan.events(MessageEditWaitfor)
+Flan.events(MessageUpdateWaitfor)
 
 def flan_help_embed_postprocessor(command_context, embed):
     if embed.color is None:

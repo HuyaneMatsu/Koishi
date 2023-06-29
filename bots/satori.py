@@ -16,7 +16,7 @@ from bot_utils.constants import CHANNEL__SYSTEM__SYNC, COLOR__SATORI_HELP, DEFAU
 from bot_utils.interpreter_v2 import Interpreter
 from bot_utils.syncer import sync_request_waiter
 from bot_utils.tools import (
-    ChannelCreateWaitfor, ChannelDeleteWaitfor, ChannelEditWaitfor, MessageDeleteWaitfor, MessageEditWaitfor
+    ChannelCreateWaitfor, ChannelDeleteWaitfor, ChannelUpdateWaitfor, MessageDeleteWaitfor, MessageUpdateWaitfor
 )
 from bot_utils.utils import category_name_rule
 
@@ -39,10 +39,10 @@ Satori = Client(
 Satori.events.message_create.append(CHANNEL__SYSTEM__SYNC, sync_request_waiter)
 
 Satori.events(MessageDeleteWaitfor)
-Satori.events(MessageEditWaitfor)
+Satori.events(MessageUpdateWaitfor)
 Satori.events(ChannelDeleteWaitfor)
 Satori.events(ChannelCreateWaitfor)
-Satori.events(ChannelEditWaitfor)
+Satori.events(ChannelUpdateWaitfor)
 
 def satori_help_embed_postprocessor(command_context, embed):
     if embed.color is None:

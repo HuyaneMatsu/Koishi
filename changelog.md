@@ -1,3 +1,7 @@
+### 2023-06-30
+
+- Add `2` new images to `like` interaction.
+
 ### 2023-06-17
 
 - When replying on an interaction (such as: `hug`, `kiss`, ...) now supports an additional `like` action.

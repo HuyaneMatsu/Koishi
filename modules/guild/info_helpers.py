@@ -258,16 +258,19 @@ async def add_guild_boosters_field(client, guild, embed, even_if_empty):
     if boost_count:
         
         boosters = guild.boosters
-        count = len(boosters)
+        count = 0 if boosters is None else len(boosters)
         
         embed.add_field(
             f'Most awesome people of the guild',
             f'{boost_count} boosts {EMOJI_HEART_GIFT} | {count} people {EMOJI_HEART_GIFT}'
         )
         
-        for user in boosters[:21]:
-            embed.add_field(user.full_name,
-                f'since: {elapsed_time(user.get_guild_profile_for(guild).boosts_since)}')
+        if count:
+            for user in boosters[:21]:
+                embed.add_field(
+                    user.full_name,
+                    f'since: {elapsed_time(user.get_guild_profile_for(guild).boosts_since)}',
+                )
         
         embed.add_footer('The displayed users might be just a subset of the reality')
     

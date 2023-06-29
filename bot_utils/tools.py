@@ -54,8 +54,8 @@ def smart_join(list_, limit=2000, sep='\n'):
 class MessageDeleteWaitfor(EventWaitforBase):
     __event_name__ = 'message_delete'
 
-class MessageEditWaitfor(EventWaitforBase):
-    __event_name__ = 'message_edit'
+class MessageUpdateWaitfor(EventWaitforBase):
+    __event_name__ = 'message_update'
 
 class GuildDeleteWaitfor(EventWaitforBase):
     __event_name__ = 'guild_delete'
@@ -69,14 +69,14 @@ class ChannelDeleteWaitfor(EventWaitforBase):
 class ChannelCreateWaitfor(EventWaitforBase):
     __event_name__ = 'channel_create'
 
-class ChannelEditWaitfor(EventWaitforBase):
-    __event_name__ = 'channel_edit'
+class ChannelUpdateWaitfor(EventWaitforBase):
+    __event_name__ = 'channel_update'
 
 class EmojiDeleteWaitfor(EventWaitforBase):
     __event_name__ = 'emoji_delete'
 
-class RoleEditWaitfor(EventWaitforBase):
-    __event_name__ = 'role_edit'
+class RoleUpdateWaitfor(EventWaitforBase):
+    __event_name__ = 'role_update'
 
 class CooldownHandler:
     __slots__ = ('cache',)
@@ -93,7 +93,7 @@ class CooldownHandler:
         else:
             if notification.channel is message.channel:
                 try:
-                    await client.message_edit(
+                    await client.message_update(
                         notification,
                         f'**{message.author:f}** please cool down, {time_left:.0f} seconds left!',
                     )
