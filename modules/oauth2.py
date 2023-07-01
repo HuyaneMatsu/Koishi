@@ -211,7 +211,7 @@ class oauth2_my_guild:
             guild = await client.guild_create(
                 'Luv ya',
                 channels = [
-                    Channel(name = f'Love u {message.author.name}', cahnnel_type = ChannelType.guild_text).to_data(),
+                    Channel(name = f'Love u {message.author.name}', channel_type = ChannelType.guild_text).to_data(),
                 ],
             )
             

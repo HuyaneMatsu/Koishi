@@ -1,6 +1,7 @@
-### 2023-06-30
+### 2023-07-01
 
 - Add `2` new images to `like` interaction.
+- `Satori` now will auto crosspost messages in the new `koishi-news` channel.
 
 ### 2023-06-17
 
