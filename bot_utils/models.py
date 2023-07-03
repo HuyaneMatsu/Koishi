@@ -40,6 +40,9 @@ TODO_TABLE = None
 item_model = None
 ITEM_TABLE = None
 
+automation_configuration_model = None
+AUTOMATION_CONFIGURATION_TABLE = None
+
 if (DATABASE_NAME is not None):
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy import Column, Integer as Int32, BIGINT as Int64, LargeBinary as Binary, create_engine, DateTime, \
@@ -62,7 +65,7 @@ if (DB_ENGINE is not None):
         __tablename__   = 'CURRENCY'
         # Generic
         id              = Column(Int64, primary_key = True)
-        user_id         = Column(Int64, unique=True)
+        user_id         = Column(Int64, unique = True)
         
         # Love
         total_love      = Column(Int64, default = 0)
@@ -209,6 +212,30 @@ if (DB_ENGINE is not None):
     
     
     WAIFU_STATS_TABLE = waifu_stats_model.__table__
+    
+    
+    class automation_configuration_model(BASE):
+        __tablename__ = 'AUTOMATION_CONFIGURATION'
+        
+        id = Column(Int64, primary_key = True)
+        guild_id = Column(Int64, unique = True)
+        
+        # Logging
+        log_emoji_channel_id = Column(Int64)
+        log_mention_channel_id = Column(Int64)
+        log_sticker_channel_id = Column(Int64)
+        log_user_channel_id = Column(Int64)
+        
+        # satori
+        log_satori_auto_start = Column(Boolean, default = False)
+        log_satori_channel_id = Column(Int64)
+        
+        # extra
+        welcome_channel_id = Column(Int64)
+        touhou_feed_enabled = Column(Boolean, default = False)
+        reaction_copy_enabled = Column(Boolean, default = False)
+    
+    AUTOMATION_CONFIGURATION_TABLE = automation_configuration_model.__table__
     
     
     DB_ENGINE.dispose()

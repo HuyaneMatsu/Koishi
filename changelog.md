@@ -1,3 +1,13 @@
+### 2023-07-03
+
+- `/automation` settings are not lost anymore on restart. It got its own db table and load / save logic.
+- `/automation` command is now public. This includes `welcome`, `log-emoji`, `log-sticker`, `log-mention`, `log-user`.
+    `log-satori` is not public and probably will not be in the future either.
+- `touhou-feed` is now an option of `/automation`. Guilds that used it before have it set as `true` by default.
+- `reaction-copy` is now public.
+- `reaction-copy` is now an option of `/automation`. Guilds that used it before have it set as `true` by default.
+- Fix `reaction-copy` case: users could target channels they had no access to. 
+
 ### 2023-07-01
 
 - Add `2` new images to `like` interaction.

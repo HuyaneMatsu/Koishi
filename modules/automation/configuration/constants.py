@@ -1,5 +1,0 @@
-__all__ = ()
-
-
-AUTOMATION_CONFIGURATIONS = {}
-SATORI_CHANNELS = {}
