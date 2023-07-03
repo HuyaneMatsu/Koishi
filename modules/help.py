@@ -175,7 +175,7 @@ CATEGORIES = (
     (
         'Administration',
         EMOJI_TOOLS,
-        ('clear', 'dupe-image-filter', 'invite-create', 'mod', 'self-mod'),
+        ('automation', 'clear', 'dupe-image-filter', 'invite-create', 'mod', 'self-mod'),
         (
             'all-users', 'automation', 'copy-message', 'in-role','latest-users', 'move-message', 'move-channel',
             'move-messages'
@@ -234,7 +234,7 @@ CATEGORIES = (
         'Waifus',
         EMOJI_WAIFU,
         (
-            'nsfwbooru', 'safebooru', 'touhou-calendar', 'touhou-character', 'touhou-feed', 'vocaloid', 'waifu-safe',
+            'nsfwbooru', 'safebooru', 'touhou-calendar', 'touhou-character', 'vocaloid', 'waifu-safe',
             'waifu-nsfw'
         ),
         (),
@@ -394,7 +394,9 @@ HELP_FIELD_NAME_TO_RENDERER = {
 }
 
 @SLASH_CLIENT.interactions(is_global = True)
-async def help_(client, event,
+async def help_(
+    client,
+    event,
     field: (HELP_FIELD_CHOICES, 'Choose a field!') = HELP_FIELD_NAME_GENERIC,
 ):
     """Lists my commands and such."""

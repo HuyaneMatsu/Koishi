@@ -53,7 +53,7 @@ And much more!
 
 - Administration
     
-    `clear` • `dupe-image-filter` • `invite-create` • `mod` • `self-mod`
+    `automation` • `clear` • `dupe-image-filter` • `invite-create` • `mod` • `self-mod`
 
 - Anime
     
@@ -94,7 +94,7 @@ And much more!
 
 - Waifus
     
-    `nsfwbooru` • `safebooru` • `touhou-calendar` • `touhou-character` • `touhou-feed` • `vocaloid` • `waifu-sfw` •
+    `nsfwbooru` • `safebooru` • `touhou-calendar` • `touhou-character` • `vocaloid` • `waifu-sfw` •
     `waifu-nsfw`
 
 <h3 align="center">
