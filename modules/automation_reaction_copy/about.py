@@ -26,9 +26,9 @@ def build_reaction_copy_about_response(client, event):
     
     return InteractionResponse(
         embed = Embed(
-            'copy-message about',
+            'reaction-copy about',
             (
-                f'`copy-message` is meant to help sort messages and posted media into their appropriate channels '
+                f'`reaction-copy` is meant to help sort messages and posted media into their appropriate channels '
                 f'without deleting them. It sends a copy of the message to a chosen channel by reacting with a '
                 f'(default) emoji of your choice, like {EXAMPLE_EMOJI} .\n'
                 f'\n'
