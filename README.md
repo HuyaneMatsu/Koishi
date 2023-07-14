@@ -1,7 +1,7 @@
 <p align="center">
     <img
         width="256px" height="256px" align="center" alt="Koishi"
-        src="https://raw.githubusercontent.com/HuyaneMatsu/Koishi/master/library/koishi_avatar_0000_by_ashy.png"
+        src="https://raw.githubusercontent.com/HuyaneMatsu/Koishi/master/koishi/library/koishi_avatar_0000_by_ashy.png"
     />
 </p>
 
