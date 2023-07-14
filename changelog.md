@@ -1,3 +1,7 @@
+### 2023-07-??
+
+- `touhou-feed` now works in media channels too.
+
 ### 2023-07-03
 
 - `/automation` settings are not lost anymore on restart. It got its own db table and load / save logic.
