@@ -8,7 +8,7 @@ from .constants import (
     COMPONENT_RIGHT_ANIME, COMPONENT_RIGHT_CHARACTER, COMPONENT_RIGHT_DISABLED, COMPONENT_RIGHT_MANGA,
     COMPONENT_SELECT_ANIME, COMPONENT_SELECT_CHARACTER, COMPONENT_SELECT_MANGA
 )
-from .keys import KEY_CHARACTER_ID, KEY_MEDIA_ID, KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER, KEY_PAGE_INFO_TOTAL_PAGES
+from .keys import KEY_CHARACTER_ID, KEY_MEDIA_ID, KEY_PAGE_INFO_CURRENT, KEY_PAGE_INFO_TOTAL
 from .parsers_description import limit_string_length
 from .parsers_name import parse_name_character, parse_name_media
 
@@ -166,13 +166,13 @@ def parse_page_info_components_base(page_info_data, button_left, button_right):
     components : ``Component``
         A component row.
     """
-    total_pages = page_info_data.get(KEY_PAGE_INFO_TOTAL_PAGES, 1)
-    current_page_identifier = page_info_data.get(KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER, 1)
+    page_total = page_info_data.get(KEY_PAGE_INFO_TOTAL, 1)
+    page_current = page_info_data.get(KEY_PAGE_INFO_CURRENT, 1)
 
-    if current_page_identifier <= 1:
+    if page_current <= 1:
         button_left = COMPONENT_LEFT_DISABLED
     
-    if current_page_identifier >= total_pages:
+    if page_current >= page_total:
         button_right = COMPONENT_RIGHT_DISABLED
     
     return Row(button_left, button_right)

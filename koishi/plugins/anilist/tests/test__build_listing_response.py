@@ -10,8 +10,8 @@ from ..constants import (
 )
 from ..keys import (
     KEY_CHARACTER_ARRAY, KEY_CHARACTER_ID, KEY_CHARACTER_NAME, KEY_CHARACTER_NAME_FIRST, KEY_MEDIA_ARRAY, KEY_MEDIA_ID,
-    KEY_MEDIA_NAME, KEY_MEDIA_NAME_ROMAJI, KEY_PAGE, KEY_PAGE_INFO, KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER,
-    KEY_PAGE_INFO_TOTAL_PAGES
+    KEY_MEDIA_NAME, KEY_MEDIA_NAME_ROMAJI, KEY_PAGE, KEY_PAGE_INFO, KEY_PAGE_INFO_CURRENT,
+    KEY_PAGE_INFO_TOTAL
 )
 from ..parsers_components import parse_page_info_components_character, parse_select_character
 from ..parsers_description import parse_listing_character
@@ -38,7 +38,12 @@ def _iter_options__build_listing_response_base():
         parse_page_info_components_character,
         InteractionResponse(
             allowed_mentions = None,
-            embed = Embed('Search result for: satori', 'No result.'),
+            embed = Embed(
+                'Search result for: satori',
+                'No result.'
+            ).add_footer(
+                'Page: 1 / 1',
+            ),
             components = [
                 COMPONENT_SELECT_CHARACTER.copy_with(
                     options = [Option('-1', 'No result', default = True)],
@@ -68,8 +73,8 @@ def _iter_options__build_listing_response_base():
                     ],
                     KEY_PAGE_INFO:
                     {
-                        KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 2,
-                        KEY_PAGE_INFO_TOTAL_PAGES: 3,
+                        KEY_PAGE_INFO_CURRENT: 2,
+                        KEY_PAGE_INFO_TOTAL: 3,
                     },
                 }
             }
@@ -87,6 +92,8 @@ def _iter_options__build_listing_response_base():
                     f'[orin]({URL_BASE_CHARACTER}{56})\n'
                     f'[okuu]({URL_BASE_CHARACTER}{69})'
                 ),
+            ).add_footer(
+                'Page: 2 / 3',
             ),
             components = [
                 COMPONENT_SELECT_CHARACTER.copy_with(
@@ -151,7 +158,12 @@ def _iter_options__build_listing_response_character():
         'satori',
         InteractionResponse(
             allowed_mentions = None,
-            embed = Embed('Search result for: satori', 'No result.'),
+            embed = Embed(
+                'Search result for: satori',
+                'No result.'
+            ).add_footer(
+                'Page: 1 / 1',
+            ),
             components = [
                 COMPONENT_SELECT_CHARACTER.copy_with(
                     options = [Option('-1', 'No result', default = True)],
@@ -181,8 +193,8 @@ def _iter_options__build_listing_response_character():
                     ],
                     KEY_PAGE_INFO:
                     {
-                        KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 2,
-                        KEY_PAGE_INFO_TOTAL_PAGES: 3,
+                        KEY_PAGE_INFO_CURRENT: 2,
+                        KEY_PAGE_INFO_TOTAL: 3,
                     },
                 }
             }
@@ -196,6 +208,8 @@ def _iter_options__build_listing_response_character():
                     f'[orin]({URL_BASE_CHARACTER}{56})\n'
                     f'[okuu]({URL_BASE_CHARACTER}{69})'
                 ),
+            ).add_footer(
+                'Page: 2 / 3',
             ),
             components = [
                 COMPONENT_SELECT_CHARACTER.copy_with(
@@ -248,7 +262,12 @@ def _iter_options__build_listing_response_anime():
         'satori',
         InteractionResponse(
             allowed_mentions = None,
-            embed = Embed('Search result for: satori', 'No result.'),
+            embed = Embed(
+                'Search result for: satori',
+                'No result.'
+            ).add_footer(
+                'Page: 1 / 1',
+            ),
             components = [
                 COMPONENT_SELECT_ANIME.copy_with(
                     options = [Option('-1', 'No result', default = True)],
@@ -278,8 +297,8 @@ def _iter_options__build_listing_response_anime():
                     ],
                     KEY_PAGE_INFO:
                     {
-                        KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 2,
-                        KEY_PAGE_INFO_TOTAL_PAGES: 3,
+                        KEY_PAGE_INFO_CURRENT: 2,
+                        KEY_PAGE_INFO_TOTAL: 3,
                     },
                 }
             }
@@ -293,6 +312,8 @@ def _iter_options__build_listing_response_anime():
                     f'[orin]({URL_BASE_ANIME}{56})\n'
                     f'[okuu]({URL_BASE_ANIME}{69})'
                 ),
+            ).add_footer(
+                'Page: 2 / 3',
             ),
             components = [
                 COMPONENT_SELECT_ANIME.copy_with(
@@ -345,7 +366,12 @@ def _iter_options__build_listing_response_manga():
         'satori',
         InteractionResponse(
             allowed_mentions = None,
-            embed = Embed('Search result for: satori', 'No result.'),
+            embed = Embed(
+                'Search result for: satori',
+                'No result.'
+            ).add_footer(
+                'Page: 1 / 1',
+            ),
             components = [
                 COMPONENT_SELECT_MANGA.copy_with(
                     options = [Option('-1', 'No result', default = True)],
@@ -375,8 +401,8 @@ def _iter_options__build_listing_response_manga():
                     ],
                     KEY_PAGE_INFO:
                     {
-                        KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 2,
-                        KEY_PAGE_INFO_TOTAL_PAGES: 3,
+                        KEY_PAGE_INFO_CURRENT: 2,
+                        KEY_PAGE_INFO_TOTAL: 3,
                     },
                 }
             }
@@ -390,6 +416,8 @@ def _iter_options__build_listing_response_manga():
                     f'[orin]({URL_BASE_MANGA}{56})\n'
                     f'[okuu]({URL_BASE_MANGA}{69})'
                 ),
+            ).add_footer(
+                'Page: 2 / 3',
             ),
             components = [
                 COMPONENT_SELECT_MANGA.copy_with(

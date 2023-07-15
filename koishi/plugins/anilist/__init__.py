@@ -11,6 +11,7 @@ from .parsers_date import *
 from .parsers_description import *
 from .parsers_media import *
 from .parsers_name import *
+from .parsers_page_info import *
 from .parsers_url import *
 from .queries import *
 from .response_building_listing import *
@@ -30,6 +31,7 @@ __all__ = (
     *parsers_description.__all__,
     *parsers_media.__all__,
     *parsers_name.__all__,
+    *parsers_page_info.__all__,
     *parsers_url.__all__,
     *queries.__all__,
     *response_building_listing.__all__,

@@ -1,5 +1,6 @@
 __all__ = ('Satori',)
 
+import signal, sys
 from itertools import chain, cycle
 from random import randint
 from threading import main_thread
@@ -11,7 +12,7 @@ from hata.ext.commands_v2 import checks
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 
 import config
-import signal, sys
+
 from ..bot_utils.constants import CHANNEL__SYSTEM__SYNC, COLOR__SATORI_HELP, DEFAULT_CATEGORY_NAME, PREFIX__SATORI
 from ..bot_utils.interpreter_v2 import Interpreter
 from ..bot_utils.syncer import sync_request_waiter

@@ -9,6 +9,7 @@ from .parsers_components import (
     parse_select_anime, parse_select_character, parse_select_manga
 )
 from .parsers_description import parse_listing_anime, parse_listing_character, parse_listing_manga
+from .parsers_page_info import parse_page_info
 
 
 def build_listing_response_base(
@@ -46,7 +47,7 @@ def build_listing_response_base(
     
     return InteractionResponse(
         allowed_mentions = None,
-        embed = Embed(f'Search result for: {search_term}', description),
+        embed = Embed(f'Search result for: {search_term}', description).add_footer(parse_page_info(page_info_data)),
         components = [
             select_parser(character_array_data),
             page_info_components_parser(page_info_data),

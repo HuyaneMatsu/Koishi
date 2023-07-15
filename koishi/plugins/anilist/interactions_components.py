@@ -92,7 +92,7 @@ async def find_anime_page_left(client, event):
     if not is_event_user_same(event):
         return
     
-    name_and_page = get_name_and_page(event.message.embed)
+    name_and_page = get_name_and_page(event)
     if name_and_page is None:
         return
     
@@ -134,7 +134,7 @@ async def find_anime_page_right(client, event):
     if not is_event_user_same(event):
         return
     
-    name_and_page = get_name_and_page(event.message.embed)
+    name_and_page = get_name_and_page(event)
     if name_and_page is None:
         return
     
@@ -222,7 +222,7 @@ async def find_character_page_left(client, event):
     if not is_event_user_same(event):
         return
     
-    name_and_page = get_name_and_page(event.message.embed)
+    name_and_page = get_name_and_page(event)
     if name_and_page is None:
         return
     
@@ -264,7 +264,7 @@ async def find_character_page_right(client, event):
     if not is_event_user_same(event):
         return
     
-    name_and_page = get_name_and_page(event.message.embed)
+    name_and_page = get_name_and_page(event)
     if name_and_page is None:
         return
     
@@ -351,7 +351,7 @@ async def find_manga_page_left(client, event):
     if not is_event_user_same(event):
         return
     
-    name_and_page = get_name_and_page(event.message.embed)
+    name_and_page = get_name_and_page(event)
     if name_and_page is None:
         return
     
@@ -393,7 +393,7 @@ async def find_manga_page_right(client, event):
     if not is_event_user_same(event):
         return
     
-    name_and_page = get_name_and_page(event.message.embed)
+    name_and_page = get_name_and_page(event)
     if name_and_page is None:
         return
     

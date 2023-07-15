@@ -5,7 +5,7 @@ from ..constants import (
     COMPONENT_LEFT_ANIME, COMPONENT_LEFT_CHARACTER, COMPONENT_LEFT_DISABLED, COMPONENT_LEFT_MANGA,
     COMPONENT_RIGHT_ANIME, COMPONENT_RIGHT_CHARACTER, COMPONENT_RIGHT_DISABLED, COMPONENT_RIGHT_MANGA
 )
-from ..keys import KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER, KEY_PAGE_INFO_TOTAL_PAGES
+from ..keys import KEY_PAGE_INFO_CURRENT, KEY_PAGE_INFO_TOTAL
 from ..parsers_components import (
     parse_page_info_components_anime, parse_page_info_components_base, parse_page_info_components_character,
     parse_page_info_components_manga
@@ -18,8 +18,8 @@ def _iter_options__parse_page_info_components_base():
     
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 2,
-            KEY_PAGE_INFO_TOTAL_PAGES: 3,
+            KEY_PAGE_INFO_CURRENT: 2,
+            KEY_PAGE_INFO_TOTAL: 3,
         },
         component_0,
         component_1,
@@ -28,8 +28,8 @@ def _iter_options__parse_page_info_components_base():
     
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 2,
-            KEY_PAGE_INFO_TOTAL_PAGES: 2,
+            KEY_PAGE_INFO_CURRENT: 2,
+            KEY_PAGE_INFO_TOTAL: 2,
         },
         component_0,
         component_1,
@@ -38,8 +38,8 @@ def _iter_options__parse_page_info_components_base():
 
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 1,
-            KEY_PAGE_INFO_TOTAL_PAGES: 3,
+            KEY_PAGE_INFO_CURRENT: 1,
+            KEY_PAGE_INFO_TOTAL: 3,
         },
         component_0,
         component_1,
@@ -48,8 +48,8 @@ def _iter_options__parse_page_info_components_base():
 
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 1,
-            KEY_PAGE_INFO_TOTAL_PAGES: 1,
+            KEY_PAGE_INFO_CURRENT: 1,
+            KEY_PAGE_INFO_TOTAL: 1,
         },
         component_0,
         component_1,
@@ -88,32 +88,32 @@ def test__parse_page_info_components_base(page_info_data, button_left, button_ri
 def _iter_options__parse_page_info_components_character():
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 2,
-            KEY_PAGE_INFO_TOTAL_PAGES: 3,
+            KEY_PAGE_INFO_CURRENT: 2,
+            KEY_PAGE_INFO_TOTAL: 3,
         },
         Row(COMPONENT_LEFT_CHARACTER, COMPONENT_RIGHT_CHARACTER),
     )
     
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 2,
-            KEY_PAGE_INFO_TOTAL_PAGES: 2,
+            KEY_PAGE_INFO_CURRENT: 2,
+            KEY_PAGE_INFO_TOTAL: 2,
         },
         Row(COMPONENT_LEFT_CHARACTER, COMPONENT_RIGHT_DISABLED),
     )
 
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 1,
-            KEY_PAGE_INFO_TOTAL_PAGES: 3,
+            KEY_PAGE_INFO_CURRENT: 1,
+            KEY_PAGE_INFO_TOTAL: 3,
         },
         Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_CHARACTER),
     )
 
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 1,
-            KEY_PAGE_INFO_TOTAL_PAGES: 1,
+            KEY_PAGE_INFO_CURRENT: 1,
+            KEY_PAGE_INFO_TOTAL: 1,
         },
         Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
     )
@@ -144,32 +144,32 @@ def test__parse_page_info_components_character(page_info_data):
 def _iter_options__parse_page_info_components_anime():
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 2,
-            KEY_PAGE_INFO_TOTAL_PAGES: 3,
+            KEY_PAGE_INFO_CURRENT: 2,
+            KEY_PAGE_INFO_TOTAL: 3,
         },
         Row(COMPONENT_LEFT_ANIME, COMPONENT_RIGHT_ANIME),
     )
     
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 2,
-            KEY_PAGE_INFO_TOTAL_PAGES: 2,
+            KEY_PAGE_INFO_CURRENT: 2,
+            KEY_PAGE_INFO_TOTAL: 2,
         },
         Row(COMPONENT_LEFT_ANIME, COMPONENT_RIGHT_DISABLED),
     )
 
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 1,
-            KEY_PAGE_INFO_TOTAL_PAGES: 3,
+            KEY_PAGE_INFO_CURRENT: 1,
+            KEY_PAGE_INFO_TOTAL: 3,
         },
         Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_ANIME),
     )
 
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 1,
-            KEY_PAGE_INFO_TOTAL_PAGES: 1,
+            KEY_PAGE_INFO_CURRENT: 1,
+            KEY_PAGE_INFO_TOTAL: 1,
         },
         Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
     )
@@ -200,32 +200,32 @@ def test__parse_page_info_components_anime(page_info_data):
 def _iter_options__parse_page_info_components_manga():
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 2,
-            KEY_PAGE_INFO_TOTAL_PAGES: 3,
+            KEY_PAGE_INFO_CURRENT: 2,
+            KEY_PAGE_INFO_TOTAL: 3,
         },
         Row(COMPONENT_LEFT_MANGA, COMPONENT_RIGHT_MANGA),
     )
     
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 2,
-            KEY_PAGE_INFO_TOTAL_PAGES: 2,
+            KEY_PAGE_INFO_CURRENT: 2,
+            KEY_PAGE_INFO_TOTAL: 2,
         },
         Row(COMPONENT_LEFT_MANGA, COMPONENT_RIGHT_DISABLED),
     )
 
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 1,
-            KEY_PAGE_INFO_TOTAL_PAGES: 3,
+            KEY_PAGE_INFO_CURRENT: 1,
+            KEY_PAGE_INFO_TOTAL: 3,
         },
         Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_MANGA),
     )
 
     yield (
         {
-            KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER: 1,
-            KEY_PAGE_INFO_TOTAL_PAGES: 1,
+            KEY_PAGE_INFO_CURRENT: 1,
+            KEY_PAGE_INFO_TOTAL: 1,
         },
         Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
     )
