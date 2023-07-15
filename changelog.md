@@ -1,6 +1,8 @@
-### 2023-07-??
+### 2023-07-15
 
 - `touhou-feed` now works in media channels too.
+- Rewrite `anilist` plugin and fix various bugs.
+- Koishi now uses a more package-like format to keep it matched with best hata practices.
 
 ### 2023-07-03
 

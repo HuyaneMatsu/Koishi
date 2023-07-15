@@ -7,8 +7,8 @@ from ..bot_utils.constants import PATH__KOISHI
 ROUTE = (__spec__.parent, 'modules')
 
 WEBAPP = Flask('koishi_web',
-    template_folder = os.path.join(PATH__KOISHI, 'web', 'templates'),
-    static_folder = os.path.join(PATH__KOISHI, 'web', 'static'),
+    template_folder = os.path.join(PATH__KOISHI, 'koishi', 'web', 'templates'),
+    static_folder = os.path.join(PATH__KOISHI, 'koishi', 'web', 'static'),
 )
 
 from config import WEBAPP_SECRET_KEY as SECRET_KEY
