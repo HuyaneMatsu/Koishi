@@ -27,6 +27,8 @@ config_path = os.path.dirname(config_path)
 if config_path not in sys.path:
     sys.path.append(config_path)
 
+print(sys.path)
+
 del config_path
 
 import config

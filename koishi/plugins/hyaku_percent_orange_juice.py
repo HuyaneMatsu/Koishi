@@ -3369,7 +3369,7 @@ async def create_images(client, event):
     for entity in (*CHARACTERS.values(), *CARDS.values()):
         card_name = entity.card_name
         
-        image_path = join_paths(PATH__KOISHI, 'oj_data', card_name)
+        image_path = join_paths(PATH__KOISHI, 'koishi', 'oj_data', card_name)
         
         if not exists(image_path):
             raise abort(f'{image_path!r} do not exists.')

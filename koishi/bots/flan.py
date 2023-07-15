@@ -83,7 +83,7 @@ BMG_NAMES_W_S = {
 
 FILE_NAME = 'bgm_names.csv'
 
-FILE_PATH = os.path.join(PATH__KOISHI, 'chesuto_data', FILE_NAME)
+FILE_PATH = os.path.join(PATH__KOISHI, 'koishi', 'chesuto_data', FILE_NAME)
 FILE_LOCK = Lock(KOKORO)
 
 def read_bgm_name_task():

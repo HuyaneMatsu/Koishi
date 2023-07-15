@@ -221,7 +221,7 @@ class CardFlag(int):
 CARDS_BY_ID = {}
 CARDS_BY_NAME = {}
 
-CHESUTO_FOLDER = os.path.join(PATH__KOISHI, 'chesuto_data')
+CHESUTO_FOLDER = os.path.join(PATH__KOISHI, 'koishi', 'chesuto_data')
 CARDS_FILE = os.path.join(CHESUTO_FOLDER, 'cards.json')
 CARDS_FILE_LOCK = SyncLock()
 

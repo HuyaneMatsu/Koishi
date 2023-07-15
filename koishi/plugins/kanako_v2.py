@@ -14,7 +14,7 @@ from ..bot_utils.tools import Pagination10step
 from ..bots import SLASH_CLIENT
 
 
-FONT = PIL.font(os.path.join(PATH__KOISHI, 'library', 'Kozuka.otf'), 90)
+FONT = PIL.font(os.path.join(PATH__KOISHI, 'koishi', 'library', 'Kozuka.otf'), 90)
 FONT_COLOR = (162, 61, 229)
 TIMEOUT = 300.0
 

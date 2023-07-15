@@ -63,7 +63,7 @@ RUNNER_STATE_VALUE_TO_NAME = {
 
 FILE_LOCK                = Lock(KOKORO)
 FILE_NAME                = 'ds_v2.json'
-FILE_PATH                = os.path.join(PATH__KOISHI, 'library', FILE_NAME)
+FILE_PATH                = os.path.join(PATH__KOISHI, 'koishi', 'library', FILE_NAME)
 
 EMOJI_WEST               = BUILTIN_EMOJIS['arrow_left']
 EMOJI_NORTH              = BUILTIN_EMOJIS['arrow_up']

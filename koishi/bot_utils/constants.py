@@ -10,7 +10,7 @@ import config
 
 from config import KOISHI_PATH as PATH__KOISHI
 if PATH__KOISHI is None:
-    PATH__KOISHI = os.path.abspath('..')
+    PATH__KOISHI = os.path.dirname(os.path.abspath('..'))
 
 PREFIX__KOISHI = config.KOISHI_PREFIX
 PREFIX__SATORI = config.SATORI_PREFIX

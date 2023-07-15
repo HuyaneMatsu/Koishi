@@ -123,7 +123,7 @@ async def send_file(client, file):
         file_name = ''.join(file_name_parts)
         
         try:
-            await client.message_create(CHANNEL__SYSTEM__SYNC, file_name, file=io)
+            await client.message_create(CHANNEL__SYSTEM__SYNC, file_name, file = io)
         except DiscordException as err:
             if err.code == 40005:
                 sys.stderr.write(repr(err))

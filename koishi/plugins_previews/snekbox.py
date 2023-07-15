@@ -31,9 +31,9 @@ MEM_MAX = 52428800
 MAX_TIMEOUT = 13
 
 NSJAIL_EXECUTABLE = os.getenv('NSJAIL_PATH', '/usr/sbin/nsjail')
-NSJAIL_CONFIG_3_8 = os.getenv('NSJAIL_CFG_3_8', os.path.join(PATH__KOISHI, 'bots', 'previews', 'nsjail_Cpython_3_8.cfg'))
-NSJAIL_CONFIG_3_10 = os.getenv('NSJAIL_CFG_3_10', os.path.join(PATH__KOISHI, 'bots', 'previews', 'nsjail_Cpython_3_10.cfg'))
-NSJAIL_CONFIG_C_3_6 = os.getenv('NSJAIL_CFG_C_3_6', os.path.join(PATH__KOISHI, 'bots', 'previews', 'nsjail_pypy_3_6.cfg'))
+NSJAIL_CONFIG_3_8 = os.getenv('NSJAIL_CFG_3_8', os.path.join(PATH__KOISHI, 'koishi', 'plugins_previews', 'nsjail_Cpython_3_8.cfg'))
+NSJAIL_CONFIG_3_10 = os.getenv('NSJAIL_CFG_3_10', os.path.join(PATH__KOISHI, 'koishi', 'plugins_previews', 'nsjail_Cpython_3_10.cfg'))
+NSJAIL_CONFIG_C_3_6 = os.getenv('NSJAIL_CFG_C_3_6', os.path.join(PATH__KOISHI, 'koishi', 'plugins_previews', 'nsjail_pypy_3_6.cfg'))
 
 PATH__PYTHON_EXECUTABLE_3_8 = '/usr/bin/python3.8'
 PATH__PYTHON_EXECUTABLE_3_10 = '/usr/bin/python3.10'
