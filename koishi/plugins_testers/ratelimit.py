@@ -13,7 +13,7 @@ from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoMod
     ERROR_CODES, ComponentType, Sticker, StickerPack, Permission, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, Oauth2User, parse_oauth2_redirect_url, Channel, Role, GUILDS, CLIENTS, \
-    Team, WebhookType, Guild, ForumTag, SoundboardSound
+    Team, WebhookType, Guild, ForumTag, SoundboardSound, OnboardingMode
 from scarletio import sleep, Task, TaskGroup, AsyncIO, CancelledError, IgnoreCaseMultiValueDictionary, \
     alchemy_incendiary,  EventThread, change_on_switch, to_json, from_json
 
@@ -1436,7 +1436,7 @@ async def user_guild_get_all(client,access,):
         f'{API_ENDPOINT}/users/@me/guilds',
         headers=headers,)
 
-async def guild_get_all(client,):
+async def guild_get_chunk(client,):
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/users/@me/guilds',
         params={'after':0},)
@@ -2671,6 +2671,29 @@ async def soundboard_sound_operation_options(client, guild_id, sound_id):
         METHOD_OPTIONS,
         f'{API_ENDPOINT}/guilds/{guild_id}/soundboard-sounds/{sound_id}',
     )
+
+
+async def onboarding_screen_get(client, guild_id):
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/onboarding',
+    )
+
+
+async def onboarding_screen_edit(client, guild_id, *, mode = ...):
+    data = {}
+    
+    if mode is not ...:
+        data['mode'] = mode.value
+    
+    await bypass_request(
+        client,
+        METHOD_PUT,
+        f'{API_ENDPOINT}/guilds/{guild_id}/onboarding',
+        data,
+    )
+
 
 
 @RATE_LIMIT_COMMANDS
@@ -4188,7 +4211,7 @@ async def rate_limit_test_0068(client, message):
     """
     channel = message.channel
     with RLTCTX(client,channel,'rate_limit_test_0068') as RLT:
-        await guild_get_all(client)
+        await guild_get_chunk(client)
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0069(client, message):
@@ -4210,7 +4233,7 @@ async def rate_limit_test_0069(client, message):
         tasks = []
         task = Task(KOKORO, user_guild_get_all(client_, access))
         tasks.append(task)
-        task = Task(KOKORO, guild_get_all(client))
+        task = Task(KOKORO, guild_get_chunk(client))
         tasks.append(task)
         
         
@@ -6926,3 +6949,32 @@ async def rate_limit_test_0190(client, message):
         if task is not None:
             task_group.cancel_all()
             task.get_result()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0191(client, message):
+    """
+    Tests onboarding screen get endpoints.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0191') as RLT:
+        guild_0 = channel.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await onboarding_screen_get(client, guild_0.id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0192(client, message):
+    """
+    Tests onboarding screen edit endpoints.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0192') as RLT:
+        guild_0 = channel.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await onboarding_screen_edit(client, guild_0.id, mode = OnboardingMode.advanced)
+

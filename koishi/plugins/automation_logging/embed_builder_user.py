@@ -244,7 +244,7 @@ def render_nick_into(into, guild_profile):
     return into
 
 
-def render_roles_into(into, guild_profile):
+def render_role_mentions_into(into, guild_profile):
     """
     Renders the user's roles.
     
@@ -332,7 +332,7 @@ def build_user_embed(guild, user, guild_profile, join):
         description_parts.append('\n')
         render_nick_into(description_parts, guild_profile)
         description_parts.append('\n')
-        render_roles_into(description_parts, guild_profile)
+        render_role_mentions_into(description_parts, guild_profile)
     
     
     description_parts.append('\n\n')

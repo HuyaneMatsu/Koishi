@@ -333,11 +333,11 @@ class Card:
         flags = self.flags
         if flags:
             # another two line
-            result +=2
+            result += 2
             parts = []
             flags.render_description_to(parts)
             for part in parts:
-                result +=len(part)
+                result += len(part)
         
         self._length_hint = result
         return result

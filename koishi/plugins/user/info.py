@@ -5,14 +5,16 @@ import re
 from hata import Embed, User
 from hata.ext.slash import Button, InteractionResponse, Row
 
+from ...bots import SLASH_CLIENT
+
+from ..rendering_helpers import build_guild_profile_description, build_user_description
+
 from .constants import (
     ICON_SOURCES_REVERSED, ICON_SOURCE_GLOBAL, ICON_SOURCE_GUILD, ICON_SOURCE_RP_GROUP, ICON_KINDS_REVERSED,
     ICON_KINDS_RP_GROUP, ICON_KIND_AVATAR, ICON_KIND_BANNER
 )
 from .icon_helpers import get_icon_of
-from .info_helpers import add_user_guild_profile_info_embed_field, add_user_info_embed_field
 
-from ...bots import SLASH_CLIENT
 
 
 async def user_info_command(
@@ -29,9 +31,10 @@ async def user_info_command(
         user.full_name,
     ).add_thumbnail(
         user.avatar_url,
+    ).add_field(
+        'User information',
+        build_user_description(user),
     )
-    
-    add_user_info_embed_field(embed, user)
     
     guild_profile = user.get_guild_profile_for(guild)
     
@@ -44,7 +47,10 @@ async def user_info_command(
     
     else:
         embed.color = user.color_at(guild)
-        add_user_guild_profile_info_embed_field(embed, guild_profile)
+        embed.add_field(
+            'In guild profile',
+            build_guild_profile_description(guild_profile),
+        )
         
         components = Row(
             Button('Show global avatar', custom_id = f'user.info.{user.id}.{ICON_KIND_AVATAR}.{ICON_SOURCE_GLOBAL}'),
