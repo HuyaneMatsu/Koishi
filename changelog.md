@@ -1,3 +1,7 @@
+### 2023-07-22
+
+- `/user info` now shows 3 new fields: `user flags`, `guild profile flags`, `display name`.
+
 ### 2023-07-15
 
 - `touhou-feed` now works in media channels too.
