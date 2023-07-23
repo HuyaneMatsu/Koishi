@@ -3,11 +3,9 @@ __all__ = ('TOUHOU_ACTION_LIKE',)
 from ...image_handling_core import ImageDetail
 from ...touhou_core.character import freeze
 from ...touhou_core.characters import (
-    FUTATSUIWA_MAMIZOU, INABA_TEWI, JUNKO, KAKU_SEIGA, KAZAMI_YUUKA, KOMEIJI_KOISHI, RUMIA, SAIGYOUJI_YUYUKO,
-    YAGOKORO_EIRIN, YAKUMO_YUKARI
+    FUTATSUIWA_MAMIZOU, HOUJUU_NUE, INABA_TEWI, JUNKO, KAKU_SEIGA, KAZAMI_YUUKA, KOMEIJI_KOISHI, RUMIA,
+    SAIGYOUJI_YUYUKO, YAGOKORO_EIRIN, YAKUMO_RAN, YAKUMO_YUKARI
 )
-
-# Images from: https://safebooru.org/index.php?page=post&s=list&tags=2girls+pocky_kiss+touhou
 
 
 TOUHOU_ACTION_LIKE = [
@@ -34,6 +32,14 @@ TOUHOU_ACTION_LIKE = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683127049195590/koishi-happy-0000.png',
         freeze(KOMEIJI_KOISHI),
+    ),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1132645810635550830/nue-huge-surprises-0000.png',
+        freeze(HOUJUU_NUE),
+    ),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1132645810908176414/ran-fluffy-tail-0000.png',
+        freeze(YAKUMO_RAN),
     ),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683127468621824/rumia-older-0000.png',

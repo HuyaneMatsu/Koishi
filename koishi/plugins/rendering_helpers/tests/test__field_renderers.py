@@ -3,6 +3,7 @@ from datetime import datetime as DateTime
 import vampytest
 from hata import Role, UserFlag
 
+from ..constants import ROLE_MENTIONS_MAX
 from ..field_renderers import (
     render_date_time_field_into, render_flags_field_into, render_role_mentions_field_into, render_string_field_into
 )
@@ -15,7 +16,7 @@ def _iter_options__render_role_mentions_field_into():
     role_1 = Role.precreate(202307190001)
     
     n_roles = (*(role_0 for counter in range(30)),)
-    n_roles_repr = (role_0.mention + ', ') * 20 + '... +10'
+    n_roles_repr = (role_0.mention + ', ') * ROLE_MENTIONS_MAX + f'... +{ROLE_MENTIONS_MAX - 20}'
     
     yield False, None, False, 'Roles', ('Roles: *none*', True)
     yield True, None, False, 'Roles', ('\nRoles: *none*', True)

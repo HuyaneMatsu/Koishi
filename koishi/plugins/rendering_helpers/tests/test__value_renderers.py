@@ -3,6 +3,7 @@ from datetime import datetime as DateTime
 import vampytest
 from hata import Role, UserFlag
 
+from ..constants import ROLE_MENTIONS_MAX
 from ..value_renderers import render_date_time_into, render_flags_into, render_role_mentions_into
 
 from .mocks import DateTimeMock, is_instance_mock
@@ -14,7 +15,10 @@ def _iter_options__render_role_mentions_into():
     
     yield (role_0,), f'{role_0:m}'
     yield (role_0, role_1), f'{role_1:m}, {role_0:m}'
-    yield (*(role_0 for counter in range(30)),), (role_0.mention + ', ') * 20 + '... +10'
+    yield (
+        (*(role_0 for counter in range(30)),),
+        (role_0.mention + ', ') * ROLE_MENTIONS_MAX + f'... +{30 - ROLE_MENTIONS_MAX}'
+    )
 
 
 @vampytest._(vampytest.call_from(_iter_options__render_role_mentions_into()).returning_last())

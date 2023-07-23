@@ -59,6 +59,28 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ---
 
+### `nue-huge-surprises-0000`
+
+- Artist:  *unknown*
+- Edit: *unknown*
+
+
+- Character: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### `ran-fluffy-tail-0000`
+
+- Artist:  *unknown*
+- Edit: *unknown*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
 ### `rumia-older-0000`
 
 - Artist:  *unknown*

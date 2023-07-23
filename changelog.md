@@ -1,3 +1,7 @@
+### 2023-07-23
+
+- Add `2` new images to `like` interaction.
+
 ### 2023-07-22
 
 - `/user info` now shows 3 new fields: `user flags`, `guild profile flags`, `display name`.

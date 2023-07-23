@@ -2,6 +2,8 @@ __all__ = ()
 
 from hata import DATETIME_FORMAT_CODE, elapsed_time
 
+from .constants import ROLE_MENTIONS_MAX
+
 
 def render_role_mentions_into(into, roles):
     """
@@ -26,9 +28,9 @@ def render_role_mentions_into(into, roles):
         
         fields_added += 1
         
-        if fields_added > 20:
+        if fields_added > ROLE_MENTIONS_MAX:
             into.append('... +')
-            into.append(str(len(roles) - 20))
+            into.append(str(len(roles) - ROLE_MENTIONS_MAX))
             break
         
         into.append(role.mention)
