@@ -39,7 +39,7 @@ def render_role_mentions_into(into, roles):
     return into
 
 
-def render_date_time_into(into, date_time, add_ago):
+def render_date_time_with_relative_into(into, date_time, add_ago):
     """
     Renders the given date time's string value into the given string container. 
     
@@ -57,6 +57,7 @@ def render_date_time_into(into, date_time, add_ago):
     into : `list` of `str`
     """
     into.append(format(date_time, DATETIME_FORMAT_CODE))
+    
     into.append(' [*')
     into.append(elapsed_time(date_time))
     if add_ago:

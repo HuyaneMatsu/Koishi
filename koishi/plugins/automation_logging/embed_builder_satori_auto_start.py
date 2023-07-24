@@ -2,10 +2,7 @@ __all__ = ()
 
 from hata import Color, Embed
 
-from .embed_builder_user import (
-    render_created_into, render_created_joined_difference_into, render_guild_profile_flags_into, render_id_into,
-    render_joined_into, render_profile_into
-)
+from ..rendering_helpers import build_user_join_or_leave_description
 
 
 SATORI_COLOR = Color.from_rgb(168, 2, 146)
@@ -29,25 +26,10 @@ def build_satori_auto_start_embed(guild, user):
     """
     guild_profile = user.get_guild_profile_for(guild)
     
-    description_parts = []
-    
-    render_profile_into(description_parts, user)
-    description_parts.append('\n')
-    render_id_into(description_parts, user)
-    description_parts.append('\n')
-    render_guild_profile_flags_into(description_parts, guild_profile)
-    description_parts.append('\n\n')
-    render_created_into(description_parts, user)
-    description_parts.append('\n')
-    render_joined_into(description_parts, guild_profile, True)
-    description_parts.append('\n')
-    render_created_joined_difference_into(description_parts, user, guild_profile, True)
-    
-    description = ''.join(description_parts)
-    description_parts = None
-    
     return Embed(
-        None, description, color = SATORI_COLOR,
+        None,
+        build_user_join_or_leave_description(user, guild_profile, True),
+        color = SATORI_COLOR,
     ).add_thumbnail(
         user.avatar_url,
     ).add_author(

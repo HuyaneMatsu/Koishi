@@ -4,7 +4,7 @@ import vampytest
 from hata import Role, UserFlag
 
 from ..constants import ROLE_MENTIONS_MAX
-from ..value_renderers import render_date_time_into, render_flags_into, render_role_mentions_into
+from ..value_renderers import render_date_time_with_relative_into, render_flags_into, render_role_mentions_into
 
 from .mocks import DateTimeMock, is_instance_mock
 
@@ -39,7 +39,7 @@ def test__render_role_mentions_into(input_roles):
     return ''.join(into)
 
 
-def _iter_options__render_date_time_into():
+def _iter_options__render_date_time_with_relative_into():
     yield (
         DateTime(2016, 10, 14, 21, 13, 16),
         DateTime(2016, 10, 14, 21, 13, 26),
@@ -55,10 +55,10 @@ def _iter_options__render_date_time_into():
     )
 
 
-@vampytest._(vampytest.call_from(_iter_options__render_date_time_into()).returning_last())
-def test__render_date_time_into(input_date_time, current_date_time, add_ago):
+@vampytest._(vampytest.call_from(_iter_options__render_date_time_with_relative_into()).returning_last())
+def test__render_date_time_with_relative_into(input_date_time, current_date_time, add_ago):
     """
-    Tests whether ``render_date_time_into`` works as intended.
+    Tests whether ``render_date_time_with_relative_into`` works as intended.
     
     Parameters
     ----------
@@ -75,7 +75,7 @@ def test__render_date_time_into(input_date_time, current_date_time, add_ago):
     """
     DateTimeMock.set_current(current_date_time)
     mocked = vampytest.mock_globals(
-        render_date_time_into, 3, {'DateTime': DateTimeMock, 'isinstance': is_instance_mock}
+        render_date_time_with_relative_into, 3, {'DateTime': DateTimeMock, 'isinstance': is_instance_mock}
     )
     
     into = mocked([], input_date_time, add_ago)

@@ -1,6 +1,8 @@
-### 2023-07-23
+### 2023-07-24
 
 - Add `2` new images to `like` interaction.
+- `/automation log-user` messages show `user flags` and `display name` fields.
+- `/automation log-satori` auto start messages show `user flag` and `display name` fields.
 
 ### 2023-07-22
 

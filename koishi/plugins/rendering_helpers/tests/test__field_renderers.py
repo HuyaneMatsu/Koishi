@@ -3,9 +3,12 @@ from datetime import datetime as DateTime
 import vampytest
 from hata import Role, UserFlag
 
-from ..constants import ROLE_MENTIONS_MAX
+from ..constants import (
+    DATE_TIME_CONDITION_ALL, DATE_TIME_CONDITION_FUTURE, DATE_TIME_CONDITION_PAST, ROLE_MENTIONS_MAX
+)
 from ..field_renderers import (
-    render_date_time_field_into, render_flags_field_into, render_role_mentions_field_into, render_string_field_into
+    render_date_time_difference_field_into, render_date_time_field_into, render_date_time_with_relative_field_into,
+    render_flags_field_into, render_role_mentions_field_into, render_string_field_into
 )
 
 from .mocks import DateTimeMock, is_instance_mock
@@ -16,7 +19,7 @@ def _iter_options__render_role_mentions_field_into():
     role_1 = Role.precreate(202307190001)
     
     n_roles = (*(role_0 for counter in range(30)),)
-    n_roles_repr = (role_0.mention + ', ') * ROLE_MENTIONS_MAX + f'... +{ROLE_MENTIONS_MAX - 20}'
+    n_roles_repr = (role_0.mention + ', ') * ROLE_MENTIONS_MAX + f'... +{30 - ROLE_MENTIONS_MAX}'
     
     yield False, None, False, 'Roles', ('Roles: *none*', True)
     yield True, None, False, 'Roles', ('\nRoles: *none*', True)
@@ -65,7 +68,7 @@ def test__render_role_mentions_field_into(field_added, roles, optional, title):
     return ''.join(into), field_added
 
 
-def _iter_options__render_date_time_field_into():
+def _iter_options__render_date_time_with_relative_field_into():
     date_time = DateTime(2016, 10, 14, 21, 13, 16)
     current = DateTime(2016, 10, 14, 21, 13, 26)
     
@@ -90,8 +93,8 @@ def _iter_options__render_date_time_field_into():
     yield current, False, date_time, False, True, 'Created at', ('Created at: 2016-10-14 21:13:16 [*10 seconds*]', True)
 
 
-@vampytest._(vampytest.call_from(_iter_options__render_date_time_field_into()).returning_last())
-def test__render_date_time_field_into(current_date, field_added, date_time, add_ago, optional, title):
+@vampytest._(vampytest.call_from(_iter_options__render_date_time_with_relative_field_into()).returning_last())
+def test__render_date_time_with_relative_field_into(current_date, field_added, date_time, add_ago, optional, title):
     """
     Tests whether ``render_role_mentions_field_into`` works as intended.
     
@@ -117,7 +120,7 @@ def test__render_date_time_field_into(current_date, field_added, date_time, add_
     """
     DateTimeMock.set_current(current_date)
     mocked = vampytest.mock_globals(
-        render_date_time_field_into, 3, {'DateTime': DateTimeMock, 'isinstance': is_instance_mock}
+        render_date_time_with_relative_field_into, 3, {'DateTime': DateTimeMock, 'isinstance': is_instance_mock}
     )
     
     into, field_added = mocked(
@@ -126,30 +129,28 @@ def test__render_date_time_field_into(current_date, field_added, date_time, add_
     return ''.join(into), field_added
 
 
-
-
-def _iter_options__render_date_time_field_into():
+def _iter_options__render_date_time_with_relative_field_into():
     current = DateTime(2016, 10, 14, 21, 13, 26)
     
-    yield current, None, -1, ('', False)
-    yield current, None, 0, ('', False)
-    yield current, None, 1, ('', False)
+    yield current, None, DATE_TIME_CONDITION_PAST, ('', False)
+    yield current, None, DATE_TIME_CONDITION_ALL, ('', False)
+    yield current, None, DATE_TIME_CONDITION_FUTURE, ('', False)
     
-    yield current, DateTime(2016, 10, 14, 21, 13, 36), -1, ('', False)
-    yield current, DateTime(2016, 10, 14, 21, 13, 36), 0, ('Date: 2016-10-14 21:13:36 [*10 seconds*]', True)
-    yield current, DateTime(2016, 10, 14, 21, 13, 36), 1, ('Date: 2016-10-14 21:13:36 [*10 seconds*]', True)
+    yield current, DateTime(2016, 10, 14, 21, 13, 36), DATE_TIME_CONDITION_PAST, ('', False)
+    yield current, DateTime(2016, 10, 14, 21, 13, 36), DATE_TIME_CONDITION_ALL, ('Date: 2016-10-14 21:13:36 [*10 seconds*]', True)
+    yield current, DateTime(2016, 10, 14, 21, 13, 36), DATE_TIME_CONDITION_FUTURE, ('Date: 2016-10-14 21:13:36 [*10 seconds*]', True)
     
-    yield current, DateTime(2016, 10, 14, 21, 13, 16), -1, ('Date: 2016-10-14 21:13:16 [*10 seconds*]', True)
-    yield current, DateTime(2016, 10, 14, 21, 13, 16), 0, ('Date: 2016-10-14 21:13:16 [*10 seconds*]', True)
-    yield current, DateTime(2016, 10, 14, 21, 13, 16), 1,  ('', False)
+    yield current, DateTime(2016, 10, 14, 21, 13, 16), DATE_TIME_CONDITION_PAST, ('Date: 2016-10-14 21:13:16 [*10 seconds*]', True)
+    yield current, DateTime(2016, 10, 14, 21, 13, 16), DATE_TIME_CONDITION_ALL, ('Date: 2016-10-14 21:13:16 [*10 seconds*]', True)
+    yield current, DateTime(2016, 10, 14, 21, 13, 16), DATE_TIME_CONDITION_FUTURE,  ('', False)
 
 
-@vampytest._(vampytest.call_from(_iter_options__render_date_time_field_into()).returning_last())
-def test__render_date_time_field_into__when(current_date, date_time, when):
+@vampytest._(vampytest.call_from(_iter_options__render_date_time_with_relative_field_into()).returning_last())
+def test__render_date_time_with_relative_field_into__condition(current_date, date_time, condition):
     """
     Tests whether ``render_role_mentions_field_into`` works as intended.
     
-    Case: `when` is defined.
+    Case: `condition` is defined.
     
     Parameters
     ----------
@@ -157,7 +158,7 @@ def test__render_date_time_field_into__when(current_date, date_time, when):
         The current time to use as a reference.
     date_time : `None`, `DateTime`
         The date to render.
-    when : `int`
+    condition : `int`
         Whether we only wanna render future time, current or perhaps both?
     
     Returns
@@ -167,11 +168,54 @@ def test__render_date_time_field_into__when(current_date, date_time, when):
     """
     DateTimeMock.set_current(current_date)
     mocked = vampytest.mock_globals(
-        render_date_time_field_into, 3, {'DateTime': DateTimeMock, 'isinstance': is_instance_mock}
+        render_date_time_with_relative_field_into, 3, {'DateTime': DateTimeMock, 'isinstance': is_instance_mock}
     )
     
     into, field_added = mocked(
-        [], False, date_time, add_ago = False, when = when
+        [], False, date_time, add_ago = False, condition = condition
+    )
+    return ''.join(into), field_added
+
+
+def _iter_options__render_date_time_field_into():
+    date_time = DateTime(2016, 10, 14, 21, 13, 16)
+    
+    yield False, None, False, 'Date', ('Date: *none*', True)
+    yield True, None, False, 'Date', ('\nDate: *none*', True)
+    yield False, date_time, False, 'Date', ('Date: 2016-10-14 21:13:16', True)
+    yield True, date_time, False, 'Date', ('\nDate: 2016-10-14 21:13:16', True)
+    yield False, None, True, 'Date', ('', False)
+    yield True, None, True, 'Date', ('', True)
+    yield False, date_time, True, 'Date', ('Date: 2016-10-14 21:13:16', True)
+    yield True, date_time, True, 'Date', ('\nDate: 2016-10-14 21:13:16', True)
+    
+    # 1 should be enough
+    yield False, date_time, True, 'Created at', ('Created at: 2016-10-14 21:13:16', True)
+
+
+@vampytest._(vampytest.call_from(_iter_options__render_date_time_field_into()).returning_last())
+def test__render_date_time_field_into(field_added, date_time, optional, title):
+    """
+    Tests whether ``render_role_mentions_field_into`` works as intended.
+    
+    Parameters
+    ----------
+    field_added : `bool`
+        Whether any fields were added already.
+    date_time : `None`, `DateTime`
+        The date to render.
+    optional : `bool`
+        Whether should not render if `date_time` is `None`.
+    title : `str`
+        The title of the field.
+    
+    Returns
+    -------
+    output : `str`
+    field_added : `bool`
+    """
+    into, field_added = render_date_time_field_into(
+        [], field_added, date_time, optional = optional, title = title
     )
     return ''.join(into), field_added
 
@@ -267,4 +311,40 @@ def test__render_string_field_into(field_added, string, optional, title):
     field_added : `bool`
     """
     into, field_added = render_string_field_into([], field_added, string, optional = optional, title = title)
+    return ''.join(into), field_added
+
+
+def _iter_options__render_date_time_difference_field_into():
+    date_time_0 = DateTime(2016, 10, 14, 21, 13, 16)
+    date_time_1 = DateTime(2016, 10, 14, 21, 13, 26)
+    
+    yield False, None, None, False, 'Date', ('Date difference: N/A', True)
+    yield True, None, None, False, 'Date', ('\nDate difference: N/A', True)
+    yield False, date_time_0, None, False, 'Date', ('Date difference: N/A', True)
+    yield True, date_time_0, None, False, 'Date', ('\nDate difference: N/A', True)
+    yield False, None, date_time_1, False, 'Date', ('Date difference: N/A', True)
+    yield True, None, date_time_1, False, 'Date', ('\nDate difference: N/A', True)
+    yield False, date_time_0, date_time_1, False, 'Date', (f'Date difference: 10 seconds', True)
+    yield True, date_time_0, date_time_1, False, 'Date', (f'\nDate difference: 10 seconds', True)
+    yield False, None, None, True, 'Date', ('', False)
+    yield True, None, None, True, 'Date', ('', True)
+    yield False, date_time_0, None, True, 'Date', ('', False)
+    yield True, date_time_0, None, True, 'Date', ('', True)
+    yield False, None, date_time_1, True, 'Date', ('', False)
+    yield True, None, date_time_1, True, 'Date', ('', True)
+    yield False, date_time_0, date_time_1, True, 'Date', (f'Date difference: 10 seconds', True)
+    yield True, date_time_0, date_time_1, True, 'Date', (f'\nDate difference: 10 seconds', True)
+
+    # 1 should be enough
+    yield False, date_time_0, date_time_1, False, 'Created - joined', (f'Created - joined difference: 10 seconds', True)
+
+
+@vampytest._(vampytest.call_from(_iter_options__render_date_time_difference_field_into()).returning_last())
+def test__render_date_time_difference_field_into(field_added, date_time_0, date_time_1, optional, title):
+    """
+    Tests whether ``render_date_time_difference_field_into`` works as intended.
+    """
+    into, field_added = render_date_time_difference_field_into(
+        [], field_added, date_time_0, date_time_1, optional = optional, title = title
+    )
     return ''.join(into), field_added
