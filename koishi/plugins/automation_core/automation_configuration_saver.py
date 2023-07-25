@@ -156,9 +156,12 @@ class AutomationConfigurationSaver:
                                     log_satori_channel_id = automation_configuration.log_satori_channel_id,
                                     log_satori_auto_start = automation_configuration.log_satori_auto_start,
                                     
-                                    welcome_channel_id = automation_configuration.welcome_channel_id,
-                                    touhou_feed_enabled = automation_configuration.touhou_feed_enabled,
                                     reaction_copy_enabled = automation_configuration.reaction_copy_enabled,
+                                    reaction_copy_role_id = automation_configuration.reaction_copy_role_id,
+                                    
+                                    touhou_feed_enabled = automation_configuration.touhou_feed_enabled,
+                                    
+                                    welcome_channel_id = automation_configuration.welcome_channel_id,
                                 ).returning(
                                     automation_configuration_model.id,
                                 )

@@ -25,6 +25,7 @@ def build_reaction_copy_about_response(client, event):
     name = client.name_at(event.guild_id)
     
     return InteractionResponse(
+        allowed_mentions = None,
         embed = Embed(
             'reaction-copy about',
             (
@@ -36,8 +37,11 @@ def build_reaction_copy_about_response(client, event):
                 f'channel may contain multiple emojis.\n'
                 f'\n'
                 f'The user needs **manage messages** permission to invoke this command in both channels while {name} '
-                f'needs **manage webhooks** permission in the target channel.'
+                f'needs **manage webhooks** permission in the target channel.\n'
+                f'\n'
+                f'A role can be additionally set to allow the feature for users without **manage messages** '
+                f'permission. '
+                f'Tho they will still need **view channel** permission in both of the channels.'
             )
         ),
-        allowed_mentions = None,
     )

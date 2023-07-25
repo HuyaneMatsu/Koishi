@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import Channel, ChannelType, Client, Permission
+from hata import Channel, ChannelType, Client, Permission, Role
 from hata.ext.slash import P, abort
 
 from ...bots import SLASH_CLIENT
@@ -20,7 +20,7 @@ from .constants import LOG_SATORI_ALLOWED_IDS
 from .permission_checks import (
     check_channel_and_client_permissions, check_user_permissions, default_channel_and_check_its_guild
 )
-from .show_all import build_response_show_all
+from .list_all import build_response_list_all
 
 
 AUTOMATION_COMMANDS = SLASH_CLIENT.interactions(
@@ -43,7 +43,7 @@ AUTOMATION_COMMANDS_SATORI = SLASH_CLIENT.interactions(
 # Read
 
 @AUTOMATION_COMMANDS.interactions
-async def show_all(
+async def list_all(
     event,
 ):
     """
@@ -68,7 +68,7 @@ async def show_all(
     
     automation_configuration = get_automation_configuration_for(event.guild_id)
     
-    return build_response_show_all(automation_configuration, guild)
+    return build_response_list_all(automation_configuration, guild)
 
 
 @AUTOMATION_COMMANDS.interactions
@@ -618,6 +618,58 @@ async def reaction_copy_disable(event):
     automation_configuration.set('reaction_copy_enabled', False)
     
     return f'Reaction-copy has been disabled.'
+
+
+@REACTION_COPY_COMMANDS.interactions(name = 'role-set')
+async def reaction_copy_role_set(
+    event,
+    role: (Role, 'select a role.'),
+):
+    """
+    Sets a role for who reaction-copy is additional enabled.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    role : ``Role``
+        The role to set.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('reaction_copy_role_id', role.id)
+    
+    return f'Reaction-copy can be used by users with role {role.name} as well.'
+
+
+@REACTION_COPY_COMMANDS.interactions(name = 'role-remove')
+async def reaction_copy_role_set(
+    event,
+):
+    """
+    Sets a role for who reaction-copy is additional enabled.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('reaction_copy_role_id', 0)
+    
+    return f'Reaction-copy will no logger be additionally available for users with any role.'
+
 
 # Touhou feed
 

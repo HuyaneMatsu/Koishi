@@ -26,5 +26,6 @@ def apply_presets():
     support_guild_configuration.welcome_channel_id = 0
     support_guild_configuration.touhou_feed_enabled = True
     support_guild_configuration.reaction_copy_enabled = True
+    support_guild_configuration.reaction_copy_role_id = 0
     
     AUTOMATION_CONFIGURATIONS[support_guild_configuration.guild_id] = support_guild_configuration

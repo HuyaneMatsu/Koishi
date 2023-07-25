@@ -3,16 +3,19 @@ __all__ = ()
 from collections import deque
 from itertools import chain
 
-from hata import KOKORO, parse_all_emojis
+from hata import KOKORO, Permission, parse_all_emojis
 from scarletio import Task, TaskGroup
 
 from ...bots import SLASH_CLIENT
 
-from ..automation_core import get_reaction_copy_enabled
+from ..automation_core import get_reaction_copy_enabled_and_role
 from ..move_message_core import create_webhook_message, get_message_and_files, get_webhook
 
 
 ACTION_QUEUE = deque(maxlen = 100)
+
+PERMISSION_MASK_ROLE = Permission().update_by_keys(view_channel = True)
+PERMISSION_MASK_DEFAULT = Permission().update_by_keys(manage_messages = True)
 
 
 def check_channel_emojis(channel, emoji):
@@ -64,17 +67,20 @@ async def reaction_add(client, event):
     if emoji.is_custom_emoji():
         return
     
-    if not get_reaction_copy_enabled(guild.id):
+    enabled, role = get_reaction_copy_enabled_and_role(guild.id)
+    if not enabled:
         return
     
     source_channel = event.message.channel
     if source_channel is None:
         return
     
-    if source_channel.permissions_for(event.user).can_manage_messages:
-        pass
-    
+    if (role is not None) and event.user.has_role(role):
+        permission_mask = PERMISSION_MASK_ROLE
     else:
+        permission_mask = PERMISSION_MASK_DEFAULT
+        
+    if not source_channel.permissions_for(event.user) & permission_mask:
         return
     
     target_channels = [
@@ -90,7 +96,7 @@ async def reaction_add(client, event):
         return
     
     # If the user does not have permissions in the target channel they should not be able to target it.
-    if not target_channel.permissions_for(event.user).can_manage_messages:
+    if not target_channel.permissions_for(event.user) & permission_mask:
         return
     
     if not target_channel.cached_permissions_for(client).can_manage_webhooks:

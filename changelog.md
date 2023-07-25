@@ -1,8 +1,15 @@
+### 2023-07-25
+
+- `/automation welcome` now respects onboarding.
+- Add `/automation reaction-copy role-set` allowing to specify an additional role for the feature to be used by.
+- Add `/automation reaction-copy role-remove` to remove the role.
+- Rename `/automation show-all` to `/automation list-all`.
+
 ### 2023-07-24
 
 - Add `2` new images to `like` interaction.
 - `/automation log-user` messages show `user flags` and `display name` fields.
-- `/automation log-satori` auto start messages show `user flag` and `display name` fields.
+- `/automation log-satori auto-start` messages show `user flag` and `display name` fields.
 
 ### 2023-07-22
 

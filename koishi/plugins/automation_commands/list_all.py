@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import CHANNELS, Embed
+from hata import CHANNELS, Embed, ROLES
 from hata.ext.slash import InteractionResponse
 
 from .constants import LOG_SATORI_ALLOWED_IDS
@@ -26,6 +26,30 @@ def get_channel_representation(channel_id):
             pass
         else:
             return channel.mention
+    
+    return 'unset'
+
+
+def get_role_representation(role_id):
+    """
+    Gets role mention for the given identifier.
+    
+    Parameters
+    ----------
+    role_id : `int`
+        The role's identifier.
+    
+    Returns
+    -------
+    mention : `str`
+    """
+    if role_id:
+        try:
+            role = ROLES[role_id]
+        except KeyError:
+            pass
+        else:
+            return role.mention
     
     return 'unset'
 
@@ -98,9 +122,9 @@ def render_logging_description(automation_configuration):
     return ''.join(description_parts)
 
 
-def build_response_show_all(automation_configuration, guild):
+def build_response_list_all(automation_configuration, guild):
     """
-    Builds `show-all` command response.
+    Builds `list-all` command response.
     
     Parameters
     ----------
@@ -122,15 +146,19 @@ def build_response_show_all(automation_configuration, guild):
         render_logging_description(automation_configuration),
     ).add_field(
         'Reaction-copy',
-        get_bool_representation(automation_configuration.reaction_copy_enabled),
+        (
+            f'State: {get_bool_representation(automation_configuration.reaction_copy_enabled)}\n'
+            f'Role: {get_role_representation(automation_configuration.reaction_copy_role_id)}'
+        ),
     ).add_field(
         'Touhou-feed',
-        get_bool_representation(automation_configuration.touhou_feed_enabled),
+        f'State: {get_bool_representation(automation_configuration.touhou_feed_enabled)}',
     ).add_field(
         'Welcome',
         f'Channel: {get_channel_representation(automation_configuration.welcome_channel_id)}',
     )
     
     return InteractionResponse(
+        allowed_mentions = None,
         embed = embed,
     )

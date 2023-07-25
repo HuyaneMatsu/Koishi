@@ -226,14 +226,19 @@ if (DB_ENGINE is not None):
         log_sticker_channel_id = Column(Int64)
         log_user_channel_id = Column(Int64)
         
-        # satori
+        # Satori
         log_satori_auto_start = Column(Boolean, default = False)
         log_satori_channel_id = Column(Int64)
         
-        # extra
-        welcome_channel_id = Column(Int64)
-        touhou_feed_enabled = Column(Boolean, default = False)
+        # Reaction copy
         reaction_copy_enabled = Column(Boolean, default = False)
+        reaction_copy_role_id = Column(Int64)
+        
+        # Touhou feed
+        touhou_feed_enabled = Column(Boolean, default = False)
+        
+        # Welcome
+        welcome_channel_id = Column(Int64)
     
     AUTOMATION_CONFIGURATION_TABLE = automation_configuration_model.__table__
     

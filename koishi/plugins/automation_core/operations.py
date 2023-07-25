@@ -1,10 +1,11 @@
 __all__ = (
     'delete_automation_configuration_of', 'get_automation_configuration_for', 'get_log_emoji_channel',
     'get_log_mention_channel', 'get_log_user_channel', 'get_log_satori_channel', 'get_log_satori_channel_if_auto_start',
-    'get_log_sticker_channel', 'get_reaction_copy_enabled', 'get_touhou_feed_enabled', 'get_welcome_channel'
+    'get_log_sticker_channel', 'get_reaction_copy_enabled', 'get_reaction_copy_enabled_and_role',
+    'get_touhou_feed_enabled', 'get_welcome_channel'
 )
 
-from hata import CHANNELS
+from hata import CHANNELS, ROLES
 
 from .automation_configuration import AutomationConfiguration
 from .constants import AUTOMATION_CONFIGURATIONS
@@ -275,6 +276,38 @@ def get_reaction_copy_enabled(guild_id):
         return False
     
     return automation_configuration.reaction_copy_enabled
+
+
+def get_reaction_copy_enabled_and_role(guild_id):
+    """
+    Gets whether reaction-copy is enabled for the given guild and the role it is limited to.
+    
+    Parameters
+    ----------
+    guild_id : `int`
+        The guild's identifier.
+    
+    Returns
+    -------
+    enabled : `bool`
+    role : `None`, ``Role``
+    """
+    try:
+        automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
+    except KeyError:
+        return False
+    
+    enabled = automation_configuration.reaction_copy_enabled
+    if enabled:
+        role_id = automation_configuration.reaction_copy_role_id
+        if role_id:
+            role = ROLES.get(role_id, None)
+        else:
+            role = None
+    else:
+        role = None
+    
+    return enabled, role
 
 
 def get_touhou_feed_enabled(guild_id):
