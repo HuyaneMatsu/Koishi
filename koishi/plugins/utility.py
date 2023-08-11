@@ -13,7 +13,7 @@ from hata import (
     BUILTIN_EMOJIS, Color, DATETIME_FORMAT_CODE, Embed, ICON_TYPE_NONE, KOKORO, Permission, Status, cchunkify,
     elapsed_time, escape_markdown, parse_color
 )
-from hata.discord.invite.invite import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
+from hata.discord.application.constants import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
 from hata.ext.slash import InteractionResponse, abort
 from hata.ext.slash.menus import Pagination
 from scarletio import ReuBytesIO, TaskGroup

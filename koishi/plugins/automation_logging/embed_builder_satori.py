@@ -3,7 +3,8 @@ __all__ = ()
 from datetime import datetime as DateTime
 
 from hata import ActivityType, DATETIME_FORMAT_CODE, Embed, Status, elapsed_time
-from hata.discord.utils import DISCORD_EPOCH_START
+
+from ..rendering_helpers import render_activity_description_into
 
 
 MAX_CHUNK_SIZE = 2000
@@ -86,8 +87,7 @@ def render_presence_update(user, old_attributes):
         if (added is not None):
             for activity in added:
                 into.append('**Added activity**:')
-                into.append('\n')
-                render_activity_into(into, activity)
+                render_activity_description_into(True, into, activity)
                 into.append('\n')
         
         if (updated is not None):
@@ -102,8 +102,7 @@ def render_presence_update(user, old_attributes):
         if (removed is not None):
             for activity in removed:
                 into.append('**Removed activity**:')
-                into.append('\n')
-                render_activity_into(into, activity)
+                render_activity_description_into(into, True, activity)
                 into.append('\n')
     
     return into
@@ -130,176 +129,6 @@ def render_date_time_into(into, date_time_value):
     into.append(' ago]')
     return into
 
-
-def render_activity_into(into, activity):
-    """
-    Renders the given activity into the given container.
-    
-    Parameters
-    ----------
-    into : `list` of `str`
-        The container to render into.
-    activity : ``Activity``
-        The activity to render.
-    
-    Returns
-    -------
-    into : `list` of `str`
-    """
-    into.append('**name:** ')
-    into.append(repr(activity.name))
-    into.append('\n')
-    
-    activity_type = activity.type
-    into.append('**type:** ')
-    into.append(activity_type.name)
-    into.append(' ~ ')
-    into.append(repr(activity_type.value))
-    into.append('\n')
-    
-    if activity_type != ActivityType.custom:
-        timestamps = activity.timestamps
-        if (timestamps is not None):
-            timestamp_start = activity.start
-            if (timestamp_start is not None):
-                into.append('**timestamp start:** ')
-                render_date_time_into(into, timestamp_start)
-                into.append('\n')
-            
-            timestamp_end = activity.end
-            if (timestamp_end is not None):
-                into.append('**timestamp end:** ')
-                render_date_time_into(into, timestamp_end)
-                into.append('\n')
-        
-        details = activity.details
-        if (details is not None):
-            into.append('**details:** ')
-            into.append(repr(details))
-            into.append('\n')
-        
-        state = activity.state
-        if (state is not None):
-            into.append('**state:** :')
-            into.append(repr(state))
-            into.append('\n')
-        
-        party = activity.party
-        if (party is not None):
-            party_id = party.id
-            if (party_id is not None):
-                into.append('**party id:** ')
-                into.append(repr(party_id))
-                into.append('\n')
-            
-            party_size = party.size
-            party_max = party.max
-            if party_size or party_max:
-                if party_size:
-                    into.append('**party size:** ')
-                    into.append(repr(party_size))
-                    into.append('\n')
-                
-                if party_max:
-                    into.append('**party max:** ')
-                    into.append(repr(party_max))
-                    into.append('\n')
-        
-        assets = activity.assets
-        if (assets is not None):
-            asset_image_large = assets.image_large
-            if (asset_image_large is not None):
-                into.append('**asset image large:** ')
-                into.append(repr(asset_image_large))
-                into.append('\n')
-            
-            asset_text_large = assets.text_large
-            if (asset_text_large is not None):
-                into.append('**asset text large:** ')
-                into.append(repr(asset_text_large))
-                into.append('\n')
-            
-            asset_image_small = assets.image_small
-            if (asset_image_small is not None):
-                into.append('**asset image small:** ')
-                into.append(repr(asset_image_small))
-                into.append('\n')
-            
-            asset_text_small = assets.text_small
-            if asset_text_small:
-                into.append('**asset text small:** ')
-                into.append(repr(asset_text_small))
-                into.append('\n')
-        
-        spotify_album_cover_url = activity.spotify_album_cover_url
-        if (spotify_album_cover_url is not None):
-            into.append('**spotify album cover url:** ')
-            into.append(repr(spotify_album_cover_url))
-            into.append('\n')
-        
-        secrets = activity.secrets
-        if (secrets is not None):
-            secret_join = secrets.join
-            if (secret_join is not None):
-                into.append('**secrets join:** ')
-                into.append(repr(secret_join))
-                into.append('\n')
-            
-            secret_spectate = secrets.spectate
-            if (secret_spectate is not None):
-                into.append('**secrets spectate:** ')
-                into.append(repr(secret_spectate))
-                into.append('\n')
-            
-            secret_match = secrets.match
-            if (secret_match is not None):
-                into.append('**secrets match:** ')
-                into.append(repr(secret_match))
-                into.append('\n')
-        
-        url = activity.url
-        if (url is not None):
-            into.append('**url:** ')
-            into.append(repr(url))
-            into.append('\n')
-        
-        sync_id = activity.sync_id
-        if (sync_id is not None):
-            into.append('**sync id:** ')
-            into.append(repr(sync_id))
-            into.append('\n')
-        
-        session_id = activity.session_id
-        if (session_id is not None):
-            into.append('**session id:** ')
-            into.append(repr(session_id))
-            into.append('\n')
-        
-        flags = activity.flags
-        if flags:
-            into.append('**flags:** ')
-            into.append(', '.join(flags))
-            into.append('\n')
-        
-        application_id = activity.application_id
-        if activity.application_id:
-            into.append('**application id:** ')
-            into.append(repr(application_id))
-            into.append('\n')
-        
-        created_at = activity.created_at
-        if created_at > DISCORD_EPOCH_START:
-            into.append('**created at:** ')
-            render_date_time_into(into, created_at)
-            into.append('\n')
-        
-        activity_id = activity.id
-        if activity_id:
-            into.append('**id:** ')
-            into.append(repr(activity_id))
-            into.append('\n')
-    
-    return into
 
 
 def render_representation_difference_into(into, old_value, new_value):
@@ -391,7 +220,7 @@ def render_name_difference_into(into, old_name, activity):
     -------
     into : `list` of `str`
     """
-    into.append('**name:** ')
+    into.append('Name: ')
     render_representation_difference_into(into, old_name, activity.name)
     return into
 
@@ -414,7 +243,7 @@ def render_type_difference_into(into, old_type, activity):
     into : `list` of `str`
     """
     new_type = activity.type
-    into.append('**type:** ')
+    into.append('Type: ')
     into.append(old_type.anme)
     into.append(' ~ ')
     into.append(repr(old_type.value))
@@ -459,11 +288,11 @@ def render_timestamps_difference_into(into, old_timestamps, activity):
         new_timestamp_end = new_timestamps.end
     
     if old_timestamp_start != new_timestamp_start:
-        into.append('**timestamp start:** ')
+        into.append('Timestamp start: ')
         render_date_time_difference_only_into(into, old_timestamp_start, new_timestamp_start)
     
     if old_timestamp_end != new_timestamp_end:
-        into.append('**timestamp end:** ')
+        into.append('Timestamp end: ')
         render_date_time_difference_only_into(into, old_timestamp_end, new_timestamp_end)
     
     return into
@@ -486,7 +315,7 @@ def render_details_difference_into(into, old_details, activity):
     -------
     into : `list` of `str`
     """
-    into.append('**details:** ')
+    into.append('Details: ')
     render_representation_difference_into(into, old_details, activity.details)
     return into
 
@@ -508,7 +337,7 @@ def render_state_difference(into, old_state, activity):
     -------
     into : `list` of `str`
     """
-    into.append('**state:** ')
+    into.append('State: ')
     render_representation_difference_into(into, old_state, activity.state)
     return into
 
@@ -550,16 +379,16 @@ def render_party_difference_into(into, old_party, activity):
         new_party_max = new_party.max
     
     if old_party_id != new_party_id:
-        into.append('**party id:** ')
+        into.append('Party id: ')
         render_representation_difference_into(into, old_party_id, new_party_id)
     
     if old_party_size or old_party_max or new_party_size or new_party_max:
         if (old_party_size or new_party_size) and (old_party_size != new_party_size):
-            into.append('**party size:** ')
+            into.append('Party size: ')
             render_representation_difference_into(into, old_party_size, new_party_size)
         
         if (old_party_max or new_party_max) and (old_party_max != new_party_max):
-            into.append('**party max:** ')
+            into.append('Party max: ')
             render_representation_difference_into(into, old_party_max, new_party_max)
     
     return into
@@ -606,19 +435,19 @@ def render_assets_difference_into(into, old_assets, activity):
         new_asset_text_small = new_assets.text_small
     
     if old_asset_image_large != mew_asset_image_large:
-        into.append('**asset image large:** ')
+        into.append('Assets image large: ')
         render_representation_difference_into(into, old_asset_image_large, mew_asset_image_large)
     
     if old_asset_text_large != new_asset_text_large:
-        into.append('**asset text large:** ')
+        into.append('Assets text large: ')
         render_representation_difference_into(into, old_asset_text_large, new_asset_text_large)
     
     if old_asset_image_small != mew_asset_image_small:
-        into.append('**asset image small:** ')
+        into.append('Assets image small: ')
         render_representation_difference_into(into, old_asset_image_small, mew_asset_image_small)
     
     if old_asset_text_small != new_asset_text_small:
-        into.append('**asset text small:** ')
+        into.append('Assets text small: ')
         render_representation_difference_into(into, old_asset_text_small, new_asset_text_small)
     
     return into
@@ -641,7 +470,7 @@ def render_album_cover_url_difference_into(into, old_spotify_album_cover_url, ac
     -------
     into : `list` of `str`
     """
-    into.append('**spotify album cover url:** ')
+    into.append('Spotify album cover url: ')
     render_representation_difference_into(into, old_spotify_album_cover_url, activity.spotify_album_cover_url)
     return into
 
@@ -683,15 +512,15 @@ def render_secrets_difference_into(into, old_secrets, activity):
         new_secret_match = new_secrets.match
         
     if old_secret_join != new_secret_join:
-        into.append('**secrets join:** ')
+        into.append('Secrets join: ')
         render_representation_difference_into(into, old_secret_join, new_secret_join)
     
     if old_secret_spectate != new_secret_spectate:
-        into.append('**secrets spectate:** ')
+        into.append('Secrets spectate: ')
         render_representation_difference_into(into, old_secret_spectate, new_secret_spectate)
     
     if old_secret_match != new_secret_match:
-        into.append('**secrets spectate:** ')
+        into.append('Secrets spectate: ')
         render_representation_difference_into(into, old_secret_match, new_secret_match)
     
     return into
@@ -714,7 +543,7 @@ def render_url_difference_into(into, old_url, activity):
     -------
     into : `list` of `str`
     """
-    into.append('**url:** ')
+    into.append('Url: ')
     render_representation_difference_into(into, old_url, activity.url)
     return into
 
@@ -736,7 +565,7 @@ def render_sync_id_difference_into(into, old_sync_id, activity):
     -------
     into : `list` of `str`
     """
-    into.append('**sync id:** ')
+    into.append('Sync id: ')
     render_representation_difference_into(into, old_sync_id, activity.sync_id)
     return into
 
@@ -758,7 +587,7 @@ def render_session_id_difference_into(into, old_session_id, activity):
     -------
     into : `list` of `str`
     """
-    into.append('**session id:** ')
+    into.append('Session id: ')
     render_representation_difference_into(into, old_session_id, activity.session_id)
     return into
 
@@ -780,7 +609,7 @@ def render_flags_difference_into(into, old_flags, activity):
     -------
     into : `list` of `str`
     """
-    into.append('**flags:** ')
+    into.append('Flags: ')
     into.append(', '.join(old_flags))
     into.append(' -> ')
     into.append(', '.join(activity.flags))
@@ -805,7 +634,7 @@ def render_application_id_difference_into(into, old_application_id, activity):
     -------
     into : `list` of `str`
     """
-    into.append('**application id:** ')
+    into.append('Application id: ')
     render_representation_difference_into(into, old_application_id, activity.application_id)
     return into
 
@@ -827,7 +656,7 @@ def render_created_at_difference_into(into, old_created_at, activity):
     -------
     into : `list` of `str`
     """
-    into.append('**created at:** ')
+    into.append('Created at: ')
     render_date_time_difference_only_into(into, old_created_at, activity.created_at)
     return into
 
@@ -849,7 +678,7 @@ def render_id_difference_into(into, old_activity_id, activity):
     -------
     into : `list` of `str`
     """
-    into.append('**id:** ')
+    into.append('Id: ')
     render_representation_difference_into(into, old_activity_id, activity.id)
     return into
 
@@ -1022,4 +851,3 @@ def build_presence_update_embeds(user, old_attributes):
     embeds : `list` of ``Embed``
     """
     return [Embed(description = chunk) for chunk in make_chunks(render_presence_update(user, old_attributes))]
-

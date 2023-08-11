@@ -254,7 +254,7 @@ def join_names_of_touhou_characters(characters, join_with):
     return ''.join(built)
 
 
-def should_auto_post_in_channel(client, channel):
+def should_touhou_feed_in_channel(client, channel):
     """
     Returns whether the client should try to auto post in the given channel.
     
@@ -547,7 +547,7 @@ def try_update_guild(client, guild):
         The guild to scan.
     """
     for channel in chain(guild.channels.values(), guild.threads.values()):
-        if should_auto_post_in_channel(client, channel):
+        if should_touhou_feed_in_channel(client, channel):
             try_update_channel(channel)
 
 
@@ -566,7 +566,7 @@ def try_remove_guild(guild):
          try_remove_channel(channel)
 
 
-def reset_auto_posters(client):
+def reset_touhou_feeders(client):
     """
     Resets all auto posters. Removing the old ones and adding the new ones.
     
@@ -611,7 +611,7 @@ def reset_channel_single(client, channel):
     channel : ``Channel``
         The channel to reset.
     """
-    if should_auto_post_in_channel(client, channel):
+    if should_touhou_feed_in_channel(client, channel):
         try_update_channel(channel)
     else:
         try_remove_channel(channel)
@@ -626,7 +626,7 @@ def setup(lib):
     lib : `ModuleType`
         This module.
     """
-    reset_auto_posters(SLASH_CLIENT)
+    reset_touhou_feeders(SLASH_CLIENT)
 
 
 def teardown(lib):

@@ -260,3 +260,40 @@ def render_string_field_into(into, field_added, string, *, optional = True, titl
             into.append(string)
         
     return into, field_added
+
+
+def render_preinstanced_field_into(into, field_added, preinstanced, *, optional = True, title = 'Type'):
+    """
+    Renders a preinstanced field into the given container.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        The container to render into.
+    field_added : `bool`
+        Whether any fields were added already.
+    preinstanced : ``PreinstancedBase``
+        The preinstanced value to render.
+    optional : `bool` = `True`, Optional (Keyword only)
+        Whether should not render if `preinstanced` is empty.
+    title : `str` = `'Type'`, Optional (Keyword only)
+        The title of the line.
+    
+    Returns
+    -------
+    into : `list<str>`
+    field_added : `bool`
+    """
+    if (not optional) or preinstanced.value:
+        if field_added:
+            into.append('\n')
+        else:
+            field_added = True
+        
+        into.append(title)
+        into.append(': ')
+        into.append(preinstanced.name)
+        into.append(' ~ ')
+        into.append(str(preinstanced.value))
+    
+    return into, field_added

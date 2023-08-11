@@ -2,105 +2,22 @@ __all__ = (
     'TOUHOU_FEED_ABOUT_BUILDERS', 'TOUHOU_FEED_ABOUT_FIELDS', 'TOUHOU_FEED_ABOUT_TOPIC_MAIN',
     'build_touhou_feed_listing_response'
 )
-
 from itertools import chain
 from re import I as re_ignore_case, U as re_unicode, compile as re_compile, escape as re_escape
 
 from dateutil.relativedelta import relativedelta as RelativeDelta
-from hata import AnsiForegroundColor, BUILTIN_EMOJIS, Embed, create_ansi_format_code, elapsed_time
+from hata import Embed, elapsed_time
 from hata.ext.slash import Button, InteractionResponse, Row
 
-from .constants import DEFAULT_INTERVAL, FEEDERS, MAX_INTERVAL, MIN_INTERVAL
-from .logic import get_interval_only, join_names_of_touhou_characters, parse_channel_tags, should_auto_post_in_channel
-
-
-STYLE_RESET = create_ansi_format_code()
-STYLE_RED = create_ansi_format_code(foreground_color = AnsiForegroundColor.red)
-STYLE_GREEN = create_ansi_format_code(foreground_color = AnsiForegroundColor.green)
-STYLE_BLUE = create_ansi_format_code(foreground_color = AnsiForegroundColor.blue)
-
-MIN_DELTA = elapsed_time(RelativeDelta(seconds = MIN_INTERVAL))
-MAX_DELTA = elapsed_time(RelativeDelta(seconds = MAX_INTERVAL))
-DEFAULT_DELTA = elapsed_time(RelativeDelta(seconds = DEFAULT_INTERVAL))
-
-EMOJI_PAGE_PREVIOUS = BUILTIN_EMOJIS['arrow_left']
-EMOJI_PAGE_NEXT = BUILTIN_EMOJIS['arrow_right']
-EMOJI_REFRESH = BUILTIN_EMOJIS['arrows_counterclockwise']
-EMOJI_CLOSE = BUILTIN_EMOJIS['x']
-
-CUSTOM_ID_CLOSE = 'auto_post.close'
-
-CUSTOM_ID_PAGE_BASE = 'auto_post.page.'
-CUSTOM_ID_REFRESH_BASE = 'auto_post.refresh.'
-
-CUSTOM_ID_PAGE_PREVIOUS_DISABLED = CUSTOM_ID_PAGE_BASE + 'd1'
-CUSTOM_ID_PAGE_NEXT_DISABLED = CUSTOM_ID_PAGE_BASE + 'd2'
-
-CUSTOM_ID_ABOUT_MAIN = 'auto_post.about.main'
-CUSTOM_ID_ABOUT_EXAMPLES = 'auto_post.about.examples'
-CUSTOM_ID_ABOUT_INTERVAL = 'auto_post.about.interval'
-
-
-BUTTON_PREVIOUS_DISABLED = Button(
-    emoji = EMOJI_PAGE_PREVIOUS,
-    custom_id = CUSTOM_ID_PAGE_PREVIOUS_DISABLED,
-    enabled = False,
+from .constants import (
+    BUTTON_CLOSE, BUTTON_NEXT_DISABLED, BUTTON_PREVIOUS_DISABLED, BUTTON_REFRESH_BASE, COMPONENTS_ABOUT_EXAMPLES,
+    COMPONENTS_ABOUT_INTERVAL, COMPONENTS_ABOUT_MAIN, CUSTOM_ID_PAGE_BASE, CUSTOM_ID_REFRESH_BASE, DEFAULT_DELTA,
+    DISPLAY_PER_PAGE, EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS, FEEDERS, MAX_DELTA, MIN_DELTA, STYLE_BLUE, STYLE_GREEN,
+    STYLE_RED, STYLE_RESET
 )
-
-BUTTON_NEXT_DISABLED = Button(
-    emoji = EMOJI_PAGE_NEXT,
-    custom_id = CUSTOM_ID_PAGE_NEXT_DISABLED,
-    enabled = False,
+from .logic import (
+    get_interval_only, join_names_of_touhou_characters, parse_channel_tags, should_touhou_feed_in_channel
 )
-
-BUTTON_REFRESH_BASE = Button(
-    'Refresh',
-    EMOJI_REFRESH,
-)
-    
-BUTTON_CLOSE = Button(
-    'Close',
-    EMOJI_CLOSE,
-    custom_id = CUSTOM_ID_CLOSE,
-)
-
-BUTTON_ABOUT_MAIN = Button(
-    'About',
-    custom_id = CUSTOM_ID_ABOUT_MAIN,
-)
-
-BUTTON_ABOUT_EXAMPLES = Button(
-    'Examples',
-    custom_id = CUSTOM_ID_ABOUT_EXAMPLES,
-)
-
-BUTTON_ABOUT_INTERVAL = Button(
-    'Interval',
-    custom_id = CUSTOM_ID_ABOUT_INTERVAL,
-)
-
-COMPONENTS_ABOUT_MAIN = Row(
-    BUTTON_ABOUT_MAIN.copy_with(enabled = False),
-    BUTTON_ABOUT_EXAMPLES,
-    BUTTON_ABOUT_INTERVAL,
-    BUTTON_CLOSE,
-)
-
-COMPONENTS_ABOUT_EXAMPLES = Row(
-    BUTTON_ABOUT_MAIN,
-    BUTTON_ABOUT_EXAMPLES.copy_with(enabled = False),
-    BUTTON_ABOUT_INTERVAL,
-    BUTTON_CLOSE,
-)
-
-COMPONENTS_ABOUT_INTERVAL = Row(
-    BUTTON_ABOUT_MAIN,
-    BUTTON_ABOUT_EXAMPLES,
-    BUTTON_ABOUT_INTERVAL.copy_with(enabled = False),
-    BUTTON_CLOSE,
-)
-
-DISPLAY_PER_PAGE = min(25 // 3, 4)
 
 
 def _channel_sort_key(channel):
@@ -138,7 +55,7 @@ def iter_channels(client, guild):
     channel : ``Channel``
     """
     for channel in chain(guild.channels.values(), guild.threads.values()):
-        if should_auto_post_in_channel(client, channel):
+        if should_touhou_feed_in_channel(client, channel):
             yield channel
 
 

@@ -13,7 +13,7 @@ from ..automation_core import (
 
 from .components_satori_auto_start import build_satori_auto_start_component_row
 from .embed_builder_satori import build_presence_update_embeds
-from .embed_builder_satori_auto_start import build_satori_auto_start_embed
+from .embed_builder_satori_start import build_satori_auto_start_embeds
 
 
 # Hata best wrapper
@@ -131,9 +131,10 @@ async def channel_create(client, channel):
     try:
         user_id = int(channel.name)
     except ValueError:
-        pass
-    else:
-        set_satori_channel(channel.id, user_id)
+        return
+    
+    set_satori_channel(channel.id, user_id)
+    await create_initial_message(client, channel, user_id)
 
 
 @SLASH_CLIENT.events
@@ -159,6 +160,7 @@ async def channel_edit(client, channel, old_attributes):
     if (satori_channel is None):
         return
     
+    # Moved ?
     try:
         old_parent_id = old_attributes['parent_id']
     except KeyError:
@@ -182,11 +184,13 @@ async def channel_edit(client, channel, old_attributes):
                 return
             else:
                 set_satori_channel(channel.id, user_id)
+                await create_initial_message(client, channel, user_id)
             return
     
     if channel.parent_id != satori_channel.id:
         return
     
+    # renamed ?
     try:
         name = old_attributes['name']
     except KeyError:
@@ -198,13 +202,14 @@ async def channel_edit(client, channel, old_attributes):
             pass
         else:
             remove_watcher_channel(channel.id, user_id)
-    
-    try:
-        user_id = int(channel.name)
-    except ValueError:
-        pass
-    else:
-        set_satori_channel(channel.id, user_id)
+        
+        try:
+            user_id = int(channel.name)
+        except ValueError:
+            pass
+        else:
+            set_satori_channel(channel.id, user_id)
+            await create_initial_message(client, channel, user_id)
 
 
 @SLASH_CLIENT.events
@@ -286,50 +291,21 @@ async def guild_user_add(client, guild, user):
     channel_name = str(user.id)
     for channel in satori_channel.iter_channels():
         if channel.name == channel_name:
-            break
-    
-    else:
-        # Channel not found -> create
-        
-        # Check channel permissions
-        if not satori_channel.cached_permissions_for(client).can_manage_channels:
-            return
-        
-        try:
-            # No need to pass permission overwrites, seems like it is auto inherited from parent.
-            channel = await client.channel_create(
-                guild,
-                channel_type = ChannelType.guild_text,
-                name = channel_name,
-                parent_id = satori_channel.id,
-            )
-        except (GeneratorExit, CancelledError):
-            raise
-        
-        except ConnectionError:
-            return
-        
-        except BaseException as err:
-            if isinstance(err, DiscordException) and err.code in (
-                ERROR_CODES.unknown_channel, # channel deleted
-                ERROR_CODES.missing_access, # client removed
-                ERROR_CODES.missing_permissions, # permissions changed
-            ):
-                return
-            
-            await client.events.error(client, 'log.satori.guild_user_add', err)
             return
     
-    # Check permissions of the new channel
-    if not channel.cached_permissions_for(client).can_send_messages:
+    # Channel not found -> create
+    
+    # Check channel permissions
+    if not satori_channel.cached_permissions_for(client).can_manage_channels:
         return
     
     try:
-        await client.message_create(
-            channel,
-            allowed_mentions = None,
-            components = build_satori_auto_start_component_row(user),
-            embed = build_satori_auto_start_embed(guild, user),
+        # No need to pass permission overwrites, seems like it is auto inherited from parent.
+        await client.channel_create(
+            guild,
+            channel_type = ChannelType.guild_text,
+            name = channel_name,
+            parent_id = satori_channel.id,
         )
     except (GeneratorExit, CancelledError):
         raise
@@ -346,4 +322,62 @@ async def guild_user_add(client, guild, user):
             return
         
         await client.events.error(client, 'log.satori.guild_user_add', err)
+        return
+
+
+async def create_initial_message(client, channel, user_id):
+    """
+    Creates the initial satori message.
+
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    channel : ``Channel``
+        The created channel.
+    user_id : `int`
+        The user's identifier.
+    """
+    # Check permissions of the new channel
+    if not channel.cached_permissions_for(client).can_send_messages:
+        return
+    
+    # Try get user
+    try:
+        user = await client.user_get(user_id)
+    except (GeneratorExit, CancelledError):
+        raise
+    except ConnectionError:
+        return
+    except DiscordException as err:
+        if err.code == ERROR_CODES.unknown_user:
+            return
+        
+        raise
+    
+    # Send message
+    try:
+        await client.message_create(
+            channel,
+            allowed_mentions = None,
+            components = build_satori_auto_start_component_row(user),
+            embed = build_satori_auto_start_embeds(user, channel.guild_id),
+        )
+    except (GeneratorExit, CancelledError):
+        raise
+    
+    except ConnectionError:
+        return
+    
+    except BaseException as err:
+        if isinstance(err, DiscordException) and err.code in (
+            ERROR_CODES.unknown_channel, # channel deleted
+            ERROR_CODES.missing_access, # client removed
+            ERROR_CODES.missing_permissions, # permissions changed
+        ):
+            return
+        
+        await client.events.error(client, 'log.satori.create_initial_message', err)
         return

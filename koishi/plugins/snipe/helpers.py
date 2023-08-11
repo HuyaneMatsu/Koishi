@@ -160,6 +160,43 @@ async def propagate_check_error_message(client, event, error_message):
     await client.interaction_followup_message_create(event, error_message, show_for_invoking_user_only = True)
 
 
+async def check_has_create_guild_expressions_permission(client, event):
+    """
+    Checks whether the user has create emojis and sticker permission.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        the client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    
+    Returns
+    -------
+    has_permissions : `bool`
+    """
+    if not event.user_permissions.can_create_guild_expressions:
+        await propagate_check_error_message(
+            client,
+            event,
+            '**You** are required to have `create guild expressions` permission to **invoke** any action.',
+        )
+        return False
+    
+    guild = event.guild
+    if (guild is None) or (not guild.cached_permissions_for(client).can_create_guild_expressions):
+        await propagate_check_error_message(
+            client,
+            event,
+            '**I** require to have `create guild expressions` permission to **execute** any action.',
+        )
+        return False
+        
+    return True
+
+
 async def check_has_manage_guild_expressions_permission(client, event):
     """
     Checks whether the user has manage emojis and sticker permission.

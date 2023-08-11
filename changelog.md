@@ -1,3 +1,12 @@
+### 2023-08-11
+
+- `snipe` now checks for the new `create-guild-expression` permission when borrowing.
+- `/automation reaction-copy list-channels` now has new `refresh` and `close` buttons.
+- `/automation log-satori` initial message now shows user presence.
+- `/automation log-satori` now creates initial messages for every channel and not only for auto-started ones.
+- Fix `/ascii avatar` command now wont ignore `size` parameter when getting global avatar.
+- `/ascii` commands now support a new `colored` parameter.
+
 ### 2023-07-25
 
 - `/automation welcome` now respects onboarding.

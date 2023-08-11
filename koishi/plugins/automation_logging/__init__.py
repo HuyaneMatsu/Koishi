@@ -2,7 +2,7 @@ from .components_satori_auto_start import *
 from .embed_builder_emoji import *
 from .embed_builder_mention import *
 from .embed_builder_satori import *
-from .embed_builder_satori_auto_start import *
+from .embed_builder_satori_start import *
 from .embed_builder_shared import *
 from .embed_builder_sticker import *
 from .embed_builder_user import *
@@ -19,7 +19,7 @@ __all__ = (
     *embed_builder_emoji.__all__,
     *embed_builder_mention.__all__,
     *embed_builder_satori.__all__,
-    *embed_builder_satori_auto_start.__all__,
+    *embed_builder_satori_start.__all__,
     *embed_builder_shared.__all__,
     *embed_builder_sticker.__all__,
     *embed_builder_user.__all__,

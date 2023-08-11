@@ -5,6 +5,8 @@ from itertools import chain
 from hata import Embed, parse_all_emojis
 from hata.ext.slash import InteractionResponse
 
+from .constants import COMPONENTS
+
 
 def collect_channels_with_emojis(client, guild):
     """
@@ -308,5 +310,6 @@ def build_reaction_copy_list_channels_response(client, guild, enabled):
     
     
     return InteractionResponse(
+        components = COMPONENTS,
         embed = embed,
     )

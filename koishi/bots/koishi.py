@@ -6,7 +6,7 @@ from scarletio.utils.trace import render_exception_into
 
 import config
 
-from ..bot_utils.constants import CHANNEL__SUPPORT__DEFAULT_TEST
+from ..bot_utils.constants import CHANNEL__SUPPORT__LOG_DISPATCH, CHANNEL__SUPPORT__LOG_ERROR
 from ..bot_utils.event_payload_analyzer import guess_event_payload_structure, render_payload_states
 from ..bot_utils.tools import EmojiDeleteWaitfor, MessageDeleteWaitfor, RoleDeleteWaitfor, RoleUpdateWaitfor
 
@@ -58,7 +58,7 @@ async def error(client, name, err):
     
     extracted = ''.join(extracted).split('\n')
     for chunk in cchunkify(extracted, lang = 'py'):
-        await client.message_create(CHANNEL__SUPPORT__DEFAULT_TEST, chunk)
+        await client.message_create(CHANNEL__SUPPORT__LOG_ERROR, chunk)
 
 
 # Add the event payload analyzer to all client's events.
@@ -69,18 +69,13 @@ async def unknown_dispatch_event(client, event_name, payload):
 
 
 @Koishi.events
-async def unknown_dispatch_event(client, name, data):
-    await client.events.error(client, name, repr(data))
-
-
-@Koishi.events
 @to_coroutine
 def unknown_dispatch_event(client, event_name, payload):
-    yield # This makes sure, the event(s) above is called first.
-    
-    file_content = render_payload_states()
-    
     yield from client.message_create(
-        CHANNEL__SUPPORT__DEFAULT_TEST,
-        file = ('unknown_dispatch_event.txt', file_content)
+        CHANNEL__SUPPORT__LOG_DISPATCH,
+        content = f'# {event_name}',
+        file = [
+            ('event.txt', repr(payload)),
+            ('structures.txt', render_payload_states()),
+        ]
     ).__await__()

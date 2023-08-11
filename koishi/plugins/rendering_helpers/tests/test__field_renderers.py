@@ -1,14 +1,14 @@
 from datetime import datetime as DateTime
 
 import vampytest
-from hata import Role, UserFlag
+from hata import ApplicationType, Role, UserFlag
 
 from ..constants import (
     DATE_TIME_CONDITION_ALL, DATE_TIME_CONDITION_FUTURE, DATE_TIME_CONDITION_PAST, ROLE_MENTIONS_MAX
 )
 from ..field_renderers import (
     render_date_time_difference_field_into, render_date_time_field_into, render_date_time_with_relative_field_into,
-    render_flags_field_into, render_role_mentions_field_into, render_string_field_into
+    render_flags_field_into, render_preinstanced_field_into, render_role_mentions_field_into, render_string_field_into
 )
 
 from .mocks import DateTimeMock, is_instance_mock
@@ -343,8 +343,70 @@ def _iter_options__render_date_time_difference_field_into():
 def test__render_date_time_difference_field_into(field_added, date_time_0, date_time_1, optional, title):
     """
     Tests whether ``render_date_time_difference_field_into`` works as intended.
+    
+    Parameters
+    ----------
+    field_added : `bool`
+        Whether any fields were added already.
+    date_time_0 : `None`, `DateTime`
+        Date time to get the difference of.
+    date_time_1 : `None`, `DateTime`
+        Date time to get the difference with.
+    optional : `bool`
+        Whether should not render if `string` is empty.
+    title : `str`
+        The title of the line.
+    
+    Returns
+    -------
+    output : `str`
+    field_added : `bool`
     """
     into, field_added = render_date_time_difference_field_into(
         [], field_added, date_time_0, date_time_1, optional = optional, title = title
+    )
+    return ''.join(into), field_added
+
+
+def _iter_options__render_preinstanced_field_into():
+    preinstanced_0 = ApplicationType.none
+    preinstanced_1 = ApplicationType.game
+    
+    yield False, preinstanced_0, False, 'Type', ('Type: none ~ 0', True)
+    yield True, preinstanced_0, False, 'Type', ('\nType: none ~ 0', True)
+    yield False, preinstanced_0, True, 'Type', ('', False)
+    yield True, preinstanced_0, True, 'Type', ('', True)
+    yield False, preinstanced_1, False, 'Type', ('Type: game ~ 1', True)
+    yield True, preinstanced_1, False, 'Type', ('\nType: game ~ 1', True)
+    yield False, preinstanced_1, True, 'Type', ('Type: game ~ 1', True)
+    yield True, preinstanced_1, True, 'Type', ('\nType: game ~ 1', True)
+
+    # 1 should be enough
+    yield False, preinstanced_1, False, 'Kind', (f'Kind: game ~ 1', True)
+
+
+@vampytest._(vampytest.call_from(_iter_options__render_preinstanced_field_into()).returning_last())
+def test__render_preinstanced_field_into(field_added, preinstanced, optional, title):
+    """
+    Tests whether ``render_preinstanced_field_into`` works as intended.
+    
+    Parameters
+    ----------
+    field_added : `bool`
+        Whether any fields were added already.
+    preinstanced : ``PreinstancedBase``
+        The preinstanced value to render.
+    optional : `bool`
+        Whether should not render if `string` is empty.
+    title : `str`
+        The title of the line.
+    
+    Returns
+    -------
+    output : `str`
+    field_added : `bool`
+    """
+    into, field_added = render_preinstanced_field_into(
+        [], field_added, preinstanced, optional = optional, title = title,
     )
     return ''.join(into), field_added

@@ -5,7 +5,7 @@ from ...bots import SLASH_CLIENT
 from ..automation_core import get_touhou_feed_enabled
 
 from .logic import (
-    reset_auto_posters, reset_channel, should_auto_post_in_channel, try_remove_channel, try_remove_guild,
+    reset_touhou_feeders, reset_channel, should_touhou_feed_in_channel, try_remove_channel, try_remove_guild,
     try_update_channel, try_update_guild
 )
 
@@ -13,7 +13,7 @@ from .logic import (
 @SLASH_CLIENT.events
 async def channel_create(client, channel):
     if get_touhou_feed_enabled(channel.guild_id):
-        if should_auto_post_in_channel(client, channel):
+        if should_touhou_feed_in_channel(client, channel):
             try_update_channel(channel)
 
 
@@ -43,4 +43,4 @@ async def guild_delete(client, guild, guild_profile):
 @SLASH_CLIENT.events
 async def ready(client):
     client.events.remove(ready)
-    reset_auto_posters(client)
+    reset_touhou_feeders(client)

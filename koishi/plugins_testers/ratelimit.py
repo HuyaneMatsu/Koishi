@@ -1386,16 +1386,16 @@ async def guild_widget_image(client, guild,):
         params={'style':'shield'},decode=False,headers={},)
 
 async def invite_get(client,invite,):
-    invite_code=invite.code
+    invite_code = invite.code
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/invites/{invite_code}',
-        )
+    )
 
 async def invite_delete(client,invite,):
-    invite_code=invite.code
+    invite_code = invite.code
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/invites/{invite_code}',
-        )
+    )
 
 async def user_info_get(client,access,):
     headers = IgnoreCaseMultiValueDictionary()

@@ -571,7 +571,7 @@ async def count_message_fields(client, message):
     description_parts.append('\n')
     
     total_fields_array = list(total_fields_by_count.items())
-    total_fields_array.sort(reverse=True)
+    total_fields_array.sort(reverse = True)
     
     for total_fields, message_amount in total_fields_array:
         description_parts.append('**')
@@ -598,6 +598,11 @@ async def count_message_fields(client, message):
     description_parts.append('\n**Total fields**: 22 (including cache)')
     
     return ''.join(description_parts)
+
+
+@Marisa.interactions(guild = GUILD__SUPPORT)
+async def show_permissions(event):
+    return ', '.join(event.user_permissions)
 
 
 @Marisa.commands

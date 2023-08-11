@@ -18,7 +18,7 @@ from .constants import (
 from .embed_builder_base import create_base_embed
 from .embed_parsers import get_emoji_from_event, get_entity_id_from_event
 from .helpers import (
-    check_has_manage_guild_expressions_permission, propagate_check_error_message, translate_components
+    check_has_create_guild_expressions_permission, propagate_check_error_message, translate_components
 )
 
 
@@ -33,7 +33,7 @@ async def snipe_interaction_add_emoji(client, event):
     -------
     form : `None`, ``InteractionForm``
     """
-    if not await check_has_manage_guild_expressions_permission(client, event):
+    if not await check_has_create_guild_expressions_permission(client, event):
         return
     
     emoji = get_emoji_from_event(event)

@@ -1,12 +1,16 @@
 from datetime import datetime as DateTime
 
 import vampytest
-from hata import GuildProfile, GuildProfileFlag, Role, User, UserFlag
+from hata import (
+    Activity, ActivityAssets, ActivityFlag, ActivityParty, ActivitySecrets, ActivityTimestamps, ActivityType,
+    BUILTIN_EMOJIS, GuildProfile, GuildProfileFlag, Role, Status, User, UserFlag
+)
 
 from ..constants import GUILD_PROFILE_MODE_GENERAL, GUILD_PROFILE_MODE_JOIN, GUILD_PROFILE_MODE_LEAVE
 from ..solution_renderers import (
-    render_guild_profile_description_into, render_nullable_guild_profile_description_into,
-    render_nulled_guild_profile_description_into, render_user_description_into
+    render_activity_description_into, render_guild_profile_description_into,
+    render_nullable_guild_profile_description_into, render_nulled_guild_profile_description_into,
+    render_user_description_into, render_user_status_description_into
 )
 
 from .mocks import DateTimeMock, is_instance_mock
@@ -458,4 +462,226 @@ def test__render_nullable_guild_profile_description_into(field_added, guild_prof
     )
     
     into, field_added = mocked([], field_added, guild_profile, mode)
+    return ''.join(into), field_added
+
+
+def _iter_options__render_activity_description_into():
+    current_date = DateTime(2016, 10, 14, 21, 13, 36)
+    
+    # Minimal
+    yield (
+        False,
+        Activity('with Kokoro'),
+        current_date,
+        (
+            (
+                f'Name: with Kokoro\n'
+                f'Type: game ~ 0'
+            ),
+            True,
+        )
+    )
+    
+    # Field already added
+    yield (
+        True,
+        Activity('with Kokoro'),
+        current_date,
+        (
+            (
+                f'\n'
+                f'Name: with Kokoro\n'
+                f'Type: game ~ 0'
+            ),
+            True,
+        )
+    )
+    
+    # Maximal
+    yield (
+        False,
+        Activity(
+            name = 'with Kokoro',
+            activity_type = ActivityType.spotify,
+            activity_id = 202308080000,
+            application_id = 202308080001,
+            assets = ActivityAssets(
+                image_large = 'spotify:Yuuka',
+                image_small = 'Yukari',
+                text_large = 'Yuyuko',
+                text_small = 'Youmu',
+            ),
+            created_at = DateTime(2016, 10, 14, 21, 13, 26),
+            details = 'Satori',
+            flags = ActivityFlag().update_by_keys(play = True, embedded = True),
+            party = ActivityParty(
+                party_id = 'Suika',
+                size = 6,
+                max_ = 9,
+            ),
+            secrets = ActivitySecrets(
+                join = 'Hecatia',
+                match = 'Junko',
+                spectate = 'Chiruno',
+            ),
+            session_id = 'Orin',
+            state = 'Okuu',
+            sync_id = 'Mr. spider',
+            timestamps = ActivityTimestamps(
+                end = DateTime(2016, 10, 14, 21, 13, 46),
+                start = DateTime(2016, 10, 14, 21, 13, 16),
+            ),
+            url = 'https://orindance.party/',
+        ),
+        current_date,
+        (
+            (
+                f'Name: with Kokoro\n'
+                f'Type: spotify ~ 2\n'
+                f'Timestamp start: 2016-10-14 21:13:16\n'
+                f'Timestamp end: 2016-10-14 21:13:46\n'
+                f'Details: Satori\n'
+                f'State: Okuu\n'
+                f'Party id: Suika\n'
+                f'Party size: 6\n'
+                f'Party max: 9\n'
+                f'Assets image large: spotify:Yuuka\n'
+                f'Assets text large: Yuyuko\n'
+                f'Assets image small: Yukari\n'
+                f'Assets text small: Youmu\n'
+                f'Secrets join: Hecatia\n'
+                f'Secrets match: Junko\n'
+                f'Secrets spectate: Chiruno\n'
+                f'Spotify album cover url: https://i.scdn.co/image/Yuuka\n'
+                f'Url: https://orindance.party/\n'
+                f'Sync id: Mr. spider\n'
+                f'Session id: Orin\n'
+                f'Flags: play, embedded\n'
+                f'Application id: 202308080001\n'
+                f'Created at: 2016-10-14 21:13:26 [*10 seconds ago*]\n'
+                f'Id: 202308080000'
+            ),
+            True,
+        )
+    )
+
+    # Custom
+    yield (
+        False,
+        Activity(
+            activity_type = ActivityType.custom,
+            created_at = DateTime(2016, 10, 14, 21, 13, 26),
+            emoji = BUILTIN_EMOJIS['heart'],
+            state = 'Koishi Love!'
+        ),
+        current_date,
+        (
+            (
+                f'Name: {BUILTIN_EMOJIS["heart"].unicode} Koishi Love!\n'
+                f'Type: custom ~ 4\n'
+                f'Created at: 2016-10-14 21:13:26 [*10 seconds ago*]'
+            ),
+            True,
+        )
+    )
+
+
+@vampytest._(vampytest.call_from(_iter_options__render_activity_description_into()).returning_last())
+def test__render_activity_description_into(field_added, activity, current_date_time):
+    """
+    Tests whether ``render_activity_description_into`` works as intended.
+    
+    Parameters
+    ----------
+    field_added : `bool`
+        Whether there were fields added already.
+    activity : ``Activity``
+        The activity to render.
+    current_date_time : `DateTime`
+        The current time to use as a reference.
+    
+    Returns
+    -------
+    output : `str`
+    field_added : `bool`
+    """
+    DateTimeMock.set_current(current_date_time)
+    mocked = vampytest.mock_globals(
+        render_activity_description_into, 4, {'DateTime': DateTimeMock, 'isinstance': is_instance_mock}
+    )
+    
+    into, field_added = mocked([], field_added, activity)
+    return ''.join(into), field_added
+
+
+def _iter_options__render_user_status_description_into():
+    user_0 = User()
+    
+    user_1 = User()
+    user_1.status = Status.idle
+    user_1.statuses = {
+        'desktop': Status.dnd.value,
+        'mobile': Status.idle.value,
+        'web': Status.online.value,
+    }
+    
+    # minimal
+    yield (
+        False,
+        user_0,
+        (
+            (
+                f'Status: offline'
+            ),
+            True,
+        )
+    )
+    
+    # Field already added
+    yield (
+        True,
+        user_0,
+        (
+            (
+                f'\n'
+                f'Status: offline'
+            ),
+            True,
+        )
+    )
+    
+    # Maximal
+    yield (
+        False,
+        user_1,
+        (
+            (
+                f'Status: idle\n'
+                f'- Desktop: dnd\n'
+                f'- Mobile: idle\n'
+                f'- Web: online'
+            ),
+            True,
+        )
+    )
+
+
+@vampytest._(vampytest.call_from(_iter_options__render_user_status_description_into()).returning_last())
+def test__render_user_status_description_into(field_added, user):
+    """
+    Tests whether ``render_user_status_description_into`` works as intended.
+    
+    Parameters
+    ----------
+    field_added : `bool`
+        Whether there were fields added already.
+    user : ``ClientUserBase``
+        The user to render its status of.
+    
+    Returns
+    -------
+    output : `str`
+    field_added : `bool`
+    """
+    into, field_added = render_user_status_description_into([], field_added, user)
     return ''.join(into), field_added

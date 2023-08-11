@@ -11,7 +11,7 @@ from .components_satori_auto_start import (
     COMPONENT_DELETE_CHANNEL, SATORI_CUSTOM_ID_CHANNEL_DELETE, SATORI_CUSTOM_ID_USER_BAN_RP,
     SATORI_CUSTOM_ID_USER_KICK_RP, create_satori_custom_id_user_ban, create_satori_custom_id_user_kick
 )
-from .embed_builder_satori_auto_start import build_satori_user_actioned_embed
+from .embed_builder_satori_start import build_satori_user_actioned_embed
 
 
 PERMISSION_BAN = Permission().update_by_keys(ban_users = True)

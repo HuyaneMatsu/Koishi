@@ -7,9 +7,11 @@ from ...bots import SLASH_CLIENT
 from ..automation_core import get_touhou_feed_enabled
 
 from .commands_core import (
-    CUSTOM_ID_ABOUT_EXAMPLES, CUSTOM_ID_ABOUT_INTERVAL, CUSTOM_ID_ABOUT_MAIN, CUSTOM_ID_CLOSE, CUSTOM_ID_PAGE_BASE,
-    CUSTOM_ID_PAGE_NEXT_DISABLED, CUSTOM_ID_PAGE_PREVIOUS_DISABLED, CUSTOM_ID_REFRESH_BASE,
     build_touhou_feed_listing_response, create_about_examples, create_about_interval, create_about_main
+)
+from .constants import (
+    CUSTOM_ID_ABOUT_EXAMPLES, CUSTOM_ID_ABOUT_INTERVAL, CUSTOM_ID_ABOUT_MAIN, CUSTOM_ID_CLOSE, CUSTOM_ID_PAGE_BASE,
+    CUSTOM_ID_PAGE_NEXT_DISABLED, CUSTOM_ID_PAGE_PREVIOUS_DISABLED, CUSTOM_ID_REFRESH_BASE
 )
 
 # ---- about ----
