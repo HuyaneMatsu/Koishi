@@ -3,12 +3,16 @@ __all__ = ('TOUHOU_ACTION_LIKE',)
 from ...image_handling_core import ImageDetail
 from ...touhou_core.character import freeze
 from ...touhou_core.characters import (
-    FUTATSUIWA_MAMIZOU, HOUJUU_NUE, INABA_TEWI, JUNKO, KAKU_SEIGA, KAZAMI_YUUKA, KOMEIJI_KOISHI, RUMIA,
-    SAIGYOUJI_YUYUKO, YAGOKORO_EIRIN, YAKUMO_RAN, YAKUMO_YUKARI
+    FUTATSUIWA_MAMIZOU, HOUJUU_NUE, INABA_TEWI, JUNKO, KAKU_SEIGA, KAZAMI_YUUKA, KOMEIJI_KOISHI, MATARA_OKINA, RUMIA,
+    SAIGYOUJI_YUYUKO, SHIKI_EIKI_YAMAXANADU, TATARA_KOGASA, YAGOKORO_EIRIN, YAKUMO_RAN, YAKUMO_YUKARI, YOMOTSU_HISAMI
 )
 
 
 TOUHOU_ACTION_LIKE = [
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1141454561253523527/eiki-judged-0000.png',
+        freeze(SHIKI_EIKI_YAMAXANADU),
+    ),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683125082062958/eirin-older-0000.png',
         freeze(YAGOKORO_EIRIN),
@@ -16,6 +20,14 @@ TOUHOU_ACTION_LIKE = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683125367296040/futatsuiwa-older-0000.png',
         freeze(FUTATSUIWA_MAMIZOU),
+    ),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1141454561891074128/hisami-grape-0000.png',
+        freeze(YOMOTSU_HISAMI),
+    ),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1141454562260156529/hisami-older-0000.png',
+        freeze(YOMOTSU_HISAMI),
     ),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683125719601244/junko-older-0000.png',
@@ -30,12 +42,20 @@ TOUHOU_ACTION_LIKE = [
         freeze(JUNKO),
     ),
     ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1141454561563914250/kogasa-umbrella-0000.png',
+        freeze(TATARA_KOGASA),
+    ),
+    ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683127049195590/koishi-happy-0000.png',
         freeze(KOMEIJI_KOISHI),
     ),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1132645810635550830/nue-huge-surprises-0000.png',
         freeze(HOUJUU_NUE),
+    ),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1141454560917995611/okina-older-0000.png',
+        freeze(MATARA_OKINA),
     ),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1132645810908176414/ran-fluffy-tail-0000.png',
@@ -92,6 +112,10 @@ TOUHOU_ACTION_LIKE = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1124044846064214138/yukari-yuyuko-older-0000.png',
         freeze(YAKUMO_YUKARI, SAIGYOUJI_YUYUKO),
+    ),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1141454560620195952/yuuka-cbt-0000.png',
+        freeze(KAZAMI_YUUKA),
     ),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683105435955271/yuuka-older-0000.png',

@@ -68,7 +68,7 @@ def build_satori_auto_start_embeds(user, guild_id):
             continue
         
         embeds.append(
-            Embed(f'Activity ({activities_added})', build_activity_description(custom_activity), color = SATORI_COLOR)
+            Embed(f'Activity ({activities_added})', build_activity_description(activity), color = SATORI_COLOR)
         )
         
         # max 10

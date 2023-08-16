@@ -21,17 +21,6 @@ AKI_SHIZUHA = TouhouCharacter(
     ),
 )
 
-LUNA_CHILD = TouhouCharacter(
-    'luna_child',
-    'Luna Child',
-    (
-        'ルナチャイルド',
-        'Chairudo Runa',
-        'Luna',
-        'Runa',
-    ),
-)
-
 CHEN = TouhouCharacter(
     'chen',
     'Chen',
@@ -54,6 +43,16 @@ DAIYOUSEI = TouhouCharacter(
     'Daiyousei',
     (
         '大妖精',
+    ),
+)
+
+DOREMY_SWEET = TouhouCharacter(
+    'doremy_sweet',
+    'Doremy Sweet',
+    (
+        'ドレミー スイート',
+        'Doremy',
+        'Doremii Suiito',
     ),
 )
 
@@ -145,6 +144,17 @@ HATA_NO_KOKORO = TouhouCharacter(
         'Kokoro',
         'こころ',
         'Hata',
+    ),
+)
+
+HECATIA_LAPISLAZULI = TouhouCharacter(
+    'hecatia_lapislazuli',
+    'Hecatia Lapislazuli',
+    (
+        'ヘカーティア ラピスラズリ',
+        'Hecatia',
+        'Hekaatia',
+        'Hekaatia Rapisurazuri',
     ),
 )
 
@@ -281,6 +291,37 @@ LETTY_WHITEROCK = TouhouCharacter(
     (
         'レティ ホワイトロック',
         'Reti Howaitorokku',
+    ),
+)
+
+LUNA_CHILD = TouhouCharacter(
+    'luna_child',
+    'Luna Child',
+    (
+        'ルナチャイルド',
+        'Chairudo Runa',
+        'Luna',
+        'Runa',
+    ),
+)
+
+LUNASA_PRISMRIVER = TouhouCharacter(
+    'lunasa_prismriver',
+    'Lunasa Prismriver',
+    (
+        'ルナサ プリズムリバー',
+        'Lunasa',
+        'Runasa Purizumuribaa',
+    ),
+)
+
+LYRICA_PRISMRIVER = TouhouCharacter(
+    'lyrica_prismriver',
+    'Lyrica Prismriver',
+    (
+        'リリカ プリズムリバー',
+        'Lyrica',
+        'Ririka Purizumuribaa',
     ),
 )
 
@@ -657,6 +698,17 @@ MEDICINE_MELANCHOLY = TouhouCharacter(
     ),
 )
 
+MERLIN_PRISMRIVER = TouhouCharacter(
+    'merlin_prismriver',
+    'Merlin Prismriver',
+    (
+        'メルラン プリズムリバ',
+        'Merlin',
+        'Merlin Prismriver',
+        'Meruran Purizumuribaa',
+    ),
+)
+
 MIMA = TouhouCharacter(
     'mima',
     'Mima',
@@ -666,12 +718,13 @@ MIMA = TouhouCharacter(
     ),
 )
 
-SUNNY_MILK = TouhouCharacter(
-    'sunny_milk',
-    'Sunny Milk',
+MITSUGASHIRA_ENOKO = TouhouCharacter(
+    'mitsugashira_enoko',
+    'Mitsugashira Enoko',
     (
-        'サニーミルク',
-        'Sanii Miruku',
+        '三頭 慧ノ子',
+        'Enoko Mitsugashira',
+        'Enoko',
     ),
 )
 
@@ -743,6 +796,15 @@ MURASA_MINAMITSU = TouhouCharacter(
     ),
 )
 
+MYSTIA_LORELEI = TouhouCharacter(
+    'mystia_lorelei',
+    'Mystia Lorelei',
+    (
+        'ミスティア ローレライ',
+        'Misutia Roorerai',
+    ),
+)
+
 NAGAE_IKU = TouhouCharacter(
     'nagae_iku',
     'Nagae Iku',
@@ -758,6 +820,16 @@ NAZRIN = TouhouCharacter(
     (
         'ナズーリン',
         'Nazuurin',
+    ),
+)
+
+NIPPAKU_ZANMU = TouhouCharacter(
+    'nippaku_zanmu',
+    'Nippaku Zanmu',
+    (
+        '日白 残無',
+        'Zanmu Nippaku',
+        'Zanmu',
     ),
 )
 
@@ -807,48 +879,6 @@ PATCHOULI_KNOWLEDGE = TouhouCharacter(
     ),
 )
 
-MERLIN_PRISMRIVER = TouhouCharacter(
-    'merlin_prismriver',
-    'Merlin Prismriver',
-    (
-        'メルラン プリズムリバ',
-        'Merlin',
-        'Merlin Prismriver',
-        'Meruran Purizumuribaa',
-    ),
-)
-
-LYRICA_PRISMRIVER = TouhouCharacter(
-    'lyrica_prismriver',
-    'Lyrica Prismriver',
-    (
-        'リリカ プリズムリバー',
-        'Lyrica',
-        'Ririka Purizumuribaa',
-    ),
-)
-
-LUNASA_PRISMRIVER = TouhouCharacter(
-    'lunasa_prismriver',
-    'Lunasa Prismriver',
-    (
-        'ルナサ プリズムリバー',
-        'Lunasa',
-        'Runasa Purizumuribaa',
-    ),
-)
-
-HECATIA_LAPISLAZULI = TouhouCharacter(
-    'hecatia_lapislazuli',
-    'Hecatia Lapislazuli',
-    (
-        'ヘカーティア ラピスラズリ',
-        'Hecatia',
-        'Hekaatia',
-        'Hekaatia Rapisurazuri',
-    ),
-)
-
 REISEN_UDONGEIN_INABA = TouhouCharacter(
     'reisen_udongein_inaba',
     'Reisen Udongein Inaba',
@@ -868,17 +898,6 @@ REIUJI_UTSUHO = TouhouCharacter(
     ),
 )
 
-WRIGGLE_NIGHTBUG = TouhouCharacter(
-    'wriggle_nightbug',
-    'Wriggle Nightbug',
-    (
-        'リグル ナイトバグ',
-        'Wriggle',
-        'Riguru Naitobagu',
-        'Nightbug Wriggle',
-    ),
-)
-
 RINGO = TouhouCharacter(
     'ringo',
     'Ringo',
@@ -888,30 +907,12 @@ RINGO = TouhouCharacter(
     ),
 )
 
-MYSTIA_LORELEI = TouhouCharacter(
-    'mystia_lorelei',
-    'Mystia Lorelei',
-    (
-        'ミスティア ローレライ',
-        'Misutia Roorerai',
-    ),
-)
-
 RUMIA = TouhouCharacter(
     'rumia',
     'Rumia',
     (
         'ルーミア',
         'Ruumia',
-    ),
-)
-
-STAR_SAPPHIRE = TouhouCharacter(
-    'star_sapphire',
-    'Star Sapphire',
-    (
-        'スターサファイア',
-        'Safaia Sutaa',
     ),
 )
 
@@ -932,6 +933,30 @@ SAKATA_NEMUNO = TouhouCharacter(
         '坂田 ネムノ',
         'Nemuno',
         'Nemuno Sakata',
+    ),
+)
+
+SCARLET_FLANDRE = TouhouCharacter(
+    'scarlet_flandre',
+    'Scarlet Flandre',
+    (
+        'スカーレット フランドール',
+        'Flandre',
+        'Flandre Scarlet',
+        'Flan',
+        'Sukaaretto Furandooru',
+    ),
+)
+
+SCARLET_REMILIA = TouhouCharacter(
+    'scarlet_remilia',
+    'Scarlet Remilia',
+    (
+        'スカーレット レミリア',
+        'Remilia',
+        'Remilia Scarlet',
+        'Sukaaretto Remiria',
+        'Remi',
     ),
 )
 
@@ -984,37 +1009,22 @@ SOGA_NO_TOJIKO = TouhouCharacter(
     ),
 )
 
-DOREMY_SWEET = TouhouCharacter(
-    'doremy_sweet',
-    'Doremy Sweet',
+SON_BITEN = TouhouCharacter(
+    'son_biten',
+    'Son Biten',
     (
-        'ドレミー スイート',
-        'Doremy',
-        'Doremii Suiito',
-    ),
+        '孫 美天',
+        'Biten Son',
+        'Biten',
+    )
 )
 
-SCARLET_FLANDRE = TouhouCharacter(
-    'scarlet_flandre',
-    'Scarlet Flandre',
+STAR_SAPPHIRE = TouhouCharacter(
+    'star_sapphire',
+    'Star Sapphire',
     (
-        'スカーレット フランドール',
-        'Flandre',
-        'Flandre Scarlet',
-        'Flan',
-        'Sukaaretto Furandooru',
-    ),
-)
-
-SCARLET_REMILIA = TouhouCharacter(
-    'scarlet_remilia',
-    'Scarlet Remilia',
-    (
-        'スカーレット レミリア',
-        'Remilia',
-        'Remilia Scarlet',
-        'Sukaaretto Remiria',
-        'Remi',
+        'スターサファイア',
+        'Safaia Sutaa',
     ),
 )
 
@@ -1025,6 +1035,15 @@ SUKUNA_SHINMYOUMARU = TouhouCharacter(
         '少名 針妙丸',
         'Shinmyoumaru Sukuna',
         'Sukuna',
+    ),
+)
+
+SUNNY_MILK = TouhouCharacter(
+    'sunny_milk',
+    'Sunny Milk',
+    (
+        'サニーミルク',
+        'Sanii Miruku',
     ),
 )
 
@@ -1056,6 +1075,16 @@ TEIREIDA_MAI = TouhouCharacter(
         '丁礼田 舞',
         'Mai Teireida',
         'Mai',
+    ),
+)
+
+TENKAJIN_CHIYARI = TouhouCharacter(
+    'tenkajin_chiyari',
+    'Tenkajin Chiyari',
+    (
+        '天火人 ちやり',
+        'Chiyari Tenkajin',
+        'Chiyari',
     ),
 )
 
@@ -1153,6 +1182,17 @@ WATATSUKI_NO_YORIHIME = TouhouCharacter(
     ),
 )
 
+WRIGGLE_NIGHTBUG = TouhouCharacter(
+    'wriggle_nightbug',
+    'Wriggle Nightbug',
+    (
+        'リグル ナイトバグ',
+        'Wriggle',
+        'Riguru Naitobagu',
+        'Nightbug Wriggle',
+    ),
+)
+
 YAGOKORO_EIRIN = TouhouCharacter(
     'yagokoro_eirin',
     'Yagokoro Eirin',
@@ -1200,6 +1240,16 @@ YATADERA_NARUMI = TouhouCharacter(
         '矢田寺 成美',
         'Narumi',
         'Narumi Yatadera',
+    ),
+)
+
+YOMOTSU_HISAMI = TouhouCharacter(
+    'yomotsu_hisami',
+    'Yomotsu Hisami',
+    (
+        '豫母都 日狭美',
+        'Hisami Yomotsu',
+        'Hisami'
     ),
 )
 

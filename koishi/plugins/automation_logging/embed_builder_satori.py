@@ -87,7 +87,7 @@ def render_presence_update(user, old_attributes):
         if (added is not None):
             for activity in added:
                 into.append('**Added activity**:')
-                render_activity_description_into(True, into, activity)
+                render_activity_description_into(into, True, activity)
                 into.append('\n')
         
         if (updated is not None):

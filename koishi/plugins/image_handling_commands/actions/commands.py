@@ -5,10 +5,9 @@ from ....bots import SLASH_CLIENT
 from .actions import (
     ACTION_BITE, ACTION_BLUSH, ACTION_BULLY, ACTION_CRINGE, ACTION_CRY, ACTION_CUDDLE, ACTION_DANCE, ACTION_GLOMP,
     ACTION_HANDHOLD, ACTION_HAPPY, ACTION_HIGHFIVE, ACTION_HUG, ACTION_KICK, ACTION_KILL, ACTION_KISS, ACTION_LICK,
-    ACTION_NOM, ACTION_PAT, ACTION_POCKY, ACTION_POKE, ACTION_SLAP, ACTION_SMILE, ACTION_SMUG, ACTION_WAVE, ACTION_WINK,
-    ACTION_YEET
+    ACTION_LIKE, ACTION_NOM, ACTION_PAT, ACTION_POCKY, ACTION_POKE, ACTION_SLAP, ACTION_SMILE, ACTION_SMUG, ACTION_WAVE,
+    ACTION_WINK, ACTION_YEET
 )
-
 
 
 PAT = SLASH_CLIENT.interactions(
@@ -36,7 +35,7 @@ HUG = SLASH_CLIENT.interactions(
 CUDDLE = SLASH_CLIENT.interactions(
     ACTION_CUDDLE,
     name = 'cuddle',
-    description = 'Come here, you little qtie pie.',
+    description = 'Come here my pog champion.',
     is_global = True,
 )
 
@@ -44,6 +43,13 @@ LICK = SLASH_CLIENT.interactions(
     ACTION_LICK,
     name = 'lick',
     description = 'Licking is a favored activity of neko girls.',
+    is_global = True,
+)
+
+LIKE = SLASH_CLIENT.interactions(
+    ACTION_LIKE,
+    name = 'like',
+    description = 'We like older woman.',
     is_global = True,
 )
 

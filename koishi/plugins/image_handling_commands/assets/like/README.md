@@ -4,6 +4,17 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ---
 
+### `eiki-judged-0000`
+
+- Artist:  *unknown*
+- Edit: *unknown*
+
+
+- Character: **Shiki Eiki Yamaxanadu**
+- Source: **Touhou**
+
+---
+
 ### `eirin-older-0000`
 
 - Artist:  *unknown*
@@ -22,6 +33,28 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 
 - Character: **Futatsuiwa Mamizou**
+- Source: **Touhou**
+
+---
+
+### `hisami-grape-0000`
+
+- Artist:  *unknown*
+- Edit: *unknown*
+
+
+- Character: **Yomotsu Hisami**
+- Source: **Touhou**
+
+---
+
+### `hisami-older-0000`
+
+- Artist:  *unknown*
+- Edit: *unknown*
+
+
+- Character: **Yomotsu Hisami**
 - Source: **Touhou**
 
 ---
@@ -48,6 +81,17 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ---
 
+### `kogasa-umbrella-0000`
+
+- Artist:  *unknown*
+- Edit: *unknown*
+
+
+- Character: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
 ### `koishi-happy-0000`
 
 - Artist:  *unknown*
@@ -66,6 +110,17 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 
 - Character: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### `okina-older-0000`
+
+- Artist:  *unknown*
+- Edit: *unknown*
+
+
+- Character: **Matara Okina**
 - Source: **Touhou**
 
 ---
@@ -218,6 +273,17 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 
 - Character: **Yakumo Yukari** & **Saigyouji Yuyuko**
+- Source: **Touhou**
+
+---
+
+### `yuuka-cbt-0000`
+
+- Artist:  *unknown*
+- Edit: *unknown*
+
+
+- Character: **Kazami Yuuka**
 - Source: **Touhou**
 
 ---

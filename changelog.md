@@ -1,3 +1,16 @@
+### 2023-08-16
+
+- Fix `/automation log-satori` raising on activity create. :KoishiFail:
+- Fix `/automation log-satori` initial message raising on activity (without custom). :KoishiFail:
+- Add `Yomotsu Hisami` touhou character.
+- Add `Mitsugashira Enoko` touhou character.
+- Add `Tenkajin Chiyari` touhou character.
+- Add `Son Biten` touhou character.
+- Add `Nippaku Zanmu` touhou character.
+- Add `6` new images to `like` interaction.
+- Add `/like` as an actual command.
+- Fix `/automation reaction-copy` raising when turned off.
+
 ### 2023-08-11
 
 - `snipe` now checks for the new `create-guild-expression` permission when borrowing.

@@ -295,7 +295,7 @@ def get_reaction_copy_enabled_and_role(guild_id):
     try:
         automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
     except KeyError:
-        return False
+        return False, None
     
     enabled = automation_configuration.reaction_copy_enabled
     if enabled:

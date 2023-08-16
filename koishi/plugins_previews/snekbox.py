@@ -249,7 +249,7 @@ if IS_UNIX:
                 user_lock.register_input_source(ctx.client, ctx.message.channel, process)
                 
                 try:
-                    await process.wait(timeout=MAX_TIMEOUT)
+                    await process.wait(timeout = MAX_TIMEOUT)
                 except TimeoutExpired:
                     await process.kill()
                 
