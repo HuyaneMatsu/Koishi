@@ -1,6 +1,6 @@
 ### 2023-08-23
 
-- `Fix `/snipe` assigned bad `yeet` button for emojis, causing it to not pop up the confirmation form.
+- Fix `/snipe` assigned bad `yeet` button for emojis, causing it to not pop up the confirmation form.
 - `Renes` now will tell where `Alice` went live.
 - `/top-list` now has buttons to move between pages!.
 - `/top-list` is now tested.
