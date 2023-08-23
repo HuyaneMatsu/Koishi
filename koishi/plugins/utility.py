@@ -10,8 +10,8 @@ from random import choice
 from PIL import Image as PIL
 from dateutil.relativedelta import relativedelta
 from hata import (
-    BUILTIN_EMOJIS, Color, DATETIME_FORMAT_CODE, Embed, ICON_TYPE_NONE, KOKORO, Permission, Status, cchunkify,
-    elapsed_time, escape_markdown, parse_color
+    BUILTIN_EMOJIS, Color, DATETIME_FORMAT_CODE, Embed, ICON_TYPE_NONE, InviteTargetType, KOKORO, Permission, Status,
+    cchunkify, elapsed_time, escape_markdown, parse_color
 )
 from hata.discord.application.constants import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
 from hata.ext.slash import InteractionResponse, abort
@@ -79,7 +79,7 @@ async def rawr(client, event):
 async def color_(
     client,
     event,
-    color: ('str', 'Beauty!')
+    color: ('str', 'Beauty!'),
 ):
     """Shows the given color"""
     
@@ -618,5 +618,10 @@ async def create_activity(
             f'{channel.mention} to execute this command.'
         )
     
-    invite = await client.application_invite_create(channel, activity, max_age=21600) # 6 hours
+    invite = await client.invite_create(
+        channel,
+        max_age = 21600,  # 6 hours
+        target_application_id = activity,
+        target_type = InviteTargetType.embedded_application,
+    )
     return invite.url

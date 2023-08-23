@@ -293,7 +293,7 @@ async def register(event,
     
     plugin = get_plugin(name)
     if (plugin is not None):
-        abort(f'There is already an plugin added with the given name: `{plugin.name}`.')
+        abort(f'There is already a plugin added with the given name: `{plugin.name}`.')
     
     try:
         register_plugin(name)

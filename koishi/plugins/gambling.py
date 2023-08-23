@@ -2,16 +2,14 @@ __all__ = ()
 
 from datetime import datetime, timedelta
 from functools import partial as partial_func
-from math import floor, log10
 from random import random
 
 from hata import (
-    BUILTIN_EMOJIS, DiscordException, ERROR_CODES, Embed, InteractionType, KOKORO, Permission, USERS, ZEROUSER,
-    parse_tdelta
+    BUILTIN_EMOJIS, DiscordException, ERROR_CODES, Embed, InteractionType, KOKORO, Permission, parse_tdelta
 )
 from hata.ext.slash import Button, Row, abort, wait_for_component_interaction
 from scarletio import Future, Task
-from sqlalchemy.sql import desc, select
+from sqlalchemy.sql import select
 
 from ..bot_utils.constants import (
     COLOR__GAMBLING, EMOJI__HEART_CURRENCY, GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, ROLE__SUPPORT__BOOSTER,
@@ -34,8 +32,6 @@ EVENT_OK_BUTTON = Button(emoji = EVENT_OK_EMOJI)
 EVENT_ABORT_BUTTON = Button(emoji = EVENT_ABORT_EMOJI)
 EVENT_COMPONENTS = Row(EVENT_OK_BUTTON, EVENT_ABORT_BUTTON)
 EVENT_CURRENCY_BUTTON = Button(emoji = EMOJI__HEART_CURRENCY)
-
-
 
 
 def convert_tdelta(delta):
@@ -274,7 +270,7 @@ class HeartEventGUI:
             to_execute = USER_COMMON_TABLE.update(
                 user_common_model.id == entry_id,
             ).values(
-                total_love=user_common_model.total_love + self.amount,
+                total_love = user_common_model.total_love + self.amount,
             )
         
         else:
@@ -294,13 +290,13 @@ class HeartEventGUI:
         sleep_time = (self.duration % update_delta).seconds
         if sleep_time:
             self.duration -= timedelta(seconds = sleep_time)
-            KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
+            KOKORO.call_after(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
             self.waiter = waiter = Future(KOKORO)
         
         sleep_time = self._update_time
         while True:
-            KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
+            KOKORO.call_after(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
             self.waiter = waiter = Future(KOKORO)
             self.duration -= update_delta
@@ -485,8 +481,8 @@ async def daily_event(client, event,
 
 
 class DailyEventGUI:
-    _update_time = 60.
-    _update_delta = timedelta(seconds=_update_time)
+    _update_time = 60.0
+    _update_delta = timedelta(seconds = _update_time)
     
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
     async def __new__(cls, client, event, duration, amount, user_limit):
@@ -592,13 +588,13 @@ class DailyEventGUI:
         sleep_time = (self.duration % update_delta).seconds
         if sleep_time:
             self.duration -= timedelta(seconds=sleep_time)
-            KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
+            KOKORO.call_after(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
             self.waiter = waiter = Future(KOKORO)
         
         sleep_time = self._update_time
         while True:
-            KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
+            KOKORO.call_after(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
             self.waiter = waiter = Future(KOKORO)
             self.duration -= update_delta
@@ -835,7 +831,7 @@ async def award(client, event,
         return
     
     if (message is not None) and len(message) > 1000:
-        message = message[:1000]+'...'
+        message = message[:1000] + '...'
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -1005,97 +1001,6 @@ async def take(client, event,
     return
 
 
-@SLASH_CLIENT.interactions(is_global = True)
-async def top_list(client, event,
-    page : ('number', 'page?') = 1,
-):
-    """A list of my best simps."""
-    if page < 1:
-        page = 1
-    
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.user_id,
-                    user_common_model.total_love,
-                ]
-            ).where(
-                user_common_model.total_love != 0,
-            ).order_by(
-                desc(user_common_model.total_love),
-            ).limit(
-                20,
-            ).offset(
-                20 * (page - 1),
-            )
-        )
-        
-        results = await response.fetchall()
-        
-        parts = []
-        max_hearts = 0
-        
-        for index, (user_id, total_hearts) in enumerate(results, (page * 20) - 19):
-            try:
-                user = USERS[user_id]
-            except KeyError:
-                try:
-                    user = await client.user_get(user_id)
-                except BaseException as err:
-                    if isinstance(err, ConnectionError):
-                        return
-                    
-                    if isinstance(err, DiscordException):
-                        if err.code == ERROR_CODES.unknown_user:
-                            user = ZEROUSER
-                        else:
-                            raise
-                    
-                    else:
-                        raise
-            
-            if total_hearts > max_hearts:
-                max_hearts = total_hearts
-            parts.append((index, total_hearts, user.full_name))
-    
-    result_parts = [
-        EMOJI__HEART_CURRENCY.as_emoji,
-        ' **Top-list** ',
-        EMOJI__HEART_CURRENCY.as_emoji,
-    ]
-    
-    if page != 1:
-        result_parts.append(' *[Page ')
-        result_parts.append(repr(page))
-        result_parts.append(']*')
-    
-    result_parts.append('\n```')
-    
-    if max_hearts:
-        result_parts.append('cs\n')
-        index_adjust = floor(log10((page - 1) * 20 + len(parts))) + 1
-        hearts_adjust = floor(log10(max_hearts)) + 1
-        
-        for index, total_hearts, full_name in parts:
-            result_parts.append(str(index).rjust(index_adjust))
-            result_parts.append('.: ')
-            result_parts.append(str(total_hearts).rjust(hearts_adjust))
-            result_parts.append(' ')
-            result_parts.append(full_name)
-            result_parts.append('\n')
-    else:
-        result_parts.append('\n*no result*\n')
-    
-    result_parts.append('```')
-    
-    yield ''.join(result_parts)
-    return
-
-
-
-
-
 HEART_GENERATOR_COOLDOWNS = set()
 HEART_GENERATOR_COOLDOWN = 3600.0
 HEART_GENERATION_AMOUNT = 10
@@ -1154,5 +1059,5 @@ async def heart_generator(client, event):
         return
     
     if random() < chance:
-        KOKORO.call_later(HEART_GENERATOR_COOLDOWN, set.discard, HEART_GENERATOR_COOLDOWNS, user_id)
+        KOKORO.call_after(HEART_GENERATOR_COOLDOWN, set.discard, HEART_GENERATOR_COOLDOWNS, user_id)
         await increase_user_total_love(user_id, HEART_GENERATION_AMOUNT)

@@ -7,7 +7,7 @@ def parse_back_tiles(event):
     """
     Parses the tiles from the given components.
     
-    parameters
+    Parameters
     ----------
     event : ``InteractionEvent``
         The received interaction event.

@@ -225,7 +225,7 @@ async def do_rename():
 
 
 def cycle_rename():
-    NAME_CYCLER_HANDLER.value = KOKORO.call_later(DAY, cycle_rename)
+    NAME_CYCLER_HANDLER.value = KOKORO.call_after(DAY, cycle_rename)
     Task(KOKORO, do_rename())
 
 NAME_CYCLER_HANDLER = Cell()
@@ -233,7 +233,7 @@ NAME_CYCLER_HANDLER = Cell()
 COMMAND_CLIENT.command_processor.create_category('CHANNEL NAMES', checks = [checks.has_role(ROLE__SUPPORT__MODERATOR)])
 
 def setup(lib):
-    NAME_CYCLER_HANDLER.value = KOKORO.call_later(
+    NAME_CYCLER_HANDLER.value = KOKORO.call_after(
         datetime.utcnow().replace(microsecond = 0, second = 0, minute = 0, hour = 0).timestamp() - time_now() + DAY,
         cycle_rename,
     )

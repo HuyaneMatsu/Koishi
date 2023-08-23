@@ -1,3 +1,12 @@
+### 2023-08-23
+
+- `Fix `/snipe` assigned bad `yeet` button for emojis, causing it to not pop up the confirmation form.
+- `Renes` now will tell where `Alice` went live.
+- `/top-list` now has buttons to move between pages!.
+- `/top-list` is now tested.
+- `/top-list` color scheme updated.
+- Fix error while creating new `/automation` entries.
+
 ### 2023-08-16
 
 - Fix `/automation log-satori` raising on activity create. :KoishiFail:
@@ -99,7 +108,7 @@
 - Fix `touhou-feed` now handles gateway-timeout and other server side errors.
 - Fix `/touhou-calendar` now handles the case correctly when there are 0 users in a month.
   In case someone wanna copy and modify it.
-- Fix `renes` (bot) now reads `Est`'s name instead of using a hardcoded one.
+- Fix `Renes` (bot) now reads `Est`'s name instead of using a hardcoded one.
 - Fix `/role-info` now shows integration name as intended.
 - `/mod` commands now have `notify-user` parameter as `false` by default.
 

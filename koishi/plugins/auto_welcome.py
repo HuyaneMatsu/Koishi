@@ -82,7 +82,7 @@ class WelcomeState:
     def maybe_start_auto_welcome_handler(self):
         auto_welcome_handle = self.auto_welcome_handle
         if (auto_welcome_handle is None):
-            self.auto_welcome_handle = KOKORO.call_later(
+            self.auto_welcome_handle = KOKORO.call_after(
                 900.0 * random(),
                 call_auto_welcome,
                 [user.id for user in self.users],

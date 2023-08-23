@@ -1,6 +1,6 @@
 __all__ = ('Renes',)
 
-from hata import ActivityType, Client, Embed
+from hata import ActivityType, Client, Embed, InviteTargetType
 from scarletio import LOOP_TIME
 
 import config
@@ -20,7 +20,8 @@ Renes = Client(
 
 STREAM_PING_DIFFERENCE = 10.0 * 60.0 # 10 min
 EST_DEFAULT_IMAGE_URL = 'https://cdn.discordapp.com/attachments/568837922288173058/1043516469218119791/est-0001.png'
-EST_STREAMING_SETUP_IMAGE_URL = 'https://cdn.discordapp.com/attachments/568837922288173058/984793641254015016/est-alice-streaming-0000-cut-0000.png'
+EST_STREAMING_SETUP_IMAGE_URL = \
+    'https://cdn.discordapp.com/attachments/568837922288173058/984793641254015016/est-alice-streaming-0000-cut-0000.png'
 INVITE_MAX_AGE = 24 * 60 * 60 # 1 day
 
 
@@ -61,7 +62,7 @@ class STREAM_DETAILS:
     DISCORD_STREAM_ENDED = -STREAM_PING_DIFFERENCE
 
 
-async def send_stream_notification(activity, join_url, image):
+async def send_stream_notification(activity, join_url, image, source):
     """
     Sends stream notification.
     
@@ -77,6 +78,9 @@ async def send_stream_notification(activity, join_url, image):
     
     image : `None`, `bytes`
         Image url for banner.
+    
+    source : `str`
+        Where did est go live.
     """
     if activity is None:
         title = None
@@ -89,7 +93,7 @@ async def send_stream_notification(activity, join_url, image):
         title,
         description,
     ).add_author(
-        f'{USER__EST.name_at(GUILD__ESTS_HOME)} went live!',
+        f'{USER__EST.name_at(GUILD__ESTS_HOME)} went live on {source}!',
         USER__EST.avatar_url_as(size = 128),
         join_url,
     ).add_thumbnail(
@@ -118,18 +122,25 @@ async def send_stream_notification(activity, join_url, image):
     await Renes.message_crosspost(message)
 
 
-async def discord_stream_started():
+async def discord_stream_started(channel):
     """
     Called when a Discord stream started by Est.
     
     This function is a coroutine.
+    
+    Parameters
+    ----------
+    channel : ``Channel``
+        The channel where Est went live.
     """
     if LOOP_TIME() < STREAM_DETAILS.DISCORD_STREAM_ENDED + STREAM_PING_DIFFERENCE:
         return
     
-    invite = await Renes.stream_invite_create(GUILD__ESTS_HOME, USER__EST, max_age = INVITE_MAX_AGE)
+    invite = await Renes.invite_create(
+        channel, max_age = INVITE_MAX_AGE, target_type = InviteTargetType.stream, target_user = USER__EST
+    )
     
-    await send_stream_notification(USER__EST.activity, invite.url, None)
+    await send_stream_notification(USER__EST.activity, invite.url, None, 'discord')
 
 
 async def discord_stream_ended():
@@ -165,7 +176,7 @@ async def twitch_stream_started(activity):
             else:
                 image = None
     
-    await send_stream_notification(activity, activity.url, image)
+    await send_stream_notification(activity, activity.url, image, 'twitch')
 
 
 async def twitch_stream_ended():
@@ -217,7 +228,7 @@ async def user_voice_join(client, voice_state):
         return
     
     if voice_state.self_stream:
-        await discord_stream_started()
+        await discord_stream_started(voice_state.channel)
 
 
 @Renes.events
@@ -229,7 +240,7 @@ async def user_voice_update(client, voice_state, old_attributes):
         return
     
     if voice_state.self_stream:
-        await discord_stream_started()
+        await discord_stream_started(voice_state.channel)
     else:
         await discord_stream_ended()
 

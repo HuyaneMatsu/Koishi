@@ -29,7 +29,7 @@ class DeleteRangeContext:
         self.event = event
         self.message_since = message
         self.message_till = None
-        self.timeout_handle = KOKORO.call_later_weak(DELETE_RANGE_TIMEOUT, self.timeout)
+        self.timeout_handle = KOKORO.call_after_weak(DELETE_RANGE_TIMEOUT, self.timeout)
         DELETE_RANGE_CONTEXTS[(event.user.id, message.channel_id)] = self
     
     def timeout(self):

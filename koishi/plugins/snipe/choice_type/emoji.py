@@ -8,7 +8,7 @@ from ..cache_emoji import update_emoji_details
 from ..component_translate_tables import SELECT_EMOJI_DISABLED, SELECT_EMOJI_INSIDE, SELECT_EMOJI_OUTSIDE
 from ..constants import (
     BUTTON_SNIPE_ACTIONS_EMOJI, BUTTON_SNIPE_ADD_EMOJI, BUTTON_SNIPE_DETAILS_EMOJI, BUTTON_SNIPE_EDIT_EMOJI,
-    BUTTON_SNIPE_REMOVE_STICKER
+    BUTTON_SNIPE_REMOVE_EMOJI
 )
 from ..embed_builder_base import create_base_embed
 from ..embed_parsers import get_emoji_from_event
@@ -52,7 +52,7 @@ class ChoiceTypeEmoji(ChoiceTypeBase):
     
     @class_property
     def button_action_remove(cls):
-        return BUTTON_SNIPE_REMOVE_STICKER
+        return BUTTON_SNIPE_REMOVE_EMOJI
     
     
     @class_property

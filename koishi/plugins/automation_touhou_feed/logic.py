@@ -411,7 +411,7 @@ class Feeder:
         
         If called while scheduled, it will break the scheduled.
         """
-        self.handle = KOKORO.call_later(self.interval, self.invoke)
+        self.handle = KOKORO.call_after(self.interval, self.invoke)
     
     
     def re_schedule(self):

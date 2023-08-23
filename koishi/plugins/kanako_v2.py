@@ -618,7 +618,7 @@ class KanakoJoinGroup:
         self.client = client
         self.event = event
         self.users = {event.user}
-        self.handler = KOKORO.call_later(TIMEOUT, self)
+        self.handler = KOKORO.call_after(TIMEOUT, self)
         self.map_name = map_name
         self.length = length
         

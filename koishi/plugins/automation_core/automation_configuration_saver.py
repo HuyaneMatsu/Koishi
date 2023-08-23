@@ -147,7 +147,7 @@ class AutomationConfigurationSaver:
                         
                         if entry_id == -1:
                             response = await connector.execute(
-                                to_execute = AUTOMATION_CONFIGURATION_TABLE.insert().values(
+                                AUTOMATION_CONFIGURATION_TABLE.insert().values(
                                     log_emoji_channel_id = automation_configuration.log_emoji_channel_id,
                                     log_mention_channel_id = automation_configuration.log_mention_channel_id,
                                     log_sticker_channel_id = automation_configuration.log_sticker_channel_id,
@@ -166,11 +166,11 @@ class AutomationConfigurationSaver:
                                     automation_configuration_model.id,
                                 )
                             )
-                        
+                            
                             result = await response.fetchone()
                             entry_id = result[0]
                             automation_configuration.entry_id = entry_id
-                            
+                        
                         else:
                             await connector.execute(
                                 AUTOMATION_CONFIGURATION_TABLE.update(

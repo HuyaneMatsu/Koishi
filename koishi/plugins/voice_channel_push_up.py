@@ -104,7 +104,7 @@ async def update_channel_push_up( channel):
         
         else:
             if (not channel.parent_id) and (channel.id not in PULL_DOWN_HANDLES):
-                PULL_DOWN_HANDLES[channel.id] = KOKORO.call_later(PULL_DOWN_TIMEOUT, invoke_pull_down, channel)
+                PULL_DOWN_HANDLES[channel.id] = KOKORO.call_after(PULL_DOWN_TIMEOUT, invoke_pull_down, channel)
 
 
 def invoke_pull_down(channel):

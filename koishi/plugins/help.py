@@ -189,8 +189,8 @@ CATEGORIES = (
         EMOJI_MASKS,
         (
             'bite', 'blush', 'bully', 'cringe', 'cry', 'dance', 'glomp', 'handhold', 'happy', 'highfive', 'hug',
-            'kick', 'kill', 'kiss', 'lick', 'nom', 'pat', 'pocky-kiss', 'poke', 'slap', 'smile', 'smug', 'wave',
-            'wink', 'yeet',
+            'kick', 'kill', 'kiss', 'lick', 'like', 'nom', 'pat', 'pocky-kiss', 'poke', 'slap', 'smile', 'smug',
+            'wave', 'wink', 'yeet',
         ),
         (),
     ), (

@@ -1693,7 +1693,7 @@ async def message_crosspost(client, message):
     await bypass_request(client, METHOD_POST,
         f'{API_ENDPOINT}/channels/{message.channel.id}/messages/{message.id}/crosspost')
 
-async def vanity_invite_get(client, guild):
+async def invite_get_vanity(client, guild):
     guild_id = guild.id
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/vanity-url')
@@ -2399,7 +2399,7 @@ async def sticker_edit(client, guild, sticker, name = None, description = None, 
     )
 
 
-async def vanity_invite_edit(client, guild, vanity_code=None):
+async def invite_edit_vanity(client, guild, vanity_code = None):
     guild_id = guild.id
     await bypass_request(client, METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/vanity-url',
@@ -4076,7 +4076,7 @@ async def rate_limit_test_0058(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        await vanity_invite_get(client, guild)
+        await invite_get_vanity(client, guild)
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0059(client, message):
@@ -6012,7 +6012,7 @@ async def rate_limit_test_0152(client, message, name:str):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        await vanity_invite_edit(client, guild, name)
+        await invite_edit_vanity(client, guild, name)
 
 
 @RATE_LIMIT_COMMANDS

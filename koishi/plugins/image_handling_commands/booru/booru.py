@@ -375,14 +375,14 @@ def start_cleanup_handle():
     if (cleanup_handle is not None) and (not cleanup_handle.cancelled):
         return
     
-    ImageCache.CLEANUP_HANDLE = KOKORO.call_later(CLEANUP_INTERVAL, cleanup)
+    ImageCache.CLEANUP_HANDLE = KOKORO.call_after(CLEANUP_INTERVAL, cleanup)
 
 
 def cleanup():
     """
     Cleans up the caches which where used outside of the expected margin.
     """
-    ImageCache.CLEANUP_HANDLE = KOKORO.call_later(CLEANUP_INTERVAL, cleanup)
+    ImageCache.CLEANUP_HANDLE = KOKORO.call_after(CLEANUP_INTERVAL, cleanup)
     
     to_unbind = []
     

@@ -76,6 +76,8 @@ async def touhou_calendar_close(client, event):
     """
     Deletes the calendar message if applicable.
     
+    This function is a coroutine.
+    
     Parameters
     ----------
     client : ``Client``

@@ -64,6 +64,6 @@ async def search(client, json_query):
                 return abort(f'Something went wrong, please try again later.\nstatus = {status_code}')
             
     finally:
-        KOKORO.call_later(RATE_LIMIT_RESET_AFTER, RATE_LIMIT_LOCK.release)
+        KOKORO.call_after(RATE_LIMIT_RESET_AFTER, RATE_LIMIT_LOCK.release)
     
     return data

@@ -38,7 +38,7 @@ class SexSpamLock:
         self.max_level = max_level
         self.expires_at = 0.0
         
-        KOKORO.call_later(SEX_RESET_AFTER, self)
+        KOKORO.call_after(SEX_RESET_AFTER, self)
         return self
     
     

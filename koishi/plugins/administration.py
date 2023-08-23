@@ -98,7 +98,7 @@ async def clear(client, event,
     is_global = True,
     show_for_invoking_user_only = True,
     allow_in_dm = False,
-    required_permissions = Permission().update_by_keys(create_instant_invite=True),
+    required_permissions = Permission().update_by_keys(create_instant_invite = True),
 )
 async def invite_create(client, event,
     permanent: ('bool', 'Create permanent?') = False,
@@ -120,7 +120,7 @@ async def invite_create(client, event,
     yield
     
     if permanent:
-        invite = await client.vanity_invite_get(guild)
+        invite = await client.invite_get_vanity(guild)
         if invite is None:
             max_age = 0
             max_uses = 0
@@ -131,7 +131,7 @@ async def invite_create(client, event,
     
     if invite is None:
         yield
-        invite = await client.invite_create_preferred(guild, max_age=max_age, max_uses=max_uses)
+        invite = await client.invite_create_preferred(guild, max_age = max_age, max_uses = max_uses)
     
     if invite is None:
         content = '**Error**\nI do not have enough permission to create invite from the guild\'s preferred channel.'
