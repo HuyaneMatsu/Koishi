@@ -14,4 +14,4 @@ STATS_COMMAND = SLASH_CLIENT.interactions(
 )
 
 STATS_COMMAND.interactions(command_show, name = 'show')
-STATS_COMMAND.interactions(command_upgrade, name = 'update')
+STATS_COMMAND.interactions(command_upgrade, name = 'upgrade')

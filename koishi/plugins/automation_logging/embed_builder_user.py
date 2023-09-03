@@ -36,5 +36,6 @@ def build_user_embed(guild, user, guild_profile, join):
         user.avatar_url,
     ).add_author(
         f'User {"joined" if join else "left"} {guild.name}'
+    ).add_fotter(
+        f'We are now {guild.user_count} shrimps{"!!!" if join else "..."}'
     )
-

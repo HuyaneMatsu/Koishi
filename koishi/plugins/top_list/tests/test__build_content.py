@@ -1,10 +1,8 @@
 import vampytest
 from hata import User
 
-from ....bot_utils.constants import EMOJI__HEART_CURRENCY
-
 from ..builders import build_content
-from ..constants import PAGE_SIZE, STYLE_HEARTS, STYLE_NAME, STYLE_NUMBER, STYLE_RESET
+from ..constants import PAGE_SIZE, STYLE_HEARTS, STYLE_NAME, STYLE_NUMBER
 
 
 def test__build_content():
@@ -22,10 +20,9 @@ def test__build_content():
     vampytest.assert_eq(
         output,
         (
-            f'{EMOJI__HEART_CURRENCY} **Top-list** {EMOJI__HEART_CURRENCY} *[Page {page_index + 1!s}]*\n'
             f'```ansi\n'
-            f'{STYLE_NUMBER}{page_index * PAGE_SIZE + 1!s}{STYLE_RESET}.: {STYLE_HEARTS}{1111!s} {STYLE_NAME}okuu\n'
-            f'{STYLE_NUMBER}{page_index * PAGE_SIZE + 2!s}{STYLE_RESET}.: {STYLE_HEARTS}{1112!s} {STYLE_NAME}orin\n'
+            f'{STYLE_NUMBER}{page_index * PAGE_SIZE + 1!s}.: {STYLE_HEARTS}{1111!s} {STYLE_NAME}okuu\n'
+            f'{STYLE_NUMBER}{page_index * PAGE_SIZE + 2!s}.: {STYLE_HEARTS}{1112!s} {STYLE_NAME}orin\n'
             f'```'
         ),
     )
@@ -45,8 +42,7 @@ def test__build_content__empty():
     vampytest.assert_eq(
         output,
         (
-            f'{EMOJI__HEART_CURRENCY} **Top-list** {EMOJI__HEART_CURRENCY} *[Page {page_index + 1!s}]*\n'
-            f'```ansi\n'
+            f'```\n'
             f'no result\n'
             f'```'
         ),
@@ -77,18 +73,17 @@ def test__build_content__shifted():
     vampytest.assert_eq(
         output,
         (
-            f'{EMOJI__HEART_CURRENCY} **Top-list** {EMOJI__HEART_CURRENCY} *[Page 1]*\n'
             f'```ansi\n'
-            f'{STYLE_NUMBER} 1{STYLE_RESET}.: {STYLE_HEARTS} 1111 {STYLE_NAME}okuu\n'
-            f'{STYLE_NUMBER} 2{STYLE_RESET}.: {STYLE_HEARTS} 1112 {STYLE_NAME}orin\n'
-            f'{STYLE_NUMBER} 3{STYLE_RESET}.: {STYLE_HEARTS} 1113 {STYLE_NAME}yuuka\n'
-            f'{STYLE_NUMBER} 4{STYLE_RESET}.: {STYLE_HEARTS}  555 {STYLE_NAME}koishi\n'
-            f'{STYLE_NUMBER} 5{STYLE_RESET}.: {STYLE_HEARTS}12222 {STYLE_NAME}satori\n'
-            f'{STYLE_NUMBER} 6{STYLE_RESET}.: {STYLE_HEARTS}   56 {STYLE_NAME}yuuma\n'
-            f'{STYLE_NUMBER} 7{STYLE_RESET}.: {STYLE_HEARTS}   75 {STYLE_NAME}ran\n'
-            f'{STYLE_NUMBER} 8{STYLE_RESET}.: {STYLE_HEARTS}   12 {STYLE_NAME}chen\n'
-            f'{STYLE_NUMBER} 9{STYLE_RESET}.: {STYLE_HEARTS}    1 {STYLE_NAME}biten\n'
-            f'{STYLE_NUMBER}10{STYLE_RESET}.: {STYLE_HEARTS} 6969 {STYLE_NAME}hisami\n'
+            f'{STYLE_NUMBER} 1.: {STYLE_HEARTS} 1111 {STYLE_NAME}okuu\n'
+            f'{STYLE_NUMBER} 2.: {STYLE_HEARTS} 1112 {STYLE_NAME}orin\n'
+            f'{STYLE_NUMBER} 3.: {STYLE_HEARTS} 1113 {STYLE_NAME}yuuka\n'
+            f'{STYLE_NUMBER} 4.: {STYLE_HEARTS}  555 {STYLE_NAME}koishi\n'
+            f'{STYLE_NUMBER} 5.: {STYLE_HEARTS}12222 {STYLE_NAME}satori\n'
+            f'{STYLE_NUMBER} 6.: {STYLE_HEARTS}   56 {STYLE_NAME}yuuma\n'
+            f'{STYLE_NUMBER} 7.: {STYLE_HEARTS}   75 {STYLE_NAME}ran\n'
+            f'{STYLE_NUMBER} 8.: {STYLE_HEARTS}   12 {STYLE_NAME}chen\n'
+            f'{STYLE_NUMBER} 9.: {STYLE_HEARTS}    1 {STYLE_NAME}biten\n'
+            f'{STYLE_NUMBER}10.: {STYLE_HEARTS} 6969 {STYLE_NAME}hisami\n'
             f'```'
         ),
     )

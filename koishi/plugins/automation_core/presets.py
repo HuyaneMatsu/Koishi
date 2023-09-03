@@ -5,7 +5,7 @@ from .constants import AUTOMATION_CONFIGURATIONS
 
 from ...bot_utils.constants import (
     CHANNEL__SUPPORT__LOG_EMOJI, CHANNEL__SUPPORT__LOG_MENTION, CHANNEL__SUPPORT__LOG_SATORI,
-    CHANNEL__SUPPORT__LOG_STICKER, CHANNEL__SUPPORT__LOG_USER, GUILD__SUPPORT
+    CHANNEL__SUPPORT__LOG_STICKER, CHANNEL__SUPPORT__LOG_USER, CHANNEL__SUPPORT__WELCOME, GUILD__SUPPORT
 )
 
 
@@ -23,7 +23,7 @@ def apply_presets():
     support_guild_configuration.log_satori_channel_id = CHANNEL__SUPPORT__LOG_SATORI.id
     support_guild_configuration.log_sticker_channel_id = CHANNEL__SUPPORT__LOG_STICKER.id
     support_guild_configuration.log_user_channel_id = CHANNEL__SUPPORT__LOG_USER.id
-    support_guild_configuration.welcome_channel_id = 0
+    support_guild_configuration.welcome_channel_id = CHANNEL__SUPPORT__WELCOME
     support_guild_configuration.touhou_feed_enabled = True
     support_guild_configuration.reaction_copy_enabled = True
     support_guild_configuration.reaction_copy_role_id = 0

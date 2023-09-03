@@ -354,7 +354,7 @@ RULES_HELP = Embed(
 ).add_field(
     f'Chapter 1 {EMOJI_REIMU}',
     (
-        f'Your character is Hakurei Reimu (博麗　霊夢), who needs some help at her basement to sort her *boxes* out.\n'
+        f'Your character is Hakurei Reimu (博麗 霊夢), who needs some help at her basement to sort her *boxes* out.\n'
         f'Reimu can jump over a box or hole.\n'
         f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
         f'{EMOJI_EAST}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}'
@@ -366,7 +366,7 @@ RULES_HELP = Embed(
 ).add_field(
     f'Chapter 2 {EMOJI_FLAN}',
     (
-        f'Your character is Scarlet Flandre (スカーレット・フランドール Sukaaretto Furandooru), who want to put her '
+        f'Your character is Scarlet Flandre (スカーレット フランドール Sukaaretto Furandooru), who want to put her '
         f'*bookshelves* on their desired place.\n'
         f'Flandre can destroy absolutely anything and everything, and she will get rid of the pillars for you.\n'
         f'{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_OBJECT_U]}{EMOJI_EAST}'
@@ -379,7 +379,7 @@ RULES_HELP = Embed(
 ).add_field(
     f'Chapter 3 {EMOJI_YUKARI}',
     (
-        f'Your character is Yakumo Yukari (八雲　紫). Her beddings needs some replacing at her home.\n'
+        f'Your character is Yakumo Yukari (八雲 紫). Her beddings needs some replacing at her home.\n'
         f'Yukari can create gaps and travel trough them. She will open gap to the closest place straightforward, '
         f'which is separated by a bedding or with wall from her.\n'
         f'{STYLE_YUKARI[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_WALL_N]}{STYLE_YUKARI[BIT_MASK_WALL_N]}'
@@ -4725,7 +4725,7 @@ class DungeonSweeperRunner:
                 if err.status >= 500:
                     pass
                 
-                elif err.code != ERROR_CODES.unknown_interaction:
+                elif err.code == ERROR_CODES.unknown_interaction:
                     pass
                 
                 else:

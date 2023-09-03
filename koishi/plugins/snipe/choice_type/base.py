@@ -3,7 +3,7 @@ __all__ = ()
 from hata import Embed
 from scarletio import RichAttributeErrorBaseType, class_property
 from ..constants import BUTTON_SNIPE_ADD_DISABLED, BUTTON_SNIPE_EDIT_DISABLED, BUTTON_SNIPE_REMOVE_DISABLED
-from ..embed_builder_base import add_embed_author, add_embed_footer, copy_extra_fields, create_base_embed
+from ..embed_builder_base import add_embed_author, add_embed_footer, copy_extra_fields, create_base_embed, with_image
 from ..helpers import are_actions_allowed_for_entity
 
 
@@ -26,7 +26,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         name : `str`
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     
     @class_property
@@ -38,7 +38,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         prefix : `str`
         """
-        raise NotImplemented
+        raise NotImplementedError
         
     
     @class_property
@@ -50,7 +50,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         button_actions_enabled : ``Component``
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     
     @class_property
@@ -62,7 +62,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         button_details_enabled : ``Component``
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     
     @class_property
@@ -74,7 +74,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         button_action_add : ``Component``
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     
     @class_property
@@ -86,7 +86,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         button_action_edit : ``Component``
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     
     @class_property
@@ -98,7 +98,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         button_action_remove : ``Component``
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     
     @class_property
@@ -110,7 +110,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         select_table_disabled : `dict` of (`str`, ``Component``) items
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     
     @class_property
@@ -122,7 +122,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         select_table_inside : `dict` of (`str`, ``Component``) items
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     
     @class_property
@@ -134,13 +134,13 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         select_table_outside : `dict` of (`str`, ``Component``) items
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     
     @classmethod
-    async def build_embed(cls, entity, client, event, message_jump_url, detailed):
+    async def build_embeds(cls, entity, client, event, message_jump_url, detailed):
         """
-        Builds a generic embed.
+        Builds a generic embeds.
         
         This function is a coroutine.
         
@@ -159,21 +159,21 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         
         Returns
         -------
-        embed : ``Embed``
+        embeds : `list` of s``Embed``
         """
         if detailed:
             await cls.update_entity_details(entity, client)
             embed = cls.build_embed_detailed(entity)
             extra_fields_set = copy_extra_fields(embed, event)
             if extra_fields_set:
-                return embed
+                return with_image(embed, entity)
         
         else:
             embed = create_base_embed(entity, None if entity.url is None else 'Click to open')
             
         add_embed_footer(embed, entity)
         add_embed_author(embed, event, cls.name, message_jump_url)
-        return embed
+        return with_image(embed, entity)
     
     
     @classmethod
@@ -211,7 +211,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         option : ``StringSelectOption``
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     
     @classmethod
@@ -228,13 +228,13 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         client : ``Client``
             Client to update the entity with.
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     
     @classmethod
     def build_embed_detailed(cls, entity):
         """
-        Builds a detailed embed.
+        Builds detailed embed.
         
         Parameters
         ----------
@@ -245,7 +245,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         embed : ``Embed``
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     
     @classmethod
@@ -302,7 +302,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         entity : `None`, ``Emoji``, ``SoundboardSound``, ``Sticker``
             The back-parsed entity.
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     
     @classmethod

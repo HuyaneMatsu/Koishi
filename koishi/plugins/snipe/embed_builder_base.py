@@ -94,7 +94,7 @@ def create_base_embed(entity, title):
     Parameters
     ----------
     entity : ``Emoji``, ``Sticker``
-        The entity's representation.
+        The entity.
     title : `str`
         The embed's title.
     
@@ -102,12 +102,10 @@ def create_base_embed(entity, title):
     -------
     embed : ``Embed``
     """
-    entity_url = entity.url
-    
-    embed = Embed(
+    return Embed(
         title,
         color = (entity.id >> 22) & 0xffffff,
-        url = entity_url,
+        url = entity.url,
     ).add_field(
         'Name',
         f'```\n{entity.name}\n```',
@@ -117,11 +115,34 @@ def create_base_embed(entity, title):
         f'```\n{entity.id}\n```',
         inline = True,
     )
+
+
+def with_image(embed, entity):
+    """
+    Returns a list of embeds. If the `entity` is a sticker and image can be shown, it adds an image embed to the
+    returned embeds. If the `entity` is an emoji it extend the original embed instead.
     
+    Parameters
+    ----------
+    embed : ``Embed``
+        Default embed to return.
+    entity : ``Emoji``, ``Sticker``
+        The entity.
+    
+    Returns
+    -------
+    embeds : `list` of ``Embed``
+    """
+    embeds = [embed]
+    
+    entity_url = entity.url
     if is_url_raster_graphics(entity_url):
-        embed.add_image(entity_url)
+        if isinstance(entity, Emoji):
+            embed.add_image(entity_url)
+        else:
+            embeds.append(Embed(color = (entity.id >> 22) & 0xffffff).add_image(entity_url))
     
-    return embed
+    return embeds
 
 
 def copy_extra_fields(embed, event):

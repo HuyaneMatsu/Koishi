@@ -3,7 +3,7 @@ __all__ = ()
 from hata import Embed, StickerFormat
 
 from .embed_builder_shared import (
-    add_bool_field, add_context_fields_to, add_nullable_container_field, add_nullable_string_field,
+    add_bool_field, add_expression_context_fields_to, add_nullable_container_field, add_nullable_string_field,
     add_preinstanced_field, add_string_field, maybe_add_modified_bool_field,
     maybe_add_modified_nullable_container_field, maybe_add_modified_nullable_string_field,
     maybe_add_modified_string_field
@@ -34,31 +34,50 @@ def add_sticker_fields_to(embed, sticker):
     return embed
 
 
-def add_sticker_image_field(embed, sticker):
+def build_sticker_image_embed(sticker):
     """
-    Adds sticker image field into the embed if applicable for sticker's type.
+    Builds a sticker image embed if applicable for sticker's type.
+    
+    Parameters
+    ----------
+    sticker : ``Sticker``
+        The sticker to show its image of.
+    
+    Returns
+    -------
+    embed : `None` ``Embed``
+    """
+    sticker_format = sticker.format
+    if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
+        return Embed().add_image(sticker.url)
+
+
+def with_sticker_image(embed, sticker):
+    """
+    Returns a list of embeds. If the `sticker`'s image can be shown, it adds an image embed to the returned embeds.
     
     Parameters
     ----------
     embed : ``Embed``
-        The embed to extend.
+        Default embed to return.
     sticker : ``Sticker``
-        The sticker to add its image of.
+        The sticker to show its image of.
     
     Returns
     -------
-    embed : ``Embed``
+    embeds : `list` of ``Embed``
     """
-    sticker_format = sticker.format
-    if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
-        embed.add_image(sticker.url)
+    embeds = [embed]
+    image_embed = build_sticker_image_embed(sticker)
+    if (image_embed is not None):
+        embeds.append(image_embed)
     
-    return embed
+    return embeds
 
 
-def build_sticker_create_embed(sticker):
+def build_sticker_create_embeds(sticker):
     """
-    Builds a created sticker embed.
+    Builds created sticker embeds.
     
     Parameters
     ----------
@@ -67,48 +86,46 @@ def build_sticker_create_embed(sticker):
     
     Returns
     -------
-    embed : ``Embed``
+    embed : `list` of ``Embed``
     """
     embed = Embed(f'Sticker created: {sticker.name} ({sticker.id})', url =  sticker.url)
     
     add_sticker_fields_to(embed, sticker)
-    add_context_fields_to(embed, sticker)
-    add_sticker_image_field(embed, sticker)
+    add_expression_context_fields_to(embed, sticker)
     
-    return embed
+    return with_sticker_image(embed, sticker)
 
 
-def build_sticker_edit_embed(sticker, old_attributes):
+def build_sticker_update_embeds(sticker, old_attributes):
     """
-    Builds an edited sticker embed.
+    Builds updated sticker embeds.
     
     Parameters
     ----------
     sticker : ``Sticker``
-        The edited sticker.
+        The updated sticker.
     old_attributes : `dict` of (`str`, `object`) items
-        The sticker's old attributes that have been edited.
+        The sticker's old attributes that have been updated.
     
     Returns
     -------
     embed : ``Embed``
     """
-    embed = Embed(f'Sticker edited: {sticker.name} ({sticker.id})', url =  sticker.url)
+    embed = Embed(f'Sticker updated: {sticker.name} ({sticker.id})', url =  sticker.url)
     
-    add_context_fields_to(embed, sticker)
-    add_sticker_image_field(embed, sticker)
+    add_expression_context_fields_to(embed, sticker)
     
     maybe_add_modified_string_field(embed, sticker, old_attributes, 'name', 'Name')
     maybe_add_modified_nullable_string_field(embed, sticker, old_attributes, 'description', 'Description')
     maybe_add_modified_bool_field(embed, sticker, old_attributes, 'available', 'Available')
     maybe_add_modified_nullable_container_field(embed, sticker, old_attributes, 'tags', 'Tags')
     
-    return embed
+    return with_sticker_image(embed, sticker)
 
 
-def build_sticker_delete_embed(sticker):
+def build_sticker_delete_embeds(sticker):
     """
-    Builds a deleted sticker embed.
+    Builds deleted sticker embeds.
     
     Parameters
     ----------
@@ -122,8 +139,6 @@ def build_sticker_delete_embed(sticker):
     embed = Embed(f'Sticker deleted: {sticker.name} ({sticker.id})', url =  sticker.url)
     
     add_sticker_fields_to(embed, sticker)
-    add_context_fields_to(embed, sticker)
-    add_sticker_image_field(embed, sticker)
+    add_expression_context_fields_to(embed, sticker)
     
-    return embed
-
+    return with_sticker_image(embed, sticker)

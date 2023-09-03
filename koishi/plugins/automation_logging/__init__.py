@@ -1,5 +1,6 @@
 from .components_satori_auto_start import *
 from .embed_builder_emoji import *
+from .embed_builder_guild_profile import *
 from .embed_builder_mention import *
 from .embed_builder_satori import *
 from .embed_builder_satori_start import *
@@ -17,6 +18,7 @@ from .interactions_satori import *
 __all__ = (
     *components_satori_auto_start.__all__,
     *embed_builder_emoji.__all__,
+    *embed_builder_guild_profile.__all__,
     *embed_builder_mention.__all__,
     *embed_builder_satori.__all__,
     *embed_builder_satori_start.__all__,

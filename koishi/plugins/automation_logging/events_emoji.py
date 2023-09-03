@@ -6,7 +6,7 @@ from ...bots import SLASH_CLIENT
 
 from ..automation_core import AUTOMATION_CONFIGURATIONS, get_log_emoji_channel
 
-from .embed_builder_emoji import build_emoji_create_embed, build_emoji_delete_embed, build_emoji_edit_embed
+from .embed_builder_emoji import build_emoji_create_embed, build_emoji_delete_embed, build_emoji_update_embed
 
 
 @SLASH_CLIENT.events
@@ -47,7 +47,7 @@ async def emoji_create(client, emoji):
 
 
 @SLASH_CLIENT.events
-async def emoji_edit(client, emoji, old_attributes):
+async def emoji_update(client, emoji, old_attributes):
     """
     Handles a emoji edit event. If the emoji's guild has emoji logging setup, sends a message there.
     
@@ -68,7 +68,7 @@ async def emoji_edit(client, emoji, old_attributes):
     
     await client.message_create(
         channel,
-        embed = build_emoji_edit_embed(emoji, old_attributes),
+        embed = build_emoji_update_embed(emoji, old_attributes),
         allowed_mentions = None,
     )
 

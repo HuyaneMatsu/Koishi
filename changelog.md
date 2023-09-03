@@ -1,3 +1,14 @@
+### 2023-09-03
+
+- `/ds play` discord lag checking had bad condition. :KoishiFail:
+- `/mod top-list` now disables the `next` button if there is nothing next.
+- `/mod top-list` is now partially tested. (So less bugs, yay).
+- `/top-list` and `/mod top-list` outputs are now standardised.
+- `/automation log-sticker` now uses `2` embeds, so Discord will stop adjusting embed width to sticker size!!!
+- `/snipe` now uses `2` embeds for stickers, for the same reason as above ^.
+- `/automation log-users` now says how much users are in the guild!!
+- `/automation log-satori` now sends messages for guild profile updates.
+
 ### 2023-08-23
 
 - Fix `/snipe` assigned bad `yeet` button for emojis, causing it to not pop up the confirmation form.

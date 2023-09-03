@@ -1,7 +1,7 @@
 import vampytest
 from hata import DiscordException, ERROR_CODES, User, ZEROUSER
 
-from ..builders import process_entries
+from ..queries import process_entries
 from ..constants import PAGE_SIZE
 
 

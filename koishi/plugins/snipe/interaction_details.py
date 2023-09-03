@@ -37,11 +37,11 @@ async def snipe_interaction_respond_with_details(client, event, choice_type):
     if (entity is None):
         return
     
-    embed = await choice_type.build_embed(entity, client, event, parse_source_message_url(event.message), True)
+    embeds = await choice_type.build_embeds(entity, client, event, parse_source_message_url(event.message), True)
      
     await client.interaction_response_message_edit(
         event,
-        embed = embed,
+        embed = embeds,
         components = translate_components(event.message.iter_components(), DETAILS_DISABLE),
     )
 

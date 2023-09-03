@@ -238,8 +238,8 @@ class ChoiceTypeSticker(ChoiceTypeBase):
             )
         
         return embed
-
-
+    
+    
     @classmethod
     @copy_docs(ChoiceTypeBase.parse_and_get_entity_id_and_entity)
     async def parse_and_get_entity_id_and_entity(cls, client, event):

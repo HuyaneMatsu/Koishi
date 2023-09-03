@@ -27,8 +27,8 @@ async def snipe_interaction_dm(client, event):
     if message is None:
         return
     
-    embed = message.embed
-    if embed is None:
+    embeds = message.embeds
+    if embeds is None:
         return
     
     await client.interaction_component_acknowledge(event, wait = False)
@@ -37,7 +37,7 @@ async def snipe_interaction_dm(client, event):
     try:
         await client.message_create(
             channel,
-            embed = embed,
+            embed = embeds,
             components = translate_components(message.iter_components(), DM_DISABLE),
             file = file
         )

@@ -146,7 +146,7 @@ async def select_response_builder(client, event):
         return
     
     entity, choice_type = choice
-    embed = await choice_type.build_embed(entity, client, event, parse_source_message_url(message), detailed)
+    embeds = await choice_type.build_embeds(entity, client, event, parse_source_message_url(message), detailed)
     
     file = await choice_type.get_file(entity, client)
     
@@ -159,7 +159,7 @@ async def select_response_builder(client, event):
         translate_table = choice_type.select_table_outside
     
     return InteractionResponse(
-        embed = embed,
+        embed = embeds,
         components = translate_components(message.iter_components(), translate_table),
         file = file,
     )

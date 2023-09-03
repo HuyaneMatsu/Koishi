@@ -4,10 +4,9 @@ from hata import AnsiForegroundColor, BUILTIN_EMOJIS, create_ansi_format_code
 from hata.ext.slash import Button
 
 
-STYLE_RESET = create_ansi_format_code()
-STYLE_NUMBER = create_ansi_format_code(foreground_color = AnsiForegroundColor.teal)
+STYLE_NUMBER = create_ansi_format_code(foreground_color = AnsiForegroundColor.white)
 STYLE_HEARTS = create_ansi_format_code(foreground_color = AnsiForegroundColor.blue)
-STYLE_NAME = create_ansi_format_code(foreground_color = AnsiForegroundColor.orange)
+STYLE_NAME = create_ansi_format_code(foreground_color = AnsiForegroundColor.white)
 
 
 PAGE_SIZE = 20
@@ -26,13 +25,15 @@ CUSTOM_ID_CLOSE = 'top_list.close'
 
 
 BUTTON_PAGE_PREVIOUS_DISABLED = Button(
-    emoji = EMOJI_PAGE_PREVIOUS,
+    'Page 0',
+    EMOJI_PAGE_PREVIOUS,
     custom_id = CUSTOM_ID_PAGE_PREVIOUS_DISABLED,
     enabled = False,
 )
 
 BUTTON_PAGE_NEXT_DISABLED = Button(
-    emoji = EMOJI_PAGE_NEXT,
+    'Page n',
+    EMOJI_PAGE_NEXT,
     custom_id = CUSTOM_ID_PAGE_NEXT_DISABLED,
     enabled = False,
 )

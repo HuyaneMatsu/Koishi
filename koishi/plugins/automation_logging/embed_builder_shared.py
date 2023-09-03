@@ -160,7 +160,55 @@ def get_nullable_string_repr(value):
     representation : `str`
     """
     return 'null' if value is None else value
+
+
+def get_flags_repr(value):
+    """
+    Gets the representation of a the flags value.
     
+    Parameters
+    ----------
+    value : ``FlagBase``
+        Flags to get their representation of.
+    
+    Returns
+    -------
+    representation : `str`
+    """
+    return 'null' if not value else ', '.join([flag_name.replace('_', ' ') for flag_name in value])
+
+
+def get_icon_repr(value):
+    """
+    Gets the representation of an icon value.
+    
+    Parameters
+    ----------
+    value : `None`, ``Icon``
+        Icon to get their representation of.
+    
+    Returns
+    -------
+    representation : `str`
+    """
+    return 'null' if (value is None) or (not value) else value.as_base_16_hash
+
+
+def get_date_time_repr(value):
+    """
+    Gets the representation of a date time value.
+    
+    Parameters
+    ----------
+    value : `DateTime`
+        Date time to get their representation of.
+    
+    Returns
+    -------
+    representation : `str`
+    """
+    return 'null' if value is None else format(value, DATETIME_FORMAT_CODE)
+
 
 def add_modified_string_field(embed, name, old_value, new_value):
     """
@@ -197,7 +245,7 @@ def try_get_modified_difference(entity, old_attributes, attribute_name):
     
     Parameters
     ----------
-    entity : ``Emoji``, ``Sticker``
+    entity : `object`
         The entity in context.
     old_attributes : `dict` of (`str`, `object`) items
         The entity's old attributes that have been edited.
@@ -225,7 +273,7 @@ def _maybe_add_difference_field(embed, entity, old_attributes, attribute_name, p
     ----------
     embed : ``Embed``
         The embed to extend.
-    entity : ``Emoji``, ``Sticker``
+    entity : `object`
         The entity in context.
     old_attributes : `dict` of (`str`, `object`) items
         The entity's old attributes that have been edited.
@@ -265,7 +313,7 @@ def maybe_add_modified_string_field(embed, entity, old_attributes, attribute_nam
     ----------
     embed : ``Embed``
         The embed to extend.
-    entity : ``Emoji``, ``Sticker``
+    entity : `object`
         The entity in context.
     old_attributes : `dict` of (`str`, `object`) items
         The entity's old attributes that have been edited.
@@ -280,6 +328,7 @@ def maybe_add_modified_string_field(embed, entity, old_attributes, attribute_nam
     """
     return _maybe_add_difference_field(embed, entity, old_attributes, attribute_name, pretty_name, None)
 
+
 def maybe_add_modified_bool_field(embed, entity, old_attributes, attribute_name, pretty_name):
     """
     Adds modified boolean field into the given embed if the value was modified.
@@ -288,7 +337,7 @@ def maybe_add_modified_bool_field(embed, entity, old_attributes, attribute_name,
     ----------
     embed : ``Embed``
         The embed to extend.
-    entity : ``Emoji``, ``Sticker``
+    entity : `object`
         The entity in context.
     old_attributes : `dict` of (`str`, `object`) items
         The entity's old attributes that have been edited.
@@ -312,7 +361,7 @@ def maybe_add_modified_nullable_string_field(embed, entity, old_attributes, attr
     ----------
     embed : ``Embed``
         The embed to extend.
-    entity : ``Emoji``, ``Sticker``
+    entity : `object`
         The entity in context.
     old_attributes : `dict` of (`str`, `object`) items
         The entity's old attributes that have been edited.
@@ -332,7 +381,7 @@ def maybe_add_modified_nullable_string_field(embed, entity, old_attributes, attr
         attribute_name,
         pretty_name,
         get_nullable_string_repr,
-)
+    )
 
 def maybe_add_modified_nullable_container_field(embed, entity, old_attributes, attribute_name, pretty_name):
     """
@@ -342,7 +391,7 @@ def maybe_add_modified_nullable_container_field(embed, entity, old_attributes, a
     ----------
     embed : ``Embed``
         The embed to extend.
-    entity : ``Emoji``, ``Sticker``
+    entity : `object`
         The entity in context.
     old_attributes : `dict` of (`str`, `object`) items
         The entity's old attributes that have been edited.
@@ -362,7 +411,8 @@ def maybe_add_modified_nullable_container_field(embed, entity, old_attributes, a
         attribute_name,
         pretty_name,
         get_nullable_container_repr,
-)
+    )
+
 
 def maybe_add_modified_role_ids_field(embed, entity, old_attributes, attribute_name, pretty_name):
     """
@@ -372,7 +422,7 @@ def maybe_add_modified_role_ids_field(embed, entity, old_attributes, attribute_n
     ----------
     embed : ``Embed``
         The embed to extend.
-    entity : ``Emoji``, ``Sticker``
+    entity : `object`
         The entity in context.
     old_attributes : `dict` of (`str`, `object`) items
         The entity's old attributes that have been edited.
@@ -392,7 +442,154 @@ def maybe_add_modified_role_ids_field(embed, entity, old_attributes, attribute_n
         attribute_name,
         pretty_name,
         get_role_ids_repr_defaulted,
-)
+    )
+
+
+def maybe_add_modified_role_ids_difference_field(embed, entity, old_attributes, attribute_name, pretty_name):
+    """
+    Adds a modified `role_ids` difference field into the given embed if the value was modified.
+    
+    Parameters
+    ----------
+    embed : ``Embed``
+        The embed to extend.
+    entity : `object`
+        The entity in context.
+    old_attributes : `dict` of (`str`, `object`) items
+        The entity's old attributes that have been edited.
+    attribute_name : `str`
+        The attribute's name.
+    pretty_name : `str`
+        Pretty name to use as field name.
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
+    difference = try_get_modified_difference(entity, old_attributes, attribute_name)
+    if (difference is not None):
+        old_value, new_value = difference
+        
+        old_role_ids = set()
+        if old_value is not None:
+            old_role_ids.update(old_value)
+        
+        new_role_ids = set()
+        if new_value is not None:
+            new_role_ids.update(new_value)
+        
+        removed_role_ids = old_role_ids - new_role_ids
+        added_role_ids = new_role_ids - old_role_ids
+        
+        parts = ['```diff\n']
+        for removed_role_id in removed_role_ids:
+            parts.append('- ')
+            parts.append(get_role_name(removed_role_id))
+            parts.append('\n')
+        
+        for added_role_id in added_role_ids:
+            parts.append('+ ')
+            parts.append(get_role_name(added_role_id))
+            parts.append('\n')
+        
+        parts.append('```')
+        
+        embed.add_field(pretty_name, ''.join(parts))
+    
+    return embed
+
+
+def maybe_add_modified_flags_field(embed, entity, old_attributes, attribute_name, pretty_name):
+    """
+    Adds modified `flags` field into the given embed if the value was modified.
+    
+    Parameters
+    ----------
+    embed : ``Embed``
+        The embed to extend.
+    entity : `object`
+        The entity in context.
+    old_attributes : `dict` of (`str`, `object`) items
+        The entity's old attributes that have been edited.
+    attribute_name : `str`
+        The attribute's name.
+    pretty_name : `str`
+        Pretty name to use as field name.
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
+    return _maybe_add_difference_field(
+        embed,
+        entity,
+        old_attributes,
+        attribute_name,
+        pretty_name,
+        get_flags_repr,
+    )
+
+
+def maybe_add_modified_icon_field(embed, entity, old_attributes, attribute_name, pretty_name):
+    """
+    Adds modified `icon` field into the given embed if the value was modified.
+    
+    Parameters
+    ----------
+    embed : ``Embed``
+        The embed to extend.
+    entity : `object`
+        The entity in context.
+    old_attributes : `dict` of (`str`, `object`) items
+        The entity's old attributes that have been edited.
+    attribute_name : `str`
+        The attribute's name.
+    pretty_name : `str`
+        Pretty name to use as field name.
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
+    return _maybe_add_difference_field(
+        embed,
+        entity,
+        old_attributes,
+        attribute_name,
+        pretty_name,
+        get_icon_repr,
+    )
+
+
+def maybe_add_modified_date_time_field(embed, entity, old_attributes, attribute_name, pretty_name):
+    """
+    Adds modified `date_time` field into the given embed if the value was modified.
+    
+    Parameters
+    ----------
+    embed : ``Embed``
+        The embed to extend.
+    entity : `object`
+        The entity in context.
+    old_attributes : `dict` of (`str`, `object`) items
+        The entity's old attributes that have been edited.
+    attribute_name : `str`
+        The attribute's name.
+    pretty_name : `str`
+        Pretty name to use as field name.
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
+    return _maybe_add_difference_field(
+        embed,
+        entity,
+        old_attributes,
+        attribute_name,
+        pretty_name,
+        get_date_time_repr,
+    )
 
 
 def add_string_field(embed, value, pretty_name):
@@ -522,7 +719,7 @@ def add_role_ids_field(embed, role_ids, pretty_name):
     return add_string_field(embed, get_role_ids_repr_defaulted(role_ids), pretty_name)
 
 
-def add_context_fields_to(embed, entity):
+def add_expression_context_fields_to(embed, entity):
     """
     Adds the context fields into the given embed.
     
@@ -532,7 +729,7 @@ def add_context_fields_to(embed, entity):
     ----------
     embed : ``Embed``
         The embed to extend.
-    entity : ``Emoji``, ``Sticker``
+    entity : ``Emoji``, ``Sticker``, ``SoundboardSound``
         The entity to pull the fields from.
     
     Returns
@@ -549,8 +746,6 @@ def add_context_fields_to(embed, entity):
         icon_url = user.avatar_url
     
     embed.add_author(author_text, icon_url)
-    
     embed.add_footer(format(DateTime.utcnow(), DATETIME_FORMAT_CODE))
     
     return embed
-

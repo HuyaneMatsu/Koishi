@@ -123,6 +123,7 @@ async def about(client, event):
             f'**<fg>{client_name} is green. <fr>{client_name} is red. '
             f'<bw>{client_name} is red but behind them is white!'
             f'<> Is {user_name} normal?**\n'
+            f'\n'
             f'Translates to: \n'
             f'```ansi\n'
             f'{RESET}{STYLE_FOREGROUND_GREEN}{client_name} is green. {STYLE_FOREGROUND_RED}{client_name} is red. '

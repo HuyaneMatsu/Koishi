@@ -29,8 +29,8 @@ async def build_initial_response_parts(client, event, target, choices, show_for_
     
     Returns
     -------
-    embed : ``Embed``
-        Embed to send.
+    embeds : `list` of ``Embed``
+        Embeds to send.
     components : `list` of ``Component``
         Components to send.
     file : `None`, `tuple` (`str`, `bytes`)
@@ -43,7 +43,7 @@ async def build_initial_response_parts(client, event, target, choices, show_for_
     
     entity, choice_type = choices[0]
     
-    embed = await choice_type.build_embed(entity, client, event, target_url, detailed)
+    embeds = await choice_type.build_embeds(entity, client, event, target_url, detailed)
     
     if show_for_invoking_user_only:
         button_reveal = BUTTON_SNIPE_REVEAL
@@ -87,7 +87,7 @@ async def build_initial_response_parts(client, event, target, choices, show_for_
     
     file = await choice_type.get_file(entity, client)
     
-    return embed, components, file
+    return embeds, components, file
 
 
 async def build_initial_response(client, event, target, choices, show_for_invoking_user_only, detailed):

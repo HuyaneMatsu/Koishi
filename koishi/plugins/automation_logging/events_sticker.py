@@ -6,7 +6,7 @@ from ...bots import SLASH_CLIENT
 
 from ..automation_core import AUTOMATION_CONFIGURATIONS, get_log_sticker_channel
 
-from .embed_builder_sticker import build_sticker_create_embed, build_sticker_delete_embed, build_sticker_edit_embed
+from .embed_builder_sticker import build_sticker_create_embeds, build_sticker_delete_embeds, build_sticker_update_embeds
 
 
 
@@ -42,13 +42,13 @@ async def sticker_create(client, sticker):
     
     await client.message_create(
         channel,
-        embed = build_sticker_create_embed(sticker),
+        embed = build_sticker_create_embeds(sticker),
         allowed_mentions = None,
     )
 
 
 @SLASH_CLIENT.events
-async def sticker_edit(client, sticker, old_attributes):
+async def sticker_update(client, sticker, old_attributes):
     """
     Handles a sticker edit event. If the sticker's guild has sticker logging setup, sends a message there.
     
@@ -69,7 +69,7 @@ async def sticker_edit(client, sticker, old_attributes):
     
     await client.message_create(
         channel,
-        embed = build_sticker_edit_embed(sticker, old_attributes),
+        embed = build_sticker_update_embeds(sticker, old_attributes),
         allowed_mentions = None,
     )
 
@@ -94,7 +94,7 @@ async def sticker_delete(client, sticker):
     
     await client.message_create(
         channel,
-        embed = build_sticker_delete_embed(sticker),
+        embed = build_sticker_delete_embeds(sticker),
         allowed_mentions = None,
     )
 

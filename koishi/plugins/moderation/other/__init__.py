@@ -39,10 +39,10 @@ from .kick import kick_command
 from .mute import mute_command
 from .regret_un_ban import regret_un_ban_command
 from .regret_un_kick import regret_un_kick_command
-from .top_list import (
-    CUSTOM_ID_CLOSE as TOP_LIST_CUSTOM_ID_CLOSE, CUSTOM_ID_PAGE_RP as TOP_LIST_CUSTOM_ID_PAGE_RP, top_list_command,
-    top_list_command_component_close, top_list_command_component_page
+from .top_list.constants import (
+    CUSTOM_ID_CLOSE as TOP_LIST_CUSTOM_ID_CLOSE, CUSTOM_ID_PAGE_RP as TOP_LIST_CUSTOM_ID_PAGE_RP
 )
+from .top_list.interactions import top_list_command, top_list_command_component_close, top_list_command_component_page
 from .un_ban import un_ban_command
 from .un_mute import un_mute_command
 

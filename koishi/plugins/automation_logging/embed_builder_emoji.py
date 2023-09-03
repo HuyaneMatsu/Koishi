@@ -2,7 +2,7 @@ __all__ = ()
 from hata import Embed
 
 from .embed_builder_shared import (
-    add_bool_field, add_context_fields_to, add_role_ids_field, add_string_field, maybe_add_modified_bool_field,
+    add_bool_field, add_expression_context_fields_to, add_role_ids_field, add_string_field, maybe_add_modified_bool_field,
     maybe_add_modified_role_ids_field, maybe_add_modified_string_field
 )
 
@@ -50,21 +50,21 @@ def build_emoji_create_embed(emoji):
     embed = Embed(f'Emoji created: {emoji.name} ({emoji.id})', url = emoji_url).add_thumbnail(emoji_url)
     
     add_emoji_fields_to(embed, emoji)
-    add_context_fields_to(embed, emoji)
+    add_expression_context_fields_to(embed, emoji)
     
     return embed
 
 
-def build_emoji_edit_embed(emoji, old_attributes):
+def build_emoji_update_embed(emoji, old_attributes):
     """
-    Builds an edited emoji embed.
+    Builds an updated emoji embed.
     
     Parameters
     ----------
     emoji : ``Emoji``
-        The edited emoji.
+        The updated emoji.
     old_attributes : `dict` of (`str`, `object`) items
-        The emoji's old attributes that have been edited.
+        The emoji's old attributes that have been updated.
     
     Returns
     -------
@@ -72,9 +72,9 @@ def build_emoji_edit_embed(emoji, old_attributes):
     """
     emoji_url = emoji.url
     
-    embed = Embed(f'Emoji edited: {emoji.name} ({emoji.id})', url = emoji_url).add_thumbnail(emoji_url)
+    embed = Embed(f'Emoji updated: {emoji.name} ({emoji.id})', url = emoji_url).add_thumbnail(emoji_url)
     
-    add_context_fields_to(embed, emoji)
+    add_expression_context_fields_to(embed, emoji)
     
     maybe_add_modified_string_field(embed, emoji, old_attributes, 'name', 'Name')
     maybe_add_modified_bool_field(embed, emoji, old_attributes, 'animated', 'Animated')
@@ -84,7 +84,6 @@ def build_emoji_edit_embed(emoji, old_attributes):
     maybe_add_modified_bool_field(embed, emoji, old_attributes, 'require_colons', 'Require colons')
     
     return embed
-
 
 
 def build_emoji_delete_embed(emoji):

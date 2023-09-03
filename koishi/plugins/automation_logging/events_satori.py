@@ -12,6 +12,7 @@ from ..automation_core import (
 )
 
 from .components_satori_auto_start import build_satori_auto_start_component_row
+from .embed_builder_guild_profile import build_guild_profile_update_embed
 from .embed_builder_satori import build_presence_update_embeds
 from .embed_builder_satori_start import build_satori_auto_start_embeds
 
@@ -381,3 +382,62 @@ async def create_initial_message(client, channel, user_id):
         
         await client.events.error(client, 'log.satori.create_initial_message', err)
         return
+
+
+@SLASH_CLIENT.events
+async def guild_user_update(client, guild, user, old_attributes):
+    """
+    Handles a user guild profile update event. If the user is watched sends a message to every watching channel.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    guild : ``Guild``
+        The guild where the user was updated at.
+    user : ``ClientUserBase``
+        The updated user.
+    old_attributes : `None`, `dict` of (`str` `object`) items
+        The user's guild profile's old attributes.
+    """
+    channels = get_watcher_channels_for(user.id)
+    if channels is None:
+        return
+    
+    if old_attributes is None:
+        return
+    
+    guild_profile = user.get_guild_profile_for(guild)
+    if guild_profile is None:
+        return
+    
+    embed = build_guild_profile_update_embed(guild_profile, old_attributes)
+    
+    for channel in channels:
+        if not channel.cached_permissions_for(client).can_send_messages:
+            continue
+        
+        try:
+            await client.message_create(
+                channel,
+                allowed_mentions = None,
+                embed = embed,
+            )
+        except (GeneratorExit, CancelledError):
+            raise
+        
+        except ConnectionError:
+            break
+        
+        except BaseException as err:
+            if isinstance(err, DiscordException) and err.code in (
+                ERROR_CODES.unknown_channel, # channel deleted
+                ERROR_CODES.missing_access, # client removed
+                ERROR_CODES.missing_permissions, # permissions changed
+            ):
+                continue
+            
+            await client.events.error(client, 'log.satori.user_presence_update', err)
+            continue

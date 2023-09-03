@@ -27,15 +27,15 @@ async def snipe_message_reveal(client, event):
     if message is None:
         return
     
-    embed = message.embed
-    if embed is None:
+    embeds = message.embeds
+    if embeds is None:
         return
     
     await client.interaction_component_acknowledge(event, wait = False)
     file = await get_message_attachment(client, message)
     await client.interaction_followup_message_create(
         event,
-        embed = embed,
+        embed = embeds,
         components = translate_components(event.message.iter_components(), REVEAL_DISABLE),
         file = file,
     )

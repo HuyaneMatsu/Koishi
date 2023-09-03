@@ -2,37 +2,13 @@ __all__ = ()
 
 from re import compile as re_compile, escape as re_escape
 
-from hata.ext.slash import InteractionResponse
-
 from ...bots import SLASH_CLIENT
 
-from .builders import build_components, build_content, process_entries
+from .builders import build_top_list_response
 from .constants import (
     CUSTOM_ID_CLOSE, CUSTOM_ID_PAGE_BASE, CUSTOM_ID_PAGE_NEXT_DISABLED, CUSTOM_ID_PAGE_PREVIOUS_DISABLED
 )
 from .queries import get_top_list_entries
-
-
-async def make_response(page_index):
-    """
-    Makes top list response.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    page_index : `int`
-        The page's index to make the response for.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
-    """
-    entries = await get_top_list_entries(page_index)
-    processed_entries = await process_entries(page_index, entries)
-    content = build_content(page_index, processed_entries)
-    components = build_components(page_index, len(entries))
-    return InteractionResponse(content = content, components = components)
 
 
 @SLASH_CLIENT.interactions(is_global = True)
@@ -59,7 +35,8 @@ async def top_list(
         page_index = page - 1
     
     yield
-    yield await make_response(page_index)
+    entries = await get_top_list_entries(page_index)
+    yield build_top_list_response(page_index, entries)
 
 
 @SLASH_CLIENT.interactions(custom_id = re_compile(f'{re_escape(CUSTOM_ID_PAGE_BASE)}(\d+)'))
@@ -81,7 +58,8 @@ async def top_list_page(page_index):
     page_index = int(page_index)
     
     yield
-    yield await make_response(page_index)
+    entries = await get_top_list_entries(page_index)
+    yield build_top_list_response(page_index, entries)
 
 
 
