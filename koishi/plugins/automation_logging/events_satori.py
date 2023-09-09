@@ -406,6 +406,11 @@ async def guild_user_update(client, guild, user, old_attributes):
     if channels is None:
         return
     
+    # We want to send messages only in channels in the current guild!
+    channels = [channel for channel in channels if channel.guild_id == guild.id]
+    if (not channels):
+        return
+    
     if old_attributes is None:
         return
     

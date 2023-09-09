@@ -1,3 +1,9 @@
+### 2023-09-09
+
+- Add **1** image to `/like` interaction.
+- Add new `/kon` interaction (with **41** images!!).
+- Fix `/automation log-satori` sent `guild_user_update` events to all guilds instead of just the current.
+
 ### 2023-09-03
 
 - `/ds play` discord lag checking had bad condition. :KoishiFail:

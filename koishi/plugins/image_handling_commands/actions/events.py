@@ -1,6 +1,6 @@
 __all__ = ()
 
-import re
+from re import M as re_multiline, U as re_unicode, compile as re_compile
 
 from hata import Client, DiscordException, ERROR_CODES, MessageType, USER_MENTION_RP
 
@@ -9,9 +9,9 @@ from ....bots import SLASH_CLIENT
 from .action import COOLDOWN_HANDLER
 from .actions import (
     ACTION_BITE, ACTION_BLUSH, ACTION_BULLY, ACTION_CRINGE, ACTION_CRY, ACTION_CUDDLE, ACTION_DANCE, ACTION_GLOMP,
-    ACTION_HANDHOLD, ACTION_HAPPY, ACTION_HIGHFIVE, ACTION_HUG, ACTION_KICK, ACTION_KILL, ACTION_KISS, ACTION_LICK,
-    ACTION_LIKE, ACTION_NOM, ACTION_PAT, ACTION_POCKY, ACTION_POKE, ACTION_SLAP, ACTION_SMILE, ACTION_SMUG, ACTION_WAVE,
-    ACTION_WINK, ACTION_YEET
+    ACTION_HANDHOLD, ACTION_HAPPY, ACTION_HIGHFIVE, ACTION_HUG, ACTION_KICK, ACTION_KILL, ACTION_KISS, ACTION_KON,
+    ACTION_LICK, ACTION_LIKE, ACTION_NOM, ACTION_PAT, ACTION_POCKY, ACTION_POKE, ACTION_SLAP, ACTION_SMILE, ACTION_SMUG,
+    ACTION_WAVE, ACTION_WINK, ACTION_YEET
 )
 
 
@@ -31,6 +31,7 @@ ACTIONS_BY_NAME = {
     'kick': ACTION_KICK,
     'kill': ACTION_KILL,
     'kiss': ACTION_KISS,
+    'kon': ACTION_KON,
     'lick': ACTION_LICK,
     'like': ACTION_LIKE,
     'nom': ACTION_NOM,
@@ -48,7 +49,7 @@ ACTIONS_BY_NAME = {
 
 MAX_ACTION_COMMAND_LENGTH = max(len(name) for name in ACTIONS_BY_NAME.keys())
 
-ACTION_CONTENT_RP = re.compile(f'> {USER_MENTION_RP.pattern} ', re.M | re.U)
+ACTION_CONTENT_RP = re_compile(f'> {USER_MENTION_RP.pattern} ', re_multiline | re_unicode)
 
 
 def could_respond_in_channel(client, channel):
@@ -303,4 +304,3 @@ async def message_create(client, message):
             ERROR_CODES.missing_access, # client removed
         ):
             raise
-

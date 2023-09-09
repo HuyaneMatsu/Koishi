@@ -624,7 +624,7 @@ KUDAMAKI_TSUKASA = TouhouCharacter(
     'Kudamaki Tsukasa',
     (
         '菅牧 典',
-        ' Tsukasa Kudamaki',
+        'Tsukasa Kudamaki',
         'Tsukasa',
     ),
 )

@@ -2,7 +2,7 @@ __all__ = ()
 
 from ...image_handling_core import ImageHandlerStatic, ImageHandlerWaifuPics
 
-from ..asset_listings import TOUHOU_ACTION_LIKE, TOUHOU_ACTION_POCKY_KISS, TOUHOU_ACTION_POCKY_KISS_SELF
+from ..asset_listings import TOUHOU_ACTION_KON, TOUHOU_ACTION_LIKE, TOUHOU_ACTION_POCKY_KISS, TOUHOU_ACTION_POCKY_KISS_SELF
 
 
 IMAGE_HANDLER_PAT = ImageHandlerWaifuPics('pat', False)
@@ -20,7 +20,7 @@ IMAGE_HANDLER_BLUSH = ImageHandlerWaifuPics('blush', False)
 IMAGE_HANDLER_SMILE = ImageHandlerWaifuPics('smile', False)
 IMAGE_HANDLER_WAVE = ImageHandlerWaifuPics('wave', False)
 IMAGE_HANDLER_HIGHFIVE = ImageHandlerWaifuPics('highfive', False)
-IMAGE_HANDLE_HANDHOLD = ImageHandlerWaifuPics('handhold', False)
+IMAGE_HANDLER_HANDHOLD = ImageHandlerWaifuPics('handhold', False)
 IMAGE_HANDLER_NOM = ImageHandlerWaifuPics('nom', False)
 IMAGE_HANDLER_BITE = ImageHandlerWaifuPics('bite', False)
 IMAGE_HANDLER_GLOMP = ImageHandlerWaifuPics('glomp', False)
@@ -31,7 +31,6 @@ IMAGE_HANDLER_DANCE = ImageHandlerWaifuPics('dance', False)
 IMAGE_HANDLER_CRINGE = ImageHandlerWaifuPics('cringe', False)
 IMAGE_HANDLER_KICK = ImageHandlerWaifuPics('kick', False)
 IMAGE_HANDLER_POCKY = ImageHandlerStatic(TOUHOU_ACTION_POCKY_KISS)
-
 IMAGE_HANDLER_POCKY_SELF = ImageHandlerStatic(TOUHOU_ACTION_POCKY_KISS_SELF)
 IMAGE_HANDLER_LIKE = ImageHandlerStatic(TOUHOU_ACTION_LIKE)
-
+IMAGE_HANDLER_KON = ImageHandlerStatic(TOUHOU_ACTION_KON)

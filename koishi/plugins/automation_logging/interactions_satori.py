@@ -220,7 +220,7 @@ async def user_kick_execute(client, event, user_id, *, reason = None):
     
     except BaseException as err:
         if isinstance(err, DiscordException) and err.code in (
-            ERROR_CODES.unknwon_user, # user deleted
+            ERROR_CODES.unknown_user, # user deleted
             ERROR_CODES.unknown_member, # user left
             ERROR_CODES.missing_access, # client removed
             ERROR_CODES.missing_permissions, # permissions changed
@@ -303,7 +303,7 @@ async def user_ban_execute(client, event, user_id, *, reason = None):
     
     except BaseException as err:
         if isinstance(err, DiscordException) and err.code in (
-            ERROR_CODES.unknwon_user, # user deleted
+            ERROR_CODES.unknown_user, # user deleted
             ERROR_CODES.missing_access, # client removed
             ERROR_CODES.missing_permissions, # permissions changed
         ):

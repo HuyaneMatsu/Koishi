@@ -39,13 +39,13 @@ else:
             CPU_MODEL = None
             
             try:
-                lscpu_output = subprocess.check_output('lscpu', shell=False)
+                lscpu_output = subprocess.check_output('lscpu', shell = False)
             except subprocess.CalledProcessError:
                 pass
             else:
                 for line in lscpu_output.splitlines():
                     if line.startswith(b'CPU max MHz:'):
-                        CPU_MAX_FREQUENCY = float(line[len(b'CPU max MHz:'):].strip())
+                        CPU_MAX_FREQUENCY = float(line[len(b'CPU max MHz:'):].strip().replace(b',', b'.'))
                         continue
                     
                     if line.startswith(b'Model name:'):
@@ -103,4 +103,4 @@ else:
             
             @property
             def cpu_percent_total(self):
-                return self.cpu_percent_with_max_frequency / psutil.cpu_count(logical=False)
+                return self.cpu_percent_with_max_frequency / psutil.cpu_count(logical = False)

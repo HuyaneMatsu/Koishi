@@ -6,7 +6,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `eiki-judged-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -17,7 +17,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `eirin-older-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -28,7 +28,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `futatsuiwa-older-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -39,7 +39,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `hisami-grape-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -50,7 +50,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `hisami-older-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -61,7 +61,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `junko-older-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -72,7 +72,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `junko-racist-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -83,7 +83,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `kogasa-umbrella-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -94,7 +94,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `koishi-happy-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -105,7 +105,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `nue-huge-surprises-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -114,9 +114,20 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ---
 
+### `rinnosuke-plain-0000`
+
+- Artist: *unknown*
+- Edit: *unknown*
+
+
+- Character: **Morichika Rinnosuke**
+- Source: **Touhou**
+
+---
+
 ### `okina-older-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -127,7 +138,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `ran-fluffy-tail-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -138,7 +149,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `rumia-older-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -149,7 +160,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `seiga-evil-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -160,7 +171,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `seiga-older-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -171,7 +182,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `tewi-older-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -180,7 +191,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `yukari-japanese-goblin-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -191,7 +202,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `yukari-older-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -202,7 +213,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `yukari-older-0001`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -213,7 +224,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `yukari-older-0002`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -224,7 +235,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `yukari-older-0003`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -235,7 +246,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `yukari-older-0004`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -246,7 +257,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `yukari-older-0005`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -257,7 +268,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `yukari-older-0006`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -268,7 +279,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `yukari-yuyuko-older-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -279,7 +290,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `yuuka-cbt-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -290,7 +301,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `yuuka-older-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -301,7 +312,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `yuyuko-older-0000`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 
@@ -312,7 +323,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `yuyuko-older-0001`
 
-- Artist:  *unknown*
+- Artist: *unknown*
 - Edit: *unknown*
 
 

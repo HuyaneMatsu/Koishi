@@ -3,8 +3,9 @@ __all__ = ('TOUHOU_ACTION_LIKE',)
 from ...image_handling_core import ImageDetail
 from ...touhou_core.character import freeze
 from ...touhou_core.characters import (
-    FUTATSUIWA_MAMIZOU, HOUJUU_NUE, INABA_TEWI, JUNKO, KAKU_SEIGA, KAZAMI_YUUKA, KOMEIJI_KOISHI, MATARA_OKINA, RUMIA,
-    SAIGYOUJI_YUYUKO, SHIKI_EIKI_YAMAXANADU, TATARA_KOGASA, YAGOKORO_EIRIN, YAKUMO_RAN, YAKUMO_YUKARI, YOMOTSU_HISAMI
+    FUTATSUIWA_MAMIZOU, HOUJUU_NUE, INABA_TEWI, JUNKO, KAKU_SEIGA, KAZAMI_YUUKA, KOMEIJI_KOISHI, MATARA_OKINA,
+    MORICHIKA_RINNOSUKE, RUMIA, SAIGYOUJI_YUYUKO, SHIKI_EIKI_YAMAXANADU, TATARA_KOGASA, YAGOKORO_EIRIN, YAKUMO_RAN,
+    YAKUMO_YUKARI, YOMOTSU_HISAMI
 )
 
 
@@ -52,6 +53,10 @@ TOUHOU_ACTION_LIKE = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1132645810635550830/nue-huge-surprises-0000.png',
         freeze(HOUJUU_NUE),
+    ),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1149730972707856464/rinnosuke-plain-0000.png',
+        freeze(MORICHIKA_RINNOSUKE),
     ),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1141454560917995611/okina-older-0000.png',
