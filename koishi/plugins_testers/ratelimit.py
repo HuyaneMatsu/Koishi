@@ -35,18 +35,22 @@ from hata.ext.slash.menus import Pagination
 MAIN_CLIENT: Client
 RATE_LIMIT_COMMANDS = eventlist(type_ = Command, category = 'RATE_LIMIT TESTS')
 
+
 def setup(lib):
     MAIN_CLIENT.command_processor.create_category('RATE_LIMIT TESTS', checks = [checks.owner_only()])
     MAIN_CLIENT.commands.extend(RATE_LIMIT_COMMANDS)
+
     
 def teardown(lib):
     MAIN_CLIENT.command_processor.delete_category('RATE_LIMIT TESTS')
+
 
 def parse_date_to_datetime(data):
     *date_tuple, tz = _parsedate_tz(data)
     if tz is None:
         return datetime(*date_tuple[:6])
     return datetime(*date_tuple[:6], tzinfo = timezone(timedelta(seconds = tz)))
+
 
 def parse_header_rate_limit(headers):
     delay1 = (
@@ -56,14 +60,15 @@ def parse_header_rate_limit(headers):
     delay2 = float(headers[RATE_LIMIT_RESET_AFTER])
     return (delay1 if delay1 < delay2 else delay2)
 
-async def bypass_request(client, method, url, data = None, params = None, reason = None, headers = None, decode = True,):
+
+async def bypass_request(client, method, url, data = None, params = None, reason = None, headers = None, decode = True):
     self = client.http
     if headers is None:
         headers = self.headers.copy()
     
     if CONTENT_TYPE not in headers and data and isinstance(data, (dict, list)):
         headers[CONTENT_TYPE] = 'application/json'
-        #converting data to json
+        # converting data to json
         data = to_json(data)
 
     if reason:
@@ -132,7 +137,7 @@ async def bypass_request(client, method, url, data = None, params = None, reason
             if status == 429:
                 retry_after = response_data['retry_after']
                 buffer.write(f'RATE LIMITED\nretry after : {retry_after}\n',)
-                await sleep(retry_after,self.loop)
+                await sleep(retry_after, self.loop)
                 continue
             
             elif status == 500 or status == 502:
@@ -143,12 +148,14 @@ async def bypass_request(client, method, url, data = None, params = None, reason
     
     return None
 
-class RLTCTX: #rate limit tester context manager
+
+# Rate limit tester context manager
+class RLTCTX:
     active_ctx = None
     
     __slots__ = ('task', 'client', 'channel', 'title',)
     
-    def __new__(cls,client,channel,title):
+    def __new__(cls, client, channel, title):
         thread = current_thread()
         if type(thread) is not EventThread:
             raise RuntimeError(f'{cls.__name__} can be created only at an {EventThread.__name__}')
@@ -157,11 +164,12 @@ class RLTCTX: #rate limit tester context manager
             raise RuntimeError(f'{cls.__name__} was created outside of a task')
             
         self = object.__new__(cls)
-        self.task=current_task
-        self.client=client
+        self.task = current_task
+        self.client = client
         self.channel = channel
-        self.title=title
+        self.title = title
         return self
+
 
     def __enter__(self):
         active_ctx = type(self).active_ctx
@@ -170,8 +178,9 @@ class RLTCTX: #rate limit tester context manager
         
         type(self).active_ctx = self
         return self
+
     
-    def __exit__(self,exc_type,exc_val,exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         type(self).active_ctx = None
         if exc_type is CancelledError:
             return True
@@ -182,6 +191,7 @@ class RLTCTX: #rate limit tester context manager
         
         Task(KOKORO, self._render_exit_exc(exc_val, exc_tb))
         return True
+    
     
     async def _render_exit_result(self):
         unit_result = []
@@ -197,7 +207,7 @@ class RLTCTX: #rate limit tester context manager
             unit_result.append('\n')
             
             for date, buffer in unit.buffer:
-                date=date.__format__('%Y.%m.%d-%H:%M:%S-%f')
+                date = date.__format__('%Y.%m.%d-%H:%M:%S-%f')
                 unit_result.append(date)
                 unit_result.append(':\n')
                 
@@ -231,7 +241,7 @@ class RLTCTX: #rate limit tester context manager
             
             page_content_length += local_length
             if page_content_length < 1996:
-                if str_=='```':
+                if str_ == '```':
                     in_code_block ^= 1
                 contents.append(str_)
                 continue
@@ -284,19 +294,20 @@ class RLTCTX: #rate limit tester context manager
             pages.append(Embed(self.title,).add_footer('Page 1/1'))
         
         await Pagination(self.client, self.channel, pages)
-        
-    async def _render_exit_exc(self,exception,tb):
+    
+    
+    async def _render_exit_exc(self, exception, traceback):
         frames = []
         while True:
-            if tb is None:
+            if traceback is None:
                 break
-            frame = TracebackFrameProxy(tb)
+            frame = TracebackFrameProxy(traceback)
             frames.append(frame)
-            tb = tb.tb_next
+            traceback = traceback.tb_next
         
         extend = []
         extend.append('```Traceback (most recent call last):\n')
-        await KOKORO.run_in_executor(alchemy_incendiary(render_frames_into, (frames,), {'extend':extend}))
+        await KOKORO.run_in_executor(alchemy_incendiary(render_frames_into, (frames,), {'extend': extend}))
         extend.append(repr(exception))
         extend.append('\n```')
         pages = []
@@ -339,21 +350,26 @@ class RLTCTX: #rate limit tester context manager
         
         await Pagination(self.client, self.channel, pages)
     
-    def write(self,content):
+    
+    def write(self, content):
         RLTPrinterBuffer.buffers.append(content)
     
-    async def send(self,description):
+    
+    async def send(self, description):
         await Pagination(self.client, self.channel, [Embed(self.title, description).add_footer('Page 1/1')])
         raise CancelledError()
-            
+
+
 class RLTPrinterUnit:
-    __slots__ = ('task','buffer','start_new_block',)
+    __slots__ = ('task', 'buffer', 'start_new_block',)
+    
     def __init__(self, task):
         self.task = task
         self.buffer = []
         self.start_new_block = True
     
-    def write(self,content):
+    
+    def write(self, content):
         if self.start_new_block:
             buffer = []
             self.buffer.append((datetime.utcnow(), buffer),)
@@ -362,7 +378,8 @@ class RLTPrinterUnit:
             buffer = self.buffer[-1][1]
         
         buffer.append(content)
-    
+
+
 class RLTPrinterBuffer:
     buffers = []
     __slots__ = ('buffer',)
@@ -371,6 +388,7 @@ class RLTPrinterBuffer:
         thread = current_thread()
         if type(thread) is not EventThread:
             raise RuntimeError(f'{self.__name__}.__enter__ can be used only at an {EventThread.__name__}')
+        
         current_task = thread.current_task
         if current_task is None:
             raise RuntimeError(f'{self.__name__}.__enter__ was used outside of a task')
@@ -387,56 +405,74 @@ class RLTPrinterBuffer:
         
         self.buffer = buffer
     
+    
     def __enter__(self):
         return self.buffer
+    
     
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.buffer.start_new_block = True
         return False
-        
-        
-async def reaction_add(client, message, emoji,):
+
+
+async def reaction_add(client, message, emoji):
     channel_id = message.channel.id
     message_id = message.id
     reaction = emoji.as_reaction
-    return await bypass_request(client,METHOD_PUT,
+    return await bypass_request(
+        client,
+        METHOD_PUT,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/@me',
     )
-        
-async def reaction_delete(client,message,emoji,user,):
+
+
+async def reaction_delete(client , message , emoji , user):
     channel_id = message.channel.id
     message_id = message.id
-    reaction=emoji.as_reaction
+    reaction = emoji.as_reaction
     user_id = user.id
-    return await bypass_request(client,METHOD_DELETE,
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/{user_id}',
-        )
+    )
 
-async def reaction_delete_own(client,message,emoji,):
+
+async def reaction_delete_own(client, message, emoji):
     channel_id = message.channel.id
     message_id = message.id
-    reaction=emoji.as_reaction
-    return await bypass_request(client,METHOD_DELETE,
+    reaction = emoji.as_reaction
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/@me',
-        )
+    )
 
-async def reaction_clear(client,message,):
+
+async def reaction_clear(client, message):
     channel_id = message.channel.id
     message_id = message.id
-    return await bypass_request(client,METHOD_DELETE,
-        f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions',)
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
+        f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions',
+    )
 
-async def reaction_user_get_chunk(client,message,emoji,):
+async def reaction_user_get_chunk(client, message, emoji):
     if message.reactions is None:
         return []
     channel_id = message.channel.id
     message_id = message.id
-    reaction=emoji.as_reaction
-    return await bypass_request(client,METHOD_GET,
+    reaction = emoji.as_reaction
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions/{reaction}',
-        params={'limit':100},)
+        params = {'limit': 100},
+    )
 
-async def message_create(client, channel, content=None, embed = None,):
+
+async def message_create(client, channel, content = None, embed = None):
     data = {}
     if content is not None and content:
         data['content'] = content
@@ -444,94 +480,135 @@ async def message_create(client, channel, content=None, embed = None,):
         data['embed'] = embed.to_data()
     channel_id = channel.id
     
-    data = await bypass_request(client,METHOD_POST,
+    data = await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/messages',
-        data,)
+        data,
+    )
     
     return channel._create_new_message(data)
 
-async def message_delete(client,message,):
+
+async def message_delete(client, message):
     channel_id = message.channel.id
     message_id = message.id
-    return await bypass_request(client,METHOD_DELETE,
-        f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}',)
-
-async def message_delete_multiple(client,messages,):
-    if len(messages)==0:
-        return
-    if len(messages)==1:
-        return message_delete(client,messages[0])
-    data={'messages':[message.id for message in messages]}
-    channel_id = messages[0].channel.id
-    return await bypass_request(client,METHOD_POST,
-        f'{API_ENDPOINT}/channels/{channel_id}/messages/bulk-delete',
-        data,)
-
-async def message_edit(client,message,content=None,embed = None,):
-    data={}
-    if content is not None:
-        data['content']=content
-    if embed is not None:
-        data['embed']=embed.to_data()
-    channel_id = message.channel.id
-    message_id = message.id
-    return await bypass_request(client,METHOD_PATCH,
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}',
-        data,)
+    )
 
-async def message_pin(client,message,):
+
+async def message_delete_multiple(client, messages):
+    if len(messages) == 0:
+        return
+    
+    if len(messages) == 1:
+        return message_delete(client, messages[0])
+    
+    data = {'messages':[message.id for message in messages]}
+    channel_id = messages[0].channel.id
+    return await bypass_request(
+        client,
+        METHOD_POST,
+        f'{API_ENDPOINT}/channels/{channel_id}/messages/bulk-delete',
+        data,
+    )
+
+
+async def message_edit(client, message, content = None, embed = None):
+    data = {}
+    if content is not None:
+        data['content'] = content
+    if embed is not None:
+        data['embed'] = embed.to_data()
+    
     channel_id = message.channel.id
     message_id = message.id
-    return await bypass_request(client,METHOD_PUT,
-        f'{API_ENDPOINT}/channels/{channel_id}/pins/{message_id}',
-        )
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
+        f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}',
+        data,
+    )
 
-async def message_unpin(client,message,):
+
+async def message_pin(client, message):
     channel_id = message.channel.id
     message_id = message.id
-    return await bypass_request(client,METHOD_DELETE,
+    return await bypass_request(
+        client,
+        METHOD_PUT,
         f'{API_ENDPOINT}/channels/{channel_id}/pins/{message_id}',
-        )
+    )
 
-async def message_pinneds(client,channel,):
+
+async def message_unpin(client, message):
+    channel_id = message.channel.id
+    message_id = message.id
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
+        f'{API_ENDPOINT}/channels/{channel_id}/pins/{message_id}',
+    )
+
+
+async def message_pinneds(client, channel):
     channel_id = channel.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/pins',
-        )
+    )
 
-async def message_get_chunk(client,channel,):
+
+async def message_get_chunk(client, channel):
     channel_id = channel.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/messages',
         params = {'limit': 1},)
 
-async def message_get(client, channel, message_id,):
-    channel_id = channel.id
-    return await bypass_request(client,METHOD_GET,
-        f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}',
-        )
 
-async def download_attachment(client,attachment,):
+async def message_get(client, channel, message_id):
+    channel_id = channel.id
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}',
+    )
+
+
+async def download_attachment(client, attachment):
     if attachment.proxy_url.startswith('https://cdn.discordapp.com/'):
         url = attachment.proxy_url
     else:
         url = attachment.url
-    return await bypass_request(client,METHOD_GET,url,headers=IgnoreCaseMultiValueDictionary(),decode=False,
-        )
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        url,
+        headers = IgnoreCaseMultiValueDictionary(),
+        decode = False,
+    )
 
 
-async def typing(client,channel,):
+async def typing(client, channel):
     channel_id = channel.id
-    return await bypass_request(client,METHOD_POST,
+    return await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/typing',
-        )
+    )
 
-async def client_edit(client, name = '', avatar=...,):
-    data={}
+async def client_edit(client, name = '', avatar = ...):
+    data = {}
     if name:
-        if not (1<len(name)<33):
+        if not (1 < len(name) < 33):
             raise ValueError(f'The length of the name can be between 2-32, got {len(name)}')
-        data['username']=name
+        data['username'] = name
     
     if (avatar is not ...):
         if avatar is None:
@@ -541,185 +618,269 @@ async def client_edit(client, name = '', avatar=...,):
     
         data['avatar'] = avatar_data
     
-    return await bypass_request(client, METHOD_PATCH,
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/users/@me',
         data,)
 
-async def client_connection_get_all(client,):
-    return await bypass_request(client,METHOD_GET,
+async def client_connection_get_all(client):
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/users/@me/connections',
-        )
+    )
 
-async def client_guild_profile_nick_edit(client, guild, nick,):
+
+async def client_guild_profile_nick_edit(client, guild, nick):
     guild_id = guild.id
-    return await bypass_request(client, METHOD_PATCH,
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/@me/nick',
-        {'nick':nick},)
+        {'nick': nick},
+    )
 
-async def client_guild_profile_edit(client, guild, nick,):
+
+async def client_guild_profile_edit(client, guild, nick):
     guild_id = guild.id
-    return await bypass_request(client, METHOD_PATCH,
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/@me',
-        {'nick':nick},)
+        {'nick': nick},
+    )
 
-async def client_gateway_bot(client,):
-    return await bypass_request(client,METHOD_GET,
+
+async def client_gateway_bot(client):
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/gateway/bot',
-        )
+    )
 
-async def application_get_own(client,):
-    return await bypass_request(client,METHOD_GET,
+
+async def application_get_own(client):
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/oauth2/applications/@me',
-        )
+    )
 
-async def client_login_static(client,):
-    return await bypass_request(client,METHOD_GET,
+
+async def client_login_static(client):
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/users/@me',
-        )
+    )
 
-async def client_logout(client,):
-    return await bypass_request(client,METHOD_POST,
+
+async def client_logout(client):
+    return await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/auth/logout',
-        )
+    )
 
 
-async def permission_overwrite_create(client,channel,target,allow,deny,):
+async def permission_overwrite_create(client, channel, target, allow, deny):
     if type(target) is Role:
-        type_='role'
-    elif type(target) in (User,Client,Oauth2User):
-        type_='member'
+        type_ = 'role'
+    elif type(target) in (User, Client, Oauth2User):
+        type_ = 'member'
     else:
         raise TypeError(f'Target expected to be Role or User type, got {type(target)!r}')
+    
     data = {
-        'allow':allow,
-        'deny':deny,
-        'type':type_,
+        'allow': allow,
+        'deny': deny,
+        'type': type_,
     }
+    
     channel_id = channel.id
     overwrite_id = target.id
-    await bypass_request(client,METHOD_PUT,
+    await bypass_request(
+        client,
+        METHOD_PUT,
         f'{API_ENDPOINT}/channels/{channel_id}/permissions/{overwrite_id}',
-        data,)
+        data,
+    )
 
 
-async def permission_overwrite_delete(client,channel,overwrite,):
+async def permission_overwrite_delete(client, channel, overwrite):
     channel_id = channel.id
     overwrite_id = overwrite.target.id
-    return await bypass_request(client,METHOD_DELETE,
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/permissions/{overwrite_id}',
-        )
+    )
 
-async def channel_edit(client,channel,name = '',topic='',nsfw = None,slowmode=None,user_limit=None,bitrate=None,type_=128,):
-    data={}
+
+async def channel_edit(
+    client, channel, name = '', topic = '', nsfw = None, slowmode = None, user_limit = None, bitrate = None, type_ = 128
+):
+    data = {}
     value = channel.type
     if name:
-        if not 1<len(name)<101:
+        if not 1 < len(name) < 101:
             raise ValueError(f'Invalid nam length {len(name)}, should be 2-100')
-        data['name']=name
+        data['name'] = name
     
     if value in (0,5):
         if topic:
-            if len(topic)>1024:
+            if len(topic) > 1024:
                 raise ValueError(f'Invalid topic length {len(topic)}, should be 0-1024')
-            data['topic']=topic
+            data['topic'] = topic
         
-        if type_<128:
-            if type_ not in (0,5):
+        if type_ < 128:
+            if type_ not in (0, 5):
                 raise ValueError('You can switch channel type only between only Text channel (0) and Guild news channel (5)')
-            if type_!=value:
-                data['type']=type_
+            if type_ != value:
+                data['type'] = type_
         
     if value == 0:
         if nsfw is not None:
-            data['nsfw']=nsfw
+            data['nsfw'] = nsfw
             
         if slowmode is not None:
-            if slowmode<0 or slowmode>120:
+            if slowmode < 0 or slowmode > 120:
                 raise ValueError(f'Invalid slowmode {slowmode}, should be 0-120')
-            data['rate_limit_per_user']=slowmode
+            data['rate_limit_per_user'] = slowmode
 
     elif value == 2:
-        if bitrate<8000 or bitrate>(96000,128000)['VIP' in channel.guild.feautres]:
+        if bitrate < 8000 or bitrate > (96000, 128000)['VIP' in channel.guild.feautres]:
             raise ValueError(f'Invalid bitrate {bitrate!r}, should be 8000-96000 (128000 for vip)')
-        data['bitrate']=bitrate
+        data['bitrate'] = bitrate
         
         if user_limit:
-            if user_limit<1 or user_limit>99:
+            if user_limit < 1 or user_limit > 99:
                 raise ValueError(f'Invalid user_limit {user_limit!r}, should be 0 for unlimited or 1-99')
-            data['user_limit']=user_limit
+            data['user_limit'] = user_limit
+
 
     channel_id = channel.id
-    return await bypass_request(client,METHOD_PATCH,
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/channels/{channel_id}',
-        data,)
+        data,
+    )
 
-async def channel_delete(client,channel,):
+
+async def channel_edit_status(client, channel, status):
+    data = {'status': status}
     channel_id = channel.id
-    return await bypass_request(client,METHOD_DELETE,
-        f'{API_ENDPOINT}/channels/{channel_id}',
-        )
+    return await bypass_request(
+        client,
+        METHOD_PUT,
+        f'{API_ENDPOINT}/channels/{channel_id}/voice-status',
+        data,
+    )
 
-async def oauth2_token(client,):
+
+async def channel_delete(client, channel):
+    channel_id = channel.id
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
+        f'{API_ENDPOINT}/channels/{channel_id}',
+    )
+
+
+async def oauth2_token(client):
     data = {
         'grant_type'    : 'client_credentials',
         'scope'         : ' connections',
-            }
+    }
     
     headers = IgnoreCaseMultiValueDictionary()
     headers[AUTHORIZATION] = BasicAuth(str(client.id), client.secret).encode()
-    headers[CONTENT_TYPE]='application/x-www-form-urlencoded'
+    headers[CONTENT_TYPE] = 'application/x-www-form-urlencoded'
                 
-    return await bypass_request(client,METHOD_POST,
+    return await bypass_request(
+        client,
+        METHOD_POST,
         'https://discordapp.com/api/oauth2/token',
-        data,headers=headers,)
+        data,
+        headers = headers,
+    )
 
-async def invite_create(client,channel,):
+
+async def invite_create(client, channel):
     data = {
         'max_age'   : 60,
         'max_uses'  : 1,
         'temporary' : False,
         'unique'    : True,
-            }
+    }
     channel_id = channel.id
-    return await bypass_request(client,METHOD_POST,
+    return await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/invites',
-        data,)
+        data,
+    )
 
-async def invite_get_channel(client,channel,):
+
+async def invite_get_channel(client, channel):
     channel_id = channel.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/invites',
-        )
+    )
 
-async def webhook_create(client,channel,name,avatar=b'',):
-    data={'name':name}
+
+async def webhook_create(client, channel, name, avatar = b''):
+    data = {'name': name}
     if avatar:            
-        data['avatar']=image_to_base64(avatar)
+        data['avatar'] = image_to_base64(avatar)
             
     channel_id = channel.id
-    data = await bypass_request(client,METHOD_POST,
+    data = await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/webhooks',
-        data,)
+        data,
+    )
     return Webhook.from_data(data)
 
-async def webhook_get_all_channel(client,channel,):
-    channel_id = channel.id
-    return await bypass_request(client,METHOD_GET,
-        f'{API_ENDPOINT}/channels/{channel_id}/webhooks',
-        )
 
-async def guild_create(client,name,icon=None,avatar=b'',
-        region=VoiceRegion.eu_central,
-        verification_level=VerificationLevel.medium,
-        message_notification_level=MessageNotificationLevel.only_mentions,
-        content_filter_level=ContentFilterLevel.disabled,
-        roles=[],channels=[],):
+async def webhook_get_all_channel(client, channel):
+    channel_id = channel.id
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/webhooks',
+    )
+
+
+async def guild_create(
+    client,
+    name,
+    icon = None,
+    avatar = b'',
+    region = VoiceRegion.eu_central,
+    verification_level = VerificationLevel.medium,
+    message_notification_level = MessageNotificationLevel.only_mentions,
+    content_filter_level = ContentFilterLevel.disabled,
+    roles = None,
+    channels = None
+):
         
     if client.bot and len(client.guilds)>9:
         raise ValueError('Bots cannot create a new server if they have more than 10.')
 
-    if not (1<len(name)<101):
+    if not (1 < len(name) < 101):
         raise ValueError(f'Guild\'s name\'s length can be between 2-100, got {len(name)}')
+    
+    if roles is None:
+        roles = []
+    
+    if channels is None:
+        channels = []
     
     data = {
         'name'                          : name,
@@ -732,68 +893,100 @@ async def guild_create(client,name,icon=None,avatar=b'',
         'channels'                      : channels,
     }
 
-    data = await bypass_request(client,METHOD_POST,
+    data = await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/guilds',
-        data,)
-    #we can create only partial, because the guild data is not completed usually
+        data,
+    )
+    # We can create only partial, because the guild data is not completed usually.
     return create_partial_guild_from_data(data)
 
-async def guild_get(client, guild_id,):
-    return await bypass_request(client,METHOD_GET,
-        f'{API_ENDPOINT}/guilds/{guild_id}',
-        )
 
-async def guild_delete(client, guild,):
+async def guild_get(client, guild_id):
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}',
+    )
+
+
+async def guild_delete(client, guild):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_DELETE,
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}',
-        )
+    )
 
-async def guild_edit(client, guild, afk_channel = ...): #keep it short
+
+async def guild_edit(client, guild, afk_channel = ...): # Keep it short.
     data = {}
     
     if (afk_channel is not ...):
         data['afk_channel'] = None if afk_channel is None else afk_channel.id
     
     guild_id = guild.id
-    return await bypass_request(client,METHOD_PATCH,
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}',
-        data,)
+        data,
+    )
 
-async def audit_log_get_chunk(client, guild,):
-    data={'limit':100}
+
+async def audit_log_get_chunk(client, guild):
+    data = {'limit':100}
     guild_id = guild.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/audit-logs',
-        params=data,)
+        params = data,
+    )
 
-async def guild_ban_get_all(client, guild,):
+
+async def guild_ban_get_all(client, guild):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans',
-        )
+    )
 
-async def guild_ban_add(client, guild,user_id,):
-    data={'delete_message_seconds':0}
+
+async def guild_ban_add(client, guild, user_id):
+    data = {'delete_message_seconds': 0}
     guild_id = guild.id
-    return await bypass_request(client,METHOD_PUT,
+    return await bypass_request(
+        client,
+        METHOD_PUT,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',
-        params=data,)
+        params = data,
+    )
 
-async def guild_ban_delete(client, guild,user_id,):
+
+async def guild_ban_delete(client, guild, user_id):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_DELETE,
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',
-        )
+    )
 
-async def guild_ban_get(client, guild,user_id,):
+
+async def guild_ban_get(client, guild, user_id):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',
-        )
+    )
 
-async def channel_move(client, channel, visual_position, category=..., parent= ..., lock_permissions = False,
-        reason = None):
+
+async def channel_move(
+    client, channel, visual_position, category = ..., parent = ..., lock_permissions = False, reason = None,
+):
     
     if parent is not ...:
         category = parent
@@ -818,329 +1011,329 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
     if type(channel) is type(category):
         raise ValueError('Cant move category under category!')
     
-    if channel.parent is category and category.channels.index(channel)==visual_position:
-        return #saved 1 request
+    if channel.parent is category and category.channels.index(channel) == visual_position:
+        return # saved 1 request
     
-    #making sure
-    visual_position=int(visual_position)
+    # making sure
+    visual_position = int(visual_position)
     
-    #quality python code incoming :ok_hand:
-    ordered=[]
-    indexes=[0,0,0,0,0,0,0] #for the 7 channel type (type 1 and 3 wont be used)
+    # quality python code incoming :ok_hand:
+    ordered = []
+    indexes = [0, 0, 0, 0, 0, 0, 0] # for the 7 channel type (type 1 and 3 wont be used) # There are more now, lol
 
-    #loop preparations
-    outer_channels=guild.channels
-    index_0=0
-    limit_0=len(outer_channels)
-    #inner loop preparations
-    index_1=0
-    #loop start
+    # loop preparations
+    outer_channels = guild.channels
+    index_0 = 0
+    limit_0 = len(outer_channels)
+    # inner loop preparations
+    index_1 = 0
+    # loop start
     while True:
-        if index_0==limit_0:
+        if index_0 == limit_0:
             break
-        channel_=outer_channels[index_0]
-        #loop block start
+        channel_ = outer_channels[index_0]
+        # loop block start
         
-        type_=channel_.type
-        type_index=indexes[type_]
-        indexes[type_]=type_index + 1
+        type_ = channel_.type
+        type_index = indexes[type_]
+        indexes[type_] = type_index + 1
         
-        ordered.append((index_0,index_1,type_index,channel_),)
+        ordered.append((index_0, index_1, type_index, channel_),)
         
-        if type_==4:
-            #reset type_indexes
-            indexes[0]=indexes[2]=indexes[5]=indexes[6]=0
-            #loop preparations
-            inner_channels=channel_.channels
-            limit_1=len(inner_channels)
-            #loop start
+        if type_ == 4:
+            # reset type_indexes
+            indexes[0] = indexes[2] = indexes[5] = indexes[6] = 0
+            # loop preparations
+            inner_channels = channel_.channels
+            limit_1 = len(inner_channels)
+            # loop start
             while True:
-                if index_1==limit_1:
+                if index_1 == limit_1:
                     break
-                channel_=inner_channels[index_1]
-                #loop block start
+                channel_ = inner_channels[index_1]
+                # loop block start
                 
-                type_=channel_.type
-                type_index=indexes[type_]
-                indexes[type_]=type_index + 1
+                type_ = channel_.type
+                type_index = indexes[type_]
+                indexes[type_] = type_index + 1
                 
-                ordered.append((index_0,index_1,type_index,channel_),)
+                ordered.append((index_0, index_1, type_index, channel_),)
                 
-                #loop block end
-                index_1=index_1 + 1
-            #reseting inner
-            index_1=0
-            #loop ended
+                # loop block end
+                index_1 = index_1 + 1
+            # resetting inner
+            index_1 = 0
+            # loop ended
         
-        #loop block end
-        index_0=index_0 + 1
-    #loop ended
+        # loop block end
+        index_0 = index_0 + 1
+    # loop ended
     
-    #prepare loop
-    index_0=0
-    limit_0=len(ordered)
-    #loop start
+    # prepare loop
+    index_0 = 0
+    limit_0 = len(ordered)
+    # loop start
     while True:
-        if index_0==limit_0:
+        if index_0 == limit_0:
             break
-        info_line=ordered[index_0]
-        #loop block start
+        info_line = ordered[index_0]
+        # loop block start
         
         if info_line[3] is channel:
-            original_position=index_0
+            original_position = index_0
             break
 
-        #loop block end
-        index_0=index_0 + 1
-    #loop ended
+        # loop block end
+        index_0 = index_0 + 1
+    # loop ended
 
-    restricted_positions=[]
+    restricted_positions = []
     
-    index_0=0
-    limit_0=len(ordered)
-    last_index=-1
+    index_0 = 0
+    limit_0 = len(ordered)
+    last_index = -1
     if type(category) is Guild:
-        #loop start
+        # loop start
         while True:
-            if index_0==limit_0:
+            if index_0 == limit_0:
                 break
-            info_line=ordered[index_0]
-            #loop block start
+            info_line = ordered[index_0]
+            # loop block start
             
             if info_line[0]>last_index:
-                last_index+=1
+                last_index += 1
                 restricted_positions.append(index_0)
             
-            #loop block end
-            index_0=index_0 + 1
-        #loop ended
+            # loop block end
+            index_0 = index_0 + 1
+        # loop ended
     else:
-        #loop start
+        # loop start
         while True:
-            if index_0==limit_0:
+            if index_0 == limit_0:
                 break
-            info_line=ordered[index_0]
-            category_index=index_0 #we might need it
-            #loop block start
+            info_line = ordered[index_0]
+            category_index = index_0 # we might need it
+            # loop block start
             if info_line[3] is category:
-                index_0=index_0 + 1
-                #loop preapre
-                #loop start
+                index_0 = index_0 + 1
+                # loop prepare
+                # loop start
                 while True:
-                    if index_0==limit_0:
+                    if index_0 == limit_0:
                         break
-                    info_line=ordered[index_0]
-                    #loop block start
+                    info_line = ordered[index_0]
+                    # loop block start
 
-                    if info_line[3].type==4:
+                    if info_line[3].type == 4:
                         break
                     restricted_positions.append(index_0)
                     
-                    #loop block end
-                    index_0=index_0 + 1
-                #loop ended
+                    # loop block end
+                    index_0 = index_0 + 1
+                # loop ended
                 break
             
-            #loop block end
-            index_0=index_0 + 1
-        #loop ended
+            # loop block end
+            index_0 = index_0 + 1
+        # loop ended
         
-    index_0=(4,2,0).index(channel.order_group)
-    before=(4,2,0)[index_0:]
-    after =(4,2,0)[:index_0 + 1]
+    index_0 = (4, 2, 0).index(channel.order_group)
+    before = (4, 2, 0)[index_0:]
+    after = (4, 2, 0)[:index_0 + 1]
 
-    possible_indexes=[]
+    possible_indexes = []
     if restricted_positions:
-        #loop prepare
-        index_0=0
-        limit_0=len(restricted_positions) - 1
-        info_line=ordered[restricted_positions[index_0]]
-        #loop at 0 block start
+        # loop prepare
+        index_0 = 0
+        limit_0 = len(restricted_positions) - 1
+        info_line = ordered[restricted_positions[index_0]]
+        # loop at 0 block start
         
         if info_line[3].order_group in after:
-            possible_indexes.append((0,restricted_positions[index_0],),)
+            possible_indexes.append((0, restricted_positions[index_0],),)
             
-        #loop at 0 block ended
+        # loop at 0 block ended
         while True:
-            if index_0==limit_0:
+            if index_0 == limit_0:
                 break
-            info_line=ordered[restricted_positions[index_0]]
-            #next step mixin
-            index_0=index_0 + 1
-            info_line_2=ordered[restricted_positions[index_0]]
-            #loop block start
+            info_line = ordered[restricted_positions[index_0]]
+            # next step mixin
+            index_0 = index_0 + 1
+            info_line_2 = ordered[restricted_positions[index_0]]
+            # loop block start
 
             if info_line[3].order_group in before and info_line_2[3].order_group in after:
-                possible_indexes.append((index_0,restricted_positions[index_0],),)
+                possible_indexes.append((index_0, restricted_positions[index_0],),)
 
-            #loop block end
+            # loop block end
         if limit_0:
-            info_line=info_line_2
-        #loop at -1 block start
+            info_line = info_line_2
+        # loop at -1 block start
         
         if info_line[3].order_group in before:
-            possible_indexes.append((index_0 + 1,restricted_positions[index_0]+1,),)
+            possible_indexes.append((index_0 + 1, restricted_positions[index_0]+1,),)
 
-        #loop at -1 block ended
-        #loop ended
+        # loop at -1 block ended
+        # loop ended
     else:
-        #empty category
-        possible_indexes.append((0,category_index + 1,),)
+        # empty category
+        possible_indexes.append((0, category_index + 1,),)
         
     #GOTO start
     while True:
         #GOTO block start
         
-        #loop prepare
-        index_0=0
-        limit_0=len(possible_indexes)
-        info_line=possible_indexes[index_0]
+        # loop prepare
+        index_0 = 0
+        limit_0 = len(possible_indexes)
+        info_line = possible_indexes[index_0]
         
-        #loop at 0 block start
+        # loop at 0 block start
         if info_line[0]>visual_position:
-            result_position=info_line[1]
+            result_position = info_line[1]
             
             #GOTO end
             break
             #GOTO ended
         
-        #loop at 0 block ended
+        # loop at 0 block ended
         
-        #setup GOTO from loop start
-        end_goto=False
-        #setup GOTO from loop ended
+        # setup GOTO from loop start
+        end_goto = False
+        # setup GOTO from loop ended
         
-        index_0=index_0 + 1
+        index_0 = index_0 + 1
         while True:
-            if index_0==limit_0:
+            if index_0 == limit_0:
                 break
-            info_line=possible_indexes[index_0]
-            #loop block start
+            info_line = possible_indexes[index_0]
+            # loop block start
 
-            if info_line[0]==visual_position:
-                result_position=info_line[1]
+            if info_line[0] == visual_position:
+                result_position = info_line[1]
                 
                 #GOTO end inner 1
-                end_goto=True
+                end_goto = True
                 break
                 #GOTO ended inner 1
 
-            #loop block end
-            index_0=index_0 + 1
-        #loop ended
+            # loop block end
+            index_0 = index_0 + 1
+        # loop ended
 
         #GOTO end
         if end_goto:
             break
-        #GOTO ended
+        # GOTO ended
 
-        result_position=info_line[1]
+        result_position = info_line[1]
 
-        #GOTO block ended
+        # GOTO block ended
         break
-    #GOTO ended
+    # GOTO ended
     
-    ordered.insert(result_position,ordered[original_position])
-    higher_flag=(result_position<original_position)
+    ordered.insert(result_position, ordered[original_position])
+    higher_flag = (result_position<original_position)
     if higher_flag:
-        original_position=original_position + 1
+        original_position = original_position + 1
     else:
-        result_position=result_position - 1
+        result_position = result_position - 1
     del ordered[original_position]
     
-    if channel.type==4:
-        channels_to_move=[]
+    if channel.type == 4:
+        channels_to_move = []
 
-        #loop prepare
-        index_0=original_position
-        limit_0=len(ordered)
-        #loop start
+        # loop prepare
+        index_0 = original_position
+        limit_0 = len(ordered)
+        # loop start
         while True:
-            if index_0==limit_0:
+            if index_0 == limit_0:
                 break
-            info_line=ordered[index_0]
-            #loop block start
+            info_line = ordered[index_0]
+            # loop block start
 
-            if info_line[3].type==4:
+            if info_line[3].type == 4:
                 break
             channels_to_move.append(info_line)
             
-            #loop block end
-            index_0=index_0 + 1
-        #loop ended
+            # loop block end
+            index_0 = index_0 + 1
+        # loop ended
 
-        insert_to=result_position + 1
+        insert_to = result_position + 1
         
-        #loop prepare
-        index_0=len(channels_to_move)
-        limit_0=0
-        #loop start
+        # loop prepare
+        index_0 = len(channels_to_move)
+        limit_0 = 0
+        # loop start
         while True:
-            index_0=index_0 - 1
-            info_line=channels_to_move[index_0]
-            #loop block start
+            index_0 = index_0 - 1
+            info_line = channels_to_move[index_0]
+            # loop block start
             
-            ordered.insert(insert_to,info_line)
+            ordered.insert(insert_to, info_line)
             
-            #loop block end
-            if index_0==limit_0:
+            # loop block end
+            if index_0 == limit_0:
                 break
-        #loop ended
+        # loop ended
 
-        delete_from=original_position
+        delete_from = original_position
         if higher_flag:
-            delete_from=delete_from + len(channels_to_move) #len(channels_to_move)
+            delete_from = delete_from + len(channels_to_move) # len(channels_to_move)
 
-        #loop prepare
-        index_0=0
-        limit_0=len(channels_to_move)
-        #loop start
+        # loop prepare
+        index_0 = 0
+        limit_0 = len(channels_to_move)
+        # loop start
         while True:
-            if index_0==limit_0:
+            if index_0 == limit_0:
                 break
-            info_line=ordered[index_0]
-            #loop block start
+            info_line = ordered[index_0]
+            # loop block start
 
             del ordered[delete_from]
             
-            #loop block end
-            index_0=index_0 + 1
-        #loop ended
+            # loop block end
+            index_0 = index_0 + 1
+        # loop ended
         
-    indexes[0]=indexes[2]=indexes[4]=indexes[5]=indexes[6]=0 #reset
+    indexes[0] = indexes[2] = indexes[4] = indexes[5] = indexes[6] = 0 # reset
 
-    #loop preparations
-    index_0=0
-    limit_0=len(ordered)
-    #loop start
+    # loop preparations
+    index_0 = 0
+    limit_0 = len(ordered)
+    # loop start
     while True:
-        if index_0==limit_0:
+        if index_0 == limit_0:
             break
-        channel_=ordered[index_0][3]
-        #loop block start
+        channel_ = ordered[index_0][3]
+        # loop block start
         
-        type_=channel_.type
-        type_index=indexes[type_]
-        indexes[type_]=type_index + 1
+        type_ = channel_.type
+        type_index = indexes[type_]
+        indexes[type_] = type_index + 1
         
-        ordered[index_0]=(type_index,channel_)
+        ordered[index_0] = (type_index, channel_)
 
-        #loop block step
-        index_0=index_0 + 1
-        #loop block continue
+        # loop block step
+        index_0 = index_0 + 1
+        # loop block continue
         
-        if type_==4:
-            #reset type_indexes
-            indexes[0]=indexes[2]=indexes[5]=indexes[6]=0
-            #loop preparations
-            #loop start
+        if type_ == 4:
+            # reset type_indexes
+            indexes[0] = indexes[2] = indexes[5] = indexes[6] = 0
+            # loop preparations
+            # loop start
             while True:
-                if index_0==limit_0:
+                if index_0 == limit_0:
                     break
-                channel_=ordered[index_0][3]
-                #loop block start
+                channel_ = ordered[index_0][3]
+                # loop block start
                 
-                type_=channel_.type
+                type_ = channel_.type
                 if type_ == 4:
                     break
                 type_index = indexes[type_]
@@ -1148,34 +1341,35 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
 
                 ordered[index_0] = (type_index, channel_)
                 
-                #loop block end
+                # loop block end
                 index_0 = index_0 + 1
             
-        #loop block end
-    #loop ended
+        # loop block end
+    # loop ended
 
-    bonus_data = {'lock_permissions':lock_permissions}
+    bonus_data = {'lock_permissions': lock_permissions}
     if category is guild:
         bonus_data['parent_id'] = None
     else:
         bonus_data['parent_id'] = category.id
     
-    data=[]
-    for position,channel_ in ordered:
+    data = []
+    for position, channel_ in ordered:
         if channel is channel_:
-            data.append({'id': channel_.id, 'position':position, **bonus_data})
+            data.append({'id': channel_.id, 'position': position, **bonus_data})
             continue
         if channel_.position != position:
-            data.append({'id': channel_.id,'position': position})
+            data.append({'id': channel_.id, 'position': position})
     
     guild_id = guild.id
     return await bypass_request(
         client,
         METHOD_PATCH,
-        f'{API_ENDPOINT}/guilds/{guild_id}/channels',data,
+        f'{API_ENDPOINT}/guilds/{guild_id}/channels', data,
     )
 
-async def channel_create(client, guild, name, category=None, type_=0):
+
+async def channel_create(client, guild, name, category = None, type_ = 0):
     data = Channel(channel_type = type_, name = name).to_data()
     data['parent_id'] = category.id if type(category) is Channel else None
     guild_id = guild.id
@@ -1187,7 +1381,8 @@ async def channel_create(client, guild, name, category=None, type_=0):
     )
     return Channel.from_data(data, client, guild_id)
 
-async def emoji_guild_get_all(client, guild,):
+
+async def emoji_guild_get_all(client, guild):
     guild_id = guild.id
     return await bypass_request(
         client,
@@ -1195,7 +1390,8 @@ async def emoji_guild_get_all(client, guild,):
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis',
     )
 
-async def emoji_create(client, guild, name, image,):
+
+async def emoji_create(client, guild, name, image):
     image = image_to_base64(image)
     name = ''.join(re.findall('([0-9A-Za-z_]+)', name))
     if not (1 < len(name) < 33):
@@ -1217,6 +1413,7 @@ async def emoji_create(client, guild, name, image,):
     
     return Emoji.from_data(data, guild_id)
 
+
 async def emoji_get(client, emoji):
     guild = emoji.guild
     if guild is None:
@@ -1229,48 +1426,69 @@ async def emoji_get(client, emoji):
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis/{emoji_id}',
     )
 
-async def emoji_delete(client, emoji,):
+
+async def emoji_delete(client, emoji):
     guild_id = emoji.guild.id
     emoji_id = emoji.id
-    return await bypass_request(client, METHOD_DELETE,
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis/{emoji_id}',
     )
 
-async def emoji_edit(client,emoji,name,): #keep it short
-    data = {'name':name}
+
+async def emoji_edit(client, emoji, name): # keep it short
+    data = {'name': name}
     guild_id = emoji.guild.id
     emoji_id = emoji.id
-    return await bypass_request(client, METHOD_PATCH,
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis/{emoji_id}',
-        data,)
+        data,
+    )
+
 
 async def integration_get_all(client, guild):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/integrations',
     )
 
-async def invite_get_all_guild(client, guild,):
+
+async def invite_get_all_guild(client, guild):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/invites',
     )
 
-async def guild_user_delete(client, guild, user,):
+
+async def guild_user_delete(client, guild, user):
     guild_id = guild.id
     user_id = user.id
-    return await bypass_request(client,METHOD_DELETE,
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}',
     )
 
-async def user_edit(client, guild,user,nick,mute=False,):
+
+async def user_edit(client, guild, user, nick, mute = False):
     guild_id = guild.id
     user_id = user.id
-    return await bypass_request(client,METHOD_PATCH,
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}',
-        data={'nick':nick,'mute':mute},)
+        data = {'nick': nick, 'mute': mute},
+    )
 
-async def guild_user_add(client, guild, user,):
+
+async def guild_user_add(client, guild, user):
     guild_id = guild.id
     user_id = user.id
     return await bypass_request(
@@ -1282,71 +1500,96 @@ async def guild_user_add(client, guild, user,):
         },
     )
 
-async def user_role_add(client,user,role,):
+
+async def user_role_add(client, user, role):
     guild_id = role.guild.id
     user_id = user.id
     role_id = role.id
-    return await bypass_request(client,METHOD_PUT,
+    return await bypass_request(
+        client,
+        METHOD_PUT,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}/roles/{role_id}',
-        )
+    )
 
-async def user_role_delete(client,user,role,):
+
+async def user_role_delete(client, user, role):
     guild_id = role.guild.id
     user_id = user.id
     role_id = role.id
-    return await bypass_request(client,METHOD_DELETE,
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}/roles/{role_id}',
-        )
+    )
 
-async def guild_prune(client, guild,):
+
+async def guild_prune(client, guild):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_POST,
+    return await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/prune',
-        params={'days':30},)
+        params = {'days': 30},
+    )
 
-async def guild_prune_estimate(client, guild,):
+
+async def guild_prune_estimate(client, guild):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/prune',
-        params={'days':30},)
+        params = {'days':30},
+    )
 
-async def role_create(client, guild,name = None,permissions = None,color = None,
-        separated=None,mentionable=None,reason = None,):
 
-    data={}
+async def role_create(
+    client, guild, name = None, permissions = None, color = None, separated = None, mentionable = None, reason = None
+):
+
+    data = {}
     if name is not None:
-        data['name']=name
+        data['name'] = name
     if permissions is not None:
-        data['permissions']=permissions
+        data['permissions'] = permissions
     if color is not None:
-        data['color']=color
+        data['color'] = color
     if separated is not None:
-        data['hoist']=separated
+        data['hoist'] = separated
     if mentionable is not None:
-        data['mentionable']=mentionable
+        data['mentionable'] = mentionable
 
     guild_id = guild.id
-    return await bypass_request(client,METHOD_POST,
+    return await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles',
-        data=data,)
+        data = data,
+    )
 
-async def role_move(client,role,new_position,):
+
+async def role_move(client, role, new_position):
     guild = role.guild
     data= change_on_switch(guild.role_list, role, new_position, key = role_move_key)
     guild_id = role.guild.id
-    return await bypass_request(client,METHOD_PATCH,
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles',
-        data=data,)
+        data = data,
+    )
 
-async def role_edit(client,role,color = None,separated=None,mentionable=None,
-        name = None,permissions = None,):
+
+async def role_edit(
+    client, role, color = None, separated = None, mentionable = None, name = None, permissions = None
+):
     
     if color is None:
         color = role.color
     if separated is None:
-        separated=role.separated
+        separated = role.separated
     if mentionable is None:
-        mentionable=role.mentionable
+        mentionable = role.mentionable
     if name is None:
         name = role.name
     if permissions is None:
@@ -1358,46 +1601,68 @@ async def role_edit(client,role,color = None,separated=None,mentionable=None,
         'color'       : color,
         'hoist'       : separated,
         'mentionable' : mentionable,
-            }
+    }
+    
     guild_id = role.guild.id
     role_id = role.id
-    return await bypass_request(client,METHOD_PATCH,
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles/{role_id}',
-        data=data,)
+        data = data,
+    )
 
-async def role_delete(client,role,):
+
+async def role_delete(client, role):
     guild_id = role.guild.id
     role_id = role.id
-    return await bypass_request(client,METHOD_DELETE,
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles/{role_id}',
-        )
+    )
 
 
-async def webhook_get_all_guild(client, guild,):
+async def webhook_get_all_guild(client, guild):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/webhooks',
-        )
+    )
 
-async def guild_widget_image(client, guild,):
+
+async def guild_widget_image(client, guild):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/widget.png',
-        params={'style':'shield'},decode=False,headers={},)
+        params = {'style': 'shield'},
+        decode = False,
+        headers = {},
+    )
 
-async def invite_get(client,invite,):
+
+async def invite_get(client, invite):
     invite_code = invite.code
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/invites/{invite_code}',
     )
 
-async def invite_delete(client,invite,):
+
+async def invite_delete(client, invite):
     invite_code = invite.code
-    return await bypass_request(client,METHOD_DELETE,
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/invites/{invite_code}',
     )
 
-async def user_info_get(client,access,):
+
+async def user_info_get(client, access):
     headers = IgnoreCaseMultiValueDictionary()
     headers[AUTHORIZATION] = f'Bearer {access.access_token}'
     return await bypass_request(
@@ -1407,134 +1672,214 @@ async def user_info_get(client,access,):
         headers = headers,
     )
 
-async def client_user_get(client,):
-    return await bypass_request(client,METHOD_GET,
+
+async def client_user_get(client):
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/users/@me',
-        )
+    )
 
-async def channel_private_get_all(client,):
-    return await bypass_request(client,METHOD_GET,
+
+async def channel_private_get_all(client):
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/users/@me/channels',
-        )
+    )
 
-async def channel_private_create(client,user,):
-    return await bypass_request(client,METHOD_POST,
+
+async def channel_private_create(client, user):
+    return await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/users/@me/channels',
-        data={'recipient_id':user.id},)
+        data = {'recipient_id': user.id},
+    )
 
-async def user_connection_get_all(client,access,):
-    headers=IgnoreCaseMultiValueDictionary()
-    headers[AUTHORIZATION]=f'Bearer {access.access_token}'
-    return await bypass_request(client,METHOD_GET,
+
+async def user_connection_get_all(client, access):
+    headers = IgnoreCaseMultiValueDictionary()
+    headers[AUTHORIZATION] = f'Bearer {access.access_token}'
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/users/@me/connections',
-        headers=headers,)
+        headers = headers,
+    )
 
-async def user_guild_get_all(client,access,):
-    headers=IgnoreCaseMultiValueDictionary()
-    headers[AUTHORIZATION]=f'Bearer {access.access_token}'
-    return await bypass_request(client,METHOD_GET,
+
+async def user_guild_get_all(client, access):
+    headers = IgnoreCaseMultiValueDictionary()
+    headers[AUTHORIZATION] = f'Bearer {access.access_token}'
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/users/@me/guilds',
-        headers=headers,)
+        headers = headers,
+    )
 
-async def guild_get_chunk(client,):
-    return await bypass_request(client,METHOD_GET,
+
+async def guild_get_chunk(client):
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/users/@me/guilds',
-        params={'after':0},)
+        params = {'after': 0},
+    )
 
-async def user_get(client,user,):
+
+async def user_get(client, user):
     user_id = user.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/users/{user_id}',
-        )
+    )
 
-async def webhook_get(client,webhook,):
+
+async def webhook_get(client, webhook):
     webhook_id = webhook.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/webhooks/{webhook_id}',
-        )
+    )
 
-async def webhook_delete(client,webhook,):
+
+async def webhook_delete(client, webhook):
     webhook_id = webhook.id
-    return  bypass_request(client,METHOD_DELETE,
+    return  bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/webhooks/{webhook_id}',
-        )
+    )
 
-async def webhook_edit(client,webhook,name,): #keep it short
+
+async def webhook_edit(client, webhook, name): # keep it short
     webhook_id = webhook.id
-    return await bypass_request(client,METHOD_PATCH,
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/webhooks/{webhook_id}',
-        data={'name':name},)
+        data = {'name': name},
+    )
 
-async def webhook_get_token(client,webhook,):
-    return await bypass_request(client,METHOD_GET,
-        webhook.url,headers={},)
 
-async def webhook_delete_token(client,webhook,):
-    return await bypass_request(client,METHOD_DELETE,
-        webhook.url,headers={},)
+async def webhook_get_token(client, webhook):
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        webhook.url, headers = {},
+    )
 
-async def webhook_edit_token(client,webhook,name,): #keep it short
-    return await bypass_request(client,METHOD_PATCH,
+
+async def webhook_delete_token(client, webhook):
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
+        webhook.url, headers = {},
+    )
+
+
+async def webhook_edit_token(client, webhook, name): # keep it short
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
         webhook.url,
-        data={'name':name},headers={},)
+        data = {'name': name},
+        headers = {},
+    )
 
-async def webhook_execute(client, webhook, content,):
-    data = await bypass_request(client,METHOD_POST,
-        f'{webhook.url}?wait=1',
-        data={'content':content}, headers={},)
+
+async def webhook_execute(client, webhook, content):
+    data = await bypass_request(
+        client,
+        METHOD_POST,
+        f'{webhook.url}?wait = 1',
+        data = {'content': content}, headers = {},)
     
     channel = webhook.channel
     if channel is None:
-        channel = Channel.precreate(int(data['channel_id']), channel_type=0)
+        channel = Channel.precreate(int(data['channel_id']), channel_type = 0)
     
     return channel._create_new_message(data)
 
+
 async def webhook_message_edit(client, webhook, message, content):
-    return await bypass_request(client, METHOD_PATCH,
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{webhook.url}/messages/{message.id}',
-        data={'content':content}, headers={},)
+        data = {'content': content},
+        headers = {},
+    )
+
 
 async def webhook_message_delete(client, webhook, message):
-    return await bypass_request(client, METHOD_DELETE,
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{webhook.url}/messages/{message.id}',
-        headers={},)
+        headers = {},
+    )
+
 
 async def webhook_message_get(client, webhook, message_id):
-    return await bypass_request(client, METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{webhook.url}/messages/{message_id}',
-        headers={},)
+        headers = {},
+    )
 
-async def guild_user_get_chunk(client, guild,):
+
+async def guild_user_get_chunk(client, guild):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/members',
-        )
+    )
 
-async def guild_voice_region_get_all(client, guild,):
+
+async def guild_voice_region_get_all(client, guild):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/regions',
-        )
+    )
 
-async def guild_channels(client, guild,):
+
+async def guild_channels(client, guild):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/channels',
-        )
+    )
 
-async def guild_role_get_all(client, guild,):
+
+async def guild_role_get_all(client, guild):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles',
-        )
+    )
 
-async def guild_user_get(client, guild,user_id,):
+
+async def guild_user_get(client, guild, user_id):
     guild_id = guild.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}',
-        )
+    )
 
-async def guild_user_search(client, guild, query, limit=1):
+
+async def guild_user_search(client, guild, query, limit = 1):
     data = {'query': query}
     
     if limit == 1:
@@ -1543,55 +1888,73 @@ async def guild_user_search(client, guild, query, limit=1):
     elif limit < 1000 and limit > 0:
         data['limit'] = limit
     else:
-        raise ValueError('`limit` can be between 1 and 1000, got `{limit}`')
+        raise ValueError(f'`limit` can be between 1 and 1000, got `{limit!r}`')
     
     guild_id = guild.id
-    return await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/guilds/{guild_id}/members/search', params = data,
-            )
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/members/search',
+        params = data,
+    )
 
-async def guild_widget_get(client, guild_id,):
-    return await bypass_request(client,METHOD_GET,
+
+async def guild_widget_get(client, guild_id):
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/widget.json',
-        headers={},)
+        headers = {},
+    )
 
-async def message_suppress_embeds(client,message,suppress=True,):
+
+async def message_suppress_embeds(client, message, suppress = True):
     message_id = message.id
     channel_id = message.channel.id
-    return await bypass_request(client,METHOD_POST,
+    return await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/suppress-embeds',
-        data={'suppress':suppress},)
+        data = {'suppress': suppress},
+    )
 
-async def channel_follow(client,source_channel,target_channel,):
-    if source_channel.type!=5:
+
+async def channel_follow(client, source_channel, target_channel):
+    if source_channel.type !=  5:
         raise ValueError(f'\'source_channel\' must be type 5, so news (announcements) channel, got {source_channel}')
     if target_channel.type not in (0, 5):
         raise ValueError(f'\'target_channel\' must be type 0 or 5, so any guild text channel, got  {target_channel}')
     
     data = {
         'webhook_channel_id': target_channel.id,
-            }
+    }
     
     channel_id = source_channel.id
     
-    data = await bypass_request(client,METHOD_POST,
+    data = await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/followers',
-        data,)
+        data,
+    )
     webhook = await Webhook._from_follow_data(data, source_channel, target_channel, client)
     return webhook
 
-async def achievement_get(client,achievement_id,):
+
+async def achievement_get(client, achievement_id):
     application_id = client.application.id
         
-    data = await bypass_request(client,METHOD_GET,
+    data = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/achievements/{achievement_id}',
-        )
+    )
     
     return Achievement(data)
     
 
-async def achievement_create(client,name,description,icon,secret=False,secure=False,):
-    icon_data=image_to_base64(icon)
+async def achievement_create(client, name, description, icon, secret = False, secure = False):
+    icon_data = image_to_base64(icon)
     
     data = {
         'name'          : {
@@ -1607,21 +1970,29 @@ async def achievement_create(client,name,description,icon,secret=False,secure=Fa
 
     application_id = client.application.id
         
-    data =  await bypass_request(client,METHOD_POST,
+    data =  await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/applications/{application_id}/achievements',
-        data=data,)
+        data = data,)
     
     return Achievement(data)
 
-async def achievement_delete(client,achievement,):
+
+async def achievement_delete(client, achievement):
     application_id = client.application.id
     achievement_id = achievement.id
-    await bypass_request(client,METHOD_DELETE,
+    await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/applications/{application_id}/achievements/{achievement_id}',
-        )
+    )
 
-async def achievement_edit(client,achievement,name = None,description = None,secret=None,secure=None,icon=...,):
-    data={}
+
+async def achievement_edit(
+    client, achievement, name = None, description = None, secret = None, secure = None, icon = ...,
+):
+    data = {}
     if (name is not None):
         data['name'] = {
             'default': name,
@@ -1642,70 +2013,105 @@ async def achievement_edit(client,achievement,name = None,description = None,sec
     application_id = client.application.id
     achievement_id = achievement.id
     
-    data = await bypass_request(client,METHOD_PATCH,
+    data = await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/applications/{application_id}/achievements/{achievement_id}',
-        data=data,)
+        data = data,
+    )
 
     achievement._update_attributes(data)
     return achievement
 
-async def achievement_get_all(client,):
+
+async def achievement_get_all(client):
     application_id = client.application.id
     
-    data = await bypass_request(client,METHOD_GET,
+    data = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/achievements',
     )
     
     return [Achievement(achievement_data) for achievement_data in data]
 
-async def user_achievement_update(client,user,achievement,percent_complete,):
-    data={'percent_complete':percent_complete}
+
+async def user_achievement_update(client, user, achievement, percent_complete):
+    data = {'percent_complete': percent_complete}
     
     user_id = user.id
     application_id = client.application.id
     achievement_id = achievement.id
     
-    await bypass_request(client,METHOD_PUT,
+    await bypass_request(
+        client,
+        METHOD_PUT,
         f'{API_ENDPOINT}/users/{user_id}/applications/{application_id}/achievements/{achievement_id}',
-        data=data,)
+        data = data,
+    )
 
-async def user_achievements(client,access,):
-    headers=IgnoreCaseMultiValueDictionary()
-    headers[AUTHORIZATION]=f'Bearer {access.access_token}'
+
+async def user_achievements(client, access):
+    headers = IgnoreCaseMultiValueDictionary()
+    headers[AUTHORIZATION] = f'Bearer {access.access_token}'
     
     application_id = client.application.id
     
-    data = await bypass_request(client,METHOD_GET,
+    data = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/users/@me/applications/{application_id}/achievements',
-        headers=headers,)
+        headers = headers,)
     
     return [Achievement(achievement_data) for achievement_data in data]
 
+
 async def reaction_delete_emoji(client, message, emoji):
-    await bypass_request(client, METHOD_DELETE,
-        f'{API_ENDPOINT}/channels/{message.channel.id}/messages/{message.id}/reactions/{emoji.as_reaction}')
+    await bypass_request(
+        client,
+        METHOD_DELETE,
+        f'{API_ENDPOINT}/channels/{message.channel.id}/messages/{message.id}/reactions/{emoji.as_reaction}',
+    )
+
 
 async def guild_preview_get(client, guild_id):
-    await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/guilds/{guild_id}/preview')
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/preview',
+    )
+
 
 async def message_crosspost(client, message):
-    await bypass_request(client, METHOD_POST,
-        f'{API_ENDPOINT}/channels/{message.channel.id}/messages/{message.id}/crosspost')
+    await bypass_request(
+        client,
+        METHOD_POST,
+        f'{API_ENDPOINT}/channels/{message.channel.id}/messages/{message.id}/crosspost',
+    )
+
 
 async def invite_get_vanity(client, guild):
     guild_id = guild.id
-    await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/guilds/{guild_id}/vanity-url')
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/vanity-url',
+    )
+
 
 async def guild_discovery_get(client, guild):
     guild_id = guild.id
-    guild_discovery_data = await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/guilds/{guild_id}/discovery-metadata')
+    guild_discovery_data = await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/discovery-metadata',
+    )
     return GuildDiscovery.from_data(guild_discovery_data)
 
-async def guild_discovery_edit(client, guild, primary_category_id = ..., keywords=...,
-            emoji_discovery=...):
+
+async def guild_discovery_edit(
+    client, guild, primary_category_id = ..., keywords = ..., emoji_discovery = ...,
+):
     
     guild_id = guild.id
     data = {}
@@ -1718,50 +2124,82 @@ async def guild_discovery_edit(client, guild, primary_category_id = ..., keyword
     if (emoji_discovery is not ...):
         data['emoji_discoverability_enabled'] = emoji_discovery
     
-    await bypass_request(client, METHOD_PATCH,
+    await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/discovery-metadata',
-        data=data)
+        data = data,
+    )
+
 
 async def guild_discovery_add_subcategory(client, guild, category_id):
     guild_id = guild.id
-    await bypass_request(client, METHOD_POST,
-        f'{API_ENDPOINT}/guilds/{guild_id}/discovery-categories/{category_id}')
+    await bypass_request(
+        client,
+        METHOD_POST,
+        f'{API_ENDPOINT}/guilds/{guild_id}/discovery-categories/{category_id}',
+    )
+
 
 async def guild_discovery_delete_subcategory(client, guild, category_id):
     guild_id = guild.id
-    await bypass_request(client, METHOD_DELETE,
-        f'{API_ENDPOINT}/guilds/{guild_id}/discovery-categories/{category_id}')
+    await bypass_request(
+        client,
+        METHOD_DELETE,
+        f'{API_ENDPOINT}/guilds/{guild_id}/discovery-categories/{category_id}',
+    )
+
 
 async def discovery_category_get_all(client):
-    discovery_category_datas = await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/discovery/categories')
-    return [DiscoveryCategory.from_data(discovery_category_data) for discovery_category_data in discovery_category_datas]
+    discovery_category_datas = await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/discovery/categories'
+    )
+    return [
+        DiscoveryCategory.from_data(discovery_category_data) for discovery_category_data in discovery_category_datas
+    ]
+
 
 async def discovery_validate_term(client, term):
-    data = await bypass_request(client, METHOD_GET,
+    data = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/discovery/valid-term',
-        params={'term': term})
+        params = {'term': term})
     
     return data['valid']
 
+
 async def applications_detectable(client):
-    data = await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/applications/detectable',
     )
 
+
 async def welcome_screen_get(client, guild_id):
-    data = await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/welcome-screen',
     )
 
+
 async def eula_get(client):
     eula_id = 542074049984200704
-    data = await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/store/eulas/{eula_id}',
     )
 
+
 async def voice_regions(client):
-    data = await bypass_request(client, METHOD_GET,
+    data = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/voice/regions',
     )
     return data
@@ -1770,61 +2208,81 @@ async def voice_regions(client):
 async def application_command_global_get_all(client):
     application_id = client.application.id
     
-    data = await bypass_request(client, METHOD_GET,
+    data = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/commands',
-            )
+    )
     
     return [ApplicationCommand.from_data(application_command_data) for application_command_data in data]
+
 
 async def application_command_global_create(client, application_command):
     application_id = client.application.id
     data = application_command.to_data()
     
-    data = await bypass_request(client, METHOD_POST,
+    data = await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/applications/{application_id}/commands',
-        data)
+        data,
+    )
     
     return ApplicationCommand.from_data(data)
+
 
 async def application_command_global_edit(client, old_application_command, new_application_command):
     application_command_id = old_application_command.id
     application_id = client.application.id
     data = new_application_command.to_data()
     
-    data = await bypass_request(client, METHOD_PATCH,
+    data = await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/applications/{application_id}/commands/{application_command_id}',
-        data)
+        data,
+    )
     
     return ApplicationCommand.from_data(data)
+
 
 async def application_command_global_delete(client, application_command):
     application_command_id = application_command.id
     application_id = client.application.id
     
-    await bypass_request(client, METHOD_DELETE,
+    await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/applications/{application_id}/commands/{application_command_id}',
-            )
+    )
 
 async def application_command_guild_get_all(client, guild):
     application_id = client.application.id
     guild_id = guild.id
     
-    data = await bypass_request(client, METHOD_GET,
+    data = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands',
-            )
+    )
     
     return [ApplicationCommand.from_data(application_command_data) for application_command_data in data]
+
 
 async def application_command_guild_create(client, guild, application_command):
     application_id = client.application.id
     guild_id = guild.id
     data = application_command.to_data()
     
-    data = await bypass_request(client, METHOD_POST,
+    data = await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands',
-        data)
+        data,
+    )
     
     return ApplicationCommand.from_data(data)
+
 
 async def application_command_guild_edit(client, guild, old_application_command, new_application_command):
     application_command_id = old_application_command.id
@@ -1832,22 +2290,29 @@ async def application_command_guild_edit(client, guild, old_application_command,
     guild_id = guild.id
     data = new_application_command.to_data()
     
-    data = await bypass_request(client, METHOD_PATCH,
+    data = await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}',
-        data)
+        data,
+    )
     
     return ApplicationCommand.from_data(data)
+
 
 async def application_command_guild_delete(client, guild, application_command):
     application_command_id = application_command.id
     application_id = client.application.id
     guild_id = guild.id
     
-    await bypass_request(client, METHOD_DELETE,
+    await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}',
     )
 
-async def interaction_response_message_create(client, interaction, content=None, embed = None):
+
+async def interaction_response_message_create(client, interaction, content = None, embed = None):
     message_data = {}
     contains_content = False
     
@@ -1872,11 +2337,14 @@ async def interaction_response_message_create(client, interaction, content=None,
     interaction_id = interaction.id
     interaction_token = interaction.token
     
-    data = await bypass_request(client, METHOD_POST,
+    await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/interactions/{interaction_id}/{interaction_token}/callback',
         data)
     
     return None
+
 
 async def interaction_response_message_edit(client, interaction, content = None, embed = None):
     message_data = {}
@@ -1890,15 +2358,21 @@ async def interaction_response_message_edit(client, interaction, content = None,
     application_id = client.application.id
     interaction_token = interaction.token
     
-    await bypass_request(client, METHOD_PATCH,
+    await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/webhooks/{application_id}/{interaction_token}/messages/@original',
-        message_data)
+        message_data,
+    )
+
 
 async def interaction_response_message_delete(client, interaction):
     application_id = client.application.id
     interaction_token = interaction.token
     
-    await bypass_request(client, METHOD_DELETE,
+    await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/webhooks/{application_id}/{interaction_token}/messages/@original',
     )
 
@@ -1907,11 +2381,14 @@ async def interaction_response_message_get(client, interaction):
     application_id = client.application.id
     interaction_token = interaction.token
     
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/webhooks/{application_id}/{interaction_token}/messages/@original',
     )
 
-async def interaction_followup_message_create(client, interaction, content=None, embed = None):
+
+async def interaction_followup_message_create(client, interaction, content = None, embed = None):
     message_data = {}
     
     if (content is not None):
@@ -1923,13 +2400,18 @@ async def interaction_followup_message_create(client, interaction, content=None,
     application_id = client.application.id
     interaction_token = interaction.token
     
-    data = await bypass_request(client, METHOD_POST,
+    data = await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/webhooks/{application_id}/{interaction_token}',
-        message_data, headers={})
+        message_data,
+        headers = {},
+    )
     
     return interaction.channel._create_new_message(data)
 
-async def interaction_followup_message_edit(client, interaction, message, content=None, embed = None):
+
+async def interaction_followup_message_edit(client, interaction, message, content = None, embed = None):
     message_data = {}
     
     if (content is not None):
@@ -1942,16 +2424,22 @@ async def interaction_followup_message_edit(client, interaction, message, conten
     interaction_token = interaction.token
     message_id = message.id
     
-    await bypass_request(client, METHOD_PATCH,
+    await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/webhooks/{application_id}/{interaction_token}/messages/{message_id}',
-        message_data)
+        message_data,
+    )
+    
     
 async def interaction_followup_message_delete(client, interaction, message):
     application_id = client.application.id
     interaction_token = interaction.token
     message_id = message.id
     
-    await bypass_request(client, METHOD_DELETE,
+    await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/webhooks/{application_id}/{interaction_token}/messages/{message_id}',
     )
 
@@ -1961,7 +2449,9 @@ async def interaction_followup_message_get(client, interaction, message):
     interaction_token = interaction.token
     message_id = message.id
     
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/webhooks/{application_id}/{interaction_token}/messages/{message_id}',
     )
 
@@ -1969,95 +2459,127 @@ async def interaction_followup_message_get(client, interaction, message):
 async def verification_screen_get(client, guild):
     guild_id = guild.id
     
-    data = await bypass_request(client, METHOD_GET,
+    data = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/member-verification',
     )
     
     return VerificationScreen.from_data(data)
+
 
 async def verification_screen_edit(client, guild):
     guild_id = guild.id
     data = {'enabled': True}
 
-    data = await bypass_request(client, METHOD_PATCH,
+    data = await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/member-verification',
-        data)
+        data,
+    )
     
     return VerificationScreen.from_data(data)
+
 
 async def welcome_screen_edit(client, guild):
     guild_id = guild.id
     data = {'enabled': True}
     
-    data = await bypass_request(client, METHOD_PATCH,
+    data = await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/welcome-screen',
-        data)
+        data,
+    )
     
     return WelcomeScreen.from_data(data)
+
 
 async def application_command_global_get(client, application_command_id):
     application_id = client.application.id
     
-    data = await bypass_request(client, METHOD_GET,
+    data = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/commands/{application_command_id}',
     )
     
     return ApplicationCommand.from_data(data)
 
+
 async def application_command_guild_get(client, guild, application_command_id):
     application_id = client.application.id
     guild_id = guild.id
     
-    data = await bypass_request(client, METHOD_GET,
+    data = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}',
     )
     
     return ApplicationCommand.from_data(data)
 
+
 async def application_command_global_update_multiple(client, application_commands):
     application_id = client.application.id
     application_command_datas = [application_command.to_data() for application_command in application_commands]
     
-    application_command_datas = await bypass_request(client, METHOD_PUT,
+    application_command_datas = await bypass_request(
+        client,
+        METHOD_PUT,
         f'{API_ENDPOINT}/applications/{application_id}/commands',
         application_command_datas,
     )
     
-    return [ApplicationCommand.from_data(application_command_data) \
-        for application_command_data in application_command_datas]
+    return [
+        ApplicationCommand.from_data(application_command_data)
+        for application_command_data in application_command_datas
+    ]
+
 
 async def application_command_guild_update_multiple(client, guild, application_commands):
     application_id = client.application.id
     guild_id = guild.id
     application_command_datas = [application_command.to_data() for application_command in application_commands]
     
-    application_command_datas = await bypass_request(client, METHOD_PUT,
+    application_command_datas = await bypass_request(
+        client,
+        METHOD_PUT,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands',
         application_command_datas,
     )
     
-    return [ApplicationCommand.from_data(application_command_data) \
-        for application_command_data in application_command_datas]
+    return [
+        ApplicationCommand.from_data(application_command_data)
+        for application_command_data in application_command_datas
+    ]
 
 
 async def application_command_permission_get_all_guild(client, guild):
     application_id = client.application.id
     guild_id = guild.id
-    permission_datas = await bypass_request(client, METHOD_GET,
+    permission_datas = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/permissions',
     )
     
     return [ApplicationCommandPermission.from_data(permission_data) for permission_data in permission_datas]
 
+
 async def application_command_permission_get(client, guild, application_command):
     application_id = client.application.id
     guild_id = guild.id
     application_command_id = application_command.id
-    permission_data = await bypass_request(client, METHOD_GET,
+    permission_data = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}/permissions',
     )
     
     return ApplicationCommandPermission.from_data(permission_data)
+
 
 async def application_command_permission_edit(client, access, guild, application_command, overwrites):
     application_id = client.application.id
@@ -2077,7 +2599,8 @@ async def application_command_permission_edit(client, access, guild, application
         headers = headers,
     )
 
-async def voice_state_client_edit(client, channel, suppress=False, request_to_speak=False):
+
+async def voice_state_client_edit(client, channel, suppress = False, request_to_speak = False):
     channel_id = channel.id
     guild_id = channel.guild.id
     
@@ -2092,11 +2615,15 @@ async def voice_state_client_edit(client, channel, suppress=False, request_to_sp
         'channel_id': channel_id,
     }
     
-    await bypass_request(client, METHOD_PATCH,
+    await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/voice-states/@me',
-        data)
+        data,
+    )
 
-async def voice_state_user_edit(client, channel, user, suppress=False):
+
+async def voice_state_user_edit(client, channel, user, suppress = False):
     channel_id = channel.id
     guild_id = channel.guild.id
     user_id = user.id
@@ -2106,25 +2633,37 @@ async def voice_state_user_edit(client, channel, user, suppress=False):
         'channel_id': channel_id,
     }
     
-    await bypass_request(client, METHOD_PATCH,
+    await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/voice-states/{user_id}',
-        data)
+        data
+    )
 
 
 async def stage_discovery_get(client):
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/discovery',
     )
 
+
 async def guild_discovery_get_all(client):
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guild-discovery',
     )
 
+
 async def stage_get_all(client):
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/stage-instances',
     )
+
 
 async def stage_create(client, channel, topic):
     data = {
@@ -2133,9 +2672,13 @@ async def stage_create(client, channel, topic):
         'privacy_level': PrivacyLevel.guild_only.value
     }
     
-    await bypass_request(client, METHOD_POST,
+    await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/stage-instances',
-        data)
+        data,
+    )
+
 
 async def stage_edit(client, channel, topic):
     channel_id = channel.id
@@ -2144,15 +2687,20 @@ async def stage_edit(client, channel, topic):
         'topic': topic,
     }
     
-    await bypass_request(client, METHOD_PATCH,
+    await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/stage-instances/{channel_id}',
-        data)
+        data,
+    )
 
 
 async def stage_get(client, channel):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/stage-instances/{channel_id}',
     )
 
@@ -2160,9 +2708,12 @@ async def stage_get(client, channel):
 async def stage_delete(client, channel):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_DELETE,
+    await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/stage-instances/{channel_id}',
-        )
+    )
+
 
 async def thread_create(client, channel, type_, name):
     channel_id = channel.id
@@ -2171,10 +2722,13 @@ async def thread_create(client, channel, type_, name):
         'type': type_,
     }
     
-    await bypass_request(client, METHOD_POST,
+    await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/threads',
         data,
     )
+
 
 async def thread_create_from_message(client, message, type_, name):
     channel_id = message.channel.id
@@ -2184,30 +2738,41 @@ async def thread_create_from_message(client, message, type_, name):
         'type': type_,
     }
     
-    await bypass_request(client, METHOD_POST,
+    await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/threads',
         data,
     )
 
+
 async def thread_join(client, channel):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_POST,
+    await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/@me',
     )
+
 
 async def application_button_create(client, data):
     application_id = client.application.id
 
-    return await bypass_request(client, METHOD_POST,
+    return await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/applications/{application_id}/message-components',
         data,
     )
 
+
 async def thread_leave(client, channel):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_DELETE,
+    await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/@me',
     )
 
@@ -2215,7 +2780,9 @@ async def thread_leave(client, channel):
 async def thread_get_self(client, channel):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/@me',
     )
 
@@ -2224,7 +2791,9 @@ async def thread_user_get(client, channel, user):
     channel_id = channel.id
     user_id = user.id
     
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/{user_id}',
     )
 
@@ -2233,7 +2802,9 @@ async def thread_user_add(client, channel, user):
     channel_id = channel.id
     user_id = user.id
     
-    await bypass_request(client, METHOD_POST,
+    await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/{user_id}',
     )
 
@@ -2242,7 +2813,9 @@ async def thread_user_delete(client, channel, user):
     channel_id = channel.id
     user_id = user.id
     
-    await bypass_request(client, METHOD_DELETE,
+    await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/{user_id}',
     )
 
@@ -2250,7 +2823,9 @@ async def thread_user_delete(client, channel, user):
 async def thread_self_settings_edit(client, channel, data):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_PATCH,
+    await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/@me/settings',
         data,
     )
@@ -2259,61 +2834,77 @@ async def thread_self_settings_edit(client, channel, data):
 async def channel_thread_get_chunk_archived_public(client, channel):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/channels/{channel_id}/threads/archived/public'
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/threads/archived/public',
     )
 
 
 async def channel_thread_get_chunk_archived_private(client, channel):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/channels/{channel_id}/threads/archived/private'
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/threads/archived/private',
     )
 
 
 async def channel_thread_get_chunk_self_archived(client, channel):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/channels/{channel_id}/users/@me/threads/archived/private'
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/users/@me/threads/archived/private',
     )
 
 
 async def channel_thread_get_chunk_active(client, channel):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/channels/{channel_id}/threads/active'
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/threads/active',
     )
 
 
 async def thread_user_get_chunk(client, channel):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/channels/{channel_id}/thread-members'
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/thread-members',
     )
 
 
 async def servers_get(client):
-    await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/servers'
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/servers',
     )
 
 
 async def sticker_get_all_guild(client, guild):
     guild_id = guild.id
-    sticker_datas = await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/guilds/{guild_id}/stickers'
+    sticker_datas = await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/stickers',
     )
     
     return [Sticker.from_data(sticker_data) for sticker_data in sticker_datas]
 
 
 async def sticker_pack_get_all(client):
-    data = await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/sticker-packs'
+    data = await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/sticker-packs',
     )
     
     sticker_pack_datas = data['sticker_packs']
@@ -2322,8 +2913,10 @@ async def sticker_pack_get_all(client):
 
 
 async def sticker_pack_get(client, sticker_pack_id):
-    data = await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/sticker-packs/{sticker_pack_id}'
+    data = await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/sticker-packs/{sticker_pack_id}',
     )
     
     return StickerPack.from_data(data)
@@ -2332,22 +2925,27 @@ async def sticker_pack_get(client, sticker_pack_id):
 async def sticker_get_guild(client, guild, sticker_id):
     guild_id = guild.id
     
-    sticker_data = await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/guilds/{guild_id}/stickers/{sticker_id}'
+    sticker_data = await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/stickers/{sticker_id}',
     )
     
     return Sticker.from_data(sticker_data)
+
 
 async def sticker_create(client, guild, name, description, file, tags):
     form = Formdata()
     form.add_field('name', name)
     form.add_field('description', description)
     form.add_field('tags', ', '.join(tags))
-    form.add_field('file', file, filename = 'file.png', content_type='image/png')
+    form.add_field('file', file, filename = 'file.png', content_type = 'image/png')
     
     guild_id = guild.id
     
-    sticker_data = await bypass_request(client, METHOD_POST,
+    sticker_data = await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/stickers',
         form,
     )
@@ -2358,20 +2956,24 @@ async def sticker_create(client, guild, name, description, file, tags):
 async def sticker_delete(client, guild, sticker_id):
     guild_id = guild.id
     
-    await bypass_request(client, METHOD_DELETE,
-        f'{API_ENDPOINT}/guilds/{guild_id}/stickers/{sticker_id}'
+    await bypass_request(
+        client,
+        METHOD_DELETE,
+        f'{API_ENDPOINT}/guilds/{guild_id}/stickers/{sticker_id}',
     )
 
 
 async def sticker_get(client, sticker_id):
-    sticker_data = await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/stickers/{sticker_id}'
+    sticker_data = await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/stickers/{sticker_id}',
     )
     
     return Sticker.from_data(sticker_data)
 
 
-async def sticker_edit(client, guild, sticker, name = None, description = None, tags=None):
+async def sticker_edit(client, guild, sticker, name = None, description = None, tags = None):
     if tags is None:
         tags = ', '.join(sticker.tags)
     else:
@@ -2393,33 +2995,45 @@ async def sticker_edit(client, guild, sticker, name = None, description = None, 
     guild_id = guild.id
     sticker_id = sticker.id
     
-    sticker_data = await bypass_request(client, METHOD_PATCH,
+    sticker_data = await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/stickers/{sticker_id}',
-        data
+        data,
     )
 
 
 async def invite_edit_vanity(client, guild, vanity_code = None):
     guild_id = guild.id
-    await bypass_request(client, METHOD_PATCH,
+    await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/vanity-url',
-        {'code': vanity_code}
+        {'code': vanity_code},
     )
 
+
 async def status_incident_unresolved(client):
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{STATUS_ENDPOINT}/incidents/unresolved.json',
         headers = IgnoreCaseMultiValueDictionary(),
     )
 
 async def status_maintenance_active(client):
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{STATUS_ENDPOINT}/scheduled-maintenances/active.json',
         headers = IgnoreCaseMultiValueDictionary(),
     )
 
+
 async def status_maintenance_upcoming(client):
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{STATUS_ENDPOINT}/scheduled-maintenances/upcoming.json',
         headers = IgnoreCaseMultiValueDictionary(),
     )
@@ -2429,31 +3043,41 @@ async def greet(client, channel):
     channel_id = channel.id
     sticker_id = 749054660769218631
     
-    await bypass_request(client, METHOD_POST,
+    await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/greet',
-        {'sticker_ids': [sticker_id]}
+        {'sticker_ids': [sticker_id]},
     )
     
 
 async def channel_directory_search(client, channel, query):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/directory-entries/search',
-        {'query': query}
+        {'query': query},
     )
+
 
 async def channel_directory_counts(client, channel):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/directory-entries/counts',
     )
+
 
 async def channel_directory_get_all(client, channel):
     channel_id = channel.id
     
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/directory-entries/list',
     )
 
@@ -2461,7 +3085,9 @@ async def channel_directory_get_all(client, channel):
 async def guild_thread_get_all_active(client, guild):
     guild_id = guild.id
     
-    await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/threads/active',
     )
 
@@ -2469,7 +3095,9 @@ async def guild_thread_get_all_active(client, guild):
 async def scheduled_event_get_all_guild(client, guild):
     guild_id = guild.id
     
-    return await bypass_request(client, METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/scheduled-events',
     )
 
@@ -2483,10 +3111,12 @@ async def scheduled_event_create(client, guild, voice, name):
         'channel_id': voice.id,
         'entity_metadata': None,
         'entity_type': ScheduledEventEntityType.voice.value,
-        'scheduled_start_time': datetime_to_timestamp(datetime.utcnow() + timedelta(hours=1)),
+        'scheduled_start_time': datetime_to_timestamp(datetime.utcnow() + timedelta(hours = 1)),
     }
     
-    await bypass_request(client, METHOD_POST,
+    await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/scheduled-events',
         data,
     )
@@ -2495,7 +3125,9 @@ async def scheduled_event_create(client, guild, voice, name):
 async def scheduled_event_get(client, guild, scheduled_event_id):
     guild_id = guild.id
     
-    return await bypass_request(client, METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/scheduled-events/{scheduled_event_id}',
     )
 
@@ -2508,7 +3140,9 @@ async def scheduled_event_edit(client, scheduled_event, name):
         'name' : name,
     }
     
-    await bypass_request(client, METHOD_PATCH,
+    await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/scheduled-events/{scheduled_event_id}',
         data,
     )
@@ -2518,7 +3152,9 @@ async def scheduled_event_delete(client, scheduled_event):
     guild_id = scheduled_event.guild_id
     scheduled_event_id = scheduled_event.id
     
-    await bypass_request(client, METHOD_DELETE,
+    await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/scheduled-events/{scheduled_event_id}',
     )
 
@@ -2527,13 +3163,17 @@ async def scheduled_event_user_get_chunk(client, scheduled_event):
     guild_id = scheduled_event.guild_id
     scheduled_event_id = scheduled_event.id
     
-    data = await bypass_request(client, METHOD_GET,
+    await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/scheduled-events/{scheduled_event_id}/users',
     )
 
 
 async def auto_moderation_rule_get(client, guild_id, auto_moderation_rule_id):
-    data = await bypass_request(client, METHOD_GET,
+    data = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/auto-moderation/rules/{auto_moderation_rule_id}',
     )
     
@@ -2541,7 +3181,9 @@ async def auto_moderation_rule_get(client, guild_id, auto_moderation_rule_id):
 
 
 async def auto_moderation_rule_get_all(client, guild_id):
-    data = await bypass_request(client, METHOD_GET,
+    data = await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/auto-moderation/rules',
     )
     
@@ -2550,16 +3192,21 @@ async def auto_moderation_rule_get_all(client, guild_id):
 
 async def auto_moderation_rule_create(client, guild_id, rule):
     data = rule.to_data()
-    data = await bypass_request(client, METHOD_POST,
+    data = await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/auto-moderation/rules',
         data,
     )
     
     return AutoModerationRule.from_data(data)
 
+
 async def auto_moderation_rule_edit(client, guild_id, rule_id, rule):
     data = rule.to_data()
-    data = await bypass_request(client, METHOD_PATCH,
+    data = await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/auto-moderation/rules/{rule_id}',
         data,
     )
@@ -2568,7 +3215,9 @@ async def auto_moderation_rule_edit(client, guild_id, rule_id, rule):
 
 
 async def auto_moderation_rule_delete(client, guild_id, auto_moderation_rule_id):
-    await bypass_request(client, METHOD_DELETE,
+    await bypass_request(
+        client,
+        METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/auto-moderation/rules/{auto_moderation_rule_id}',
     )
 
@@ -2617,7 +3266,7 @@ async def soundboard_sound_get_all_default(client):
 
 async def soundboard_sound_create(client, guild_id, sound, name):
     data = {
-        'sound': 'data:audio/mp3;base64,' + b64encode(sound).decode('ascii'),
+        'sound': 'data:audio/mp3;base64, ' + b64encode(sound).decode('ascii'),
         'name': name,
         'volume': 1.0,
     }
@@ -2639,6 +3288,7 @@ async def soundboard_sound_options(client, guild_id):
         f'{API_ENDPOINT}/guilds/{guild_id}/soundboard-sounds',
     )
 
+
 async def soundboard_sound_delete(client, guild_id, sound_id):
     await bypass_request(
         client,
@@ -2654,8 +3304,9 @@ async def soundboard_sound_edit(client, guild_id, sound_id, name):
         f'{API_ENDPOINT}/guilds/{guild_id}/soundboard-sounds/{sound_id}',
         {
             'name': name,
-        }
+        },
     )
+
 
 async def soundboard_sound_get(client, guild_id, sound_id):
     await bypass_request(
@@ -2720,21 +3371,22 @@ async def rate_limit_test_0000(client, message):
             tasks.append(task)
         
         await TaskGroup(KOKORO, tasks).wait_all()
-    #achievement_get limited. limit:5, reset:5
-    
+    # achievement_get limited. limit:5, reset:5
+
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0001(client,message):
+async def rate_limit_test_0001(client, message):
     """
     Does 3-3 achievement get request towards 2 achievement.
     The bot's application must have at least 2 achievement created.
     """
-    with RLTCTX(client,message.channel, 'rate_limit_test_0001') as RLT:
+    with RLTCTX(client, message.channel, 'rate_limit_test_0001') as RLT:
         try:
             achievements = await client.achievement_get_all()
         except BaseException as err:
             await RLT.send(repr(err))
         
-        if len(achievements)<3:
+        if len(achievements) < 3:
             await RLT.send(repr('The application has less than 2 achievements'))
         
         achievement_1 = achievements[0]
@@ -2745,17 +3397,18 @@ async def rate_limit_test_0001(client,message):
         
         tasks = []
         for _ in range(4):
-            task = Task(KOKORO, achievement_get(client,achievement_id_1))
+            task = Task(KOKORO, achievement_get(client, achievement_id_1))
             tasks.append(task)
             
-            task = Task(KOKORO, achievement_get(client,achievement_id_2))
+            task = Task(KOKORO, achievement_get(client, achievement_id_2))
             tasks.append(task)
         
         await TaskGroup(KOKORO, tasks).wait_all()
-    #achievement_get limited globally
-    
+    # achievement_get limited globally
+
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0002(client,message):
+async def rate_limit_test_0002(client, message):
     """
     Creates 6 achievements.
     """
@@ -2765,10 +3418,10 @@ async def rate_limit_test_0002(client,message):
             image = await file.read()
         
         tasks = []
-        names = ('Yura','Hana','Neko','Kaze','Scarlet','Yukari')
+        names = ('Yura', 'Hana', 'Neko', 'Kaze', 'Scarlet', 'Yukari')
         for name in names:
-            description = name+'boroshi'
-            task = Task(KOKORO, achievement_create(client,name,description,image))
+            description = name + 'boroshi'
+            task = Task(KOKORO, achievement_create(client, name, description, image))
             tasks.append(task)
             
         await TaskGroup(KOKORO, tasks).wait_all()
@@ -2780,25 +3433,26 @@ async def rate_limit_test_0002(client,message):
                 pass
             else:
                 await client.achievement_delete(achievement.id)
-    #achievement_create limited. limit:5, reset:5, globally
+    # achievement_create limited. limit:5, reset:5, globally
+    
     
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0003(client,message):
+async def rate_limit_test_0003(client, message):
     """
     First creates 2 achievements with the client normally, then deletes them for testing.
     """
-    with RLTCTX(client,message.channel, 'rate_limit_test_0003') as RLT:
+    with RLTCTX(client, message.channel, 'rate_limit_test_0003') as RLT:
         image_path = join(os.path.abspath(''), 'images', '0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
-        achievements=[]
-        for name in ('Cake','Neko'):
+        achievements = []
+        for name in ('Cake', 'Neko'):
             description = name+' are love'
-            achievement = await client.achievement_create(name,description,image)
+            achievement = await client.achievement_create(name, description, image)
             achievements.append(achievement)
         
-        loop=client.loop
+        loop = client.loop
         
         tasks = []
         for achievement in achievements:
@@ -2806,48 +3460,49 @@ async def rate_limit_test_0003(client,message):
             tasks.append(task)
         
         await TaskGroup(loop, tasks).wait_all()
-    #achievement_delete limited. limit:5, reset:5, globally
+    # achievement_delete limited. limit:5, reset:5, globally
+
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0004(client,message):
+async def rate_limit_test_0004(client, message):
     """
     Creates an achievement, then edits it twice for testing. When done, deletes it.
     """
-    
-    with RLTCTX(client,message.channel,'rate_limit_test_0004') as RLT:
+    with RLTCTX(client, message.channel, 'rate_limit_test_0004') as RLT:
         image_path = join(os.path.abspath(''), 'images', '0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
-        achievement = await client.achievement_create('Cake','Nekos are love',image)
+        achievement = await client.achievement_create('Cake', 'Nekos are love', image)
         
-        loop=client.loop
+        loop = client.loop
         tasks = []
         
-        task = Task(loop, achievement_edit(client,achievement,name = 'Hana'))
+        task = Task(loop, achievement_edit(client, achievement, name = 'Hana'))
         tasks.append(task)
         
-        task = Task(loop, achievement_edit(client,achievement,name = 'Phantom'))
+        task = Task(loop, achievement_edit(client, achievement, name = 'Phantom'))
         tasks.append(task)
         
         await TaskGroup(loop, tasks).wait_all()
         await client.achievement_delete(achievement)
-    #achievement_edit limited. limit:5, reset:5
-    
+    # achievement_edit limited. limit:5, reset:5
+
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0005(client,message):
+async def rate_limit_test_0005(client, message):
     """
     Creates 2 achievements, then edits them once, once for testing. At the end deletes them.
     """
-    with RLTCTX(client,message.channel,'rate_limit_test_0005') as RLT:
-        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
+    with RLTCTX(client, message.channel, 'rate_limit_test_0005') as RLT:
+        image_path = join(os.path.abspath(''), 'images', '0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
-        achievements=[]
-        for name in ('Kokoro','Koishi'):
+        achievements = []
+        for name in ('Kokoro', 'Koishi'):
             description = 'UwUwUwU'
-            achievement = await client.achievement_create(name,description,image)
+            achievement = await client.achievement_create(name, description, image)
             achievements.append(achievement)
     
         loop = client.loop
@@ -2860,34 +3515,36 @@ async def rate_limit_test_0005(client,message):
         
         for achievement in achievements:
             await client.achievement_delete(achievement)
-    #achievement_edit limited globally
+    # achievement_edit limited globally
+
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0006(client,message):
+async def rate_limit_test_0006(client, message):
     """
     Creates, edits and deletes an achievement.
     """
     
-    with RLTCTX(client,message.channel,'rate_limit_test_0006') as RLT:
-        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
+    with RLTCTX(client, message.channel, 'rate_limit_test_0006') as RLT:
+        image_path = join(os.path.abspath(''), 'images', '0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
-        achievement = await achievement_create(client,'Kokoro','is love',image)
-        await achievement_get(client,achievement.id)
-        await achievement_edit(client,achievement,name = 'Yurika')
-        await achievement_delete(client,achievement)
+        achievement = await achievement_create(client, 'Kokoro', 'is love', image)
+        await achievement_get(client, achievement.id)
+        await achievement_edit(client, achievement, name = 'Yurika')
+        await achievement_delete(client, achievement)
     
     # achievement_create, achievement_get, achievement_edit, achievement_delete are NOT grouped
-    
+
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0007(client,message):
+async def rate_limit_test_0007(client, message):
     """
     Requests all the achievements.
     """
     
-    with RLTCTX(client,message.channel,'rate_limit_test_0007') as RLT:
-        loop=client.loop
+    with RLTCTX(client, message.channel, 'rate_limit_test_0007') as RLT:
+        loop = client.loop
         tasks = []
         for _ in range(2):
             task = Task(loop, achievement_get_all(client))
@@ -2895,77 +3552,80 @@ async def rate_limit_test_0007(client,message):
         
         await TaskGroup(loop, tasks).wait_all()
     
-    #achievement_get_all limited. limit:5, reset:5, globally
+    # achievement_get_all limited. limit:5, reset:5, globally
+
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0008(client,message):
+async def rate_limit_test_0008(client, message):
     """
     Updates an achievement of the client's owner.
     """
     
-    with RLTCTX(client,message.channel,'rate_limit_test_0008') as RLT:
-        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
+    with RLTCTX(client, message.channel, 'rate_limit_test_0008') as RLT:
+        image_path = join(os.path.abspath(''), 'images', '0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
-        achievement = await client.achievement_create('Koishi','Kokoro',image,secure=True)
+        achievement = await client.achievement_create('Koishi', 'Kokoro', image, secure = True)
         
         try:
-            await user_achievement_update(client,client.owner,achievement,100)
+            await user_achievement_update(client, client.owner, achievement,100)
         finally:
             await client.achievement_delete(achievement)
     
-    # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
+    # DiscordException NOT FOUND (404), code = 10029: Unknown Entitlement
     # user_achievement_update limited. Limit : 5, reset : 5.
-    
+
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0009(client,message):
+async def rate_limit_test_0009(client, message):
     """
     Updates an achievement of the client's owner.
     Waits 2 seconds after the achievement is created, so it might work this time (nope).
     """
-    with RLTCTX(client,message.channel,'rate_limit_test_0009') as RLT:
-        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
+    with RLTCTX(client, message.channel, 'rate_limit_test_0009') as RLT:
+        image_path = join(os.path.abspath(''), 'images', '0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
-        achievement = await client.achievement_create('Koishi','Kokoro',image,secure=True)
-        await sleep(2.0,client.loop) # wait some time this time
+        achievement = await client.achievement_create('Koishi', 'Kokoro', image, secure = True)
+        await sleep(2.0, client.loop) # wait some time this time
         
         try:
-            await user_achievement_update(client,client.owner,achievement,100)
+            await user_achievement_update(client, client.owner, achievement,100)
         finally:
             await client.achievement_delete(achievement)
 
-    # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
-    
+    # DiscordException NOT FOUND (404), code = 10029: Unknown Entitlement
+
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0010(client, message):
     """
-    Updates an achievement of the client's owner. But now one, what has `secure=False`
+    Updates an achievement of the client's owner. But now one, what has `secure = False`
     """
-    with RLTCTX(client,message.channel,'rate_limit_test_0010') as RLT:
-        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
+    with RLTCTX(client, message.channel, 'rate_limit_test_0010') as RLT:
+        image_path = join(os.path.abspath(''), 'images', '0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
-        achievement = await client.achievement_create('Koishi', 'Kokoro', image) #no just a normal one
+        achievement = await client.achievement_create('Koishi', 'Kokoro', image) # no just a normal one
         
         try:
-            await user_achievement_update(client,client.owner,achievement,100)
+            await user_achievement_update(client, client.owner, achievement,100)
         finally:
             await client.achievement_delete(achievement)
     
-    # DiscordException FORBIDDEN (403), code=40001: Unauthorized
+    # DiscordException FORBIDDEN (403), code = 40001: Unauthorized
+
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0011(client,message):
+async def rate_limit_test_0011(client, message):
     """
     Updates the achievements of all the owners of the client.
     """
-    
-    with RLTCTX(client,message.channel,'rate_limit_test_0011') as RLT:
-        image_path=join(os.path.abspath(''), 'images', '0000000C_touhou_komeiji_koishi.png')
+    with RLTCTX(client, message.channel, 'rate_limit_test_0011') as RLT:
+        image_path = join(os.path.abspath(''), 'images', '0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
@@ -2974,38 +3634,44 @@ async def rate_limit_test_0011(client,message):
         tasks = []
         for member in client.application.owner.members:
             user = member.user
-            task = Task(KOKORO, user_achievement_update(client,user,achievement,100))
+            task = Task(KOKORO, user_achievement_update(client, user, achievement,100))
             tasks.append(task)
         
         await TaskGroup(KOKORO, tasks).wait_all()
         await client.achievement_delete(achievement)
     
-    # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
-    #limited globally
+    # DiscordException NOT FOUND (404), code = 10029: Unknown Entitlement
+    # limited globally
+
 
 class check_is_owner:
     __slots__ = ('client', )
     def __init__(self, client):
         self.client = client
     
-    def __call__(self,message):
+    def __call__(self, message):
         return self.client.is_owner(message.author)
-    
+
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0012(client,message):
+async def rate_limit_test_0012(client, message):
     """
     Tries to get a user's achievements after oauth2 authorization.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0012') as RLT:
-        await client.message_create(channel, (
-            'Please authorize yourself and resend the redirected url after it\n'
-            'https://discordapp.com/oauth2/authorize?client_id = 486565096164687885'
-            '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
-            '&response_type=code&scope=identify%20applications.store.update'))
+    with RLTCTX(client, channel, 'rate_limit_test_0012') as RLT:
+        await client.message_create(
+            channel,
+            (
+                'Please authorize yourself and resend the redirected url after it\n'
+                'https://discordapp.com/oauth2/authorize?client_id = 486565096164687885'
+                '&redirect_uri = https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
+                '&response_type = code&scope = identify%20applications.store.update'
+            ),
+        )
         
         try:
-            message = await wait_for_message(client,channel,check_is_owner(client),60.)
+            message = await wait_for_message(client, channel, check_is_owner(client), 60.0)
         except TimeoutError:
             await RLT.send('Timeout meanwhile waiting for redirect url.')
     
@@ -3015,14 +3681,15 @@ async def rate_limit_test_0012(client,message):
         except ValueError:
             await RLT.send('Bad redirect url.')
         
-        access = await client.activate_authorization_code( * result, ['identify', 'applications.store.update'])
+        access = await client.activate_authorization_code(*result, ['identify', 'applications.store.update'])
         
         if access is None:
             await RLT.send('Too old redirect url.')
         
-        await user_achievements(client,access)
+        await user_achievements(client, access)
     #DiscordException UNAUTHORIZED (401): 401: Unauthorized
     # no limit data provided
+
 
 rate_limit_test_0013_OK       = BUILTIN_EMOJIS['ok_hand']
 rate_limit_test_0013_CANCEL   = BUILTIN_EMOJIS['x']
@@ -3043,13 +3710,14 @@ class rate_limit_test_0013_checker:
         
         return True
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0013(client,message):
+async def rate_limit_test_0013(client, message):
     """
     Requests messages for each day from the channel if can, then deletes them if you agree with it as well.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0013') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0013') as RLT:
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
@@ -3067,21 +3735,21 @@ async def rate_limit_test_0013(client,message):
         for day in range(41):
             before= int((now - (day    ) * 86400.0 + 100.0) * 1000.0 - DISCORD_EPOCH) << 22
             after = int((now - (day + 1) * 86400.0 - 100.0) * 1000.0 - DISCORD_EPOCH) << 22
-            time_bounds.append((before,after),)
+            time_bounds.append((before, after),)
         
         messages = []
         for day in range(41):
             messages.append((None, None),)
         
         for message_ in channel.messages:
-            for day,(before,after) in enumerate(time_bounds):
+            for day,(before, after) in enumerate(time_bounds):
                 if message_.id>before:
                     continue
                 
                 if message_.id<after:
                     continue
                 
-                message_own, message_other=messages[day]
+                message_own, message_other = messages[day]
                 if (message_own is not None) and (message_other is not None):
                     break
                 
@@ -3094,16 +3762,16 @@ async def rate_limit_test_0013(client,message):
                 
                 break
         
-        result=['```\nday | own | other\n']
+        result = ['```\nday | own | other\n']
         for day,(message_own, message_other) in enumerate(messages):
             result.append(f'{day:>3} | {("YES", "NO")[message_own is None]} | {("YES", "NO")[message_other is None]}\n')
         result.append('```\nShould we start?')
-        embed = Embed('Found messages',''.join(result))
+        embed = Embed('Found messages', ''.join(result))
         
         message = await client.message_create(channel, embed = embed)
         
         for emoji in rate_limit_test_0013_EMOJIS:
-            await client.reaction_add(message,emoji)
+            await client.reaction_add(message, emoji)
         
         try:
             event = await wait_for_reaction(client, message, rate_limit_test_0013_checker(client), 40.)
@@ -3132,34 +3800,36 @@ async def rate_limit_test_0013(client,message):
             return
             
         # no more case
-        
+
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0014(client,message):
+async def rate_limit_test_0014(client, message):
     """
     Creates 2 message.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0014') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0014') as RLT:
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
             
-        messages=[]
+        messages = []
         for index in range(2):
-            message_ = await client.message_create(channel,f'testing rate_limit: message {index}')
+            message_ = await client.message_create(channel, f'testing rate_limit: message {index}')
             messages.append(message_)
         
-        await Task(KOKORO, message_delete_multiple(client,messages))
+        await Task(KOKORO, message_delete_multiple(client, messages))
+
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0015(client,message):
+async def rate_limit_test_0015(client, message):
     """
     Deletes all the reactions of a single emoji from a message.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0015') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0015') as RLT:
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
@@ -3169,13 +3839,14 @@ async def rate_limit_test_0015(client,message):
         emoji = BUILTIN_EMOJIS['x']
         await reaction_delete_emoji(client, message, emoji)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0016(client, message):
     """
     Adds a reaction and deletes all the same type from the message.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0016') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0016') as RLT:
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
@@ -3186,32 +3857,35 @@ async def rate_limit_test_0016(client, message):
         await reaction_add(client, message, emoji)
         await reaction_delete_emoji(client, message, emoji)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0017(client,message):
+async def rate_limit_test_0017(client, message):
     """
     Requests 1 guild preview.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0017') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0017') as RLT:
         await guild_preview_get(client, 197038439483310086)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0018(client,message):
+async def rate_limit_test_0018(client, message):
     """
     Requests 2 guild preview.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0018') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0018') as RLT:
         await guild_preview_get(client, 302094807046684672)
         await guild_preview_get(client, 197038439483310086)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0019(client,message):
+async def rate_limit_test_0019(client, message):
     """
     Edits the channel twice.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0019') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0019') as RLT:
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
@@ -3223,13 +3897,14 @@ async def rate_limit_test_0019(client,message):
         await channel_edit(client, channel, nsfw = (not nsfw))
         await channel_edit(client, channel, nsfw = nsfw)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0020(client,message):
+async def rate_limit_test_0020(client, message):
     """
     Creates a channel.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0020') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0020') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3241,13 +3916,14 @@ async def rate_limit_test_0020(client,message):
         channel_id = int(data['id'])
         await client.http.channel_delete(channel_id, None)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0021(client,message):
+async def rate_limit_test_0021(client, message):
     """
     Deletes a channel.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0021') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0021') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3255,16 +3931,17 @@ async def rate_limit_test_0021(client,message):
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        channel = await client.channel_create(guild, name = 'Kanako', type_=0)
+        channel = await client.channel_create(guild, name = 'Kanako', type_ = 0)
         await channel_delete(client, channel)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0022(client,message):
+async def rate_limit_test_0022(client, message):
     """
     Edits a role.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0022') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0022') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3272,17 +3949,18 @@ async def rate_limit_test_0022(client,message):
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        role = await client.role_create(guild,name = 'Sanae')
+        role = await client.role_create(guild, name = 'Sanae')
         await role_edit(client, role, name = 'Chiruno')
         await client.role_delete(role)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0023(client,message):
+async def rate_limit_test_0023(client, message):
     """
     Creates a role.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0023') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0023') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3292,7 +3970,8 @@ async def rate_limit_test_0023(client,message):
         
         data = await role_create(client, guild, name = 'Yukari')
         role_id = int(data['id'])
-        await client.http.role_delete(guild.id,role_id,None)
+        await client.http.role_delete(guild.id, role_id, None)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0024(client, message):
@@ -3300,7 +3979,7 @@ async def rate_limit_test_0024(client, message):
     Deletes a role.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0024') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0024') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3312,16 +3991,17 @@ async def rate_limit_test_0024(client, message):
         if (top_role is not None) and (top_role.position < 2):
             await RLT.send('My top role\'s position is not enough high.')
         
-        role = await client.role_create(guild,name = 'Sakuya')
+        role = await client.role_create(guild, name = 'Sakuya')
         await role_delete(client, role)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0025(client,message):
+async def rate_limit_test_0025(client, message):
     """
     Edits 2 channel.
     """
     channel_1 = message.channel
-    with RLTCTX(client,channel_1,'rate_limit_test_0025') as RLT:
+    with RLTCTX(client, channel_1, 'rate_limit_test_0025') as RLT:
         if channel_1.guild is None:
             await RLT.send('Please use this command at a guild.')
         
@@ -3332,7 +4012,7 @@ async def rate_limit_test_0025(client,message):
         if parent is None:
             await RLT.send('The channel should be at a category')
         
-        channel_2=None
+        channel_2 = None
         for channel in parent.channels:
             if channel is channel_1:
                 continue
@@ -3346,8 +4026,8 @@ async def rate_limit_test_0025(client,message):
         if channel_2 is None:
             await RLT.send('I want 2 text channels at the category of this channel.')
         
-        nsfw_1=channel_1.nsfw
-        nsfw_2=channel_2.nsfw
+        nsfw_1 = channel_1.nsfw
+        nsfw_2 = channel_2.nsfw
         
         await channel_edit(client, channel_1, nsfw = (not nsfw_1))
         await channel_edit(client, channel_2, nsfw = (not nsfw_2))
@@ -3355,13 +4035,14 @@ async def rate_limit_test_0025(client,message):
         await client.channel_edit(channel_1, nsfw = nsfw_1)
         await client.channel_edit(channel_2, nsfw = nsfw_2)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0026(client,message):
+async def rate_limit_test_0026(client, message):
     """
     Edits 2 roles at the same guild.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0026') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0026') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3369,20 +4050,21 @@ async def rate_limit_test_0026(client,message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        role_1 = await client.role_create(guild,name = 'Sanae')
-        role_2 = await client.role_create(guild,name = 'Reimu')
+        role_1 = await client.role_create(guild, name = 'Sanae')
+        role_2 = await client.role_create(guild, name = 'Reimu')
         await role_edit(client, role_1, name = 'Chiruno')
         await role_edit(client, role_2, name = 'Ririi')
         await client.role_delete(role_1)
         await client.role_delete(role_2)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0027(client, message, guild_id:str = ''):
+async def rate_limit_test_0027(client, message, guild_id : str = ''):
     """
     Edits 1-1 roles at separate guilds.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0027') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0027') as RLT:
         guild_1 = channel.guild
         if guild_1 is None:
             await RLT.send('Please use this command at a guild.')
@@ -3398,20 +4080,21 @@ async def rate_limit_test_0027(client, message, guild_id:str = ''):
         if not guild_2.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission at the other guild as well')
             
-        role_1 = await client.role_create(guild_1,name = 'Sanae')
-        role_2 = await client.role_create(guild_2,name = 'Reimu')
+        role_1 = await client.role_create(guild_1, name = 'Sanae')
+        role_2 = await client.role_create(guild_2, name = 'Reimu')
         await role_edit(client, role_1, name = 'Chiruno')
         await role_edit(client, role_2, name = 'Ririi')
         await client.role_delete(role_1)
         await client.role_delete(role_2)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0028(client, message, guild_id:str = ''):
+async def rate_limit_test_0028(client, message, guild_id : str = ''):
     """
     Creates 1-1 roles at separate guilds
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0027') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0027') as RLT:
         guild_1 = channel.guild
         if guild_1 is None:
             await RLT.send('Please use this command at a guild.')
@@ -3434,13 +4117,14 @@ async def rate_limit_test_0028(client, message, guild_id:str = ''):
         await client.http.role_delete(guild_1.id, role_1_id, None)
         await client.http.role_delete(guild_2.id, role_2_id, None)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0029(client,message):
+async def rate_limit_test_0029(client, message):
     """
     Moves a role.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0029') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0029') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3453,8 +4137,9 @@ async def rate_limit_test_0029(client,message):
             await RLT.send('My top role\'s position is not enough high.')
         
         role = await client.role_create(guild, name = 'Sakuya')
-        await role_move(client,role,2)
+        await role_move(client, role,2)
         await client.role_delete(role)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0030(client, message):
@@ -3462,7 +4147,7 @@ async def rate_limit_test_0030(client, message):
     Crossposts 2 message at the current channel.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0030') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0030') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3482,13 +4167,14 @@ async def rate_limit_test_0030(client, message):
         await client.message_delete(message_1)
         await client.message_delete(message_2)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0031(client, message):
     """
     Crossposts 1-1 messages at 2 different channels.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0031') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0031') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3507,7 +4193,7 @@ async def rate_limit_test_0031(client, message):
             if channel_ is channel:
                 continue
             
-            if channel_.type!=5:
+            if channel_.type !=  5:
                 continue
             
             channel_2 = channel_
@@ -3527,13 +4213,14 @@ async def rate_limit_test_0031(client, message):
         await client.message_delete(message_1)
         await client.message_delete(message_2)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0032(client, message):
     """
     Requests a user (myself) at 2 guilds.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0032') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0032') as RLT:
         guild_1 = channel.guild
         if guild_1 is None:
             await RLT.send('Please use this command at a guild.')
@@ -3550,13 +4237,14 @@ async def rate_limit_test_0032(client, message):
         await guild_user_get(client, guild_1, client.id)
         await guild_user_get(client, GUILDS[guild_2_id], client.id)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0033(client, message):
     """
     Requests users with name `nyan` at 2 guilds.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0033') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0033') as RLT:
         guild_1 = channel.guild
         if guild_1 is None:
             await RLT.send('Please use this command at a guild.')
@@ -3573,13 +4261,14 @@ async def rate_limit_test_0033(client, message):
         await guild_user_search(client, guild_1, 'nyan')
         await guild_user_search(client, GUILDS[guild_2_id], 'nyan')
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0034(client, message):
     """
     Requests an application's owner's access.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0034') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0034') as RLT:
         for client_ in CLIENTS.values():
             if (type(client_.application.owner) is not Team) and client_.bot and (client_.secret is not None):
                 break
@@ -3590,6 +4279,7 @@ async def rate_limit_test_0034(client, message):
             await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
         
         await oauth2_token(client_)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0035(client, message):
@@ -3606,7 +4296,7 @@ async def rate_limit_test_0035(client, message):
             await RLT.send('I need admin permission to complete this command.')
             
         for channel_ in guild.channels.values():
-            if channel_.type ==5:
+            if channel_.type ==  5:
                 source_channel = channel_
                 break
         else:
@@ -3642,6 +4332,7 @@ async def rate_limit_test_0035(client, message):
         webhook = await channel_follow(client, source_channel, target_channel)
         await client.webhook_delete(webhook)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0036(client, message):
     """
@@ -3659,6 +4350,7 @@ async def rate_limit_test_0036(client, message):
         
         await invite_get_channel(client, channel)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0037(client, message):
     """
@@ -3670,7 +4362,8 @@ async def rate_limit_test_0037(client, message):
             await RLT.send('I need permission to read message history to execute this command.')
         
         await message_get_chunk(client, channel)
-        
+
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0038(client, message):
     """
@@ -3679,6 +4372,7 @@ async def rate_limit_test_0038(client, message):
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0038') as RLT:
         await message_get(client, channel, message.id)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0039(client, message):
@@ -3694,6 +4388,7 @@ async def rate_limit_test_0039(client, message):
         await client.reaction_add(message, emoji)
         
         await reaction_user_get_chunk(client, message, emoji)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0040(client, message):
@@ -3735,6 +4430,7 @@ async def rate_limit_test_0040(client, message):
         permission_overwrite = await client.permission_overwrite_create(channel, role, 0b1000, 0b0100)
         await permission_overwrite_delete(client, channel, permission_overwrite)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0041(client, message):
     """
@@ -3775,6 +4471,7 @@ async def rate_limit_test_0041(client, message):
         permission_overwrite = await permission_overwrite_create(client, target_channel, role, 0b1000, 0b0100)
         await client.permission_overwrite_delete(channel, permission_overwrite)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0042(client, message):
     """
@@ -3790,6 +4487,7 @@ async def rate_limit_test_0042(client, message):
             await RLT.send('I need admin permission to complete this command.')
         
         await webhook_get_all_channel(client, channel)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0043(client, message):
@@ -3808,6 +4506,7 @@ async def rate_limit_test_0043(client, message):
         webhook = await webhook_create(client, channel, 'cake')
         await client.webhook_delete(webhook)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0044(client, message):
     """
@@ -3820,6 +4519,7 @@ async def rate_limit_test_0044(client, message):
             await RLT.send('Please use this command at a guild.')
         
         await guild_get(client, guild.id)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0045(client, message):
@@ -3849,11 +4549,12 @@ async def rate_limit_test_0045(client, message):
         else:
             target_channel = None
         
-        if afk_channel is target_channel: #both is None
+        if afk_channel is target_channel: # both is None
             await RLT.send('The guild should have at least 1 voice channel.')
 
         await guild_edit(client, guild, afk_channel = target_channel)
         await client.guild_edit(guild, afk_channel = afk_channel)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0046(client, message):
@@ -3871,6 +4572,7 @@ async def rate_limit_test_0046(client, message):
         
         await audit_log_get_chunk(client, guild)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0047(client, message):
     """
@@ -3887,9 +4589,10 @@ async def rate_limit_test_0047(client, message):
         
         await guild_ban_get_all(client, guild)
 
+
 @RATE_LIMIT_COMMANDS
-@configure_converter('user', everywhere=True)
-async def rate_limit_test_0048(client, message, user:'user'=None):
+@configure_converter('user', everywhere = True)
+async def rate_limit_test_0048(client, message, user : 'user' = None):
     """
     Bans gets the ban and un-bans the given user.
     
@@ -3914,6 +4617,7 @@ async def rate_limit_test_0048(client, message, user:'user'=None):
         await guild_ban_get(client, guild, user.id)
         await guild_ban_delete(client, guild, user.id)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0049(client, message):
     """
@@ -3926,6 +4630,7 @@ async def rate_limit_test_0049(client, message):
             await RLT.send('Please use this command at a guild.')
         
         await guild_channels(client, guild)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0050(client, message):
@@ -3941,7 +4646,7 @@ async def rate_limit_test_0050(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        target_channel = await client.channel_create(guild, name = 'tesuto_next:gen', parent=channel.parent, type_=0)
+        target_channel = await client.channel_create(guild, name = 'tesuto_next:gen', parent = channel.parent, type_ = 0)
         if channel.position == 0:
             position = 1
         else:
@@ -3950,6 +4655,7 @@ async def rate_limit_test_0050(client, message):
         await channel_move(client, target_channel, position)
         
         await client.channel_delete(target_channel)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0051(client, message):
@@ -3965,9 +4671,10 @@ async def rate_limit_test_0051(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        created_channel = await channel_create(client, guild, name = 'tesuto_next:gen2', type_=0)
+        created_channel = await channel_create(client, guild, name = 'tesuto_next:gen2', type_ = 0)
         
         await client.channel_delete(created_channel)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0052(client, message):
@@ -3981,6 +4688,7 @@ async def rate_limit_test_0052(client, message):
             await RLT.send('Please use this command at a guild.')
         
         await emoji_guild_get_all(client, guild)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0053(client, message):
@@ -4001,6 +4709,7 @@ async def rate_limit_test_0053(client, message):
         
         await emoji_get(client, emoji)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0054(client, message):
     """
@@ -4016,6 +4725,7 @@ async def rate_limit_test_0054(client, message):
             await RLT.send('I need admin permission to complete this command.')
         
         await guild_prune_estimate(client, guild)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0055(client, message):
@@ -4033,6 +4743,7 @@ async def rate_limit_test_0055(client, message):
         
         await guild_prune(client, guild)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0056(client, message):
     """
@@ -4048,6 +4759,7 @@ async def rate_limit_test_0056(client, message):
             await RLT.send('I need admin permission to complete this command.')
         
         await guild_voice_region_get_all(client, guild)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0057(client, message):
@@ -4065,6 +4777,7 @@ async def rate_limit_test_0057(client, message):
         
         await guild_role_get_all(client, guild)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0058(client, message):
     """
@@ -4077,6 +4790,7 @@ async def rate_limit_test_0058(client, message):
             await RLT.send('Please use this command at a guild.')
         
         await invite_get_vanity(client, guild)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0059(client, message):
@@ -4093,6 +4807,7 @@ async def rate_limit_test_0059(client, message):
             await RLT.send('I need admin permission to complete this command.')
         
         await webhook_get_all_guild(client, guild)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0060(client, message):
@@ -4111,6 +4826,7 @@ async def rate_limit_test_0060(client, message):
         invite = await client.invite_create_preferred(guild)
         await invite_delete(client, invite)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0061(client, message):
     """
@@ -4120,13 +4836,14 @@ async def rate_limit_test_0061(client, message):
     with RLTCTX(client, channel, 'rate_limit_test_0061') as RLT:
         await application_get_own(client)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0062(client, message):
     """
     Requests the application owner's user information.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0062') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0062') as RLT:
         for client_ in CLIENTS.values():
             if (type(client_.application.owner) is not Team) and client_.bot and (client_.secret is not None):
                 break
@@ -4139,14 +4856,16 @@ async def rate_limit_test_0062(client, message):
         access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random access
         await user_info_get(client_, access)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0063(client, message):
     """
     Requests the client's profile.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0063') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0063') as RLT:
         await client_user_get(client)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0064(client, message):
@@ -4154,8 +4873,9 @@ async def rate_limit_test_0064(client, message):
     Gets the private channels of the client.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0064') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0064') as RLT:
         await channel_private_get_all(client)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0065(client, message):
@@ -4163,8 +4883,9 @@ async def rate_limit_test_0065(client, message):
     Gets the client's connections.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0065') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0065') as RLT:
         await client_connection_get_all(client)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0066(client, message):
@@ -4172,7 +4893,7 @@ async def rate_limit_test_0066(client, message):
     Requests the owner's connections.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0066') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0066') as RLT:
         for client_ in CLIENTS.values():
             if (type(client_.application.owner) is not Team) and client_.bot and (client_.secret is not None):
                 break
@@ -4185,13 +4906,14 @@ async def rate_limit_test_0066(client, message):
         access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random access
         await user_connection_get_all(client_, access)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0067(client, message):
     """
     Requests the owner's guilds.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0067') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0067') as RLT:
         for client_ in CLIENTS.values():
             if (type(client_.application.owner) is not Team) and client_.bot and (client_.secret is not None):
                 break
@@ -4204,14 +4926,16 @@ async def rate_limit_test_0067(client, message):
         access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random access
         await user_guild_get_all(client_, access)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0068(client, message):
     """
     Requests the client's guilds.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0068') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0068') as RLT:
         await guild_get_chunk(client)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0069(client, message):
@@ -4219,7 +4943,7 @@ async def rate_limit_test_0069(client, message):
     Requests the owner's and the client' guilds.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0069') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0069') as RLT:
         for client_ in CLIENTS.values():
             if (type(client_.application.owner) is not Team) and client_.bot and (client_.secret is not None):
                 break
@@ -4259,9 +4983,10 @@ async def rate_limit_test_0070(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        webhook = await client.webhook_create(channel,name = 'Suzuya')
+        webhook = await client.webhook_create(channel, name = 'Suzuya')
         await webhook_edit(client, webhook, 'Saki')
         await client.webhook_delete(webhook)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0071(client, message):
@@ -4281,6 +5006,7 @@ async def rate_limit_test_0071(client, message):
         await webhook_edit_token(client, webhook, 'Saki')
         await client.webhook_delete(webhook)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0072(client, message):
     """
@@ -4296,6 +5022,7 @@ async def rate_limit_test_0072(client, message):
             await RLT.send('I need manage guild permission to complete this command.')
         
         await guild_discovery_get(client, guild)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0073(client, message):
@@ -4316,6 +5043,7 @@ async def rate_limit_test_0073(client, message):
         
         await guild_discovery_edit(client, guild, emoji_discovery = (not discovery))
         await client.guild_discovery_edit(guild, emoji_discovery = discovery)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0074(client, message):
@@ -4358,6 +5086,7 @@ async def rate_limit_test_0074(client, message):
         for action in actions:
             await action(client, guild, id_)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0075(client, message):
     """
@@ -4366,6 +5095,7 @@ async def rate_limit_test_0075(client, message):
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0075') as RLT:
         await discovery_category_get_all(client)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0076(client, message):
@@ -4376,6 +5106,7 @@ async def rate_limit_test_0076(client, message):
     with RLTCTX(client, channel, 'rate_limit_test_0076') as RLT:
         await discovery_validate_term(client, 'gaming')
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0077(client, message):
     """
@@ -4385,6 +5116,7 @@ async def rate_limit_test_0077(client, message):
     with RLTCTX(client, channel, 'rate_limit_test_0077') as RLT:
         await applications_detectable(client)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0078(client, message):
     """
@@ -4393,6 +5125,7 @@ async def rate_limit_test_0078(client, message):
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0078') as RLT:
         await eula_get(client)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0079(client, message):
@@ -4407,6 +5140,7 @@ async def rate_limit_test_0079(client, message):
         
         await welcome_screen_get(client, guild.id)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0080(client, message):
     """
@@ -4415,6 +5149,7 @@ async def rate_limit_test_0080(client, message):
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0080') as RLT:
         await voice_regions(client)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0081(client, message):
@@ -4428,9 +5163,10 @@ async def rate_limit_test_0081(client, message):
             await RLT.send('Please use this command at a guild.')
         
         await integration_get_all(client, guild)
-    
+
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0082(client, message, name:str, emoji:'Emoji'):
+async def rate_limit_test_0082(client, message, name : str, emoji : 'Emoji'):
     """
     Creates an emoji in 2 guilds and then deletes it. Checks emoji deletion.
     
@@ -4446,20 +5182,20 @@ async def rate_limit_test_0082(client, message, name:str, emoji:'Emoji'):
             if index == 0:
                 guild1 = guild
             else:
-                guild2 = guild
+                guild_2 = guild
         
         async with client.http.get(emoji.url) as response:
             emoji_data = await response.read()
         
-        emoji1 = await client.emoji_create(guild1, name, emoji_data)
-        emoji2 = await client.emoji_create(guild2, name, emoji_data)
+        emoji_1 = await client.emoji_create(guild1, name, emoji_data)
+        emoji_2 = await client.emoji_create(guild_2, name, emoji_data)
         
-        await emoji_delete(client, emoji1)
-        await emoji_delete(client, emoji2)
+        await emoji_delete(client, emoji_1)
+        await emoji_delete(client, emoji_2)
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0083(client, message, name:str, emoji:'Emoji'):
+async def rate_limit_test_0083(client, message, name : str, emoji : 'Emoji'):
     """
     Creates an emoji in 2 guilds and then deletes it. Checks emoji creation.
     
@@ -4475,20 +5211,20 @@ async def rate_limit_test_0083(client, message, name:str, emoji:'Emoji'):
             if index == 0:
                 guild1 = guild
             else:
-                guild2 = guild
+                guild_2 = guild
         
         async with client.http.get(emoji.url) as response:
             emoji_data = await response.read()
         
-        emoji1 = await emoji_create(client, guild1, name, emoji_data)
-        emoji2 = await emoji_create(client, guild2, name, emoji_data)
+        emoji_1 = await emoji_create(client, guild1, name, emoji_data)
+        emoji_2 = await emoji_create(client, guild_2, name, emoji_data)
         
-        await client.emoji_delete(emoji1)
-        await client.emoji_delete(emoji2)
+        await client.emoji_delete(emoji_1)
+        await client.emoji_delete(emoji_2)
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0084(client, message, name:str, emoji:'Emoji'):
+async def rate_limit_test_0084(client, message, name : str, emoji : 'Emoji'):
     """
     Creates 2 emoji in 1 guild and then deletes it. Checks emoji creation.
     
@@ -4503,14 +5239,15 @@ async def rate_limit_test_0084(client, message, name:str, emoji:'Emoji'):
         async with client.http.get(emoji.url) as response:
             emoji_data = await response.read()
         
-        emoji1 = await emoji_create(client, guild, name, emoji_data)
-        await client.emoji_delete(emoji1)
+        emoji_1 = await emoji_create(client, guild, name, emoji_data)
+        await client.emoji_delete(emoji_1)
         
-        emoji2 = await emoji_create(client, guild, name, emoji_data)
-        await client.emoji_delete(emoji2)
+        emoji_2 = await emoji_create(client, guild, name, emoji_data)
+        await client.emoji_delete(emoji_2)
+
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0085(client, message, name:str, emoji:'Emoji'):
+async def rate_limit_test_0085(client, message, name : str, emoji : 'Emoji'):
     """
     Creates an emoji, edits and then deletes it. Checks emoji edition.
     
@@ -4529,8 +5266,9 @@ async def rate_limit_test_0085(client, message, name:str, emoji:'Emoji'):
         await emoji_edit(client, emoji, name = 'cake_hater')
         await client.emoji_delete(emoji)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0086(client, message, name:str,):
+async def rate_limit_test_0086(client, message, name : str):
     """
     Edits my nick desu.
     
@@ -4544,8 +5282,9 @@ async def rate_limit_test_0086(client, message, name:str,):
         
         await client_guild_profile_nick_edit(client, guild, name)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0087(client, message, user:'user',):
+async def rate_limit_test_0087(client, message, user : 'user'):
     """
     Kicks the given user from the guild.
     
@@ -4559,6 +5298,7 @@ async def rate_limit_test_0087(client, message, user:'user',):
         
         await guild_user_delete(client, guild, user)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0088(client, message):
     """
@@ -4567,6 +5307,7 @@ async def rate_limit_test_0088(client, message):
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0088') as RLT:
         await channel_private_create(client, message.author)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0089(client, message):
@@ -4594,6 +5335,7 @@ async def rate_limit_test_0089(client, message):
         
         new_message = await webhook_execute(client, executor_webhook, 'ayaya')
         await webhook_message_edit(client, executor_webhook, new_message, 'nya')
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0090(client, message):
@@ -4643,8 +5385,9 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages_in_threads = True,
 )
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0092(client, message, channel2: Channel=None):
+async def rate_limit_test_0092(client, message, channel2 : Channel = None):
     """
     Creates 3 messages in 2 channels and deletes them. Please also define an other channel.
     """
@@ -4687,6 +5430,7 @@ async def rate_limit_test_0093(client, message):
         for message in messages:
             await client.message_delete(message)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0094(client, message):
     """
@@ -4705,6 +5449,7 @@ async def rate_limit_test_0094(client, message):
         
         await message_delete_multiple(client, messages[5:])
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0095(client, message):
     """
@@ -4718,8 +5463,9 @@ async def rate_limit_test_0095(client, message):
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        for name in ('ayaya', 'nyan', 'ahaha'):
+        for name in ('ayaya', 'nyan', 'orin'):
             await channel_edit(client, channel, name = name)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0096(client, message):
@@ -4790,12 +5536,15 @@ async def rate_limit_test_0099(client, message):
         await application_command_guild_edit(client, guild, application_command, application_command_schema)
         await application_command_guild_delete(client, guild, application_command)
 
+
 class check_interacter:
     __slots__ = ('user', 'channel', 'application_command')
+    
     def __init__(self, channel, user, application_command):
         self.channel = channel
         self.user = user
         self.application_command = application_command
+    
         
     def __call__(self, event):
         channel, user, interaction_command = event
@@ -4809,6 +5558,7 @@ class check_interacter:
             return False
         
         return True
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0100(client, message):
@@ -4824,7 +5574,7 @@ async def rate_limit_test_0100(client, message):
         application_command_schema = ApplicationCommand(
             'test_command',
             'ayaya',
-                )
+        )
         
         # Command
         application_command = await client.application_command_guild_create(guild, application_command_schema)
@@ -4843,6 +5593,7 @@ async def rate_limit_test_0100(client, message):
             await interaction_response_message_delete(client, interaction)
         finally:
             await client.application_command_guild_delete(guild, application_command)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0101(client, message):
@@ -4959,6 +5710,7 @@ async def rate_limit_test_0104(client, message):
         
         await verification_screen_edit(client, guild)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0105(client, message):
     """
@@ -4972,8 +5724,9 @@ async def rate_limit_test_0105(client, message):
         
         await welcome_screen_edit(client, guild)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0106(client, message, guild2:'guild'=None):
+async def rate_limit_test_0106(client, message, guild_2 : 'guild' = None):
     """
     Edits the welcome screen of 2 guilds. Please also define the second guild.
     """
@@ -4983,11 +5736,12 @@ async def rate_limit_test_0106(client, message, guild2:'guild'=None):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if guild2 is None:
+        if guild_2 is None:
             await RLT.send('Second guild unknown.')
         
         await welcome_screen_edit(client, guild)
-        await welcome_screen_edit(client, guild2)
+        await welcome_screen_edit(client, guild_2)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0107(client, message):
@@ -5009,6 +5763,7 @@ async def rate_limit_test_0107(client, message):
         finally:
             if delete_after:
                 await client.application_command_global_delete(application_command)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0108(client, message):
@@ -5035,6 +5790,7 @@ async def rate_limit_test_0108(client, message):
         finally:
             if delete_after:
                 await client.application_command_guild_delete(guild, application_command)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0109(client, message):
@@ -5077,8 +5833,9 @@ async def rate_limit_test_0109(client, message):
                 application_command = application_commands[0]
                 await client.application_command_guild_delete(guild, application_command)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0110(client, message, guild2:'guild'=None):
+async def rate_limit_test_0110(client, message, guild_2 : 'guild' = None):
     """
     Adds command with 2 guilds, then uses the update many endpoint. Please give an additional guild to use the command
     within.
@@ -5089,10 +5846,10 @@ async def rate_limit_test_0110(client, message, guild2:'guild'=None):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if guild2 is None:
+        if guild_2 is None:
             await RLT.send('Second guild unknown.')
         
-        application_commands = await client.application_command_guild_get_all(guild2)
+        application_commands = await client.application_command_guild_get_all(guild_2)
         if application_commands:
             application_command = application_commands[0]
             delete_command_after = False
@@ -5101,11 +5858,11 @@ async def rate_limit_test_0110(client, message, guild2:'guild'=None):
             delete_command_after = True
         
         try:
-            application_commands = await application_command_guild_update_multiple(client, guild2, [application_command])
+            application_commands = await application_command_guild_update_multiple(client, guild_2, [application_command])
         finally:
             if delete_command_after:
                 application_command = application_commands[0]
-                await client.application_command_guild_delete(guild2, application_command)
+                await client.application_command_guild_delete(guild_2, application_command)
         
         application_commands = await client.application_command_guild_get_all(guild)
         if application_commands:
@@ -5122,8 +5879,9 @@ async def rate_limit_test_0110(client, message, guild2:'guild'=None):
                 application_command = application_commands[0]
                 await client.application_command_guild_delete(guild, application_command)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0111(client, message, guild2:'guild'=None):
+async def rate_limit_test_0111(client, message, guild_2 : 'guild' = None):
     """
     Creates application command within 2 guilds. Please define a second guild.
     """
@@ -5133,19 +5891,20 @@ async def rate_limit_test_0111(client, message, guild2:'guild'=None):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if guild2 is None:
+        if guild_2 is None:
             await RLT.send('Second guild unknown.')
         
         application_command = ApplicationCommand('test_command', 'ayaya')
-        application_command = await application_command_guild_create(client, guild2, application_command)
-        await client.application_command_guild_delete(guild2, application_command)
+        application_command = await application_command_guild_create(client, guild_2, application_command)
+        await client.application_command_guild_delete(guild_2, application_command)
         
         application_command = ApplicationCommand('test_command', 'ayaya')
         application_command = await application_command_guild_create(client, guild, application_command)
         await client.application_command_guild_delete(guild, application_command)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0112(client, message, guild2:'guild'=None):
+async def rate_limit_test_0112(client, message, guild_2 : 'guild' = None):
     """
     Creates, edits and the deletes a guild bound application command. Please define a second guild as well.
     """
@@ -5155,7 +5914,7 @@ async def rate_limit_test_0112(client, message, guild2:'guild'=None):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if guild2 is None:
+        if guild_2 is None:
             await RLT.send('Second guild unknown.')
         
         application_command_schema = ApplicationCommand(
@@ -5176,13 +5935,13 @@ async def rate_limit_test_0112(client, message, guild2:'guild'=None):
             'But does nothing for real, pls don\'t use it.',
                 )
         
-        application_command = await application_command_guild_create(client, guild2, application_command_schema)
+        application_command = await application_command_guild_create(client, guild_2, application_command_schema)
         
         application_command_schema.description = 'The floor is lava.'
         application_command_schema.name = 'derping-out'
         
-        await application_command_guild_edit(client, guild2, application_command, application_command_schema)
-        await application_command_guild_delete(client, guild2, application_command)
+        await application_command_guild_edit(client, guild_2, application_command, application_command_schema)
+        await application_command_guild_delete(client, guild_2, application_command)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5221,6 +5980,7 @@ async def rate_limit_test_0114(client, message):
         
         await client.application_command_guild_delete(guild, application_command)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0115(client, message):
     """
@@ -5241,6 +6001,7 @@ async def rate_limit_test_0115(client, message):
             [ApplicationCommandPermissionOverwrite(client.owner, True)])
         
         await client.application_command_guild_delete(guild, application_command)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0116(client, message):
@@ -5273,7 +6034,7 @@ async def rate_limit_test_0116(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0117(client, message, guild2:'guild'=None):
+async def rate_limit_test_0117(client, message, guild_2 : 'guild' = None):
     """
     Creates and edits application commands inside of 2 guilds.
     """
@@ -5283,7 +6044,7 @@ async def rate_limit_test_0117(client, message, guild2:'guild'=None):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if guild2 is None:
+        if guild_2 is None:
             await RLT.send('Second guild unknown.')
         
         access = await client.owners_access('applications.commands.permissions.update')
@@ -5297,12 +6058,13 @@ async def rate_limit_test_0117(client, message, guild2:'guild'=None):
         await client.application_command_guild_delete(guild, application_command)
         
         application_command = ApplicationCommand('test_command_56', 'ayaya')
-        application_command = await client.application_command_guild_create(guild2, application_command)
+        application_command = await client.application_command_guild_create(guild_2, application_command)
         
-        await application_command_permission_edit(client, access, guild2, application_command,
+        await application_command_permission_edit(client, access, guild_2, application_command,
             [ApplicationCommandPermissionOverwrite(client.owner, True)])
         
-        await client.application_command_guild_delete(guild2, application_command)
+        await client.application_command_guild_delete(guild_2, application_command)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0118(client, message):
@@ -5310,7 +6072,7 @@ async def rate_limit_test_0118(client, message):
     Joins to a stage channel.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0118') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0118') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -5336,12 +6098,12 @@ async def rate_limit_test_0119_parallel(client, stage_channel):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0119(client, message, guild2:'guild'=None):
+async def rate_limit_test_0119(client, message, guild_2 : 'guild' = None):
     """
     Joins to 2 stage channels. Please also define a second guild.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0119') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0119') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -5349,7 +6111,7 @@ async def rate_limit_test_0119(client, message, guild2:'guild'=None):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        if guild2 is None:
+        if guild_2 is None:
             await RLT.send('Second guild unknown.')
         
         if not guild.cached_permissions_for(client).can_administrator:
@@ -5370,18 +6132,20 @@ async def rate_limit_test_0119(client, message, guild2:'guild'=None):
         
         await TaskGroup(KOKORO, tasks).wait_all()
 
+
 async def rate_limit_test_0120_parallel(client, stage_channel, user):
     voice_client = await client.join_voice(stage_channel)
     await voice_state_user_edit(client, stage_channel, user, True)
     await voice_client.disconnect()
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0120(client, message, guild2:'guild'=None):
+async def rate_limit_test_0120(client, message, guild_2 : 'guild' = None):
     """
     Moves 2 users in stage channels. Please also define an other guild.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0120') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0120') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -5389,7 +6153,7 @@ async def rate_limit_test_0120(client, message, guild2:'guild'=None):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        if guild2 is None:
+        if guild_2 is None:
             await RLT.send('Second guild unknown.')
         
         if not guild.cached_permissions_for(client).can_administrator:
@@ -5436,6 +6200,7 @@ async def rate_limit_test_0121(client, message):
     with RLTCTX(client, channel, 'rate_limit_test_0121') as RLT:
         await stage_discovery_get(client)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0122(client, message):
     """
@@ -5451,8 +6216,9 @@ async def rate_limit_test_0122(client, message):
             else:
                 raise
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0123(client, message, stage_channel:'channel'=None):
+async def rate_limit_test_0123(client, message, stage_channel : 'channel' = None):
     """
     Edits a stage channel.
     """
@@ -5476,7 +6242,7 @@ async def rate_limit_test_0123(client, message, stage_channel:'channel'=None):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0124(client, message, stage_channel:'channel'=None):
+async def rate_limit_test_0124(client, message, stage_channel : 'channel' = None):
     """
     Edits a stage channel's topic only.
     """
@@ -5509,7 +6275,7 @@ async def rate_limit_test_0125(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0126(client, message, stage_channel:'channel'=None):
+async def rate_limit_test_0126(client, message, stage_channel : 'channel' = None):
     """
     Deletes a stage.
     """
@@ -5626,6 +6392,7 @@ async def rate_limit_test_0130(client, message):
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await thread_join(client, channel)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0131(client, message):
@@ -5788,7 +6555,7 @@ async def rate_limit_test_0140(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0141(client, message, stage_channel:'channel'=None):
+async def rate_limit_test_0141(client, message, stage_channel : 'channel' = None):
     """
     Gets a stage channel.
     """
@@ -5826,7 +6593,7 @@ async def rate_limit_test_0142(client, message):
             await RLT.send('Image is required')
         
         avatar = await client.download_attachment(attachment)
-        await client_edit(client, avatar=avatar)
+        await client_edit(client, avatar = avatar)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5854,7 +6621,7 @@ async def rate_limit_test_0144(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0145(client, message, sticker_id:int=None):
+async def rate_limit_test_0145(client, message, sticker_id : int = None):
     """
     Requests a sticker. Defaults to `0`.
     """
@@ -5871,7 +6638,7 @@ async def rate_limit_test_0145(client, message, sticker_id:int=None):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0146(client, message, emoji1: 'emoji' = None, emoji2: 'emoji'=None):
+async def rate_limit_test_0146(client, message, emoji_1: 'emoji' = None, emoji_2: 'emoji' = None):
     """
     Creates a sticker from an emoji.
     """
@@ -5884,30 +6651,30 @@ async def rate_limit_test_0146(client, message, emoji1: 'emoji' = None, emoji2: 
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        if emoji1 is None:
+        if emoji_1 is None:
             await RLT.send('Please give an emoji to mimic.')
         
-        if (emoji1.is_unicode_emoji()):
+        if (emoji_1.is_unicode_emoji()):
             await RLT.send('First emoji must be custom emoji.')
         
-        if emoji2 is None:
+        if emoji_2 is None:
             await RLT.send('Please give a second emoji to use as tag.')
         
-        if (emoji2.is_custom_emoji()):
+        if (emoji_2.is_custom_emoji()):
             await RLT.send('Second emoji must be unicode emoji.')
         
-        async with client.http.get(emoji1.url) as response:
+        async with client.http.get(emoji_1.url) as response:
             file = await response.read()
         
-        name = emoji1.name
+        name = emoji_1.name
         description = name
-        tags = [emoji2.name, 'egg']
+        tags = [emoji_2.name, 'egg']
         
         await sticker_create(client, guild, name, description, file, tags)
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0147(client, message, sticker_id:int=None):
+async def rate_limit_test_0147(client, message, sticker_id : int = None):
     """
     Deletes a sticker.
     """
@@ -5938,8 +6705,9 @@ async def rate_limit_test_0148(client, message):
         
         await sticker_get(client, 819131232642007062)
 
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0149(client, message, name:str,):
+async def rate_limit_test_0149(client, message, name : str):
     """
     Edits my nick desu.
     
@@ -5955,12 +6723,12 @@ async def rate_limit_test_0149(client, message, name:str,):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0150(client, message, name:str, guild_id:str = ''):
+async def rate_limit_test_0150(client, message, name : str, guild_id : str = ''):
     """
     Edits my nick in 2 guilds. Please give a name and the second guild.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'rate_limit_test_0150') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0150') as RLT:
         guild_1 = channel.guild
         if guild_1 is None:
             await RLT.send('Please use this command at a guild.')
@@ -5975,7 +6743,7 @@ async def rate_limit_test_0150(client, message, name:str, guild_id:str = ''):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0151(client, message, sticker_id:int=None, name:str = None):
+async def rate_limit_test_0151(client, message, sticker_id : int = None, name : str = None):
     """
     Edits a sticker.
     """
@@ -6000,7 +6768,7 @@ async def rate_limit_test_0151(client, message, sticker_id:int=None, name:str = 
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0152(client, message, name:str):
+async def rate_limit_test_0152(client, message, name : str):
     """
     Edits the guild's vanity invite.
     
@@ -6057,7 +6825,7 @@ async def rate_limit_test_0156(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0157(client, message, directory_channel:'channel'=None, name:'str'=None):
+async def rate_limit_test_0157(client, message, directory_channel : 'channel' = None, name : str = None):
     """
     Gets directory sub-channel by name?
     
@@ -6082,7 +6850,7 @@ async def rate_limit_test_0157(client, message, directory_channel:'channel'=None
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0158(client, message, directory_channel:'channel'=None):
+async def rate_limit_test_0158(client, message, directory_channel : 'channel' = None):
     """
     Gets directory sub-channel count?
     
@@ -6104,7 +6872,7 @@ async def rate_limit_test_0158(client, message, directory_channel:'channel'=None
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0159(client, message, directory_channel:'channel'=None):
+async def rate_limit_test_0159(client, message, directory_channel : 'channel' = None):
     """
     Gets directory sub-channels?
     
@@ -6241,7 +7009,7 @@ async def rate_limit_test_0166(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0167(client, message, guild_id:str = ''):
+async def rate_limit_test_0167(client, message, guild_id : str = ''):
     """
     scheduled_event_get_all_guild | 2 guilds, please pass a second guild_id
     """
@@ -6281,7 +7049,7 @@ async def rate_limit_test_0168(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0169(client, message, guild_id:str = ''):
+async def rate_limit_test_0169(client, message, guild_id : str = ''):
     """
     scheduled_event_create | 2 guilds, please pass a second guild_id
     """
@@ -6333,7 +7101,7 @@ async def rate_limit_test_0170(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0171(client, message, guild_id:str = ''):
+async def rate_limit_test_0171(client, message, guild_id : str = ''):
     """
     scheduled_event_get | 2 guild
     """
@@ -6389,7 +7157,7 @@ async def rate_limit_test_0172(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0173(client, message, guild_id:str = ''):
+async def rate_limit_test_0173(client, message, guild_id : str = ''):
     """
     scheduled_event_edit | 2 guild
     """
@@ -6429,7 +7197,7 @@ async def rate_limit_test_0173(client, message, guild_id:str = ''):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0174(client, message, guild_id:str = ''):
+async def rate_limit_test_0174(client, message, guild_id : str = ''):
     """
     scheduled_event_delete | 2 guild
     """
@@ -6486,7 +7254,7 @@ async def rate_limit_test_0175(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0176(client, message, guild_id:str = ''):
+async def rate_limit_test_0176(client, message, guild_id : str = ''):
     """
     scheduled_event_user_get_chunk | 2 guild
     """
@@ -6571,7 +7339,7 @@ async def rate_limit_test_0179(client, message):
             AutoModerationRule(
                 'meow',
                 actions = [
-                    AutoModerationAction(duration=60),
+                    AutoModerationAction(duration = 60),
                 ],
                 keywords = ['windows'],
             ),
@@ -6584,7 +7352,7 @@ async def rate_limit_test_0179(client, message):
             AutoModerationRule(
                 'moo',
                 actions = [
-                    AutoModerationAction(duration=60),
+                    AutoModerationAction(duration = 60),
                 ],
                 keywords = ['windows'],
             ),
@@ -6623,7 +7391,7 @@ async def rate_limit_test_0180(client, message):
             AutoModerationRule(
                 'meow',
                 actions = [
-                    AutoModerationAction(duration=60),
+                    AutoModerationAction(duration = 60),
                 ],
                 keywords = ['windows'],
             ),
@@ -6634,7 +7402,7 @@ async def rate_limit_test_0180(client, message):
             AutoModerationRule(
                 'moo',
                 actions = [
-                    AutoModerationAction(duration=60),
+                    AutoModerationAction(duration = 60),
                 ],
                 keywords = ['windows'],
             ),
@@ -6644,7 +7412,7 @@ async def rate_limit_test_0180(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0181(client, message, guild_id:str = ''):
+async def rate_limit_test_0181(client, message, guild_id : str = ''):
     """
     auto_moderation_rule_create
     auto_moderation_rule_get <- some why failed
@@ -6669,7 +7437,7 @@ async def rate_limit_test_0181(client, message, guild_id:str = ''):
         rule_to_create = AutoModerationRule(
             'meow',
             actions = [
-                AutoModerationAction(duration=60),
+                AutoModerationAction(duration = 60),
             ],
             keywords = ['windows'],
         )
@@ -6677,7 +7445,7 @@ async def rate_limit_test_0181(client, message, guild_id:str = ''):
         rule_to_edit_to = AutoModerationRule(
             'moo',
             actions = [
-                AutoModerationAction(duration=60),
+                AutoModerationAction(duration = 60),
             ],
             keywords = ['windows'],
         )
@@ -6978,3 +7746,127 @@ async def rate_limit_test_0192(client, message):
         
         await onboarding_screen_edit(client, guild_0.id, mode = OnboardingMode.advanced)
 
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0192(client, message):
+    """
+    Tests onboarding screen edit endpoints.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0192') as RLT:
+        guild_0 = channel.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await onboarding_screen_edit(client, guild_0.id, mode = OnboardingMode.advanced)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0193(client, message, voice_channel : 'channel' = None):
+    """
+    Edits a voice channel's status.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0193') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if voice_channel is None:
+            await RLT.send('Please define a channel.')
+        
+        if not voice_channel.is_guild_voice():
+            await RLT.send('Voice channel only.')
+        
+        if voice_channel.status == 'koishi':
+            status = 'satori'
+        else:
+            status = 'koishi'
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+    
+        await channel_edit_status(client, voice_channel, status)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0194(client, message, voice_channel_0 : 'channel' = None, voice_channel_1 : 'channel' = None):
+    """
+    Edits two voice channel's status 6 times.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0194') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if voice_channel_0 is None:
+            await RLT.send('Please define a channel.')
+        
+        if not voice_channel_0.is_guild_voice():
+            await RLT.send('voice channel only.')
+        
+        if voice_channel_1 is None:
+            await RLT.send('Please define a channel.')
+        
+        if not voice_channel_1.is_guild_voice():
+            await RLT.send('Voice channel only.')
+        
+        if voice_channel_0 is voice_channel_1:
+            await RLT.send('Different channels only.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        task_group = TaskGroup(KOKORO)
+        task_group.create_task(channel_edit_status(client, voice_channel_0, 'koishi'))
+        task_group.create_task(channel_edit_status(client, voice_channel_1, 'koishi'))
+        task_group.create_task(channel_edit_status(client, voice_channel_0, 'satori'))
+        task_group.create_task(channel_edit_status(client, voice_channel_1, 'satori'))
+        task_group.create_task(channel_edit_status(client, voice_channel_0, 'koishi'))
+        task_group.create_task(channel_edit_status(client, voice_channel_1, 'koishi'))
+        task_group.create_task(channel_edit_status(client, voice_channel_0, 'satori'))
+        task_group.create_task(channel_edit_status(client, voice_channel_1, 'satori'))
+        task_group.create_task(channel_edit_status(client, voice_channel_0, 'koishi'))
+        task_group.create_task(channel_edit_status(client, voice_channel_1, 'koishi'))
+        task_group.create_task(channel_edit_status(client, voice_channel_0, 'satori'))
+        task_group.create_task(channel_edit_status(client, voice_channel_1, 'satori'))
+        
+        await task_group.wait_all()
+        task_group.cancel_all()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0195(client, message, voice_channel : 'channel' = None):
+    """
+    Edits one voice channel's status 10 times.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0195') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if voice_channel is None:
+            await RLT.send('Please define a channel.')
+        
+        if not voice_channel.is_guild_voice():
+            await RLT.send('Voice channel only.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        task_group = TaskGroup(KOKORO)
+        task_group.create_task(channel_edit_status(client, voice_channel, 'koishi'))
+        task_group.create_task(channel_edit_status(client, voice_channel, 'satori'))
+        task_group.create_task(channel_edit_status(client, voice_channel, 'koishi'))
+        task_group.create_task(channel_edit_status(client, voice_channel, 'satori'))
+        task_group.create_task(channel_edit_status(client, voice_channel, 'koishi'))
+        task_group.create_task(channel_edit_status(client, voice_channel, 'satori'))
+        task_group.create_task(channel_edit_status(client, voice_channel, 'koishi'))
+        task_group.create_task(channel_edit_status(client, voice_channel, 'satori'))
+        task_group.create_task(channel_edit_status(client, voice_channel, 'koishi'))
+        task_group.create_task(channel_edit_status(client, voice_channel, 'satori'))
+        
+        await task_group.wait_all()
+        task_group.cancel_all()

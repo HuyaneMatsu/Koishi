@@ -1,23 +1,26 @@
 __all__ = ('TouhouHandlerKey',)
 
+
+from scarletio import RichAttributeErrorBaseType
+
 from ..image_handling_core import ImageHandlerBooru, ImageHandlerGroup
 from ..image_handling_core.constants import (
     SAFE_BOORU_ENDPOINT, SAFE_BOORU_PROVIDER, SOLO_REQUIRED_TAGS, TOUHOU_TAGS_BANNED
 )
-from .character import TOUHOU_CHARACTERS_UNIQUE
+from .character import TOUHOU_CHARACTERS
 from .safe_booru_tags import TOUHOU_SAFE_BOORU_TAGS
 
 
 TOUHOU_IMAGE_HANDLERS = {}
 
 
-class TouhouHandlerKey:
+class TouhouHandlerKey(RichAttributeErrorBaseType):
     """
     Represents a touhou handler's key.
     
     Attributes
     ----------
-    characters : `frozenset` of ``TouhouCharacter``
+    characters : `None | frozenset<TouhouCharacter>`
         The included characters.
     hash_value : `int`
         The has precalculated hash value of the key.
@@ -26,17 +29,31 @@ class TouhouHandlerKey:
     """
     __slots__ = ('characters', 'hash_value', 'solo')
     
-    def __init__(self, *characters, solo = True):
-        characters = frozenset(characters)
+    def __new__(cls, *characters, solo = True):
+        # Process characters
+        if characters:
+            characters = frozenset(characters)
+        else:
+            characters = None
         
-        if len(characters) > 1:
+        # Process solo
+        if (characters is not None) and (len(characters) > 1):
             solo = False
         
-        hash_value = hash(characters) ^ solo
+        # calculate hash value
+        hash_value = 0
         
+        if characters is not None:
+            hash_value = hash(characters)
+        
+        hash_value ^= solo
+        
+        # Construct
+        self = object.__new__(cls)
         self.characters = characters
         self.hash_value = hash_value
         self.solo = solo
+        return self
     
     
     def __repr__(self):
@@ -76,9 +93,10 @@ class TouhouHandlerKey:
         """
         Applies solo preference if applicable.
         """
-        if len(self.characters) == 1:
+        characters = self.characters
+        if (characters is not None) and (len(characters) == 1):
             self.solo = True
-    
+        
     
     def get_handler(self):
         """
@@ -105,89 +123,108 @@ class TouhouHandlerKey:
         -------
         handler : ``HandlerBase``
         """
-        characters_length = len(self.characters)
-        if characters_length == 0:
-            handler = self.create_all_handler()
-        else:
-            if self.solo:
-                if characters_length == 1:
-                    handler = self.create_solo_single_handler()
-                else:
-                    handler = self.create_solo_poly_handler()
-            else:
-                handler = self.create_wide_handler()
-        
-        return handler
-    
-    
-    def create_all_handler(self):
-        """
-        Creates an all character handler.
-        
-        Returns
-        -------
-        handler : ``HandlerBase``
-        """
+        characters = self.characters
         solo = self.solo
-        return ImageHandlerGroup(*(
-            TouhouHandlerKey(character, solo = solo).get_handler() for character in TOUHOU_CHARACTERS_UNIQUE
-        ))
-    
-    
-    def create_solo_single_handler(self):
-        """
-        Creates a solo handler single character handler.
         
-        Returns
-        -------
-        handler : ``HandlerBase``
-        """
-        return ImageHandlerGroup(*(
-            ImageHandlerBooru(
-                SAFE_BOORU_PROVIDER,
-                SAFE_BOORU_ENDPOINT,
-                SOLO_REQUIRED_TAGS,
-                TOUHOU_TAGS_BANNED,
-                {tag},
-                True,
-            ) for tag in TOUHOU_SAFE_BOORU_TAGS[next(iter(self.characters))]
-        ))
-    
-    
-    def create_solo_poly_handler(self):
-        """
-        Creates a handler for multiple solo characters.
+        if characters is None:
+            return _create_all_handler(solo)
         
-        Returns
-        -------
-        handler : ``HandlerBase``
-        """
-        return ImageHandlerGroup(*(
-            TouhouHandlerKey(character, solo = True).get_handler() for character in self.characters
-        ))
-    
-    
-    def create_wide_handler(self):
-        """
-        Creates a truly multi-character handler.
+        if not solo:
+            return _create_wide_handler(characters)
+            
+        if len(characters) == 1:
+            return _create_solo_single_handler(next(iter(characters)))
         
-        Returns
-        -------
-        handler : ``HandlerBase``
-        """
-        return ImageHandlerGroup(*(
-            ImageHandlerBooru(
-                SAFE_BOORU_PROVIDER,
-                SAFE_BOORU_ENDPOINT,
-                None,
-                TOUHOU_TAGS_BANNED,
-                tags,
-                True,
-            ) for tags in iter_combine_character_tags(self.characters)
-        ))
+        return _create_solo_group_handler(characters)
 
 
-def iter_combine_character_tags(characters):
+def _create_all_handler(solo):
+    """
+    Creates an all character handler.
+    
+    Parameters
+    ----------
+    solo : `bool`
+        Whether the selected characters should be solo.
+    
+    Returns
+    -------
+    handler : ``HandlerBase``
+    """
+    return ImageHandlerGroup(*(
+        TouhouHandlerKey(character, solo = solo).get_handler() for character in TOUHOU_CHARACTERS.values()
+    ))
+
+
+def _create_solo_single_handler(character):
+    """
+    Creates a solo handler single character handler.
+    
+    Parameters
+    ----------
+    character : ``TouhouCharacter``
+        Character to create the handler for.
+    
+    Returns
+    -------
+    handler : ``HandlerBase``
+    """
+    return ImageHandlerGroup(*(
+        ImageHandlerBooru(
+            SAFE_BOORU_PROVIDER,
+            SAFE_BOORU_ENDPOINT,
+            SOLO_REQUIRED_TAGS,
+            TOUHOU_TAGS_BANNED,
+            {tag},
+            True,
+        ) for tag in TOUHOU_SAFE_BOORU_TAGS[character]
+    ))
+
+
+def _create_solo_group_handler(characters):
+    """
+    Creates a handler for multiple solo characters.
+    
+    Parameters
+    ----------
+    characters : `frozenset<TouhouCharacter>`
+        Characters to create handler for.
+    
+    Returns
+    -------
+    handler : ``HandlerBase``
+    """
+    return ImageHandlerGroup(*(
+        TouhouHandlerKey(character, solo = True).get_handler() for character in characters
+    ))
+
+
+def _create_wide_handler(characters):
+    """
+    Creates a truly multi-character handler.
+    
+    Parameters
+    ----------
+    characters : `frozenset<TouhouCharacter>`
+        Characters to create handler for.
+    
+    Returns
+    -------
+    handler : ``HandlerBase``
+    """
+    return ImageHandlerGroup(*(
+        ImageHandlerBooru(
+            SAFE_BOORU_PROVIDER,
+            SAFE_BOORU_ENDPOINT,
+            None,
+            TOUHOU_TAGS_BANNED,
+            tags,
+            True,
+        ) for tags in _iter_combine_character_tags(characters)
+    ))
+
+
+def _iter_combine_character_tags(characters):
     """
     Combines the tags of the given characters.
     
@@ -195,12 +232,12 @@ def iter_combine_character_tags(characters):
     
     Parameters
     ----------
-    characters : `frozenset` of ``TouhouCharacter``
+    characters : `frozenset<TouhouCharacter>`
         The characters to walk through.
     
     Yields
     ------
-    tags : `set` of `str`
+    tags : `set<str>`
     """
     tag_groups = tuple(TOUHOU_SAFE_BOORU_TAGS[character] for character in characters)
     
@@ -220,7 +257,7 @@ def _walk_tags(tags, tag_groups):
     ----------
     tags : `list` of `str`
         Tags list to build the group into.
-    tag_groups : `tuple` of (`tuple` of `str`)
+    tag_groups : `tuple<tuple<str>>`
         Tag groups to walk.
     """
     if not tag_groups:

@@ -202,7 +202,7 @@ class sync_avatar:
         async with client.http.get(avatar_url) as response:
             avatar = await response.read()
         
-        await client.client_edit(avatar=avatar)
+        await client.client_edit(avatar = avatar)
         
         await client.message_create(message.channel,'Avatar synced.')
     
@@ -222,7 +222,7 @@ class sync_avatar:
 class massadd:
     async def command(client, message):
         try:
-            await client.message_at_index(message.channel,1000)
+            await client.message_at_index(message.channel, 1000)
         except IndexError:
             pass
         
@@ -240,15 +240,15 @@ class massadd:
             
             messages.append(message_)
         
-        new_=0
-        modified_=0
+        new_ = 0
+        modified_ = 0
         
         description_parts=[]
         for message_ in messages:
-            lines=message_.content.split('\n')
+            lines = message_.content.split('\n')
             
             next_id = message_.id
-            state=0 #parse header
+            state = 0 #parse header
             description_parts.clear()
             
             for line in lines:
@@ -259,41 +259,41 @@ class massadd:
                     description = '\n'.join(description_parts)
                     description_parts.clear()
                     
-                    if Card.update(description,next_id,name,rarity):
-                        new_+=1
-                        next_id+=1
+                    if Card.update(description, next_id, name, rarity):
+                        new_ += 1
+                        next_id += 1
                     else:
-                        modified_+=1
+                        modified_ += 1
                     
-                    state=0
+                    state = 0
                     continue
                 
-                if state==0:
+                if state == 0:
                     parsed=CARD_HDR_RP.fullmatch(line)
                     if parsed is None:
                         continue
-                    name,special_rarity,rarity=parsed.groups()
+                    name,special_rarity,rarity = parsed.groups()
                     
                     if special_rarity is None:
-                        special_rarity=-1
+                        special_rarity = -1
                     else:
-                        special_rarity=special_rarity.lower()
-                        if special_rarity=='token':
-                            special_rarity=0
-                        elif special_rarity=='passive':
-                            special_rarity=1
+                        special_rarity = special_rarity.lower()
+                        if special_rarity == 'token':
+                            special_rarity = 0
+                        elif special_rarity == 'passive':
+                            special_rarity = 1
                         else:
-                            special_rarity=-1
+                            special_rarity = -1
                     
-                    if special_rarity==-1:
+                    if special_rarity == -1:
                         if rarity is None:
-                            special_rarity=0
+                            special_rarity = 0
                         else:
-                            rarity=rarity.lower()
+                            rarity = rarity.lower()
                     
-                    if special_rarity!=-1:
+                    if special_rarity != -1:
                         try:
-                            rarity=Rarity.INSTANCES[special_rarity]
+                            rarity = Rarity.INSTANCES[special_rarity]
                         except IndexError:
                             continue
                     else:
@@ -302,17 +302,17 @@ class massadd:
                         except KeyError:
                             continue
                     
-                    state=1 #parse description
+                    state = 1 #parse description
                     continue
                 
-                if state==1:
+                if state == 1:
                     description_parts.append(line)
                     continue
         
             if description_parts:
                 description = '\n'.join(description_parts)
                 description_parts.clear()
-                if Card.update(description,next_id,name,rarity):
+                if Card.update(description, next_id, name, rarity):
                     new_ += 1
                 else:
                     modified_ += 1
@@ -322,22 +322,30 @@ class massadd:
         if new_ or modified_:
             await Card.dump_cards(KOKORO)
         
-        message = await client.message_create(message.channel,
-            embed = Embed(None,f'modified: {modified_}\nnew: {new_}', color = CHESUTO_COLOR))
-        await sleep(30., KOKORO)
+        message = await client.message_create(
+            message.channel,
+            embed = Embed(None, f'modified: {modified_}\nnew: {new_}', color = CHESUTO_COLOR),
+        )
+        await sleep(30.0, KOKORO)
         await client.message_delete(message)
         return
     
     checks = checks.owner_or_has_role(CARDS_ROLE)
     
     async def description(command_context):
-        return Embed('massadd', (
-            'Loads the last 100 message at the channel, and check each of them '
-            'searching for card definitions. If it finds one, then updates it, if '
-            'already added, or creates a new one.\n'
-            f'Usage: `{command_context.prefix}massadd`'
-            ), color = COLOR__FLAN_HELP).add_footer(
-                f'You must have `{CARDS_ROLE}` role to use this command.')
+        return Embed(
+            'massadd',
+            (
+                'Loads the last 100 message at the channel, and check each of them '
+                'searching for card definitions. If it finds one, then updates it, if '
+                'already added, or creates a new one.\n'
+                f'Usage: `{command_context.prefix}massadd`'
+            ),
+            color = COLOR__FLAN_HELP
+        ).add_footer(
+            f'You must have `{CARDS_ROLE}` role to use this command.'
+        )
+
 
 @Flan.commands.from_class
 class showcard:
@@ -359,7 +367,7 @@ class showcard:
         
         with client.keep_typing(message.channel):
             with (await ReuAsyncIO(os.path.join(CHESUTO_FOLDER,image_name),'rb')) as file:
-                await client.message_create(message.channel,embed = embed,file=file)
+                await client.message_create(message.channel,embed = embed,file = file)
     
     async def description(command_context):
         return Embed(
@@ -425,25 +433,25 @@ class showcards:
 class CardPaginator:
     __slots__ = ('title', 'rendered', 'collected', 'page_information')
     def __init__(self, title, collected):
-        self.title=title
-        self.collected=collected
+        self.title = title
+        self.collected = collected
         
         page_information=[]
-        self.page_information=page_information
+        self.page_information = page_information
         
-        total_length=0
+        total_length = 0
         
-        page_information_start=0
+        page_information_start = 0
         
-        index=0
-        limit=len(collected)
+        index = 0
+        limit = len(collected)
         
         while True:
             if index==limit:
                 page_information.append((page_information_start,index),)
                 break
             
-            card=collected[index]
+            card = collected[index]
             
             # 2 extra linebreak
             local_length = 2 + len(card)
@@ -452,22 +460,22 @@ class CardPaginator:
                 page_information.append((page_information_start, index),)
                 page_information_start = index
                 index = index + 1
-                total_length=local_length
+                total_length = local_length
                 continue
             
             index = index + 1
             total_length+=local_length
             continue
         
-        self.rendered=list(None for _ in range(len(page_information)))
+        self.rendered = list(None for _ in range(len(page_information)))
         
     def __len__(self):
         return len(self.page_information)
     
     def __getitem__(self,index):
-        page=self.rendered[index]
+        page = self.rendered[index]
         if page is None:
-            page=self.render(index)
+            page = self.render(index)
             self.rendered[index]=page
         
         return page
@@ -478,7 +486,7 @@ class CardPaginator:
         page_parts=[]
         index = start
         while True:
-            card=self.collected[index]
+            card = self.collected[index]
             card.render_to(page_parts)
             
             index = index + 1
@@ -522,7 +530,7 @@ class add_image:
             
             attachment = attachments[0]
             name = attachment.name
-            extension=os.path.splitext(name)[1].lower()
+            extension = os.path.splitext(name)[1].lower()
             
             if extension not in ('.png','.jpg','.jpeg','.bmp','.mp4','.gif'): # are there more?
                 content = 'You sure the message format is an image format?\n If you are please request adding it.'
@@ -633,14 +641,14 @@ class checklist:
                 
                 title = f'Checklist for {rarity.name}'
                 
-                limit=len(filtered)
+                limit = len(filtered)
                 if limit:
                     parts=[]
-                    index=1
+                    index = 1
                     
                     card = filtered[0]
                     name = card.name
-                    length=len(name)
+                    length = len(name)
                     if length>EMBED_NAME_LENGTH:
                         name = name[:EMBED_NAME_LENGTH]+'...'
                         length = 203
@@ -651,19 +659,19 @@ class checklist:
                         if index==limit:
                             break
                         
-                        card=filtered[index]
-                        index=index + 1
+                        card = filtered[index]
+                        index = index + 1
                         name = card.name
                         
-                        name_ln=len(name)
+                        name_ln = len(name)
                         if name_ln>EMBED_NAME_LENGTH:
                             name = name[:EMBED_NAME_LENGTH]+'...'
                             name_ln = 203
                         
-                        length=length + name_ln + 1
+                        length = length + name_ln + 1
                         if length>2000:
                             result.append(Embed(title,''.join(parts), color = CHESUTO_COLOR))
-                            length=name_ln
+                            length = name_ln
                             parts.clear()
                             parts.append(name)
                             continue
@@ -680,7 +688,7 @@ class checklist:
                     result.append(Embed(title, color = CHESUTO_COLOR))
                 
         else:
-            filtered=tuple([] for x in range(len(Rarity.INSTANCES)))
+            filtered = tuple([] for x in range(len(Rarity.INSTANCES)))
             
             for card in CARDS_BY_NAME.values():
                 if card.image_name is None:
@@ -692,18 +700,18 @@ class checklist:
             title='Checklist'
             
             parts=[]
-            length=0
+            length = 0
             
             for rarity_index in range(len(filtered)):
-                container=filtered[rarity_index]
+                container = filtered[rarity_index]
                 
-                limit=len(container)
-                if limit==0:
+                limit = len(container)
+                if limit == 0:
                     continue
                 
                 if length>1500:
                     result.append(Embed(title,''.join(parts), color = CHESUTO_COLOR))
-                    length=0
+                    length = 0
                     parts.clear()
                 else:
                     parts.append('\n\n')
@@ -713,33 +721,33 @@ class checklist:
                 length = length + len(rarity_name)
                 parts.append(rarity_name)
                 
-                card=container[0]
+                card = container[0]
                 name = card.name
-                name_ln=len(name)
+                name_ln = len(name)
                 if name_ln>EMBED_NAME_LENGTH:
                     name = name[:EMBED_NAME_LENGTH]+'...'
                     name_ln = 203
                 
                 length = length + name_ln
                 parts.append(name)
-                index=1
+                index = 1
                 
                 while True:
-                    if index==limit:
+                    if index == limit:
                         break
                     
-                    card=container[index]
-                    index=index + 1
+                    card = container[index]
+                    index = index + 1
                     name = card.name
-                    name_ln=len(name)
-                    if name_ln>EMBED_NAME_LENGTH:
-                        name = name[:EMBED_NAME_LENGTH]+'...'
-                        name_ln=203
+                    name_ln = len(name)
+                    if name_ln > EMBED_NAME_LENGTH:
+                        name = name[:EMBED_NAME_LENGTH] + '...'
+                        name_ln = 203
                     
                     length = length + 1 + name_ln
-                    if length>2000:
-                        result.append(Embed(title,''.join(parts), color = CHESUTO_COLOR))
-                        length=len(rarity_name) + name_ln
+                    if length > 2000:
+                        result.append(Embed(title, ''.join(parts), color = CHESUTO_COLOR))
+                        length = len(rarity_name) + name_ln
                         parts.clear()
                         parts.append(rarity_name)
                         parts.append(name)
@@ -754,14 +762,14 @@ class checklist:
             
             parts = None
         
-        index=0
-        limit=len(result)
+        index = 0
+        limit = len(result)
         while True:
             if index==limit:
                 break
             
             embed = result[index]
-            index=index + 1
+            index = index + 1
             embed.add_footer(f'Page: {index}/{limit}')
         
         await Pagination(client,message.channel,result)
@@ -1198,7 +1206,7 @@ async def set_bgm_name_description(command_context):
         ), color = COLOR__FLAN_HELP).add_footer(
             f'You must have `{CARDS_ROLE}` role to use this command.')
 
-@Flan.commands(checks=checks.has_role(CARDS_ROLE), category='VOICE', description = set_bgm_name_description)
+@Flan.commands(checks = checks.has_role(CARDS_ROLE), category='VOICE', description = set_bgm_name_description)
 async def set_bgm_name(client, message, content):
     bgm = get_bgm(content)
     

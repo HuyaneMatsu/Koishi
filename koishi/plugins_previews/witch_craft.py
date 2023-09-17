@@ -65,7 +65,7 @@ class CookingFactor:
     """
     __slots__ = ('flavor', 'fruit', 'meat', 'monster', 'mushroom', 'vegetable')
     
-    def __new__(cls, *, flavor=0, fruit=0, meat=0, monster=0, mushroom=0, vegetable=0):
+    def __new__(cls, *, flavor = 0, fruit = 0, meat = 0, monster = 0, mushroom = 0, vegetable = 0):
         """
         Creates a new cooking factor instance.
         
@@ -231,7 +231,7 @@ class EdibilityFactor:
     """
     __slots__ = ('health', 'hunger', 'sanity')
     
-    def __new__(cls, *, health=0, hunger=0, sanity=0):
+    def __new__(cls, *, health = 0, hunger = 0, sanity = 0):
         """
         Creates a new edibility factor instance.
         
@@ -257,6 +257,7 @@ class EdibilityFactor:
         self.hunger = hunger
         self.sanity = sanity
         return self
+    
     
     def __repr__(self):
         """Returns the representation of the edibility factor."""
@@ -343,7 +344,7 @@ class Item:
     """
     __slots__ = ('cost', 'cooking', 'edibility', 'emoji', 'id', 'market_cost', 'name',)
     
-    def __new__(cls, item_id, name, emoji, *, cooking=None, edibility=None):
+    def __new__(cls, item_id, name, emoji, *, cooking = None, edibility = None):
         """
         Creates a new item instance.
         
@@ -421,48 +422,48 @@ class Item:
 
 
 ITEM_DUCK = Item(1, 'Duck', BUILTIN_EMOJIS['duck'],
-    cooking = CookingFactor(flavor=100, meat=100, monster=20),
-    edibility = EdibilityFactor(hunger=40, sanity=-20),
+    cooking = CookingFactor(flavor = 100, meat = 100, monster = 20),
+    edibility = EdibilityFactor(hunger = 40, sanity = -20),
 )
 
 ITEM_SALT = Item(2, 'Flavor crystal', BUILTIN_EMOJIS['salt'],
-    cooking = CookingFactor(flavor=100),
-    edibility = EdibilityFactor(health=-20, hunger=0, sanity=-20),
+    cooking = CookingFactor(flavor = 100),
+    edibility = EdibilityFactor(health = -20, hunger = 0, sanity = -20),
 )
 
 ITEM_ONION = Item(3, 'Organic tear gas', BUILTIN_EMOJIS['onion'],
-    cooking = CookingFactor(flavor=50, vegetable=40),
-    edibility = EdibilityFactor(health=5, hunger=5, sanity=-10),
+    cooking = CookingFactor(flavor = 50, vegetable = 40),
+    edibility = EdibilityFactor(health = 5, hunger = 5, sanity = -10),
 )
 
 ITEM_EGG = Item(4, 'Next generation (capsule)', BUILTIN_EMOJIS['egg'],
-    cooking = CookingFactor(flavor=50, meat=50),
-    edibility = EdibilityFactor(health=5, hunger=10),
+    cooking = CookingFactor(flavor = 50, meat = 50),
+    edibility = EdibilityFactor(health = 5, hunger = 10),
 )
 
 ITEM_RED_MUSHROOM = Item(5, 'Witch hallucinogen', BUILTIN_EMOJIS['mushroom'],
-    cooking = CookingFactor(flavor=50, mushroom=100),
-    edibility = EdibilityFactor(health=-20, hunger=10, sanity=-5),
+    cooking = CookingFactor(flavor = 50, mushroom = 100),
+    edibility = EdibilityFactor(health = -20, hunger = 10, sanity = -5),
 )
 
 ITEM_GARLIC = Item(6, 'Anti-vampire grenade', BUILTIN_EMOJIS['garlic'],
-    cooking = CookingFactor(flavor=100, vegetable=30),
-    edibility = EdibilityFactor(health=10, hunger=5, sanity=-10),
+    cooking = CookingFactor(flavor = 100, vegetable = 30),
+    edibility = EdibilityFactor(health = 10, hunger = 5, sanity = -10),
 )
 
 ITEM_OIL = Item(7, 'Pan slipper', BUILTIN_EMOJIS['oil'],
-    cooking = CookingFactor(flavor=30, vegetable=20, fruit=20),
-    edibility = EdibilityFactor(hunger=5, sanity=-10),
+    cooking = CookingFactor(flavor = 30, vegetable = 20, fruit = 20),
+    edibility = EdibilityFactor(hunger = 5, sanity = -10),
 )
 
 ITEM_OLIVE = Item(8, 'Slipper fruit', BUILTIN_EMOJIS['olive'],
-    cooking = CookingFactor(flavor=30, fruit=30),
-    edibility = EdibilityFactor(health=10, hunger=10),
+    cooking = CookingFactor(flavor = 30, fruit = 30),
+    edibility = EdibilityFactor(health = 10, hunger = 10),
 )
 
 ITEM_ROSE = Item(9, 'Blood thorn', BUILTIN_EMOJIS['rose'],
-    cooking = CookingFactor(vegetable=10),
-    edibility = EdibilityFactor(sanity=5),
+    cooking = CookingFactor(vegetable = 10),
+    edibility = EdibilityFactor(sanity = 5),
 )
 
 BUYABLE = [
@@ -481,7 +482,7 @@ def item_name_sort_key(item):
 BUYABLE.sort(key = item_name_sort_key)
 
 def load_file():
-    if not os.exists(COST_FILE_PATH):
+    if not os.path.exists(COST_FILE_PATH):
         return None
     
     with open(COST_FILE_PATH, 'r') as file:
@@ -590,12 +591,15 @@ async def prices(client, event):
     for item in BUYABLE:
         embed_field_name = f'{item.emoji} {item.name}'
         market_cost = item.market_cost
-        embed_field_value = f'Sell for: {floor(market_cost * (1.0 - MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY}\n' \
-                            f'Buy for: {floor(market_cost * (1.0 + MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY}'
+        embed_field_value = (
+            f'Sell for: {floor(market_cost * (1.0 - MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY}\n'
+            f'Buy for: {floor(market_cost * (1.0 + MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY}'
+        )
         
         embed.add_field(embed_field_name, embed_field_value, inline = True)
     
     return embed
+
 
 CONFIRM_NAH = BUILTIN_EMOJIS['person_gesturing_no']
 
@@ -677,8 +681,9 @@ async def buy(client, event,
     message = yield InteractionResponse(embed = embed, components = components)
     
     try:
-        component_interaction = await wait_for_component_interaction(message, timeout = 300.0,
-            check = partial_func(check_is_user_same, event.user))
+        component_interaction = await wait_for_component_interaction(
+            message, timeout = 300.0, check = partial_func(check_is_user_same, event.user)
+        )
     except TimeoutError:
         component_interaction = None
         cancelled = True

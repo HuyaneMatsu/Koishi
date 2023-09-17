@@ -29,7 +29,7 @@ def choose_not_same(list_,last):
     index = int(random() * len(list_))
     value = list_[index]
     if value == last:
-        index +=1
+        index += 1
         if index == len(list_):
             index = 0
         value = list_[index]
@@ -39,7 +39,7 @@ def choose_not_same(list_,last):
 def pop_one(list_):
     return list_.pop(int((random() * len(list_))))
 
-def smart_join(list_, limit=2000, sep='\n'):
+def smart_join(list_, limit = 2000, sep = '\n'):
     result = []
     separator_length = len(sep)
     limit -= (3 + separator_length)

@@ -21,6 +21,16 @@ def populate_tag_map():
 def parse_touhou_characters_from_tags(image_detail):
     """
     Parses out the touhou characters from the given image detail's tags.
+    
+    Parameters
+    ----------
+    image_detail : ``ImageDetail``
+        The image detail to parse its tag of.
+    
+    Returns
+    -------
+    characters : `set<TouhouCharacter>`
+        The parsed out characters.
     """
     characters = set()
     

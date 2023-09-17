@@ -48,6 +48,17 @@ class ImageHandlerWaifuPics(ImageHandlerRequestBase):
         return self
     
     
+    @copy_docs(ImageHandlerRequestBase.__eq__)
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return NotImplemented
+        
+        if self._url != other._url:
+            return False
+        
+        return True
+    
+    
     @copy_docs(ImageHandlerRequestBase._request)
     async def _request(self, client):
         try:
@@ -72,4 +83,4 @@ class ImageHandlerWaifuPics(ImageHandlerRequestBase):
         except KeyError:
             return None
         
-        return [ImageDetail(url, None, PROVIDER) for url in urls]
+        return [ImageDetail(url, PROVIDER) for url in urls]

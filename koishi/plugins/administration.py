@@ -202,7 +202,7 @@ async def bans(client, event):
                 field_count += 1
                 if field_count == 25:
                     break
-                index +=1
+                index += 1
                 if index == limit:
                     break
             if index == limit:
@@ -217,7 +217,7 @@ async def bans(client, event):
     result = []
     while True:
         embed = embeds[index]
-        index +=1
+        index += 1
         embed.add_footer(f'Page: {index}/{embed_ln}. Bans {field_count + 1}-{field_count + len(embed.fields)}/{limit}')
         field_count += len(embed.fields)
         

@@ -31,6 +31,17 @@ class ImageHandlerStatic(ImageHandlerBase):
         return self
     
     
+    @copy_docs(ImageHandlerBase.__eq__)
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return NotImplemented
+        
+        if self._images != other._images:
+            return False
+        
+        return True
+    
+    
     @copy_docs(ImageHandlerBase.get_image)
     async def get_image(self, client, event, **acknowledge_parameters):
         images = self._images
@@ -45,3 +56,13 @@ class ImageHandlerStatic(ImageHandlerBase):
             weight = 1.0
         
         return weight
+    
+    
+    @copy_docs(ImageHandlerBase.is_character_filterable)
+    def is_character_filterable(self):
+        return True
+    
+    
+    @copy_docs(ImageHandlerBase.iter_character_filterable)
+    def iter_character_filterable(self):
+        yield from self._images

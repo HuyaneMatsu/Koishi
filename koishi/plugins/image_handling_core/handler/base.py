@@ -1,6 +1,10 @@
 __all__ = ('ImageHandlerBase', )
 
-class ImageHandlerBase:
+
+from scarletio import RichAttributeErrorBaseType
+
+
+class ImageHandlerBase(RichAttributeErrorBaseType):
     """
     Base image handler.
     """
@@ -12,6 +16,14 @@ class ImageHandlerBase:
         """
         self = object.__new__(cls)
         return self
+    
+    
+    def __eq__(self, other):
+        """Returns whether the two image handlers are equal."""
+        if type(self) is not type(other):
+            return NotImplemented
+        
+        return True
     
     
     async def get_image(self, client, event, **acknowledge_parameters):
@@ -30,6 +42,10 @@ class ImageHandlerBase:
             The respective interaction event.
         **acknowledge_parameters : Keyword parameters
             Additional parameter used when acknowledging.
+        
+        Returns
+        -------
+        image : ``ImageDetail``
         """
         return None
     
@@ -43,3 +59,28 @@ class ImageHandlerBase:
         weight : `float`
         """
         return 1.0
+    
+    
+    def is_character_filterable(self):
+        """
+        Returns whether the image handler supports character filtering.
+        
+        Returns
+        -------
+        is_character_filterable : `bool`
+        """
+        return False
+    
+    
+    def iter_character_filterable(self):
+        """
+        Iterates over the filterable characters.
+        
+        This method is an iterable generator.
+        
+        Yields
+        ------
+        image_detail : ``ImageDetail``
+        """
+        return
+        yield

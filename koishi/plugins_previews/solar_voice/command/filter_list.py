@@ -29,7 +29,7 @@ async def filter_list_(client, event):
         author_icon_url = None
         author_name = 'Filters'
     else:
-        author_icon_url = guild.icon_url_as(size=64)
+        author_icon_url = guild.icon_url_as(size = 64)
         author_name = f'Filters for {guild.name}'
     
     embed.add_author(author_name, author_icon_url)

@@ -404,7 +404,7 @@ class user_profile:
         ]
         text.extend(render_map(self.data, SHIP_VALUES))
         embed = Embed('', '\n'.join(text), 0x010101)
-        embed.add_author(f'vs.: {other.user.full_name}', other.user.avatar_url_as(size=64))
+        embed.add_author(f'vs.: {other.user.full_name}', other.user.avatar_url_as(size = 64))
         
         text.clear()
         if sum(self.ships_left):
@@ -447,7 +447,7 @@ class user_profile:
             footer = f'You have {sum(self.ships_left)} ships left on {len(self.ship_positions)} tiles. {self.text}'
 
         embed = Embed('', '\n'.join(text), 0x010101)
-        embed.add_author(f'vs.: {other.user:f}', other.user.avatar_url_as(size=64))
+        embed.add_author(f'vs.: {other.user:f}', other.user.avatar_url_as(size = 64))
         embed.add_footer(footer)
         return embed
 
@@ -467,7 +467,7 @@ class user_profile:
             text.extend(render_map(self.data, SHIP_VALUES))
         
         embed = Embed('', '\n'.join(text), 0x010101)
-        embed.add_author(f'vs.: {other.user:f}', other.user.avatar_url_as(size=64))
+        embed.add_author(f'vs.: {other.user:f}', other.user.avatar_url_as(size = 64))
         embed.add_footer(self.text)
         return embed
 
@@ -622,7 +622,7 @@ class battleships_game:
             size1 = int(result[2])
             size2 = int(result[3])
             if (size1 == 1 and size2 == 3) or (size1 == 3 and size2 == 1):
-                type_=1
+                type_ = 1
             elif (size1 == 1 and size2 == 4) or (size1 == 4 and size2 == 1):
                 type_ = 2
             elif (size1 == 2 and size2 == 2):

@@ -1,7 +1,6 @@
 __all__ = ('TOUHOU_ACTION_KON',)
 
 from ...image_handling_core import ImageDetail
-from ...touhou_core.character import freeze
 from ...touhou_core.characters import (
     IMAIZUMI_KAGEROU, INUBASHIRI_MOMIJI, JUNKO, KAENBYOU_RIN, KONPAKU_YOUMU, KUDAMAKI_TSUKASA, YAKUMO_RAN
 )
@@ -10,166 +9,125 @@ from ...touhou_core.characters import (
 TOUHOU_ACTION_KON = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149991612550754344/kagerou-kon-0000.png',
-        freeze(IMAIZUMI_KAGEROU),
-    ),
+    ).with_source(IMAIZUMI_KAGEROU),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149991612945010718/kagerou-kon-0001.png',
-        freeze(IMAIZUMI_KAGEROU),
-    ),
+    ).with_source(IMAIZUMI_KAGEROU),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149989580406259793/momiji-kon-0000.png',
-        freeze(INUBASHIRI_MOMIJI),
-    ),
+    ).with_source(INUBASHIRI_MOMIJI),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149989580792139836/momiji-kon-0001.png',
-        freeze(INUBASHIRI_MOMIJI),
-    ),
+    ).with_source(INUBASHIRI_MOMIJI),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149989581555507320/momiji-kon-0002.png',
-        freeze(INUBASHIRI_MOMIJI),
-    ),
+    ).with_source(INUBASHIRI_MOMIJI),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149989579538038814/junko-kon-0000.png',
-        freeze(JUNKO),
-    ),
+    ).with_source(JUNKO),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1150000049749774397/junko-kon-0001.png',
-        freeze(JUNKO),
-    ),
+    ).with_source(JUNKO),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1150000366818168902/junko-kon-0002.png',
-        freeze(JUNKO),
-    ),
+    ).with_source(JUNKO),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1150001216277971014/orin-tsukasa-kon-0000.png',
-        freeze(KAENBYOU_RIN, KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KAENBYOU_RIN).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990428771356723/youmu-kon-0000.png',
-        freeze(KONPAKU_YOUMU),
-    ),
+    ).with_source(KONPAKU_YOUMU),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990400476598332/tsukasa-kon-0000.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990400849887323/tsukasa-kon-0001.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990401160269884/tsukasa-kon-0002.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990401483227158/tsukasa-kon-0003.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990401902661713/tsukasa-kon-0004.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990402405974116/tsukasa-kon-0005.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990402921865286/tsukasa-kon-0006.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990403337113640/tsukasa-kon-0007.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990403706208276/tsukasa-kon-0008.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990404117241947/tsukasa-kon-0009.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990425449472111/tsukasa-kon-0010.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990425902452746/tsukasa-kon-0011.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990426296729610/tsukasa-kon-0012.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990426699370639/tsukasa-kon-0013.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990427068481536/tsukasa-kon-0014.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990427513069568/tsukasa-kon-0015.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990427877969960/tsukasa-kon-0016.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990428351930409/tsukasa-kon-0017.png',
-        freeze(KUDAMAKI_TSUKASA),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1150011131721695292/tsukasa-ran-kon-0000.png',
-        freeze(KUDAMAKI_TSUKASA, YAKUMO_RAN),
-    ),
+    ).with_source(KUDAMAKI_TSUKASA).with_source(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990026420162672/ran-kon-0000.png',
-        freeze(YAKUMO_RAN),
-    ),
+    ).with_source(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990026868965466/ran-kon-0001.png',
-        freeze(YAKUMO_RAN),
-    ),
+    ).with_source(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990027191931000/ran-kon-0002.png',
-        freeze(YAKUMO_RAN),
-    ),
+    ).with_source(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990027581984798/ran-kon-0003.png',
-        freeze(YAKUMO_RAN),
-    ),
+    ).with_source(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990027938517075/ran-kon-0004.png',
-        freeze(YAKUMO_RAN),
-    ),
+    ).with_source(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990028253073418/ran-kon-0005.png',
-        freeze(YAKUMO_RAN),
-    ),
+    ).with_source(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990028676710440/ran-kon-0006.png',
-        freeze(YAKUMO_RAN),
-    ),
+    ).with_source(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990029196808253/ran-kon-0007.png',
-        freeze(YAKUMO_RAN),
-    ),
+    ).with_source(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990041981042718/ran-kon-0008.png',
-        freeze(YAKUMO_RAN),
-    ),
+    ).with_source(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990042358513714/ran-kon-0009.png',
-        freeze(YAKUMO_RAN),
-    ),
+    ).with_source(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990042715045888/ran-kon-0010.png',
-        freeze(YAKUMO_RAN),
-    ),
+    ).with_source(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990043843297320/ran-kon-0011.png',
-        freeze(YAKUMO_RAN),
-    ),
+    ).with_source(YAKUMO_RAN),
 ]

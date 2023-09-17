@@ -40,6 +40,17 @@ class ImageHandlerMeekMoe(ImageHandlerRequestBase):
         return self
     
     
+    @copy_docs(ImageHandlerRequestBase.__eq__)
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return NotImplemented
+        
+        if self._url != other._url:
+            return False
+        
+        return True
+    
+    
     @copy_docs(ImageHandlerRequestBase._request)
     async def _request(self, client):
         async with client.http.get(self._url) as response:
@@ -56,4 +67,4 @@ class ImageHandlerMeekMoe(ImageHandlerRequestBase):
         if not isinstance(data, dict):
             return
         
-        return [ImageDetail(data['url'], None, PROVIDER)]
+        return [ImageDetail(data['url'], PROVIDER)]

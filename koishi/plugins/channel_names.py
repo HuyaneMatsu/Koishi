@@ -95,8 +95,8 @@ class ChannelNameDescriber:
     def from_csv_line(cls, line):
         name, last_present, weight = line
         
-        last_present = int(last_present, base=16)
-        weight = int(weight, base=16)
+        last_present = int(last_present, base = 16)
+        weight = int(weight, base = 16)
         
         self = object.__new__(cls)
         
@@ -290,7 +290,7 @@ ADD_BUTTON_CANCEL = Button(emoji = ADD_EMOJI_CANCEL)
 ADD_COMPONENTS = Row(ADD_BUTTON_OK, ADD_BUTTON_CANCEL)
 
 @COMMAND_CLIENT.commands(category='CHANNEL NAMES', separator='|')
-async def add_bot_channel_name(client, message, weight:int, name):
+async def add_bot_channel_name(client, message, weight : int, name):
     """
     Adds the given channel name to the bot channel names.
     
@@ -307,7 +307,7 @@ async def add_bot_channel_name(client, message, weight:int, name):
             return
         
         names = await read_channels()
-        close_matches = get_close_matches(name, [describer.name for describer in names], n=1, cutoff=0.8)
+        close_matches = get_close_matches(name, [describer.name for describer in names], n = 1, cutoff = 0.8)
         if not close_matches:
             overwrite = False
             embed = Embed(
@@ -339,7 +339,7 @@ async def add_bot_channel_name(client, message, weight:int, name):
         message = await client.message_create(message.channel, embed = embed, components = ADD_COMPONENTS)
         
         try:
-            event = await wait_for_component_interaction(message, timeout = 300., check = check_staff_role)
+            event = await wait_for_component_interaction(message, timeout = 300.0, check = check_staff_role)
         except TimeoutError:
             event = None
             cancelled = False
@@ -369,7 +369,7 @@ async def add_bot_channel_name(client, message, weight:int, name):
             await client.interaction_component_message_edit(event, embed = embed, components = None)
 
 
-@COMMAND_CLIENT.commands(category='CHANNEL NAMES')
+@COMMAND_CLIENT.commands(category = 'CHANNEL NAMES')
 async def do_bot_channel_rename(client, message):
     """
     Adds the given channel name to the bot channel names.

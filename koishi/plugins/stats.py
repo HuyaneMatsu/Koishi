@@ -82,16 +82,16 @@ class threads:
             description.append('**Executors:**\n')
             
             if event_loop_executor_count:
-                other_executors -=event_loop_executor_count
+                other_executors -= event_loop_executor_count
                 description.append('Event thread executors: ')
                 description.append(repr(event_loop_executor_count))
                 description.append('\n')
             
             if DB_ENGINE.uses_single_worker:
-                other_executors -=1
+                other_executors -= 1
                 description.append('Database engine worker: 1\n')
             
-            if other_executors>0:
+            if other_executors > 0:
                 description.append('Other executors: ')
                 description.append(repr(other_executors))
                 description.append('\n')
@@ -113,7 +113,7 @@ class threads:
             
             total_leftover = 0
             for item in thread_count_by_type:
-                total_leftover +=item[1]
+                total_leftover += item[1]
             
             displayed_thread_types_count = 0
             non_displayed_thread_count = total_leftover
@@ -133,7 +133,7 @@ class threads:
                 
                 thread_type_name = type_.__name__
                 if len(thread_type_name) > 32:
-                    thread_type_name = thread_type_name[:32]+'...'
+                    thread_type_name = thread_type_name[:32] + '...'
                 
                 description.append(thread_type_name)
                 description.append(': ')

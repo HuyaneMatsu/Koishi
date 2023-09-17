@@ -39,7 +39,7 @@ PYTHON_RP = re.compile('(?:python|py|)[ \t]*', re.I)
 ENDER_1_RP = re.compile('[^\\\]`')
 ENDER_3_RP = re.compile('[^\\\]```')
 
-def parse_code_content(content, no_code_output=None):
+def parse_code_content(content, no_code_output = None):
     lines = content.splitlines()
     if not lines:
         return 'No content was provided', True
@@ -100,7 +100,7 @@ def parse_code_content(content, no_code_output=None):
 def raw_input():
     raise RuntimeError('Input disabled')
 
-def raw_print(buffer, *args, file=None, flush=False, **kwargs):
+def raw_print(buffer, *args, file = None, flush = False, **kwargs):
     if file is None:
         file = buffer
     

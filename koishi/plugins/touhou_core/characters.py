@@ -572,6 +572,18 @@ KOMANO_AUNN = TouhouCharacter(
     ),
 )
 
+
+KOMASUKA_SANNYO = TouhouCharacter(
+    'komakusa_sannyo',
+    'Komakusa Sannyo',
+    (
+        '駒草 山如',
+        'Sannyo',
+        'Sannyo Komakusa',
+    ),
+)
+
+
 KOMEIJI_KOISHI = TouhouCharacter(
     'komeiji_koishi',
     'Komeiji Koishi',
@@ -894,7 +906,7 @@ REIUJI_UTSUHO = TouhouCharacter(
     (
         '霊烏路 空',
         'Okuu',
-        'Utsuho Reiuji ',
+        'Utsuho Reiuji',
     ),
 )
 
@@ -1220,6 +1232,16 @@ YAKUMO_YUKARI = TouhouCharacter(
         '八雲 紫',
         'Yukari',
         'Yukari Yakumo',
+    ),
+)
+
+YAMASHIRO_TAKANE = TouhouCharacter(
+    'yamashiro_takane',
+    'Yamashiro Takane',
+    (
+        '山城 たかね',
+        'Takane',
+        'Takane Yamashiro',
     ),
 )
 

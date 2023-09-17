@@ -107,7 +107,7 @@ async def color_(
         image.save(buffer,'png')
         buffer.seek(0)
         
-        await client.interaction_followup_message_create(event, embed = embed, file=('color.png', buffer))
+        await client.interaction_followup_message_create(event, embed = embed, file = ('color.png', buffer))
 
 
 @SLASH_CLIENT.interactions(
@@ -121,7 +121,7 @@ async def raw(client, event):
         abort('You must have manage messages permission to invoke this command.')
     
     data = await client.http.message_get(event.channel_id, event.interaction.target_id)
-    chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
+    chunks = cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
     
     pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, event, pages)
@@ -129,6 +129,7 @@ async def raw(client, event):
 
 class RoleCache:
     __slots__ = ('cache', 'guild', 'roles',)
+    
     def __new__(cls, guild):
         self = object.__new__(cls)
         self.guild = guild
@@ -457,7 +458,7 @@ async def latest_users(client, event):
     if not event.user_permissions.can_kick_users:
         abort('You must have kick users to invoke this command.')
     
-    date_limit = datetime.now() - timedelta(days=7)
+    date_limit = datetime.now() - timedelta(days = 7)
     
     users = []
     guild = event.guild

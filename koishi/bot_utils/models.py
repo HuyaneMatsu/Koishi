@@ -43,6 +43,9 @@ ITEM_TABLE = None
 automation_configuration_model = None
 AUTOMATION_CONFIGURATION_TABLE = None
 
+character_preference_model = None
+CHARACTER_PREFERENCE_TABLE = None
+
 if (DATABASE_NAME is not None):
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy import Column, Integer as Int32, BIGINT as Int64, LargeBinary as Binary, create_engine, DateTime, \
@@ -241,6 +244,15 @@ if (DB_ENGINE is not None):
         welcome_channel_id = Column(Int64)
     
     AUTOMATION_CONFIGURATION_TABLE = automation_configuration_model.__table__
+    
+    
+    class character_preference_model(BASE):
+        __tablename__   = 'CHARACTER_PREFERENCE'
+        id              = Column(Int64, primary_key = True)
+        user_id         = Column(Int64, nullable = False)
+        system_name     = Column(String, nullable = True)
+    
+    CHARACTER_PREFERENCE_TABLE = character_preference_model.__table__
     
     
     DB_ENGINE.dispose()

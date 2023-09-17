@@ -208,7 +208,7 @@ def join_names_of_touhou_characters(characters, join_with):
     
     Parameters
     ----------
-    characters : `set` of ``TouhouCharacter``
+    characters : `set<TouhouCharacter>`
         The touhou character names to join.
     join_with : `str`
         The string to join the names with.
@@ -217,7 +217,11 @@ def join_names_of_touhou_characters(characters, join_with):
     -------
     joined_names : `None`, `str`
     """
-    character_count = len(characters)
+    if characters is None:
+        character_count = 0
+    else:
+        character_count = len(characters)
+    
     if character_count == 0:
         return '*none*'
     

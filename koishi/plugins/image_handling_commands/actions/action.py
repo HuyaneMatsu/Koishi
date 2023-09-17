@@ -8,6 +8,8 @@ from hata.ext.slash import abort
 from ..cooldown import CooldownHandler
 from ..helpers import add_provider
 
+from .character_preference import get_preferred_image
+
 
 EMOJI_FLUSHED = Emoji.precreate(965960651853926480)
 
@@ -316,9 +318,18 @@ class Action:
             content = build_response(client, self.verb, source_user, allowed_mentions, client_in_users)
             handler = self.handler
         
-        image_detail = await handler.get_image(
-            client, event, content = content, allowed_mentions = allowed_mentions, silent = True,
-        )
+        # Use goto
+        while True:
+            if handler.is_character_filterable():
+                image_detail = await get_preferred_image(handler, source_user, allowed_mentions)
+                if (image_detail is not None):
+                    break
+        
+            image_detail = await handler.get_image(
+                client, event, content = content, allowed_mentions = allowed_mentions, silent = True,
+            )
+            break
+        
         
         color = (color_seed >> 22) & 0xffffff
         if image_detail is None:

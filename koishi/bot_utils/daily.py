@@ -2,9 +2,9 @@ from datetime import datetime, timedelta
 
 from .constants import ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__BOOSTER, ROLE__SUPPORT__HEART_BOOST
 
-DAILY_INTERVAL          = timedelta(hours=22)
-DAILY_STREAK_BREAK      = timedelta(hours=26)
-DAILY_STREAK_LOSE       = timedelta(hours=12)
+DAILY_INTERVAL          = timedelta(hours = 22)
+DAILY_STREAK_BREAK      = timedelta(hours = 26)
+DAILY_STREAK_LOSE       = timedelta(hours = 12)
 
 DAILY_BASE              = 100
 DAILY_PER_DAY           = 5
@@ -31,8 +31,8 @@ VOTE_BASE_BONUS_WEEKEND = 100
 VOTE_PER_DAY_BONUS_WEEKEND = 1
 
 
-TOP_GG_VOTE_DELAY_MIN = timedelta(hours=12)
-TOP_GG_VOTE_DELAY_MAX = timedelta(days=4)
+TOP_GG_VOTE_DELAY_MIN = timedelta(hours = 12)
+TOP_GG_VOTE_DELAY_MAX = timedelta(days = 4)
 
 
 def calculate_daily_for(user, daily_streak):

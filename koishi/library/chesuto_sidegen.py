@@ -42,24 +42,24 @@ class methodsimulator:
     def __delete__(self,obj):
         raise AttributeError('can\'t delete attribute')
 
-PIL.Image.draw=methodsimulator(ImageDraw)
-PIL.font=truetype
-del ImageDraw,truetype
+PIL.Image.draw = methodsimulator(ImageDraw)
+PIL.font = truetype
+del ImageDraw, truetype
 
 def char_range(start,end):
     for x in range(ord(start),ord(end) + 1):
         yield chr(x)
 
 
-FONT=PIL.font('Kozuka.otf',50)
-FONT_COLOR=(0,0,0)
+FONT = PIL.font('Kozuka.otf', 50)
+FONT_COLOR = (0, 0, 0)
 
-size=53
+size = 53
 
-DC=(181,136,99)
-BC=(240,217,181)
+DC = (181,136,99)
+BC = (240,217,181)
 
-side_size=8
+side_size = 8
    
 for text in char_range('1','8'):
     image=PIL.new('RGB',(size,size),BC)

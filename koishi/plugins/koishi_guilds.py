@@ -139,7 +139,7 @@ async def build_guild_embed(guild):
         description,
         color  = (guild.icon_hash & 0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id >> 22) & 0xFFFFFF),
     ).add_thumbnail(
-        guild.icon_url_as(size=128),
+        guild.icon_url_as(size = 128),
     )
     
     guild_description = guild.description

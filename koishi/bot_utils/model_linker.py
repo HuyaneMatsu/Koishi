@@ -80,7 +80,7 @@ class Field(RichAttributeErrorBaseType):
         raise NotImplementedError()
 
 
-def compile_and_get(variable_name, code, globals=None):
+def compile_and_get(variable_name, code, globals = None):
     if globals is None:
         globals = {}
     

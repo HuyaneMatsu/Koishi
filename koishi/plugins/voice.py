@@ -401,8 +401,8 @@ if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE and (not SOLARLINK_VOICE):
             return
         
         while True:
-            index +=1
-            if index==limit:
+            index += 1
+            if index == limit:
                 break
             
             name = FILE_NAMES[index]

@@ -36,7 +36,7 @@ class ImageHandlerGroup(ImageHandlerBase):
         if handler_count == 1:
             return handlers[0]
         
-        weights = tuple(handler.get_weight() for handler in handlers)
+        weights = (*(handler.get_weight() for handler in handlers),)
         
         self = object.__new__(cls)
         self._handlers = handlers
@@ -44,7 +44,36 @@ class ImageHandlerGroup(ImageHandlerBase):
         return self
     
     
+    @copy_docs(ImageHandlerBase.__eq__)
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return NotImplemented
+        
+        if self._handlers != other._handlers:
+            return False
+        
+        if self._weights != other._weights:
+            return False
+        
+        return True
+
+    
     @copy_docs(ImageHandlerBase.get_image)
     async def get_image(self, client, event, **acknowledge_parameters):
         handler = choices(self._handlers, self._weights)[0]
         return await handler.get_image(client, event, **acknowledge_parameters)
+    
+    
+    @copy_docs(ImageHandlerBase.is_character_filterable)
+    def is_character_filterable(self):
+        for handler in self._handlers:
+            if handler.is_character_filterable():
+                return True
+        
+        return False
+    
+    
+    @copy_docs(ImageHandlerBase.iter_character_filterable)
+    def iter_character_filterable(self):
+        for handler in self._handler:
+            yield from handler.iter_character_filterable()

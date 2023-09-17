@@ -67,7 +67,8 @@ def get_back_path(unit):
     
     return ''.join(result)
 
-def get_searched_info(path, order_priority_base=0):
+
+def get_searched_info(path, order_priority_base = 0):
     unit = MAPPED_OBJECTS.get(path, None)
     if unit is None:
         type_ = None
@@ -132,7 +133,7 @@ def get_searched_info(path, order_priority_base=0):
         url_parts.append('#')
         
         while True:
-            index -=1
+            index -= 1
             part = backfetched[index]
             name_parts.append(part)
             

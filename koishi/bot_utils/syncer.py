@@ -37,6 +37,11 @@ IGNORED_NAMES = frozenset((
     '.git',
 ))
 
+IGNORED_EXTENSIONS = frozenset((
+    'png',
+))
+
+
 def flatten_directory(path, name, access_path):
     access_path.append(name)
     
@@ -51,8 +56,12 @@ def flatten_directory(path, name, access_path):
             continue
         
         if isfile(directory_path):
+            if name.rpartition('.')[2] in IGNORED_EXTENSIONS:
+                continue
+            
             yield File(directory_path, name, access_path)
             continue
+
 
 class File:
     __slots__ = ('path', 'modified', 'name', 'access_path',)

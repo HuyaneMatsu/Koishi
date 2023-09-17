@@ -1,32 +1,29 @@
 __all__ = ()
 
 import json, os
-from time import perf_counter
-from random import random
-from datetime import datetime
 from audioop import add as add_voice
-
+from datetime import datetime
 from io import BytesIO
+from random import random
+from time import perf_counter
+
 from PIL import Image as PIL
 from PIL.ImageSequence import Iterator as ImageSequenceIterator
-
-from hata import eventlist, RATE_LIMIT_GROUPS, Embed, cchunkify, User, random_id, chunkify, Webhook, \
-    KOKORO, VoiceRegion, parse_custom_emojis, UserBase, Channel, datetime_to_id, Client, \
-    ApplicationCommand, ApplicationCommandOption, ApplicationCommandOptionType, \
-    ApplicationCommandOptionChoice, LocalAudio, AudioSource, OpusDecoder, PrivacyLevel
-
-from scarletio import Future, TaskGroup, sleep, ReuBytesIO, ReuAsyncIO, enter_executor
-
-from hata.ext.command_utils import ChooseMenu, Pagination, Closer
-from hata.ext.commands_v2 import Command, checks, configure_converter, ConverterFlag
+from hata import (
+    ApplicationCommand, ApplicationCommandOption, ApplicationCommandOptionChoice, ApplicationCommandOptionType,
+    AudioSource, Channel, Client, Embed, KOKORO, LocalAudio, OpusDecoder, PrivacyLevel, RATE_LIMIT_GROUPS, User,
+    UserBase, VoiceRegion, Webhook, cchunkify, chunkify, datetime_to_id, eventlist, parse_custom_emojis, random_id
+)
 from hata.discord.events.core import PARSERS
+from hata.ext.command_utils import ChooseMenu, Closer, Pagination
+from hata.ext.commands_v2 import Command, ConverterFlag, checks, configure_converter
 from hata.ext.patchouli import map_module
-
-
-from config import AUDIO_PLAY_POSSIBLE, MARISA_MODE
+from scarletio import Future, ReuAsyncIO, ReuBytesIO, TaskGroup, enter_executor, sleep
 
 from ..bot_utils.constants import GUILD__SUPPORT, PATH__KOISHI
 from ..bots import MAIN_CLIENT
+
+from config import AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
 
 TEST_COMMANDS = eventlist(type_ = Command, category = 'TEST COMMANDS',)
@@ -40,7 +37,7 @@ def setup(lib):
 def teardown(lib):
     MAIN_CLIENT.commands.unextend(TEST_COMMANDS)
 
-def test_choose_menu_repr_choose_menu_selector( * args):
+def test_choose_menu_repr_choose_menu_selector(*args):
     return Future(KOKORO)
 
 
@@ -53,7 +50,8 @@ async def test_choose_menu_repr(client, message):
     choose_menu = await ChooseMenu(client, message.channel, choices, test_choose_menu_repr_choose_menu_selector)
     await client.message_create(message.channel, repr(choose_menu))
 
-@TEST_COMMANDS(checks=[checks.guild_only()])
+
+@TEST_COMMANDS(checks = [checks.guild_only()])
 async def test_role_create(client, message):
     """
     Creates and deletes a role.
@@ -63,6 +61,7 @@ async def test_role_create(client, message):
     await client.role_delete(role)
     await client.message_create('done')
 
+
 @TEST_COMMANDS
 async def test_allowed_edit(client, message):
     """
@@ -71,6 +70,7 @@ async def test_allowed_edit(client, message):
     user = message.author
     message = await client.message_create(message.channel, 'Test')
     await client.message_edit(message, user.mention, allowed_mentions = None)
+
 
 @TEST_COMMANDS(checks = [checks.guild_only()])
 async def test_rate_limit(client, message):
@@ -88,7 +88,7 @@ async def test_rate_limit(client, message):
             return
         
         roles = message.guild.role_list
-        if len(roles)==1:
+        if len(roles) == 1:
             await client.message_create(message.channel, 'Current state unknown -> Need more roles.')
             return
         
@@ -117,14 +117,23 @@ async def test_rate_limit(client, message):
     
     await client.message_create(message.channel, f'Next reset after : {next_reset!r}, used : {used!r}, free : {free!r}.')
     return
-    
+
+
 @TEST_COMMANDS
-async def test_user_data(client, message, user:User):
+async def test_user_data(client, message, user : User):
     """
     Prints out user data as received json
     """
     data = await client.http.user_get(user.id)
-    await Pagination(client, message.channel,[Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())])
+    await Pagination(
+        client,
+        message.channel,
+        [
+            Embed(description = chunk) for chunk in
+            cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
+        ],
+    )
+
 
 @TEST_COMMANDS
 async def test_100_messages(client, message):
@@ -142,8 +151,9 @@ async def test_100_messages(client, message):
     
     await client.message_create(message.channel, repr(end - start))
 
+
 @TEST_COMMANDS
-async def crosspost(client, message, message_id:int):
+async def crosspost(client, message, message_id : int):
     """
     Crossposts, pls pass a message id from the current channel!
     """
@@ -151,6 +161,7 @@ async def crosspost(client, message, message_id:int):
     await client.message_crosspost(to_message)
     
     await client.message_create(message.channel, 'success')
+
 
 @TEST_COMMANDS
 async def get_guild(client, message):
@@ -162,10 +173,18 @@ async def get_guild(client, message):
         await client.message_create(message.channel, 'Please use this command at a guild.')
     
     data = await client.http.guild_get(guild.id)
-    await Pagination(client, message.channel,[Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())])
+    await Pagination(
+        client,
+        message.channel,
+        [
+            Embed(description = chunk) for chunk in
+            cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
+        ],
+    )
+
 
 @TEST_COMMANDS
-async def test_webhook_response(client, message, user:User, use_user_avatar:int=1):
+async def test_webhook_response(client, message, user : User, use_user_avatar : int = 1):
     """
     Creates a message with a webhook for checking whether avatar is included.
     
@@ -223,6 +242,7 @@ async def test_webhook_response(client, message, user:User, use_user_avatar:int=
     
     await Pagination(client, channel, [Embed(description = description) for description in chunkify(result)])
 
+
 @TEST_COMMANDS
 async def test_webhook_response_with_url(client, message, url):
     """
@@ -267,10 +287,11 @@ async def test_webhook_response_with_url(client, message, url):
     
     await Pagination(client, channel, [Embed(description = description) for description in chunkify(result)])
 
+
 @TEST_COMMANDS
 async def test_webhook_response_avatar_url(client, message, avatar_url):
     """
-    Creates a message with a webhook for checking whether avatar is included. Please include avatr url, hehe.
+    Creates a message with a webhook for checking whether avatar is included. Please include avatar url, hehe.
     """
     channel = message.channel
     result = ['']
@@ -302,7 +323,7 @@ async def test_webhook_response_avatar_url(client, message, avatar_url):
     
     PARSERS['MESSAGE_CREATE'] = replace_MESSAGE_CREATE
     
-    message = await client.webhook_message_create(executor_webhook,content,avatar_url = avatar_url, wait=True)
+    message = await client.webhook_message_create(executor_webhook,content,avatar_url = avatar_url, wait = True)
     
     http_type.webhook_message_create = original_webhook_message_create
     
@@ -313,10 +334,11 @@ async def test_webhook_response_avatar_url(client, message, avatar_url):
     
     await Pagination(client, channel, [Embed(description = description) for description in chunkify(result)])
 
+
 @TEST_COMMANDS
 async def test_webhook_response_avatar_url_nowait(client, message, avatar_url):
     """
-    Creates a message with a webhook for checking whether avatar is included. Please include avatr url, hehe.
+    Creates a message with a webhook for checking whether avatar is included. Please include avatar url, hehe.
     """
     channel = message.channel
     result = []
@@ -337,7 +359,7 @@ async def test_webhook_response_avatar_url_nowait(client, message, avatar_url):
     
     PARSERS['MESSAGE_CREATE'] = replace_MESSAGE_CREATE
     
-    message = await client.webhook_message_create(executor_webhook,content,avatar_url = avatar_url, wait=False)
+    message = await client.webhook_message_create(executor_webhook,content,avatar_url = avatar_url, wait = False)
     
     await sleep(1.0)
     
@@ -345,6 +367,7 @@ async def test_webhook_response_avatar_url_nowait(client, message, avatar_url):
         PARSERS['MESSAGE_CREATE'] = source_MESSAGE_CREATE
     
     await Pagination(client, channel, [Embed(description = description) for description in chunkify(result)])
+
 
 @TEST_COMMANDS
 async def discovery_validate_randoms(client, message):
@@ -364,6 +387,7 @@ async def discovery_validate_randoms(client, message):
         collected.append(f'{word} : {result} ({end - start:.2f}s)')
     
     await client.message_create(message.channel, '\n'.join(collected))
+
 
 @TEST_COMMANDS(checks = [checks.guild_only()])
 async def test_receive_voice(client, message, target: User = None):
@@ -414,7 +438,7 @@ async def test_receive_voice(client, message, target: User = None):
 
 
 @MAIN_CLIENT.interactions(guild = GUILD__SUPPORT)
-async def test_receive_voice_decoded(client, event, target: User):
+async def test_receive_voice_decoded(client, event, target : User):
     """Receives 10 seconds of sound, then plays it."""
     channel = event.channel
     guild = channel.guild
@@ -456,7 +480,7 @@ async def test_receive_voice_decoded(client, event, target: User):
 
 
 @MAIN_CLIENT.interactions(guild = GUILD__SUPPORT)
-async def test_receive_voice_repeat(client, event, target: User):
+async def test_receive_voice_repeat(client, event, target : User):
     """Repeats your audio for 30 seconds."""
     channel = event.channel
     guild = channel.guild
@@ -505,29 +529,33 @@ async def test_raise(client, message):
     """
     raise ValueError('umm?')
 
+
 @TEST_COMMANDS
-async def test_multytype_annotation(client, message, value:('channel', 'role') = None):
+async def test_multytype_annotation(client, message, value : ('channel', 'role') = None):
     """
     Tries to parse role and channel at the same time, lets go boiz!
     """
     await client.message_create(message.channel, repr(value))
 
+
 @TEST_COMMANDS
-@configure_converter('message', everywhere=True)
-async def test_message_converter(client, message, value:'message'=True):
+@configure_converter('message', everywhere = True)
+async def test_message_converter(client, message, value : 'message' = True):
     """
     Tries to parse the message from the content of the message.
     """
     await client.message_create(message.channel, repr(value))
 
+
 @TEST_COMMANDS
-async def test_invite_converter(client, message, value:'invite'):
+async def test_invite_converter(client, message, value : 'invite'):
     """
     Tries to parse an invite from the content of the message.
     """
     await client.message_create(message.channel, repr(value))
 
-@TEST_COMMANDS(separator='|')
+
+@TEST_COMMANDS(separator = '|')
 async def test_command_parameter_single(client, message, *words):
     """
     Separates words by `|' character.
@@ -538,7 +566,8 @@ async def test_command_parameter_single(client, message, *words):
     
     await client.message_create(message.channel, result)
 
-@TEST_COMMANDS(separator=('[', ']'))
+
+@TEST_COMMANDS(separator = ('[', ']'))
 async def test_command_parameter_area(client, message, *words):
     """
     Separates words by space, but between `[]` count as one.
@@ -549,7 +578,8 @@ async def test_command_parameter_area(client, message, *words):
     
     await client.message_create(message.channel, result)
 
-@TEST_COMMANDS(separator=('*', '*'))
+
+@TEST_COMMANDS(separator = ('*', '*'))
 async def test_command_parameter_inter(client, message, *words):
     """
     Separates words by space, but the ones between `*` character are one.
@@ -560,11 +590,13 @@ async def test_command_parameter_inter(client, message, *words):
     
     await client.message_create(message.channel, result)
 
+
 def rule_upper(name):
     if name is None:
         return 'UNCATEGORIZED'
     
     return name.upper()
+
 
 def rule_capu(name):
     if name is None:
@@ -572,11 +604,13 @@ def rule_capu(name):
     
     return name.capitalize()
 
+
 def rule_lower(name):
     if name is None:
         return 'uncategorized'
     
     return name.lower()
+
 
 @TEST_COMMANDS
 async def set_upper_category_names(client, message):
@@ -586,6 +620,7 @@ async def set_upper_category_names(client, message):
     client.command_processor.category_name_rule = rule_upper
     await client.message_create(message.channel, 'nya!')
 
+
 @TEST_COMMANDS
 async def set_upper_command_names(client, message):
     """
@@ -593,6 +628,7 @@ async def set_upper_command_names(client, message):
     """
     client.command_processor.command_name_rule = rule_upper
     await client.message_create(message.channel, 'nya!')
+
 
 @TEST_COMMANDS
 async def set_capu_category_names(client, message):
@@ -602,6 +638,7 @@ async def set_capu_category_names(client, message):
     client.command_processor.category_name_rule = rule_capu
     await client.message_create(message.channel, 'nya!')
 
+
 @TEST_COMMANDS
 async def set_capu_command_names(client, message):
     """
@@ -610,6 +647,7 @@ async def set_capu_command_names(client, message):
     client.command_processor.command_name_rule = rule_capu
     await client.message_create(message.channel, 'nya!')
 
+
 @TEST_COMMANDS
 async def set_lower_category_names(client, message):
     """
@@ -617,6 +655,7 @@ async def set_lower_category_names(client, message):
     """
     client.command_processor.category_name_rule = rule_lower
     await client.message_create(message.channel, 'nya!')
+
 
 @TEST_COMMANDS
 async def set_lower_command_names(client, message):
@@ -627,47 +666,63 @@ async def set_lower_command_names(client, message):
     await client.message_create(message.channel, 'nya!')
 
 
-# DiscordException Forbidden (403), code=20001: Bots cannot use this endpoint
+# DiscordException Forbidden (403), code = 20001: Bots cannot use this endpoint
 # 2020 10 09:
 # DiscordException Not Found (404): 404: Not Found
-@TEST_COMMANDS(checks=[checks.guild_only()])
+@TEST_COMMANDS(checks = [checks.guild_only()])
 async def test_start_channel_thread(client, message):
     """
     Does a post request to the channel's threads.
     """
     data = await client.http.thread_create_private(message.channel.id, None)
-    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [
+        Embed(description = chunk) for chunk in
+        cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
+    ]
     await Pagination(client, message.channel, pages)
 
+
 # DiscordException Not Found (404): 404: Not Found
-@TEST_COMMANDS(checks=[checks.guild_only()])
+@TEST_COMMANDS(checks = [checks.guild_only()])
 async def test_get_channel_thread_user_get_all(client, message):
     """
     Gets the channel's threads' users probably, no clue.
     """
     data = await client.http.thread_user_get_all(message.channel.id)
-    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [
+        Embed(description = chunk) for chunk in
+        cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
+    ]
     await Pagination(client, message.channel, pages)
 
+
 # DiscordException Not Found (404): 404: Not Found
-@TEST_COMMANDS(checks=[checks.guild_only()])
+@TEST_COMMANDS(checks = [checks.guild_only()])
 async def test_add_channel_thread_user(client, message):
     """
     Adds you to the channel's threads.
     """
     data = await client.http.thread_user_add(message.channel.id, message.author.id)
-    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [
+        Embed(description = chunk) for chunk in
+        cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
+    ]
     await Pagination(client, message.channel, pages)
 
+
 # DiscordException Not Found (404): 404: Not Found
-@TEST_COMMANDS(checks=[checks.guild_only()])
+@TEST_COMMANDS(checks = [checks.guild_only()])
 async def test_delete_channel_thread_user(client, message):
     """
     Deletes you to the channel's threads.
     """
     data = await client.http.thread_user_delete(message.channel.id, message.author.id)
-    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [
+        Embed(description = chunk) for chunk in
+        cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
+    ]
     await Pagination(client, message.channel, pages)
+
 
 @TEST_COMMANDS
 async def test_application_get_all_detectable(client, message):
@@ -676,8 +731,12 @@ async def test_application_get_all_detectable(client, message):
     """
     data = await client.http.applications_detectable()
     
-    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [
+        Embed(description = chunk) for chunk in
+        cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
+    ]
     await Pagination(client, message.channel, pages)
+
 
 @TEST_COMMANDS
 async def test_get_eula(client, message):
@@ -686,11 +745,14 @@ async def test_get_eula(client, message):
     """
     data = await client.http.eula_get(542074049984200704)
     
-    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [
+        Embed(description = chunk) for chunk in
+        cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
+    ]
     await Pagination(client, message.channel, pages)
 
 
-@TEST_COMMANDS(checks=[checks.guild_only()])
+@TEST_COMMANDS(checks = [checks.guild_only()])
 async def test_get_welcome_screen(client, message):
     """
     Gets an eula.
@@ -701,8 +763,12 @@ async def test_get_welcome_screen(client, message):
     
     data = await client.http.welcome_screen_get(guild.id)
     
-    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [
+        Embed(description = chunk) for chunk in
+        cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
+    ]
     await Pagination(client, message.channel, pages)
+
 
 @TEST_COMMANDS
 async def test_regions(client, message):
@@ -719,15 +785,21 @@ async def test_regions(client, message):
     if not difference:
         embeds = [Embed(description = '*There are no new voice regions added*')]
     else:
-        embeds = [Embed(description = (
-            f'Voice region : {region.name!r}\n'
-            f'id : {region.value!r}\n'
-            f'vip : {region.vip!r}\n'
-            f'deprecated : {region.deprecated!r}\n'
-            f'custom : {region.custom!r}'
-                )) for region in difference]
+        embeds = [
+            Embed(
+                None,
+                (
+                    f'Voice region : {region.name!r}\n'
+                    f'id : {region.value!r}\n'
+                    f'vip : {region.vip!r}\n'
+                    f'deprecated : {region.deprecated!r}\n'
+                    f'custom : {region.custom!r}'
+                ),
+            ) for region in difference
+        ]
     
     await Pagination(client, message.channel, embeds)
+
 
 @TEST_COMMANDS
 async def test_closer(client, message):
@@ -737,25 +809,30 @@ async def test_closer(client, message):
     await Closer(client, message.channel, Embed('cake?'), timeout = 5.0)
 
 
-@TEST_COMMANDS(separator=',')
-async def autohelp_singles(client, message, name:str, user:'user', *words):
+@TEST_COMMANDS(separator = ',')
+async def autohelp_singles(client, message, name : str, user : 'user', *words):
     pass
 
-@TEST_COMMANDS(aliases=['autohelp-defaulted-alt'])
-async def autohelp_defaulted(client, message, name:str = None, channel:Channel=None, rest=None):
+
+@TEST_COMMANDS(aliases = ['autohelp-defaulted-alt'])
+async def autohelp_defaulted(client, message, name : str = None, channel:Channel = None, rest = None):
     pass
 
-@TEST_COMMANDS(separator=('[', ']'))
-async def autohelp_multy(client, message, value:{int, str}, user:{User, 'invite'}, *cakes:{Channel, 'tdelta'}):
+
+@TEST_COMMANDS(separator = ('[', ']'))
+async def autohelp_multy(client, message, value:{int, str}, user : {User, 'invite'}, *cakes : {Channel, 'tdelta'}):
     pass
 
-@TEST_COMMANDS(separator=('[', ']'))
-async def auto_sub_help(client, message, cake:str):
+
+@TEST_COMMANDS(separator = ('[', ']'))
+async def auto_sub_help(client, message, cake : str):
     pass
+
 
 @auto_sub_help.commands
 async def sugoi_dekai(ayaya:str):
     pass
+
 
 @TEST_COMMANDS
 async def detect_custom_emojis(client, message):
@@ -779,20 +856,22 @@ async def detect_custom_emojis(client, message):
     await client.message_create(message.channel, content)
 
 @TEST_COMMANDS
-async def test_message_reaction_clear(client, message, channel_id: int, message_id:int):
+async def test_message_reaction_clear(client, message, channel_id : int, message_id : int):
     """
-    Removes the reactions from the given channel-id - message-id conbination.
+    Removes the reactions from the given channel-id - message-id combination.
     """
     await client.http.reaction_clear(channel_id, message_id)
     await client.message_create(message.channel, 'nya')
 
+
 @TEST_COMMANDS
-async def test_message_reaction_delete_emoji(client, message, channel_id: int, message_id: int, emoji:'emoji'):
+async def test_message_reaction_delete_emoji(client, message, channel_id : int, message_id : int, emoji : 'emoji'):
     """
-    Removes the reactions from the given channel-id - message-id - emoji conbination.
+    Removes the reactions from the given channel-id - message-id - emoji combination.
     """
     await client.http.reaction_delete_emoji(channel_id, message_id, emoji.as_reaction)
     await client.message_create(message.channel, 'nya')
+
 
 @TEST_COMMANDS
 @configure_converter('user', ConverterFlag.user_all)
@@ -811,6 +890,7 @@ async def avatar_1(client, message, user: 'user' = None):
     
     await client.message_create(message.channel, embed = embed)
 
+
 @TEST_COMMANDS
 async def what_is_it_1(client, message, entity: {'user', 'channel', 'role'} = None):
     if entity is None:
@@ -824,9 +904,10 @@ async def what_is_it_1(client, message, entity: {'user', 'channel', 'role'} = No
     
     await client.message_create(message.channel, result)
 
+
 @TEST_COMMANDS
 @configure_converter('user', ConverterFlag.user_all)
-async def avatar_2(client, message, user: 'user'=None):
+async def avatar_2(client, message, user : 'user' = None):
     if user is None:
         user = message.author
     
@@ -841,9 +922,10 @@ async def avatar_2(client, message, user: 'user'=None):
     
     await client.message_create(message.channel, embed = embed)
 
+
 @TEST_COMMANDS
 @configure_converter('user', ConverterFlag.user_all)
-async def avatar_3(client, message, user: 'user'=None):
+async def avatar_3(client, message, user: 'user' = None):
     if user is None:
         user = message.author
     
@@ -873,23 +955,28 @@ async def what_is_it_2(client, message, entity: {'user', 'channel', 'role'}):
     
     await client.message_create(message.channel, result)
 
-@TEST_COMMANDS(checks=[checks.owner_only()])
+
+@TEST_COMMANDS(checks = [checks.owner_only()])
 async def owner_1(client, message):
     await client.message_create(message.channel, f'My masuta is {client.owner:f} !')
 
-@TEST_COMMANDS(checks=[checks.owner_only()])
+
+@TEST_COMMANDS(checks = [checks.owner_only()])
 async def owner_2(client, message):
     await client.message_create(message.channel, f'My masuta is {client.owner:f} !')
+
 
 @TEST_COMMANDS(name = 'print_1')
 async def print_1_(client, message, content):
     if content:
         await client.message_create(message.channel, content)
 
-@TEST_COMMANDS(name = 'print_2', aliases=['say_2'])
+
+@TEST_COMMANDS(name = 'print_2', aliases = ['say_2'])
 async def print_2_(client, message, content):
     if content:
         await client.message_create(message.channel, content)
+
 
 @TEST_COMMANDS
 async def estimate_fast_delete_before_2020_02_00(client, message):
@@ -903,7 +990,7 @@ async def estimate_fast_delete_before_2020_02_00(client, message):
     before = datetime_to_id(datetime(2020, 2, 1))
     
     while True:
-        messages = await client.message_get_chunk(target_channel, before=before)
+        messages = await client.message_get_chunk(target_channel, before = before)
         if not messages:
             break
         
@@ -931,7 +1018,10 @@ async def estimate_fast_delete_before_2020_02_00(client, message):
         DURATION -= RESET
         DURATION += LIMIT * DELAY / PARALLELISM
     
-    await client.message_create(target_channel, f'Total messages: {COUNTER + OWNED}.\nEstimated duration {DURATION:.2f}')
+    await client.message_create(
+        target_channel, f'Total messages: {COUNTER + OWNED}.\nEstimated duration {DURATION:.2f}',
+    )
+
 
 @TEST_COMMANDS
 async def do_delete(client, message):
@@ -970,6 +1060,7 @@ async def test_2_attachments(client, message):
         with await ReuAsyncIO(os.path.join(PATH__KOISHI, 'images', '0000001F_yuri_hug.gif')) as file2:
             await client.message_create(message.channel, file = [file1, file2])
 
+
 @TEST_COMMANDS
 async def test_webhook_message_edit_0(client, message):
     """
@@ -980,8 +1071,9 @@ async def test_webhook_message_edit_0(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait = True)
     await client.webhook_message_edit(executor_webhook, new_message, None)
+
 
 @TEST_COMMANDS
 async def test_webhook_message_edit_1(client, message):
@@ -993,8 +1085,9 @@ async def test_webhook_message_edit_1(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait = True)
     await client.webhook_message_edit(executor_webhook, new_message, 'ayaya')
+
 
 @TEST_COMMANDS
 async def test_webhook_message_edit_2(client, message):
@@ -1006,8 +1099,9 @@ async def test_webhook_message_edit_2(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait = True)
     await client.webhook_message_edit(executor_webhook, new_message, None, embed = Embed('cake'))
+
 
 @TEST_COMMANDS
 async def test_webhook_message_edit_3(client, message):
@@ -1019,7 +1113,7 @@ async def test_webhook_message_edit_3(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait = True)
     await client.webhook_message_edit(executor_webhook, new_message, embed = None)
 
 
@@ -1035,8 +1129,9 @@ async def test_webhook_message_edit_4(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', wait = True)
     await client.webhook_message_edit(executor_webhook, new_message, None)
+
 
 @TEST_COMMANDS
 async def test_webhook_message_edit_5(client, message):
@@ -1048,8 +1143,9 @@ async def test_webhook_message_edit_5(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait = True)
     await client.webhook_message_edit(executor_webhook, new_message, None, None)
+
 
 @TEST_COMMANDS
 async def test_webhook_message_edit_6(client, message):
@@ -1061,8 +1157,9 @@ async def test_webhook_message_edit_6(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait = True)
     await client.webhook_message_edit(executor_webhook, new_message, embed = None)
+
 
 @TEST_COMMANDS
 async def test_webhook_message_delete(client, message):
@@ -1074,8 +1171,9 @@ async def test_webhook_message_delete(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait = True)
     await client.webhook_message_delete(executor_webhook, new_message)
+
 
 @TEST_COMMANDS
 async def test_webhook_message_edit_7(client, message):
@@ -1089,8 +1187,11 @@ async def test_webhook_message_edit_7(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, message.author.mention, allowed_mentions = None, wait=True)
+    new_message = await client.webhook_message_create(
+        executor_webhook, message.author.mention, allowed_mentions = None, wait = True
+    )
     await client.webhook_message_edit(executor_webhook, new_message, allowed_mentions = None,)
+
 
 @TEST_COMMANDS
 async def test_webhook_message_edit_8(client, message):
@@ -1102,8 +1203,9 @@ async def test_webhook_message_edit_8(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'ayaya', wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'ayaya', wait = True)
     await client.webhook_message_edit(executor_webhook, new_message, 'ayaya')
+
 
 @TEST_COMMANDS
 async def test_webhook_message_edit_9(client, message):
@@ -1115,9 +1217,8 @@ async def test_webhook_message_edit_9(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, embed = Embed('cake'), wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, embed = Embed('cake'), wait = True)
     await client.webhook_message_edit(executor_webhook, new_message, embed = Embed('cake'))
-
 
 
 @TEST_COMMANDS
@@ -1156,12 +1257,20 @@ async def half_size(client, message):
                 frames.append(frame)
         
         buffer = ReuBytesIO()
-        new_image.save(buffer, format='gif', save_all=True, append_images=frames, loop=0, optimize=False,
-            transparency=0, disposal=2)
+        new_image.save(
+            buffer,
+            format = 'gif',
+            save_all = True,
+            append_images = frames,
+            loop = 0,
+            optimize = False,
+            transparency = 0,
+            disposal = 2,
+        )
         
         buffer.seek(0)
     
-    await client.message_create(message, file=(attachment.name, buffer))
+    await client.message_create(message, file = (attachment.name, buffer))
 
 class check_interacter:
     __slots__ = ('user', 'channel', 'application_command')
@@ -1183,7 +1292,8 @@ class check_interacter:
         
         return True
 
-@TEST_COMMANDS(checks=checks.guild_only())
+
+@TEST_COMMANDS(checks = checks.guild_only())
 async def test_application_command_response_twice(client, message):
     """
     Tries to respond on an interaction twice, because why not.
@@ -1195,7 +1305,7 @@ async def test_application_command_response_twice(client, message):
     application_command_schema = ApplicationCommand(
         'test_command0000',
         'ayaya',
-            )
+    )
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
     
@@ -1216,7 +1326,8 @@ async def test_application_command_response_twice(client, message):
     finally:
         await client.application_command_guild_delete(guild, application_command)
 
-@TEST_COMMANDS(checks=checks.guild_only())
+
+@TEST_COMMANDS(checks = checks.guild_only())
 async def test_application_command_response_multiple_embeds(client, message):
     """
     Tries to respond on an interaction with multiple embeds.
@@ -1228,7 +1339,7 @@ async def test_application_command_response_multiple_embeds(client, message):
     application_command_schema = ApplicationCommand(
         'test_command0001',
         'ayaya',
-            )
+    )
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
     
@@ -1247,7 +1358,8 @@ async def test_application_command_response_multiple_embeds(client, message):
     finally:
         await client.application_command_guild_delete(guild, application_command)
 
-@TEST_COMMANDS(checks=checks.guild_only())
+
+@TEST_COMMANDS(checks = checks.guild_only())
 async def test_application_command_followup_first(client, message):
     """
     Tries to respond on an interaction with followup.
@@ -1259,7 +1371,7 @@ async def test_application_command_followup_first(client, message):
     application_command_schema = ApplicationCommand(
         'test_command0002',
         'ayaya',
-            )
+    )
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
     
@@ -1279,7 +1391,8 @@ async def test_application_command_followup_first(client, message):
     finally:
         await client.application_command_guild_delete(guild, application_command)
 
-@TEST_COMMANDS(checks=checks.guild_only())
+
+@TEST_COMMANDS(checks = checks.guild_only())
 async def test_application_command_followup(client, message):
     """
     Tries to respond on an interaction normally, then with followup.
@@ -1291,7 +1404,7 @@ async def test_application_command_followup(client, message):
     application_command_schema = ApplicationCommand(
         'test_command0003',
         'ayaya',
-            )
+    )
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
     
@@ -1311,6 +1424,7 @@ async def test_application_command_followup(client, message):
     finally:
         await client.application_command_guild_delete(guild, application_command)
 
+
 # Name param is removed since it wont work.
 '''
 @TEST_COMMANDS(checks=checks.guild_only())
@@ -1325,7 +1439,7 @@ async def test_application_command_followup_alt_name(client, message):
     application_command_schema = ApplicationCommand(
         'test_command0004',
         'ayaya',
-            )
+    )
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
     
@@ -1346,7 +1460,7 @@ async def test_application_command_followup_alt_name(client, message):
         await client.application_command_guild_delete(guild, application_command)
 '''
 
-@TEST_COMMANDS(checks=checks.guild_only())
+@TEST_COMMANDS(checks = checks.guild_only())
 async def test_application_command_option_value_1(client, message):
     """
     Tests user type application command value.
@@ -1358,13 +1472,13 @@ async def test_application_command_option_value_1(client, message):
     application_command_schema = ApplicationCommand(
         'test_command0004',
         'ayaya',
-            )
+    )
     
     application_command_schema.add_option(ApplicationCommandOption(
         'user',
         'Dunno something',
         ApplicationCommandOptionType.user,
-            ))
+    ))
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
     
@@ -1385,8 +1499,8 @@ async def test_application_command_option_value_1(client, message):
         await client.application_command_guild_delete(guild, application_command)
 
 
-@TEST_COMMANDS(checks=checks.guild_only())
-async def load_messages(client, message, channel:Channel):
+@TEST_COMMANDS(checks = checks.guild_only())
+async def load_messages(client, message, channel : Channel):
     start = perf_counter()
     collected = 0
     limit = 2000
@@ -1398,9 +1512,10 @@ async def load_messages(client, message, channel:Channel):
     
     delay = (perf_counter() - start)
     
-    return f'Loaded: {collected} messages (limit={limit}); Took: {delay:.3f} seconds.'
-    
-@TEST_COMMANDS(checks=checks.guild_only())
+    return f'Loaded: {collected} messages (limit = {limit}); Took: {delay:.3f} seconds.'
+
+
+@TEST_COMMANDS(checks = checks.guild_only())
 async def test_application_command_option_choice_type_1(client, message):
     """
     Tests int type application command choice value.
@@ -1412,14 +1527,14 @@ async def test_application_command_option_choice_type_1(client, message):
     application_command_schema = ApplicationCommand(
         'test_command0005',
         'ayaya',
-            )
+    )
     
     application_command_schema.add_option(ApplicationCommandOption(
         'number',
         'Dunno something',
         ApplicationCommandOptionType.integer,
         choices = [ApplicationCommandOptionChoice('cake', '6'), ApplicationCommandOptionChoice('cookie', '8')]
-            ))
+    ))
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
     
@@ -1428,8 +1543,11 @@ async def test_application_command_option_choice_type_1(client, message):
         
         # Wait
         try:
-            interaction = await client.wait_for('interaction_create',
-                check_interacter(message.channel, message.author, application_command), timeout = 300.0)
+            interaction = await client.wait_for(
+                'interaction_create',
+                check_interacter(message.channel, message.author, application_command),
+                timeout = 300.0,
+            )
         except TimeoutError:
             await client.message_create(message.channel, 'timeout occurred')
             return
@@ -1439,7 +1557,8 @@ async def test_application_command_option_choice_type_1(client, message):
     finally:
         await client.application_command_guild_delete(guild, application_command)
 
-@TEST_COMMANDS(checks=checks.guild_only())
+
+@TEST_COMMANDS(checks = checks.guild_only())
 async def test_application_command_option_choice_type_2(client, message):
     """
     Tests big-int type application command choice value.
@@ -1451,14 +1570,17 @@ async def test_application_command_option_choice_type_2(client, message):
     application_command_schema = ApplicationCommand(
         'test_command0005',
         'ayaya',
-            )
+    )
     
     application_command_schema.add_option(ApplicationCommandOption(
         'number',
         'Dunno something',
         ApplicationCommandOptionType.integer,
-        choices = [ApplicationCommandOptionChoice('cake', 798636232133181511), ApplicationCommandOptionChoice('cookie', 7986362321331815111545)]
-            ))
+        choices = [
+            ApplicationCommandOptionChoice('cake', 798636232133181511),
+            ApplicationCommandOptionChoice('cookie', 7986362321331815111545),
+        ]
+    ))
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
     
@@ -1478,7 +1600,8 @@ async def test_application_command_option_choice_type_2(client, message):
     finally:
         await client.application_command_guild_delete(guild, application_command)
 
-@TEST_COMMANDS(checks=checks.guild_only())
+
+@TEST_COMMANDS(checks = checks.guild_only())
 async def test_application_command_option_choice_type_3(client, message):
     """
     Tests 33 bit big-int type application command choice value.
@@ -1490,14 +1613,17 @@ async def test_application_command_option_choice_type_3(client, message):
     application_command_schema = ApplicationCommand(
         'test_command0006',
         'ayaya',
-            )
+    )
     
     application_command_schema.add_option(ApplicationCommandOption(
         'number',
         'Dunno something',
         ApplicationCommandOptionType.integer,
-        choices = [ApplicationCommandOptionChoice('cake', 4294967296), ApplicationCommandOptionChoice('cookie', 4294967296)]
-            ))
+        choices = [
+            ApplicationCommandOptionChoice('cake', 4294967296),
+            ApplicationCommandOptionChoice('cookie', 4294967296),
+        ],
+    ))
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
     
@@ -1517,7 +1643,8 @@ async def test_application_command_option_choice_type_3(client, message):
     finally:
         await client.application_command_guild_delete(guild, application_command)
 
-@TEST_COMMANDS(checks=checks.guild_only())
+
+@TEST_COMMANDS(checks = checks.guild_only())
 async def test_application_command_option_choice_type_4(client, message):
     """
     Tests 61 bit big-int type application command choice value.
@@ -1529,14 +1656,17 @@ async def test_application_command_option_choice_type_4(client, message):
     application_command_schema = ApplicationCommand(
         'test_command0007',
         'ayaya',
-            )
+    )
     
     application_command_schema.add_option(ApplicationCommandOption(
         'number',
         'Dunno something',
         ApplicationCommandOptionType.integer,
-        choices = [ApplicationCommandOptionChoice('cake', 1 << 60), ApplicationCommandOptionChoice('cookie', (1 << 60) + 1556656)]
-            ))
+        choices = [
+            ApplicationCommandOptionChoice('cake', 1 << 60),
+            ApplicationCommandOptionChoice('cookie', (1 << 60) + 1556656),
+        ],
+    ))
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
     
@@ -1556,7 +1686,8 @@ async def test_application_command_option_choice_type_4(client, message):
     finally:
         await client.application_command_guild_delete(guild, application_command)
 
-@TEST_COMMANDS(checks=checks.guild_only())
+
+@TEST_COMMANDS(checks = checks.guild_only())
 async def test_application_command_option_choice_type_5(client, message):
     """
     Tests 65 bit big-int type application command choice value.
@@ -1568,7 +1699,7 @@ async def test_application_command_option_choice_type_5(client, message):
     application_command_schema = ApplicationCommand(
         'test_command0008',
         'ayaya',
-            )
+    )
     
     application_command_schema.add_option(
         ApplicationCommandOption(
@@ -1577,7 +1708,7 @@ async def test_application_command_option_choice_type_5(client, message):
             ApplicationCommandOptionType.integer,
             choices = [
                 ApplicationCommandOptionChoice('cake', 1 << 64),
-                ApplicationCommandOptionChoice('cookie', (1 << 64) + 4554656)
+                ApplicationCommandOptionChoice('cookie', (1 << 64) + 4554656),
             ],
         )
     )
@@ -1600,7 +1731,8 @@ async def test_application_command_option_choice_type_5(client, message):
     finally:
         await client.application_command_guild_delete(guild, application_command)
 
-@TEST_COMMANDS(checks=checks.guild_only())
+
+@TEST_COMMANDS(checks = checks.guild_only())
 async def test_application_command_normal_edit(client, message):
     """
     Normally edits a sus message
@@ -1612,7 +1744,7 @@ async def test_application_command_normal_edit(client, message):
     application_command_schema = ApplicationCommand(
         'test_command0009',
         'ayaya',
-            )
+    )
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
     
@@ -1640,12 +1772,18 @@ async def test_application_command_normal_edit(client, message):
 
 async def voice_state(client, message):
     prefix = client.command_processor.get_prefix_for(message)
-    return Embed('voice-state', (
-        'Gets the voice state of the respective voice client.\n'
-        f'Usage: `{prefix}voice-state`\n'
-        )).add_footer('Owner only!')
+    return Embed(
+        'voice-state',
+        (
+            'Gets the voice state of the respective voice client.\n'
+            f'Usage: `{prefix}voice-state`\n'
+        ),
+    ).add_footer(
+        'Owner only!',
+    )
 
-@TEST_COMMANDS(description = voice_state, checks=checks.owner_only(), category='VOICE')
+
+@TEST_COMMANDS(description = voice_state, checks = checks.owner_only(), category = 'VOICE')
 async def voice_state(client, message):
     voice_client = client.voice_client_for(message)
     lines = []
@@ -1686,12 +1824,14 @@ async def voice_state(client, message):
     
     await Pagination(client, message.channel, pages)
 
+
 class MixerStream(AudioSource):
     __slots__ = ('_decoder', '_postprocess_called', 'sources', )
     def __init__(self, *sources):
         self.sources = list(sources)
         self._decoder = OpusDecoder()
         self._postprocess_called = False
+    
     
     async def postprocess(self):
         if self._postprocess_called:
@@ -1701,11 +1841,13 @@ class MixerStream(AudioSource):
         for source in self.sources:
             await source.postprocess()
     
+    
     async def add(self, source):
         if self._postprocess_called:
             await source.postprocess()
         
         self.sources.append(source)
+    
     
     async def read(self):
         sources = self.sources
@@ -1732,6 +1874,7 @@ class MixerStream(AudioSource):
         
         return result
     
+    
     async def cleanup(self):
         self._postprocess_called = False
         sources = self.sources
@@ -1741,7 +1884,7 @@ class MixerStream(AudioSource):
 
 
 if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
-    @TEST_COMMANDS(separator='|', checks=checks.owner_only(), category='VOICE')
+    @TEST_COMMANDS(separator = '|', checks = checks.owner_only(), category = 'VOICE')
     async def play_double(client, message):
         guild = message.guild
         if guild is None:
@@ -1765,8 +1908,9 @@ if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
             break
         
         await client.message_create(message.channel, text)
-
-    @TEST_COMMANDS(separator='|', checks=checks.owner_only(), category='VOICE')
+    
+    
+    @TEST_COMMANDS(separator = '|', checks = checks.owner_only(), category = 'VOICE')
     @configure_converter(Channel, ConverterFlag.channel_all)
     async def play_from(client, message, voice_channel):
         
@@ -1850,7 +1994,7 @@ async def test_webhook_message_edit_10(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', wait = True)
     await client.webhook_message_edit(executor_webhook, new_message, file=('cake', b'cakes are great'))
 
 
@@ -1860,7 +2004,7 @@ async def test_stage_discovery_get(client, message):
     Tries to get stage discovery.
     """
     data = await client.http.stage_discovery_get()
-    chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
+    chunks = cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
     pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
 
@@ -1871,7 +2015,7 @@ async def test_stage_get_all(client, message):
     Gets all the stages.
     """
     data = await client.http.stage_get_all()
-    chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
+    chunks = cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
     pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
 
@@ -1883,7 +2027,7 @@ async def test_stage_edit(client, message):
     """
     data = {'topic':'Ayaya'}
     data = await client.http.stage_edit(826912003452436510, data)
-    chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
+    chunks = cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
     pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
 
@@ -1894,7 +2038,7 @@ async def test_stage_create(client, message):
     """
     data = {'channel_id':826912003452436510, 'topic':'Ayaya', 'privacy_level': PrivacyLevel.guild_only.value}
     data = await client.http.stage_create(data)
-    chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
+    chunks = cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
     pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
 
@@ -1905,7 +2049,7 @@ async def test_stage_delete(client, message):
     Deletes the stage topic?
     """
     data = await client.http.stage_delete(826912003452436510)
-    chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
+    chunks = cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
     pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
 
@@ -1919,7 +2063,7 @@ async def test_kwargs(ctx, **kwargs):
 
 
 @TEST_COMMANDS
-async def test_message_interaction(ctx, message:'message'):
+async def test_message_interaction(ctx, message : 'message'):
     """
     Gets message interaction?
     """

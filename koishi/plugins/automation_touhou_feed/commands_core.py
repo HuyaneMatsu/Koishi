@@ -278,7 +278,7 @@ def build_touhou_feed_listing_response(client, guild, page, enabled):
             style = STYLE_RED
             character_name = 'unknown'
         else:
-            if handler_keys[0].characters:
+            if handler_keys[0].characters is not None:
                 character_name = join_handler_keys(handler_keys)
                 style = STYLE_GREEN
             else:

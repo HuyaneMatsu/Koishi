@@ -260,15 +260,15 @@ class dispatch_tester:
                                 result.append(f'Sizes got update at embed {index}:')
                                 for name, value in collected:
                                     result.append(f'- {name} : {value}')
-                elif flag==2:
+                elif flag == 2:
                     for index, embed in enumerate(embeds,1):
                         if embed.type in EXTRA_EMBED_TYPES:
                             result.append(f'New embed appeared at index {index}:')
                             result.append(repr(embed))
 
-        text=cchunkify(result)
-        pages=[Embed(description = chunk) for chunk in text]
-        await Pagination(client, self.channel, pages, timeout = 120.)
+        text = cchunkify(result)
+        pages = [Embed(description = chunk) for chunk in text]
+        await Pagination(client, self.channel, pages, timeout = 120.0)
     
     
     @classmethod

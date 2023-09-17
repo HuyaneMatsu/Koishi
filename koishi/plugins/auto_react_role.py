@@ -315,11 +315,11 @@ class AutoReactRoleChange:
         if (self.actual is not None):
             actual_length += len(self.actual)
         if emoji_state in (CHANGE_STATE_ADDED, CHANGE_STATE_ACTUAL):
-            actual_length -=1
+            actual_length -= 1
         if role_state in (CHANGE_STATE_ADDED, CHANGE_STATE_ACTUAL):
-            actual_length -=1
+            actual_length -= 1
         
-        if actual_length>=20:
+        if actual_length >= 20:
             return False
         
         self.added.append((emoji,role))
@@ -887,11 +887,11 @@ class AutoReactRoleManager:
                 
                 if isinstance(err, DiscordException):
                     if err.code in (
-                            ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.unknown_channel, # channel deleted
-                            ERROR_CODES.missing_access, # client removed
-                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                                ):
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # channel deleted
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                    ):
                         return
                 
                 await client.events.error(client,f'{cls.__name__}.__new__',err)
@@ -906,13 +906,13 @@ class AutoReactRoleManager:
                 
                 if isinstance(err, DiscordException):
                     if err.code in (
-                            ERROR_CODES.unknown_emoji, # emoji deleted
-                            ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-                            ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.unknown_channel, # channel deleted
-                            ERROR_CODES.missing_access, # client removed
-                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                                ):
+                        ERROR_CODES.unknown_emoji, # emoji deleted
+                        ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # channel deleted
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                    ):
                         return
                 
                 await client.events.error(client, f'{cls.__name__}.__new__', err)
@@ -924,21 +924,24 @@ class AutoReactRoleManager:
         relations = {}
         
         for emoji, role in changes.added:
-            data[position:position + 8] = emoji.id.to_bytes(8, byteorder='big')
-            position +=8
-            data[position:position + 8] = role.id.to_bytes(8, byteorder='big')
-            position +=8
+            data[position:position + 8] = emoji.id.to_bytes(8, byteorder = 'big')
+            position += 8
+            data[position:position + 8] = role.id.to_bytes(8, byteorder = 'big')
+            position += 8
 
             relations[emoji] = role
             relations[role] = emoji
         
         async with DB_ENGINE.connect() as connector:
-            await connector.execute(AUTO_REACT_ROLE_TABLE.insert().values(
-                message_id  = message.id,
-                channel_id  = message.channel.id,
-                data        = data,
-                behaviour   = changes.new_behaviour,
-                client_id   = client.id))
+            await connector.execute(
+                AUTO_REACT_ROLE_TABLE.insert().values(
+                    message_id  = message.id,
+                    channel_id  = message.channel.id,
+                    data        = data,
+                    behaviour   = changes.new_behaviour,
+                    client_id   = client.id,
+                ),
+            )
         
         self = object.__new__(cls)
         self.message = message
@@ -990,10 +993,10 @@ class AutoReactRoleManager:
         except BaseException as err:
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.missing_access, # client removed
-                            ):
+                    ERROR_CODES.unknown_message, # message deleted
+                    ERROR_CODES.unknown_channel, # channel deleted
+                    ERROR_CODES.missing_access, # client removed
+                ):
                     await connector.execute(AUTO_REACT_ROLE_TABLE.delete().where(
                         auto_react_role_model.id == query.id))
                     return
@@ -1005,7 +1008,7 @@ class AutoReactRoleManager:
         re_do = False
         data = query.data
         for position in range(0, 320, 16):
-            emoji_id = int.from_bytes(data[position:position + 8], byteorder='big')
+            emoji_id = int.from_bytes(data[position : position + 8], byteorder = 'big')
             
             if emoji_id == 0:
                 break
@@ -1016,7 +1019,7 @@ class AutoReactRoleManager:
                 re_do = True
                 continue
             
-            role_id = int.from_bytes(data[position + 8:position + 16], byteorder='big')
+            role_id = int.from_bytes(data[position + 8 : position + 16], byteorder = 'big')
             
             try:
                 role = ROLES[role_id]
@@ -1350,10 +1353,10 @@ class AutoReactRoleManager:
         data = bytearray(320)
         position = 0
         for emoji, role in self.relations.items():
-            data[position:position + 8] = emoji.id.to_bytes(8, byteorder='big')
-            position +=8
-            data[position:position + 8] = role.id.to_bytes(8, byteorder='big')
-            position +=8
+            data[position:position + 8] = emoji.id.to_bytes(8, byteorder = 'big')
+            position += 8
+            data[position:position + 8] = role.id.to_bytes(8, byteorder = 'big')
+            position += 8
         
         async with DB_ENGINE.connect() as connector:
             await connector.execute(

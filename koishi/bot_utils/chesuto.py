@@ -228,17 +228,17 @@ CARDS_FILE_LOCK = SyncLock()
 PROTECTED_FILE_NAMES = {'cards.json'}
 
 class Card:
-    __slots__=('_length_hint', 'description', 'flags', 'id', 'image_name', 'name', 'rarity')
+    __slots__ = ('_length_hint', 'description', 'flags', 'id', 'image_name', 'name', 'rarity')
     def __init__(self, description, id_, name, rarity, flags = 0, image_name = None):
-        self.id         = id_
-        self.name       = name
-        self.description =  description
-        self.rarity     = rarity
-        self.flags      = CardFlag(flags)
+        self.id = id_
+        self.name = name
+        self.description = description
+        self.rarity = rarity
+        self.flags = CardFlag(flags)
         self.image_name = image_name
-        self._length_hint=0
-        CARDS_BY_ID[id_]= self
-        CARDS_BY_NAME[name.lower()]=self
+        self._length_hint = 0
+        CARDS_BY_ID[id_] = self
+        CARDS_BY_NAME[name.lower()] = self
     
     def __hash__(self):
         return self.id
@@ -260,7 +260,7 @@ class Card:
         
         description = self.description
         description_parts = []
-        if len(description)<=EMBED_DESCRIPTION_LENGTH:
+        if len(description) <= EMBED_DESCRIPTION_LENGTH:
             description_parts.append(description)
         else:
             description = description[:EMBED_DESCRIPTION_LENGTH]
@@ -307,7 +307,7 @@ class Card:
     
     def __len__(self):
         result = self._length_hint
-        if result!=0:
+        if result != 0:
             return result
         
         # 2 name start with **
@@ -318,7 +318,7 @@ class Card:
         
         # name length
         name_ln = len(self.name)
-        if name_ln>EMBED_NAME_LENGTH:
+        if name_ln > EMBED_NAME_LENGTH:
             name_ln = EMBED_NAME_LENGTH + 3
         
         result += name_ln
@@ -343,18 +343,18 @@ class Card:
         return result
     
     @classmethod
-    def update(cls,description,id_,name,rarity):
+    def update(cls, description, id_, name, rarity):
         lower_name = name.lower()
         try:
             card=CARDS_BY_NAME[lower_name]
         except KeyError:
-            Card(description,id_,name,rarity)
+            Card(description, id_, name, rarity)
             result = True
         else:
             card.description = description
             card.name = name
-            card.rarity=rarity
-            card._length_hint=0
+            card.rarity = rarity
+            card._length_hint = 0
             result = False
         
         return result
@@ -383,13 +383,13 @@ class Card:
             card_data['flags']      = card.flags
             card_datas.append(card_data)
         
-        await loop.run_in_executor(alchemy_incendiary(cls._dump_cards,(card_datas,),),)
+        await loop.run_in_executor(alchemy_incendiary(cls._dump_cards, (card_datas,),),)
     
     @classmethod
     def _dump_cards(cls,card_datas):
         with CARDS_FILE_LOCK:
             with open(CARDS_FILE, 'w') as file:
-                json.dump(card_datas, file, indent=4)
+                json.dump(card_datas, file, indent = 4)
     
     @classmethod
     def load_cards(cls):

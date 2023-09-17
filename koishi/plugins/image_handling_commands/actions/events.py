@@ -49,7 +49,7 @@ ACTIONS_BY_NAME = {
 
 MAX_ACTION_COMMAND_LENGTH = max(len(name) for name in ACTIONS_BY_NAME.keys())
 
-ACTION_CONTENT_RP = re_compile(f'> {USER_MENTION_RP.pattern} ', re_multiline | re_unicode)
+ACTION_CONTENT_RP = re_compile(f'> .*?{USER_MENTION_RP.pattern}', re_multiline | re_unicode)
 
 
 def could_respond_in_channel(client, channel):
@@ -113,7 +113,7 @@ def is_message_action_interaction(client, message):
     
     # We do not receive nonce for requested or referenced messages, so we cannot match that reliable.
     # Try to match message by structure~
-    elif message_type is MessageType.inline_reply:
+    elif (message_type is MessageType.inline_reply) or (message_type is MessageType.default):
         if (message.content is not None):
             embed = message.embed
             if (embed is not None):

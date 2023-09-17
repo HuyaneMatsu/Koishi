@@ -2,13 +2,14 @@ __all__ = ()
 
 from random import choice
 
-from hata import Client
+from hata import Client, Embed
 
 from ...bots import SLASH_CLIENT
 
 from ..automation_core import get_welcome_channel
 
-from .constants import ONBOARDING_MASK_ALL, ONBOARDING_MASK_STARTED, WELCOME_MESSAGES
+from .characters import WELCOME_DEFAULT
+from .constants import ONBOARDING_MASK_ALL, ONBOARDING_MASK_STARTED
 
 
 @SLASH_CLIENT.events
@@ -41,9 +42,12 @@ async def guild_user_add(client, guild, user):
     if flags & ONBOARDING_MASK_ALL == ONBOARDING_MASK_STARTED:
         return
     
+    messages, images = WELCOME_DEFAULT
+    
     await client.message_create(
         channel,
-        content = choice(WELCOME_MESSAGES)(user),
+        content = f'> {choice(messages)(user)}',
+        embed = Embed().add_image(choice(images)),
         silent = True,
     )
 

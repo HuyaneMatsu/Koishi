@@ -113,7 +113,7 @@ async def queue_(client, event,
             f'{EMOJI_VOLUME} Volume',
             (
                 f'```\n'
-                f'{player.get_volume() * 100.:.0f}%\n'
+                f'{player.get_volume() * 100.0:.0f}%\n'
                 f'```'
             ),
             inline = True,
@@ -125,7 +125,7 @@ async def queue_(client, event,
         author_icon_url = None
         author_name = 'Queue'
     else:
-        author_icon_url = guild.icon_url_as(size=64)
+        author_icon_url = guild.icon_url_as(size = 64)
         author_name = f'Queue for {guild.name}'
     
     embed.add_author(author_name, author_icon_url)

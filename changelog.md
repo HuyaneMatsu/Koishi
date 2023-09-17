@@ -1,3 +1,13 @@
+### 2023-09-17
+
+- Add missing `Yamashiro Takane` touhou character.
+- Add missing `Komakusa Sannyo` touhou character.
+- `/automation welcome` now sends images.
+- Now you can reply with interactions (such as `hug`, ...) on welcome messages.
+- Restructure old `/accessibility` command, now `notification-settings` is a sub-command group (also rename commands).
+- Add new `/accessibility character-preference` commands (show, add and remove).
+- Actions, such as `/pocky-kiss` now will respect your character preference.
+
 ### 2023-09-09
 
 - Add **1** image to `/like` interaction.

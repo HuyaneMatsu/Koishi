@@ -1,14 +1,15 @@
 __all__ = ()
 
 from collections import OrderedDict
-from datetime import datetime
-from scarletio import LOOP_TIME, Lock, IgnoreCaseMultiValueDictionary, IgnoreCaseString, Future
-from hata import KOKORO, Embed
+from datetime import datetime as DateTime
+
+from hata import Embed, KOKORO
 from hata.discord.http import LIBRARY_USER_AGENT
-from scarletio.web_common.headers import USER_AGENT, DATE
 from hata.discord.utils import parse_date_header_to_datetime
-from scarletio.web_common import quote
 from hata.ext.slash import abort
+from scarletio import Future, IgnoreCaseMultiValueDictionary, IgnoreCaseString, LOOP_TIME, Lock
+from scarletio.web_common import quote
+from scarletio.web_common.headers import DATE, USER_AGENT
 
 from ..bot_utils.constants import GUILD__SUPPORT
 from ..bots import SLASH_CLIENT
@@ -19,6 +20,7 @@ GITHUB_HEADERS[USER_AGENT] = LIBRARY_USER_AGENT
 
 GITHUB_HEADER_RATE_LIMIT_REMAINING = IgnoreCaseString('x-ratelimit-remaining')
 GITHUB_HEADER_RATE_LIMIT_RESET_AT = IgnoreCaseString('x-ratelimit-reset')
+
 
 class GitHubQueryLimit:
     __slots__ = ('rate_limit_reset_at', 'lock')
@@ -34,6 +36,7 @@ class GitHubQueryLimit:
             now = parse_date_header_to_datetime(headers[DATE]).timestamp()
             reset = int(headers[GITHUB_HEADER_RATE_LIMIT_RESET_AT])
             self.rate_limit_reset_at = LOOP_TIME() + float(reset - now)
+
 
 class GitHubQuery:
     __slots__ = ('active', 'limit', 'http', 'query_builder', 'cache', 'object_type')
@@ -87,7 +90,7 @@ class GitHubQuery:
                 else:
                     
                     url = self.query_builder(quoted_key)
-                    async with self.http.get(url, headers=GITHUB_HEADERS) as response:
+                    async with self.http.get(url, headers = GITHUB_HEADERS) as response:
                         self.limit.set(response.headers)
                         if response.status in (200, 404):
                             result_data = await response.json()
@@ -173,15 +176,17 @@ class SearchUserType:
         return extend
 
 class UserType:
-    __slots__ = ('user_name', 'nick_name', 'avatar_url', 'created_at', 'reference_url', 'follower_count',
-        'repo_count', 'gist_count', 'bio', 'following_count', 'company', 'location', 'twitter_user_name', 'blog_name',
-        'blog_link', 'has_extra_fields', )
+    __slots__ = (
+        'avatar_url', 'bio', 'blog_link', 'blog_name', 'company', 'created_at', 'follower_count', 'following_count',
+        'gist_count', 'has_extra_fields', 'location', 'nick_name', 'reference_url', 'repo_count', 'twitter_user_name',
+        'user_name'
+    )
     
     def __new__(cls, data):
         user_name = data['login']
         nick_name = data['name']
         avatar_url = data['avatar_url']
-        created_at = datetime.strptime(data['created_at'], '%Y-%m-%dT%H:%M:%SZ')
+        created_at = DateTime.strptime(data['created_at'], '%Y-%m-%dT%H:%M:%SZ')
         reference_url = data['html_url']
         follower_count = data['followers']
         repo_count = data['public_repos']
@@ -201,8 +206,12 @@ class UserType:
             blog_link = None
             blog_name = None
         
-        if (company is not None) or (location is not None) or (twitter_user_name is not None) \
-                or (blog_name is not None):
+        if (
+            (company is not None) or
+            (location is not None) or
+            (twitter_user_name is not None) or
+            (blog_name is not None)
+        ):
             has_extra_fields = True
         else:
             has_extra_fields = False
@@ -266,7 +275,7 @@ class UserType:
         extend.append('](https://github.com/')
         extend.append(quoted_name)
         extend.append('?tab=following)\n'
-                                 'Gists: [')
+                      'Gists: [')
         extend.append(repr(self.gist_count))
         extend.append('](https://gist.github.com/')
         extend.append(quoted_name)

@@ -175,6 +175,26 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
         return self
     
     
+    @copy_docs(ImageHandlerRequestBase.__eq__)
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return NotImplemented
+        
+        if self._post_parser != other._post_parser:
+            return False
+        
+        if self._provider != other._provider:
+            return False
+        
+        if self._random_order != other._random_order:
+            return False
+        
+        if self._url != other._url:
+            return False
+        
+        return True
+
+    
     @copy_docs(ImageHandlerRequestBase._request)
     async def _request(self, client):
         retries_left = RETRIES_MAX
@@ -244,7 +264,7 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
         for post in soup.find_all('post'):
             url, tags = post_parser(post)
             if (url is not None) and (tags is not None):
-                image_details.append(ImageDetail(url, frozenset(tags.split()), self._provider))
+                image_details.append(ImageDetail(url, self._provider).with_tags(frozenset(tags.split())))
         
         if random_order:
             shuffle(image_details)
