@@ -43,7 +43,6 @@ async def guild_user_add(client, guild, user):
         return
     
     messages, images = WELCOME_DEFAULT
-    
     await client.message_create(
         channel,
         content = f'> {choice(messages)(user)}',
@@ -99,8 +98,10 @@ async def guild_user_update(client, guild, user, old_attributes):
         return
     
     # Send message
+    messages, images = WELCOME_DEFAULT
     await client.message_create(
         channel,
-        content = choice(WELCOME_MESSAGES)(user),
+        content = f'> {choice(messages)(user)}',
+        embed = Embed().add_image(choice(images)),
         silent = True,
     )
