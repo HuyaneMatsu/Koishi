@@ -16,8 +16,8 @@ from ..bots import SLASH_CLIENT
 from sqlalchemy import func as alchemy_function, and_, or_
 from sqlalchemy.sql import select
 
-
 from .marriage_slot import BUY_WAIFU_SLOT_INVOKE_COMPONENT, EMOJI_YES, EMOJI_NO
+from .notification_settings import NOTIFICATION_SETTINGS_CUSTOM_ID_PROPOSAL_DISABLE, get_one_notification_settings_with_connector
 
 
 CUSTOM_ID_DIVORCE_CANCEL = 'marriage.divorce.cancel'
@@ -36,7 +36,6 @@ def get_multiplier(user_id_1, user_id_2):
 async def waifu_info(event,
     user: ('user', 'The user to get') = None,
 ):
-    
     if user is None:
         user = event.user
     
@@ -174,7 +173,6 @@ async def propose(
                     user_common_model.total_allocated,
                     user_common_model.waifu_cost,
                     user_common_model.waifu_owner_id,
-                    user_common_model.notify_proposal,
                 ]
             ).where(
                 user_common_model.user_id.in_(
@@ -252,16 +250,17 @@ async def propose(
             target_entry_id = -1
             target_waifu_cost = WAIFU_COST_DEFAULT
             target_waifu_owner_id = 0
-            target_waifu_notify_proposal = True
         else:
             target_entry_id = target_entry[0]
             target_waifu_owner_id = target_entry[6]
-            target_waifu_notify_proposal = target_entry[7]
             
             target_waifu_cost = target_entry[5]
             if not target_waifu_cost:
                 target_waifu_cost = WAIFU_COST_DEFAULT
         
+        target_waifu_notification_settings = await get_one_notification_settings_with_connector(
+            target_user_id, connector
+        )
         
         required_love = floor(target_waifu_cost * get_multiplier(source_user_id, target_user_id))
         
@@ -354,7 +353,7 @@ async def propose(
                     f'{EMOJI__HEART_CURRENCY} to {amount} {EMOJI__HEART_CURRENCY}.'
                 )
                 
-                if target_waifu_notify_proposal:
+                if target_waifu_notification_settings.proposal:
                     await send_embed_to(
                         client,
                         target_user_id,
@@ -503,7 +502,7 @@ async def propose(
         )
         
         
-        if target_waifu_notify_proposal:
+        if target_waifu_notification_settings.proposal:
             await send_embed_to(
                 client,
                 target_user_id,
@@ -513,7 +512,7 @@ async def propose(
                 ),
                 Button(
                     'I don\'t want notifs, nya!!',
-                    custom_id = 'accessibility.change_notification_settings.proposal.disable',
+                    custom_id = NOTIFICATION_SETTINGS_CUSTOM_ID_PROPOSAL_DISABLE,
                 )
             )
 
@@ -923,21 +922,9 @@ async def cancel(
             )
         )
         
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.notify_proposal,
-                ]
-            ).where(
-                user_common_model.user_id == target_user_id,
-            )
+        target_waifu_notification_settings = await get_one_notification_settings_with_connector(
+            target_user_id, connector
         )
-        
-        results = await response.fetchall()
-        if results:
-            target_waifu_notify_proposal = results[0][0]
-        else:
-            target_waifu_notify_proposal = True
     
     yield Embed(
         None,
@@ -947,7 +934,7 @@ async def cancel(
     )
     
     
-    if (not user.bot) and target_waifu_notify_proposal:
+    if (not user.bot) and target_waifu_notification_settings.proposal:
         await send_embed_to(
             client,
             target_user_id,

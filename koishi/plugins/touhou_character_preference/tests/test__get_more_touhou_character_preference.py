@@ -15,8 +15,8 @@ async def test__get_more_touhou_character_preference__cache_hit():
     """
     query_called = False
     
-    user_id_0 = 2023090070
-    user_id_1 = 2023090071
+    user_id_0 = 202309230070
+    user_id_1 = 202309230071
     
     character_preferences_0 = [
         CharacterPreference(user_id_0, 'komeiji_koishi'),
@@ -62,8 +62,8 @@ async def test__get_more_touhou_character_preference__database_hit_value():
     query_called = False
     called_with_user_ids = None
     
-    user_id_0 = 2023090072
-    user_id_1 = 2023090073
+    user_id_0 = 202309230072
+    user_id_1 = 202309230073
     
     character_preferences_0 = [
         CharacterPreference(user_id_0, 'komeiji_koishi'),
@@ -119,8 +119,8 @@ async def test__get_more_touhou_character_preference__database_hit_none():
     query_called = False
     called_with_user_ids = 0
     
-    user_id_0 = 2023090074
-    user_id_1 = 2023090075
+    user_id_0 = 202309230074
+    user_id_1 = 202309230075
     
     character_preferences_0 = None
     character_preferences_1 = None
@@ -167,8 +167,8 @@ async def test__get_more_touhou_character_preference__mixed_hit_value():
     query_called = False
     called_with_user_ids = None
     
-    user_id_0 = 2023090076
-    user_id_1 = 2023090077
+    user_id_0 = 202309230076
+    user_id_1 = 202309230077
     
     character_preferences_0 = [
         CharacterPreference(user_id_0, 'komeiji_koishi'),

@@ -16,8 +16,8 @@ async def test__get_more_touhou_character_preference_with_connector__cache_hit()
     query_called = False
     connector = object()
     
-    user_id_0 = 2023090080
-    user_id_1 = 2023090081
+    user_id_0 = 202309230080
+    user_id_1 = 202309230081
     
     character_preferences_0 = [
         CharacterPreference(user_id_0, 'komeiji_koishi'),
@@ -65,8 +65,8 @@ async def test__get_more_touhou_character_preference_with_connector__database_hi
     connector = object()
     called_with_connector = None
     
-    user_id_0 = 2023090082
-    user_id_1 = 2023090083
+    user_id_0 = 202309230082
+    user_id_1 = 202309230083
     
     character_preferences_0 = [
         CharacterPreference(user_id_0, 'komeiji_koishi'),
@@ -127,8 +127,8 @@ async def test__get_more_touhou_character_preference_with_connector__database_hi
     connector = object()
     called_with_connector = None
     
-    user_id_0 = 2023090084
-    user_id_1 = 2023090085
+    user_id_0 = 202309230084
+    user_id_1 = 202309230085
     
     character_preferences_0 = None
     character_preferences_1 = None
@@ -180,8 +180,8 @@ async def test__get_more_touhou_character_preference_with_connector__mixed_hit_v
     connector = object()
     called_with_connector = None
     
-    user_id_0 = 2023090086
-    user_id_1 = 2023090088
+    user_id_0 = 202309230086
+    user_id_1 = 202309230088
     
     character_preferences_0 = [
         CharacterPreference(user_id_0, 'komeiji_koishi'),

@@ -23,4 +23,3 @@ def add_provider(embed, image_detail):
         )
 
     return embed
-

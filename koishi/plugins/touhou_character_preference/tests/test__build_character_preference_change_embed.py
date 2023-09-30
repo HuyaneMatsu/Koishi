@@ -3,7 +3,7 @@ from hata import Embed, User
 
 from ...touhou_core.characters import KOMEIJI_KOISHI, KOMEIJI_SATORI
 
-from ..character_preference import build_character_preference_change_embed
+from ..builders import build_character_preference_change_embed
 
 
 def _iter_options():

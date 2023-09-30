@@ -80,7 +80,7 @@ class CharacterPreference(RichAttributeErrorBaseType):
     
     
     def __eq__(self, other):
-        """Returns whether the two character entries are equal."""
+        """Returns whether the two character preference entries are equal."""
         if type(self) is not type(other):
             return NotImplemented
         

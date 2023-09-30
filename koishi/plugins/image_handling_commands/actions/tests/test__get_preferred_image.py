@@ -40,9 +40,9 @@ def _iter_options():
         user_0,
         [],
         [
-            CharacterPreference(user_id_0, KOMEIJI_KOISHI.system_name),
+            CharacterPreference(user_id_0, KOMEIJI_SATORI.system_name),
         ],
-        image_detail_0,
+        image_detail_1,
     )
 
     yield (
@@ -50,9 +50,9 @@ def _iter_options():
         user_0,
         [user_1],
         [
-            CharacterPreference(user_id_0, KOMEIJI_KOISHI.system_name),
+            CharacterPreference(user_id_0, KOMEIJI_SATORI.system_name),
         ],
-        image_detail_0,
+        image_detail_1,
     )
 
     yield (

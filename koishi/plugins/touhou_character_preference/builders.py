@@ -1,9 +1,6 @@
-__all__ = ()
+__all__ = ('build_character_preference_change_embed', 'build_character_preference_embed',)
 
 from hata import Embed
-
-
-PREFERRED_CHARACTER_MAX = 3
 
 
 def build_character_listing(character_preferences):

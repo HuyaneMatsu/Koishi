@@ -21,6 +21,9 @@ from ..bot_utils.utils import send_embed_to
 from ..bots import SLASH_CLIENT
 
 
+from .notification_settings import NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_DISABLE, get_one_notification_settings_with_connector
+
+
 async def claim_daily_for_yourself(client, event):
     user = event.user
     
@@ -158,7 +161,6 @@ async def claim_daily_for_waifu(client, event, target_user):
                         user_common_model.total_love,
                         user_common_model.daily_streak,
                         user_common_model.daily_next,
-                        user_common_model.notify_daily,
                         user_common_model.waifu_cost,
                     ]
                 ).where(
@@ -181,6 +183,7 @@ async def claim_daily_for_waifu(client, event, target_user):
             else:
                 target_entry, source_entry = results
             
+            target_notification_settings = await get_one_notification_settings_with_connector(target_user.id, connector)
             
             now = datetime.utcnow()
             
@@ -210,7 +213,7 @@ async def claim_daily_for_waifu(client, event, target_user):
             waifu_cost_increase = 1 + floor(received * 0.01)
             
             
-            new_waifu_cost = source_entry[6]
+            new_waifu_cost = source_entry[5]
             if not new_waifu_cost:
                 new_waifu_cost = WAIFU_COST_DEFAULT
             new_waifu_cost += waifu_cost_increase
@@ -224,7 +227,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                 )
             )
             
-            new_waifu_cost = target_entry[6]
+            new_waifu_cost = target_entry[5]
             if not new_waifu_cost:
                 new_waifu_cost = WAIFU_COST_DEFAULT
             new_waifu_cost += waifu_cost_increase
@@ -254,7 +257,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                 )
             )
             
-            if (not target_user.bot) and target_entry[5]:
+            if (not target_user.bot) and target_notification_settings.daily:
                 await send_embed_to(
                     client,
                     target_user.id,
@@ -269,7 +272,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                     ),
                     Button(
                         'I don\'t want notifs, nya!!',
-                        custom_id = 'accessibility.change_notification_settings.daily.disable',
+                        custom_id = NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_DISABLE,
                     ),
                 )
             

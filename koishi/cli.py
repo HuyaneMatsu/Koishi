@@ -56,7 +56,7 @@ def load_plugins():
         write_exception_sync(err, filter = frame_filter)
         
         KOKORO.stop()
-        raise SystemExit
+        raise SystemExit(1) from None
 
 
 def main():

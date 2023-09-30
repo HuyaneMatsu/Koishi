@@ -1,23 +1,19 @@
 __all__ = ()
 
-from hata import Embed
-from hata.ext.slash import P, abort
+from hata.ext.slash import InteractionResponse, P, abort
 
 from ...bots import SLASH_CLIENT
 
+from ..notification_settings import (
+    NOTIFICATION_SETTINGS_CHOICES, NOTIFICATION_SETTING_RESOLUTION, build_notification_settings_embed,
+    get_one_notification_settings, handle_notification_settings_change
+)
 from ..touhou_character_preference import (
-    add_touhou_character_to_preference, get_one_touhou_character_preference, remove_touhou_character_from_preference
+    PREFERRED_CHARACTER_MAX, add_touhou_character_to_preference, build_character_preference_change_embed,
+    build_character_preference_embed, get_one_touhou_character_preference, remove_touhou_character_from_preference
 )
 from ..touhou_core import (
     auto_complete_touhou_character_name, get_touhou_character_like, get_touhou_character_names_like_from
-)
-
-from .character_preference import (
-    PREFERRED_CHARACTER_MAX, build_character_preference_change_embed, build_character_preference_embed
-)
-from .notification import (
-    NOTIFICATION_CHOICES, NOTIFICATION_TYPE_TO_OPTION, build_notification_settings_change_embed,
-    build_notification_settings_embed, get_notification_settings, switch_notification
 )
 
 
@@ -49,18 +45,21 @@ async def notification_settings_show(event):
     
     Returns
     -------
-    response : ``Embed``
+    response : ``InteractionResponse``
     """
     user = event.user
-    notification_settings = await get_notification_settings(user.id)
-    return build_notification_settings_embed(user, notification_settings)
+    notification_settings = await get_one_notification_settings(user.id)
+    return InteractionResponse(
+        embed = build_notification_settings_embed(user, notification_settings),
+        show_for_invoking_user_only = True,
+    )
 
 
 @NOTIFICATION_SETTINGS.interactions(name = 'change')
 async def notification_settings_change(
     event,
-    notification_type: (NOTIFICATION_CHOICES, 'Select the notification to change.'),
-    enabled: ('bool', 'Whether the notification should be enabled.'),
+    notification_type: (NOTIFICATION_SETTINGS_CHOICES, 'Select the notification to change.'),
+    enabled: (bool, 'Whether the notification should be enabled.'),
 ):
     """
     Set your notification setting.
@@ -77,19 +76,11 @@ async def notification_settings_change(
     
     Returns
     -------
-    response : ``Embed``
+    response : ``InteractionResponse``
     """
-    user = event.user
-    
-    notification_option = NOTIFICATION_TYPE_TO_OPTION[notification_type]
-    
-    await switch_notification(
-        user.id,
-        enabled,
-        notification_option,
+    return await handle_notification_settings_change(
+        event, NOTIFICATION_SETTING_RESOLUTION[notification_type], enabled
     )
-    
-    return build_notification_settings_change_embed(user, notification_option, enabled)
 
 
 CHARACTER_PREFERENCE = ACCESSIBILITY_INTERACTIONS.interactions(
@@ -113,11 +104,14 @@ async def character_preference_show(event):
     
     Returns
     -------
-    response : ``Embed``
+    response : ``InteractionResponse``
     """
     user = event.user
     character_preferences = await get_one_touhou_character_preference(user.id)
-    return build_character_preference_embed(user, character_preferences)
+    return InteractionResponse(
+        embed = build_character_preference_embed(user, character_preferences),
+        show_for_invoking_user_only = True,
+    )
 
 
 @CHARACTER_PREFERENCE.interactions(name = 'add')
@@ -139,7 +133,7 @@ async def character_preference_add(
     
     Returns
     -------
-    response : ``Embed``
+    response : ``InteractionResponse``
     """
     character = get_touhou_character_like(name)
     if (character is None):
@@ -151,7 +145,11 @@ async def character_preference_add(
         abort(f'Can not add more character preferences. ({len(character_preferences)!r} / {PREFERRED_CHARACTER_MAX!r})')
     
     await add_touhou_character_to_preference(user.id, character)
-    return build_character_preference_change_embed(user, character, True)
+    
+    return InteractionResponse(
+        embed = build_character_preference_change_embed(user, character, True),
+        show_for_invoking_user_only = True,
+    )
 
 
 @CHARACTER_PREFERENCE.interactions(name = 'remove')
@@ -173,7 +171,7 @@ async def character_preference_remove(
     
     Returns
     -------
-    response : ``Embed``
+    response : ``InteractionResponse``
     """
     character = get_touhou_character_like(name)
     if (character is None):
@@ -181,7 +179,11 @@ async def character_preference_remove(
     
     user = event.user
     await remove_touhou_character_from_preference(user.id, character)
-    return build_character_preference_change_embed(user, character, False)
+    
+    return InteractionResponse(
+        embed = build_character_preference_change_embed(user, character, False),
+        show_for_invoking_user_only = True,
+    )
 
 
 @character_preference_remove.autocomplete('name')

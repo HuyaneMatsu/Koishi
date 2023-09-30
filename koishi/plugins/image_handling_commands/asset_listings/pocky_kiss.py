@@ -1,405 +1,174 @@
-__all__ = ('TOUHOU_ACTION_POCKY_KISS', 'TOUHOU_ACTION_POCKY_KISS_SELF')
+__all__ = ('TOUHOU_ACTION_POCKY_KISS',)
 
 from ...image_handling_core import ImageDetail
 from ...touhou_core.characters import (
     CHEN, CHIRUNO, DAIYOUSEI, FUJIWARA_NO_MOKOU, HAKUREI_REIMU, HATA_NO_KOKORO, HEARN_MARIBEL, HIEDA_NO_AKYUU,
-    HIJIRI_BYAKUREN, HIMEKAIDOU_HATATE, HINANAWI_TENSHI, HONG_MEILING, HOUJUU_NUE, IMAIZUMI_KAGEROU, INUBASHIRI_MOMIJI,
-    IZAYOI_SAKUYA, KAENBYOU_RIN, KAMISHIRASAWA_KEINE, KAZAMI_YUUKA, KIRISAME_MARISA, KOAKUMA, KOCHIYA_SANAE,
-    KOMEIJI_KOISHI, KOMEIJI_SATORI, KONPAKU_YOUMU, LILY_BLACK, LILY_WHITE, MARGATROID_ALICE, MEDICINE_MELANCHOLY,
-    MONONOBE_NO_FUTO, MORIYA_SUWAKO, MOTOORI_KOSUZU, MURASA_MINAMITSU, MYSTIA_LORELEI, NAGAE_IKU, NAZRIN,
-    ONOZUKA_KOMACHI, PATCHOULI_KNOWLEDGE, REIUJI_UTSUHO, RUMIA, SAIGYOUJI_YUYUKO, SCARLET_FLANDRE, SCARLET_REMILIA,
-    SHAMEIMARU_AYA, SHIKI_EIKI_YAMAXANADU, TATARA_KOGASA, TORAMARU_SHOU, TOYOSATOMIMI_NO_MIKO, USAMI_RENKO,
-    WAKASAGIHIME, WRIGGLE_NIGHTBUG, YAKUMO_RAN, YAKUMO_YUKARI, YASAKA_KANAKO
+    HIMEKAIDOU_HATATE, HINANAWI_TENSHI, HONG_MEILING, HOUJUU_NUE, IMAIZUMI_KAGEROU, IZAYOI_SAKUYA, KAENBYOU_RIN,
+    KAMISHIRASAWA_KEINE, KIRISAME_MARISA, KOAKUMA, KOCHIYA_SANAE, KOMEIJI_KOISHI, KOMEIJI_SATORI, KONPAKU_YOUMU,
+    LILY_WHITE, MARGATROID_ALICE, MORIYA_SUWAKO, MOTOORI_KOSUZU, MURASA_MINAMITSU, MYSTIA_LORELEI, NAZRIN,
+    PATCHOULI_KNOWLEDGE, RUMIA, SAIGYOUJI_YUYUKO, SCARLET_FLANDRE, SCARLET_REMILIA, SHAMEIMARU_AYA, TATARA_KOGASA,
+    TORAMARU_SHOU, USAMI_RENKO, WAKASAGIHIME, YAKUMO_RAN, YAKUMO_YUKARI, YASAKA_KANAKO
 )
+
 
 # Images from: https://safebooru.org/index.php?page=post&s=list&tags=2girls+pocky_kiss+touhou
 
 
 TOUHOU_ACTION_POCKY_KISS = [
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959700573081452564/akyuu-x-kosuzu-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155211020483174470/akyuu-kosuzu-pocky-0000.png',
     ).with_any(HIEDA_NO_AKYUU).with_any(MOTOORI_KOSUZU),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959700573706407946/aya-x-remilia-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155416757964640266/aya-remilia-pocky-0000.png',
     ).with_source(SCARLET_REMILIA).with_target(SHAMEIMARU_AYA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959700574033567754/chen-x-orin-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155417439706824734/chen-orin-pocky-0000.png',
     ).with_any(CHEN).with_any(KAENBYOU_RIN),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055081320570699816/chen-x-ran-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155418080961368074/chen-ran-pocky-0000.png',
     ).with_source(CHEN).with_target(YAKUMO_RAN),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055081499562610698/chiruno-x-dai-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155418521304563732/chiruno-dai-pocky-0000.png',
     ).with_any(CHIRUNO).with_any(DAIYOUSEI),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055082269129330739/flandre-x-remilia-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155419036797124628/flandre-remilia-pocky-0000.png',
     ).with_source(SCARLET_FLANDRE).with_target(SCARLET_REMILIA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959700575291846686/hatate-x-aya-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155419380402892880/flandre-remilia-pocky-0001.png',
+    ).with_source(SCARLET_FLANDRE).with_target(SCARLET_REMILIA),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155419891285884979/hatate-aya-pocky-0000.png',
     ).with_any(HIMEKAIDOU_HATATE).with_any(SHAMEIMARU_AYA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959700575585439794/kagerou-x-remilia-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155420220245155850/kagerou-remilia-pocky-0000.png',
     ).with_any(IMAIZUMI_KAGEROU).with_any(SCARLET_REMILIA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055085629358227486/keine-x-mokou-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155420854105157742/keine-mokou-pocky-0000.png',
     ).with_any(KAMISHIRASAWA_KEINE).with_any(FUJIWARA_NO_MOKOU),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055091597567602728/keine-x-mokou-0001.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155421417085603850/keine-mokou-pocky-0001.png',
     ).with_source(FUJIWARA_NO_MOKOU).with_target(KAMISHIRASAWA_KEINE),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959701269969256488/koishi-x-flandre-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155422011250724914/koishi-flandre-pocky-0000.png',
     ).with_any(KOMEIJI_KOISHI).with_any(SCARLET_FLANDRE),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055091921791500288/koishi-x-flandre-0001.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155422663645352037/koishi-flandre-pocky-0001.png',
     ).with_source(KOMEIJI_KOISHI).with_target(SCARLET_FLANDRE),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959701270820716654/koishi-x-kokoro-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155423230371319859/koishi-flandre-pocky-0002.png',
+    ).with_source(KOMEIJI_KOISHI).with_target(SCARLET_FLANDRE),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155423779367944242/koishi-kokoro-pocky-0000.png',
     ).with_source(KOMEIJI_KOISHI).with_target(HATA_NO_KOKORO),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959701271298859068/koishi-x-satori-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155424037099544632/koishi-satori-pocky-0000.png',
     ).with_source(KOMEIJI_KOISHI).with_target(KOMEIJI_SATORI),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055092416882937866/koishi-x-satori-0001.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155424507054530600/koishi-satori-pocky-0001.png',
     ).with_any(KOMEIJI_KOISHI).with_any(KOMEIJI_SATORI),
     ImageDetail(
-    'https://cdn.discordapp.com/attachments/568837922288173058/959701271852482570/kokoro-x-koishi-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155424835179126854/kokoro-koishi-pocky-0000.png',
     ).with_any(HATA_NO_KOKORO).with_any(KOMEIJI_KOISHI),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959701272150286366/lily-x-rumia-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155425400323838053/lily-rumia-pocky-0000.png',
     ).with_any(LILY_WHITE).with_any(RUMIA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959701272460673024/maribel-x-renko-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155425812003180584/maribel-renko-pocky-0000.png',
     ).with_any(HEARN_MARIBEL).with_any(USAMI_RENKO),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959701770509119498/marisa-x-alice-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155426224320032768/marisa-alice-pocky-0000.png',
     ).with_any(KIRISAME_MARISA).with_any(MARGATROID_ALICE),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959701770773331988/marisa-x-reimu-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155427814682669170/marisa-reimu-pocky-0000.png',
     ).with_any(KIRISAME_MARISA).with_any(HAKUREI_REIMU),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055074351440998421/marisa-x-reimu-0001.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155428193940013106/marisa-reimu-pocky-0001.png',
     ).with_source(KIRISAME_MARISA).with_target(HAKUREI_REIMU),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959701771377315880/marisa-x-reimu-0002.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155428618940452954/marisa-reimu-pocky-0002.png',
     ).with_source(KIRISAME_MARISA).with_target(HAKUREI_REIMU),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055074988811624488/marisa-x-reimu-0003.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155428858112254002/marisa-reimu-pocky-0003.png',
     ).with_any(KIRISAME_MARISA).with_any(HAKUREI_REIMU),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959701771792547871/meiling-x-sakuya-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155429318013493288/meiling-sakuya-pocky-0000.png',
     ).with_source(HONG_MEILING).with_target(IZAYOI_SAKUYA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959701772140691456/minamitsu-x-nue-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155430157331472394/minamitsu-nue-pocky-0000.png',
     ).with_source(MURASA_MINAMITSU).with_target(HOUJUU_NUE),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055075516278911056/mokou-x-keine-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155430608114302986/mokou-keine-pocky-0000.png',
     ).with_source(FUJIWARA_NO_MOKOU).with_target(KAMISHIRASAWA_KEINE),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055076323661467748/mystia-x-alice-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155430976479051846/mystia-alice-pocky-0000.png',
     ).with_any(MYSTIA_LORELEI).with_any(MARGATROID_ALICE),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959702866010968074/nazrin-x-shou-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155431623265894540/nazrin-shou-pocky-0000.png',
     ).with_source(TORAMARU_SHOU).with_target(NAZRIN),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959702866392678440/nue-x-kogasa-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155432026808258570/nue-kogasa-pocky-0000.png',
     ).with_any(HOUJUU_NUE).with_any(TATARA_KOGASA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959702866635923496/patchouli-x-remilia-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155432393444950046/patchouli-remilia-pocky-0000.png',
     ).with_any(PATCHOULI_KNOWLEDGE).with_any(SCARLET_REMILIA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959702867080515584/ran-x-chen-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155432913161179156/ran-chen-pocky-0000.png',
     ).with_any(YAKUMO_RAN).with_any(CHEN),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959702867458019358/ran-x-chen-0001.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155433206246539274/ran-chen-pocky-0001.png',
     ).with_source(CHEN).with_target(YAKUMO_RAN),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055078160040984616/reimu-x-marisa-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155433750054850560/reimu-marisa-pocky-0000.png',
     ).with_any(HAKUREI_REIMU).with_any(KIRISAME_MARISA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959703161893965854/remilia-x-flandre-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155434221234561034/remilia-flandre-pocky-0000.png',
     ).with_source(SCARLET_FLANDRE).with_target(SCARLET_REMILIA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959703162195963934/remilia-x-flandre-0001.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155434519508291614/remilia-flandre-pocky-0001.png',
     ).with_source(SCARLET_FLANDRE).with_target(SCARLET_REMILIA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959703162795753482/renko-x-maribel-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155434757354704946/renko-maribel-pocky-0000.png',
     ).with_source(USAMI_RENKO).with_target(HEARN_MARIBEL),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1022179444732993536/renko-x-maribel-0001.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155435134682673262/renko-maribel-pocky-0001.png',
     ).with_source(USAMI_RENKO).with_target(HEARN_MARIBEL),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959703163466825748/rumia-x-chiruno-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155435634886983690/rumia-chiruno-pocky-0000.png',
     ).with_source(CHIRUNO).with_target(RUMIA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959703164125347860/sakuya-x-meiling-0000.png',
-    ).with_source(HONG_MEILING).with_target(HONG_MEILING),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055092931578572860/sakuya-x-koakuma-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155436010054885516/sakuya-koakuma-pocky-0000.png',
     ).with_source(IZAYOI_SAKUYA).with_target(KOAKUMA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959703496012222475/shou-x-nazrin-0000.png',
-    ).with_source(NAZRIN).with_target(TORAMARU_SHOU),
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155436621278232657/sakuya-meiling-pocky-0000.png',
+    ).with_source(HONG_MEILING).with_target(IZAYOI_SAKUYA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055080350700818483/suwako-x-kanako-0000.png',
-    ).with_source(MORIYA_SUWAKO).with_target(YASAKA_KANAKO),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959703496830107658/suwako-x-sanae-0000.png',
-    ).with_any(MORIYA_SUWAKO).with_any(KOCHIYA_SANAE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959703497190830080/tenshi-x-reimu-0000.png',
-    ).with_source(HINANAWI_TENSHI).with_target(HAKUREI_REIMU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959703497501204521/wakasagihime-x-kagerou-0000.png',
-    ).with_source(WAKASAGIHIME).with_target(IMAIZUMI_KAGEROU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1022178973666529290/youmo-x-patchouli-0000.png',
-    ).with_source(PATCHOULI_KNOWLEDGE).with_target(KONPAKU_YOUMU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959703498113581056/youmu-x-sanae-0000.png',
-    ).with_source(KONPAKU_YOUMU).with_target(KOCHIYA_SANAE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055080654225805354/yuyuko-x-yukari-0000.png',
-    ).with_any(SAIGYOUJI_YUYUKO).with_any(YAKUMO_YUKARI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/959703499388616734/yuyuko-x-mystia-0000.png',
-    ).with_source(SAIGYOUJI_YUYUKO).with_target(MYSTIA_LORELEI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1023272988881211502/koishi-flandre-pocky-kiss-0001.png',
-    ).with_source(KOMEIJI_KOISHI).with_target(SCARLET_FLANDRE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1053001373916069989/satori-x-remilia-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155436937046405150/satori-remilia-pocky-0000.png',
     ).with_source(SCARLET_REMILIA).with_target(KOMEIJI_SATORI),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055082358203756655/flandre-x-remilia-0001.png',
-    ).with_source(SCARLET_FLANDRE).with_target(SCARLET_REMILIA),
-]
-
-# Images from: https://safebooru.org/index.php?page=post&s=list&tags=touhou+pocky+solo
-
-TOUHOU_ACTION_POCKY_KISS_SELF = [
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155437695544336425/shou-nazrin-pocky-0000.png',
+    ).with_source(NAZRIN).with_target(TORAMARU_SHOU),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055026936897863711/aya-0000.png',
-        ).with_any(SHAMEIMARU_AYA),
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155437980253683742/suwako-kanako-pocky-0000.png',
+    ).with_source(MORIYA_SUWAKO).with_target(YASAKA_KANAKO),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055026937388613672/byakuren-0000.png',
-        ).with_any(HIJIRI_BYAKUREN),
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155438675908370532/suwako-sanae-pocky-0000.png',
+    ).with_any(MORIYA_SUWAKO).with_any(KOCHIYA_SANAE),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055026937820614666/byakuren-0001.png',
-        ).with_any(HIJIRI_BYAKUREN),
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155439108072681552/tenshi-reimu-pocky-0000.png',
+    ).with_source(HINANAWI_TENSHI).with_target(HAKUREI_REIMU),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055026938189709362/chiruno-0000.png',
-        ).with_any(CHIRUNO),
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155439445722550354/wakasagihime-kagerou-pocky-0000.png',
+    ).with_source(WAKASAGIHIME).with_target(IMAIZUMI_KAGEROU),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055026938634309682/eiki-0000.png',
-        ).with_any(SHIKI_EIKI_YAMAXANADU),
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155439994543026176/youmo-patchouli-pocky-0000.png',
+    ).with_source(PATCHOULI_KNOWLEDGE).with_target(KONPAKU_YOUMU),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055027767604936744/flandre-0000.png',
-        ).with_any(SCARLET_FLANDRE),
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155440764520759336/youmu-sanae-pocky-0000.png',
+    ).with_source(KONPAKU_YOUMU).with_target(KOCHIYA_SANAE),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055027767890169917/flandre-0001.png',
-        ).with_any(SCARLET_FLANDRE),
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155441354869055528/yuyuko-mystia-pocky-0000.png',
+    ).with_source(SAIGYOUJI_YUYUKO).with_target(MYSTIA_LORELEI),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055028120400445490/flandre-0002.png',
-        ).with_any(SCARLET_FLANDRE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055027768397660230/flandre-0003.png',
-        ).with_any(SCARLET_FLANDRE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055027768687087637/flandre-0004.png',
-        ).with_any(SCARLET_FLANDRE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055027768951312434/flandre-0005.png',
-        ).with_any(SCARLET_FLANDRE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055027769261686824/flandre-0006.png',
-        ).with_any(SCARLET_FLANDRE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055028732072575026/futo-0000.png',
-        ).with_any(MONONOBE_NO_FUTO),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055028732374552616/hatate-0000.png',
-        ).with_any(MONONOBE_NO_FUTO),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055028732718481419/hatate-0001.png',
-        ).with_any(MONONOBE_NO_FUTO),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055034840996642836/iku-0000.png',
-        ).with_any(NAGAE_IKU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055034841353175040/kagerou-0000.png',
-        ).with_any(IMAIZUMI_KAGEROU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055034841680322603/kagerou-0001.png',
-        ).with_any(IMAIZUMI_KAGEROU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055034841948749944/keine-0000.png',
-        ).with_any(KAMISHIRASAWA_KEINE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055034842275921970/kogasa-0000.png',
-        ).with_any(TATARA_KOGASA),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055035484469985330/koishi-0000.png',
-        ).with_any(KOMEIJI_KOISHI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055035484914593912/koishi-0001.png',
-        ).with_any(KOMEIJI_KOISHI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055035485224980480/koishi-0002.png',
-        ).with_any(KOMEIJI_KOISHI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055035485854105600/kokoro-0000.png',
-        ).with_any(HATA_NO_KOKORO),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055035486198050836/komachi-0000.png',
-        ).with_any(ONOZUKA_KOMACHI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055035486558748762/lily_black-0000.png',
-        ).with_any(LILY_BLACK),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055035486936248350/lily_white-0000.png',
-        ).with_any(LILY_WHITE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055036556135628891/marisa-0000.png',
-        ).with_any(KIRISAME_MARISA),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055036556555063337/marisa-0001.png',
-        ).with_any(KIRISAME_MARISA),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055036556953530378/medicine_melancholy-0000.png',
-        ).with_any(MEDICINE_MELANCHOLY),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055036557423280128/miko-0000.png',
-        ).with_any(TOYOSATOMIMI_NO_MIKO),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055036557712691240/mokou-0000.png',
-        ).with_any(FUJIWARA_NO_MOKOU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055036558010495057/mokou-0001.png',
-        ).with_any(FUJIWARA_NO_MOKOU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055036558459273237/momiji-0000.png',
-        ).with_any(INUBASHIRI_MOMIJI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055036558828376074/momiji-0001.png',
-        ).with_any(INUBASHIRI_MOMIJI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055036558828376074/momiji-0001.png',
-        ).with_any(INUBASHIRI_MOMIJI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055036559159734322/momiji-0002.png',
-        ).with_any(INUBASHIRI_MOMIJI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055037378269556756/mystia-0000.png',
-        ).with_any(MYSTIA_LORELEI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055037378684780574/nazrin-0000.png',
-        ).with_any(NAZRIN),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055037379011944508/nue-0000.png',
-        ).with_any(HOUJUU_NUE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055037379427184660/nue-0001.png',
-        ).with_any(HOUJUU_NUE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055037379720773642/okuu-0000.png',
-        ).with_any(REIUJI_UTSUHO),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055037380026966117/orin-0000.png',
-        ).with_any(KAENBYOU_RIN),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055037380412846150/orin-0001.png',
-        ).with_any(KAENBYOU_RIN),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055038642420187187/patchouli-0000.png',
-        ).with_any(PATCHOULI_KNOWLEDGE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055038642776707132/patchouli-0001.png',
-        ).with_any(PATCHOULI_KNOWLEDGE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055038643112247346/patchouli-0002.png',
-        ).with_any(PATCHOULI_KNOWLEDGE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055038643552669736/ran-0000.png',
-        ).with_any(YAKUMO_RAN),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055038643909169182/ran-0001.png',
-        ).with_any(YAKUMO_RAN),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055038643909169182/ran-0001.png',
-        ).with_any(HAKUREI_REIMU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055038644643172422/reimu-0001.png',
-        ).with_any(HAKUREI_REIMU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055038644999704636/reimu-0002.png',
-        ).with_any(HAKUREI_REIMU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055039347352666142/remilia-0000.png',
-        ).with_any(SCARLET_REMILIA),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055039348061524048/remilia-0001.png',
-        ).with_any(SCARLET_REMILIA),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055039348061524048/remilia-0001.png',
-        ).with_any(SCARLET_REMILIA),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055039348782944266/rumia-0000.png',
-        ).with_any(RUMIA),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055039349135253504/sakuya-0000.png',
-        ).with_any(IZAYOI_SAKUYA),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055039349495955506/sanae-0000.png',
-        ).with_any(KOCHIYA_SANAE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055039349844103240/sanae-0001.png',
-        ).with_any(KOCHIYA_SANAE),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055039746637832304/satori-0000.png',
-        ).with_any(KOMEIJI_SATORI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055039746948223017/satori-0001.png',
-        ).with_any(KOMEIJI_SATORI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055039747246002286/suwako-0000.png',
-        ).with_any(MORIYA_SUWAKO),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055039747543801866/tenshi-0000.png',
-        ).with_any(HINANAWI_TENSHI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055039747858386994/wriggle-0000.png',
-        ).with_any(WRIGGLE_NIGHTBUG),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055039748156166164/wriggle-0001.png',
-        ).with_any(WRIGGLE_NIGHTBUG),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055040218371211325/youmu-0000.png',
-        ).with_any(KONPAKU_YOUMU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055040218769653880/youmu-0001.png',
-        ).with_any(KONPAKU_YOUMU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055040219214258186/youmu-0002.png',
-        ).with_any(KONPAKU_YOUMU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055040219512061992/youmu-0003.png',
-        ).with_any(KONPAKU_YOUMU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055040219860172800/youmu-0004.png',
-        ).with_any(KONPAKU_YOUMU),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055040555186393088/yukari-0000.png',
-        ).with_any(YAKUMO_YUKARI),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055040555542917140/yuuka-0000.png',
-        ).with_any(KAZAMI_YUUKA),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055040555903619132/yuuka-0001.png',
-        ).with_any(KAZAMI_YUUKA),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055040556276908113/yuuka-0002.png',
-        ).with_any(KAZAMI_YUUKA),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1055040557006716928/yuyuko-0000.png',
-        ).with_any(SAIGYOUJI_YUYUKO),
+        'https://cdn.discordapp.com/attachments/568837922288173058/1155441890053849119/yuyuko-yukari-pocky-0000.png',
+    ).with_any(SAIGYOUJI_YUYUKO).with_any(YAKUMO_YUKARI),
 ]

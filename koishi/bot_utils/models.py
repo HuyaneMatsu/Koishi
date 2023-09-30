@@ -1,7 +1,8 @@
 from config import DATABASE_NAME
-from datetime import datetime
-import warnings
+from datetime import datetime as DateTime
+from warnings import warn
 
+utc_now = DateTime.utcnow
 
 user_common_model = None
 USER_COMMON_TABLE = None
@@ -46,6 +47,10 @@ AUTOMATION_CONFIGURATION_TABLE = None
 character_preference_model = None
 CHARACTER_PREFERENCE_TABLE = None
 
+notification_settings_model = None
+NOTIFICATION_SETTINGS_TABLE = None
+
+
 if (DATABASE_NAME is not None):
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy import Column, Integer as Int32, BIGINT as Int64, LargeBinary as Binary, create_engine, DateTime, \
@@ -55,8 +60,9 @@ if (DATABASE_NAME is not None):
     try:
         DB_ENGINE = create_engine(DATABASE_NAME)
     except ImportError as err:
-        warnings.warn(
-            f'Could not create database engine: {err!r}.'
+        warn(
+            f'Could not create database engine: {err!r}.',
+            RuntimeWarning,
         )
         DB_ENGINE = None
         
@@ -90,14 +96,10 @@ if (DB_ENGINE is not None):
         waifu_slots     = Column(Int32, default = 1)
         waifu_owner_id  = Column(Int64, default = 0)
         
-        # notification settings
-        notify_proposal = Column(Boolean, default = True)
-        notify_daily = Column(Boolean, default = True)
-        
         # Notify voters that they can vote on top.gg if they can. We base this on a top.gg vote timer and whether they
         # voted before
         top_gg_last_vote = Column(DateTime, default = func.utc_timestamp())
-        
+    
     
     USER_COMMON_TABLE = user_common_model.__table__
     
@@ -247,13 +249,23 @@ if (DB_ENGINE is not None):
     
     
     class character_preference_model(BASE):
-        __tablename__   = 'CHARACTER_PREFERENCE'
-        id              = Column(Int64, primary_key = True)
-        user_id         = Column(Int64, nullable = False)
-        system_name     = Column(String, nullable = True)
+        __tablename__ = 'CHARACTER_PREFERENCE'
+        id = Column(Int64, primary_key = True)
+        user_id = Column(Int64, nullable = False)
+        system_name = Column(String, nullable = True)
     
     CHARACTER_PREFERENCE_TABLE = character_preference_model.__table__
     
+    
+    class notification_settings_model(BASE):
+        __tablename__ = 'NOTIFICATION_SETTINGS'
+        id = Column(Int64, primary_key = True)
+        user_id = Column(Int64, nullable = False)
+        daily = Column(Boolean, default = True, nullable = False)
+        proposal = Column(Boolean, default = True, nullable = False)
+    
+    NOTIFICATION_SETTINGS_TABLE = notification_settings_model.__table__
+
     
     DB_ENGINE.dispose()
     # BASE.metadata.create_all(DB_ENGINE)
@@ -267,8 +279,6 @@ if (DB_ENGINE is not None):
         waifu_cost = 0,
         waifu_divorces = 0,
         waifu_slots = 1,
-        notify_proposal = True,
-        notify_daily = True,
         count_daily_self = 0,
         count_daily_by_waifu = 0,
         count_daily_for_waifu = 0,
@@ -280,13 +290,13 @@ if (DB_ENGINE is not None):
         
         if daily_next is None:
             if now is None:
-                now = datetime.utcnow()
+                now = utc_now()
 
             daily_next = now
         
         if top_gg_last_vote is None:
             if now is None:
-                now = datetime.utcnow()
+                now = utc_now()
             
             top_gg_last_vote = now
         
@@ -299,8 +309,6 @@ if (DB_ENGINE is not None):
             waifu_cost      = waifu_cost,
             waifu_divorces  = waifu_divorces,
             waifu_slots     = waifu_slots,
-            notify_proposal = notify_proposal,
-            notify_daily = notify_daily,
             count_daily_self = count_daily_self,
             count_daily_by_waifu = count_daily_by_waifu,
             count_daily_for_waifu = count_daily_for_waifu,

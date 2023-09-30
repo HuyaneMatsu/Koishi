@@ -1,3 +1,11 @@
+### 2023-09-30
+
+- Add `1` image to `/kon`.
+- `/pocky-kiss` images have been uploaded and their creator referenced. (Self pockies excluded for now.)
+- Fix the touhou character preference deleting. Before it yeeted all entries. :KoishiFail:
+- Notification settings are now separated down from user common model and accessibility.
+    They got their own model, plugin and tests as well.
+
 ### 2023-09-17
 
 - Add missing `Yamashiro Takane` touhou character.

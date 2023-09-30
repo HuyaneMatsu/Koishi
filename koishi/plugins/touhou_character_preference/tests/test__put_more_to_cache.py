@@ -115,7 +115,7 @@ def test__put_more_to_cache__pop():
     try:
         CHARACTER_PREFERENCE_CACHE[user_id_0] = None
         
-        mocked = vampytest.mock_globals(put_more_to_cache, 2, CHARACTER_PREFERENCE_MAX_SIZE = 1)
+        mocked = vampytest.mock_globals(put_more_to_cache, 2, CHARACTER_PREFERENCE_CACHE_MAX_SIZE = 1)
         
         mocked([user_id_1], None)
         

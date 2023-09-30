@@ -3,7 +3,7 @@ from hata import Embed, User
 
 from ...touhou_character_preference import CharacterPreference
 
-from ..character_preference import build_character_preference_embed
+from ..builders import build_character_preference_embed
 
 
 def test__build_character_preference_embed():
@@ -19,7 +19,7 @@ def test__build_character_preference_embed():
     
     expected_output = Embed(
         'Character preferences',
-                (
+        (
             '```\n'
             'Komeiji Koishi\n'
             'Komeiji Satori\n'

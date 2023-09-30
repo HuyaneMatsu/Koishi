@@ -15,7 +15,7 @@ async def test__get_one_touhou_character_preference__cache_hit():
     """
     query_called = False
     
-    user_id = 2023090050
+    user_id = 202309230050
     character_preferences = [
         CharacterPreference(user_id, 'komeiji_koishi'),
         CharacterPreference(user_id, 'komeiji_satori'),
@@ -54,7 +54,7 @@ async def test__get_one_touhou_character_preference__database_hit_value():
     query_called = False
     called_with_user_id = 0
     
-    user_id = 2023090051
+    user_id = 202309230051
     character_preferences = [
         CharacterPreference(user_id, 'komeiji_koishi'),
         CharacterPreference(user_id, 'komeiji_satori'),
@@ -100,7 +100,7 @@ async def test__get_one_touhou_character_preference__database_hit_none():
     query_called = False
     called_with_user_id = 0
     
-    user_id = 2023090052
+    user_id = 202309230052
     character_preferences = None
     
     async def query(user_id):

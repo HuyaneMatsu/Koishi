@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 
 CHARACTER_PREFERENCE_CACHE = OrderedDict()
-CHARACTER_PREFERENCE_MAX_SIZE = 1000
+CHARACTER_PREFERENCE_CACHE_MAX_SIZE = 1000
 
 
 def get_one_from_cache(user_id):
@@ -84,7 +84,7 @@ def put_one_to_cache(user_id, result):
     CHARACTER_PREFERENCE_CACHE[user_id] = result
     CHARACTER_PREFERENCE_CACHE.move_to_end(user_id)
     
-    if len(CHARACTER_PREFERENCE_CACHE) > CHARACTER_PREFERENCE_MAX_SIZE:
+    if len(CHARACTER_PREFERENCE_CACHE) > CHARACTER_PREFERENCE_CACHE_MAX_SIZE:
         del CHARACTER_PREFERENCE_CACHE[next(iter(CHARACTER_PREFERENCE_CACHE))]
 
 

@@ -1,8 +1,7 @@
 import vampytest
 
-from ...touhou_character_preference import CharacterPreference
-
-from ..character_preference import build_character_listing
+from ..builders import build_character_listing
+from ..character_preference import CharacterPreference
 
 
 def _iter_options():

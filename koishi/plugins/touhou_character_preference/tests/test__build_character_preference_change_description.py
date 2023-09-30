@@ -2,7 +2,7 @@ import vampytest
 
 from ...touhou_core.characters import KOMEIJI_KOISHI, KOMEIJI_SATORI
 
-from ..character_preference import build_character_preference_change_description
+from ..builders import build_character_preference_change_description
 
 
 def _iter_options():

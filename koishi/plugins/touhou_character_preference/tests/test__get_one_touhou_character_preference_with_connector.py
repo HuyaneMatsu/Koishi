@@ -16,7 +16,7 @@ async def test__get_one_touhou_character_preference_with_connector__cache_hit():
     query_called = False
     connector = object()
     
-    user_id = 2023090060
+    user_id = 202309230060
     character_preferences = [
         CharacterPreference(user_id, 'komeiji_koishi'),
         CharacterPreference(user_id, 'komeiji_satori'),
@@ -57,7 +57,7 @@ async def test__get_one_touhou_character_preference_with_connector__database_hit
     connector = object()
     called_with_connector = None
     
-    user_id = 2023090061
+    user_id = 202309230061
     character_preferences = [
         CharacterPreference(user_id, 'komeiji_koishi'),
         CharacterPreference(user_id, 'komeiji_satori'),
@@ -108,7 +108,7 @@ async def test__get_one_touhou_character_preference_with_connector__database_hit
     connector = object()
     called_with_connector = None
     
-    user_id = 2023090062
+    user_id = 202309230062
     character_preferences = None
     
     async def query(user_id, connector):

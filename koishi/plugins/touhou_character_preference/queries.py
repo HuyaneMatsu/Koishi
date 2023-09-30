@@ -144,7 +144,7 @@ async def get_more_touhou_character_preference(user_ids):
     character_preferences : `None | list<CharacterPreference>`
     """
     character_preferences, misses = get_more_from_cache(user_ids)
-    if misses:
+    if misses is not None:
         to_merge = await _query_more_touhou_character_preference(misses)
         put_more_to_cache(misses, to_merge)
         character_preferences = merge_results(character_preferences, to_merge)
@@ -196,7 +196,7 @@ async def get_more_touhou_character_preference_with_connector(user_ids, connecto
     """
 
     character_preferences, misses = get_more_from_cache(user_ids)
-    if misses:
+    if misses is not None:
         to_merge = await _query_more_touhou_character_preference_with_connector(misses, connector)
         put_more_to_cache(misses, to_merge)
         character_preferences = merge_results(character_preferences, to_merge)
@@ -351,7 +351,7 @@ async def _remove_touhou_character_preference(character_preference):
     async with DB_ENGINE.connect() as connector:
         await connector.execute(
             CHARACTER_PREFERENCE_TABLE.delete().where(
-                character_preference.entry_id == entry_id,
+                character_preference_model.id == entry_id,
             )
         )
 

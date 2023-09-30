@@ -37,7 +37,6 @@ async def request(client, event, target_user, request_detail):
                     user_common_model.total_love,
                     user_common_model.total_allocated,
                     user_common_model.waifu_cost,
-                    user_common_model.notify_proposal,
                 ]
             ).where(
                 user_common_model.user_id.in_(
@@ -72,4 +71,4 @@ async def request(client, event, target_user, request_detail):
             source_waifu_slots = 1
             source_total_love = 0
             source_total_allocated = 0
-            source_
+

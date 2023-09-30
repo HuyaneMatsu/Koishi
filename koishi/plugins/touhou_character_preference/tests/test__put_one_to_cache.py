@@ -79,7 +79,7 @@ def test__put_one_to_cache__pop():
     try:
         CHARACTER_PREFERENCE_CACHE[user_id_0] = None
         
-        mocked = vampytest.mock_globals(put_one_to_cache, CHARACTER_PREFERENCE_MAX_SIZE = 1)
+        mocked = vampytest.mock_globals(put_one_to_cache, CHARACTER_PREFERENCE_CACHE_MAX_SIZE = 1)
         
         mocked(user_id_1, None)
         

@@ -72,7 +72,7 @@ class SexSpamLock:
         """
         max_level = self.max_level
         if level > max_level:
-            level = max_level
+            level = 0
         elif level < max_level:
             self.max_level = level
         

@@ -29,7 +29,7 @@ def test__get_more_from_cache__hit_none():
     """
     Tests whether ``get_more_from_cache`` works as intended.
     
-    Case: hiz, but None.
+    Case: hit, but None.
     """
     user_id_0 = 202309160008
     user_id_1 = 202309160009

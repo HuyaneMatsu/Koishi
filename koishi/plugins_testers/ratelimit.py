@@ -4,7 +4,7 @@ from base64 import b64encode
 from threading import current_thread
 from time import time as time_now
 from email._parseaddr import _parsedate_tz
-from datetime import datetime, timedelta, timezone
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 
 from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoModerationRule, AutoModerationAction, \
     DiscoveryCategory, Emoji, KOKORO, Webhook, eventlist, DiscordException, BUILTIN_EMOJIS, CHANNELS, \
@@ -48,13 +48,13 @@ def teardown(lib):
 def parse_date_to_datetime(data):
     *date_tuple, tz = _parsedate_tz(data)
     if tz is None:
-        return datetime(*date_tuple[:6])
-    return datetime(*date_tuple[:6], tzinfo = timezone(timedelta(seconds = tz)))
+        return DateTime(*date_tuple[:6])
+    return DateTime(*date_tuple[:6], tzinfo = TimeZone(TimeDelta(seconds = tz)))
 
 
 def parse_header_rate_limit(headers):
     delay1 = (
-        datetime.fromtimestamp(float(headers[RATE_LIMIT_RESET]), timezone.utc)
+        DateTime.fromtimestamp(float(headers[RATE_LIMIT_RESET]), TimeZone.utc)
         - parse_date_to_datetime(headers[DATE])
     ).total_seconds()
     delay2 = float(headers[RATE_LIMIT_RESET_AFTER])
@@ -372,7 +372,7 @@ class RLTPrinterUnit:
     def write(self, content):
         if self.start_new_block:
             buffer = []
-            self.buffer.append((datetime.utcnow(), buffer),)
+            self.buffer.append((DateTime.utcnow(), buffer),)
             self.start_new_block = False
         else:
             buffer = self.buffer[-1][1]
@@ -3346,6 +3346,40 @@ async def onboarding_screen_edit(client, guild_id, *, mode = ...):
     )
 
 
+async def guild_inventory_settings_edit(client, guild_id, *, emoji_pack_collectible = ...):
+    data = {}
+    
+    if emoji_pack_collectible is not ...:
+        data['is_emoji_pack_collectible'] = emoji_pack_collectible
+    
+    await bypass_request(
+        client,
+        METHOD_PATCH,
+        f'{API_ENDPOINT}/guilds/{guild_id}/inventory/settings',
+        data,
+    )
+
+
+async def guild_incidents_edit(client, guild_id, *, direct_messages_disabled_until = ..., invites_disabled_until = ...):
+    data = {}
+    
+    if direct_messages_disabled_until is not ...:
+        if direct_messages_disabled_until is not None:
+            direct_messages_disabled_until = datetime_to_timestamp(direct_messages_disabled_until)
+        data['dms_disabled_until'] = direct_messages_disabled_until
+    
+    if invites_disabled_until is not ...:
+        if invites_disabled_until is not None:
+            invites_disabled_until = datetime_to_timestamp(invites_disabled_until)
+        data['invites_disabled_until'] = invites_disabled_until
+    
+    await bypass_request(
+        client,
+        METHOD_PUT,
+        f'{API_ENDPOINT}/guilds/{guild_id}/incident-actions',
+        data,
+    )
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0000(client, message):
@@ -5920,7 +5954,7 @@ async def rate_limit_test_0112(client, message, guild_2 : 'guild' = None):
         application_command_schema = ApplicationCommand(
             'This-command_cake',
             'But does nothing for real, pls don\'t use it.',
-                )
+        )
         
         application_command = await application_command_guild_create(client, guild, application_command_schema)
         
@@ -5933,7 +5967,7 @@ async def rate_limit_test_0112(client, message, guild_2 : 'guild' = None):
         application_command_schema = ApplicationCommand(
             'This-command_cake',
             'But does nothing for real, pls don\'t use it.',
-                )
+        )
         
         application_command = await application_command_guild_create(client, guild_2, application_command_schema)
         
@@ -5997,8 +6031,13 @@ async def rate_limit_test_0115(client, message):
         application_command = ApplicationCommand('test_command_56', 'ayaya')
         application_command = await client.application_command_guild_create(guild, application_command)
         
-        await application_command_permission_edit(client, access, guild, application_command,
-            [ApplicationCommandPermissionOverwrite(client.owner, True)])
+        await application_command_permission_edit(
+            client,
+            access,
+            guild,
+            application_command,
+            [ApplicationCommandPermissionOverwrite(client.owner, True)],
+        )
         
         await client.application_command_guild_delete(guild, application_command)
 
@@ -6019,16 +6058,26 @@ async def rate_limit_test_0116(client, message):
         application_command = ApplicationCommand('test_command_56', 'ayaya')
         application_command = await client.application_command_guild_create(guild, application_command)
         
-        await application_command_permission_edit(client, access, guild, application_command,
-            [ApplicationCommandPermissionOverwrite(client.owner, True)])
+        await application_command_permission_edit(
+            client,
+            access,
+            guild,
+            application_command,
+            [ApplicationCommandPermissionOverwrite(client.owner, True)],
+        )
         
         await client.application_command_guild_delete(guild, application_command)
 
         application_command = ApplicationCommand('test_command_56', 'ayaya')
         application_command = await client.application_command_global_create(application_command)
         
-        await application_command_permission_edit(client, access, guild, application_command,
-            [ApplicationCommandPermissionOverwrite(client.owner, True)])
+        await application_command_permission_edit(
+            client,
+            access,
+            guild,
+            application_command,
+            [ApplicationCommandPermissionOverwrite(client.owner, True)],
+        )
         
         await client.application_command_global_delete(application_command)
 
@@ -7784,7 +7833,7 @@ async def rate_limit_test_0193(client, message, voice_channel : 'channel' = None
             status = 'koishi'
         
         if not guild.cached_permissions_for(client).can_administrator:
-            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+            await RLT.send('I need admin permission in the guild to complete this command.')
     
         await channel_edit_status(client, voice_channel, status)
 
@@ -7816,7 +7865,7 @@ async def rate_limit_test_0194(client, message, voice_channel_0 : 'channel' = No
             await RLT.send('Different channels only.')
         
         if not guild.cached_permissions_for(client).can_administrator:
-            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+            await RLT.send('I need admin permission in the guild to complete this command.')
         
         task_group = TaskGroup(KOKORO)
         task_group.create_task(channel_edit_status(client, voice_channel_0, 'koishi'))
@@ -7854,7 +7903,7 @@ async def rate_limit_test_0195(client, message, voice_channel : 'channel' = None
             await RLT.send('Voice channel only.')
         
         if not guild.cached_permissions_for(client).can_administrator:
-            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+            await RLT.send('I need admin permission in the guild to complete this command.')
         
         task_group = TaskGroup(KOKORO)
         task_group.create_task(channel_edit_status(client, voice_channel, 'koishi'))
@@ -7867,6 +7916,64 @@ async def rate_limit_test_0195(client, message, voice_channel : 'channel' = None
         task_group.create_task(channel_edit_status(client, voice_channel, 'satori'))
         task_group.create_task(channel_edit_status(client, voice_channel, 'koishi'))
         task_group.create_task(channel_edit_status(client, voice_channel, 'satori'))
+        
+        await task_group.wait_all()
+        task_group.cancel_all()
+
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0196(client, message):
+    """
+    Edits the guild's inventory settings.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0196') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the guild as well to complete this command.')
+        
+        await guild_inventory_settings_edit(client, guild.id, emoji_pack_collectible = True)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0197(client, message, guild_1: 'guild' = None):
+    """
+    Edits the guild's incidents in two guilds.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0197') as RLT:
+        guild_0 = channel.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild_0.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the guild to complete this command.')
+        
+        if guild_1 is None:
+            await RLT.send('Please provide a secondary guild parameter')
+        
+        if not guild_1.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        if guild_0 is guild_1:
+            await RLT.send('Current and the given guilds are the same.')
+            
+            
+        until = DateTime.utcnow() + TimeDelta(hours = 1)
+        
+        task_group = TaskGroup(KOKORO)
+        task_group.create_task(guild_incidents_edit(client, guild_0.id, invites_disabled_until = until))
+        task_group.create_task(guild_incidents_edit(client, guild_1.id, invites_disabled_until = until))
+        task_group.create_task(guild_incidents_edit(client, guild_0.id, invites_disabled_until = until))
+        task_group.create_task(guild_incidents_edit(client, guild_1.id, invites_disabled_until = until))
+        task_group.create_task(guild_incidents_edit(client, guild_0.id, invites_disabled_until = until))
+        task_group.create_task(guild_incidents_edit(client, guild_1.id, invites_disabled_until = until))
+        task_group.create_task(guild_incidents_edit(client, guild_0.id, invites_disabled_until = until))
+        task_group.create_task(guild_incidents_edit(client, guild_1.id, invites_disabled_until = until))
         
         await task_group.wait_all()
         task_group.cancel_all()

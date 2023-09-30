@@ -106,9 +106,6 @@ async def do_transfer(client, event, source_user, target_user, message):
                     user_common_model.waifu_cost,
                     user_common_model.waifu_divorces,
                     user_common_model.waifu_slots,
-                    
-                    user_common_model.notify_proposal,
-                    user_common_model.notify_daily,
                 ]
             ).where(
                 user_common_model.user_id.in_(
@@ -155,10 +152,7 @@ async def do_transfer(client, event, source_user, target_user, message):
             
             source_user_waifu_cost = 0
             source_user_waifu_divorces = 0
-            source_user_waifu_slots = 1
-            
-            source_user_notify_proposal = True
-            source_user_notify_daily = True
+            source_user_waifu_slots = 14
         
         else:
             source_user_entry_id, \
@@ -177,9 +171,6 @@ async def do_transfer(client, event, source_user, target_user, message):
             source_user_waifu_cost, \
             source_user_waifu_divorces, \
             source_user_waifu_slots, \
-            \
-            source_user_notify_proposal, \
-            source_user_notify_daily, \
                 = source_user_result
             
             if source_user_daily_next > now:
@@ -207,9 +198,6 @@ async def do_transfer(client, event, source_user, target_user, message):
             target_user_waifu_cost = 0
             target_user_waifu_divorces = 0
             target_user_waifu_slots = 1
-            
-            target_user_notify_proposal = True
-            target_user_notify_daily = True
         
         else:
             target_user_entry_id, \
@@ -229,9 +217,6 @@ async def do_transfer(client, event, source_user, target_user, message):
             target_user_waifu_cost, \
             target_user_waifu_divorces, \
             target_user_waifu_slots, \
-            \
-            target_user_notify_proposal, \
-            target_user_notify_daily, \
                 = target_user_result
             
             now = datetime.utcnow()
@@ -274,17 +259,6 @@ async def do_transfer(client, event, source_user, target_user, message):
             new_waifu_slots = source_user_waifu_slots
         else:
             new_waifu_slots = target_user_waifu_slots
-        
-        if source_user_notify_proposal and target_user_notify_proposal:
-            new_notify_proposal = True
-        else:
-            new_notify_proposal = False
-        
-        if source_user_notify_daily and target_user_notify_daily:
-            new_notify_daily = True
-        else:
-            new_notify_daily = False
-        
         
         # transfer waifus
         
@@ -340,8 +314,6 @@ async def do_transfer(client, event, source_user, target_user, message):
                     waifu_cost = new_waifu_cost,
                     waifu_divorces = new_waifu_divorces,
                     waifu_slots = new_waifu_slots,
-                    notify_proposal = new_notify_proposal,
-                    notify_daily = new_notify_daily,
                     count_daily_self = new_count_daily_self,
                     count_daily_by_waifu = new_count_daily_by_waifu,
                     count_daily_for_waifu = new_count_daily_for_waifu,
@@ -360,8 +332,6 @@ async def do_transfer(client, event, source_user, target_user, message):
                     waifu_cost = new_waifu_cost,
                     waifu_divorces = new_waifu_divorces,
                     waifu_slots = new_waifu_slots,
-                    notify_proposal = new_notify_proposal,
-                    notify_daily = new_notify_daily,
                     count_daily_self = new_count_daily_self,
                     count_daily_by_waifu = new_count_daily_by_waifu,
                     count_daily_for_waifu = new_count_daily_for_waifu,

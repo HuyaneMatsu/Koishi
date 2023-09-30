@@ -33,6 +33,4 @@ class CommonFields(ModelLink, model = user_common_model, table = USER_COMMON_TAB
     waifu_slots = Field(getattr(user_common_model, 'waifu_slots', None), 0)
     waifu_owner_id = Field(getattr(user_common_model, 'waifu_owner_id', None), 0)
     
-    notify_proposal = Field(getattr(user_common_model, 'notify_proposal', None), 0)
-    notify_daily = Field(getattr(user_common_model, 'notify_daily', None), 0)
     top_gg_last_vote = Field(getattr(user_common_model, 'top_gg_last_vote', None), DateTime.utcnow)
