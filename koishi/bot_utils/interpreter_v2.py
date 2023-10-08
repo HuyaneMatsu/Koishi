@@ -26,7 +26,7 @@ def get_buffer_value(buffer):
     data = buffer.read()
     if data:
         lines = data.split('\n')
-        chunks = cchunkify(lines, lang='py')
+        chunks = cchunkify(lines, lang = 'py')
     else:
         chunks = None
     
@@ -104,7 +104,7 @@ def raw_print(buffer, *args, file = None, flush = False, **kwargs):
     if file is None:
         file = buffer
     
-    print(*args, file=file, **kwargs)
+    print(*args, file = file, **kwargs)
 
 
 def _ignore_console_frames(file_name, name, line_number, line):

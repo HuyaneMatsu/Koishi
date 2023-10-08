@@ -112,7 +112,7 @@ KANAKO_COLOR = Color.from_tuple(FONT_COLOR)
 
 def draw(buffer, text):
     image = PIL.new('RGBA', FONT.getsize(text), (0, 0, 0, 0))
-    image.draw().text((0,0), text, fill=FONT_COLOR, font=FONT)
+    image.draw().text((0,0), text, fill = FONT_COLOR, font = FONT)
     image.save(buffer, 'png')
     buffer.seek(0)
     return buffer
@@ -129,7 +129,7 @@ async def create_images(client, event):
         question = relation_pair[0]
         draw(buffer, question)
         
-        message = await client.interaction_followup_message_create(event, file=('a.png', buffer))
+        message = await client.interaction_followup_message_create(event, file = ('a.png', buffer))
         
         relation.append((question, message.attachment.url))
     
@@ -871,7 +871,7 @@ class KanakoRunner:
                             chances[key] += 1
                 else:
                     for key in chances:
-                        if len(key)!=ln:
+                        if len(key) != ln:
                             continue
                         if char_d in key:
                             chances[key] += 1

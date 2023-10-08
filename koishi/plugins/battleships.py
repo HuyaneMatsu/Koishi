@@ -522,7 +522,7 @@ class battleships_game:
                     text1 = 'You timed out'
                     text2 = 'The other player timed out'
                 else:
-                    text1 = text2 ='The time is over, both players timed out'
+                    text1 = text2 = 'The time is over, both players timed out'
                 
                 Task(KOKORO, client.message_create(player1.channel, text1))
                 Task(KOKORO, client.message_create(player2.channel, text2))
@@ -595,7 +595,7 @@ class battleships_game:
             if value.isdigit():
                 x = int(value)
                 if x > 10:
-                    text='Bad input format.'
+                    text = 'Bad input format.'
                     break
                 x -= 1
                 y = 100
@@ -771,7 +771,7 @@ class battleships_game:
             
             value = data[x + y * 10]
             if value > 4:
-                text='That position is already shot'
+                text = 'That position is already shot'
                 break
 
             text = ''

@@ -15,7 +15,7 @@ URL_PREFIX = '/project/koishi/api'
 ROUTES = Blueprint('vote', '', url_prefix = URL_PREFIX)
 
 
-@ROUTES.route('/top_gg/vote', methods=['POST'])
+@ROUTES.route('/top_gg/vote', methods = ['POST'])
 def vote():
     authorization = request.headers.get('Authorization', '')
     if authorization != KOISHI_TOP_GG_AUTHORIZATION:
@@ -85,4 +85,4 @@ def vote():
                 )
             )
         
-    return Response(status=200)
+    return Response(status = 200)

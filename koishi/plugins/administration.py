@@ -85,7 +85,7 @@ async def clear(client, event,
     
     try:
         await client.multi_client_message_delete_sequence(
-            channel, after=after, before=before, limit=limit, filter=filter, reason = reason
+            channel, after = after, before = before, limit = limit, filter = filter, reason = reason
         )
     except DiscordException as err:
         if err.code not in (
@@ -156,7 +156,7 @@ def bans_pagination_check(event):
 @SLASH_CLIENT.interactions(
     is_global = True,
     allow_in_dm = False,
-    required_permissions = Permission().update_by_keys(ban_users=True),
+    required_permissions = Permission().update_by_keys(ban_users = True),
 )
 
 async def bans(client, event):
@@ -307,13 +307,13 @@ async def invites_(client, event,
         coroutine = client.invite_get_all_guild(guild)
     invites = await coroutine
     
-    pages = [Embed(description = chunk) for chunk in pchunkify(invites, write_parents=False)]
+    pages = [Embed(description = chunk) for chunk in pchunkify(invites, write_parents = False)]
     
     if channel is None:
         check = check_guild_invites_pagination_permissions
     else:
         check = check_channel_invites_pagination_permissions
     
-    await Pagination(client, event, pages, timeout = 120., check = check)
+    await Pagination(client, event, pages, timeout = 120.0, check = check)
 
 '''

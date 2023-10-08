@@ -3,7 +3,9 @@ __all__ = ()
 from hata import Embed, User
 
 from ..shared_constants import PERMISSIONS__MUTE, WORD_CONFIG__MUTE
-from ..shared_helpers import add_reason_field, add_standalone_field, create_auto_reason, process_reason
+from ..shared_helpers import (
+    add_reason_field, add_standalone_field, check_user_cannot_be_admin, create_auto_reason, process_reason
+)
 from ..shared_helpers_mute import (
     PARAMETER_DAYS, PARAMETER_HOURS, PARAMETER_MINUTES, PARAMETER_SECONDS, build_duration_string, get_duration
 )
@@ -81,6 +83,7 @@ async def mute_command(
     guild = event.guild
     
     check_required_permissions(client, event, guild, user, PERMISSIONS__MUTE, WORD_CONFIG__MUTE)
+    check_user_cannot_be_admin(guild, user, WORD_CONFIG__MUTE)
     duration = get_duration(days, hours, minutes, seconds)
     reason = process_reason(reason)
     duration_string = build_duration_string(duration)

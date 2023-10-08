@@ -335,7 +335,7 @@ class OJEvent(OJEntityBase):
         self.id = identifier
         self.name = name
         
-        EVENTS[identifier] =self
+        EVENTS[identifier] = self
         return self
 
 
@@ -424,7 +424,7 @@ def apply_filters(character, filters):
     return True
 
 def create_string_filter_options(values):
-    return [(f'+{value}' if (value > 0) else str(value)) for value in sorted(values, reverse=True)]
+    return [(f'+{value}' if (value > 0) else str(value)) for value in sorted(values, reverse = True)]
 
 def create_character_filter_options():
     attack_values = set()
@@ -3375,7 +3375,7 @@ async def create_images(client, event):
             raise abort(f'{image_path!r} do not exists.')
         
         with (await ReuAsyncIO(image_path)) as io:
-            message = await client.interaction_followup_message_create(event, file=io)
+            message = await client.interaction_followup_message_create(event, file = io)
         
         relation.append((card_name, message.attachment.url))
     

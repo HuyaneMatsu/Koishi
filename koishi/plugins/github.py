@@ -384,9 +384,10 @@ class OrganizationContainerType:
 
 GET_USER_AND_ORGANIZATIONS_LIMIT = GitHubQueryLimit()
 SEARCH_USER_NAME = GitHubQuery(build_search_user_url, SLASH_CLIENT.http, SearchUserType)
-GET_USER = GitHubQuery(build_get_user_url, SLASH_CLIENT.http, UserType, limit=GET_USER_AND_ORGANIZATIONS_LIMIT)
-GET_ORGANIZATIONS = GitHubQuery(build_get_organizations_url, SLASH_CLIENT.http, OrganizationContainerType,
-    limit=GET_USER_AND_ORGANIZATIONS_LIMIT)
+GET_USER = GitHubQuery(build_get_user_url, SLASH_CLIENT.http, UserType, limit = GET_USER_AND_ORGANIZATIONS_LIMIT)
+GET_ORGANIZATIONS = GitHubQuery(
+    build_get_organizations_url, SLASH_CLIENT.http, OrganizationContainerType, limit = GET_USER_AND_ORGANIZATIONS_LIMIT
+)
 
 
 @SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)

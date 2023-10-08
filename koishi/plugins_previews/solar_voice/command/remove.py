@@ -7,7 +7,7 @@ from ..helpers import create_added_music_embed, create_track_short_description, 
 
 
 async def remove_(client, event,
-    track: P('str', 'Which track to skip?', autocomplete=autocomplete_track_name) = None,
+    track: P('str', 'Which track to skip?', autocomplete = autocomplete_track_name) = None,
 ):
     """Removes the selected track from the queue"""
     player = get_player_or_abort(client, event)

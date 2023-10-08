@@ -118,7 +118,7 @@ class CookingFactor:
         
         flavor = self.flavor
         if flavor:
-            result.append(' flavor=')
+            result.append(' flavor = ')
             result.append(repr(flavor))
             
             should_add_comma = True
@@ -132,7 +132,7 @@ class CookingFactor:
             else:
                 should_add_comma = True
             
-            result.append(' fruit=')
+            result.append(' fruit = ')
             result.append(repr(fruit))
         
         meat = self.meat
@@ -142,7 +142,7 @@ class CookingFactor:
             else:
                 should_add_comma = True
             
-            result.append(' meat=')
+            result.append(' meat = ')
             result.append(repr(meat))
         
         monster = self.monster
@@ -152,7 +152,7 @@ class CookingFactor:
             else:
                 should_add_comma = True
             
-            result.append(' monster=')
+            result.append(' monster = ')
             result.append(repr(monster))
         
         mushroom = self.mushroom
@@ -162,7 +162,7 @@ class CookingFactor:
             else:
                 should_add_comma = True
             
-            result.append(' mushroom=')
+            result.append(' mushroom = ')
             result.append(repr(mushroom))
         
         vegetable = self.vegetable
@@ -170,7 +170,7 @@ class CookingFactor:
             if should_add_comma:
                 result.append(',')
             
-            result.append(' vegetable=')
+            result.append(' vegetable = ')
             result.append(repr(vegetable))
         
         result.append('>')
@@ -265,7 +265,7 @@ class EdibilityFactor:
         
         health = self.health
         if health:
-            result.append(' health=')
+            result.append(' health = ')
             result.append(repr(health))
             
             should_add_comma = True
@@ -279,7 +279,7 @@ class EdibilityFactor:
             else:
                 should_add_comma = True
             
-            result.append(' hunger=')
+            result.append(' hunger = ')
             result.append(repr(hunger))
         
         sanity = self.sanity
@@ -287,7 +287,7 @@ class EdibilityFactor:
             if should_add_comma:
                 result.append(',')
             
-            result.append(' sanity=')
+            result.append(' sanity = ')
             result.append(repr(sanity))
         
         result.append('>')

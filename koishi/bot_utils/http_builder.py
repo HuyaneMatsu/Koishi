@@ -22,7 +22,7 @@ class HttpUrl:
         return self
     
     def render(self):
-        url = quote(self.url, safe=':@', protected='/')
+        url = quote(self.url, safe = ':@', protected = '/')
         value = html_escape(self.value)
         
         return f'<a href="{url}">{value}</a>'

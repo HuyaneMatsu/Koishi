@@ -20,7 +20,7 @@ from ..bots import COMMAND_CLIENT
 
 STAT_COLOR = Color.from_rgb(61, 255, 249)
 
-COMMAND_CLIENT.command_processor.create_category('STATS', checks=checks.owner_only())
+COMMAND_CLIENT.command_processor.create_category('STATS', checks = checks.owner_only())
 
 
 def thread_count_type_item_sort_key(item):
@@ -129,7 +129,7 @@ class threads:
                     break
                 
                 type_, count = thread_count_by_type.pop()
-                non_displayed_thread_count-=count
+                non_displayed_thread_count -= count
                 
                 thread_type_name = type_.__name__
                 if len(thread_type_name) > 32:
@@ -156,11 +156,16 @@ class threads:
     category = 'STATS'
     
     async def description(command_context):
-        return Embed('threads',(
-            'Just shows how my threads are doing.\n'
-            f'Usage: `{command_context.prefix}threads`'
-            ), color = STAT_COLOR).add_footer(
-                'Owner only!')
+        return Embed(
+            'threads',
+            (
+                'Just shows how my threads are doing.\n'
+                f'Usage: `{command_context.prefix}threads`'
+            ),
+            color = STAT_COLOR,
+        ).add_footer(
+            'Owner only!',
+        )
 
 if IS_PYPY:
     @COMMAND_CLIENT.commands.from_class
@@ -168,27 +173,31 @@ if IS_PYPY:
         async def command(client, message):
             stats = get_gc_stats()
             
-            embed = Embed(None,
-                '**Total memory consumed:**\n'
-                f'GC used: {stats.total_gc_memory} (peak: {stats.peak_memory})\n'
-                f'In arenas: {stats.total_arena_memory}\n'
-                f'Rawmalloced: {stats.total_rawmalloced_memory}\n'
-                f'Nursery: {stats.nursery_size}\n'
-                f'Jit backend used: {stats.jit_backend_used}\n'
-                '----------------------------\n'
-                f'Total: {stats.memory_used_sum}\n'
-                '\n'
-                f'**Total memory allocated:**\n'
-                f'GC allocated: {stats.total_allocated_memory} (peak: {stats.peak_allocated_memory})\n'
-                f'In arenas: {stats.peak_arena_memory}\n'
-                f'Rawmalloced: {stats.peak_rawmalloced_memory}\n'
-                f'Nursery: {stats.nursery_size}\n'
-                f'Jit backend allocated: {stats.jit_backend_allocated}\n'
-                '----------------------------\n'
-                f'Total: {stats.memory_allocated_sum}\n'
-                '\n'
-                f'Total time spent in GC: {stats.total_gc_time / 1000.0:.3f}',
-                  color = STAT_COLOR)
+            embed = Embed(
+                None,
+                (
+                    '**Total memory consumed:**\n'
+                    f'GC used: {stats.total_gc_memory} (peak: {stats.peak_memory})\n'
+                    f'In arenas: {stats.total_arena_memory}\n'
+                    f'Rawmalloced: {stats.total_rawmalloced_memory}\n'
+                    f'Nursery: {stats.nursery_size}\n'
+                    f'Jit backend used: {stats.jit_backend_used}\n'
+                    '----------------------------\n'
+                    f'Total: {stats.memory_used_sum}\n'
+                    '\n'
+                    f'**Total memory allocated:**\n'
+                    f'GC allocated: {stats.total_allocated_memory} (peak: {stats.peak_allocated_memory})\n'
+                    f'In arenas: {stats.peak_arena_memory}\n'
+                    f'Rawmalloced: {stats.peak_rawmalloced_memory}\n'
+                    f'Nursery: {stats.nursery_size}\n'
+                    f'Jit backend allocated: {stats.jit_backend_allocated}\n'
+                    '----------------------------\n'
+                    f'Total: {stats.memory_allocated_sum}\n'
+                    '\n'
+                    f'Total time spent in GC: {stats.total_gc_time / 1000.0:.3f}',
+                ),
+                color = STAT_COLOR,
+            )
             
             await client.message_create(message.channel, embed = embed)
         
@@ -196,11 +205,16 @@ if IS_PYPY:
         category = 'STATS'
         
         async def description(command_context):
-            return Embed('gc-stats',(
-                'Garbage collector info to check memory usage.\n'
-                f'Usage: `{command_context}gc-stats`'
-                ), color = STAT_COLOR).add_footer(
-                    'Owner only!')
+            return Embed(
+                'gc-stats',
+                (
+                    'Garbage collector info to check memory usage.\n'
+                    f'Usage: `{command_context}gc-stats`'
+                ),
+                color = STAT_COLOR,
+            ).add_footer(
+                'Owner only!',
+            )
 
 
 if (CpuUsage is not None):
@@ -215,107 +229,159 @@ if (CpuUsage is not None):
             
             description = []
             
-            description.append('**System info**:\n' \
-                               'Platform: ')
+            description.append(
+                '**System info**:\n'
+               'Platform: '
+            )
             description.append(sys.platform)
-            description.append('\n' \
-                               'Cores: ')
-            description.append(repr(psutil.cpu_count(logical=False)))
-            description.append('\n' \
-                               'Threads: ')
-            description.append(repr(psutil.cpu_count(logical=True)))
-            description.append('\n' \
-                               'Max CPU frequency: ')
+            description.append(
+                '\n'
+                'Cores: '
+            )
+            description.append(repr(psutil.cpu_count(logical = False)))
+            description.append(
+                '\n'
+                'Threads: '
+            )
+            description.append(repr(psutil.cpu_count(logical = True)))
+            description.append(
+                '\n'
+                'Max CPU frequency: '
+            )
             description.append(CPU_MAX_FREQUENCY.__format__('.2f'))
-            description.append('MHz\n\n' \
-                               '**Memory and swap**:\n' \
-                               'Memory total: ')
+            description.append(
+                'MHz\n\n'
+                '**Memory and swap**:\n'
+                'Memory total: '
+            )
             memory = psutil.virtual_memory()
             description.append((memory.total / (1 << 20)).__format__('.2f'))
-            description.append('MB\n' \
-                               'Memory used: ')
+            description.append(
+                'MB\n'
+                'Memory used: '
+            )
             description.append((memory.used / (1 << 20)).__format__('.2f'))
-            description.append('MB\n' \
-                               'Memory percent: ')
+            description.append(
+                'MB\n'
+                'Memory percent: '
+            )
             description.append(memory.percent.__format__('.2f'))
-            description.append('%\n' \
-                               'Swap total: ')
+            description.append(
+                '%\n'
+                'Swap total: '
+            )
             swap = psutil.swap_memory()
             description.append((swap.total / (1 << 20)).__format__('.2f'))
-            description.append('MB\n' \
-                               'Swap used: ')
+            description.append(
+                'MB\n'
+                'Swap used: '
+            )
             description.append((swap.used / (1 << 20)).__format__('.2f'))
-            description.append('MB\n' \
-                               'Swap percent: ')
+            description.append(
+                'MB\n'
+                'Swap percent: '
+            )
             description.append(swap.percent.__format__('.2f'))
-            description.append('%\n' \
-                               '\n' \
-                               '**Process info**:\n' \
-                               'Name: ')
+            description.append(
+                '%\n'
+                '\n'
+                '**Process info**:\n'
+                'Name: '
+            )
             description.append(PROCESS.name())
-            description.append('\n' \
-                               'PID: ')
+            description.append(
+                '\n'
+                'PID: '
+            )
             description.append(repr(PROCESS_PID))
-            description.append('\n' \
-                               'File descriptor count: ')
+            description.append(
+                '\n'
+                'File descriptor count: '
+            )
             description.append(repr(PROCESS.num_fds()))
-            description.append('\n' \
-                               'Thread count: ')
+            description.append(
+                '\n'
+                'Thread count: '
+            )
             description.append(repr(PROCESS.num_threads()))
-            description.append('\n' \
-                               'Created: ')
+            description.append(
+                '\n'
+                'Created: '
+            )
             description.append(elapsed_time(datetime.utcfromtimestamp(PROCESS.create_time())))
-            description.append(' ago\n' \
-                               '\n' \
-                               '**CPU times:**\n' \
-                               'User: ')
+            description.append(
+                ' ago\n'
+                '\n'
+                '**CPU times:**\n'
+                'User: '
+            )
             cpu_times = PROCESS.cpu_times()
             cpu_time_user = cpu_times.user
             cpu_time_total = cpu_time_user
             description.append(cpu_time_user.__format__('.2f'))
             cpu_time_system = cpu_times.system
-            cpu_time_total +=cpu_time_system
-            description.append('\n' \
-                               'System: ')
+            cpu_time_total += cpu_time_system
+            description.append(
+                '\n'
+                'System: '
+            )
             description.append(cpu_time_system.__format__('.2f'))
-            description.append('\n' \
-                               'Children User: ')
+            description.append(
+                '\n'
+                'Children User: '
+            )
             cpu_times = PROCESS.cpu_times()
             cpu_time_children_user = cpu_times.children_user
             cpu_time_total += cpu_time_children_user
             description.append(cpu_time_children_user.__format__('.2f'))
-            description.append('\n' \
-                               'Children system: ')
+            description.append(
+                '\n'
+                'Children system: '
+            )
             cpu_time_children_system = cpu_times.children_system
-            cpu_time_total +=cpu_time_children_system
+            cpu_time_total += cpu_time_children_system
             description.append(cpu_time_children_system.__format__('.2f'))
-            description.append('\n' \
-                               'IO wait: ')
+            description.append(
+                '\n'
+                'IO wait: '
+            )
             cpu_time_io_wait = cpu_times.iowait
             cpu_time_total += cpu_time_io_wait
             description.append(cpu_time_io_wait.__format__('.2f'))
-            description.append('\n' \
-                               '--------------------\n' \
-                               'Total: ')
+            description.append(
+                '\n'
+                '--------------------\n'
+                'Total: '
+            )
             description.append(cpu_time_total.__format__('.2f'))
-            description.append('\n' \
-                               '\n' \
-                               '**CPU usage:**\n' \
-                               'CPU usage percent: ')
+            description.append(
+                '\n'
+                '\n'
+                '**CPU usage:**\n'
+                'CPU usage percent: '
+            )
             description.append(process_cpu_usage.cpu_percent.__format__('.2f'))
-            description.append('%\n' \
-                               'CPU usage with max frequency: ')
+            description.append(
+                '%\n'
+                'CPU usage with max frequency: '
+            )
             description.append(process_cpu_usage.cpu_percent_with_max_frequency.__format__('.2f'))
-            description.append('%\n' \
-                               'CPU usage over all cores: ')
+            description.append(
+                '%\n'
+                'CPU usage over all cores: '
+            )
             description.append(process_cpu_usage.cpu_percent_total.__format__('.2f'))
-            description.append('%\n' \
-                               '\n' \
-                               '**RAM usage**:\n' \
-                               'Total: ')
+            description.append(
+                '%\n'
+                '\n'
+                '**RAM usage**:\n'
+                'Total: '
+            )
             description.append((PROCESS.memory_info().rss / (1 << 20)).__format__('.2f'))
-            description.append('MB\n' \
-                               'Percent: ')
+            description.append(
+                'MB\n'
+                'Percent: '
+            )
             description.append(PROCESS.memory_percent().__format__('.2f'))
             description.append('%')
             
@@ -326,9 +392,14 @@ if (CpuUsage is not None):
         category = 'STATS'
         
         async def description(command_context):
-            return Embed('system-stats',(
-                'Shows my system\s and processes\'s stats.\n'
-                f'Usage: `{command_context.prefix}system-stats`'
-                ), color = STAT_COLOR).add_footer(
-                    'Owner only!')
+            return Embed(
+                'system-stats',
+                (
+                    'Shows my system\s and processes\'s stats.\n'
+                    f'Usage: `{command_context.prefix}system-stats`'
+                ),
+                color = STAT_COLOR,
+            ).add_footer(
+                'Owner only!',
+            )
 

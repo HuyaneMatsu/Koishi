@@ -3,10 +3,11 @@ __all__ = ()
 SEX_RESET_AFTER = 600
 
 SEX_IMAGES = [
-    'https://cdn.discordapp.com/attachments/568837922288173058/927858207764918284/no-sex-0000.gif',
-    'https://cdn.discordapp.com/attachments/568837922288173058/944868502676865144/chiruno-maybe-sex.gif',
-    'https://cdn.discordapp.com/attachments/568837922288173058/1074024248164753538/chiruno-probably-sex-0001.gif',
-    'https://cdn.discordapp.com/attachments/568837922288173058/837747879497433158/yes-sex.gif',
-    'https://cdn.discordapp.com/attachments/568837922288173058/840676567180771348/yes-sex-hyper-opti.gif',
-    'https://cdn.discordapp.com/attachments/568837922288173058/927858614226526228/sex_2_0.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1160496032094896170/chiruno-no-sex.gif',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1160496031746760714/chiruno-maybe-sex.gif',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1160496031331536936/chiruno-probably-sex.gif',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1160496033994915860/chiruno-yes-sex.gif',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1160496033399316540/chiruno-yes-sex-fast.gif',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1160496032468193400/chiruno-sex-2.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1160496030886936636/koishi-yes-sex.gif',
 ]

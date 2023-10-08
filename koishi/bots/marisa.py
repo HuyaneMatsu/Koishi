@@ -127,7 +127,7 @@ async def command_error_handler(ctx, exception):
         repr(ctx.content),
         '\n```py\n'
     ]
-    await render_exception_into_async(exception, into, loop=KOKORO)
+    await render_exception_into_async(exception, into, loop = KOKORO)
     into.append('```')
     
     lines = ''.join(into).splitlines()
@@ -241,7 +241,7 @@ Marisa.commands(
     ],
 )
 
-Marisa.commands(sync_request_command, name = 'sync', category='UTILITY', checks=[checks.owner_only()])
+Marisa.commands(sync_request_command, name = 'sync', category = 'UTILITY', checks = [checks.owner_only()])
 
 @ALL.events(overwrite = True)
 async def error(client, name, err):
@@ -559,7 +559,7 @@ async def count_message_fields(client, message):
         (field_count_mentioned_users, 'mentioned_users'),
     ]
     
-    fields_array.sort(reverse=True)
+    fields_array.sort(reverse = True)
     
     for field_count, field_name in fields_array:
         description_parts.append('**')

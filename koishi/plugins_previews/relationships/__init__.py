@@ -2,7 +2,7 @@ from hata import Client
 from hata.ext.plugin_loader import require
 
 # This will fail
-require(Koishi=Client)
+require(Koishi = Client)
 
 
 from .command import *

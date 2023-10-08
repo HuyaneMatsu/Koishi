@@ -23,14 +23,14 @@ VOICE_COLORS = {}
 
 if MARISA_MODE:
     from ..bots import Marisa
-    VOICE_COMMANDS_MARISA = eventlist(category='VOICE', )
+    VOICE_COMMANDS_MARISA = eventlist(category = 'VOICE', )
     VOICE_COMMAND_CLIENT = Marisa
     
     MAIN_VOICE_COLOR = Color.from_rgb(121, 231, 78)
     VOICE_COLORS[Marisa] = MAIN_VOICE_COLOR
 else:
     from ..bots import Flan, Koishi
-    VOICE_COMMANDS_FLAN = eventlist(checks=checks.guild_only())
+    VOICE_COMMANDS_FLAN = eventlist(checks = checks.guild_only())
     VOICE_COMMAND_CLIENT = Flan
     
     MAIN_VOICE_COLOR = Color.from_rgb(235, 52, 207)
@@ -111,7 +111,7 @@ if SOLARLINK_VOICE:
         return track
 else:
     async def get_from_youtube(client, name):
-        return await YTAudio(name, stream=True)
+        return await YTAudio(name, stream = True)
 
 if SOLARLINK_VOICE:
     async def do_skip(player, index):
@@ -650,7 +650,7 @@ if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE) and (not SOLARLINK_VOICE):
             with await AsyncIO(path, 'wb') as file:
                 await file.write(data)
         
-        source = await LocalAudio(path, title=bgm.display_name)
+        source = await LocalAudio(path, title = bgm.display_name)
         
         if voice_client.append(source):
             text = 'Now playing'
@@ -708,7 +708,7 @@ async def command_join_description(command_context):
     )
 
 
-@VOICE_COMMAND_CLIENT.commands(name = 'join', description = command_join_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'join', description = command_join_description, category = 'VOICE')
 async def command_join(client, message, volume: int = None):
     async for content in join(client, message.author, message.guild, volume):
         if (content is not None):
@@ -726,7 +726,7 @@ async def command_pause_description(command_context):
     )
 
 
-@VOICE_COMMAND_CLIENT.commands(name = 'pause', description = command_pause_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'pause', description = command_pause_description, category = 'VOICE')
 async def command_resume(client, message):
     return await pause(client, message)
 
@@ -741,7 +741,7 @@ async def command_resume_description(command_context):
         color = VOICE_COLORS.get(command_context.client, None),
     )
 
-@VOICE_COMMAND_CLIENT.commands(name = 'resume', description = command_resume_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'resume', description = command_resume_description, category = 'VOICE')
 async def command_resume(client, message):
     return await resume(client, message)
 
@@ -756,7 +756,7 @@ async def command_leave_description(command_context):
         color = VOICE_COLORS.get(command_context.client, None),
     )
 
-@VOICE_COMMAND_CLIENT.commands(name = 'leave', description = command_leave_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'leave', description = command_leave_description, category = 'VOICE')
 async def command_leave(client, message):
     async for content in leave(client, message):
         if (content is not None):
@@ -796,7 +796,7 @@ async def command_move_description(command_context):
         color = VOICE_COLORS.get(command_context.client, None),
     )
 
-@VOICE_COMMAND_CLIENT.commands(name = 'move', description = command_move_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'move', description = command_move_description, category = 'VOICE')
 async def command_move(client, message, voice_channel: 'channel' = None):
     if (voice_channel is not None) and (not voice_channel.is_in_group_guild_connectable()):
         yield 'Please select a voice channel.'
@@ -856,7 +856,7 @@ if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
             'Note that the given name can be also given as the position of the track.'
                 ), color = COLOR__FLAN_HELP)
     
-    @Flan.commands(name = 'play', description = command_chesuto_chesuto_play_by_name_description, category='VOICE')
+    @Flan.commands(name = 'play', description = command_chesuto_chesuto_play_by_name_description, category = 'VOICE')
     async def command_chesuto_play(command_context, name):
         if not name:
             yield await command_chesuto_chesuto_play_by_name_description(command_context)
@@ -873,7 +873,7 @@ if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
             f'Usage: `{command_context.prefix}random`\n'
                 ), color = COLOR__FLAN_HELP)
     
-    @Flan.commands(name = 'random', description = command_chesuto_play_random_description, category='VOICE')
+    @Flan.commands(name = 'random', description = command_chesuto_play_random_description, category = 'VOICE')
     async def command_chesuto_random(client, message):
         async for content in chesuto_play_random(client, message):
             if (content is not None):
@@ -885,7 +885,7 @@ async def command_loop_description(command_context):
         f'Usage: `{command_context.prefix}loop <queue|actual|stop>`\n'
         ), color = VOICE_COLORS.get(command_context.client, None))
 
-@VOICE_COMMAND_CLIENT.commands(name = 'loop', description = command_loop_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'loop', description = command_loop_description, category = 'VOICE')
 async def command_loop(client, message, behaviour:'str' = None):
     if (behaviour is not None):
         state = behaviour.lower()
@@ -902,7 +902,7 @@ async def command_queue_description(command_context):
         ), color = VOICE_COLORS.get(command_context.client, None))
 
 
-@VOICE_COMMAND_CLIENT.commands(name = 'queue', description = command_queue_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'queue', description = command_queue_description, category = 'VOICE')
 async def command_queue(client, message):
     guild = message.guild
     if guild is None:
@@ -924,7 +924,7 @@ async def command_volume_description(command_context):
         color = VOICE_COLORS.get(command_context.client, None),
     )
 
-@VOICE_COMMAND_CLIENT.commands(name = 'volume', description = command_volume_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'volume', description = command_volume_description, category = 'VOICE')
 async def command_volume(client, message, volume: int = None):
     return await volume_(client, message, volume)
 
@@ -940,7 +940,7 @@ async def command_stop_description(command_context):
     )
 
 
-@VOICE_COMMAND_CLIENT.commands(name = 'stop', description = command_stop_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'stop', description = command_stop_description, category = 'VOICE')
 async def command_stop(client, message):
     return await stop(client, message)
 
@@ -955,7 +955,7 @@ async def command_skip_description(command_context):
         color = VOICE_COLORS.get(command_context.client, None),
     )
 
-@VOICE_COMMAND_CLIENT.commands(name = 'skip', description = command_skip_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'skip', description = command_skip_description, category = 'VOICE')
 async def command_skip(client, message, index: int = 0):
     return await skip(client, message, index)
 

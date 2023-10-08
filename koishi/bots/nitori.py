@@ -36,7 +36,7 @@ MODERATOR_ROLE_ID = ROLE__SUPPORT__MODERATOR.id
 
 # command start slash perms
 
-@Nitori.interactions(guild = TEST_GUILD, show_for_invoking_user_only=True)
+@Nitori.interactions(guild = TEST_GUILD, show_for_invoking_user_only = True)
 async def perms(event):
     """Shows your permissions."""
     user_permissions = event.user_permissions
@@ -270,7 +270,7 @@ async def channel_create(
         return 'Please keep name length between 2 and 32 characters.'
     
     try:
-        await client.channel_create(event.guild, name, parent=event.channel.parent)
+        await client.channel_create(event.guild, name, parent = event.channel.parent)
     except DiscordException as err:
         # Error message can be over 2k length
         reason = str(err)
@@ -652,7 +652,7 @@ async def set_nick(
 ):
     """Edit's the selected user's nick."""
     yield
-    await client.user_guild_profile_edit(event.guild, user, nick=nick)
+    await client.user_guild_profile_edit(event.guild, user, nick = nick)
     yield f'{user:f}\'s nick has been updated'
 
 # command end
@@ -945,7 +945,7 @@ async def autocomplete_sticker_name(event, value):
 @Nitori.interactions(guild = TEST_GUILD)
 async def get_sticker_id(
     event,
-    sticker: P('str', 'Sticker\'s name', autocomplete=autocomplete_sticker_name),
+    sticker: P('str', 'Sticker\'s name', autocomplete = autocomplete_sticker_name),
 ):
     guild = event.guild
     if guild is None:
@@ -1963,7 +1963,7 @@ class TypingMeta(type):
             return cls(parameters)
 
 
-class Annotated(metaclass=TypingMeta):
+class Annotated(metaclass = TypingMeta):
     __slots__ = ('__args__', '__metadata__')
     
     def __new__(cls, pep_484, *metadata):
@@ -2112,7 +2112,7 @@ def build_command_string(command_lines):
         connected_chunk_length += chunk_length
         if connected_chunk_length > 1500:
             if len(connected_chunk_lines) > 1:
-                connected_chunk_lines[-1] ='```'
+                connected_chunk_lines[-1] = '```'
             
             connected_chunk = '\n'.join(connected_chunk_lines)
             connected_chunks.append(connected_chunk)
@@ -2126,7 +2126,7 @@ def build_command_string(command_lines):
             connected_chunk_lines.extend(chunk)
             connected_chunk_lines.append('')
     
-    connected_chunk_lines[-1] ='```'
+    connected_chunk_lines[-1] = '```'
     connected_chunk = '\n'.join(connected_chunk_lines)
     connected_chunks.append(connected_chunk)
     
@@ -2233,7 +2233,7 @@ class AutoCompleteInteractionCommandSource:
 
 SOURCE = Nitori.interactions(None,
     name = 'source',
-    description ='The collective commands of Nitori.',
+    description = 'The collective commands of Nitori.',
     guild = TEST_GUILD,
 )
 

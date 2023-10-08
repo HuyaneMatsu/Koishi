@@ -10,7 +10,7 @@ from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoMod
     DiscoveryCategory, Emoji, KOKORO, Webhook, eventlist, DiscordException, BUILTIN_EMOJIS, CHANNELS, \
     ApplicationCommand, InteractionResponseType, VerificationScreen, WelcomeScreen, \
     ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, \
-    ERROR_CODES, ComponentType, Sticker, StickerPack, Permission, \
+    ERROR_CODES, ComponentType, Sticker, StickerPack, Permission, EntitlementOwnerType, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, Oauth2User, parse_oauth2_redirect_url, Channel, Role, GUILDS, CLIENTS, \
     Team, WebhookType, Guild, ForumTag, SoundboardSound, OnboardingMode
@@ -94,7 +94,8 @@ async def bypass_request(client, method, url, data = None, params = None, reason
         
         with RLTPrinterBuffer() as buffer:
             response_headers = response.headers
-            
+            for k, v in response_headers.items():
+                print(k, v)
             status = response.status
             if response_headers['content-type'].startswith('application/json'):
                 response_data = from_json(response_data)
@@ -665,6 +666,15 @@ async def application_get_own(client):
         client,
         METHOD_GET,
         f'{API_ENDPOINT}/oauth2/applications/@me',
+    )
+
+
+
+async def application_get(client, application_id):
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/oauth2/applications/{application_id}',
     )
 
 
@@ -2061,7 +2071,8 @@ async def user_achievements(client, access):
         client,
         METHOD_GET,
         f'{API_ENDPOINT}/users/@me/applications/{application_id}/achievements',
-        headers = headers,)
+        headers = headers,
+    )
     
     return [Achievement(achievement_data) for achievement_data in data]
 
@@ -2184,6 +2195,26 @@ async def welcome_screen_get(client, guild_id):
         client,
         METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/welcome-screen',
+    )
+
+
+async def user_application_role_connection_get(client):
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/users/@me/applications/{client.application.id}/role-connection',
+    )
+
+
+async def user_application_role_connection_get_with_access(client, access):
+    headers = IgnoreCaseMultiValueDictionary()
+    headers[AUTHORIZATION] = f'Bearer {access.access_token}'
+    
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/users/@me/applications/{client.application.id}/role-connection',
+        headers = headers,
     )
 
 
@@ -2605,7 +2636,7 @@ async def voice_state_client_edit(client, channel, suppress = False, request_to_
     guild_id = channel.guild.id
     
     if request_to_speak:
-        request_to_speak_timestamp = datetime.utcnow().isoformat()
+        request_to_speak_timestamp = DateTime.utcnow().isoformat()
     else:
         request_to_speak_timestamp = None
     
@@ -3111,7 +3142,7 @@ async def scheduled_event_create(client, guild, voice, name):
         'channel_id': voice.id,
         'entity_metadata': None,
         'entity_type': ScheduledEventEntityType.voice.value,
-        'scheduled_start_time': datetime_to_timestamp(datetime.utcnow() + timedelta(hours = 1)),
+        'scheduled_start_time': datetime_to_timestamp(DateTime.utcnow() + TimeDelta(hours = 1)),
     }
     
     await bypass_request(
@@ -3378,6 +3409,63 @@ async def guild_incidents_edit(client, guild_id, *, direct_messages_disabled_unt
         METHOD_PUT,
         f'{API_ENDPOINT}/guilds/{guild_id}/incident-actions',
         data,
+    )
+
+
+async def sku_get_all(client):    
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/applications/{client.application.id}/skus',
+    )
+
+
+async def entitlement_get_chunk(client):
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/applications/{client.application.id}/entitlements',
+    )
+
+
+async def application_role_connection_metadata_get_all(client):
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/applications/{client.application.id}/role-connections/metadata',
+    )
+
+
+async def application_role_connection_metadata_edit_all(client):
+    await bypass_request(
+        client,
+        METHOD_PUT,
+        f'{API_ENDPOINT}/applications/{client.application.id}/role-connections/metadata',
+    )
+
+
+async def entitlement_create(client):
+    data = {
+        'owner_type': EntitlementOwnerType.user.value,
+        'owner_id': client.id,
+        'sku_id': 1122121212121,
+    }
+    
+    await bypass_request(
+        client,
+        METHOD_POST,
+        f'{API_ENDPOINT}/applications/{client.application.id}/entitlements',
+        data,
+    )
+
+
+async def entitlement_delete(client):
+    entitlement_id = 1122121212121
+    
+    await bypass_request(
+        client,
+        METHOD_DELETE,
+        f'{API_ENDPOINT}/applications/{client.application.id}/entitlements{entitlement_id}',
     )
 
 
@@ -7977,3 +8065,147 @@ async def rate_limit_test_0197(client, message, guild_1: 'guild' = None):
         
         await task_group.wait_all()
         task_group.cancel_all()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0198(client, message):
+    """
+    Request the application's sku-s.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0198') as RLT:
+        await sku_get_all(client)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0199(client, message):
+    """
+    Request the application's entitlements.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0199') as RLT:
+        await entitlement_get_chunk(client)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_200(client, message):
+    """
+    Request the application's entitlements and skus-s mixed.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0200') as RLT:
+        task_group = TaskGroup(KOKORO)
+        task_group.create_task(sku_get_all(client))
+        task_group.create_task(entitlement_get_chunk(client))
+        task_group.create_task(sku_get_all(client))
+        task_group.create_task(entitlement_get_chunk(client))
+        task_group.create_task(sku_get_all(client))
+        task_group.create_task(entitlement_get_chunk(client))
+        task_group.create_task(sku_get_all(client))
+        task_group.create_task(entitlement_get_chunk(client))
+        
+        await task_group.wait_all()
+        task_group.cancel_all()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0201(client, message):
+    """
+    Request the application's entitlements with a second client.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0201') as RLT:
+        for iterated_client in CLIENTS.values():
+            if iterated_client is not client:
+                break
+        else:
+            await RLT.send('Secondary client required.')
+        
+        await entitlement_get_chunk(iterated_client)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0202(client, message):
+    """
+    Request the application's role connection metadata.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0202') as RLT:
+        await application_role_connection_metadata_get_all(client)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0203(client, message):
+    """
+    Edits the application's role connection metadata.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0203') as RLT:
+        await Task(KOKORO, application_role_connection_metadata_edit_all(client)).wait_for_completion()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0204(client, message):
+    """
+    Gets an other application. Second client required.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0204') as RLT:
+        for iterated_client in CLIENTS.values():
+            if iterated_client is not client:
+                break
+        else:
+            await RLT.send('Secondary client required.')
+        
+        await Task(KOKORO, application_get(client, iterated_client.application.id)).wait_for_completion()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0205(client, message):
+    """
+    Gets the client's application role connections. With bot token.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0205') as RLT:
+        await Task(KOKORO, user_application_role_connection_get(client)).wait_for_completion()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0206(client, message):
+    """
+    Gets the client's application role connections. With the owner's oauth2 token.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0206') as RLT:
+        for client_ in CLIENTS.values():
+            if (type(client_.application.owner) is not Team) and client_.bot and (client_.secret is not None):
+                break
+        else:
+            client_ = None
+        
+        if client_ is None:
+            await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
+        
+        # Weird shit, owners access fails, lol.
+        access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random access
+        await Task(KOKORO, user_application_role_connection_get_with_access(client_, access)).wait_for_completion()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0207(client, message):
+    """
+    Creates an entitlement.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0207') as RLT:
+        await Task(KOKORO, entitlement_create(client)).wait_for_completion()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0208(client, message):
+    """
+    Deletes an entitlement.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0208') as RLT:
+        await Task(KOKORO, entitlement_delete(client)).wait_for_completion()

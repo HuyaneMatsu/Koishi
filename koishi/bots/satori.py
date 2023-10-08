@@ -49,7 +49,7 @@ def satori_help_embed_postprocessor(command_context, embed):
     if embed.color is None:
         embed.color = COLOR__SATORI_HELP
 
-Satori.commands(SubterraneanHelpCommand(embed_postprocessor=satori_help_embed_postprocessor), 'help')
+Satori.commands(SubterraneanHelpCommand(embed_postprocessor = satori_help_embed_postprocessor), 'help')
 
 @Satori.commands
 async def invalid_command(client, message, command, content):
@@ -170,7 +170,7 @@ class auto_pyramid:
         for client_, count in zip(cycle(available_clients), chain(range(1, size),range(size, 0, -1))):
             await client_.message_create(channel, ' '.join(emoji.as_emoji for _ in range(count)))
     
-    checks = checks.has_guild_permissions(manage_messages=True)
+    checks = checks.has_guild_permissions(manage_messages = True)
     
     async def description(command_context):
         return Embed(

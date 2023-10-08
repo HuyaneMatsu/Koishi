@@ -125,20 +125,54 @@ async def rules(
     return InteractionResponse(embed = embed, components = components, allowed_mentions = None)
 
 
-@SLASH_CLIENT.interactions(custom_id = CLAIM_ROLE_VERIFIED_CUSTOM_ID)
+@SLASH_CLIENT.interactions(custom_id = CLAIM_ROLE_VERIFIED_CUSTOM_ID, show_for_invoking_user_only = True)
 async def claim_verified_role(client, event):
+    """
+    Assigns the verified role to the user.
+    
+    This function is a coroutine generator.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    
+    Yields
+    ------
+    response `None | str`
+    """
     user = event.user
     if user.has_role(ROLE__SUPPORT__VERIFIED):
         response = f'You already have {ROLE__SUPPORT__VERIFIED.name} role claimed.'
     else:
+        yield
         await client.user_role_add(user, ROLE__SUPPORT__VERIFIED)
         response = f'You claimed {ROLE__SUPPORT__VERIFIED.name} role.'
     
-    await client.interaction_response_message_create(event, response, show_for_invoking_user_only=True)
+    yield response
 
 
-@SLASH_CLIENT.interactions(custom_id = CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID)
+@SLASH_CLIENT.interactions(custom_id = CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID, show_for_invoking_user_only = True)
 async def claim_announcements_role(client, event):
+    """
+    Assigns or removes the announcements role to / of the user.
+    
+    This function is a coroutine generator.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    
+    Yields
+    ------
+    response `None | str`
+    """
+    yield
     user = event.user
     if user.has_role(ROLE__SUPPORT__ANNOUNCEMENTS):
         await client.user_role_delete(user, ROLE__SUPPORT__ANNOUNCEMENTS)
@@ -147,7 +181,7 @@ async def claim_announcements_role(client, event):
         await client.user_role_add(user, ROLE__SUPPORT__ANNOUNCEMENTS)
         response = f'You claimed {ROLE__SUPPORT__ANNOUNCEMENTS.name} role.'
     
-    await client.interaction_response_message_create(event, response, show_for_invoking_user_only=True)
+    yield response
 
 
 def docs_search_pagination_check(user, event):
@@ -379,6 +413,18 @@ async def render_help_heart_guide(client, event):
     return HEARD_GUIDE_EMBED
 
 
+CUSTOM_ID_HELP_CLOSE = 'help.close'
+
+
+HELP_COMPONENTS = Row(
+    Button(
+        'Close',
+        BUILTIN_EMOJIS['x'],
+        custom_id = CUSTOM_ID_HELP_CLOSE,
+    )
+)
+
+
 HELP_FIELD_NAME_GENERIC = 'generic'
 HELP_FIELD_NAME_HEART_GUIDE = 'heart-guide'
 
@@ -398,13 +444,61 @@ async def help_(
     event,
     field: (HELP_FIELD_CHOICES, 'Choose a field!') = HELP_FIELD_NAME_GENERIC,
 ):
-    """Lists my commands and such."""
+    """
+    Lists my commands and such.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    event : ``InteractionEvent``
+        The received interaction event.
+    field : `str` == `'generic'`, Optional
+        Which field to show.
+    
+    Returns
+    -------
+    response : ``InteractionResponse``
+    """
     try:
         field_renderer = HELP_FIELD_NAME_TO_RENDERER[field]
     except KeyError:
-        abort(f'Unknown field: {field!r}.')
+        return abort(f'Unknown field: {field!r}.')
+    
+    embed = await field_renderer(client, event)
+    return InteractionResponse(
+        embed = embed,
+        components = HELP_COMPONENTS,
+    )
+
+
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_HELP_CLOSE)
+async def help_close(client, event):
+    """
+    Closes the help message.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    """
+    await client.interaction_component_acknowledge(event)
+    
+    if event.user_permissions.can_manage_messages or event.message.interaction.user is event.user:
+        await client.interaction_response_message_delete(event)
+    
     else:
-        return await field_renderer(client, event)
+        await client.interaction_followup_message_create(
+            event,
+            'You must be the invoker of the interaction, or have manage messages permission to do this.',
+            show_for_invoking_user_only = True,
+        )
 
 
 @SLASH_CLIENT.interactions(is_global = True, wait_for_acknowledgement = True)

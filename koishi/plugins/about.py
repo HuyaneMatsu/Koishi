@@ -153,6 +153,22 @@ KOISHI_JOKES = (
 
 
 async def render_about_generic(client, event):
+    """
+    Renders a generic about embed.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received event.
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
     embed = Embed(
         None,
         get_koishi_header(),
@@ -278,10 +294,7 @@ async def render_about_generic(client, event):
         inline = True,
     )
     
-    return InteractionResponse(
-        embed = embed,
-        components = ABOUT_COMPONENTS,
-    )
+    return embed
 
 
 async def render_about_js(client, event):
@@ -299,7 +312,7 @@ async def render_about_js(client, event):
     
     Returns
     -------
-    response : ``InteractionResponse``
+    embed : ``Embed``
     """
     embed = Embed(
         None,
@@ -433,12 +446,26 @@ async def render_about_js(client, event):
         inline = True,
     )
     
-    return InteractionResponse(
-        embed = embed,
-        components = ABOUT_COMPONENTS,
-    )
+    return embed
+
 
 async def render_about_cache(client, event):
+    """
+    Renders a cache info about embed.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received event.
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
     embed = Embed(
         color = COLOR__KOISHI_HELP,
     ).add_field(
@@ -530,16 +557,35 @@ async def about(
     event,
     field: (ABOUT_FIELD_CHOICES, 'Choose a field!') = ABOUT_FIELD_NAME_GENERIC,
 ):
-    """My secrets and stats. Simpers only!"""
+    """
+    My secrets and stats. Simps only!
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    
+    Returns
+    -------
+    response : ``InteractionResponse``
+    """
     try:
         field_renderer = ABOUT_FIELD_NAME_TO_RENDERER[field]
     except KeyError:
-        abort(f'Unknown field: {field!r}.')
-    else:
-        if (field_renderer is render_about_generic) and (event.guild is GUILD__ORIN_PARTY_HOUSE):
-            field_renderer = render_about_js
-        
-        return await field_renderer(client, event)
+        return abort(f'Unknown field: {field!r}.')
+    
+    if (field_renderer is render_about_generic) and (event.guild is GUILD__ORIN_PARTY_HOUSE):
+        field_renderer = render_about_js
+    
+    embed = await field_renderer(client, event)
+    return InteractionResponse(
+        embed = embed,
+        components = ABOUT_COMPONENTS,
+    )
 
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_ABOUT_CLOSE)

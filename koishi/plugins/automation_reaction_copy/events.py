@@ -63,6 +63,9 @@ async def reaction_add(client, event):
     if (guild is None):
         return
     
+    if event.user.bot:
+        return
+    
     emoji = event.emoji
     if emoji.is_custom_emoji():
         return

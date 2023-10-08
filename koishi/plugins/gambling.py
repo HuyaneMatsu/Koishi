@@ -163,7 +163,7 @@ async def heart_event(client, event,
         break
     
     if error:
-        await client.interaction_response_message_create(event, response, show_for_invoking_user_only=True)
+        await client.interaction_response_message_create(event, response, show_for_invoking_user_only = True)
         return
     
     await client.interaction_application_command_acknowledge(event)
@@ -194,9 +194,10 @@ async def heart_event(client, event,
 
 class HeartEventGUI:
     _update_time = 60.
-    _update_delta = timedelta(seconds=_update_time)
+    _update_delta = timedelta(seconds = _update_time)
     
-    __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
+    __slots__ = ('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
+    
     async def __new__(cls, client, event, duration, amount, user_limit):
         self = object.__new__(cls)
         self.connector = None
@@ -211,8 +212,9 @@ class HeartEventGUI:
         self.message = message
         
         try:
-            await client.interaction_response_message_edit(event, content='', embed = self.generate_embed(),
-                components = EVENT_CURRENCY_BUTTON)
+            await client.interaction_response_message_edit(
+                event, content = '', embed = self.generate_embed(), components = EVENT_CURRENCY_BUTTON
+            )
         except BaseException as err:
             if isinstance(err, ConnectionError):
                 return
@@ -451,7 +453,7 @@ async def daily_event(client, event,
         break
     
     if error:
-        await client.interaction_response_message_create(event, response, show_for_invoking_user_only=True)
+        await client.interaction_response_message_create(event, response, show_for_invoking_user_only = True)
         return
     
     await client.interaction_application_command_acknowledge(event)
@@ -484,7 +486,8 @@ class DailyEventGUI:
     _update_time = 60.0
     _update_delta = timedelta(seconds = _update_time)
     
-    __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
+    __slots__ = ('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
+    
     async def __new__(cls, client, event, duration, amount, user_limit):
         self = object.__new__(cls)
         self.connector = None
@@ -499,8 +502,9 @@ class DailyEventGUI:
         self.message = message
         
         try:
-            await client.interaction_response_message_edit(event, content='', embed = self.generate_embed(),
-                components = EVENT_CURRENCY_BUTTON)
+            await client.interaction_response_message_edit(
+                event, content = '', embed = self.generate_embed(), components = EVENT_CURRENCY_BUTTON
+            )
         except BaseException as err:
             if isinstance(err, ConnectionError):
                 return
@@ -587,7 +591,7 @@ class DailyEventGUI:
         
         sleep_time = (self.duration % update_delta).seconds
         if sleep_time:
-            self.duration -= timedelta(seconds=sleep_time)
+            self.duration -= timedelta(seconds = sleep_time)
             KOKORO.call_after(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
             self.waiter = waiter = Future(KOKORO)

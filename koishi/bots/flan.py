@@ -194,7 +194,7 @@ class ping:
 @Flan.commands.from_class
 class sync_avatar:
     async def command(client, message):
-        avatar_url = client.application.icon_url_as(ext='png', size = 4096)
+        avatar_url = client.application.icon_url_as(ext = 'png', size = 4096)
         if avatar_url is None:
             await client.message_create(message.channel, 'The application has no avatar set.')
             return
@@ -243,7 +243,7 @@ class massadd:
         new_ = 0
         modified_ = 0
         
-        description_parts=[]
+        description_parts = []
         for message_ in messages:
             lines = message_.content.split('\n')
             
@@ -252,8 +252,8 @@ class massadd:
             description_parts.clear()
             
             for line in lines:
-                if line=='<:nothing:562509134654865418>':
-                    line=''
+                if line == '<:nothing:562509134654865418>':
+                    line = ''
                 
                 if not line and description_parts:
                     description = '\n'.join(description_parts)
@@ -269,10 +269,10 @@ class massadd:
                     continue
                 
                 if state == 0:
-                    parsed=CARD_HDR_RP.fullmatch(line)
+                    parsed = CARD_HDR_RP.fullmatch(line)
                     if parsed is None:
                         continue
-                    name,special_rarity,rarity = parsed.groups()
+                    name, special_rarity, rarity = parsed.groups()
                     
                     if special_rarity is None:
                         special_rarity = -1
@@ -298,7 +298,7 @@ class massadd:
                             continue
                     else:
                         try:
-                            rarity=Rarity.BY_NAME[rarity]
+                            rarity = Rarity.BY_NAME[rarity]
                         except KeyError:
                             continue
                     
@@ -418,11 +418,11 @@ class showcards:
             break
         
         if result is None:
-            pages=[Embed(f'No search results for : `{content}`', color = CHESUTO_COLOR)]
+            pages = [Embed(f'No search results for : `{content}`', color = CHESUTO_COLOR)]
         else:
-            pages=CardPaginator(title,result)
+            pages = CardPaginator(title,result)
         
-        await Pagination(client,message.channel,pages)
+        await Pagination(client, message.channel, pages)
     
     async def description(command_context):
         return Embed('showcards',(
@@ -436,7 +436,7 @@ class CardPaginator:
         self.title = title
         self.collected = collected
         
-        page_information=[]
+        page_information = []
         self.page_information = page_information
         
         total_length = 0
@@ -447,8 +447,8 @@ class CardPaginator:
         limit = len(collected)
         
         while True:
-            if index==limit:
-                page_information.append((page_information_start,index),)
+            if index == limit:
+                page_information.append((page_information_start, index),)
                 break
             
             card = collected[index]
@@ -464,7 +464,7 @@ class CardPaginator:
                 continue
             
             index = index + 1
-            total_length+=local_length
+            total_length += local_length
             continue
         
         self.rendered = list(None for _ in range(len(page_information)))
@@ -476,14 +476,14 @@ class CardPaginator:
         page = self.rendered[index]
         if page is None:
             page = self.render(index)
-            self.rendered[index]=page
+            self.rendered[index] = page
         
         return page
     
     def render(self,page_index):
         start, end = self.page_information[page_index]
         
-        page_parts=[]
+        page_parts = []
         index = start
         while True:
             card = self.collected[index]
@@ -496,7 +496,7 @@ class CardPaginator:
             page_parts.append('\n\n')
             continue
         
-        return Embed(self.title,''.join(page_parts), color = CHESUTO_COLOR).add_footer(
+        return Embed(self.title, ''.join(page_parts), color = CHESUTO_COLOR).add_footer(
             f'Page: {page_index + 1}/{len(self.page_information)}. Results {start + 1}-{end}/{len(self.collected)}')
 
 ADD_IMAGE_OK = BUILTIN_EMOJIS['ok_hand']
@@ -625,11 +625,11 @@ class checklist:
             rarity = Rarity.BY_NAME.get(content.lower(), None)
             if rarity is None:
                 if len(content) > 50:
-                    content = content[:50]+'...'
+                    content = content[:50] + '...'
                 result.append(Embed(f'{content!r} is not a rarity', color = CHESUTO_COLOR))
                 
             else:
-                filtered=[]
+                filtered = []
                 
                 for card in CARDS_BY_NAME.values():
                     if card.rarity is rarity:
@@ -643,20 +643,20 @@ class checklist:
                 
                 limit = len(filtered)
                 if limit:
-                    parts=[]
+                    parts = []
                     index = 1
                     
                     card = filtered[0]
                     name = card.name
                     length = len(name)
-                    if length>EMBED_NAME_LENGTH:
-                        name = name[:EMBED_NAME_LENGTH]+'...'
+                    if length > EMBED_NAME_LENGTH:
+                        name = name[:EMBED_NAME_LENGTH] + '...'
                         length = 203
                     
                     parts.append(name)
                     
                     while True:
-                        if index==limit:
+                        if index == limit:
                             break
                         
                         card = filtered[index]
@@ -665,11 +665,11 @@ class checklist:
                         
                         name_ln = len(name)
                         if name_ln>EMBED_NAME_LENGTH:
-                            name = name[:EMBED_NAME_LENGTH]+'...'
+                            name = name[:EMBED_NAME_LENGTH] + '...'
                             name_ln = 203
                         
                         length = length + name_ln + 1
-                        if length>2000:
+                        if length > 2000:
                             result.append(Embed(title,''.join(parts), color = CHESUTO_COLOR))
                             length = name_ln
                             parts.clear()
@@ -681,7 +681,7 @@ class checklist:
                         continue
                     
                     if parts:
-                        result.append(Embed(title,''.join(parts), color = CHESUTO_COLOR))
+                        result.append(Embed(title, ''.join(parts), color = CHESUTO_COLOR))
                     
                     parts = None
                 else:
@@ -697,9 +697,9 @@ class checklist:
                 filtered[card.rarity.index].append(card)
                 continue
             
-            title='Checklist'
+            title = 'Checklist'
             
-            parts=[]
+            parts = []
             length = 0
             
             for rarity_index in range(len(filtered)):
@@ -709,7 +709,7 @@ class checklist:
                 if limit == 0:
                     continue
                 
-                if length>1500:
+                if length > 1500:
                     result.append(Embed(title,''.join(parts), color = CHESUTO_COLOR))
                     length = 0
                     parts.clear()
@@ -765,7 +765,7 @@ class checklist:
         index = 0
         limit = len(result)
         while True:
-            if index==limit:
+            if index == limit:
                 break
             
             embed = result[index]
@@ -1114,7 +1114,7 @@ async def bgminfo_command(command_context, content):
     embed = Embed(title, description, color = CHESUTO_COLOR)
     await command_context.client.message_create(command_context.message.channel, embed = embed)
 
-Flan.commands(bgminfo_command, name = 'bgminfo', description = bgminfo_description, category='VOICE')
+Flan.commands(bgminfo_command, name = 'bgminfo', description = bgminfo_description, category = 'VOICE')
 
 BGM_NOTE = 'Note: If a bgm\'s name has no specified route, it highly likely belongs in the good route.\n\n'
 
@@ -1206,7 +1206,7 @@ async def set_bgm_name_description(command_context):
         ), color = COLOR__FLAN_HELP).add_footer(
             f'You must have `{CARDS_ROLE}` role to use this command.')
 
-@Flan.commands(checks = checks.has_role(CARDS_ROLE), category='VOICE', description = set_bgm_name_description)
+@Flan.commands(checks = checks.has_role(CARDS_ROLE), category = 'VOICE', description = set_bgm_name_description)
 async def set_bgm_name(client, message, content):
     bgm = get_bgm(content)
     
@@ -1248,11 +1248,11 @@ async def set_bgm_name(client, message, content):
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                            ):
+                    ERROR_CODES.missing_access, # client removed
+                    ERROR_CODES.unknown_message, # message deleted
+                    ERROR_CODES.unknown_channel, # channel deleted
+                    ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                ):
                     return
             
             raise

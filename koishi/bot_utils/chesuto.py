@@ -78,9 +78,9 @@ EMBED_DESCRIPTION_LENGTH = 1600
 
 class Rarity:
     INSTANCES = [NotImplemented] * 8
-    BY_NAME   = {}
+    BY_NAME = {}
     
-    __slots__=('index', 'name', 'special', 'outlook')
+    __slots__ = ('index', 'name', 'special', 'outlook')
     
     def __init__(self,index,name,special):
         self.index = index
@@ -201,7 +201,7 @@ class CardFlag(int):
             while True:
                 if index:
                     parts.append(', ')
-                    if collected[index - 1][0]==start_type:
+                    if collected[index - 1][0] == start_type:
                         parts.append('neither')
                         break
                     else:
@@ -244,10 +244,10 @@ class Card:
         return self.id
     
     def render_to_embed(self):
-        title_parts=['**']
+        title_parts = ['**']
         name = self.name
-        if len(name)>EMBED_NAME_LENGTH:
-            title=name[:EMBED_NAME_LENGTH]
+        if len(name) > EMBED_NAME_LENGTH:
+            title = name[:EMBED_NAME_LENGTH]
             title_parts.append(title)
             title_parts.append('...')
         else:
@@ -256,7 +256,7 @@ class Card:
         title_parts.append('** ')
         title_parts.append(self.rarity.outlook)
         
-        title=''.join(title_parts)
+        title = ''.join(title_parts)
         
         description = self.description
         description_parts = []
@@ -280,10 +280,10 @@ class Card:
         parts.append('**')
         
         name = self.name
-        if len(name)<=EMBED_NAME_LENGTH:
+        if len(name) <= EMBED_NAME_LENGTH:
             parts.append(name)
         else:
-            title=name[:EMBED_NAME_LENGTH]
+            title = name[:EMBED_NAME_LENGTH]
             parts.append(title)
             parts.append('...')
         
@@ -293,7 +293,7 @@ class Card:
         parts.append('\n\n')
         
         description = self.description
-        if len(description)<=EMBED_DESCRIPTION_LENGTH:
+        if len(description) <= EMBED_DESCRIPTION_LENGTH:
             parts.append(description)
         else:
             description = description[:EMBED_DESCRIPTION_LENGTH]
@@ -346,7 +346,7 @@ class Card:
     def update(cls, description, id_, name, rarity):
         lower_name = name.lower()
         try:
-            card=CARDS_BY_NAME[lower_name]
+            card = CARDS_BY_NAME[lower_name]
         except KeyError:
             Card(description, id_, name, rarity)
             result = True
@@ -372,7 +372,7 @@ class Card:
     
     @classmethod
     async def dump_cards(cls, loop):
-        card_datas=[]
+        card_datas = []
         for card in CARDS_BY_ID.values():
             card_data={}
             card_data['description']= card.description
@@ -420,17 +420,17 @@ class Card:
                 try:
                     description = card_data['description']
                 except KeyError:
-                    exception='No \'description\' key'
+                    exception = 'No \'description\' key'
                     break
 
                 if type(description) is not str:
-                    exception=f'Expected type \'str\' for \'description\', got \'{description.__class__.__name__}\''
+                    exception = f'Expected type \'str\' for \'description\', got \'{description.__class__.__name__}\''
                     break
                     
                 try:
-                    id_=card_data['id']
+                    id_ = card_data['id']
                 except KeyError:
-                    exception='No \'id\' key'
+                    exception = 'No \'id\' key'
                     break
                 
                 if type(id_) is not int:
@@ -449,7 +449,7 @@ class Card:
                 try:
                     name = card_data['name']
                 except KeyError:
-                    exception='No \'name\' key'
+                    exception = 'No \'name\' key'
                     break
                 
                 if type(name) is not str:
@@ -472,7 +472,7 @@ class Card:
                     exception = f'No such \'rarity\' index: {rarity}'
                     break
                 
-                flags=card_data.get('flags',0)
+                flags = card_data.get('flags',0)
                 break
             
             if exception is None:
@@ -507,8 +507,8 @@ def get_card(value):
                 continue
         
         card = card_
-        start_index=index
-        length=len(card_name)
+        start_index = index
+        length = len(card_name)
         continue
     
     return card

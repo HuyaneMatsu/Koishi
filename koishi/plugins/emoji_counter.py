@@ -263,7 +263,7 @@ async def user_top(event,
         )
         
         if (action_type != EMOJI_COMMAND_ACTION_TYPE_ALL):
-            statement = statement.where(emoji_counter_model.action_type==action_type)
+            statement = statement.where(emoji_counter_model.action_type == action_type)
         
         response = await connector.execute(statement)
         results = await response.fetchall()
@@ -321,7 +321,7 @@ async def emoji_top(
         )
         
         if (action_type != EMOJI_COMMAND_ACTION_TYPE_ALL):
-            statement = statement.where(emoji_counter_model.action_type==action_type)
+            statement = statement.where(emoji_counter_model.action_type == action_type)
         
         response = await connector.execute(statement)
         results = await response.fetchall()
@@ -496,7 +496,7 @@ def _populate_embed_with_fields(embed, query_result, type_, order, page, page_si
         is_new = (emoji.created_at >= is_new_limit)
         items.append((emoji, 0, is_new))
     
-    items.sort(key = item_sort_key, reverse=order)
+    items.sort(key = item_sort_key, reverse = order)
     
     page_shift = (page - 1) * page_size
     index = page_shift
@@ -567,7 +567,7 @@ async def most_used(
         )
         
         if (action_type != EMOJI_COMMAND_ACTION_TYPE_ALL):
-            statement = statement.where(emoji_counter_model.action_type==action_type)
+            statement = statement.where(emoji_counter_model.action_type == action_type)
         
         response = await connector.execute(statement)
         results = await response.fetchall()

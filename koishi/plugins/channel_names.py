@@ -289,7 +289,7 @@ ADD_BUTTON_CANCEL = Button(emoji = ADD_EMOJI_CANCEL)
 
 ADD_COMPONENTS = Row(ADD_BUTTON_OK, ADD_BUTTON_CANCEL)
 
-@COMMAND_CLIENT.commands(category='CHANNEL NAMES', separator='|')
+@COMMAND_CLIENT.commands(category = 'CHANNEL NAMES', separator = '|')
 async def add_bot_channel_name(client, message, weight : int, name):
     """
     Adds the given channel name to the bot channel names.

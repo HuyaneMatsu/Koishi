@@ -8,7 +8,9 @@ from hata import Embed
 from ....bots import SLASH_CLIENT
 
 from ..shared_constants import PERMISSIONS__MUTE, WORD_CONFIG__MUTE
-from ..shared_helpers import add_reason_field, add_standalone_field, create_auto_reason, process_reason
+from ..shared_helpers import (
+    add_reason_field, add_standalone_field, check_user_cannot_be_admin, create_auto_reason, process_reason
+)
 from ..shared_helpers_mute import (
     PARAMETER_DAYS, PARAMETER_HOURS, PARAMETER_MINUTES, PARAMETER_SECONDS, build_duration_string, get_duration
 )
@@ -57,6 +59,7 @@ async def mute_command(
     """Wanna mute yourself?"""
     guild = event.guild
     check_required_permissions(client, event, guild, PERMISSIONS__MUTE, WORD_CONFIG__MUTE)
+    check_user_cannot_be_admin(guild, event.user, WORD_CONFIG__MUTE)
     
     duration = get_duration(days, hours, minutes, seconds)
     duration_string = build_duration_string(duration)

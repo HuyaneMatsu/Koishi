@@ -1484,7 +1484,7 @@ class GuesserState(RichAttributeErrorBaseType):
         if (received_values is None):
             items = None
         else:
-            items = sorted(received_values.items(), key = received_values_most_common_sort_key, reverse=True)[:5]
+            items = sorted(received_values.items(), key = received_values_most_common_sort_key, reverse = True)[:5]
         
         return items
     
@@ -1502,7 +1502,7 @@ class GuesserState(RichAttributeErrorBaseType):
         if (received_values is None):
             items = None
         else:
-            items = sorted(received_values.items(), key = received_values_order_sort_key, reverse=True)[:5]
+            items = sorted(received_values.items(), key = received_values_order_sort_key, reverse = True)[:5]
         
         return items
     

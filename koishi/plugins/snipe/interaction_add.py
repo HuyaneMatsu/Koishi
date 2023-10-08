@@ -172,7 +172,7 @@ async def snipe_interaction_add_sticker(client, event):
     -------
     form : `None`, ``InteractionForm``
     """
-    if not await check_has_manage_guild_expressions_permission(client, event):
+    if not await check_has_create_guild_expressions_permission(client, event):
         return
     
     sticker_id = get_entity_id_from_event(event)

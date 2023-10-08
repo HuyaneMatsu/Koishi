@@ -231,7 +231,7 @@ async def test_webhook_response(client, message, user : User, use_user_avatar : 
     else:
         avatar_url = None
     
-    message = await client.webhook_message_create(executor_webhook,content,avatar_url = avatar_url, wait=True)
+    message = await client.webhook_message_create(executor_webhook,content,avatar_url = avatar_url, wait = True)
     
     http_type.webhook_message_create = original_webhook_message_create
     
@@ -276,7 +276,7 @@ async def test_webhook_response_with_url(client, message, url):
     
     executor_webhook = Webhook.from_url(url)
     
-    message = await client.webhook_message_create(executor_webhook, content, wait=True)
+    message = await client.webhook_message_create(executor_webhook, content, wait = True)
     
     http_type.webhook_message_create = original_webhook_message_create
     
@@ -1427,7 +1427,7 @@ async def test_application_command_followup(client, message):
 
 # Name param is removed since it wont work.
 '''
-@TEST_COMMANDS(checks=checks.guild_only())
+@TEST_COMMANDS(checks = checks.guild_only())
 async def test_application_command_followup_alt_name(client, message):
     """
     Tries to respond on an interaction with a different name.
@@ -1995,7 +1995,7 @@ async def test_webhook_message_edit_10(client, message):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
     new_message = await client.webhook_message_create(executor_webhook, 'testing', wait = True)
-    await client.webhook_message_edit(executor_webhook, new_message, file=('cake', b'cakes are great'))
+    await client.webhook_message_edit(executor_webhook, new_message, file = ('cake', b'cakes are great'))
 
 
 @TEST_COMMANDS

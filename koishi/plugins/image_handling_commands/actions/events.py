@@ -6,7 +6,7 @@ from hata import Client, DiscordException, ERROR_CODES, MessageType, USER_MENTIO
 
 from ....bots import SLASH_CLIENT
 
-from .action import COOLDOWN_HANDLER
+from .action import COOLDOWN_HANDLER, send_action_response_to
 from .actions import (
     ACTION_BITE, ACTION_BLUSH, ACTION_BULLY, ACTION_CRINGE, ACTION_CRY, ACTION_CUDDLE, ACTION_DANCE, ACTION_GLOMP,
     ACTION_HANDHOLD, ACTION_HAPPY, ACTION_HIGHFIVE, ACTION_HUG, ACTION_KICK, ACTION_KILL, ACTION_KISS, ACTION_KON,
@@ -142,10 +142,16 @@ def get_intended_action(message):
     if content is None:
         return None
     
-    if len(content) > MAX_ACTION_COMMAND_LENGTH:
+    starts_with_slash = content.startswith('/')
+        
+    if len(content) > (MAX_ACTION_COMMAND_LENGTH + starts_with_slash):
         return None
     
-    content = content.lower().replace(' ', '-').replace('_', '-')
+    # Remove slash if we start with it.
+    if starts_with_slash:
+        content = content[1:]
+    
+    content = content.casefold().replace(' ', '-').replace('_', '-')
     if content not in ACTIONS_BY_NAME.keys():
         return None
     
@@ -288,19 +294,4 @@ async def message_create(client, message):
         client, None, message.id, message.author, allowed_mentions, client_in_users, user_in_users
     )
     
-    try:
-        await client.message_create(
-            referenced_message, content, allowed_mentions = allowed_mentions, embed = embed, silent = True
-        )
-    except ConnectionError:
-        # No internet connect
-        return
-    
-    except DiscordException as err:
-        # If the channel is deleted return
-        if err.code not in (
-            ERROR_CODES.unknown_channel, # channel deleted
-            ERROR_CODES.missing_permissions, # permissions changed meanwhile
-            ERROR_CODES.missing_access, # client removed
-        ):
-            raise
+    await send_action_response_to(client, referenced_message, content, embed, allowed_mentions)

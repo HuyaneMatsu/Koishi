@@ -104,7 +104,7 @@ SYNC_DONE = 'message_done'
 SYNC_LOCK = Lock(KOKORO)
 
 def get_modified_files(days_allowed):
-    days_allowed = timedelta(days=days_allowed)
+    days_allowed = timedelta(days = days_allowed)
     should_send = []
     
     min_time = datetime.now() - days_allowed
@@ -262,7 +262,7 @@ async def receive_sync(client, partner):
     except BaseException as err:
         into = []
         into.append('```')
-        await render_exception_into_async(err, into, loop=KOKORO)
+        await render_exception_into_async(err, into, loop = KOKORO)
         
         lines = ''.join(into).splitlines()
         into = None

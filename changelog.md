@@ -1,3 +1,21 @@
+### 2023-10-08
+
+- Fix `/snipe` errored when adding a sticker. This was a quickfix pushed after last update.
+- `/sex` now has a new 7th tier with 0.2% chance.
+- `/automation welcome` messages will use colored embeds, following the scheme of `/hug` and such.
+- `/automation welcome` now will send the same message if a user rejoins the guild.
+- Fix `/mod mute` now aborts if the target user is an admin. You cannot mute admins.
+- Fix `self-mod mute` now aborts if the invoking user is an admin. You cannot mute admins.
+- When clicking on `accept rules` / `claim announcements role` it will acknowledge the interaction to avoid timeout.
+- Actions like `/hug` sometimes timed out thanks to Discord lagging. If that happens now a normal message will be sent.
+    Since these are popular commands it happened once every few week.
+- Fix `/automation reaction-copy` did not ignore reactions of bots.
+- Replying to an action such as `/hug`, will work even if the message starts with a slash.
+- Add **1** image to `/like` interaction.
+- Add **2** image to `/kon` interaction.
+- `/about field: cache` now also includes the about components.
+- `/help` responses now include a close button.
+
 ### 2023-09-30
 
 - Add `1` image to `/kon`.

@@ -31,7 +31,7 @@ async def command_error(client, message, command, content, exception):
         '\n```py\n'
     ]
     
-    await render_exception_into_async(exception, into, loop=KOKORO)
+    await render_exception_into_async(exception, into, loop = KOKORO)
     into.append('```')
     
     lines = ''.join(into).splitlines()

@@ -66,7 +66,7 @@ if IS_UNIX:
                 pass
 
 
-COMMAND_CLIENT.command_processor.create_category('SNEKBOX', checks=checks.is_guild(GUILD__SUPPORT))
+COMMAND_CLIENT.command_processor.create_category('SNEKBOX', checks = checks.is_guild(GUILD__SUPPORT))
 
 
 def build_output(output, return_code):
@@ -271,14 +271,14 @@ if IS_UNIX:
         embed = Embed(title, description, color = SNEKBOX_COLOR).add_author(author.full_name, author.avatar_url)
         await Closer(ctx.client, ctx.message.channel, embed, check = partial_func(check_reactor, author))
     
-    @COMMAND_CLIENT.commands(name = 'eval', aliases='e', description = eval_description, category='SNEKBOX')
+    @COMMAND_CLIENT.commands(name = 'eval', aliases = 'e', description = eval_description, category = 'SNEKBOX')
     async def eval_3_8(ctx, content):
         await snake_box(ctx, content, PATH__PYTHON_EXECUTABLE_3_8, NSJAIL_CONFIG_3_8)
 
-    @COMMAND_CLIENT.commands(name = 'eval_3.10', aliases='e10', description = eval_description, category='SNEKBOX')
+    @COMMAND_CLIENT.commands(name = 'eval_3.10', aliases = 'e10', description = eval_description, category = 'SNEKBOX')
     async def eval_3_10(ctx, content):
         await snake_box(ctx, content, PATH__PYTHON_EXECUTABLE_3_10, NSJAIL_CONFIG_3_10)
 
-    @COMMAND_CLIENT.commands(name = 'c_eval_3.6', aliases='chad', description = eval_description, category='SNEKBOX')
+    @COMMAND_CLIENT.commands(name = 'c_eval_3.6', aliases = 'chad', description = eval_description, category = 'SNEKBOX')
     async def c_eval_3_6(ctx, content):
         await snake_box(ctx, content, PATH__PYTHON_EXECUTABLE_C_3_6, NSJAIL_CONFIG_C_3_6)

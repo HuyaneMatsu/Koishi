@@ -62,10 +62,10 @@ AUTO_REACT_ROLE = SLASH_CLIENT.interactions(None,
     is_global = True,
 )
 
-@AUTO_REACT_ROLE.interactions(name = 'create', show_for_invoking_user_only=True)
+@AUTO_REACT_ROLE.interactions(name = 'create', show_for_invoking_user_only = True)
 async def create_auto_react_role(client, event,
-        message: ('str', 'Please reference a message!'),
-            ):
+    message: ('str', 'Please reference a message!'),
+):
     """Adds roles if the users reacts on a message. (Admin only)"""
     guild = event.guild
     if guild is None:
@@ -472,10 +472,10 @@ class AutoReactRoleChange:
         return None
     
     def __repr__(self):
-        repr_parts =[
+        repr_parts = [
             '<',
             self.__class__.__name__,
-            ' added='
+            ' added = '
         ]
         
         added = self.added
@@ -490,10 +490,10 @@ class AutoReactRoleChange:
         else:
             repr_parts.append('{}')
         
-        repr_parts.append(', actual=')
+        repr_parts.append(', actual = ')
         actual = self.actual
         if (actual is not None) and actual:
-            result.append('{')
+            repr_parts.append('{')
             for emoji, role in actual:
                 repr_parts.append(repr(emoji))
                 repr_parts.append(': ')
@@ -503,7 +503,7 @@ class AutoReactRoleChange:
         else:
             repr_parts.append('{}')
         
-        repr_parts.append(', removed=')
+        repr_parts.append(', removed = ')
         removed = self.removed
         if removed:
             repr_parts.append('{')
@@ -520,12 +520,12 @@ class AutoReactRoleChange:
         new_behaviour = self.new_behaviour
         
         if old_behaviour == new_behaviour:
-            repr_parts.append(', behaviour=')
+            repr_parts.append(', behaviour = ')
             repr_parts.append(repr(old_behaviour))
         else:
-            repr_parts.append(', old_behaviour=')
+            repr_parts.append(', old_behaviour = ')
             repr_parts.append(repr(old_behaviour))
-            repr_parts.append(', new_behaviour=')
+            repr_parts.append(', new_behaviour = ')
             repr_parts.append(repr(new_behaviour))
         
         repr_parts.append('>')
@@ -547,7 +547,9 @@ class AutoReactRoleGUI:
         try:
             old_gui = AUTO_REACT_ROLE_GUIS.pop(target_message)
         except KeyError:
-            manager = client.events.reaction_add.get_waiter(target_message, AutoReactRoleManager, by_type = True, is_method=True)
+            manager = client.events.reaction_add.get_waiter(
+                target_message, AutoReactRoleManager, by_type = True, is_method = True
+            )
             changes = AutoReactRoleChange(manager, channel_or_event.guild)
         else:
             await old_gui.cancel()
@@ -581,11 +583,11 @@ class AutoReactRoleGUI:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                            ):
+                    ERROR_CODES.unknown_message, # message deleted
+                    ERROR_CODES.unknown_channel, # channel deleted
+                    ERROR_CODES.missing_access, # client removed
+                    ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                ):
                     return
             
             await client.events.error(client, f'{self!r}.__new__', err)
@@ -601,16 +603,16 @@ class AutoReactRoleGUI:
         result = [
             '<',
             self.__class__.__name__,
-            ' client=',
+            ' client = ',
             repr(self.client),
-            ', changes=',
+            ', changes = ',
             repr(self.changes),
             ', target_message = ',
             repr(self.target_message),
-            ', manager=',
+            ', manager = ',
             repr(self.manager),
             '>',
-                ]
+        ]
         
         return ''.join(result)
     
@@ -858,10 +860,10 @@ class AutoReactRoleGUI:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.missing_access, # client removed
-                            ):
+                    ERROR_CODES.unknown_message, # message deleted
+                    ERROR_CODES.unknown_channel, # channel deleted
+                    ERROR_CODES.missing_access, # client removed
+                ):
                     return
             
             await client.events.error(client,f'{self!r}.delete_message',err)
@@ -1099,13 +1101,13 @@ class AutoReactRoleManager:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.unknown_user, #user deleted
-                        ERROR_CODES.unknown_role, # role deleted
-                        ERROR_CODES.unknown_guild, # guild deleted
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                        ERROR_CODES.missing_access, # client removed
-                            ):
-                    #handled by other methods
+                    ERROR_CODES.unknown_user, # user deleted
+                    ERROR_CODES.unknown_role, # role deleted
+                    ERROR_CODES.unknown_guild, # guild deleted
+                    ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                    ERROR_CODES.missing_access, # client removed
+                ):
+                    # handled by other methods
                     return
             
             await client.events.error(client, f'{self!r}.action_on_reaction_add', err)
@@ -1333,13 +1335,13 @@ class AutoReactRoleManager:
                 
                 if isinstance(err, DiscordException):
                     if err.code in (
-                            ERROR_CODES.unknown_emoji, # emoji deleted
-                            ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-                            ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.unknown_channel, # channel deleted
-                            ERROR_CODES.missing_access, # client removed
-                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                                ):
+                        ERROR_CODES.unknown_emoji, # emoji deleted
+                        ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # channel deleted
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                    ):
                         
                         await self.destroy()
                         return
@@ -1443,7 +1445,7 @@ async def show_auto_react_roles(client, event):
     if (not permissions & PERMISSION_MASK_MESSAGING) or ( not permissions & PERMISSION_MASK_REACT):
         abort('I require `send messages` and `add reactions` permissions to execute this command.')
     
-    managers = client.events.guild_delete.get_waiters(guild, AutoReactRoleManager, by_type=True, is_method=True)
+    managers = client.events.guild_delete.get_waiters(guild, AutoReactRoleManager, by_type = True, is_method = True)
     
     embed = Embed(f'Auto role managers for: {guild}', color = AUTO_REACT_ROLE_COLOR)
     if not managers:

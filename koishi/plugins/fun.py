@@ -9,7 +9,7 @@ from ..bot_utils.constants import GUILD__SUPPORT
 from ..bots import SLASH_CLIENT
 
 
-@SLASH_CLIENT.interactions(show_for_invoking_user_only=True, is_global = True)
+@SLASH_CLIENT.interactions(show_for_invoking_user_only = True, is_global = True)
 async def message_me(client, event):
     """Messages you!"""
     yield
@@ -290,7 +290,7 @@ EMOJI_1 = Emoji.precreate(814618830106132511, name = 'T90Salute')
 EMOJI_2 = Emoji.precreate(588052578214871053, name = 'tatohaHola')
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, show_for_invoking_user_only=True)
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, show_for_invoking_user_only = True)
 async def crywolf_(client, event):
     """Crywolf is a bot"""
     yield 'crywolf is a sus'

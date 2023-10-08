@@ -39,7 +39,7 @@ FORMAT_TIME_COMMANDS = SLASH_CLIENT.interactions(
 
 def maybe_add_time_zone_offset(date_time, time_zone_offset):
     if time_zone_offset != 0.0:
-        date_time += TimeDelta(hours=time_zone_offset)
+        date_time += TimeDelta(hours = time_zone_offset)
         
     return date_time
 

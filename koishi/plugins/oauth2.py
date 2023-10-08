@@ -9,7 +9,7 @@ from ..bots import COMMAND_CLIENT
 
 OAUTH2_COLOR = Color.from_rgb(148, 0, 211)
 
-COMMAND_CLIENT.command_processor.create_category('OAUTH2', checks=checks.owner_only())
+COMMAND_CLIENT.command_processor.create_category('OAUTH2', checks = checks.owner_only())
 
 VALUABLE_SCOPES = [
     'identify',
@@ -85,7 +85,7 @@ class oauth2_feed:
             
             raise
         
-        result=parse_oauth2_redirect_url(content)
+        result = parse_oauth2_redirect_url(content)
         if result is None:
             await client.message_create(message.channel,'Bad link')
             return
@@ -219,7 +219,7 @@ class oauth2_my_guild:
             await sleep(1.0, client.loop)
             await client.guild_user_add(guild, user)
             await sleep(1.0, client.loop)
-            await client.guild_edit(guild, owner=user.id)
+            await client.guild_edit(guild, owner = user.id)
         finally:
             try:
                 guild
@@ -254,10 +254,10 @@ class oauth2_renew:
             await client.message_create(message.channel,'Could not find that user')
             return
         
-        access=user.access
-        last=access.created_at
+        access = user.access
+        last = access.created_at
         await client.renew_access_token(access)
-        new=access.created_at
+        new = access.created_at
         await client.message_create(message.channel,
             f'{user:f}\' access token is renewed.\n'
             f'From creation time at: {last:%Y.%m.%d-%H:%M:%S}\n'

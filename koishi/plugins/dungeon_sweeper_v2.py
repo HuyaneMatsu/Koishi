@@ -1142,7 +1142,7 @@ def REIMU_SKILL_CAN_ACTIVATE(game_state):
     map_ = game_state.map
     
     for step in ( -x_size, 1, x_size, -1):
-        target_tile=map_[position + step]
+        target_tile = map_[position + step]
         
         if not target_tile & (BIT_MASK_PUSHABLE | BIT_MASK_SPECIAL):
             continue

@@ -70,6 +70,28 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ---
 
+### `junko-older-0001`
+
+- Artist: *unknown*
+- Edit: *unknown*
+
+
+- Character: **Junko**
+- Source: **Touhou**
+
+---
+
+### `junko-older-0002`
+
+- Artist: *unknown*
+- Edit: *unknown*
+
+
+- Character: **Junko**
+- Source: **Touhou**
+
+---
+
 ### `junko-racist-0000`
 
 - Artist: *unknown*

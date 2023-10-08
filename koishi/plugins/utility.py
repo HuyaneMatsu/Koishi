@@ -13,7 +13,7 @@ from hata import (
     BUILTIN_EMOJIS, Color, DATETIME_FORMAT_CODE, Embed, ICON_TYPE_NONE, InviteTargetType, KOKORO, Permission, Status,
     cchunkify, elapsed_time, escape_markdown, parse_color
 )
-from hata.discord.application.constants import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
+from hata.discord.application.application.constants import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
 from hata.ext.slash import InteractionResponse, abort
 from hata.ext.slash.menus import Pagination
 from scarletio import ReuBytesIO, TaskGroup
@@ -468,7 +468,7 @@ async def latest_users(client, event):
         if created_at > date_limit:
             users.append((created_at, user))
     
-    users.sort(reverse=True)
+    users.sort(reverse = True)
     del users[10:]
     
     embed = Embed('Recently joined users')
@@ -498,7 +498,7 @@ async def all_users(client, event):
         if (joined_at is not None):
             users.append((joined_at, user))
     
-    users.sort(reverse=True)
+    users.sort(reverse = True)
     
     embeds = []
     

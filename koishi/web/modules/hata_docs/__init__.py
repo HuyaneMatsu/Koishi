@@ -116,7 +116,7 @@ del hata_module
 del scarletio_module
 
 
-@ROUTES.route('/search', methods=['GET', 'POST'])
+@ROUTES.route('/search', methods = ['GET', 'POST'])
 def search():
     search_form = SearchForm()
     if search_form.validate_on_submit():
@@ -145,7 +145,7 @@ def search():
     else:
         found = None
     
-    return render_template('hata_docs_search.html', search_form=search_form, found=found)
+    return render_template('hata_docs_search.html', search_form = search_form, found = found)
 
 
 DEFAULT_LIMIT = 100
@@ -172,7 +172,7 @@ def api_search():
                     limit = DEFAULT_LIMIT
         
         found = []
-        for index, path in  enumerate(search_paths(search_for, limit=limit)):
+        for index, path in  enumerate(search_paths(search_for, limit = limit)):
             found.append(get_searched_info(path, index))
         found.sort(key = search_info_sort_key)
         

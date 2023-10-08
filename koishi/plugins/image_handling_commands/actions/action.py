@@ -2,7 +2,7 @@ __all__ = ()
 
 from random import random
 
-from hata import Embed, Emoji
+from hata import DiscordException, Embed, Emoji, ERROR_CODES
 from hata.ext.slash import abort
 
 from ..cooldown import CooldownHandler
@@ -159,6 +159,176 @@ def build_response_self(verb, source_user):
     return ''.join(['> ', source_user.mention, ' ', verb, ' ', target_word, ' ', end_sign])
 
 
+async def send_action_response_with_interaction_event(client, event, content, embed, allowed_mentions):
+    """
+    Sends action response with the given interaction event.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The interaction event to respond to.
+    content : `str`
+        Response content.
+    embed : ``Embed``
+        Response embed.
+    allowed_mentions : `set<ClientUserBase>`
+        The users to ping.
+    
+    Returns
+    -------
+    success : `bool`
+    
+    Raises
+    ------
+    DiscordException
+        Unexpected exception from Discord.
+    """
+    try:
+        if event.is_unanswered():
+            await client.interaction_response_message_create(
+                event, content, allowed_mentions = allowed_mentions, embed = embed, silent = True
+            )
+        else:
+            await client.interaction_response_message_edit(
+                event, content, allowed_mentions = allowed_mentions, embed = embed
+            )
+    except ConnectionError:
+        # No internet access
+        return False
+    
+    except DiscordException as err:
+        if err.code == ERROR_CODES.unknown_interaction:
+            return False
+        
+        raise
+    
+    return True
+
+
+def can_send_response_to_channel(client, channel):
+    """
+    Returns whether response can be sent to the given channel.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client to check for.
+    channel : ``Channel``
+        The channel to check.
+    
+    Returns
+    -------
+    can_send_response : `bool`
+    """
+    permissions = channel.cached_permissions_for(client)
+    
+    # send messages depends on channel type.
+    if channel.is_in_group_thread():
+        can_send_message = permissions.can_send_messages_in_threads
+    else:
+        can_send_message = permissions.can_send_messages
+    if not can_send_message:
+        return False
+    
+    return True
+
+
+async def send_action_response_to(client, channel_or_message, content, embed, allowed_mentions):
+    """
+    Sends action response to the given channel, or a reply on the given message.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    channel_or_message : `Channel | Message`
+        Channel to send the response to. Or a message to reply on.
+    content : `str`
+        Response content.
+    embed : ``Embed``
+        Response embed.
+    allowed_mentions : `set<ClientUserBase>`
+        The users to ping.
+    
+    Returns
+    -------
+    success : `bool`
+    
+    Raises
+    ------
+    DiscordException
+        Unexpected exception from Discord.
+    """
+    try:
+        await client.message_create(
+            channel_or_message, content, allowed_mentions = allowed_mentions, embed = embed, silent = True
+        )
+    except ConnectionError:
+        # No internet access
+        return False
+    
+    except DiscordException as err:
+        if err.code in (
+            ERROR_CODES.unknown_message, # Replied message deleted
+            ERROR_CODES.unknown_channel, # message's channel deleted
+            ERROR_CODES.missing_access, # client removed
+            ERROR_CODES.missing_permissions, # permissions changed meanwhile
+            ERROR_CODES.cannot_message_user, # user has dm-s disallowed
+        ):
+            return False
+        
+        raise
+    
+    return True
+
+
+async def send_action_response(client, event, content, embed, allowed_mentions):
+    """
+    Sends action response as interaction response and then to the channel if fails.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    content : `str`
+        Response content.
+    embed : ``Embed``
+        Response embed.
+    allowed_mentions : `set<ClientUserBase>`
+        The users to ping.
+    
+    Returns
+    -------
+    success : `bool`
+    
+    Raises
+    ------
+    DiscordException
+        Unexpected exception from Discord.
+    """
+    # Try interaction
+    if await send_action_response_with_interaction_event(client, event, content, embed, allowed_mentions):
+        return True
+    
+    # Try channel
+    channel = event.channel
+    if can_send_response_to_channel(client, channel):
+        if await send_action_response_to(client, channel, content, embed, allowed_mentions):
+            return True
+    
+    return False
+
+
 class Action:
     """
     Represents an action.
@@ -237,6 +407,11 @@ class Action:
             The received interaction event.
         user_{n} : `None`, ``ClientUserBase`` = `None`, Optional
             Additional users to pat.
+        
+        Raises
+        ------
+        DiscordException
+            Unexpected exception from Discord.
         """
         guild_id = event.guild_id
         if not guild_id:
@@ -263,15 +438,8 @@ class Action:
             client, event, event.id, event.user, allowed_mentions, client_in_users, user_in_users
         )
         
-        if event.is_unanswered():
-            await client.interaction_response_message_create(
-                event, content, allowed_mentions = allowed_mentions, embed = embed, silent = True
-            )
-        else:
-            await client.interaction_response_message_edit(
-                event, content, allowed_mentions = allowed_mentions, embed = embed
-            )
-    
+        await send_action_response(client, event, content, embed, allowed_mentions)
+
     
     async def create_response_content_and_embed(
         self, client, event, color_seed, source_user, allowed_mentions, client_in_users, user_in_users

@@ -81,12 +81,12 @@ async def play_(client, event,
         
         if (selected_track_index <= 0) or (selected_track_index >= length):
             if join_player:
-                player = await client.solarlink.join_voice(channel, cls=Player)
+                player = await client.solarlink.join_voice(channel, cls = Player)
             
             emojis = [choice(TRACK_EMOJIS) for index in range(length)]
             
             for (track, emoji) in zip(tracks, emojis):
-                await player.append(track, requester=user, emoji = emoji)
+                await player.append(track, requester = user, emoji = emoji)
             
             title_parts.append(str(length))
             title_parts.append(' track from playlist ')
@@ -134,11 +134,11 @@ async def play_(client, event,
             # 1 Track is selected, add only that one
             
             if join_player:
-                player = await client.solarlink.join_voice(channel, cls=Player)
+                player = await client.solarlink.join_voice(channel, cls = Player)
             
             emoji = choice(TRACK_EMOJIS)
             track = tracks[selected_track_index]
-            await player.append(track, requester=user, emoji = emoji)
+            await player.append(track, requester = user, emoji = emoji)
             
             title_parts.append('Track from ')
             
@@ -160,11 +160,11 @@ async def play_(client, event,
     
     if is_name_an_url:
         if join_player:
-            player = await client.solarlink.join_voice(channel, cls=Player)
+            player = await client.solarlink.join_voice(channel, cls = Player)
         
         track = tracks[0]
         emoji = choice(TRACK_EMOJIS)
-        await player.append(track, requester=user, emoji = emoji)
+        await player.append(track, requester = user, emoji = emoji)
         
         description_parts.append(emoji.as_emoji)
         description_parts.append(' ')
@@ -254,10 +254,10 @@ async def play_(client, event,
                 ))
         
         if join_player:
-            player = await client.solarlink.join_voice(channel, cls=Player)
+            player = await client.solarlink.join_voice(channel, cls = Player)
         
         for track, emoji in selected_tracks_and_emojis:
-            await player.append(track, requester=user, emoji = emoji)
+            await player.append(track, requester = user, emoji = emoji)
         
         description_parts = []
         

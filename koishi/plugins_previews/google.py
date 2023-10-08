@@ -49,7 +49,7 @@ class ApiKeyTracker:
 
 API_KEY_TRACKERS = [ApiKeyTracker(api_key) for api_key in GOOGLE_API_KEYS]
 
-async def search(query, safe_search=True, image_search=False):
+async def search(query, safe_search = True, image_search = False):
     for api_key_tracker in API_KEY_TRACKERS:
         if api_key_tracker.can_do_request():
             async with api_key_tracker.lock:
@@ -62,7 +62,7 @@ async def search(query, safe_search=True, image_search=False):
                 if image_search:
                     query['searchType'] = 'image'
                 
-                async with HTTP_CLIENT.get(API_URL, params=query) as response:
+                async with HTTP_CLIENT.get(API_URL, params = query) as response:
                     response_data = await response.json()
                 
                 api_error = response_data.get('error', None)

@@ -35,10 +35,11 @@ async def sex(event):
         level = 3
     elif value > 0.01:
         level = 4
-    else:
+    elif value > 0.002:
         level = 5
+    else:
+        level = 6
     
     level = check_lock_and_limit_level(event, level)
-    
     
     return Embed().add_image(SEX_IMAGES[level])

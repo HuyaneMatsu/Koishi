@@ -10,7 +10,7 @@ from ..helpers import get_player_or_abort
 
 
 async def filter_remove_(client, event,
-    type_: P('str', 'The filter to remove', autocomplete=autocomplete_filter_name),
+    type_: P('str', 'The filter to remove', autocomplete = autocomplete_filter_name),
 ):
     """Removes the filter of the selected type"""
     player = get_player_or_abort(client, event)

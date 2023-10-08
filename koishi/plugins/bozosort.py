@@ -66,7 +66,7 @@ class TokenBase:
         return 0
     
     def _cursed_repr_builder(self):
-        repr_parts = ['<', self.__class__.__name__, ' type=', repr(get_token_name(self.type))]
+        repr_parts = ['<', self.__class__.__name__, ' type = ', repr(get_token_name(self.type))]
         yield repr_parts
         repr_parts.append('>')
     
@@ -91,14 +91,14 @@ class Token(TokenBase):
         return self.start_position
     
     def get_end(self):
-        return self.start_position+self.length
+        return self.start_position + self.length
     
     def __repr__(self):
         for repr_parts in self._cursed_repr_builder():
-            repr_parts.append(', start_position=')
+            repr_parts.append(', start_position = ')
             repr_parts.append(repr(self.start_position))
             
-            repr_parts.append(', length=')
+            repr_parts.append(', length = ')
             repr_parts.append(repr(self.length))
         
         return ''.join(repr_parts)
@@ -144,7 +144,7 @@ class TokenGroup(TokenBase):
     
     def __repr__(self):
         for repr_parts in self._cursed_repr_builder():
-            repr_parts.append(', tokens=')
+            repr_parts.append(', tokens = ')
             repr_parts.append(repr(self.tokens))
         
         return ''.join(repr_parts)
@@ -1730,4 +1730,4 @@ async def bozosort_(
         content = None
         file = ('output.py', output)
     
-    yield InteractionResponse(content, allowed_mentions = None, file=file)
+    yield InteractionResponse(content, allowed_mentions = None, file = file)

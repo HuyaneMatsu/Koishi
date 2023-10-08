@@ -324,7 +324,7 @@ async def most_used(
         is_new = (sticker.created_at >= is_new_limit)
         items.append((sticker, 0, is_new))
     
-    items.sort(key = item_sort_key, reverse=order)
+    items.sort(key = item_sort_key, reverse = order)
     
     page_shift = (page - 1) * MOST_USED_PER_PAGE
     
@@ -439,7 +439,7 @@ async def add_(client, event,
             break
         
         yield 'The sticker has been successfully created'
-        await client.message_create(event.channel, sticker=sticker)
+        await client.message_create(event.channel, sticker = sticker)
         return
     
     yield error_message

@@ -444,6 +444,28 @@ All authors are actually known!! In case you know them better create a PR with i
 
 ---
 
+### `tsukasa-kon-0018`
+
+- Artist: **furumero**
+- Edit: *none*
+
+
+- Character: **Kudamaki Tsukasa**
+- Source: **Touhou**
+
+---
+
+### `tsukasa-kon-0019`
+
+- Artist: **gyouza**
+- Edit: *none*
+
+
+- Character: **Kudamaki Tsukasa**
+- Source: **Touhou**
+
+---
+
 ### `tsukasa-ran-kon-0000`
 
 - Artist: **fe (tetsu)**

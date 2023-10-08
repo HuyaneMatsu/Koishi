@@ -106,7 +106,7 @@ async def download_wiki_page(client, title_, url):
                 
                 if element_name == 'dd':
                     # check links
-                    subs = element.findAll(recursive=False)
+                    subs = element.findAll(recursive = False)
                     # if len(1) == 1, then it might be a div
                     if len(subs) == 1:
                         sub = subs[0]
@@ -289,7 +289,7 @@ async def download_wiki_page(client, title_, url):
                     continue
             
             else:
-                section_ln=section_ln + len(block)
+                section_ln = section_ln + len(block)
                 collected.append(block)
             
             index += 1

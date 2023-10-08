@@ -92,6 +92,12 @@ TOUHOU_ACTION_KON = [
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990428351930409/tsukasa-kon-0017.png',
     ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1160533157175623680/tsukasa-kon-0018.gif',
+    ).with_source(KUDAMAKI_TSUKASA),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1160533130772480020/tsukasa-kon-0019.gif',
+    ).with_source(KUDAMAKI_TSUKASA),
+    ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1150011131721695292/tsukasa-ran-kon-0000.png',
     ).with_source(KUDAMAKI_TSUKASA).with_source(YAKUMO_RAN),
     ImageDetail(

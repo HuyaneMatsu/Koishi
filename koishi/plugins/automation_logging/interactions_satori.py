@@ -179,7 +179,7 @@ async def user_kick_confirmation(client, event, user_id):
     return create_response_form(f'Kicking {user.full_name}', 'Kick', create_satori_custom_id_user_kick(user))
 
 
-@SLASH_CLIENT.interactions(custom_id =SATORI_CUSTOM_ID_USER_KICK_RP, target = 'form')
+@SLASH_CLIENT.interactions(custom_id = SATORI_CUSTOM_ID_USER_KICK_RP, target = 'form')
 async def user_kick_execute(client, event, user_id, *, reason = None):
     """
     Executes kicking the user.
