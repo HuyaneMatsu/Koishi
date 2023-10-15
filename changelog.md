@@ -1,3 +1,7 @@
+### 2023-10-15
+
+- Add **3** image to `/kon` interaction.
+
 ### 2023-10-08
 
 - Fix `/snipe` errored when adding a sticker. This was a quickfix pushed after last update.

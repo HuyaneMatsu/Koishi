@@ -1980,7 +1980,7 @@ async def achievement_create(client, name, description, icon, secret = False, se
 
     application_id = client.application.id
         
-    data =  await bypass_request(
+    data = await bypass_request(
         client,
         METHOD_POST,
         f'{API_ENDPOINT}/applications/{application_id}/achievements',

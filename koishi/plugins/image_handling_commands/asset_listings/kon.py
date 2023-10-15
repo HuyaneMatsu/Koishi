@@ -139,4 +139,14 @@ TOUHOU_ACTION_KON = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1153368835492155532/ran-kon-0012.png',
     ).with_source(YAKUMO_RAN),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1163130820509311136/ran-kon-0013.png',
+    ).with_source(YAKUMO_RAN),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1163130820970692708/ran-kon-0014.png',
+    ).with_source(YAKUMO_RAN),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1163130821553692773/ran-kon-0015.png',
+    ).with_source(YAKUMO_RAN),
 ]
+    

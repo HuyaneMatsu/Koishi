@@ -31,7 +31,7 @@ async def welcome_user(client, guild, channel, user):
     
     seed = guild.id ^ user.id
     
-    message = messages[seed % len(messages)]
+    message = messages[seed % len(messages)](user)
     image = images[seed % len(images)]
     
     color = (now_as_id() >> 22) & 0xffffff

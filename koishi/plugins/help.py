@@ -90,7 +90,7 @@ async def rules(
     if rule is None:
         description_parts = []
         for index, (title, description_builder) in enumerate(RULES):
-            description_parts.append(f'**{index}. {title}**\n')
+            description_parts.append(f'**{index}\\. {title}**\n')
             description_parts.append(description_builder())
             description_parts.append('\n\n')
         

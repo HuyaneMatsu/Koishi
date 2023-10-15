@@ -246,7 +246,40 @@ All authors are actually known!! In case you know them better create a PR with i
 
 ---
 
-### `tsukasa-kon-0000`
+### `ran-kon-0013`
+
+- Artist: **ashi / あ氏**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0014`
+
+- Artist: **qqqrinkappp / Rinka**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0015`
+
+- Artist: **safutsuguon / さふ亞おん**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `tsukasa-kon-0005`
 
 - Artist: **asuzemu / あすぜむ**
 - Edit: *none*
