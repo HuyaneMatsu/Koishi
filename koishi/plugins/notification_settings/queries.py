@@ -51,7 +51,7 @@ async def get_one_notification_settings_with_connector(user_id, connector):
     user_id : `int`
         The user identifier to request the settings for.
     connector : ``AsyncConnection``
-        Data base connector.
+        Database connector.
     
     Returns
     -------
@@ -107,7 +107,7 @@ async def _query_one_notification_settings_with_connector(user_id, connector):
     user_id : `int`
         The user identifier to request the settings for.
     connector : ``AsyncConnection``
-        Data base connector.
+        Database connector.
     
     Returns
     -------
@@ -177,7 +177,7 @@ async def get_more_notification_settings_with_connector(user_ids, connector):
     user_ids : `list<int>`
         The user identifiers to request the settings for.
     connector : ``AsyncConnection``
-        Data base connector.
+        Database connector.
     
     Returns
     -------
@@ -237,7 +237,7 @@ async def _query_more_notification_settings_with_connector(user_ids, connector):
     user_ids : `list<int>`
         The user identifiers to request the settings for.
     connector : ``AsyncConnection``
-        Data base connector.
+        Database connector.
     
     Returns
     -------
@@ -307,7 +307,7 @@ async def save_one_notification_settings_with_connector(notification_settings, c
     notification_settings : ``NotificationSettings``
         The notification settings to save.
     connector : ``AsyncConnection``
-        Data base connector.
+        Database connector.
     """
     if notification_settings:
         await _save_notification_settings_with_connector(notification_settings, connector)
@@ -349,7 +349,7 @@ async def _save_notification_settings_with_connector(notification_settings, conn
     notification_settings : ``NotificationSettings``
         The notification settings to add.
     connector : ``AsyncConnection``
-        Data base connector.
+        Database connector.
     """
     entry_id = notification_settings.entry_id
     if entry_id == -1:
@@ -419,7 +419,7 @@ async def _remove_notification_settings_with_connector(notification_settings, co
     notification_settings : ``NotificationSettings``
         The notification settings to add.
     connector : ``AsyncConnection``
-        Data base connector.
+        Database connector.
     """
     entry_id = notification_settings.entry_id
     # Do nothing if the entry doesnt exists.

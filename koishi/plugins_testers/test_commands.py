@@ -17,7 +17,6 @@ from hata import (
 from hata.discord.events.core import PARSERS
 from hata.ext.command_utils import ChooseMenu, Closer, Pagination
 from hata.ext.commands_v2 import Command, ConverterFlag, checks, configure_converter
-from hata.ext.patchouli import map_module
 from scarletio import Future, ReuAsyncIO, ReuBytesIO, TaskGroup, enter_executor, sleep
 
 from ..bot_utils.constants import GUILD__SUPPORT, PATH__KOISHI
@@ -28,8 +27,6 @@ from config import AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
 TEST_COMMANDS = eventlist(type_ = Command, category = 'TEST COMMANDS',)
 
-
-map_module('hata')
 
 def setup(lib):
     MAIN_CLIENT.commands.extend(TEST_COMMANDS)

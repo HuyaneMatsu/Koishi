@@ -9,6 +9,7 @@ from scarletio import Task, TaskGroup
 from ...bots import SLASH_CLIENT
 
 from ..automation_core import get_reaction_copy_enabled_and_role
+from ..blacklist_core import is_user_id_in_blacklist
 from ..move_message_core import create_webhook_message, get_message_and_files, get_webhook
 
 
@@ -63,7 +64,7 @@ async def reaction_add(client, event):
     if (guild is None):
         return
     
-    if event.user.bot:
+    if event.user.bot or is_user_id_in_blacklist(event.user.id):
         return
     
     emoji = event.emoji

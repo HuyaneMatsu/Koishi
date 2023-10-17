@@ -50,6 +50,9 @@ CHARACTER_PREFERENCE_TABLE = None
 notification_settings_model = None
 NOTIFICATION_SETTINGS_TABLE = None
 
+blacklist_model = None
+BLACKLIST_TABLE = None
+
 
 if (DATABASE_NAME is not None):
     from sqlalchemy.ext.declarative import declarative_base
@@ -265,7 +268,14 @@ if (DB_ENGINE is not None):
         proposal = Column(Boolean, default = True, nullable = False)
     
     NOTIFICATION_SETTINGS_TABLE = notification_settings_model.__table__
-
+    
+    
+    class blacklist_model(BASE):
+        __tablename__   = 'BLACKLIST'
+        
+        id              = Column(Int64, primary_key = True)
+        user_id         = Column(Int64, nullable = False)
+    
     
     DB_ENGINE.dispose()
     # BASE.metadata.create_all(DB_ENGINE)

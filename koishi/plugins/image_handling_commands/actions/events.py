@@ -6,6 +6,8 @@ from hata import Client, DiscordException, ERROR_CODES, MessageType, USER_MENTIO
 
 from ....bots import SLASH_CLIENT
 
+from ...blacklist_core import is_user_id_in_blacklist
+
 from .action import COOLDOWN_HANDLER, send_action_response_to
 from .actions import (
     ACTION_BITE, ACTION_BLUSH, ACTION_BULLY, ACTION_CRINGE, ACTION_CRY, ACTION_CUDDLE, ACTION_DANCE, ACTION_GLOMP,
@@ -206,7 +208,7 @@ async def message_create(client, message):
     message : ``Message``
         The created message.
     """
-    if message.author.bot:
+    if message.author.bot or is_user_id_in_blacklist(message.author.id):
         return
     
     if message.type is not MessageType.inline_reply:

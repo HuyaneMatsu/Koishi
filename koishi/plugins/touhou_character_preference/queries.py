@@ -75,7 +75,7 @@ async def get_one_touhou_character_preference_with_connector(user_id, connector)
     user_id : `int`
         The user identifier to request the preference for.
     connector : ``AsyncConnection``
-        Data base connector.
+        Database connector.
     
     Returns
     -------
@@ -101,7 +101,7 @@ async def _query_one_touhou_character_preference_with_connector(user_id, connect
     user_id : `int`
         The user identifier to request the preference for.
     connector : ``AsyncConnection``
-        Data base connector.
+        Database connector.
     
     Returns
     -------
@@ -188,7 +188,7 @@ async def get_more_touhou_character_preference_with_connector(user_ids, connecto
     user_ids : `list<int>`
         The user identifiers to request the preference for.
     connector : ``AsyncConnection``
-        Data base connector.
+        Database connector.
     
     Returns
     -------
@@ -215,7 +215,7 @@ async def _query_more_touhou_character_preference_with_connector(user_ids, conne
     user_ids : `list<int>`
         The user identifiers to request the preference for.
     connector : ``AsyncConnection``
-        Data base connector.
+        Database connector.
     
     Returns
     -------
@@ -334,7 +334,7 @@ async def remove_touhou_character_from_preference(user_id, character):
 
 async def _remove_touhou_character_preference(character_preference):
     """
-    Adds a character preference to the database.
+    Removes a character preference from the database.
     
     This function is a coroutine.
     

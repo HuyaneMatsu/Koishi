@@ -1,3 +1,8 @@
+### 2023-10-??
+
+- Add `/blacklist` commands. These are owner only.
+- Reaction copy, action reply and all interaction commands now respect the blacklist.
+
 ### 2023-10-15
 
 - Add **3** image to `/kon` interaction.
