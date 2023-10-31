@@ -276,6 +276,8 @@ if (DB_ENGINE is not None):
         id              = Column(Int64, primary_key = True)
         user_id         = Column(Int64, nullable = False)
     
+    BLACKLIST_TABLE = blacklist_model.__table__
+    
     
     DB_ENGINE.dispose()
     # BASE.metadata.create_all(DB_ENGINE)
