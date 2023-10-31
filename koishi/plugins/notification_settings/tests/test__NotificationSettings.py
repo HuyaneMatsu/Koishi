@@ -5,7 +5,7 @@ from ..notification_settings import NotificationSettings
 
 def _assert_fields_set(notification_settings):
     """
-    Assets whether every field is set of teh given notification settings.
+    Assets whether every field is set of the given notification settings.
     
     Parameters
     ----------

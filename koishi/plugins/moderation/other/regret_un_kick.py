@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import AuditLogEvent, Embed, User
+from hata import AuditLogEntryType, Embed, User
 from hata.ext.slash import Button
 
 from ..shared_constants import PERMISSIONS__KICK, WORD_CONFIG__REGRET_UN_KICK
@@ -79,7 +79,7 @@ async def regret_un_kick_command(
     reason = process_reason(reason)
     await client.interaction_application_command_acknowledge(event, wait = False)
     
-    regret_mode = await can_regret(client, guild, user, AuditLogEvent.member_kick)
+    regret_mode = await can_regret(client, guild, user, AuditLogEntryType.member_kick)
     if regret_mode == -1:
         return
     

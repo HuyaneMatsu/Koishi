@@ -7,7 +7,7 @@ from ..character_preference import CharacterPreference
 
 def _assert_fields_set(character_preference):
     """
-    Assets whether every field is set of teh given character preference.
+    Assets whether every field is set of the given character preference.
     
     Parameters
     ----------

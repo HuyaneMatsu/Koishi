@@ -2,7 +2,7 @@ __all__ = ()
 
 from datetime import datetime as DateTime, timedelta as TimeDelta
 
-from hata import AuditLogEvent, Color, DiscordException, ERROR_CODES, KOKORO
+from hata import AuditLogEntryType, Color, DiscordException, ERROR_CODES, KOKORO
 from scarletio import TaskGroup
 
 from ..shared_constants import REASON_RP
@@ -88,16 +88,16 @@ async def should_show_orin(client, guild, user):
     
     task_group = TaskGroup(KOKORO)
     task_group.create_task(
-        client.audit_log_get_chunk(guild, after = after, user = client, event = AuditLogEvent.member_kick)
+        client.audit_log_get_chunk(guild, after = after, user = client, event = AuditLogEntryType.member_kick)
     )
     task_group.create_task(
-        client.audit_log_get_chunk(guild, after = after, user = client, event = AuditLogEvent.member_ban_add)
+        client.audit_log_get_chunk(guild, after = after, user = client, event = AuditLogEntryType.member_ban_add)
     )
     task_group.create_task(
-        client.audit_log_get_chunk(guild, after = after, user = user, event = AuditLogEvent.member_kick)
+        client.audit_log_get_chunk(guild, after = after, user = user, event = AuditLogEntryType.member_kick)
     )
     task_group.create_task(
-        client.audit_log_get_chunk(guild, after = after, user = user, event = AuditLogEvent.member_ban_add)
+        client.audit_log_get_chunk(guild, after = after, user = user, event = AuditLogEntryType.member_ban_add)
     )
     
     failed_task = await task_group.wait_exception()

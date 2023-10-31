@@ -88,7 +88,7 @@ async def un_ban_user(client, event, guild, user, reason):
         The respective client instance.
     guild : ``Guild``
         The guild to check the action at.
-    event : `AuditLogEvent``
+    event : `AuditLogEntryType``
         The audit log event ot search for.
     user : ``ClientUserBase``
         The user to check for.

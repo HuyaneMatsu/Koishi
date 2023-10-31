@@ -23,7 +23,7 @@ async def welcome_user(client, guild, channel, user):
     guild : ``Guild``
         The guild the welcome the user at.
     channel: ``Channel``
-        The channel to welcome teh user at.
+        The channel to welcome the user at.
     user : ``ClientUserBase``
         The user to welcome.
     """
@@ -31,7 +31,7 @@ async def welcome_user(client, guild, channel, user):
     
     seed = guild.id ^ user.id
     
-    message = messages[seed % len(messages)](user)
+    message = messages[seed % len(messages)](user.mention)
     image = images[seed % len(images)]
     
     color = (now_as_id() >> 22) & 0xffffff

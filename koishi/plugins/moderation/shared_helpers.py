@@ -2,6 +2,8 @@ __all__ = ()
 
 from hata.ext.slash import abort
 
+from .shared_constants import REASON_ALLOWED_LENGTH_MAX
+
 
 def process_reason(reason):
     """
@@ -22,8 +24,8 @@ def process_reason(reason):
     elif (not reason):
         reason = None
     
-    elif len(reason) > 400:
-        reason = reason[:400] + ' ...'
+    elif len(reason) > REASON_ALLOWED_LENGTH_MAX:
+        reason = reason[:REASON_ALLOWED_LENGTH_MAX] + ' ...'
     
     return reason
 
@@ -73,7 +75,7 @@ def add_reason_field(embed, reason):
     if reason is None:
         reason = ' '
     
-    return add_standalone_field(embed, 'Reason', reason)
+    add_standalone_field(embed, 'Reason', reason)
 
 
 def add_standalone_field(embed, name, value):

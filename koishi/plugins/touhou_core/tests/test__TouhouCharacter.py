@@ -5,7 +5,7 @@ from ..character import TouhouCharacter, remove_character
 
 def _assert_fields_set(character):
     """
-    Asserts whether teh touhou character has every of its fields set.
+    Asserts whether the touhou character has every of its fields set.
     
     Parameters
     ----------

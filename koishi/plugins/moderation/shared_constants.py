@@ -7,6 +7,9 @@ from hata import ID_RP, Permission
 from collections import namedtuple as NamedTuple
 
 
+REASON_ALLOWED_LENGTH_MAX = 400
+
+
 WordConfig = NamedTuple('WordConfig', ('permission', 'name', 'to_be', 'connector'))
 
 

@@ -2,7 +2,7 @@ __all__ = ()
 
 from datetime import datetime as DateTime
 
-from hata import AuditLogEvent, Client, KOKORO
+from hata import AuditLogEntryType, Client, KOKORO
 from scarletio import TaskGroup
 
 from .action_counter import ActionCounter
@@ -27,7 +27,7 @@ async def request_bans(client, guild, after, actions):
     actions : `set` of `tuple` (`int`, ``ClientUserBase``, ``ClientUserBase``)
         The executed actions to extend.
     """
-    async for audit_log_entry in (await client.audit_log_iterator(guild, event = AuditLogEvent.member_ban_add)):
+    async for audit_log_entry in (await client.audit_log_iterator(guild, event = AuditLogEntryType.member_ban_add)):
         if audit_log_entry.created_at < after:
             break
         
@@ -67,7 +67,7 @@ async def request_kicks(client, guild, after, actions):
     actions : `set` of `tuple` (`int`, ``ClientUserBase``, ``ClientUserBase``)
         The executed actions to extend.
     """
-    async for audit_log_entry in (await client.audit_log_iterator(guild, event = AuditLogEvent.member_kick)):
+    async for audit_log_entry in (await client.audit_log_iterator(guild, event = AuditLogEntryType.member_kick)):
         if audit_log_entry.created_at < after:
             break
         
@@ -107,7 +107,7 @@ async def request_mutes(client, guild, after, actions):
     actions : `set` of `tuple` (`int`, ``ClientUserBase``, ``ClientUserBase``)
         The executed actions to extend.
     """
-    async for audit_log_entry in (await client.audit_log_iterator(guild, event = AuditLogEvent.member_update)):
+    async for audit_log_entry in (await client.audit_log_iterator(guild, event = AuditLogEntryType.member_update)):
         if audit_log_entry.created_at < after:
             break
         

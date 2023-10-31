@@ -104,7 +104,7 @@ class NotificationSettings(RichAttributeErrorBaseType):
     
     
     def __bool__(self):
-        """Returns whether teh notification setting has anything modified."""
+        """Returns whether the notification setting has anything modified."""
         if self.daily != True:
             return True
         

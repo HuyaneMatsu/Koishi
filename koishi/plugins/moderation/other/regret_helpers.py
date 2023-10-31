@@ -42,7 +42,7 @@ async def can_regret(client, guild, user, event):
         The guild to check the action at.
     user : ``ClientUserBase``
         The user to check for.
-    event : `AuditLogEvent``
+    event : `AuditLogEntryType``
         The audit log event ot search for.
     
     Returns

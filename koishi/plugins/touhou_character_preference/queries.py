@@ -247,7 +247,7 @@ if DB_ENGINE is None:
 async def add_touhou_character_to_preference(user_id, character):
     """
     Adds the touhou character to the user's preference.
-    If the character is already in teh user's preference does nothing.
+    If the character is already in the user's preference does nothing.
     
     This function is a coroutine.
     

@@ -2,7 +2,7 @@ __all__ = ()
 
 from datetime import timedelta as TimeDelta
 
-from hata.ext.slash import P, abort
+from hata.ext.slash import P
 
 
 PARAMETER_DAYS = P('int', 'days', min_value = 0, max_value = 28)
@@ -35,7 +35,7 @@ def get_duration(days, hours, minutes, seconds):
         Mute duration if any.
     """
     if not (days or hours or minutes or seconds):
-        return abort('Mute duration must be positive.')
+        return DURATION_MAX
     
     duration = TimeDelta(days = days, hours = hours, minutes = minutes, seconds = seconds)
     if duration > DURATION_MAX:

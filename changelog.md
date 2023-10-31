@@ -2,6 +2,7 @@
 
 - Add `/blacklist` commands. These are owner only.
 - Reaction copy, action reply and all interaction commands now respect the blacklist.
+- Speed up koishi startup by 3 seconds.
 
 ### 2023-10-15
 

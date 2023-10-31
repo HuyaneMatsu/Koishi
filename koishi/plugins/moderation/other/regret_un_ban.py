@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import AuditLogEvent, Embed, User
+from hata import AuditLogEntryType, Embed, User
 from hata.ext.slash import Button
 
 from ..shared_constants import PERMISSIONS__BAN, WORD_CONFIG__REGRET_UN_BAN
@@ -78,7 +78,7 @@ async def regret_un_ban_command(
     reason = process_reason(reason)
     await client.interaction_application_command_acknowledge(event, wait = False)
     
-    regret_mode = await can_regret(client, guild, user, AuditLogEvent.member_ban_add)
+    regret_mode = await can_regret(client, guild, user, AuditLogEntryType.member_ban_add)
     if regret_mode == -1:
         return
     

@@ -37,7 +37,7 @@ TOKEN_TYPE_STAR = 13
 
 LINE_LENGTH_MAX = 120
 INDENT_LENGTH = 4
-INDENT = ' '*INDENT_LENGTH
+INDENT = ' ' * INDENT_LENGTH
 
 
 KEYWORD_MAP = {
@@ -609,6 +609,10 @@ PACKAGE_MODULES = frozenset((
     'dateutil',
     'vampytest',
     'PIL',
+    'matplotlib',
+    'numpy',
+    'seaborn',
+    'scipy',
 ))
 
 class ImportStatement:
@@ -1723,7 +1727,7 @@ async def bozosort_(
         file = None
     
     elif len(output) < 1900:
-        content = f'```py\n{output}```'
+        content = f'```py\n{output}\n```'
         file = None
     
     else:
