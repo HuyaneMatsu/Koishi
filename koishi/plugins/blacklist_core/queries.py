@@ -90,7 +90,7 @@ async def _add_user_id_to_blacklist(user_id):
     entry_id : `int`
     """
     async with DB_ENGINE.connect() as connector:
-        await _add_user_id_to_blacklist_with_connector(user_id, connector)
+        return await _add_user_id_to_blacklist_with_connector(user_id, connector)
 
 
 async def _add_user_id_to_blacklist_with_connector(user_id, connector):
@@ -207,7 +207,7 @@ async def _remove_entry_id_from_blacklist(entry_id):
         The entry's identifier to remove.
     """
     async with DB_ENGINE.connect() as connector:
-        await _remove_entry_id_from_blacklist_with_connector(entry_id, connector)
+        return await _remove_entry_id_from_blacklist_with_connector(entry_id, connector)
 
 
 async def _remove_entry_id_from_blacklist_with_connector(entry_id, connector):

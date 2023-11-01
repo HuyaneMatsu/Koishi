@@ -44,9 +44,8 @@ async def add(
     -------
     response : ``InteractionResponse``
     """
-    if client.is_owner(event.user):
-        abort('Owner only')
-        return
+    if not client.is_owner(event.user):
+        return abort('Owner only')
     
     success = await add_user_id_to_blacklist(user.id)
     
@@ -80,9 +79,8 @@ async def remove(
     -------
     response : ``InteractionResponse``
     """
-    if client.is_owner(event.user):
-        abort('Owner only')
-        return
+    if not client.is_owner(event.user):
+        return abort('Owner only')
     
     success = await remove_user_id_from_blacklist(user.id)
     
@@ -116,9 +114,8 @@ async def check(
     -------
     response : ``InteractionResponse``
     """
-    if client.is_owner(event.user):
-        abort('Owner only')
-        return
+    if not client.is_owner(event.user):
+        return abort('Owner only')
     
     blacklisted = is_user_id_in_blacklist(user.id)
     

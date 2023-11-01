@@ -1,4 +1,4 @@
-### 2023-10-??
+### 2023-10-31
 
 - Add `/blacklist` commands. These are owner only.
 - Reaction copy, action reply and all interaction commands now respect the blacklist.
