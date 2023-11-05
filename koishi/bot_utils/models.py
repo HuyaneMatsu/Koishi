@@ -221,39 +221,41 @@ if (DB_ENGINE is not None):
     
     WAIFU_STATS_TABLE = waifu_stats_model.__table__
     
-    
+        
     class automation_configuration_model(BASE):
         __tablename__ = 'AUTOMATION_CONFIGURATION'
         
-        id = Column(Int64, primary_key = True)
-        guild_id = Column(Int64, unique = True)
+        id = Column(Int64, nullable = False, primary_key = True)
+        guild_id = Column(Int64, unique = True, nullable = False)
         
         # Logging
-        log_emoji_channel_id = Column(Int64)
-        log_mention_channel_id = Column(Int64)
-        log_sticker_channel_id = Column(Int64)
-        log_user_channel_id = Column(Int64)
+        log_emoji_channel_id = Column(Int64, nullable = False)
+        log_mention_channel_id = Column(Int64, nullable = False)
+        log_sticker_channel_id = Column(Int64, nullable = False)
+        log_user_channel_id = Column(Int64, nullable = False)
         
         # Satori
-        log_satori_auto_start = Column(Boolean, default = False)
-        log_satori_channel_id = Column(Int64)
+        log_satori_auto_start = Column(Boolean, default = False, nullable = False)
+        log_satori_channel_id = Column(Int64, nullable = False)
         
         # Reaction copy
-        reaction_copy_enabled = Column(Boolean, default = False)
-        reaction_copy_role_id = Column(Int64)
+        reaction_copy_enabled = Column(Boolean, default = False, nullable = False)
+        reaction_copy_role_id = Column(Int64, nullable = False)
         
         # Touhou feed
-        touhou_feed_enabled = Column(Boolean, default = False)
+        touhou_feed_enabled = Column(Boolean, default = False, nullable = False)
         
         # Welcome
-        welcome_channel_id = Column(Int64)
+        welcome_channel_id = Column(Int64, nullable = False)
+        welcome_button_enabled = Column(Boolean, default = False, nullable = False)
+        
     
     AUTOMATION_CONFIGURATION_TABLE = automation_configuration_model.__table__
     
     
     class character_preference_model(BASE):
         __tablename__ = 'CHARACTER_PREFERENCE'
-        id = Column(Int64, primary_key = True)
+        id = Column(Int64, nullable = False, primary_key = True)
         user_id = Column(Int64, nullable = False)
         system_name = Column(String, nullable = True)
     
@@ -262,7 +264,7 @@ if (DB_ENGINE is not None):
     
     class notification_settings_model(BASE):
         __tablename__ = 'NOTIFICATION_SETTINGS'
-        id = Column(Int64, primary_key = True)
+        id = Column(Int64, nullable = False, primary_key = True)
         user_id = Column(Int64, nullable = False)
         daily = Column(Boolean, default = True, nullable = False)
         proposal = Column(Boolean, default = True, nullable = False)
@@ -273,7 +275,7 @@ if (DB_ENGINE is not None):
     class blacklist_model(BASE):
         __tablename__   = 'BLACKLIST'
         
-        id              = Column(Int64, primary_key = True)
+        id              = Column(Int64, nullable = False, primary_key = True)
         user_id         = Column(Int64, nullable = False)
     
     BLACKLIST_TABLE = blacklist_model.__table__

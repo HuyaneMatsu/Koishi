@@ -1,43 +1,51 @@
 __all__ = ()
 
-MESSAGES = (
-    lambda mention: f'Roses are red, also blue, {mention} joined this server with Mr. Hat too',
-    lambda mention: f'Koooosh. {mention} just landed.',
-    lambda mention: f'{mention} just joined. Everyone, watch your back!',
-    lambda mention: f'Welcome, {mention}. We hope you brought shrimp fry.',
-    lambda mention: f'Where’s {mention}? RIGHT BEHIND YOU!',
-    lambda mention: f'Heart throbbing {mention} showed up!',
-    lambda mention: f'It\'s a youkai! It\'s a fairy! Nevermind, it\'s just {mention}.',
-    lambda mention: f'We\'ve been already behind you {mention}',
-    lambda mention: f'It\'s {mention}! Praise Mr. Unconsciousness! [T]/',
-    lambda mention: f'Always gonna love {mention}. Always gonna remember {mention}.',
-    lambda mention: f'{mention} is here to stab and eat shrimp fry. And {mention} is all out of shrimp fry.',
-    lambda mention: f'{mention} is behind me... or are they?',
-    lambda mention: f'{mention} just showed up. Hold my fishing rod.',
-    lambda mention: f'A lovely {mention} chan appeared.',
-    lambda mention: f'{mention} just joined. Can I get a croissant?',
-    lambda mention: f'Mr. Hat owner {mention}',
-    lambda mention: f'{mention} is here, as the Mr. Hat foretold.',
-    lambda mention: f'{mention} just arrived. Seems adorable - please love.',
-    lambda mention: f'Moshi Moshi?. Is it {mention} you\'re calling?',
-    lambda mention: f'The creature {mention} showed up!',
-    lambda mention: f'Ready to stop thinking, {mention}?',
-    lambda mention: f'{mention} has joined the server! It\'s a fumo!',
-    lambda mention: f'{mention} just joined the server - *staaaare*',
-    lambda mention: f'{mention} just joined. Everyone, stop thinking!',
-    lambda mention: f'Welcome, {mention}. Bring shrimp fry and croissant.',
-    lambda mention: f'Satoooori, {mention} is here!',
-    lambda mention: f'{mention} has arrived. The dinner just started.',
-    lambda mention: f'Welcome, {mention}. Stay awhile and fish with us.',
-    lambda mention: f'Welcome {mention}. Leave your Mr. Knife by the door.',
-    lambda mention: f'{mention} joined. Mr. Hat helps them relax.',
-    lambda mention: f'{mention} just arrived. Seems conscious - please nerf.',
-    lambda mention: f'{mention} has joined the Extra stage.',
-    lambda mention: f'Hey! Listen! {mention} has called!',
-    lambda mention: f'{mention} hopped into the server. My face is butter!!',
-    lambda mention: f'{mention} just flew into the server.',
-    lambda mention: f'Yay! {mention} just landed.',
-    lambda mention: f'{mention} joined. You must collect additional **P**ower items.',
+from hata import Emoji
+
+from ..welcome_style import WelcomeStyle
+
+
+NAME = 'koishi'
+
+
+MESSAGE_CONTENT_BUILDERS = (
+    (lambda mention: f'Roses are red, also blue, {mention} joined this server with Mr. Hat too'),
+    (lambda mention: f'Koooosh. {mention} just landed.'),
+    (lambda mention: f'{mention} just joined. Everyone, watch your back!'),
+    (lambda mention: f'Welcome, {mention}. We hope you brought shrimp fry.'),
+    (lambda mention: f'Where’s {mention}? RIGHT BEHIND YOU!'),
+    (lambda mention: f'Heart throbbing {mention} showed up!'),
+    (lambda mention: f'It\'s a youkai! It\'s a fairy! Nevermind, it\'s just {mention}.'),
+    (lambda mention: f'We\'ve been already behind you {mention}'),
+    (lambda mention: f'It\'s {mention}! Praise Mr. Unconsciousness! [T]/'),
+    (lambda mention: f'Always gonna love {mention}. Always gonna remember {mention}.'),
+    (lambda mention: f'{mention} is here to stab and eat shrimp fry. And {mention} is all out of shrimp fry.'),
+    (lambda mention: f'{mention} is behind me... or are they?'),
+    (lambda mention: f'{mention} just showed up. Hold my fishing rod.'),
+    (lambda mention: f'A lovely {mention} chan appeared.'),
+    (lambda mention: f'{mention} just joined. Can I get a croissant?'),
+    (lambda mention: f'Mr. Hat owner {mention}'),
+    (lambda mention: f'{mention} is here, as the Mr. Hat foretold.'),
+    (lambda mention: f'{mention} just arrived. Seems adorable - please love.'),
+    (lambda mention: f'Moshi Moshi?. Is it {mention} you\'re calling?'),
+    (lambda mention: f'The creature {mention} showed up!'),
+    (lambda mention: f'Ready to stop thinking, {mention}?'),
+    (lambda mention: f'{mention} has joined the server! It\'s a fumo!'),
+    (lambda mention: f'{mention} just joined the server - *staaaare*'),
+    (lambda mention: f'{mention} just joined. Everyone, stop thinking!'),
+    (lambda mention: f'Welcome, {mention}. Bring shrimp fry and croissant.'),
+    (lambda mention: f'Satoooori, {mention} is here!'),
+    (lambda mention: f'{mention} has arrived. The dinner just started.'),
+    (lambda mention: f'Welcome, {mention}. Stay awhile and fish with us.'),
+    (lambda mention: f'Welcome {mention}. Leave your Mr. Knife by the door.'),
+    (lambda mention: f'{mention} joined. Mr. Hat helps them relax.'),
+    (lambda mention: f'{mention} just arrived. Seems conscious - please nerf.'),
+    (lambda mention: f'{mention} has joined the Extra stage.'),
+    (lambda mention: f'Hey! Listen! {mention} has called!'),
+    (lambda mention: f'{mention} hopped into the server. My face is butter!!'),
+    (lambda mention: f'{mention} just flew into the server.'),
+    (lambda mention: f'Yay! {mention} just landed.'),
+    (lambda mention: f'{mention} joined. You must collect additional **P**ower items.'),
 )
 
 
@@ -361,4 +369,56 @@ IMAGES = (
     'https://cdn.discordapp.com/attachments/568837922288173058/1151772295573032970/koishi-welcome-0316.png',
     'https://cdn.discordapp.com/attachments/568837922288173058/1151772303097598022/koishi-welcome-0317.png',
     'https://cdn.discordapp.com/attachments/568837922288173058/1151772310215348244/koishi-welcome-0318.png',
+)
+
+BUTTON_EMOJI = Emoji.precreate(648173118392762449)
+
+BUTTON_CONTENTS = (
+    'Share mr. hat with them.',
+    'Share shrimp fry with them.',
+    'Help them embrace mr. unconsciousness.',
+    'Share your fishing rod with them.',
+    'Share croissant with them.',
+    'Share shrimp fry and croissant with them.',
+    'Hug them.',
+    'Share subconscious love with them.',
+    'Help them stop thinking.',
+    'Share koishi fumo with them.',
+    'To staaaaare at them.',
+    'To go fishing with them.',
+    'Welcome them to the Extra Stage.',
+    'Welcome them to a heart throbbing adventure.',
+    'Become their imaginary friend.',
+    'Call them.',
+    'Welcome them to the Palace of the Earth Spirits.',
+)
+
+REPLY_CONTENT_BUILDERS = (
+    (lambda source, target: f'{source} shares mr. hat with {target}.'),
+    (lambda source, target: f'{source} shares shrimp fry with {target}.'),
+    (lambda source, target: f'{source} helps {target} embrace mr. unconsciousness.'),
+    (lambda source, target: f'{source} shares their fishing rod with {target}.'),
+    (lambda source, target: f'{source} shares croissant with {target}.'),
+    (lambda source, target: f'{source} shares shrimp fry and croissant with {target}.'),
+    (lambda source, target: f'{source} hugs {target}.'),
+    (lambda source, target: f'{source} shares subconscious love with {target}.'),
+    (lambda source, target: f'{source} helps {target} stop thinking.'),
+    (lambda source, target: f'{source} shares koishi fumo with {target}.'),
+    (lambda source, target: f'{source} staaaaares at {target}.'),
+    (lambda source, target: f'{source} goes fishing with {target}.'),
+    (lambda source, target: f'{source} welcomes {target} to the Extra Stage.'),
+    (lambda source, target: f'{source} welcomes {target} to a heart throbbing adventure.'),
+    (lambda source, target: f'{source} becomes {target}\'s imaginary friend.'),
+    (lambda source, target: f'{source} calls {target}.'),
+    (lambda source, target: f'{source} welcomes {target} to the Palace of the Earth Spirits.'),
+)
+
+
+WELCOME_STYLE = WelcomeStyle(
+    NAME,
+    MESSAGE_CONTENT_BUILDERS,
+    IMAGES,
+    BUTTON_EMOJI,
+    BUTTON_CONTENTS,
+    REPLY_CONTENT_BUILDERS,
 )

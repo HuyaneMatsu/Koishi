@@ -1,16 +1,18 @@
 __all__ = ()
 
 from hata import Embed, now_as_id
+from hata.ext.slash import Button, ButtonStyle
 
 from ...bots import SLASH_CLIENT
 
-from ..automation_core import get_welcome_channel
+from ..automation_core import get_welcome_channel_and_button_enabled
 
-from .characters import WELCOME_DEFAULT
-from .constants import ONBOARDING_MASK_ALL, ONBOARDING_MASK_STARTED
+from .constants import CUSTOM_ID_WELCOME_REPLY, ONBOARDING_MASK_ALL, ONBOARDING_MASK_STARTED
+from .helpers import can_send_messages
+from .welcome_styles import WELCOME_STYLE_DEFAULT
 
 
-async def welcome_user(client, guild, channel, user):
+async def welcome_user(client, guild, user, welcome_style, welcome_channel, welcome_button_enabled):
     """
     Welcomes the user.
     
@@ -22,23 +24,41 @@ async def welcome_user(client, guild, channel, user):
         The client who received the event.
     guild : ``Guild``
         The guild the welcome the user at.
-    channel: ``Channel``
-        The channel to welcome the user at.
     user : ``ClientUserBase``
         The user to welcome.
+    welcome_style : ``WelcomeStyle``
+        The welcome style to use.
+    welcome_channel : ``Channel``
+        The channel to welcome the user at.
+    welcome_button_enabled : `bool`
+        Whether welcome reply button should be added under the message.
     """
-    messages, images = WELCOME_DEFAULT
+    if not can_send_messages(welcome_channel, welcome_channel.cached_permissions_for(client)):
+        return
     
     seed = guild.id ^ user.id
     
-    message = messages[seed % len(messages)](user.mention)
+    message_content_builders = welcome_style.message_content_builders
+    message_content = message_content_builders[seed % len(message_content_builders)](user.mention)
+    
+    images = welcome_style.images
     image = images[seed % len(images)]
     
     color = (now_as_id() >> 22) & 0xffffff
     
+    if welcome_button_enabled:
+        button_contents = welcome_style.button_contents
+        button_content = button_contents[seed % len(button_contents)]
+        welcome_button = Button(
+            button_content, welcome_style.button_emoji, custom_id = CUSTOM_ID_WELCOME_REPLY, style = ButtonStyle.green
+        )
+    else:
+        welcome_button = None
+    
     await client.message_create(
-        channel,
-        content = f'> {message}',
+        welcome_channel,
+        components = welcome_button,
+        content = f'> {message_content}',
         embed = Embed(color = color).add_image(image),
         silent = True,
     )
@@ -60,8 +80,8 @@ async def guild_user_add(client, guild, user):
     user : ``ClientUserBase``
         The added user.
     """
-    channel = get_welcome_channel(guild.id)
-    if (channel is None):
+    welcome_channel, welcome_button_enabled = get_welcome_channel_and_button_enabled(guild.id)
+    if (welcome_channel is None):
         return
     
     guild_profile = user.get_guild_profile_for(guild)
@@ -75,7 +95,7 @@ async def guild_user_add(client, guild, user):
         return
     
     # Send message
-    await welcome_user(client, guild, channel, user)
+    await welcome_user(client, guild, user, WELCOME_STYLE_DEFAULT, welcome_channel, welcome_button_enabled)
 
 
 @SLASH_CLIENT.events
@@ -96,8 +116,8 @@ async def guild_user_update(client, guild, user, old_attributes):
     old_attributes : `None | dict<str, object>`
         The updated attributes.
     """
-    channel = get_welcome_channel(guild.id)
-    if (channel is None):
+    welcome_channel, welcome_button_enabled = get_welcome_channel_and_button_enabled(guild.id)
+    if (welcome_channel is None):
         return
     
     # Check whether the old flags are valid.
@@ -125,4 +145,4 @@ async def guild_user_update(client, guild, user, old_attributes):
         return
     
     # Send message
-    await welcome_user(client, guild, channel, user)
+    await welcome_user(client, guild, user, WELCOME_STYLE_DEFAULT, welcome_channel, welcome_button_enabled)

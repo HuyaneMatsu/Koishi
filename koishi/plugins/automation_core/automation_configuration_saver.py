@@ -148,6 +148,8 @@ class AutomationConfigurationSaver:
                         if entry_id == -1:
                             response = await connector.execute(
                                 AUTOMATION_CONFIGURATION_TABLE.insert().values(
+                                    guild_id = automation_configuration.guild_id,
+                                    
                                     log_emoji_channel_id = automation_configuration.log_emoji_channel_id,
                                     log_mention_channel_id = automation_configuration.log_mention_channel_id,
                                     log_sticker_channel_id = automation_configuration.log_sticker_channel_id,
@@ -162,6 +164,7 @@ class AutomationConfigurationSaver:
                                     touhou_feed_enabled = automation_configuration.touhou_feed_enabled,
                                     
                                     welcome_channel_id = automation_configuration.welcome_channel_id,
+                                    welcome_button_enabled = automation_configuration.welcome_button_enabled,
                                 ).returning(
                                     automation_configuration_model.id,
                                 )

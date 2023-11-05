@@ -47,11 +47,14 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
     
     welcome_channel_id : `int`
         The channel's identifier where the welcome messages will be sent.
+    
+    welcome_button_enabled : `bool`
+        Whether welcome messages should be quipped with a welcome button.
     """
     __slots__ = (
         'entry_id', 'guild_id', 'log_emoji_channel_id', 'log_mention_channel_id', 'log_satori_auto_start',
         'log_satori_channel_id', 'log_sticker_channel_id', 'log_user_channel_id', 'reaction_copy_enabled',
-        'reaction_copy_role_id', 'saver', 'touhou_feed_enabled', 'welcome_channel_id'
+        'reaction_copy_role_id', 'saver', 'touhou_feed_enabled', 'welcome_channel_id', 'welcome_button_enabled'
     )
     
     def __new__(cls, guild_id):
@@ -77,6 +80,7 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.saver = None
         self.touhou_feed_enabled = False
         self.welcome_channel_id = 0
+        self.welcome_button_enabled = False
         return self
     
     
@@ -152,6 +156,12 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         if welcome_channel_id:
             repr_parts.append(', welcome_channel_id = ')
             repr_parts.append(repr(welcome_channel_id))
+            
+            # welcome_button_enabled
+            welcome_button_enabled = self.welcome_button_enabled
+            if welcome_button_enabled:
+                repr_parts.append(', welcome_button_enabled = ')
+                repr_parts.append(repr(welcome_button_enabled))
         
         repr_parts.append('>')
         return ''.join(repr_parts)
@@ -187,6 +197,9 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
             return True
         
         if self.welcome_channel_id:
+            return True
+        
+        if self.welcome_button_enabled:
             return True
         
         return False
@@ -284,6 +297,7 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.reaction_copy_role_id = entry['reaction_copy_role_id']
         self.touhou_feed_enabled = entry['touhou_feed_enabled']
         self.welcome_channel_id = entry['welcome_channel_id']
+        self.welcome_button_enabled = entry['welcome_button_enabled']
         
         return self
 
@@ -303,4 +317,5 @@ AUTOMATION_CONFIGURATION_FIELD_SETTERS = {
     'touhou_feed_enabled': AutomationConfiguration.touhou_feed_enabled.__set__,
     
     'welcome_channel_id': AutomationConfiguration.welcome_channel_id.__set__,
+    'welcome_button_enabled': AutomationConfiguration.welcome_button_enabled.__set__,
 }

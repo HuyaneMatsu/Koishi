@@ -64,7 +64,7 @@ async def list_all(
     
     guild = event.guild
     if guild is None:
-        return abort('guild out of cache')
+        return abort('Guild out of cache.')
     
     automation_configuration = get_automation_configuration_for(event.guild_id)
     
@@ -339,7 +339,7 @@ async def log_satori_disable(
         automation_configuration = get_automation_configuration_for(event.guild_id)
         automation_configuration.set('log_satori_channel_id', 0)
     
-    return f'Satori (presence) log messages will not be sent anymore.'
+    return 'Satori (presence) log messages will not be sent anymore.'
 
 
 @LOG_SATORI_COMMANDS.interactions(name = 'auto-start')
@@ -512,7 +512,7 @@ async def log_user_disable(
     automation_configuration = get_automation_configuration_for(event.guild_id)
     automation_configuration.set('log_user_channel_id', 0)
     
-    return f'User log messages will not be sent anymore.'
+    return 'User log messages will not be sent anymore.'
 
 # Reaction copy
 
@@ -567,7 +567,7 @@ async def reaction_copy_list_channels(client, event):
     
     guild = event.guild
     if guild is None:
-        return abort('guild out of cache')
+        return abort('Guild out of cache.')
     
     return build_reaction_copy_list_channels_response(client, guild, get_reaction_copy_enabled(guild.id))
 
@@ -593,7 +593,7 @@ async def reaction_copy_enable(event):
     automation_configuration = get_automation_configuration_for(event.guild_id)
     automation_configuration.set('reaction_copy_enabled', True)
     
-    return f'Reaction-copy has been enabled.'
+    return 'Reaction-copy has been enabled.'
 
 
 @REACTION_COPY_COMMANDS.interactions(name = 'disable')
@@ -871,3 +871,30 @@ async def welcome_disable(
     automation_configuration.set('welcome_channel_id', 0)
     
     return f'Welcome messages will not be sent anymore.'
+
+
+@WELCOME_COMMANDS.interactions(name = 'button')
+async def welcome_button(
+    event,
+    value: (bool, 'Whether a button should shown under welcome messages to reply.'),
+):
+    """
+    Enable or disable putting a button under welcome messages to reply.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    value : `bool`
+        Whether auto start should be enabled.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('welcome_button_enabled', value)
+    
+    return f'Welcome button {"will" if value else "wont"} be put under welcome messages.'

@@ -1,16 +1,16 @@
 ### Asset Information
 
-Some authors might be unknown. If you know them please create a PR with it.
+Many creators and editors are unknown. If you know them please create a PR with it.
 
 ---
 
-### `koishi-flandre-kiss-0000`
+### `only-kids-play-roblox-meme`
 
-- Artist: **由芽音功**
-- Edit: *none*
+- Artist: *unknown*
+- Edit: *unknown*
 
 
-- Character: **Komeiji Koishi**, **Scarlet Flandre**
+- Character: **Inaba Tewi**, **Reisen Udongein Inaba**
 - Source: **Touhou**
 
 ---

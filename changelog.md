@@ -1,3 +1,11 @@
+### 2023-11-05
+
+- Add `/automation welcome button` command.
+- `automation_welcome` now can put a button under the welcome message to reply.
+- Fix a `/automation` bug that made new guilds to not be correctly stored in the database.
+- Add `automation_chat_interaction` plugin which will randomly trigger after a message is sent.
+    It has different context presets that will send a topic related message.
+
 ### 2023-10-31
 
 - Add `/blacklist` commands. These are owner only.

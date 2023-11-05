@@ -155,7 +155,10 @@ def build_response_list_all(automation_configuration, guild):
         f'State: {get_bool_representation(automation_configuration.touhou_feed_enabled)}',
     ).add_field(
         'Welcome',
-        f'Channel: {get_channel_representation(automation_configuration.welcome_channel_id)}',
+        (
+            f'Channel: {get_channel_representation(automation_configuration.welcome_channel_id)}\n'
+            f'Button: {get_bool_representation(automation_configuration.welcome_button_enabled)}'
+        )
     )
     
     return InteractionResponse(

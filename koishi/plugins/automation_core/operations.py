@@ -2,7 +2,7 @@ __all__ = (
     'delete_automation_configuration_of', 'get_automation_configuration_for', 'get_log_emoji_channel',
     'get_log_mention_channel', 'get_log_user_channel', 'get_log_satori_channel', 'get_log_satori_channel_if_auto_start',
     'get_log_sticker_channel', 'get_reaction_copy_enabled', 'get_reaction_copy_enabled_and_role',
-    'get_touhou_feed_enabled', 'get_welcome_channel'
+    'get_touhou_feed_enabled', 'get_welcome_channel_and_button_enabled'
 )
 
 from hata import CHANNELS, ROLES
@@ -331,9 +331,9 @@ def get_touhou_feed_enabled(guild_id):
     return automation_configuration.touhou_feed_enabled
 
 
-def get_welcome_channel(guild_id):
+def get_welcome_channel_and_button_enabled(guild_id):
     """
-    Gets welcome channel for the given guild.
+    Gets welcome channel and whether the welcome button is enabled for the given guild.
     
     Parameters
     ----------
@@ -342,21 +342,22 @@ def get_welcome_channel(guild_id):
     
     Returns
     -------
-    channel : `None`, ``Channel``
+    welcome_channel : `None`, ``Channel``
+    welcome_button_enabled : `bool`
     """
     try:
         automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
     except KeyError:
-        return None
+        return None, False
     
     welcome_channel_id = automation_configuration.welcome_channel_id
     if not welcome_channel_id:
-        return None
+        return None, False
     
     try:
-        return CHANNELS[welcome_channel_id]
+        channel = CHANNELS[welcome_channel_id]
     except KeyError:
-        pass
+        automation_configuration.set('welcome_channel_id', 0)
+        return None, False
     
-    automation_configuration.set('welcome_channel_id', 0)
-    return None
+    return channel, automation_configuration.welcome_button_enabled
