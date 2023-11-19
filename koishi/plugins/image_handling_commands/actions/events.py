@@ -254,7 +254,7 @@ async def message_create(client, message):
     
     
     # Get context information for generating content (and cooldown)
-    allowed_mentions = set()
+    targets = set()
     client_in_users = False
     user_in_users = False
     
@@ -263,11 +263,11 @@ async def message_create(client, message):
     elif target_user is message.author:
         user_in_users = True
     else:
-        allowed_mentions.add(target_user)
+        targets.add(target_user)
     
     
     # Are we on cooldown -> try notify cooldown
-    expire_after = COOLDOWN_HANDLER.get_cooldown(message, len(allowed_mentions))
+    expire_after = COOLDOWN_HANDLER.get_cooldown(message, len(targets))
     if expire_after > 0.0:
         try:
             private_channel = await client.channel_private_create(message.author)
@@ -291,9 +291,10 @@ async def message_create(client, message):
         
         return
     
+    allowed_mentions = [*targets]
     # Create response and send
     content, embed = await ACTIONS_BY_NAME[intended_action].create_response_content_and_embed(
-        client, None, message.id, message.author, allowed_mentions, client_in_users, user_in_users
+        client, None, message.id, message.author, targets, client_in_users, user_in_users, allowed_mentions,
     )
     
     await send_action_response_to(client, referenced_message, content, embed, allowed_mentions)
