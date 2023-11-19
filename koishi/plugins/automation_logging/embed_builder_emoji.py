@@ -1,6 +1,7 @@
 __all__ = ()
 from hata import Embed
 
+from .constants import COLOR_ADD, COLOR_DELETE, COLOR_UPDATE
 from .embed_builder_shared import (
     add_bool_field, add_expression_context_fields_to, add_role_ids_field, add_string_field, maybe_add_modified_bool_field,
     maybe_add_modified_role_ids_field, maybe_add_modified_string_field
@@ -47,7 +48,13 @@ def build_emoji_create_embed(emoji):
     """
     emoji_url = emoji.url
     
-    embed = Embed(f'Emoji created: {emoji.name} ({emoji.id})', url = emoji_url).add_thumbnail(emoji_url)
+    embed = Embed(
+        f'Emoji created: {emoji.name} ({emoji.id})',
+        color = COLOR_ADD,
+        url = emoji_url,
+    ).add_thumbnail(
+        emoji_url,
+    )
     
     add_emoji_fields_to(embed, emoji)
     add_expression_context_fields_to(embed, emoji)
@@ -72,7 +79,13 @@ def build_emoji_update_embed(emoji, old_attributes):
     """
     emoji_url = emoji.url
     
-    embed = Embed(f'Emoji updated: {emoji.name} ({emoji.id})', url = emoji_url).add_thumbnail(emoji_url)
+    embed = Embed(
+        f'Emoji updated: {emoji.name} ({emoji.id})',
+        color = COLOR_UPDATE,
+        url = emoji_url,
+    ).add_thumbnail(
+        emoji_url,
+    )
     
     add_expression_context_fields_to(embed, emoji)
     
@@ -100,7 +113,13 @@ def build_emoji_delete_embed(emoji):
     embed : ``Embed``
     """
     emoji_url = emoji.url
-    embed = Embed(f'Emoji deleted: {emoji.name} ({emoji.id})', url = emoji_url).add_thumbnail(emoji_url)
+    embed = Embed(
+        f'Emoji deleted: {emoji.name} ({emoji.id})',
+        color = COLOR_DELETE,
+        url = emoji_url,
+    ).add_thumbnail(
+        emoji_url,
+    )
 
     embed = add_emoji_fields_to(embed, emoji)
     

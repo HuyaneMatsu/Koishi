@@ -6,6 +6,8 @@ from hata import ActivityType, DATETIME_FORMAT_CODE, Embed, Status, elapsed_time
 
 from ..rendering_helpers import render_activity_description_into
 
+from .constants import COLOR_UPDATE
+
 
 MAX_CHUNK_SIZE = 2000
 BREAK_AFTER_LINE_COUNT = 1500
@@ -850,4 +852,7 @@ def build_presence_update_embeds(user, old_attributes):
     -------
     embeds : `list` of ``Embed``
     """
-    return [Embed(description = chunk) for chunk in make_chunks(render_presence_update(user, old_attributes))]
+    return [
+        Embed(description = chunk, color = COLOR_UPDATE)
+        for chunk in make_chunks(render_presence_update(user, old_attributes))
+    ]

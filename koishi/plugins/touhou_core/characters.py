@@ -928,6 +928,17 @@ RUMIA = TouhouCharacter(
     ),
 )
 
+SATSUKI_RIN = TouhouCharacter(
+    'satsuki_rin',
+    'Satsuki Rin',
+    (
+        '冴月麟',
+        'Satsuki',
+        'Rin Satsuki',
+    ),
+)
+
+
 SAIGYOUJI_YUYUKO = TouhouCharacter(
     'saigyouji_yuyuko',
     'Saigyouji Yuyuko',

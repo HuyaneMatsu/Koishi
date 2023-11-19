@@ -130,9 +130,9 @@ async def build_guild_embed(guild):
     else:
         vanity_code = guild.vanity_code
         if vanity_code is None:
-            description = f'[Join {guild.name} !]({invite_url})'
+            description = f'[Join {guild.name}!]({invite_url})'
         else:
-            description = f'[Join discord.gg/{vanity_code} !]({invite_url})'
+            description = f'[Join discord.gg/{vanity_code}!]({invite_url})'
     
     embed = Embed(
         guild.name,

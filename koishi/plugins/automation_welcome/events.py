@@ -47,10 +47,14 @@ async def welcome_user(client, guild, user, welcome_style, welcome_channel, welc
     color = (now_as_id() >> 22) & 0xffffff
     
     if welcome_button_enabled:
-        button_contents = welcome_style.button_contents
-        button_content = button_contents[seed % len(button_contents)]
+        reply_styles = welcome_style.reply_styles
+        reply_style = reply_styles[seed % len(reply_styles)]
+        
         welcome_button = Button(
-            button_content, welcome_style.button_emoji, custom_id = CUSTOM_ID_WELCOME_REPLY, style = ButtonStyle.green
+            reply_style.button_content,
+            reply_style.button_emoji,
+            custom_id = CUSTOM_ID_WELCOME_REPLY,
+            style = ButtonStyle.green,
         )
     else:
         welcome_button = None

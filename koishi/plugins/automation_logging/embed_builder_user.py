@@ -1,12 +1,9 @@
 __all__ = ()
 
-from hata import Color, Embed
+from hata import Embed
 
 from ..rendering_helpers import build_user_join_or_leave_description
-
-
-USER_COLOR_JOIN = Color.from_rgb(2, 168, 77)
-USER_COLOR_LEAVE = Color.from_rgb(168, 49, 2)
+from .constants import COLOR_ADD, COLOR_DELETE
 
 
 def build_user_embed(guild, user, guild_profile, join):
@@ -31,7 +28,7 @@ def build_user_embed(guild, user, guild_profile, join):
     return Embed(
         user.full_name,
         build_user_join_or_leave_description(user, guild_profile, join),
-        color = (USER_COLOR_JOIN if join else USER_COLOR_LEAVE),
+        color = (COLOR_ADD if join else COLOR_DELETE),
     ).add_thumbnail(
         user.avatar_url,
     ).add_author(

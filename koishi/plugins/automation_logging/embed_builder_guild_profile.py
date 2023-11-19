@@ -4,6 +4,7 @@ from datetime import datetime as DateTime
 
 from hata import DATETIME_FORMAT_CODE, Embed
 
+from .constants import COLOR_UPDATE
 from .embed_builder_shared import (
     maybe_add_modified_bool_field, maybe_add_modified_date_time_field, maybe_add_modified_flags_field,
     maybe_add_modified_icon_field, maybe_add_modified_nullable_string_field,
@@ -26,7 +27,12 @@ def build_guild_profile_update_embed(guild_profile, old_attributes):
     -------
     embed : ``Embed``
     """
-    embed = Embed(f'Guild profile updated').add_footer(format(DateTime.utcnow(), DATETIME_FORMAT_CODE))
+    embed = Embed(
+        f'Guild profile updated',
+        color = COLOR_UPDATE,
+    ).add_footer(
+        format(DateTime.utcnow(), DATETIME_FORMAT_CODE),
+    )
     
     maybe_add_modified_icon_field(embed, guild_profile, old_attributes, 'avatar', 'Avatar')
     maybe_add_modified_date_time_field(embed, guild_profile, old_attributes, 'boosts_since', 'Boosts since')

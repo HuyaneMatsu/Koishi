@@ -88,16 +88,16 @@ async def should_show_orin(client, guild, user):
     
     task_group = TaskGroup(KOKORO)
     task_group.create_task(
-        client.audit_log_get_chunk(guild, after = after, user = client, event = AuditLogEntryType.member_kick)
+        client.audit_log_get_chunk(guild, after = after, user = client, entry_type = AuditLogEntryType.user_kick)
     )
     task_group.create_task(
-        client.audit_log_get_chunk(guild, after = after, user = client, event = AuditLogEntryType.member_ban_add)
+        client.audit_log_get_chunk(guild, after = after, user = client, entry_type = AuditLogEntryType.user_ban_add)
     )
     task_group.create_task(
-        client.audit_log_get_chunk(guild, after = after, user = user, event = AuditLogEntryType.member_kick)
+        client.audit_log_get_chunk(guild, after = after, user = user, entry_type = AuditLogEntryType.user_kick)
     )
     task_group.create_task(
-        client.audit_log_get_chunk(guild, after = after, user = user, event = AuditLogEntryType.member_ban_add)
+        client.audit_log_get_chunk(guild, after = after, user = user, entry_type = AuditLogEntryType.user_ban_add)
     )
     
     failed_task = await task_group.wait_exception()

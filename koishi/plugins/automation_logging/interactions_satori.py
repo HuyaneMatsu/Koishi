@@ -318,4 +318,3 @@ async def user_ban_execute(client, event, user_id, *, reason = None):
         components = COMPONENT_DELETE_CHANNEL,
         embed = build_satori_user_actioned_embed(user, reason, 'Banned'),
     )
-

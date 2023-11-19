@@ -2,7 +2,7 @@ __all__ = ()
 
 from random import random
 
-from hata import DiscordException, Embed, Emoji, ERROR_CODES
+from hata import ClientUserBase, DiscordException, Embed, Emoji, ERROR_CODES
 from hata.ext.slash import abort
 
 from ..cooldown import CooldownHandler
@@ -16,7 +16,7 @@ EMOJI_FLUSHED = Emoji.precreate(965960651853926480)
 COOLDOWN_HANDLER = CooldownHandler('user', 1800, 20)
 
 
-def get_allowed_users(client, event, input_users):
+def get_allowed_users(client, event, input_targets):
     """
     Parameters
     ----------
@@ -24,41 +24,42 @@ def get_allowed_users(client, event, input_users):
         The client who received the event.
     event : ``InteractionEvent``
         The received interaction event.
-    input_users : `tuple` of ``ClientUserBase``
+    input_targets : `tuple` of ``ClientUserBase``
         The input users to the command.
     
     Returns
     -------
-    allowed_users : `set` of ``ClientUserBase``
-        The mentioned users by the event.
+    targets : `set<Role | ClientUserBase>`
+        The mentioned users and roles by the event.
     client_in_users : `bool`
         Whether the client is in the mentioned users.
     user_in_users : `bool`
         Whether the user in in the mentioned users as well.
+    allowed_mentions : `list<ClientUserBase>`
+        Allowed mentions.
     """
-    users = set()
-    for user in input_users:
-        if user is not None:
-            users.add(user)
+    targets = {target for target in input_targets if target is not None}
     
     try:
-        users.remove(event.user)
+        targets.remove(event.user)
     except KeyError:
         user_in_users = False
     else:
         user_in_users = True
     
     try:
-        users.remove(client)
+        targets.remove(client)
     except KeyError:
         client_in_users = False
     else:
         client_in_users = True
     
-    return users, client_in_users, user_in_users
+    allowed_mentions = [target for target in targets if isinstance(target, ClientUserBase)]
+    
+    return targets, client_in_users, user_in_users, allowed_mentions
 
 
-def build_response(client, verb, source_user, users, client_in_users):
+def build_response(client, verb, source_user, targets, client_in_targets):
     """
     Builds action response text and allowed mentions.
     
@@ -70,21 +71,21 @@ def build_response(client, verb, source_user, users, client_in_users):
         The verb to use in the response.
     source_user : ``ClientUserBase``
         The user source user who invoked the event.
-    users : `set` of ``ClientUserBase``
-        The mentioned users by the event.
-    client_in_users : `bool`
-        Whether the client is in the mentioned users.
+    targets : `set<Role | ClientUserBase>`
+        The mentioned users and roles by the event.
+    client_in_targets : `bool`
+        Whether the client is in the mentioned targets.
     
     Returns
     -------
     response : `str`
     """
-    users = [*users]
+    targets = [*targets]
     
     response_parts = ['> ']
     
-    user_count = len(users)
-    if (user_count == 0) and (not client_in_users):
+    user_count = len(targets)
+    if (user_count == 0) and (not client_in_targets):
         response_parts.append(client.mention)
     else:
         response_parts.append(source_user.mention)
@@ -94,7 +95,7 @@ def build_response(client, verb, source_user, users, client_in_users):
     response_parts.append(' ')
     
     if user_count == 0:
-        if client_in_users:
+        if client_in_targets:
             if random() > 0.5:
                 response_parts.append('me ')
                 response_parts.append(EMOJI_FLUSHED.as_emoji)
@@ -103,29 +104,27 @@ def build_response(client, verb, source_user, users, client_in_users):
         else:
             response_parts.append(source_user.mention)
     
-    elif user_count == 1 and not client_in_users:
-            response_parts.append(users[0].mention)
+    elif user_count == 1 and not client_in_targets:
+        response_parts.append(targets[0].mention)
     
     else:
-        for user in users[: - (2 - client_in_users)]:
+        for user in targets[: - (2 - client_in_targets)]:
             response_parts.append(user.mention)
             response_parts.append(', ')
         
-        response_parts.append(users[- (2 - client_in_users)].mention)
+        response_parts.append(targets[- (2 - client_in_targets)].mention)
         response_parts.append(' and ')
         
-        if client_in_users:
+        if client_in_targets:
             if random() > 0.5:
                 response_parts.append('me ')
                 response_parts.append(EMOJI_FLUSHED.as_emoji)
             else:
                 response_parts.append(client.mention)
         else:
-            response_parts.append(users[-1].mention)
+            response_parts.append(targets[-1].mention)
     
-    response = ''.join(response_parts)
-    
-    return response
+    return ''.join(response_parts)
 
 
 def build_response_self(verb, source_user):
@@ -175,7 +174,7 @@ async def send_action_response_with_interaction_event(client, event, content, em
         Response content.
     embed : ``Embed``
         Response embed.
-    allowed_mentions : `set<ClientUserBase>`
+    allowed_mentions : `list<ClientUserBase>`
         The users to ping.
     
     Returns
@@ -368,31 +367,31 @@ class Action:
         self,
         client,
         event,
-        user_00: ('user', 'Select someone.', 'user-1') = None,
-        user_01: ('user', 'Select someone', 'user-2') = None,
-        user_02: ('user', 'Select someone', 'user-3') = None,
-        user_03: ('user', 'Select someone', 'user-4') = None,
-        user_04: ('user', 'Select someone', 'user-5') = None,
-        user_05: ('user', 'Select someone', 'user-6') = None,
-        user_06: ('user', 'Select someone', 'user-7') = None,
-        user_07: ('user', 'Select someone', 'user-8') = None,
-        user_08: ('user', 'Select someone', 'user-9') = None,
-        user_09: ('user', 'Select someone', 'user-10') = None,
-        user_10: ('user', 'Select someone', 'user-11') = None,
-        user_11: ('user', 'Select someone', 'user-12') = None,
-        user_12: ('user', 'Select someone', 'user-13') = None,
-        user_13: ('user', 'Select someone', 'user-14') = None,
-        user_14: ('user', 'Select someone', 'user-15') = None,
-        user_15: ('user', 'Select someone', 'user-16') = None,
-        user_16: ('user', 'Select someone', 'user-17') = None,
-        user_17: ('user', 'Select someone', 'user-18') = None,
-        user_18: ('user', 'Select someone', 'user-19') = None,
-        user_19: ('user', 'Select someone', 'user-20') = None,
-        user_20: ('user', 'Select someone', 'user-21') = None,
-        user_21: ('user', 'Select someone', 'user-22') = None,
-        user_22: ('user', 'Select someone', 'user-23') = None,
-        user_23: ('user', 'Select someone', 'user-24') = None,
-        user_24: ('user', 'Select someone', 'user-25') = None,
+        target_00: ('mentionable', 'Select someone.', 'target-1') = None,
+        target_01: ('mentionable', 'Select someone', 'target-2') = None,
+        target_02: ('mentionable', 'Select someone', 'target-3') = None,
+        target_03: ('mentionable', 'Select someone', 'target-4') = None,
+        target_04: ('mentionable', 'Select someone', 'target-5') = None,
+        target_05: ('mentionable', 'Select someone', 'target-6') = None,
+        target_06: ('mentionable', 'Select someone', 'target-7') = None,
+        target_07: ('mentionable', 'Select someone', 'target-8') = None,
+        target_08: ('mentionable', 'Select someone', 'target-9') = None,
+        target_09: ('mentionable', 'Select someone', 'target-10') = None,
+        target_10: ('mentionable', 'Select someone', 'target-11') = None,
+        target_11: ('mentionable', 'Select someone', 'target-12') = None,
+        target_12: ('mentionable', 'Select someone', 'target-13') = None,
+        target_13: ('mentionable', 'Select someone', 'target-14') = None,
+        target_14: ('mentionable', 'Select someone', 'target-15') = None,
+        target_15: ('mentionable', 'Select someone', 'target-16') = None,
+        target_16: ('mentionable', 'Select someone', 'target-17') = None,
+        target_17: ('mentionable', 'Select someone', 'target-18') = None,
+        target_18: ('mentionable', 'Select someone', 'target-19') = None,
+        target_19: ('mentionable', 'Select someone', 'target-20') = None,
+        target_20: ('mentionable', 'Select someone', 'target-21') = None,
+        target_21: ('mentionable', 'Select someone', 'target-22') = None,
+        target_22: ('mentionable', 'Select someone', 'target-23') = None,
+        target_23: ('mentionable', 'Select someone', 'target-24') = None,
+        target_24: ('mentionable', 'Select someone', 'target-25') = None,
     ):
         """
         Calls the action command.
@@ -417,13 +416,13 @@ class Action:
         if not guild_id:
             abort('Guild only command')
         
-        allowed_mentions, client_in_users, user_in_users = get_allowed_users(
+        targets, client_in_users, user_in_users, allowed_mentions = get_allowed_users(
             client,
             event,
             (
-                user_00, user_01, user_02, user_03, user_04, user_05, user_06, user_07, user_08, user_09,
-                user_10, user_11, user_12, user_13, user_14, user_15, user_16, user_17, user_18, user_19,
-                user_20, user_21, user_22, user_23, user_24
+                target_00, target_01, target_02, target_03, target_04, target_05, target_06, target_07, target_08,
+                target_09, target_10, target_11, target_12, target_13, target_14, target_15, target_16, target_17,
+                target_18, target_19, target_20, target_21, target_22, target_23, target_24
             ),
         )
         
@@ -435,14 +434,14 @@ class Action:
             )
         
         content, embed = await self.create_response_content_and_embed(
-            client, event, event.id, event.user, allowed_mentions, client_in_users, user_in_users
+            client, event, event.id, event.user, targets, client_in_users, user_in_users, allowed_mentions
         )
         
         await send_action_response(client, event, content, embed, allowed_mentions)
 
     
     async def create_response_content_and_embed(
-        self, client, event, color_seed, source_user, allowed_mentions, client_in_users, user_in_users
+        self, client, event, color_seed, source_user, targets, client_in_users, user_in_users, allowed_mentions
     ):
         """
         Creates response content and embed.
@@ -459,12 +458,14 @@ class Action:
             Seed to generate the embed color from.
         source_user : ``ClientUserBase``
             The user source user who invoked the event.
-        allowed_users : `set` of ``ClientUserBase``
-            The mentioned users by the event.
+        targets : `set<Role, ClientUserBase>`
+            Target entities.
         client_in_users : `bool`
             Whether the client is in the mentioned users.
         user_in_users : `bool`
             Whether the user in in the mentioned users as well.
+        allowed_mentions : `list<ClientUserBase>`
+            The allowed mentions.
         
         Returns
         -------
@@ -475,7 +476,7 @@ class Action:
         """
         if (
             user_in_users and
-            (not allowed_mentions) and
+            (not targets) and
             (self.handler_self is not None)
             and ((random() < 0.5) if client_in_users else True)
         ):
@@ -483,13 +484,13 @@ class Action:
             handler = self.handler_self
             
         else:
-            content = build_response(client, self.verb, source_user, allowed_mentions, client_in_users)
+            content = build_response(client, self.verb, source_user, targets, client_in_users)
             handler = self.handler
         
         # Use goto
         while True:
             if handler.is_character_filterable():
-                image_detail = await get_preferred_image(handler, source_user, allowed_mentions)
+                image_detail = await get_preferred_image(handler, source_user, targets)
                 if (image_detail is not None):
                     break
         

@@ -27,7 +27,7 @@ async def request_bans(client, guild, after, actions):
     actions : `set` of `tuple` (`int`, ``ClientUserBase``, ``ClientUserBase``)
         The executed actions to extend.
     """
-    async for audit_log_entry in (await client.audit_log_iterator(guild, event = AuditLogEntryType.member_ban_add)):
+    async for audit_log_entry in (await client.audit_log_iterator(guild, event = AuditLogEntryType.user_ban_add)):
         if audit_log_entry.created_at < after:
             break
         

@@ -66,8 +66,9 @@ async def welcome_reply(client, event):
     welcome_style = WELCOME_STYLE_DEFAULT
     
     seed = event.guild_id ^ joined_user.id
-    reply_content_builders = welcome_style.reply_content_builders
-    message_content = reply_content_builders[seed % len(reply_content_builders)](user.mention, joined_user.mention)
+    reply_styles = welcome_style.reply_styles
+    reply_style = reply_styles[seed % len(reply_styles)]
+    message_content = reply_style.reply_content_builder(user.mention, joined_user.mention)
     
     seed = seed ^ event.user_id
     images = welcome_style.images

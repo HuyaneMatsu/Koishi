@@ -1,14 +1,12 @@
 __all__ = ()
 
-from hata import ActivityType, Color, Embed
+from hata import ActivityType, Embed
 
 from ..rendering_helpers import (
     build_activity_description, build_user_status_description, build_user_with_guild_profile_description
 )
 
-
-SATORI_COLOR = Color.from_rgb(168, 2, 146)
-SATORI_IMAGE = 'https://cdn.discordapp.com/attachments/568837922288173058/1109762751963865200/satori-0015-edit-0000.png'
+from .constants import COLOR_SATORI, IMAGE_URL_SATORI
 
 
 def build_satori_auto_start_header_embed(user, guild_id):
@@ -29,7 +27,7 @@ def build_satori_auto_start_header_embed(user, guild_id):
     return Embed(
         None,
         build_user_with_guild_profile_description(user, user.get_guild_profile_for(guild_id)),
-        color = SATORI_COLOR,
+        color = COLOR_SATORI,
     ).add_thumbnail(
         user.avatar_url,
     ).add_author(
@@ -54,12 +52,12 @@ def build_satori_auto_start_embeds(user, guild_id):
     """
     embeds = [
         build_satori_auto_start_header_embed(user, guild_id),
-        Embed('Status', build_user_status_description(user), color = SATORI_COLOR),
+        Embed('Status', build_user_status_description(user), color = COLOR_SATORI),
     ]
     
     custom_activity = user.custom_activity
     if (custom_activity is not None):
-        embeds.append(Embed('Custom activity', build_activity_description(custom_activity), color = SATORI_COLOR))
+        embeds.append(Embed('Custom activity', build_activity_description(custom_activity), color = COLOR_SATORI))
     
     activities_added = 1
     for activity in user.iter_activities():
@@ -68,7 +66,7 @@ def build_satori_auto_start_embeds(user, guild_id):
             continue
         
         embeds.append(
-            Embed(f'Activity ({activities_added})', build_activity_description(activity), color = SATORI_COLOR)
+            Embed(f'Activity ({activities_added})', build_activity_description(activity), color = COLOR_SATORI)
         )
         
         # max 10
@@ -78,7 +76,7 @@ def build_satori_auto_start_embeds(user, guild_id):
         
         continue
     
-    embeds[-1].add_image(SATORI_IMAGE)
+    embeds[-1].add_image(IMAGE_URL_SATORI)
     
     return embeds
 
@@ -104,7 +102,7 @@ def build_satori_user_actioned_embed(user, reason, actioned_name):
         reason = ' '
     
     return Embed(
-        color = SATORI_COLOR,
+        color = COLOR_SATORI,
     ).add_thumbnail(
         user.avatar_url,
     ).add_author(
@@ -117,4 +115,3 @@ def build_satori_user_actioned_embed(user, reason, actioned_name):
             f'```'
         ),
     )
-

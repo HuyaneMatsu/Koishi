@@ -1,3 +1,11 @@
+### 2023-11-19
+
+- Add `Satsuki Rin` touhou character.
+- Touhou feed now has a 80% chance to skip images if there are too many characters on it.
+- `/automation welcome button` now has its own emoji for each button label.
+- `/automation logging` messages are now more colorful.
+- Actions such as `/hug` now support targeting roles.
+
 ### 2023-11-05
 
 - Add `/automation welcome button` command.

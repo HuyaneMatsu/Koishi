@@ -72,12 +72,12 @@ def should_render_exception(exception):
         return False
     
     if isinstance(exception, DiscordException) and exception.code in (
-                ERROR_CODES.unknown_message, # message deleted
-                ERROR_CODES.unknown_channel, # message's channel deleted
-                ERROR_CODES.missing_access, # client removed
-                ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                ERROR_CODES.cannot_message_user, # user dm-s disabled or bot blocked.
-            ):
+        ERROR_CODES.unknown_message, # message deleted
+        ERROR_CODES.unknown_channel, # message's channel deleted
+        ERROR_CODES.missing_access, # client removed
+        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+        ERROR_CODES.cannot_message_user, # user dm-s disabled or bot blocked.
+    ):
          return False
     
     return True
@@ -178,7 +178,7 @@ class Game21Player:
             
             total += card_weight
             
-            while total>21 and ace:
+            while total > 21 and ace:
                 total -= 10
                 ace -= 1
             
@@ -207,7 +207,7 @@ class Game21Player:
         
         total += card_weight
         
-        while total>21 and ace:
+        while total > 21 and ace:
             total -= 10
             ace -= 1
             
@@ -233,26 +233,34 @@ class Game21Player:
             field_content.append(CARD_NUMBERS[number_index])
             field_content.append('\n')
         
-        embed.add_field(f'{self.user.name_at(self.parent.guild)}\'s cards\'\nWeight: {self.total}',
-            ''.join(field_content), inline = True)
+        embed.add_field(
+            f'{self.user.name_at(self.parent.guild)}\'s cards\'\nWeight: {self.total}',
+            ''.join(field_content),
+            inline = True,
+        )
     
     def add_hand(self, embed):
         for round_, card in enumerate(self.hand, 1):
             type_index, number_index = divmod(card, len(CARD_NUMBERS))
-            embed.add_field(f'Round {round_}',
-                f'You pulled {CARD_TYPES[type_index]} {CARD_NUMBERS[number_index]}')
+            embed.add_field(
+                f'Round {round_}',
+                f'You pulled {CARD_TYPES[type_index]} {CARD_NUMBERS[number_index]}',
+            )
         
     def create_gamble_embed(self, amount):
-        embed = Embed(f'How to gamble {amount} {EMOJI__HEART_CURRENCY.as_emoji}',
+        embed = Embed(
+            f'How to gamble {amount} {EMOJI__HEART_CURRENCY.as_emoji}',
             f'You have cards equal to {self.total} weight at your hand.',
-            color = COLOR__GAMBLING)
+            color = COLOR__GAMBLING,
+        )
         
         self.add_hand(embed)
         
         return embed
     
     def create_after_embed(self, amount):
-        embed = Embed(f'Gambled {amount} {EMOJI__HEART_CURRENCY.as_emoji}',
+        embed = Embed(
+            f'Gambled {amount} {EMOJI__HEART_CURRENCY.as_emoji}',
             (
                 f'You have cards equal to {self.total} weight at your hand.\n'
                 'Go back to the other channel and wait till all the player finishes the game and the winner will be '
@@ -1033,8 +1041,10 @@ async def game_21_mp_cancelled(client, user, guild, source_channel, amount, priv
 def game_21_mp_notify_cancellation(client, joined_tuples, amount, channel, guild, joined_user_ids):
     Task(KOKORO, game_21_refund(joined_tuples[0][2], amount))
     for notify_user, private_channel, entry_id in joined_tuples[1:]:
-        Task(KOKORO, game_21_mp_cancelled(client, notify_user, guild, channel, amount, private_channel,
-            joined_user_ids, entry_id))
+        Task(
+            KOKORO,
+            game_21_mp_cancelled(client, notify_user, guild, channel, amount, private_channel, joined_user_ids, entry_id)
+        )
 
 GAME_21_MP_MAX_USERS = 10
 GAME_21_MP_FOOTER = f'Max {GAME_21_MP_MAX_USERS} users allowed.'

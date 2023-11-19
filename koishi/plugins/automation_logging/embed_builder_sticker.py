@@ -2,6 +2,7 @@ __all__ = ()
 
 from hata import Embed, StickerFormat
 
+from .constants import COLOR_ADD, COLOR_DELETE, COLOR_UPDATE
 from .embed_builder_shared import (
     add_bool_field, add_expression_context_fields_to, add_nullable_container_field, add_nullable_string_field,
     add_preinstanced_field, add_string_field, maybe_add_modified_bool_field,
@@ -34,7 +35,7 @@ def add_sticker_fields_to(embed, sticker):
     return embed
 
 
-def build_sticker_image_embed(sticker):
+def build_sticker_image_embed(sticker, color):
     """
     Builds a sticker image embed if applicable for sticker's type.
     
@@ -49,7 +50,7 @@ def build_sticker_image_embed(sticker):
     """
     sticker_format = sticker.format
     if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
-        return Embed().add_image(sticker.url)
+        return Embed(color = color).add_image(sticker.url)
 
 
 def with_sticker_image(embed, sticker):
@@ -68,7 +69,7 @@ def with_sticker_image(embed, sticker):
     embeds : `list` of ``Embed``
     """
     embeds = [embed]
-    image_embed = build_sticker_image_embed(sticker)
+    image_embed = build_sticker_image_embed(sticker, embed.color)
     if (image_embed is not None):
         embeds.append(image_embed)
     
@@ -88,7 +89,11 @@ def build_sticker_create_embeds(sticker):
     -------
     embed : `list` of ``Embed``
     """
-    embed = Embed(f'Sticker created: {sticker.name} ({sticker.id})', url =  sticker.url)
+    embed = Embed(
+        f'Sticker created: {sticker.name} ({sticker.id})',
+        color = COLOR_ADD,
+        url =  sticker.url,
+    )
     
     add_sticker_fields_to(embed, sticker)
     add_expression_context_fields_to(embed, sticker)
@@ -111,7 +116,11 @@ def build_sticker_update_embeds(sticker, old_attributes):
     -------
     embed : ``Embed``
     """
-    embed = Embed(f'Sticker updated: {sticker.name} ({sticker.id})', url =  sticker.url)
+    embed = Embed(
+        f'Sticker updated: {sticker.name} ({sticker.id})',
+        color = COLOR_UPDATE,
+        url =  sticker.url,
+    )
     
     add_expression_context_fields_to(embed, sticker)
     
@@ -136,7 +145,11 @@ def build_sticker_delete_embeds(sticker):
     -------
     embed : ``Embed``
     """
-    embed = Embed(f'Sticker deleted: {sticker.name} ({sticker.id})', url =  sticker.url)
+    embed = Embed(
+        f'Sticker deleted: {sticker.name} ({sticker.id})',
+        color = COLOR_DELETE,
+        url =  sticker.url,
+    )
     
     add_sticker_fields_to(embed, sticker)
     add_expression_context_fields_to(embed, sticker)

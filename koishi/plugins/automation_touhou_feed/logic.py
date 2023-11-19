@@ -1,7 +1,7 @@
 __all__ = ('try_remove_guild', 'try_update_guild')
 
 from itertools import chain
-from random import choice
+from random import choice, random
 
 from hata import Client, DiscordException, ERROR_CODES, Embed, KOKORO, now_as_id
 from scarletio import CancelledError, LOOP_TIME, Task
@@ -465,11 +465,25 @@ class Feeder:
         This method is a coroutine.
         """
         try:
-            image_detail = await choice(self.handler_keys).get_handler().get_image(SLASH_CLIENT, None)
-            if (image_detail is None):
-                return
+            # SKip images if there are too many characters on it. Do 5 retries.
+            retries = 5
+            while True:
+                image_detail = await choice(self.handler_keys).get_handler().get_image(SLASH_CLIENT, None)
+                if (image_detail is None):
+                    return
+                
+                touhou_characters = parse_touhou_characters_from_tags(image_detail)
+                
+                retries -= 1
+                if retries <= 0:
+                    break
+                
+                if len(touhou_characters) > 12 and random() > 0.2:
+                    continue
+                
+                break
             
-            title = join_names_of_touhou_characters(parse_touhou_characters_from_tags(image_detail), ', ')
+            title = join_names_of_touhou_characters(touhou_characters, ', ')
             
             embed = Embed(
                 title,

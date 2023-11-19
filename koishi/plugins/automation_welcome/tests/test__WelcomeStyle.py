@@ -1,6 +1,7 @@
 import vampytest
-from hata import BUILTIN_EMOJIS, Emoji
+from hata import BUILTIN_EMOJIS
 
+from ..reply_style import ReplyStyle
 from ..welcome_style import WelcomeStyle
 
 
@@ -14,12 +15,10 @@ def _assert_fields_set(welcome_style):
         The welcome style to check.
     """
     vampytest.assert_instance(welcome_style, WelcomeStyle)
-    vampytest.assert_instance(welcome_style.button_contents, tuple)
-    vampytest.assert_instance(welcome_style.button_emoji, Emoji)
     vampytest.assert_instance(welcome_style.images, tuple)
     vampytest.assert_instance(welcome_style.message_content_builders, tuple)
     vampytest.assert_instance(welcome_style.name, str)
-    vampytest.assert_instance(welcome_style.reply_content_builders, tuple)
+    vampytest.assert_instance(welcome_style.reply_styles, tuple)
 
 
 def test__WelcomeStyle__new():
@@ -33,30 +32,22 @@ def test__WelcomeStyle__new():
     images = (
         'image.png',
     )
-    button_emoji = BUILTIN_EMOJIS['x']
-    button_contents = (
-        'satori',
-    )
-    reply_content_builders = (
-        (lambda mention: 'hey mister'),
+    reply_styles = (
+        ReplyStyle('Stare at them', BUILTIN_EMOJIS['heart'], lambda source, target: f'{source} stares at {target}'),
     )
     
     welcome_style = WelcomeStyle(
         name,
         message_content_builders,
         images,
-        button_emoji,
-        button_contents,
-        reply_content_builders,
+        reply_styles,
     )
     _assert_fields_set(welcome_style)
     
-    vampytest.assert_eq(welcome_style.button_contents, button_contents)
-    vampytest.assert_is(welcome_style.button_emoji, button_emoji)
     vampytest.assert_eq(welcome_style.images, images)
     vampytest.assert_eq(welcome_style.message_content_builders, message_content_builders)
     vampytest.assert_eq(welcome_style.name, name)
-    vampytest.assert_eq(welcome_style.reply_content_builders, reply_content_builders)
+    vampytest.assert_eq(welcome_style.reply_styles, reply_styles)
 
 
 def test__WelcomeStyle__repr():
@@ -70,21 +61,15 @@ def test__WelcomeStyle__repr():
     images = (
         'image.png',
     )
-    button_emoji = BUILTIN_EMOJIS['x']
-    button_contents = (
-        'satori',
-    )
-    reply_content_builders = (
-        (lambda mention: 'hey mister'),
+    reply_styles = (
+        ReplyStyle('Stare at them', BUILTIN_EMOJIS['heart'], lambda source, target: f'{source} stares at {target}'),
     )
     
     welcome_style = WelcomeStyle(
         name,
         message_content_builders,
         images,
-        button_emoji,
-        button_contents,
-        reply_content_builders,
+        reply_styles,
     )
     
     vampytest.assert_instance(repr(welcome_style), str)
