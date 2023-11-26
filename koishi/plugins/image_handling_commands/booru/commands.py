@@ -5,7 +5,7 @@ import re
 from hata import Client
 from hata.ext.slash import abort
 
-from ....bots import SLASH_CLIENT
+from ....bots import FEATURE_CLIENTS
 
 from .booru import (
     CACHES, CUSTOM_ID_NEW_DISABLED, CUSTOM_ID_TAGS_DISABLED, ImageCache, SESSION_ID, build_booru_disabled_components,
@@ -21,7 +21,7 @@ from .tag_cache import get_tag_auto_completion
 TAG_DESCRIPTION = 'Some tags to spice it up?'
 
 
-@SLASH_CLIENT.interactions(is_global = True, name = 'safebooru')
+@FEATURE_CLIENTS.interactions(is_global = True, name = 'safebooru')
 async def safe_booru(
     client,
     event,
@@ -67,7 +67,7 @@ async def safe_booru(
     await cache.invoke_initial(client, event)
 
 
-@SLASH_CLIENT.interactions(is_global = True, nsfw = True, name = 'nsfwbooru')
+@FEATURE_CLIENTS.interactions(is_global = True, nsfw = True, name = 'nsfwbooru')
 async def nsfw_booru(
     client,
     event,
@@ -229,7 +229,7 @@ async def autocomplete_nsfw_tags(client, event, input_value):
 
 
 
-@SLASH_CLIENT.interactions(custom_id = [CUSTOM_ID_NEW_DISABLED, CUSTOM_ID_TAGS_DISABLED])
+@FEATURE_CLIENTS.interactions(custom_id = [CUSTOM_ID_NEW_DISABLED, CUSTOM_ID_TAGS_DISABLED])
 async def booru_disabled():
     """
     Handles a disabled component click. So does nothing.
@@ -264,7 +264,7 @@ async def notify_session_expiration(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = re.compile('booru\.(\d+)\.(\d+)\.new'))
+@FEATURE_CLIENTS.interactions(custom_id = re.compile('booru\.(\d+)\.(\d+)\.new'))
 async def booru_new(client, event, session_id, cache_id):
     """
     Gets the defined cache by the parameters and responds with an another image pulled from it.
@@ -299,7 +299,7 @@ async def booru_new(client, event, session_id, cache_id):
     await notify_session_expiration(client, event)
 
 
-@SLASH_CLIENT.interactions(custom_id = re.compile('booru\.(\d+)\.(\d+)\.tags'))
+@FEATURE_CLIENTS.interactions(custom_id = re.compile('booru\.(\d+)\.(\d+)\.tags'))
 async def booru_tags(client, event, session_id, cache_id):
     """
     Gets the defined cache by the parameters and responds with the current image's tags.
@@ -335,7 +335,7 @@ async def booru_tags(client, event, session_id, cache_id):
     await notify_session_expiration(client, event)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_CLOSE)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_CLOSE)
 async def booru_close(client, event):
     """
     Deletes the booru message if applicable.

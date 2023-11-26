@@ -6,7 +6,7 @@ from hata import Embed, KOKORO, seconds_to_elapsed_time, Message, DiscordExcepti
     seconds_to_id_difference, format_loop_time, TIMESTAMP_STYLES, Permission
 from hata.ext.slash import Button, abort, ButtonStyle, Row, wait_for_component_interaction
 
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
 
 HEADER_E_TAG = IgnoreCaseString('ETag')
@@ -545,7 +545,7 @@ def has_manage_messages_permission(event):
 
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     is_global = True,
     required_permissions = Permission().update_by_keys(manage_messages = True),
     allow_in_dm = False,
@@ -578,14 +578,14 @@ async def dupe_image_filter(
     DupeImageFilter(client, event, look_back)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_CLOSE)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_CLOSE)
 async def close_dupe_image_filter(client, event):
     if event.user_permissions.can_manage_messages:
         await client.interaction_component_acknowledge(event)
         await client.interaction_response_message_delete(event)
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def shutdown(client):
     cancel_tasks = []
     

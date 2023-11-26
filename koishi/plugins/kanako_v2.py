@@ -11,7 +11,7 @@ from PIL import Image as PIL
 
 from ..bot_utils.constants import PATH__KOISHI, GUILD__STORAGE
 from ..bot_utils.tools import Pagination10step
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 FONT = PIL.font(os.path.join(PATH__KOISHI, 'koishi', 'library', 'Kozuka.otf'), 90)
@@ -118,7 +118,7 @@ def draw(buffer, text):
     return buffer
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__STORAGE)
+@FEATURE_CLIENTS.interactions(guild = GUILD__STORAGE)
 async def create_images(client, event):
     await client.interaction_response_message_create(event, 'Starting to create images.\nIt may take some time.')
     
@@ -415,7 +415,7 @@ def render_showcase(name, map_):
 MAP_SHOWCASES = {name: render_showcase(name, map_) for name, map_ in MAPS.items()}
 
 
-KANAKO = SLASH_CLIENT.interactions(
+KANAKO = FEATURE_CLIENTS.interactions(
     None,
     name = 'kanako',
     description = 'Start a hiragana or a katakana quiz!',
@@ -710,7 +710,7 @@ def create_kanako_join_message(event, map_name, length):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_KANAKO_JOIN_OR_LEAVE)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_KANAKO_JOIN_OR_LEAVE)
 async def handle_join_or_leave(event):
     try:
         join_group = KANAKO_JOIN_GROUPS[event.message.interaction.id]
@@ -750,7 +750,7 @@ async def handle_join_or_leave(event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_KANAKO_CANCEL)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_KANAKO_CANCEL)
 async def handle_cancel(client, event):
     interaction = event.message.interaction
     if event.user is not interaction.user:
@@ -767,7 +767,7 @@ async def handle_cancel(client, event):
     await client.interaction_response_message_delete(event)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_KANAKO_START)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_KANAKO_START)
 async def handle_start(client, event):
     interaction = event.message.interaction
     if event.user is not interaction.user:

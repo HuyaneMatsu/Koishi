@@ -14,7 +14,7 @@ from ..bot_utils.constants import (
     ROLE__SUPPORT__EVENT_MANAGER, ROLE__SUPPORT__EVENT_PARTICIPANT, ROLE__SUPPORT__EVENT_WINNER,
     ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__NSFW_ACCESS, ROLE__SUPPORT__VERIFIED
 )
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 HATA_DOCS_BASE_URL = 'https://www.astil.dev/project/hata/docs/'
@@ -79,7 +79,7 @@ RULES = [
 
 RULE_CHOICES = [(f'{index}. {title}', index) for index, (title, description_builder) in enumerate(RULES)]
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     guild = GUILD__SUPPORT,
     description = f'{GUILD__SUPPORT.name}\'s rules!'
 )
@@ -125,7 +125,7 @@ async def rules(
     return InteractionResponse(embed = embed, components = components, allowed_mentions = None)
 
 
-@SLASH_CLIENT.interactions(custom_id = CLAIM_ROLE_VERIFIED_CUSTOM_ID, show_for_invoking_user_only = True)
+@FEATURE_CLIENTS.interactions(custom_id = CLAIM_ROLE_VERIFIED_CUSTOM_ID, show_for_invoking_user_only = True)
 async def claim_verified_role(client, event):
     """
     Assigns the verified role to the user.
@@ -154,7 +154,7 @@ async def claim_verified_role(client, event):
     yield response
 
 
-@SLASH_CLIENT.interactions(custom_id = CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID, show_for_invoking_user_only = True)
+@FEATURE_CLIENTS.interactions(custom_id = CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID, show_for_invoking_user_only = True)
 async def claim_announcements_role(client, event):
     """
     Assigns or removes the announcements role to / of the user.
@@ -438,7 +438,7 @@ HELP_FIELD_NAME_TO_RENDERER = {
     HELP_FIELD_NAME_HEART_GUIDE: render_help_heart_guide,
 }
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def help_(
     client,
     event,
@@ -474,7 +474,7 @@ async def help_(
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_HELP_CLOSE)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_HELP_CLOSE)
 async def help_close(client, event):
     """
     Closes the help message.
@@ -501,7 +501,7 @@ async def help_close(client, event):
         )
 
 
-@SLASH_CLIENT.interactions(is_global = True, wait_for_acknowledgement = True)
+@FEATURE_CLIENTS.interactions(is_global = True, wait_for_acknowledgement = True)
 async def ping(client, event):
     """HTTP ping-pong."""
     start = perf_counter()
@@ -529,7 +529,7 @@ async def ping(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
+@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT)
 async def docs_search(client, event,
     search_for: ('str', 'Search term'),
 ):
@@ -621,7 +621,7 @@ async def docs_search(client, event,
     await Pagination(client, event, embeds, check = partial_func(docs_search_pagination_check, event.user))
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
+@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT)
 async def ask():
     """How to ask!"""
     return Embed(
@@ -639,7 +639,7 @@ async def ask():
     )
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
+@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT)
 async def markdown():
     """How to use markdown."""
     return Embed(
@@ -663,7 +663,7 @@ async def markdown():
 
 
 
-ROLE_INFO = SLASH_CLIENT.interactions(
+ROLE_INFO = FEATURE_CLIENTS.interactions(
     None,
     name = 'roles',
     description = 'Role information!',

@@ -6,7 +6,7 @@ from hata import Embed, CLIENTS, Permission
 from hata.ext.slash import Select, Option, InteractionResponse, abort
 
 from ..bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__ADMIN
-from ..bots import SLASH_CLIENT
+from ..bots import MAIN_CLIENT
 
 
 def check_permission(event):
@@ -14,7 +14,7 @@ def check_permission(event):
         abort(f'You must have {ROLE__SUPPORT__ADMIN.mention} to invoke this command.')
 
 
-EXTENSION_COMMANDS = SLASH_CLIENT.interactions(
+PLUGIN_COMMANDS = MAIN_CLIENT.interactions(
     None,
     name = 'plugin',
     description = 'plugin related commands',
@@ -24,7 +24,7 @@ EXTENSION_COMMANDS = SLASH_CLIENT.interactions(
 
 EXTENSION_LIST_PER_GUILD_CUSTOM_ID = 'plugin.list_per_client'
 
-@EXTENSION_COMMANDS.interactions
+@PLUGIN_COMMANDS.interactions
 async def list_per_client(event):
     """Lists the plugins for each client."""
     check_permission(event)
@@ -39,7 +39,7 @@ async def list_per_client(event):
 
 
 
-@SLASH_CLIENT.interactions(custom_id = EXTENSION_LIST_PER_GUILD_CUSTOM_ID)
+@MAIN_CLIENT.interactions(custom_id = EXTENSION_LIST_PER_GUILD_CUSTOM_ID)
 async def handle_list_per_client_component(event):
     if not event.user.has_role(ROLE__SUPPORT__ADMIN):
         return
@@ -133,7 +133,7 @@ EXTENSION_LIMIT = 40
 def plugin_item_sort_key(item):
     return item[0]
 
-@EXTENSION_COMMANDS.interactions
+@PLUGIN_COMMANDS.interactions
 async def list_all(event):
     """Lists all the available plugins."""
     check_permission(event)
@@ -230,7 +230,7 @@ async def run_plugin_coroutine(plugin_name, action_name, coroutine):
     return Embed(title, description)
 
 
-@EXTENSION_COMMANDS.interactions
+@PLUGIN_COMMANDS.interactions
 async def load(event,
     name: ('str', 'Please provide a name to load.'),
     deep: ('bool', 'you know what it means') = True,
@@ -248,7 +248,7 @@ async def load(event,
     )
 
 
-@EXTENSION_COMMANDS.interactions
+@PLUGIN_COMMANDS.interactions
 async def reload(event,
     name: ('str', 'Please provide a name to reload.'),
     deep: ('bool', 'you know what it means') = True,
@@ -266,7 +266,7 @@ async def reload(event,
     )
 
 
-@EXTENSION_COMMANDS.interactions
+@PLUGIN_COMMANDS.interactions
 async def unload(event,
     name: ('str', 'Please provide a name to unload.'),
     deep: ('bool', 'you know what it means') = True,
@@ -284,7 +284,7 @@ async def unload(event,
     )
 
 
-@EXTENSION_COMMANDS.interactions
+@PLUGIN_COMMANDS.interactions
 async def register(event,
     name: ('str', 'Please provide a name to register.'),
 ):
@@ -307,7 +307,7 @@ async def register(event,
     return Embed(title, description)
 
 
-@EXTENSION_COMMANDS.interactions
+@PLUGIN_COMMANDS.interactions
 async def discard_kept_commands(client, event):
     """Discards all the kept commands, which are not yet deleted."""
     check_permission(event)

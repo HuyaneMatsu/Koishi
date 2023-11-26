@@ -5,7 +5,7 @@ from hata.ext.slash import Button, InteractionResponse, Row, abort
 from scarletio import Lock, Task
 from scarletio.web_common.headers import USER_AGENT
 
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 EMOJI_NEW = BUILTIN_EMOJIS['arrows_counterclockwise']
@@ -36,7 +36,20 @@ class MemeLock:
 
 MEME_LOCK_GOOD_ANIME_MEMES = MemeLock(f'{URL_BASE}r/goodanimemes.json')
 
-async def get_memes(meme_lock):
+
+async def get_memes(client, meme_lock):
+    """
+    Gets memes.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        Client to get the memes with.
+    meme_lock : ``MemeLock``
+        Lock to handle meme requests.
+    """
     lock = meme_lock.lock
     if lock.is_locked():
         await lock
@@ -47,7 +60,7 @@ async def get_memes(meme_lock):
         if after is None:
             after = ''
         
-        async with SLASH_CLIENT.http.get(
+        async with client.http.get(
             meme_lock.url,
             headers = HEADERS,
             params = {
@@ -86,7 +99,7 @@ async def get_meme(client, event, meme_lock):
     if meme_queue:
         return meme_queue.pop()
     
-    get_meme_task = Task(KOKORO, get_memes(meme_lock))
+    get_meme_task = Task(KOKORO, get_memes(client, meme_lock))
     
     if event.type is InteractionType.application_command:
         await client.interaction_application_command_acknowledge(event)
@@ -102,7 +115,7 @@ async def get_meme(client, event, meme_lock):
     return None
 
 
-@SLASH_CLIENT.interactions(is_global = True, name = 'meme')
+@FEATURE_CLIENTS.interactions(is_global = True, name = 'meme')
 async def meme_(client, event):
     """Shows a meme."""
     if not event.guild_id:
@@ -118,7 +131,7 @@ async def meme_(client, event):
     return InteractionResponse(embed = embed, components = COMPONENTS_GOOD_ANIME_MEMES)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_GOOD_ANIME_MEMES)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_GOOD_ANIME_MEMES)
 async def send_new_good_anime_meme(client, event):
     if event.user is not event.message.interaction.user:
         return

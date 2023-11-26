@@ -5,13 +5,13 @@ from dateutil.relativedelta import relativedelta
 from hata import elapsed_time, Embed
 from ..bot_utils.constants import ROLE__SUPPORT__VERIFIED, EMOJI__HEART_CURRENCY, COLOR__EVENT, \
     CHANNEL__SUPPORT__EVENT, ROLE__SUPPORT__EVENT_MANAGER, LINK__HATA_GIT, GUILD__SUPPORT
-from ..bots import SLASH_CLIENT
+from ..bots import MAIN_CLIENT
 
 
 EVENT_TEST_CHECK = None # checks.has_any_role((ROLE__SUPPORT__MODERATOR, ROLE__SUPPORT__EVENT_MANAGER))
 
 
-EVENTS = SLASH_CLIENT.interactions(
+EVENTS = MAIN_CLIENT.interactions(
     None,
     name = 'events',
     description = f'{GUILD__SUPPORT.name} event information.',

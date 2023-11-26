@@ -10,7 +10,7 @@ from hata import BUILTIN_EMOJIS, Embed
 from hata.ext.slash import abort, Select, Option, InteractionResponse
 
 from ..bot_utils.constants import GUILD__STORAGE, PATH__KOISHI
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
 
 EMOJI_STAR = BUILTIN_EMOJIS['star']
@@ -3360,7 +3360,7 @@ CHARACTER_MESCAL = OJCharacter(78,
 
 #### #### #### #### COMMANDS #### #### #### ####
 
-@SLASH_CLIENT.interactions(guild = GUILD__STORAGE)
+@MAIN_CLIENT.interactions(guild = GUILD__STORAGE)
 async def create_images(client, event):
     await client.interaction_response_message_create(event, 'Starting to create images.\nIt may take some time.')
     
@@ -3784,7 +3784,7 @@ def filter_entities_by(filters, container, select_custom_id_enabled, select_cust
     return InteractionResponse(embed = embed, components = select)
 
 
-OJ_COMMANDS = SLASH_CLIENT.interactions(
+OJ_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
     name = 'OJ',
     description = '100% Orange juice',
@@ -3893,7 +3893,7 @@ async def filter_characters(
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SELECT_CHARACTER)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SELECT_CHARACTER)
 async def select_character(event):
     if event.message.interaction.user is not event.user:
         return
@@ -4094,7 +4094,7 @@ async def autocomplete_card_rarity(value):
     return get_simple_autocomplete_results(value, CARD_RARITY_FILTERABLE_NAMES)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SELECT_CARD)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SELECT_CARD)
 async def select_card(event):
     if event.message.interaction.user is not event.user:
         return
@@ -4119,11 +4119,11 @@ async def select_card(event):
     )
 
 
-@SLASH_CLIENT.interactions(
-    custom_id = (
+@FEATURE_CLIENTS.interactions(
+    custom_id = [
         CUSTOM_ID_SELECT_CHARACTER_DISABLED,
         CUSTOM_ID_SELECT_CARD_DISABLED,
-    )
+    ]
 )
 async def handle_disabled_components():
     pass

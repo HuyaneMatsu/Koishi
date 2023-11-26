@@ -1,12 +1,12 @@
 __all__ = ('STATS_COMMAND',)
 
-from .....bots import SLASH_CLIENT
+from .....bots import FEATURE_CLIENTS
 
 from .show import *
 from .upgrade import *
 
 
-STATS_COMMAND = SLASH_CLIENT.interactions(
+STATS_COMMAND = FEATURE_CLIENTS.interactions(
     None,
     name = 'stats',
     description = 'wanna know you waifu stats?',

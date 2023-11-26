@@ -2,13 +2,13 @@ __all__ = ()
 
 from hata import Client
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .constants import CUSTOM_ID_SNIPE_SELECT
 from .response_builder_select import select_response_builder
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_SELECT)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SNIPE_SELECT)
 async def snipe_interaction_select_emoji(client, event):
     """
     Switches the response to the selected entity.

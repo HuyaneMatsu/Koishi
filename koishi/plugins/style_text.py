@@ -5,7 +5,7 @@ import re
 from hata import AnsiBackgroundColor, AnsiForegroundColor, AnsiTextDecoration, create_ansi_format_code, Embed
 from hata.ext.slash import abort
 
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 PATTERN = re.compile('(?<!\\\\)<([a-z]{0,2})>')
@@ -52,7 +52,7 @@ STYLE_CODES = {
 }
 
 
-@SLASH_CLIENT.interactions(is_global = True, target = 'message', allowed_mentions = None)
+@FEATURE_CLIENTS.interactions(is_global = True, target = 'message', allowed_mentions = None)
 async def style_text(target):
     content = target.content
     if content is None:
@@ -96,7 +96,7 @@ async def style_text(target):
     return output
 
 
-STYLE_COMMANDS = SLASH_CLIENT.interactions(
+STYLE_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
     name = 'style-text',
     description = 'Styling text',

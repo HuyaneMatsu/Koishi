@@ -20,7 +20,7 @@ from scarletio import ReuBytesIO, TaskGroup
 
 from ..bot_utils.constants import GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT
 from ..bot_utils.tools import Pagination10step
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 UTILITY_COLOR = Color(0x5dc66f)
@@ -51,7 +51,7 @@ STATUS_VALUE_TO_HEART_EMOJI = {
 
 PLATFORMS = ('desktop', 'mobile', 'web')
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def rawr(client, event):
     """Sends a message with everyone from my universe."""
     channel = event.channel
@@ -75,7 +75,7 @@ async def rawr(client, event):
         failed_task.get_result()
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def color_(
     client,
     event,
@@ -110,7 +110,7 @@ async def color_(
         await client.interaction_followup_message_create(event, embed = embed, file = ('color.png', buffer))
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     guild = GUILD__SUPPORT,
     target = 'message',
     required_permissions = Permission().update_by_keys(manage_messages = True),
@@ -186,7 +186,7 @@ PERMISSION_MASK_REACT = Permission().update_by_keys(
     add_reactions = True,
 )
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def roles_(client, event):
     """Lists the roles of the guild for my cutie!"""
     guild = event.guild
@@ -216,7 +216,7 @@ def shared_guilds_pagination_check(user, event):
     return False
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def shared_guilds(client, event):
     """Returns the shared guilds between you and me."""
     pages = []
@@ -353,7 +353,7 @@ def in_role_pagination_check(user, event):
     
     return False
 
-@SLASH_CLIENT.interactions(guild = [GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT])
+@FEATURE_CLIENTS.interactions(guild = [GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT])
 async def in_role(
     client,
     event,
@@ -403,7 +403,7 @@ async def in_role(
     await Pagination(client, event, pages, check = partial_func(in_role_pagination_check, event.user))
 
 
-@SLASH_CLIENT.interactions(is_global = True, target = 'user')
+@FEATURE_CLIENTS.interactions(is_global = True, target = 'user')
 async def status_(user):
     status = user.status
     emoji = STATUS_VALUE_TO_HEART_EMOJI.get(status.value, EMOJI_HEART_BLACK)
@@ -449,7 +449,7 @@ def add_user_field(embed, index, joined_at, user):
         ),
     )
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     guild = [GUILD__SUPPORT, GUILD__ORIN_PARTY_HOUSE],
     required_permissions = Permission().update_by_keys(kick_users = True),
 )
@@ -482,7 +482,7 @@ async def latest_users(client, event):
     return InteractionResponse(embed = embed, allowed_mentions = None)
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     guild = [GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT],
     required_permissions = Permission().update_by_keys(kick_users = True),
 )
@@ -513,7 +513,7 @@ async def all_users(client, event):
     await Pagination(client, event, embeds)
 
 
-@SLASH_CLIENT.interactions(is_global = True, target = 'message')
+@FEATURE_CLIENTS.interactions(is_global = True, target = 'message')
 async def escape(message):
     content = message.content
     if content is None:
@@ -526,14 +526,14 @@ async def escape(message):
     return InteractionResponse(content, allowed_mentions = None)
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def calc(
     expression: ('expression', 'Mathematical expression to evaluate')
 ):
     return repr(expression)
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def choose(
     choice_1: (str, 'choice'),
     choice_2: (str, 'another one') = None,
@@ -580,7 +580,7 @@ CREATE_EMBEDDED_ACTIVITY_PERMISSIONS = Permission().update_by_keys(
     create_instant_invite = True,
 )
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def create_activity(
     client,
     event,

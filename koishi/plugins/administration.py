@@ -6,7 +6,7 @@ from functools import partial as partial_func
 from hata import Color, DiscordException, ERROR_CODES, parse_rdelta, datetime_to_id, Emoji, Permission
 from hata.ext.slash import abort
 
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 ADMINISTRATION_COLOR = Color.from_rgb(148, 0, 211)
@@ -17,7 +17,7 @@ EMOJI__REIMU_HAMMER = Emoji.precreate(690550890045898812)
 def match_message_author(user, message):
     return (message.author is user)
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     is_global = True,
     show_for_invoking_user_only = True,
     allow_in_dm = False,
@@ -94,7 +94,7 @@ async def clear(client, event,
             raise
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     is_global = True,
     show_for_invoking_user_only = True,
     allow_in_dm = False,
@@ -153,7 +153,7 @@ def bans_pagination_check(event):
 
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     is_global = True,
     allow_in_dm = False,
     required_permissions = Permission().update_by_keys(ban_users = True),
@@ -259,7 +259,7 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages_in_threads = True,
 )
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     is_global = True,
     allow_in_dm = False,
     required_permissions = Permission().update_by_keys(create_instant_invite = True),

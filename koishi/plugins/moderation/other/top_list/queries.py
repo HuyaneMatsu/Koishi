@@ -2,7 +2,7 @@ __all__ = ()
 
 from datetime import datetime as DateTime
 
-from hata import AuditLogEntryType, Client, KOKORO
+from hata import AuditLogEntryType, CLIENTS, Client, KOKORO
 from scarletio import TaskGroup
 
 from .action_counter import ActionCounter
@@ -35,7 +35,7 @@ async def request_bans(client, guild, after, actions):
         if source_user is None:
             continue
         
-        if source_user is client:
+        if source_user.id in CLIENTS:
             source_user = await get_source_user_from_client_entry(audit_log_entry)
             if source_user is None:
                 continue
@@ -75,7 +75,7 @@ async def request_kicks(client, guild, after, actions):
         if source_user is None:
             continue
         
-        if source_user is client:
+        if source_user.id in CLIENTS:
             source_user = await get_source_user_from_client_entry(audit_log_entry)
             if source_user is None:
                 continue
@@ -111,14 +111,8 @@ async def request_mutes(client, guild, after, actions):
         if audit_log_entry.created_at < after:
             break
         
-        changes = audit_log_entry.changes
-        if (changes is None):
-            continue
-            
-        for change in changes:
-            if change.attribute_name == 'timed_out_until':
-                break
-        else:
+        change = audit_log_entry.get_change('timed_out_until')
+        if change is None:
             continue
         
         if change.after is None:
@@ -128,7 +122,7 @@ async def request_mutes(client, guild, after, actions):
         if source_user is None:
             continue
         
-        if source_user is client:
+        if source_user.id in CLIENTS:
             source_user = await get_source_user_from_client_entry(audit_log_entry)
             if source_user is None:
                 continue

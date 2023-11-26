@@ -4,13 +4,13 @@ from random import random
 
 from hata import Embed
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .constants import SEX_IMAGES
 from .lock import check_lock_and_limit_level
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def sex(event):
     """
     You horny? Try your luck!

@@ -5,7 +5,7 @@ from datetime import timedelta as TimeDelta
 
 from hata import Embed
 
-from ....bots import SLASH_CLIENT
+from ....bots import FEATURE_CLIENTS
 
 from ..shared_constants import PERMISSIONS__MUTE, WORD_CONFIG__MUTE
 from ..shared_helpers import (
@@ -71,7 +71,7 @@ async def mute_command(
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = re.compile(f'{re.escape(CUSTOM_ID_SELF_MUTE)}\.(\d+)'), target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = re.compile(f'{re.escape(CUSTOM_ID_SELF_MUTE)}\.(\d+)'), target = 'form')
 async def self_mute(client, event, duration_seconds, *, reason = None):
     """Self-mutes the user."""
     guild = event.guild

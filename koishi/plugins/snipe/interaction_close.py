@@ -2,12 +2,12 @@ __all__ = ()
 
 from hata import Client, DiscordException, ERROR_CODES
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .constants import CUSTOM_ID_SNIPE_CLOSE
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_CLOSE)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SNIPE_CLOSE)
 async def snipe_interaction_close(client, event):
     """
     Closes the message.

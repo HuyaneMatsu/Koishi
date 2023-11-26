@@ -7,7 +7,7 @@ from random import choice, randint, random
 from math import sqrt, ceil
 
 from ..bot_utils.constants import GUILD__SUPPORT
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 require(Marisa = Client)
@@ -783,7 +783,7 @@ CATEGORIES = [
 
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
+@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT)
 async def rember_preview(
     client,
     event,
@@ -809,7 +809,7 @@ async def rember_preview(
 CUSTOM_ID_QUESTION_BASE = 'help_me_rember.question'
 
 
-@SLASH_CLIENT.interactions(custom_id = re.compile(f'{re.escape(CUSTOM_ID_QUESTION_BASE)}\.(\d+)'))
+@FEATURE_CLIENTS.interactions(custom_id = re.compile(f'{re.escape(CUSTOM_ID_QUESTION_BASE)}\.(\d+)'))
 async def select_question(event, index):
     user = event.user
     if event.message.interaction.user is not user:

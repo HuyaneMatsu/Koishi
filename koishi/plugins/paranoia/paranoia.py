@@ -4,7 +4,7 @@ from os.path import dirname as get_directory_name, join as join_paths
 
 from hata import Client, Embed, LocalAudio
 
-from ...bots import SLASH_CLIENT
+from ...bots import MAIN_CLIENT
 
 
 PARANOIA_TITLE = 'Pa-Pa-Pa-Pa-Paranoia'
@@ -179,7 +179,7 @@ async def try_play_paranoia(client, event, user_is_satori):
     voice_client.append(source)
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@MAIN_CLIENT.interactions(is_global = True)
 async def paranoia(client, event):
     """Pa-Pa-Pa-Pa-Paranoia!!!"""
     user_is_satori = is_event_user_satori(event)

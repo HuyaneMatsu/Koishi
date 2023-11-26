@@ -7,7 +7,7 @@ from hata.ext.slash import abort
 from scarletio import Task
 
 from ..bot_utils.constants import GUILD__SUPPORT
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 DELETE_RANGE_CONTEXTS = {}
@@ -106,7 +106,7 @@ class DeleteRangeContext:
         )
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     guild = GUILD__SUPPORT,
     target = 'message',
     show_for_invoking_user_only = True,
@@ -134,7 +134,7 @@ def match_message_author(user, message):
     return (message.author is user)
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     guild = GUILD__SUPPORT,
     target = 'message',
     show_for_invoking_user_only = True,

@@ -2,15 +2,14 @@ __all__ = ()
 
 from hata import Embed
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
-from .helpers import can_send_messages
 from .constants import CUSTOM_ID_WELCOME_REPLY, REPLY_EXPIRES_AFTER
 from .spam_protection import is_reply_in_cache
 from .welcome_styles import WELCOME_STYLE_DEFAULT
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_WELCOME_REPLY)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_WELCOME_REPLY)
 async def welcome_reply(client, event):
     """
     Sends a welcome reply.
@@ -26,11 +25,6 @@ async def welcome_reply(client, event):
     """
     await client.interaction_component_acknowledge(event)
     
-    channel = event.channel
-    user = event.user
-    if not can_send_messages(channel, channel.permissions_for(user)):
-        return
-    
     message = event.message
     if message is None:
         return None
@@ -40,6 +34,7 @@ async def welcome_reply(client, event):
         return
     
     joined_user = mentioned_users[0]
+    user = event.user
     if user is joined_user:
         return
     

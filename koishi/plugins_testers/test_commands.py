@@ -528,7 +528,7 @@ async def test_raise(client, message):
 
 
 @TEST_COMMANDS
-async def test_multytype_annotation(client, message, value : ('channel', 'role') = None):
+async def test_multi_type_annotation(client, message, value : ('channel', 'role') = None):
     """
     Tries to parse role and channel at the same time, lets go boiz!
     """
@@ -817,7 +817,7 @@ async def autohelp_defaulted(client, message, name : str = None, channel:Channel
 
 
 @TEST_COMMANDS(separator = ('[', ']'))
-async def autohelp_multy(client, message, value:{int, str}, user : {User, 'invite'}, *cakes : {Channel, 'tdelta'}):
+async def autohelp_multi(client, message, value:{int, str}, user : {User, 'invite'}, *cakes : {Channel, 'tdelta'}):
     pass
 
 

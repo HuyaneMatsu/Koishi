@@ -3,7 +3,7 @@ __all__ = ()
 from hata import Client
 from hata.ext.slash import Row
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .choice_type import ChoiceTypeEmoji, ChoiceTypeSoundboardSound, ChoiceTypeSticker
 from .component_translate_tables import ACTIONS_DISABLE
@@ -48,7 +48,7 @@ async def respond_with_actions(client, event, choice_type):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_ACTIONS_EMOJI)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SNIPE_ACTIONS_EMOJI)
 async def snipe_interaction_actions_emoji(client, event):
     """
     Adds the possible actions to the message as additional operations.
@@ -68,7 +68,7 @@ async def snipe_interaction_actions_emoji(client, event):
     await respond_with_actions(client, event,
         ChoiceTypeEmoji)
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_ACTIONS_SOUNDBOARD_SOUND)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SNIPE_ACTIONS_SOUNDBOARD_SOUND)
 async def snipe_interaction_actions_soundboard_sound(client, event):
     """
     Adds the possible actions to the message as additional operations.
@@ -88,7 +88,7 @@ async def snipe_interaction_actions_soundboard_sound(client, event):
     await respond_with_actions(client, event, ChoiceTypeSoundboardSound)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_ACTIONS_STICKER)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SNIPE_ACTIONS_STICKER)
 async def snipe_interaction_actions_sticker(client, event):
     """
     Adds the possible actions to the message as additional operations.

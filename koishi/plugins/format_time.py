@@ -10,7 +10,7 @@ from hata import (
 from hata.discord.utils import DATETIME_MAX, DATETIME_MIN, UNIX_TIME_MAX, UNIX_TIME_MIN
 from hata.ext.slash import P, abort
 
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 P_TIME_ZONE = P('float', 'timezone offset from utc 0', min_value = -26.0, max_value = +26.0)
@@ -29,7 +29,7 @@ FORMAT_STYLES = (
 )
 
 
-FORMAT_TIME_COMMANDS = SLASH_CLIENT.interactions(
+FORMAT_TIME_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
     is_global = True,
     name = 'format-time',

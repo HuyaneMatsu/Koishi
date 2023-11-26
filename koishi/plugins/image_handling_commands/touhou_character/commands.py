@@ -2,7 +2,7 @@ __all__ = ()
 
 from hata.ext.slash import Button, P, abort
 
-from ....bots import SLASH_CLIENT
+from ....bots import FEATURE_CLIENTS
 
 from ...touhou_core import (
     TOUHOU_CHARACTERS, TouhouHandlerKey, auto_complete_touhou_character_name, get_touhou_character_like
@@ -15,7 +15,7 @@ from .touhou_character import (
 )
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def touhou_character(
     client,
     event,
@@ -57,7 +57,7 @@ async def touhou_character(
 
 
 for touhou_character in TOUHOU_CHARACTERS.values():
-    SLASH_CLIENT.interactions(
+    FEATURE_CLIENTS.interactions(
         NewTouhouCharacter(TouhouHandlerKey(touhou_character, solo = True).get_handler(), touhou_character),
         custom_id = make_custom_id_of_character(touhou_character),
     )

@@ -11,7 +11,7 @@ from ..bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, 
 from ..bot_utils.constants import EMOJI__HEART_CURRENCY, WAIFU_COST_DEFAULT
 from ..bot_utils.utils import send_embed_to
 from ..bot_utils.user_getter import get_user, get_users_unordered
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 from sqlalchemy import func as alchemy_function, and_, or_
 from sqlalchemy.sql import select
@@ -32,7 +32,7 @@ def get_multiplier(user_id_1, user_id_2):
     return 2.1 - (((user_id_1 & 0x1111111111111111111111) + (user_id_2 & 0x1111111111111111111111)) % 101 * 0.01)
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def waifu_info(event,
     user: ('user', 'The user to get') = None,
 ):
@@ -148,7 +148,7 @@ async def waifu_info(event,
     yield InteractionResponse(embed = embed, allowed_mentions = None)
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def propose(
     client,
     event,
@@ -517,7 +517,7 @@ async def propose(
             )
 
 
-PROPOSAL = SLASH_CLIENT.interactions(
+PROPOSAL = FEATURE_CLIENTS.interactions(
     None,
     name = 'proposal',
     description = 'Commands to handle proposals.',
@@ -1004,7 +1004,7 @@ async def get_all_divorce_with_name(event, value):
     return waifus
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def divorce(
     client,
     event,
@@ -1168,7 +1168,7 @@ async def autocomplete_divorce_name(event, value):
     return sorted(divorce.full_name for divorce in divorces)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_DIVORCE_CANCEL)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_DIVORCE_CANCEL)
 async def divorce_cancelled(event):
     if event.user is not event.message.interaction.user:
         return
@@ -1182,7 +1182,7 @@ async def divorce_cancelled(event):
     )
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     custom_id = re.compile('marriage\.divorce\.([cio])\-([0-9a-f]{6,16})\-([0-9a-f]{6,16})')
 )
 async def divorce_execute(client, event, mode, source_user_id, target_user_id):

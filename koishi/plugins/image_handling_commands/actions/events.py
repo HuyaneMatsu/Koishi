@@ -2,9 +2,10 @@ __all__ = ()
 
 from re import M as re_multiline, U as re_unicode, compile as re_compile
 
-from hata import Client, DiscordException, ERROR_CODES, MessageType, USER_MENTION_RP
+from hata import Client, DiscordException, ERROR_CODES, MessageType, Permission, USER_MENTION_RP
 
-from ....bots import SLASH_CLIENT
+from ....bot_utils.multi_client_utils import get_first_client_with_message_create_permissions_from
+from ....bots import FEATURE_CLIENTS
 
 from ...blacklist_core import is_user_id_in_blacklist
 
@@ -52,39 +53,7 @@ ACTIONS_BY_NAME = {
 MAX_ACTION_COMMAND_LENGTH = max(len(name) for name in ACTIONS_BY_NAME.keys())
 
 ACTION_CONTENT_RP = re_compile(f'> .*?{USER_MENTION_RP.pattern}', re_multiline | re_unicode)
-
-
-def could_respond_in_channel(client, channel):
-    """
-    Returns whether the client could respond in the channel as intended.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The client who received the event.
-    channel : ``Channel``
-        The respective channel.
-    
-    Returns
-    -------
-    could_respond : `bool`
-    """
-    permissions = channel.cached_permissions_for(client)
-    
-    # manage messages needed for deleting the message.
-    if not permissions.can_manage_messages:
-        return False
-    
-    # send messages depends on channel type.
-    if channel.is_in_group_thread():
-        can_send_message = permissions.can_send_messages_in_threads
-    else:
-        can_send_message = permissions.can_send_messages
-    if not can_send_message:
-        return False
-    
-    # Everything looks good
-    return True
+MANAGE_MESSAGES_PERMISSION = Permission().update_by_keys(manage_messages = True)
 
 
 def is_message_action_interaction(client, message):
@@ -104,7 +73,7 @@ def is_message_action_interaction(client, message):
     -------
     is_message_action_interaction : `bool`
     """
-    if message.author is not client:
+    if message.author not in FEATURE_CLIENTS:
         return False
     
     message_type = message.type
@@ -191,7 +160,7 @@ async def get_user_from_referenced_message(client, referenced_message):
     return await client.user_get(user_id)
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def message_create(client, message):
     """
     Handles a message create event.
@@ -208,6 +177,9 @@ async def message_create(client, message):
     message : ``Message``
         The created message.
     """
+    if client is not get_first_client_with_message_create_permissions_from(message.channel, FEATURE_CLIENTS, MANAGE_MESSAGES_PERMISSION):
+        return
+    
     if message.author.bot or is_user_id_in_blacklist(message.author.id):
         return
     
@@ -220,9 +192,6 @@ async def message_create(client, message):
     
     if not is_message_action_interaction(client, referenced_message):
         return
-    
-    if not could_respond_in_channel(client, message.channel):
-        return False
     
     intended_action = get_intended_action(message)
     if (intended_action is None):

@@ -14,13 +14,13 @@ __all__ = (
 
 # Construct command
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .info import user_info_command
 from .avatar import user_avatar_command
 
 
-USER_COMMANDS = SLASH_CLIENT.interactions(
+USER_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
     name = 'user',
     description = 'User commands',

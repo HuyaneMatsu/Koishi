@@ -14,7 +14,7 @@ from ..bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__EMOJI_MANAGER
 from ..bot_utils.models import (
     DB_ENGINE, EMOJI_COUNTER_TABLE, STICKER_COUNTER_TABLE, emoji_counter_model, sticker_counter_model
 )
-from ..bots import Koishi, Satori
+from ..bots import MAIN_CLIENT, Satori
 
 
 EMOJI_ACTION_TYPE_MESSAGE_CONTENT = 1
@@ -192,7 +192,7 @@ ORDERS = [
     
 ]
 
-EMOJI_COMMANDS = Koishi.interactions(
+EMOJI_COMMANDS = MAIN_CLIENT.interactions(
     None,
     name = 'emoji',
     description = 'Emoji counter commands.',

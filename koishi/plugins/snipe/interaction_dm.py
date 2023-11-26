@@ -2,14 +2,14 @@ __all__ = ()
 
 from hata import Client, DiscordException, ERROR_CODES
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .component_translate_tables import DM_DISABLE
 from .constants import CUSTOM_ID_SNIPE_DM
 from .helpers import get_message_attachment, translate_components
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_DM)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SNIPE_DM)
 async def snipe_interaction_dm(client, event):
     """
     Dm-s the message to the user.

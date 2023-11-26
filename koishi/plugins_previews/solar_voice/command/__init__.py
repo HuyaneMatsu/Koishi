@@ -3,7 +3,7 @@ __all__ = ('COMMAND', )
 import warnings
 
 from ....bot_utils.constants import GUILD__SUPPORT
-from ....bots import SLASH_CLIENT
+from ....bots import FEATURE_CLIENTS
 
 from .behavior import *
 from .filter_add import *
@@ -24,7 +24,7 @@ from .volume import *
 
 
 
-COMMAND = SLASH_CLIENT.interactions(
+COMMAND = FEATURE_CLIENTS.interactions(
     None,
     name = 'voice',
     description = 'Voice commands',

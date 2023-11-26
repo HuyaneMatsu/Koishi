@@ -5,7 +5,7 @@ from hata.ext.slash import Form, InteractionResponse, TextInput, TextInputStyle,
 from scarletio import CancelledError
 
 from ...bot_utils.user_getter import get_user
-from ...bots import SLASH_CLIENT
+from ...bots import MAIN_CLIENT
 
 from .components_satori_auto_start import (
     COMPONENT_DELETE_CHANNEL, SATORI_CUSTOM_ID_CHANNEL_DELETE, SATORI_CUSTOM_ID_USER_BAN_RP,
@@ -115,7 +115,7 @@ def process_reason(event, reason):
     return ''.join(reason_parts)
 
 
-@SLASH_CLIENT.interactions(custom_id = SATORI_CUSTOM_ID_CHANNEL_DELETE)
+@MAIN_CLIENT.interactions(custom_id = SATORI_CUSTOM_ID_CHANNEL_DELETE)
 async def channel_delete(client, event):
     """
     Deletes the channel.
@@ -154,7 +154,7 @@ async def channel_delete(client, event):
         return
 
 
-@SLASH_CLIENT.interactions(custom_id = SATORI_CUSTOM_ID_USER_KICK_RP)
+@MAIN_CLIENT.interactions(custom_id = SATORI_CUSTOM_ID_USER_KICK_RP)
 async def user_kick_confirmation(client, event, user_id):
     """
     Returns a form to confirm the kick.
@@ -179,7 +179,7 @@ async def user_kick_confirmation(client, event, user_id):
     return create_response_form(f'Kicking {user.full_name}', 'Kick', create_satori_custom_id_user_kick(user))
 
 
-@SLASH_CLIENT.interactions(custom_id = SATORI_CUSTOM_ID_USER_KICK_RP, target = 'form')
+@MAIN_CLIENT.interactions(custom_id = SATORI_CUSTOM_ID_USER_KICK_RP, target = 'form')
 async def user_kick_execute(client, event, user_id, *, reason = None):
     """
     Executes kicking the user.
@@ -237,7 +237,7 @@ async def user_kick_execute(client, event, user_id, *, reason = None):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = SATORI_CUSTOM_ID_USER_BAN_RP)
+@MAIN_CLIENT.interactions(custom_id = SATORI_CUSTOM_ID_USER_BAN_RP)
 async def user_ban_confirmation(client, event, user_id):
     """
     Returns a form to confirm the ban.
@@ -262,7 +262,7 @@ async def user_ban_confirmation(client, event, user_id):
     return create_response_form(f'Banning {user.full_name}', 'Ban', create_satori_custom_id_user_ban(user))
 
 
-@SLASH_CLIENT.interactions(custom_id = SATORI_CUSTOM_ID_USER_BAN_RP, target = 'form')
+@MAIN_CLIENT.interactions(custom_id = SATORI_CUSTOM_ID_USER_BAN_RP, target = 'form')
 async def user_ban_execute(client, event, user_id, *, reason = None):
     """
     Executes banning the user.

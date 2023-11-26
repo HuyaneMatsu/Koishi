@@ -13,7 +13,7 @@ from sqlalchemy.sql import select, update
 
 from ..bot_utils.constants import GUILD__SUPPORT, PATH__KOISHI, EMOJI__HEART_CURRENCY
 from ..bot_utils.models import DB_ENGINE, user_common_model, item_model, ITEM_TABLE
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 ITEMS = {}
@@ -582,7 +582,7 @@ def calculate_buyable_and_cost(market_cost, n, usable):
     return n, cost
 
 
-SHOP = SLASH_CLIENT.interactions(None, 'shop', 'Witch shop ~ Nya!', guild = GUILD__SUPPORT)
+SHOP = FEATURE_CLIENTS.interactions(None, 'shop', 'Witch shop ~ Nya!', guild = GUILD__SUPPORT)
 
 @SHOP.interactions
 async def prices(client, event):

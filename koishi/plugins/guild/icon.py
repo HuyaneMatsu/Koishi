@@ -3,7 +3,7 @@ __all__ = ()
 from hata import Client
 from hata.ext.slash import abort
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .base_command import GUILD_COMMANDS
 from .constants import (
@@ -57,21 +57,21 @@ async def handle_button_click(client, event, icon_kind):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_GUILD_ICON)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_GUILD_ICON)
 async def handle_guild_icon(client, event):
     return await handle_button_click(client, event, ICON_KIND_ICON)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_GUILD_BANNER)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_GUILD_BANNER)
 async def handle_guild_banner(client, event):
     return await handle_button_click(client, event, ICON_KIND_BANNER)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_GUILD_DISCOVERY_SPLASH)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_GUILD_DISCOVERY_SPLASH)
 async def handle_guild_discovery_splash(client, event):
     return await handle_button_click(client, event, ICON_KIND_DISCOVERY_SPLASH)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_GUILD_INVITE_SPLASH)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_GUILD_INVITE_SPLASH)
 async def handle_guild_invite_splash(client, event):
     return await handle_button_click(client, event, ICON_KIND_INVITE_SPLASH)

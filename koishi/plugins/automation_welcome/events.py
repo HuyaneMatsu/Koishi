@@ -3,12 +3,12 @@ __all__ = ()
 from hata import Embed, now_as_id
 from hata.ext.slash import Button, ButtonStyle
 
-from ...bots import SLASH_CLIENT
+from ...bot_utils.multi_client_utils import get_first_client_with_message_create_permissions_from
+from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_welcome_channel_and_button_enabled
 
 from .constants import CUSTOM_ID_WELCOME_REPLY, ONBOARDING_MASK_ALL, ONBOARDING_MASK_STARTED
-from .helpers import can_send_messages
 from .welcome_styles import WELCOME_STYLE_DEFAULT
 
 
@@ -33,9 +33,6 @@ async def welcome_user(client, guild, user, welcome_style, welcome_channel, welc
     welcome_button_enabled : `bool`
         Whether welcome reply button should be added under the message.
     """
-    if not can_send_messages(welcome_channel, welcome_channel.cached_permissions_for(client)):
-        return
-    
     seed = guild.id ^ user.id
     
     message_content_builders = welcome_style.message_content_builders
@@ -68,7 +65,7 @@ async def welcome_user(client, guild, user, welcome_style, welcome_channel, welc
     )
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def guild_user_add(client, guild, user):
     """
     Handles a guild user add event.
@@ -88,6 +85,9 @@ async def guild_user_add(client, guild, user):
     if (welcome_channel is None):
         return
     
+    if client is not get_first_client_with_message_create_permissions_from(welcome_channel, FEATURE_CLIENTS):
+        return
+    
     guild_profile = user.get_guild_profile_for(guild)
     if (guild_profile is None):
         flags = 0
@@ -102,7 +102,7 @@ async def guild_user_add(client, guild, user):
     await welcome_user(client, guild, user, WELCOME_STYLE_DEFAULT, welcome_channel, welcome_button_enabled)
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def guild_user_update(client, guild, user, old_attributes):
     """
     handles a guild user profile update event.
@@ -126,6 +126,9 @@ async def guild_user_update(client, guild, user, old_attributes):
     
     # Check whether the old flags are valid.
     if old_attributes is None:
+        return
+    
+    if client is not get_first_client_with_message_create_permissions_from(welcome_channel, FEATURE_CLIENTS):
         return
     
     try:

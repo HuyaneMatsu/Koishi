@@ -13,7 +13,7 @@ from sqlalchemy.sql import desc, select
 
 from ..bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__EMOJI_MANAGER
 from ..bot_utils.models import DB_ENGINE, STICKER_COUNTER_TABLE, sticker_counter_model
-from ..bots import SLASH_CLIENT
+from ..bots import MAIN_CLIENT
 
 
 RELATIVE_MONTH = relativedelta(months = 1)
@@ -21,7 +21,7 @@ MONTH = timedelta(days = 367, hours = 6) / 12
 MOST_USED_PER_PAGE = 30
 
 
-STICKER_COMMANDS = SLASH_CLIENT.interactions(
+STICKER_COMMANDS = MAIN_CLIENT.interactions(
     None,
     name = 'sticker',
     description = 'Sticker counter commands.',

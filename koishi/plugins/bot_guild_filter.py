@@ -2,7 +2,7 @@ __all__ = ()
 
 from hata import DiscordException, ERROR_CODES, Sticker, Emoji
 
-from ..bots import Koishi
+from ..bots import FEATURE_CLIENTS
 
 
 STICKER_KOISHI_SPRING = Sticker.precreate(861178095319253002)
@@ -13,8 +13,11 @@ LEFT_GUILD_IDS = set()
 LEFT_GUILD_OWNER_IDS = set()
 
 
-@Koishi.events
+@FEATURE_CLIENTS.events
 async def guild_create(client, guild):
+    if len(guild.clients) > 1:
+        return
+    
     if guild.id in LEFT_GUILD_IDS:
         should_leave = True
         repeated_leave = True

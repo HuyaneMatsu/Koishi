@@ -3,7 +3,7 @@ __all__ = ()
 from hata import Client, DiscordException, ERROR_CODES, is_id, parse_emoji, parse_message_jump_url
 from hata.ext.slash import abort
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .cache_sticker import get_sticker
 from .choice import Choice
@@ -12,7 +12,7 @@ from .command_helpers_snipe_whole_message import respond_snipe_whole_message
 from .response_builder import build_initial_response
 
 
-SNIPE_COMMANDS = SLASH_CLIENT.interactions(
+SNIPE_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
     name = 'snipe',
     description = 'snipe emojis or stickers!',

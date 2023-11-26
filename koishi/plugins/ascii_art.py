@@ -6,7 +6,7 @@ from hata.ext.slash import InteractionResponse, abort
 from numpy import array as Array, around, uint8 as u8
 from PIL import Image, ImageOps
 
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 STYLE_NAME_CHARACTER_SHORT = 'character short'
@@ -186,7 +186,7 @@ async def get_ascii_art_of(client, image_url, scale, colored):
     return (create_colored if colored else create_grayscale)(Image.open(BytesIO(data)), scale)
 
 
-ASCII_COMMANDS = SLASH_CLIENT.interactions(
+ASCII_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
     is_global = True,
     name = 'ascii',

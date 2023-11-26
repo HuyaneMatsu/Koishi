@@ -3,10 +3,10 @@ __all__ = ()
 from hata import DATETIME_FORMAT_CODE, elapsed_time, id_to_datetime, now_as_id, parse_emoji
 from hata.ext.slash import abort
 
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
-ID_GETTER_COMMANDS = SLASH_CLIENT.interactions(
+ID_GETTER_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
     name = 'id',
     description = 'Shows the id of the selected entity',

@@ -1,9 +1,9 @@
 __all__ = ()
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 
-GUILD_COMMANDS = SLASH_CLIENT.interactions(
+GUILD_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
     name = 'guild',
     description = 'guild utility commands',

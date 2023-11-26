@@ -2,7 +2,7 @@ __all__ = ()
 
 from hata.ext.slash import InteractionResponse, P
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .anilist_api import search
 from .constants import PARAMETER_LENGTH_MAX
@@ -23,7 +23,7 @@ from .response_building_listing import (
 
 # ---- Anime ----
 
-@SLASH_CLIENT.interactions(is_global = True, name = 'anime')
+@FEATURE_CLIENTS.interactions(is_global = True, name = 'anime')
 async def show_anime(
     client,
     name_or_id: P(str, 'The anime\'s name or it\'s id.', max_length = PARAMETER_LENGTH_MAX)
@@ -70,7 +70,7 @@ async def show_anime(
     )
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def find_anime(
     client,
     name: P(str, 'The anime\'s name to try to find.', max_length = PARAMETER_LENGTH_MAX)
@@ -108,7 +108,7 @@ async def find_anime(
 # ---- Character ----
 
 
-@SLASH_CLIENT.interactions(is_global = True, name = 'character')
+@FEATURE_CLIENTS.interactions(is_global = True, name = 'character')
 async def show_character(
     client,
     name_or_id: P(str, 'The character\'s name or it\'s id.', max_length = PARAMETER_LENGTH_MAX)
@@ -155,7 +155,7 @@ async def show_character(
     )
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def find_character(
     client,
     name: P(str, 'The character\'s name to try to find.', max_length = PARAMETER_LENGTH_MAX)
@@ -193,7 +193,7 @@ async def find_character(
 # ---- Manga ----
 
 
-@SLASH_CLIENT.interactions(is_global = True, name = 'manga')
+@FEATURE_CLIENTS.interactions(is_global = True, name = 'manga')
 async def show_manga(
     client,
     name_or_id: P(str, 'The manga\'s name or it\'s id.', max_length = PARAMETER_LENGTH_MAX)
@@ -240,7 +240,7 @@ async def show_manga(
     )
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def find_manga(
     client,
     name: P(str, 'The manga\'s name to try to find.', max_length = PARAMETER_LENGTH_MAX)

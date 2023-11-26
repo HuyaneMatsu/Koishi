@@ -6,10 +6,10 @@ from hata import Client, Embed, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, E
 from hata.ext.slash import abort
 
 from ..bot_utils.constants import GUILD__SUPPORT
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
-@SLASH_CLIENT.interactions(show_for_invoking_user_only = True, is_global = True)
+@FEATURE_CLIENTS.interactions(show_for_invoking_user_only = True, is_global = True)
 async def message_me(client, event):
     """Messages you!"""
     yield
@@ -27,7 +27,7 @@ async def message_me(client, event):
     yield ':3'
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def roll(client, event,
     dice_count: ([(str(v), v) for v in range(1, 7)], 'With how much dice do you wanna roll?') = 1,
 ):
@@ -39,7 +39,7 @@ async def roll(client, event,
     return str(amount)
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def rate(client, event,
     target_user: ('user', 'Do you want me to rate someone else?') = None,
 ):
@@ -55,7 +55,7 @@ async def rate(client, event,
     return f'I rate {target_user.name_at(event.guild)} {result}/10'
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def yuno():
     """Your personal yandere!"""
     return Embed(
@@ -88,7 +88,7 @@ async def yuno():
     )
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def random_(
     n1: ('int', 'Number limit.'),
     n2: ('int', 'Other number limit!') = 0,
@@ -249,7 +249,7 @@ def generate_love_level():
 LOVE_VALUES = tuple(generate_love_level())
 del generate_love_level
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def love(client, event,
     user_1: ('user', 'Select your heart\'s chosen one!', 'user') = None,
     user_2: ('user', 'Check some else\'s love life?', 'with') = None,
@@ -290,7 +290,7 @@ EMOJI_1 = Emoji.precreate(814618830106132511, name = 'T90Salute')
 EMOJI_2 = Emoji.precreate(588052578214871053, name = 'tatohaHola')
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, show_for_invoking_user_only = True)
+@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT, show_for_invoking_user_only = True)
 async def crywolf_(client, event):
     """Crywolf is a bot"""
     yield 'crywolf is a sus'

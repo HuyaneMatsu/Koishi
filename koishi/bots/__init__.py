@@ -1,10 +1,12 @@
 __all__ = (
     'COMMAND_CLIENT',
     'MAIN_CLIENT',
-    'SLASH_CLIENT',
+    'FEATURE_CLIENTS',
 )
 
 import sys
+
+from hata import ClientWrapper
 
 import config
 
@@ -18,24 +20,31 @@ else:
 
 
 if LOAD_KOISHI:
-    from .flan import *
+    from .flandre import *
     from .koishi import *
     from .nitori import *
     from .renes import *
     from .satori import *
+    from .yoshika import *
     
     
     COMMAND_CLIENT = Satori
-    SLASH_CLIENT = Koishi
     MAIN_CLIENT = Koishi
+    
+    FEATURE_CLIENTS = ClientWrapper(
+        Flandre,
+        Koishi,
+        Yoshika,
+    )
     
     __all__ = (
         *__all__,
-        *flan.__all__,
+        *flandre.__all__,
         *koishi.__all__,
         *nitori.__all__,
         *renes.__all__,
-        *satori.__all__
+        *satori.__all__,
+        *yoshika.__all__,
     )
 
 
@@ -45,7 +54,7 @@ if LOAD_MARISA:
     
     
     COMMAND_CLIENT = Marisa
-    SLASH_CLIENT = Marisa
+    FEATURE_CLIENTS = ClientWrapper(Marisa)
     MAIN_CLIENT = Marisa
     
     __all__ = (

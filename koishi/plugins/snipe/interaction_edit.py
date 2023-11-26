@@ -3,7 +3,7 @@ __all__ = ()
 from hata import Client, DiscordException, ERROR_CODES, Emoji
 from hata.ext.slash import Form, TextInput, TextInputStyle
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .action_helpers import (
     check_emoji_guild, check_emoji_type, check_is_emoji_name_valid, check_sticker_guild, check_sticker_type_modify,
@@ -58,7 +58,7 @@ def add_change_field(embed, field_name, old_value, new_value):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_EDIT_EMOJI)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SNIPE_EDIT_EMOJI)
 async def snipe_interaction_edit_emoji(client, event):
     """
     Pops up an emoji edit form.
@@ -106,7 +106,7 @@ async def snipe_interaction_edit_emoji(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = EMOJI_EDIT_FORM_PATTERN, target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = EMOJI_EDIT_FORM_PATTERN, target = 'form')
 async def snipe_confirm_edit_emoji(client, event, emoji_id, emoji_name, emoji_animated, *, name, roles):
     """
     Handles emoji edit confirmation.
@@ -189,7 +189,7 @@ async def snipe_confirm_edit_emoji(client, event, emoji_id, emoji_name, emoji_an
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_EDIT_STICKER)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SNIPE_EDIT_STICKER)
 async def snipe_interaction_edit_sticker(client, event):
     """
     Pops up an sticker edit confirmation form.
@@ -250,7 +250,7 @@ async def snipe_interaction_edit_sticker(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = STICKER_EDIT_FORM_PATTERN, target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = STICKER_EDIT_FORM_PATTERN, target = 'form')
 async def snipe_confirm_edit_sticker(client, event, sticker_id, *, name, tags, description):
     """
     Handles sticker edit confirmation.

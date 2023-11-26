@@ -15,7 +15,7 @@ from ..bot_utils.models import (
     DB_ENGINE, DS_V2_RESULT_TABLE, DS_V2_TABLE, USER_COMMON_TABLE, ds_v2_model, ds_v2_result_model,
     get_create_common_user_expression, user_common_model
 )
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
 
 DUNGEON_SWEEPER_COLOR = Color(0xa000c4)
@@ -4588,7 +4588,7 @@ class DungeonSweeperRunner:
         return self
     
     
-    async def renew(self, event):
+    async def renew(self, new_client, event):
         """
         Renews the interaction gui creating a new message.
         
@@ -4596,6 +4596,8 @@ class DungeonSweeperRunner:
         
         Parameters
         ----------
+        new_client : ``Client``
+            The new client to work with.
         event : ``InteractionEvent``
             The received interaction event.
         """
@@ -4616,10 +4618,10 @@ class DungeonSweeperRunner:
         
         self._gui_state = GUI_STATE_SWITCHING_CONTEXT
         
-        client = self.client
+        old_client = self.client
         try:
-            await client.interaction_response_message_create(event)
-            message = await client.interaction_followup_message_create(event, embed = embed, components = components)
+            await new_client.interaction_response_message_create(event)
+            message = await new_client.interaction_followup_message_create(event, embed = embed, components = components)
         
         except BaseException as err:
             
@@ -4639,7 +4641,7 @@ class DungeonSweeperRunner:
         
         
         try:
-            await client.message_edit(self.message, components = None)
+            await old_client.message_edit(self.message, components = None)
         except BaseException as err:
             if not (
                 isinstance(err, ConnectionError) or
@@ -4653,11 +4655,12 @@ class DungeonSweeperRunner:
                     )
                 )
             ):
-                await client.events.error(client, f'{self!r}.renew', err)
+                await old_client.events.error(old_client, f'{self!r}.renew', err)
         
-        client.slasher.remove_component_interaction_waiter(self.message, self)
-        client.slasher.add_component_interaction_waiter(message, self)
+        old_client.slasher.remove_component_interaction_waiter(self.message, self)
+        new_client.slasher.add_component_interaction_waiter(message, self)
         
+        self.client = new_client
         self.message = message
         
         if self._gui_state == GUI_STATE_SWITCHING_CONTEXT:
@@ -4940,7 +4943,7 @@ class DungeonSweeperRunner:
 
 
 
-DUNGEON_SWEEPER = SLASH_CLIENT.interactions(
+DUNGEON_SWEEPER = FEATURE_CLIENTS.interactions(
     None,
     name = 'ds',
     description = 'Touhou themed puzzle game.',
@@ -4964,10 +4967,10 @@ async def play(client, event):
     if game is None:
         await DungeonSweeperRunner(client, event)
     else:
-        await game.renew(event)
+        await game.renew(client, event)
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def shutdown(client):
     tasks = []
     exception = SystemExit()

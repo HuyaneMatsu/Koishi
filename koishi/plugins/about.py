@@ -17,20 +17,17 @@ from ..bot_utils.constants import (
     LINK__KOISHI_TOP_GG, PATH__KOISHI, STARTUP
 )
 from ..bot_utils.cpu_info import CpuUsage, PROCESS
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
 
-@SLASH_CLIENT.events(name = 'interaction_create')
+@FEATURE_CLIENTS.events(name = 'interaction_create')
 class interaction_counter:
-    __slots__ = ('application_command', 'total')
+    application_command = 0
+    total = 0
     
-    def __init__(self):
-        self.application_command = 0
-        self.total = 0
-    
-    async def __call__(self, client, interaction_event):
-        self.application_command += (interaction_event.type is InteractionType.application_command)
-        self.total += 1
+    async def __new__(cls, client, interaction_event):
+        cls.application_command += (interaction_event.type is InteractionType.application_command)
+        cls.total += 1
 
 
 def create_interpreter_info():
@@ -77,32 +74,36 @@ PLATFORM_FIELD_VALUE = (
 CUSTOM_ID_ABOUT_CLOSE = 'about.close'
 
 
-ABOUT_COMPONENTS = Row(
-    Button(
+def iter_about_components(client):
+    yield Button(
         'Invite me!',
         url = (
-            f'https://discord.com/oauth2/authorize?client_id={SLASH_CLIENT.application.id}&scope=bot%20'
+            f'https://discord.com/oauth2/authorize?client_id={client.application.id}&scope=bot%20'
             f'applications.commands'
         ),
-    ),
-    Button(
-        'Vote for me!',
-        url = LINK__KOISHI_TOP_GG,
-    ),
-    Button(
+    )
+    
+    yield Button(
         'Support server',
-        url = INVITE__SUPPORT.url,
-    ),
-    # Button(
+         url = INVITE__SUPPORT.url,
+    )
+    
+    # yield Button(
     #     'Source code',
     #     url = LINK__KOISHI_GIT,
-    # ),
-    Button(
+    # )
+    
+    if client is MAIN_CLIENT:
+        yield Button(
+            'Vote for me!',
+            url = LINK__KOISHI_TOP_GG,
+        )
+    
+    yield Button(
         'Close',
         BUILTIN_EMOJIS['x'],
         custom_id = CUSTOM_ID_ABOUT_CLOSE,
     )
-)
 
 
 def count_lines_of(directory_path):
@@ -551,7 +552,7 @@ ABOUT_FIELD_NAME_TO_RENDERER = {
 }
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def about(
     client,
     event,
@@ -584,11 +585,11 @@ async def about(
     embed = await field_renderer(client, event)
     return InteractionResponse(
         embed = embed,
-        components = ABOUT_COMPONENTS,
+        components = Row(*iter_about_components(client)),
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_ABOUT_CLOSE)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ABOUT_CLOSE)
 async def about_close(client, event):
     """
     Closes the about message.

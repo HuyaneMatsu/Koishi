@@ -3,7 +3,7 @@ __all__ = ()
 from hata import Embed, ICON_TYPE_NONE
 from hata.ext.slash import InteractionResponse, Option, StringSelect, abort
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .base_command import GUILD_COMMANDS
 from .info_helpers import (
@@ -97,7 +97,7 @@ async def guild_info_slash_command(
     return await get_guild_info_response(client, event, field)
 
 
-@SLASH_CLIENT.interactions(custom_id = GUILD_INFO_SELECT_CUSTOM_ID)
+@FEATURE_CLIENTS.interactions(custom_id = GUILD_INFO_SELECT_CUSTOM_ID)
 async def guild_info_component_command(client, event):
     """
     Handles a guild info select interaction.

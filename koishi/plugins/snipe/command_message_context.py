@@ -2,12 +2,12 @@ __all__ = ()
 
 from hata import Client
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .command_helpers_snipe_whole_message import respond_snipe_whole_message
 
 
-@SLASH_CLIENT.interactions(is_global = True, target = 'message')
+@FEATURE_CLIENTS.interactions(is_global = True, target = 'message')
 async def snipe(client, event, target):
     """
     Snipes the emojis, reactions and stickers of the message.

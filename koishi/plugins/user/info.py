@@ -5,7 +5,7 @@ import re
 from hata import Embed, User
 from hata.ext.slash import Button, InteractionResponse, Row
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from ..rendering_helpers import build_guild_profile_description, build_user_description
 
@@ -61,7 +61,7 @@ async def user_info_command(
     return InteractionResponse(embed = embed, components = components)
 
 
-@SLASH_CLIENT.interactions(custom_id = re.compile(f'user\.info\.(\d+)\.{ICON_KINDS_RP_GROUP}\.{ICON_SOURCE_RP_GROUP}'))
+@FEATURE_CLIENTS.interactions(custom_id = re.compile(f'user\.info\.(\d+)\.{ICON_KINDS_RP_GROUP}\.{ICON_SOURCE_RP_GROUP}'))
 async def show_user_icon(client, event, user_id, icon_kind, icon_source):
     user_id = int(user_id)
     icon_kind = int(icon_kind)

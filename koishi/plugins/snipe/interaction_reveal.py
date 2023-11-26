@@ -2,14 +2,14 @@ __all__ = ()
 
 from hata import Client
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .component_translate_tables import REVEAL_DISABLE
 from .constants import CUSTOM_ID_SNIPE_REVEAL
 from .helpers import get_message_attachment, translate_components
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_REVEAL)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SNIPE_REVEAL)
 async def snipe_message_reveal(client, event):
     """
     Flips the interaction's message.

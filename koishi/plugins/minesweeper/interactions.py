@@ -3,7 +3,7 @@ __all__ = ()
 from hata import Client
 from hata.ext.slash import InteractionResponse
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .constants import CUSTOM_ID_CONTINUOUS_RP, CUSTOM_ID_INITIAL_RP
 from .helpers import flip_tile, generate_flipped_tiles, generate_tiles
@@ -41,7 +41,7 @@ async def check_invoking_user(client, event):
     return False
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def minesweeper(
     bomb_count: (range(4, 9), 'how much bombs should there be') = 4,
 ):
@@ -62,7 +62,7 @@ async def minesweeper(
     return InteractionResponse(components = render_initial(bomb_count))
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_INITIAL_RP)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_INITIAL_RP)
 async def flip_initial(client, event, index, bomb_count):
     """
     Executes an initial flip on the game.
@@ -94,7 +94,7 @@ async def flip_initial(client, event, index, bomb_count):
     return InteractionResponse(components = render_continuous(tiles, flipped_tiles))
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_CONTINUOUS_RP)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_CONTINUOUS_RP)
 async def flip_continuous(client, event, index):
     """
     Executes an flip on the game.

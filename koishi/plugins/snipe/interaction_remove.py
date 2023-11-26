@@ -3,7 +3,7 @@ __all__ = ()
 from hata import Client, DiscordException, ERROR_CODES, Emoji
 from hata.ext.slash import Form, TextInput, TextInputStyle
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .action_helpers import (
     check_emoji_guild, check_emoji_type, check_sticker_guild, check_sticker_type_modify, process_reason
@@ -23,7 +23,7 @@ from .helpers import (
 )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_REMOVE_EMOJI)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SNIPE_REMOVE_EMOJI)
 async def snipe_interaction_remove_emoji(client, event):
     """
     Pops up an emoji remove confirmation form.
@@ -63,7 +63,7 @@ async def snipe_interaction_remove_emoji(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = EMOJI_REMOVE_FORM_PATTERN, target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = EMOJI_REMOVE_FORM_PATTERN, target = 'form')
 async def snipe_confirm_remove_emoji(client, event, emoji_id, emoji_name, emoji_animated, *, reason):
     """
     Handles emoji remove confirmation.
@@ -137,7 +137,7 @@ async def snipe_confirm_remove_emoji(client, event, emoji_id, emoji_name, emoji_
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_REMOVE_STICKER)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SNIPE_REMOVE_STICKER)
 async def snipe_interaction_remove_sticker(client, event):
     """
     Pops up an sticker remove confirmation form.
@@ -181,7 +181,7 @@ async def snipe_interaction_remove_sticker(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = STICKER_REMOVE_FORM_PATTERN, target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = STICKER_REMOVE_FORM_PATTERN, target = 'form')
 async def snipe_confirm_remove_sticker(client, event, sticker_id, *, reason):
     """
     Handles sticker remove confirmation.

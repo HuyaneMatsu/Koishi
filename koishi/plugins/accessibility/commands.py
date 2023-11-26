@@ -2,7 +2,7 @@ __all__ = ()
 
 from hata.ext.slash import InteractionResponse, P, abort
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from ..notification_settings import (
     NOTIFICATION_SETTINGS_CHOICES, NOTIFICATION_SETTING_RESOLUTION, build_notification_settings_embed,
@@ -17,7 +17,7 @@ from ..touhou_core import (
 )
 
 
-ACCESSIBILITY_INTERACTIONS = SLASH_CLIENT.interactions(
+ACCESSIBILITY_INTERACTIONS = FEATURE_CLIENTS.interactions(
     None,
     name = 'accessibility',
     description = 'Customize your Koishi experience. (Actually just a few things.)',

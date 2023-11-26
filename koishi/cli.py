@@ -21,7 +21,7 @@ def load_plugins():
     from hata.ext.plugin_loader import add_default_plugin_variables, load_all_plugin, frame_filter, register_plugin
     from scarletio import write_exception_sync
     
-    from .bots import COMMAND_CLIENT, SLASH_CLIENT, MAIN_CLIENT
+    from .bots import COMMAND_CLIENT, FEATURE_CLIENTS, MAIN_CLIENT
     
     MARISA_MODE = config.MARISA_MODE
     
@@ -29,7 +29,7 @@ def load_plugins():
         MARISA_MODE = MARISA_MODE,
         SOLARLINK_VOICE = MARISA_MODE,
         SOLARLINK_VOICE_ENABLED = False,
-        SLASH_CLIENT = SLASH_CLIENT,
+        FEATURE_CLIENTS = FEATURE_CLIENTS,
         COMMAND_CLIENT = COMMAND_CLIENT,
         MAIN_CLIENT = MAIN_CLIENT,
     )

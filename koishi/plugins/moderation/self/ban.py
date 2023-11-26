@@ -2,7 +2,7 @@ __all__ = ()
 
 from hata import Embed
 
-from ....bots import SLASH_CLIENT
+from ....bots import FEATURE_CLIENTS
 
 from ..shared_constants import PERMISSIONS__BAN, WORD_CONFIG__BAN
 from ..shared_helpers import add_reason_field, create_auto_reason, process_reason
@@ -47,7 +47,7 @@ async def ban_command(client, event):
     return create_response_form('Self ban confirmation', 'Ban', CUSTOM_ID_SELF_BAN)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SELF_BAN, target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SELF_BAN, target = 'form')
 async def self_ban(client, event, *, reason = None):
     """Self-bans the user."""
     guild = event.guild

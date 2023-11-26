@@ -14,7 +14,7 @@ from ..bot_utils.constants import ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__BOOSTE
 from ..bot_utils.daily import VOTE_BASE, calculate_daily_new_only, DAILY_PER_DAY_BONUS_W_B, DAILY_LIMIT_BONUS_W_E, \
     DAILY_BASE_BONUS_W_HE, DAILY_LIMIT_BONUS_W_HE, DAILY_LIMIT_BONUS_W_B, DAILY_BASE, VOTE_PER_DAY, \
     DAILY_LIMIT, DAILY_PER_DAY, VOTE_BASE_BONUS_WEEKEND, VOTE_PER_DAY_BONUS_WEEKEND
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 ESCAPED_AT_SIGN = '@\u200b'
@@ -502,7 +502,7 @@ HEARTS_FIELD_NAME_TO_RENDERER = {
     HEARTS_FIELD_NAME_STATS: (False, render_hearts_stats),
 }
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def hearts(client, event,
     target_user: ('user', 'Do you wanna know some1 else\'s hearts?') = None,
     field: (HEARTS_FIELD_CHOICES, 'Choose a field!') = HEARTS_FIELD_NAME_SHORT,

@@ -6,7 +6,7 @@ from hata import Permission
 from hata.ext.slash import abort, InteractionResponse
 
 from ..bot_utils.constants import GUILD__SUPPORT
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 SPACE_RP = re.compile('[ \t]+')
@@ -1692,7 +1692,7 @@ def bozosort(text):
     return output
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     guild = GUILD__SUPPORT,
     target = 'message',
     required_permissions = Permission().update_by_keys(manage_messages = True),

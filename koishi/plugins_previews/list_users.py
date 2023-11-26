@@ -7,7 +7,7 @@ from hata import Permission, Embed, datetime_to_timestamp
 from hata.ext.slash import P, abort, InteractionResponse
 
 from ..bot_utils.constants import GUILD__SUPPORT
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 def iter_users(guild, offset, limit):
@@ -388,7 +388,7 @@ def create_csv_data(guild, offset, limit, serialisation):
 SERIALIZATION_MODES = ['koishi.json', 'discord.json', 'koishi.csv', 'discord.csv']
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     guild = GUILD__SUPPORT,
     allow_in_dm = False,
     required_permissions = Permission().update_by_keys(manage_messages = True),

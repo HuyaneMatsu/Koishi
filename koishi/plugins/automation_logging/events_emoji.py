@@ -1,15 +1,18 @@
 __all__ = ()
 
-from hata import Client, DiscordException, ERROR_CODES
+from hata import Client, DiscordException, ERROR_CODES, GUILDS
 
-from ...bots import SLASH_CLIENT
+from ...bot_utils.multi_client_utils import (
+    get_first_client_in_guild_from, get_first_client_with_message_create_permissions_from
+)
+from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import AUTOMATION_CONFIGURATIONS, get_log_emoji_channel
 
 from .embed_builder_emoji import build_emoji_create_embed, build_emoji_delete_embed, build_emoji_update_embed
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def emoji_create(client, emoji):
     """
     Handles a emoji create event. If the emoji's guild has emoji logging setup, sends a message there.
@@ -25,6 +28,9 @@ async def emoji_create(client, emoji):
     """
     channel = get_log_emoji_channel(emoji.guild_id)
     if (channel is None):
+        return
+    
+    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
         return
     
     # We get the creator of the emoji.
@@ -46,7 +52,7 @@ async def emoji_create(client, emoji):
     )
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def emoji_update(client, emoji, old_attributes):
     """
     Handles a emoji edit event. If the emoji's guild has emoji logging setup, sends a message there.
@@ -66,6 +72,9 @@ async def emoji_update(client, emoji, old_attributes):
     if (channel is None):
         return
     
+    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
+        return
+    
     await client.message_create(
         channel,
         embed = build_emoji_update_embed(emoji, old_attributes),
@@ -73,7 +82,7 @@ async def emoji_update(client, emoji, old_attributes):
     )
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def emoji_delete(client, emoji):
     """
     Handles a emoji delete event. If the emoji's guild has emoji logging setup, sends a message there.
@@ -91,6 +100,9 @@ async def emoji_delete(client, emoji):
     if (channel is None):
         return
     
+    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
+        return
+    
     await client.message_create(
         channel,
         embed = build_emoji_delete_embed(emoji),
@@ -98,7 +110,7 @@ async def emoji_delete(client, emoji):
     )
 
 
-@SLASH_CLIENT.events(name = 'ready')
+@FEATURE_CLIENTS.events(name = 'ready')
 async def initial_request_emmojis(client):
     """
     Requests the emojis of the guild where emoji logging is set up. On success removes itself from the events.
@@ -115,7 +127,9 @@ async def initial_request_emmojis(client):
             automation_configuration for automation_configuration in AUTOMATION_CONFIGURATIONS.values()
             if automation_configuration.log_emoji_channel_id
         ]:
-            await client.emoji_guild_get_all(automation_configuration.guild_id)
+            guild = GUILDS.get(automation_configuration.guild_id, None)
+            if (guild is not None) and (client is get_first_client_in_guild_from(guild, FEATURE_CLIENTS)):
+                await client.emoji_guild_get_all(guild)
     except ConnectionError:
         # No internet connection
         return

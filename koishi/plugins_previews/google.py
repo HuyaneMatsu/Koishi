@@ -9,7 +9,7 @@ from scarletio import Lock
 from config import GOOGLE_API_KEYS
 
 from ..bot_utils.constants import GUILD__SUPPORT
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
 
 require(GOOGLE_API_KEYS = list)
@@ -18,7 +18,7 @@ require(GOOGLE_API_KEYS = list)
 GOOGLE_FAVICON = 'https://image.flaticon.com/teams/slug/google.jpg'
 API_URL = 'https://www.googleapis.com/customsearch/v1'
 
-HTTP_CLIENT = SLASH_CLIENT.http
+HTTP_CLIENT = MAIN_CLIENT.http
 
 class ApiKeyTracker:
     __slots__ = ('api_key', 'lock', 'rate_limited', 'reset_at', )
@@ -163,7 +163,7 @@ def create_search_results(data, image_search):
     return results
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
+@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT)
 async def google(client, event, query:(str, 'query')):
     yield
     

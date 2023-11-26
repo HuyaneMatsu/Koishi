@@ -3,7 +3,7 @@ __all__ = ()
 from hata import ChannelType, Client, DiscordException, ERROR_CODES
 from scarletio import CancelledError
 
-from ...bots import SLASH_CLIENT
+from ...bots import MAIN_CLIENT
 
 from ..automation_core import (
     clear_satori_channel, clear_satori_channels, discover_satori_channels, get_log_satori_channel,
@@ -16,7 +16,7 @@ from .embed_builder_guild_profile import build_guild_profile_update_embed
 from .embed_builder_satori import build_presence_update_embeds
 from .embed_builder_satori_start import build_satori_auto_start_embeds
 
-
+# Only added for 1 client.
 # Hata best wrapper
 
 def setup(module):
@@ -28,7 +28,7 @@ def setup(module):
     module : ``ModuleType``
         This module.
     """
-    if SLASH_CLIENT.running:
+    if MAIN_CLIENT.running:
         discover_satori_channels()
 
 
@@ -44,7 +44,7 @@ def teardown(module):
     clear_satori_channels()
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def ready(client):
     """
     Handles a ready event. Resets all satori channels.
@@ -59,7 +59,7 @@ async def ready(client):
     reset_satori_channels()
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def guild_delete(client, guild, guild_profile):
     """
     Handles a guild delete event. Removes all of it
@@ -75,12 +75,16 @@ async def guild_delete(client, guild, guild_profile):
     guild_profile : `None`, ``GuildProfile``
         The client's guild profile at the guild.
     """
+    # Do nothing if the guild has clients left.
+    if guild.cients:
+        return
+    
     satori_channel = get_log_satori_channel(guild.id)
     if (satori_channel is not None):
         clear_satori_channel(satori_channel)
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def channel_delete(client, channel):
     """
     Handles a channel delete event. Removes the channel from watchers if present.
@@ -105,7 +109,7 @@ async def channel_delete(client, channel):
         remove_watcher_channel(channel.id, user_id)
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def channel_create(client, channel):
     """
     Handles a channel create event. Registers the channel as a watchers if applicable.
@@ -138,7 +142,7 @@ async def channel_create(client, channel):
     await create_initial_message(client, channel, user_id)
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def channel_edit(client, channel, old_attributes):
     """
     Handles a channel edition event.
@@ -213,7 +217,7 @@ async def channel_edit(client, channel, old_attributes):
             await create_initial_message(client, channel, user_id)
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def user_presence_update(client, user, old_attributes):
     """
     Handles a user presence update event. If the user is watched sends a message to every watching channel.
@@ -263,7 +267,7 @@ async def user_presence_update(client, user, old_attributes):
             continue
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def guild_user_add(client, guild, user):
     """ 
     Handles a user guild add event. If the guild has satori channel set with auto start then creates a new channel for
@@ -384,7 +388,7 @@ async def create_initial_message(client, channel, user_id):
         return
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def guild_user_update(client, guild, user, old_attributes):
     """
     Handles a user guild profile update event. If the user is watched sends a message to every watching channel.

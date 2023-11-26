@@ -2,7 +2,7 @@ __all__ = ()
 
 from random import choice, random
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from ..blacklist_core import is_user_id_in_blacklist
 
@@ -10,7 +10,7 @@ from .chat_interactions import CHAT_INTERACTIONS
 from .constants import ALLOWED_GUILD_IDS, TRIGGER_CHANCE
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def message_create(client, message):
     """
     Client message create event handler.

@@ -8,7 +8,7 @@ from ..bot_utils.constants import (
     EMOJI__HEART_CURRENCY, MAX_WAIFU_SLOTS, WAIFU_SLOT_2_COST, WAIFU_SLOT_COSTS, WAIFU_SLOT_COST_DEFAULT
 )
 from ..bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, user_common_model
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 EMOJI_YES = Emoji.precreate(990558169963049041)
@@ -49,7 +49,7 @@ BUY_WAIFU_SLOT_INVOKE_COMPONENT = Button(
 )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_BUY_WAIFU_SLOT_INVOKE)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_BUY_WAIFU_SLOT_INVOKE)
 async def buy_waifu_slot_in_inline(event):
     if event.message.interaction.user is event.user:
         return await buy_waifu_slot_invoke(event)
@@ -119,7 +119,7 @@ async def buy_waifu_slot_invoke(event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_BUY_WAIFU_SLOT_CANCEL)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_BUY_WAIFU_SLOT_CANCEL)
 async def buy_marriage_slot_cancel(event):
     if event.user is not event.message.interaction.user:
         return
@@ -132,7 +132,7 @@ async def buy_marriage_slot_cancel(event):
         components = None,
     )
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_BUY_WAIFU_SLOT_CONFIRM)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_BUY_WAIFU_SLOT_CONFIRM)
 async def buy_marriage_slot_confirm(event):
     user = event.user
     if user is not event.message.interaction.user:

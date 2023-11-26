@@ -2,7 +2,7 @@ __all__ = ()
 
 from re import compile as re_compile, escape as re_escape
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_touhou_feed_enabled
 
@@ -16,7 +16,7 @@ from .constants import (
 
 # ---- about ----
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_ABOUT_MAIN)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ABOUT_MAIN)
 async def response_about_main(client, event):
     """
     Handles `about.main` component click.
@@ -38,7 +38,7 @@ async def response_about_main(client, event):
         return create_about_main(client, event)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_ABOUT_EXAMPLES)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ABOUT_EXAMPLES)
 async def response_about_examples(client, event):
     """
     Handles `about.examples` component click.
@@ -60,7 +60,7 @@ async def response_about_examples(client, event):
         return create_about_examples(client, event)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_ABOUT_INTERVAL)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ABOUT_INTERVAL)
 async def response_about_interval(client, event):
     """
     Handles `about.interval` component click.
@@ -84,7 +84,7 @@ async def response_about_interval(client, event):
 
 # ---- listing ----
 
-@SLASH_CLIENT.interactions(custom_id = [CUSTOM_ID_PAGE_PREVIOUS_DISABLED, CUSTOM_ID_PAGE_NEXT_DISABLED])
+@FEATURE_CLIENTS.interactions(custom_id = [CUSTOM_ID_PAGE_PREVIOUS_DISABLED, CUSTOM_ID_PAGE_NEXT_DISABLED])
 async def disabled_page_move():
     """
     Called when a disabled page-move is clicked. Does nothing.
@@ -94,7 +94,7 @@ async def disabled_page_move():
     pass
 
 
-@SLASH_CLIENT.interactions(custom_id = re_compile(re_escape(CUSTOM_ID_PAGE_BASE) + '(\d+)'))
+@FEATURE_CLIENTS.interactions(custom_id = re_compile(re_escape(CUSTOM_ID_PAGE_BASE) + '(\d+)'))
 async def page_move(client, event, page):
     """
     Called when a disabled page-move is clicked. Does nothing.
@@ -119,7 +119,7 @@ async def page_move(client, event, page):
         return build_touhou_feed_listing_response(client, guild, int(page), get_touhou_feed_enabled(guild.id))
 
 
-@SLASH_CLIENT.interactions(custom_id = re_compile(re_escape(CUSTOM_ID_REFRESH_BASE) + '(\d+)'))
+@FEATURE_CLIENTS.interactions(custom_id = re_compile(re_escape(CUSTOM_ID_REFRESH_BASE) + '(\d+)'))
 async def page_refresh(client, event, page):
     """
     Refreshes the current page.
@@ -144,7 +144,7 @@ async def page_refresh(client, event, page):
         return build_touhou_feed_listing_response(client, guild, int(page), get_touhou_feed_enabled(guild.id))
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_CLOSE)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_CLOSE)
 async def close_message(client, event):
     """
     Closes the message.

@@ -3,7 +3,7 @@ __all__ = ()
 from hata import Channel, ChannelType, Client, Permission, Role
 from hata.ext.slash import P, abort
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import (
     clear_satori_channel, delete_automation_configuration_of, discover_satori_channel, get_automation_configuration_for,
@@ -23,7 +23,7 @@ from .permission_checks import (
 from .list_all import build_response_list_all
 
 
-AUTOMATION_COMMANDS = SLASH_CLIENT.interactions(
+AUTOMATION_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
     name = 'automation',
     description = 'Automate with koishi ',
@@ -31,7 +31,7 @@ AUTOMATION_COMMANDS = SLASH_CLIENT.interactions(
     required_permissions = Permission().update_by_keys(administrator = True),
 )
 
-AUTOMATION_COMMANDS_SATORI = SLASH_CLIENT.interactions(
+AUTOMATION_COMMANDS_SATORI = FEATURE_CLIENTS.interactions(
     None,
     name = 'automation',
     description = 'Automate with koishi ',

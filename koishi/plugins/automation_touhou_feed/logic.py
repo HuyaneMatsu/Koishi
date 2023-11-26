@@ -6,7 +6,10 @@ from random import choice, random
 from hata import Client, DiscordException, ERROR_CODES, Embed, KOKORO, now_as_id
 from scarletio import CancelledError, LOOP_TIME, Task
 
-from ...bots import SLASH_CLIENT
+from ...bot_utils.multi_client_utils import (
+    get_first_client_in_guild_from, get_first_client_with_message_create_permissions_from
+)
+from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_touhou_feed_enabled
 from ..touhou_core import TouhouHandlerKey, get_touhou_character_like, parse_touhou_characters_from_tags
@@ -464,11 +467,16 @@ class Feeder:
         
         This method is a coroutine.
         """
+        client = get_first_client_with_message_create_permissions_from(self.channel, FEATURE_CLIENTS)
+        if client is None:
+            self.cancel()
+            return
+        
         try:
             # SKip images if there are too many characters on it. Do 5 retries.
             retries = 5
             while True:
-                image_detail = await choice(self.handler_keys).get_handler().get_image(SLASH_CLIENT, None)
+                image_detail = await choice(self.handler_keys).get_handler().get_image(client, None)
                 if (image_detail is None):
                     return
                 
@@ -494,7 +502,7 @@ class Feeder:
             )
             
             try:
-                await SLASH_CLIENT.message_create(self.channel, embed = embed)
+                await client.message_create(self.channel, embed = embed)
             except ConnectionError:
                 pass
             
@@ -516,7 +524,7 @@ class Feeder:
             raise
         
         except BaseException as err:
-            await SLASH_CLIENT.events.error(SLASH_CLIENT, repr(self), err)
+            await client.events.error(client, repr(self), err)
 
 
 def try_update_channel(channel):
@@ -575,8 +583,6 @@ def try_remove_guild(guild):
     
     Parameters
     ----------
-    client : ``Client``
-        The client who would post.
     guild : ``Guild``
         The guild to scan.
     """
@@ -593,10 +599,15 @@ def reset_touhou_feeders(client):
     client : ``Client``
         The client who would post.
     """
-    for guild in SLASH_CLIENT.guilds:
-        if get_touhou_feed_enabled(guild.id):
-            for channel in chain(guild.channels.values(), guild.threads.values()):
-                reset_channel_single(client, channel)
+    for guild in client.guilds:
+        if client is not get_first_client_in_guild_from(guild, FEATURE_CLIENTS):
+            continue
+        
+        if not get_touhou_feed_enabled(guild.id):
+            continue
+            
+        for channel in chain(guild.channels.values(), guild.threads.values()):
+            reset_channel_single(client, channel)
 
 
 def reset_channel(client, channel):
@@ -644,7 +655,8 @@ def setup(lib):
     lib : `ModuleType`
         This module.
     """
-    reset_touhou_feeders(SLASH_CLIENT)
+    for client in FEATURE_CLIENTS:
+        reset_touhou_feeders(client)
 
 
 def teardown(lib):

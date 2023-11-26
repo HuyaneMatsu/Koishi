@@ -6,7 +6,7 @@ from random import choice, randint, shuffle
 from hata import BUILTIN_EMOJIS, Color, Embed, Emoji
 from hata.ext.slash import Button, ButtonStyle, InteractionResponse, Row
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .category import CATEGORIES
 from .item import ITEMS
@@ -279,7 +279,7 @@ async def send_user_mismatch_notification(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def trivia(
     event,
     category_id: (CATEGORY_NAME_TO_ID, 'Choose a category.', 'category') = CATEGORY_KOISHI_ALL.id,
@@ -310,7 +310,7 @@ async def trivia(
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = OPTION_PATTERN)
+@FEATURE_CLIENTS.interactions(custom_id = OPTION_PATTERN)
 async def trivia_select(client, event, user_id_string, category_id_string, item_id_string, selected_option_id_string):
     """
     Handles when an option is selected.
@@ -375,7 +375,7 @@ async def trivia_select(client, event, user_id_string, category_id_string, item_
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = NEW_PATTERN)
+@FEATURE_CLIENTS.interactions(custom_id = NEW_PATTERN)
 async def trivia_new(client, event, user_id_string, category_id_string, item_id_string):
     """
     Shows a new trivia.

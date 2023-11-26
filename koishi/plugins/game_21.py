@@ -12,7 +12,7 @@ from sqlalchemy.sql import select
 
 from ..bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE
 from ..bot_utils.constants import EMOJI__HEART_CURRENCY, IN_GAME_IDS, COLOR__GAMBLING
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 
@@ -43,7 +43,7 @@ DECK_SIZE   = len(CARD_TYPES) * len(CARD_NUMBERS)
 ACE_INDEX   = len(CARD_NUMBERS) - 1
 BET_MIN     = 10
 
-@SLASH_CLIENT.interactions(name = '21', is_global = True)
+@FEATURE_CLIENTS.interactions(name = '21', is_global = True)
 async def game_21(client, event,
     amount : ('int', 'The amount of hearts to bet'),
     mode : ([('single-player', 'sg'), ('multi-player', 'mp')], 'Game mode, yayyy') = 'sg',

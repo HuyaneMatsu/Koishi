@@ -13,7 +13,7 @@ from ..bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, 
     ds_v2_result_model, DS_V2_RESULT_TABLE
 from ..bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, IN_GAME_IDS,  COLOR__GAMBLING
 from ..bot_utils.daily import calculate_daily_new_only
-from ..bots import SLASH_CLIENT
+from ..bots import MAIN_CLIENT
 
 WAIFU_STATE_NONE = 0
 WAIFU_STATE_KEEP = 1
@@ -28,7 +28,7 @@ def assert_required_permission(event):
         abort('You must have administrator permission to invoke this command.')
 
 
-TRANSFER = SLASH_CLIENT.interactions(
+TRANSFER = MAIN_CLIENT.interactions(
     None,
     name = 'transfer',
     description = 'Transfers all of someone\'s hearts to an other person.',

@@ -7,7 +7,7 @@ from hata import KOKORO, DiscordException, ERROR_CODES, InviteTargetType, Embed,
 from hata.ext.slash import abort
 
 from ..bot_utils.constants import GUILD__SUPPORT
-from ..bots import SLASH_CLIENT
+from ..bots import MAIN_CLIENT
 
 
 CACHING_INTERVAL = 8 * 60.0 * 60.0 # 8 hour
@@ -38,7 +38,7 @@ def clear_cache():
 def cache_guilds():
     guilds = []
     
-    for guild in SLASH_CLIENT.guilds:
+    for guild in MAIN_CLIENT.guilds:
         if guild.owner_id not in GUILD__SUPPORT.users:
             continue
         
@@ -122,7 +122,7 @@ async def build_guild_embed(guild):
     
     approximate_user_count = guild.approximate_user_count
     if approximate_user_count == 0:
-        await SLASH_CLIENT.guild_get(guild)
+        await MAIN_CLIENT.guild_get(guild)
         approximate_user_count = guild.approximate_user_count
     
     if invite_url is None:
@@ -210,12 +210,12 @@ async def try_get_invite_url_of(guild):
     if (invite_url is not None):
         return invite_url
     
-    if not guild.cached_permissions_for(SLASH_CLIENT).can_create_instant_invite:
+    if not guild.cached_permissions_for(MAIN_CLIENT).can_create_instant_invite:
         return None
     
     
     try:
-        invites = await SLASH_CLIENT.invite_get_all_guild(guild)
+        invites = await MAIN_CLIENT.invite_get_all_guild(guild)
     except ConnectionError:
         raise
     
@@ -231,7 +231,7 @@ async def try_get_invite_url_of(guild):
     
     
     for invite in invites:
-        if invite.inviter is not SLASH_CLIENT:
+        if invite.inviter is not MAIN_CLIENT:
             continue
         
         if invite.type is not InviteTargetType.none:
@@ -250,7 +250,7 @@ async def try_get_invite_url_of(guild):
     return None
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@MAIN_CLIENT.interactions(is_global = True)
 class koi_guilds:
     NEXT_CACHE_AT = 0.0
     
@@ -275,7 +275,7 @@ class koi_guilds:
 EMOJI_KOISHI_DERP = Emoji.precreate(772498743378575403)
 
 
-@SLASH_CLIENT.interactions(
+@MAIN_CLIENT.interactions(
     is_global = True,
     required_permissions = Permission().update_by_keys(administrator = True),
 )
@@ -303,7 +303,7 @@ async def koi_guilds_how_to(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(
+@MAIN_CLIENT.interactions(
     guild = GUILD__SUPPORT,
     required_permissions = Permission().update_by_keys(administrator = True),
 )

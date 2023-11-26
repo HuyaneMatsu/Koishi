@@ -12,7 +12,7 @@ from sqlalchemy.exc import OperationalError
 
 from ..bot_utils.models import DB_ENGINE, TODO_TABLE, todo_model
 from ..bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__TESTER
-from ..bots import SLASH_CLIENT
+from ..bots import MAIN_CLIENT
 
 
 require(DB_ENGINE = KOKOROEngine)
@@ -213,7 +213,7 @@ def create_entry_embed(entry, user):
     )
 
 
-TODO = SLASH_CLIENT.interactions(
+TODO = MAIN_CLIENT.interactions(
     None,
     name = 'todo',
     description = 'Todo list for koishi',
@@ -245,7 +245,7 @@ async def add(event):
     return ADD_TODO_FORM
 
 
-@SLASH_CLIENT.interactions(custom_id = TODO_FORM_SUBMIT_CUSTOM_ID, target = 'form')
+@MAIN_CLIENT.interactions(custom_id = TODO_FORM_SUBMIT_CUSTOM_ID, target = 'form')
 async def todo_add_form_submit(
     event,
     *,
@@ -396,7 +396,7 @@ async def del_(
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = DELETE_ENTRY_RP)
+@MAIN_CLIENT.interactions(custom_id = DELETE_ENTRY_RP)
 async def del_approval(
     client,
     event,
@@ -465,7 +465,7 @@ async def edit(
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_EDIT_RP, target = 'form')
+@MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_EDIT_RP, target = 'form')
 async def edit_form_submit(
     client,
     entry_id,

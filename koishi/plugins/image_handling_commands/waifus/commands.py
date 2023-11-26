@@ -2,7 +2,7 @@ __all__ = ()
 
 from itertools import chain
 
-from ....bots import SLASH_CLIENT
+from ....bots import FEATURE_CLIENTS
 
 from .waifu import Waifu
 
@@ -26,7 +26,7 @@ SAFE_HANDLERS = {waifu_type: Waifu(waifu_type, False) for waifu_type in SAFE_WAI
 NSFW_HANDLERS = {waifu_type: Waifu(waifu_type, True ) for waifu_type in NSFW_WAIFU_TYPES}
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def waifu_safe(
     client,
     event,
@@ -36,7 +36,7 @@ async def waifu_safe(
     await SAFE_HANDLERS[type_](client, event)
 
 
-@SLASH_CLIENT.interactions(is_global = True, nsfw = True)
+@FEATURE_CLIENTS.interactions(is_global = True, nsfw = True)
 async def waifu_nsfw(
     client,
     event,
@@ -48,7 +48,7 @@ async def waifu_nsfw(
 
 
 for waifu in chain(SAFE_HANDLERS.values(), NSFW_HANDLERS.values()):
-    SLASH_CLIENT.interactions(waifu.get_renew_command(), custom_id = waifu.custom_id)
+    FEATURE_CLIENTS.interactions(waifu.get_renew_command(), custom_id = waifu.custom_id)
 
 waifu = None
 del waifu

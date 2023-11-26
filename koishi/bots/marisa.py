@@ -6,19 +6,17 @@ from time import perf_counter
 
 from hata import (
     CHANNELS, Client, ClientWrapper, DiscordException, ERROR_CODES, Embed, GUILDS, IntentFlag, KOKORO, Locale,
-    cchunkify
 )
 from hata.ext.commands_v2 import checks
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import abort, set_permission
 from hata.ext.slash.menus import Pagination
-from scarletio import alchemy_incendiary, render_exception_into_async
-from scarletio.utils.trace import render_exception_into
+from scarletio import render_exception_into_async
 
 import config
+
 from ..bot_utils.constants import (
-    CHANNEL__SUPPORT__DEFAULT_TEST, COLOR__MARISA_HELP, DEFAULT_CATEGORY_NAME, GUILD__SUPPORT, PREFIX__MARISA,
-    ROLE__SUPPORT__TESTER
+    COLOR__MARISA_HELP, DEFAULT_CATEGORY_NAME, GUILD__SUPPORT, PREFIX__MARISA, ROLE__SUPPORT__TESTER
 )
 from ..bot_utils.interpreter_v2 import Interpreter
 from ..bot_utils.syncer import sync_request_command
@@ -242,30 +240,6 @@ Marisa.commands(
 )
 
 Marisa.commands(sync_request_command, name = 'sync', category = 'UTILITY', checks = [checks.owner_only()])
-
-@ALL.events(overwrite = True)
-async def error(client, name, err):
-    extracted = [
-        client.full_name,
-        ' ignores occurred exception at ',
-        name,
-        '\n',
-    ]
-    
-    if isinstance(err, BaseException):
-        await KOKORO.run_in_executor(alchemy_incendiary(render_exception_into, (err, extracted)))
-    else:
-        if not isinstance(err, str):
-            err = repr(err)
-        
-        extracted.append(err)
-        extracted.append('\n')
-    
-    extracted = ''.join(extracted).split('\n')
-    for chunk in cchunkify(extracted, lang = 'py'):
-        await client.message_create(CHANNEL__SUPPORT__DEFAULT_TEST, chunk)
-
-
 
 # You might wanna add `-tag`-s to surely avoid nsfw pictures
 SAFE_BOORU = 'http://safebooru.org/index.php?page=dapi&s=post&q=index&tags='

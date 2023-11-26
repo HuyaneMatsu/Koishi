@@ -3,7 +3,7 @@ __all__ = ()
 from hata import DiscordException, ERROR_CODES, Permission, is_id
 from hata.ext.slash import abort
 
-from ....bots import SLASH_CLIENT
+from ....bots import FEATURE_CLIENTS
 
 from ..checks import check_move_permissions
 from ..constants import ALLOWED_GUILDS
@@ -15,17 +15,17 @@ from .constants import (
 from .context import MessageMoverContext
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_SUBMIT)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_SUBMIT)
 async def submit_message_mover(event):
     await maybe_call_message_mover_method(event, MessageMoverContext.submit)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_CANCEL)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_CANCEL)
 async def cancel_message_mover(event):
     await maybe_call_message_mover_method(event, MessageMoverContext.cancel)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_CLOSE)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_CLOSE)
 async def close_message_mover(client, event):
     if event.user_permissions.can_manage_messages:
         await client.interaction_component_acknowledge(event)
@@ -44,7 +44,7 @@ async def maybe_call_message_mover_method(event, function):
         await function(message_mover_context, event)
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     guild = ALLOWED_GUILDS,
     required_permissions = Permission().update_by_keys(manage_messages = True),
 )
@@ -67,7 +67,7 @@ async def move_messages(
     await context.start()
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     guild = ALLOWED_GUILDS,
     required_permissions = Permission().update_by_keys(manage_messages = True),
     target = 'message',
@@ -80,13 +80,13 @@ async def add_to_move_group(
     await add_message_to_move_group(event, message)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID)
 async def add_message_by_id_button_click(event):
     if event.user_permissions.can_manage_messages:
         return MESSAGE_MOVER_ADD_BY_ID_FORM
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID, target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID, target = 'form')
 async def add_message_by_id_form_submit(client, event, *, message_id):
     if not is_id(message_id):
         abort(f'Please submit a message\'s id.')

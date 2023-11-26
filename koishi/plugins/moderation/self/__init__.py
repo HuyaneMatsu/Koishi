@@ -13,14 +13,14 @@ __all__ = (
 
 # Construct command
 
-from ....bots import SLASH_CLIENT
+from ....bots import FEATURE_CLIENTS
 
 from .ban import ban_command
 from .kick import kick_command
 from .mute import mute_command
 
 
-MAIN_COMMAND = SLASH_CLIENT.interactions(
+MAIN_COMMAND = FEATURE_CLIENTS.interactions(
     None,
     name = 'self-mod',
     description = 'Moderate yourself?!',

@@ -5,13 +5,13 @@ from datetime import datetime as DateTime
 
 from hata import Client
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .constants import CUSTOM_ID_BACK_DISABLED, CUSTOM_ID_CLOSE, CUSTOM_ID_NEXT_DISABLED
 from .response_building import get_response_for_year
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def touhou_calendar():
     """
     Returns the touhou calendar for the current year.
@@ -30,7 +30,7 @@ async def touhou_calendar():
     return get_response_for_year(DateTime.utcnow().year)
 
 
-@SLASH_CLIENT.interactions(custom_id = re.compile('touhou_calendar.year.(\d+)'))
+@FEATURE_CLIENTS.interactions(custom_id = re.compile('touhou_calendar.year.(\d+)'))
 async def touhou_calendar_page(client, event, year):
     """
     Returns the touhou calendar for the given year.
@@ -62,7 +62,7 @@ async def touhou_calendar_page(client, event, year):
     return get_response_for_year(int(year))
 
 
-@SLASH_CLIENT.interactions(custom_id = [CUSTOM_ID_BACK_DISABLED, CUSTOM_ID_NEXT_DISABLED])
+@FEATURE_CLIENTS.interactions(custom_id = [CUSTOM_ID_BACK_DISABLED, CUSTOM_ID_NEXT_DISABLED])
 async def touhou_calendar_page_disabled():
     """
     Handles a disabled component click. So does nothing.
@@ -71,7 +71,7 @@ async def touhou_calendar_page_disabled():
     """
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_CLOSE)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_CLOSE)
 async def touhou_calendar_close(client, event):
     """
     Deletes the calendar message if applicable.

@@ -5,7 +5,7 @@ from hata.discord.utils import timestamp_to_datetime
 from hata.ext.slash import abort
 from scarletio.web_common import quote
 
-from ..bots import SLASH_CLIENT
+from ..bots import MAIN_CLIENT
 
 
 URBAN_DICTIONARY_API_URL = 'https://api.urbandictionary.com/v0/define'
@@ -94,7 +94,7 @@ def embrace_urban_markdown(text, text_length_limit):
     return ''.join(string_parts_connectible)
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@MAIN_CLIENT.interactions(is_global = True)
 async def urban(
     client,
     event,

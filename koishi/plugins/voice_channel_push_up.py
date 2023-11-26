@@ -3,8 +3,9 @@ __all__ = ()
 from hata import Guild, Channel, CHANNELS, KOKORO
 from scarletio import Lock, Task
 
-from ..bots import SLASH_CLIENT
+from ..bots import MAIN_CLIENT
 
+# Only registered into the main client.
 
 GUILD__KOISHI_CLAN = Guild.precreate(866746184990720020)
 CATEGORY__VOICE = Channel.precreate(914407653114011648)
@@ -100,7 +101,7 @@ async def update_channel_push_up( channel):
                 else:
                     handle.cancel()
                 
-                await SLASH_CLIENT.channel_edit(channel, position = 0, parent_id = 0)
+                await MAIN_CLIENT.channel_edit(channel, position = 0, parent_id = 0)
         
         else:
             if (not channel.parent_id) and (channel.id not in PULL_DOWN_HANDLES):
@@ -141,10 +142,10 @@ async def pull_down(channel):
     else:
         target_category = CATEGORY__VOICE
     
-    await SLASH_CLIENT.channel_edit(channel, position = 0, parent_id = target_category)
+    await MAIN_CLIENT.channel_edit(channel, position = 0, parent_id = target_category)
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def ready(client):
     """
     Handles a ready event of the client.
@@ -163,7 +164,7 @@ async def ready(client):
             await update_channel_push_up(channel)
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def user_voice_join(client, voice_state):
     """
     Handles a user voice channel join event.
@@ -189,7 +190,7 @@ async def user_voice_join(client, voice_state):
         await update_channel_push_up(channel)
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def user_voice_move(client, voice_state, channel_id):
     """
     Handles a user voice move event.
@@ -225,7 +226,7 @@ async def user_voice_move(client, voice_state, channel_id):
             await update_channel_push_up(channel)
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def user_voice_leave(client, voice_state, channel_id):
     """
     Handles a user voice channel leave event.
@@ -253,7 +254,7 @@ async def user_voice_leave(client, voice_state, channel_id):
         await update_channel_push_up(channel)
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def user_voice_update(client, voice_state, old_attributes):
     """
     Handles a user voice state update event.

@@ -20,8 +20,9 @@ Renes = Client(
 
 STREAM_PING_DIFFERENCE = 10.0 * 60.0 # 10 min
 EST_DEFAULT_IMAGE_URL = 'https://cdn.discordapp.com/attachments/568837922288173058/1043516469218119791/est-0001.png'
-EST_STREAMING_SETUP_IMAGE_URL = \
+EST_STREAMING_SETUP_IMAGE_URL = (
     'https://cdn.discordapp.com/attachments/568837922288173058/984793641254015016/est-alice-streaming-0000-cut-0000.png'
+)
 INVITE_MAX_AGE = 24 * 60 * 60 # 1 day
 
 

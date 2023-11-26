@@ -4,7 +4,7 @@ from scarletio import to_coroutine
 from hata import Embed
 from hata.ext.solarlink import TRACK_END_REASONS
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .constants import EMBED_COLOR, EMOJI_LAST_TRACK, EMOJI_CURRENT_TRACK, LEAVE_TIMEOUT
 from .helpers import create_track_short_field_description
@@ -39,7 +39,7 @@ async def notify_leave(client, player):
     await client.message_create(channel, embed = embed)
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def track_end(client, event):
     if event.reason != TRACK_END_REASONS.finished:
         return
@@ -73,7 +73,7 @@ async def track_end(client, event):
     )
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def track_exception(client, event):
     old_track = event.track
     new_track = event.player.get_current()
@@ -102,28 +102,28 @@ async def track_exception(client, event):
     )
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def user_voice_join(client, voice_state):
     player = client.solarlink.get_player(voice_state.guild_id)
     if (player is not None):
         player.check_auto_leave()
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def user_voice_leave(client, voice_state, old_channel_id):
     player = client.solarlink.get_player(voice_state.guild_id)
     if (player is not None) and player.check_auto_leave():
            await notify_leave(client, player)
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def user_voice_update(client, voice_state, old_attributes):
     player = client.solarlink.get_player(voice_state.guild_id)
     if (player is not None) and player.check_auto_leave():
            await notify_leave(client, player)
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def user_voice_update(client, voice_state, old_channel_id):
     player = client.solarlink.get_player(voice_state.guild_id)
     if (player is not None):
@@ -131,7 +131,7 @@ async def user_voice_update(client, voice_state, old_channel_id):
            await notify_leave(client, player)
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 @to_coroutine
 def voice_client_move(client, voice_state, old_channel_id):
     yield

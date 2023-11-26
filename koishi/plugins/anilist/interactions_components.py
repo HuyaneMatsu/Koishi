@@ -2,7 +2,7 @@ __all__ = ()
 
 from hata.ext.slash import InteractionResponse
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .anilist_api import search
 from .constants import (
@@ -29,7 +29,7 @@ from .response_building_listing import (
 # ---- Anime ----
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_SELECT_ANIME)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_FIND_SELECT_ANIME)
 async def find_anime_select(client, event):
     """
     Handles when an anime is selected.
@@ -71,7 +71,7 @@ async def find_anime_select(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_LEFT_ANIME)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_FIND_LEFT_ANIME)
 async def find_anime_page_left(client, event):
     """
     Handles when a left anime button is clicked.
@@ -113,7 +113,7 @@ async def find_anime_page_left(client, event):
     yield build_listing_response_anime(data, name)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_RIGHT_ANIME)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_FIND_RIGHT_ANIME)
 async def find_anime_page_right(client, event):
     """
     Handles when a right anime button is clicked.
@@ -159,7 +159,7 @@ async def find_anime_page_right(client, event):
 # ---- Character ----
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_SELECT_CHARACTER)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_FIND_SELECT_CHARACTER)
 async def find_character_select(client, event):
     """
     Handles when a character is selected.
@@ -201,7 +201,7 @@ async def find_character_select(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_LEFT_CHARACTER)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_FIND_LEFT_CHARACTER)
 async def find_character_page_left(client, event):
     """
     Handles when a left character button is clicked.
@@ -243,7 +243,7 @@ async def find_character_page_left(client, event):
     yield build_listing_response_character(data, name)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_RIGHT_CHARACTER)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_FIND_RIGHT_CHARACTER)
 async def find_character_page_right(client, event):
     """
     Handles when a right character button is clicked.
@@ -288,7 +288,7 @@ async def find_character_page_right(client, event):
 # ---- Manga ----
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_SELECT_MANGA)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_FIND_SELECT_MANGA)
 async def find_manga_select(client, event):
     """
     Handles when a manga is selected.
@@ -330,7 +330,7 @@ async def find_manga_select(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_LEFT_MANGA)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_FIND_LEFT_MANGA)
 async def find_manga_page_left(client, event):
     """
     Handles when a left manga button is clicked.
@@ -372,7 +372,7 @@ async def find_manga_page_left(client, event):
     yield build_listing_response_manga(data, name)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_RIGHT_MANGA)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_FIND_RIGHT_MANGA)
 async def find_manga_page_right(client, event):
     """
     Handles when a right manga button is clicked.
@@ -417,7 +417,7 @@ async def find_manga_page_right(client, event):
 # ---- Generic ----
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     custom_id = [
         CUSTOM_ID_FIND_LEFT_DISABLED,
         CUSTOM_ID_FIND_RIGHT_DISABLED,

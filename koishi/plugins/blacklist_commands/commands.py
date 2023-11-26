@@ -4,7 +4,7 @@ from hata import User
 from hata.ext.slash import InteractionResponse, abort
 
 from ...bot_utils.constants import GUILD__SUPPORT
-from ...bots import SLASH_CLIENT
+from ...bots import MAIN_CLIENT
 
 from ..blacklist_core import (
     add_user_id_to_blacklist, build_blacklist_user_add_embed, build_blacklist_user_entry_embed,
@@ -12,7 +12,7 @@ from ..blacklist_core import (
 )
 
 
-BLACKLIST_COMMAND = SLASH_CLIENT.interactions(
+BLACKLIST_COMMAND = MAIN_CLIENT.interactions(
     None,
     name = 'blacklist',
     description = 'Blacklists a user from interacting with the application.',

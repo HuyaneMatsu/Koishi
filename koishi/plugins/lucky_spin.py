@@ -10,7 +10,7 @@ from sqlalchemy.sql import select
 
 from ..bot_utils.constants import IN_GAME_IDS, EMOJI__HEART_CURRENCY
 from ..bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 MULTIPLIERS = (1.7, 2.4, 1.2, 0.5, 0.3, 0.1, 0.2, 1.5,)
@@ -30,7 +30,7 @@ ARROW_BLOCKS = tuple(
 )
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def lucky_spin(client, event,
     bet: ('int', 'The bet of hearts to bet') = None,
 ):

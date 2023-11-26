@@ -5,7 +5,7 @@ from hashlib import md5
 from hata import Embed, Color
 from hata.ext.slash import abort
 
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 def hash_string(string):
@@ -41,7 +41,7 @@ BAKA_BALL_IMAGE = 'https://cdn.discordapp.com/attachments/568837922288173058/939
 
 EMBED_COLOR = Color(0x2e93ff)
 
-@SLASH_CLIENT.interactions(is_global = True, name = '9ball')
+@FEATURE_CLIENTS.interactions(is_global = True, name = '9ball')
 async def baka_ball(
     event,
     question: str,

@@ -3,7 +3,7 @@ __all__ = ()
 from hata import ChannelType, KOKORO, Permission, create_partial_channel_from_id
 from scarletio import TaskGroup
 
-from ....bots import SLASH_CLIENT
+from ....bots import FEATURE_CLIENTS, MAIN_CLIENT
 
 from ..checks import check_move_permissions, check_move_permissions_custom
 from ..constants import ALLOWED_GUILDS
@@ -15,7 +15,7 @@ from .context import ChannelMoverContext
 from .helpers import check_movable, try_initialize_channel_move
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     guild = ALLOWED_GUILDS,
     required_permissions = Permission().update_by_keys(administrator = True),
 )
@@ -33,7 +33,7 @@ async def move_channel(
     await ChannelMoverContext(client, event, source_channel, target_channel, last_message_id, webhook)
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     custom_id = CUSTOM_ID_CHANNEL_MOVER_CANCEL
 )
 async def move_channel_cancel(client, event):
@@ -53,7 +53,7 @@ async def move_channel_cancel(client, event):
         )
 
 
-@SLASH_CLIENT.interactions(
+@FEATURE_CLIENTS.interactions(
     custom_id = CUSTOM_ID_RP_CHANNEL_MOVER_RESUME
 )
 async def move_channel_resume(client, event, source_channel_id, target_channel_id, last_message_id):
@@ -71,7 +71,7 @@ async def move_channel_resume(client, event, source_channel_id, target_channel_i
     await client.interaction_component_message_edit(event, components = None)
 
 
-@SLASH_CLIENT.events
+@MAIN_CLIENT.events
 async def shutdown(client):
     """
     Called when the client is shutting down.

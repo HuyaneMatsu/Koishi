@@ -3,13 +3,13 @@ __all__ = ('COMMAND', )
 import warnings
 
 from ....bot_utils.constants import GUILD__SUPPORT
-from ....bots import SLASH_CLIENT
+from ....bots import FEATURE_CLIENTS
 
 from .info import *
 
 
 
-COMMAND = SLASH_CLIENT.interactions(
+COMMAND = FEATURE_CLIENTS.interactions(
     None,
     name = 'relationship',
     description = 'Wanna marry?',

@@ -6,7 +6,8 @@ from itertools import chain
 from hata import KOKORO, Permission, parse_all_emojis
 from scarletio import Task, TaskGroup
 
-from ...bots import SLASH_CLIENT
+from ...bot_utils.multi_client_utils import get_first_client_in_channel_from
+from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_reaction_copy_enabled_and_role
 from ..blacklist_core import is_user_id_in_blacklist
@@ -46,7 +47,7 @@ def check_channel_emojis(channel, emoji):
     return False
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def reaction_add(client, event):
     """
     Handles a reaction-add event.
@@ -77,6 +78,9 @@ async def reaction_add(client, event):
     
     source_channel = event.message.channel
     if source_channel is None:
+        return
+    
+    if client is not get_first_client_in_channel_from(source_channel, FEATURE_CLIENTS):
         return
     
     if (role is not None) and event.user.has_role(role):

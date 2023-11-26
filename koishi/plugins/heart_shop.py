@@ -14,11 +14,11 @@ from ..bot_utils.constants import (
 )
 from ..bot_utils.daily import ELEVATED_COST, HEART_BOOST_COST, NSFW_ACCESS_COST, calculate_daily_new
 from ..bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, user_common_model
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 
-HEART_SHOP = SLASH_CLIENT.interactions(
+HEART_SHOP = FEATURE_CLIENTS.interactions(
     None,
     name = 'heart-shop',
     description = 'Trade your love!',
@@ -107,7 +107,7 @@ async def burn_divorce_papers(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_REDUCE_DIVORCE_PAPER_YES)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_REDUCE_DIVORCE_PAPER_YES)
 async def reduce_divorce_yes(event):
     user = event.user
     if event.message.interaction.user is not user:
@@ -184,7 +184,7 @@ async def reduce_divorce_yes(event):
     return InteractionResponse(embed = embed, components = None)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_REDUCE_DIVORCE_PAPER_NO)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_REDUCE_DIVORCE_PAPER_NO)
 async def reduce_divorce_yes(event):
     user = event.user
     if event.message.interaction.user is not user:

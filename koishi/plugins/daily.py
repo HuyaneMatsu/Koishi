@@ -18,7 +18,7 @@ from ..bot_utils.models import (
 )
 from ..bot_utils.user_getter import get_users_unordered
 from ..bot_utils.utils import send_embed_to
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 from .notification_settings import NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_DISABLE, get_one_notification_settings_with_connector
@@ -342,7 +342,7 @@ async def get_waifus_with_name(event, value):
     return waifus
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def daily(
     client,
     event,

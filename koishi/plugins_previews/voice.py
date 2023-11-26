@@ -2,40 +2,34 @@ __all__ = ()
 
 import re, os
 
-from scarletio import Task, AsyncIO, TaskGroup
-from hata import Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio, VoiceClient, \
-    KOKORO, is_url, InteractionEvent
+from hata import (
+    Color, DownloadError, Embed, InteractionEvent, KOKORO, LocalAudio, YTAudio, VoiceClient, eventlist, is_url
+)
 from hata.ext.commands_v2 import checks
+from hata.ext.plugin_loader import require
 from hata.ext.slash.menus import Pagination
+from scarletio import Task, TaskGroup
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
 from ..bot_utils.constants import GUILD__SUPPORT
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
-if not MARISA_MODE:
-    from ..bots.flan import COLOR__FLAN_HELP, CHESUTO_FOLDER, get_bgm, get_random_bgm
+require('Marisa')
+
+from ..bots import Marisa
 
 SOLARLINK_VOICE: bool
+
 
 VOICE_COLORS = {}
 
 
-if MARISA_MODE:
-    from ..bots import Marisa
-    VOICE_COMMANDS_MARISA = eventlist(category = 'VOICE', )
-    VOICE_COMMAND_CLIENT = Marisa
-    
-    MAIN_VOICE_COLOR = Color.from_rgb(121, 231, 78)
-    VOICE_COLORS[Marisa] = MAIN_VOICE_COLOR
-else:
-    from ..bots import Flan, Koishi
-    VOICE_COMMANDS_FLAN = eventlist(checks = checks.guild_only())
-    VOICE_COMMAND_CLIENT = Flan
-    
-    MAIN_VOICE_COLOR = Color.from_rgb(235, 52, 207)
-    VOICE_COLORS[Flan] = COLOR__FLAN_HELP
-    VOICE_COLORS[Koishi] = MAIN_VOICE_COLOR
+VOICE_COMMANDS_MARISA = eventlist(category = 'VOICE', )
+VOICE_COMMAND_CLIENT = Marisa
+
+MAIN_VOICE_COLOR = Color.from_rgb(121, 231, 78)
+VOICE_COLORS[Marisa] = MAIN_VOICE_COLOR
 
 
 if AUDIO_PATH is not None:
@@ -46,6 +40,7 @@ if AUDIO_PATH is not None:
                 FILE_NAMES.append(filename)
     
     collect_local_audio()
+
 
 if SOLARLINK_VOICE:
     async def do_join_voice(client, channel):
@@ -641,59 +636,6 @@ async def loop(client, event_or_message, behaviour):
     return await do_set_looping_behavior(voice_client, behaviour)
 
 
-if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE) and (not SOLARLINK_VOICE):
-    async def chesuto_play(client, voice_client, bgm):
-        path = os.path.join(os.path.abspath(''), CHESUTO_FOLDER, bgm.source_name)
-        if not os.path.exists(path):
-            async with client.http.get(bgm.url) as response:
-                data = await response.read()
-            with await AsyncIO(path, 'wb') as file:
-                await file.write(data)
-        
-        source = await LocalAudio(path, title = bgm.display_name)
-        
-        if voice_client.append(source):
-            text = 'Now playing'
-        else:
-            text = 'Added to queue'
-        
-        return f'{text} {bgm.display_name!r}!'
-    
-    async def chesuto_play_by_name(client, event_or_message, name):
-        voice_client = get_voice_client(client, event_or_message)
-        
-        if voice_client is None:
-            yield 'There is no voice client at your guild.'
-            return
-        
-        bgm = get_bgm(name)
-        
-        if bgm is None:
-            yield 'Nothing found.'
-            return
-        
-        yield
-        yield await chesuto_play(client, voice_client, bgm)
-        return
-
-    
-    async def chesuto_play_random(client, event_or_message):
-        voice_client = get_voice_client(client, event_or_message)
-        
-        if voice_client is None:
-            yield 'There is no voice client at your guild.'
-            return
-        
-        bgm = get_random_bgm()
-        
-        if bgm is None:
-            yield 'No bgms added, something is messed up.'
-            return
-        
-        yield
-        yield await chesuto_play(client, voice_client, bgm)
-        return
-    
 #### #### #### #### Add as normal commands #### #### #### ####
 
 async def command_join_description(command_context):
@@ -846,44 +788,12 @@ if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
             if (content is not None):
                 yield content
 
-if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
-    async def command_chesuto_chesuto_play_by_name_description(command_context):
-        
-        return Embed('play', (
-            'Plays the given chesuto bgm.\n'
-            f'Usage: `{command_context.prefix}play <name>`\n'
-            '\n'
-            'Note that the given name can be also given as the position of the track.'
-                ), color = COLOR__FLAN_HELP)
-    
-    @Flan.commands(name = 'play', description = command_chesuto_chesuto_play_by_name_description, category = 'VOICE')
-    async def command_chesuto_play(command_context, name):
-        if not name:
-            yield await command_chesuto_chesuto_play_by_name_description(command_context)
-            return
-        
-        async for content in chesuto_play_by_name(command_context.client, command_context.message, name):
-            if (content is not None):
-                yield content
-    
-    async def command_chesuto_play_random_description(command_context):
-        
-        return Embed('play', (
-            'Plays a random chesuto bgm.\n'
-            f'Usage: `{command_context.prefix}random`\n'
-                ), color = COLOR__FLAN_HELP)
-    
-    @Flan.commands(name = 'random', description = command_chesuto_play_random_description, category = 'VOICE')
-    async def command_chesuto_random(client, message):
-        async for content in chesuto_play_random(client, message):
-            if (content is not None):
-                yield content
-
 async def command_loop_description(command_context):
     return Embed('loop', (
         'Sets the voice client\'s looping behaviour or returns the current one.\n'
         f'Usage: `{command_context.prefix}loop <queue|actual|stop>`\n'
         ), color = VOICE_COLORS.get(command_context.client, None))
+
 
 @VOICE_COMMAND_CLIENT.commands(name = 'loop', description = command_loop_description, category = 'VOICE')
 async def command_loop(client, message, behaviour:'str' = None):
@@ -961,8 +871,8 @@ async def command_skip(client, message, index: int = 0):
 
 #### #### #### #### Add as slash commands #### #### #### ####
 
-if SLASH_CLIENT is not None:
-    VOICE_COMMANDS = SLASH_CLIENT.interactions(
+if FEATURE_CLIENTS is not None:
+    VOICE_COMMANDS = FEATURE_CLIENTS.interactions(
         None,
         name = 'voice',
         description = 'Voice commands',

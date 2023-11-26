@@ -1,6 +1,6 @@
 __all__ = ()
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_reaction_copy_enabled_and_role
 
@@ -8,7 +8,7 @@ from .constants import CUSTOM_ID_CLOSE, CUSTOM_ID_REFRESH
 from .list_channels import build_reaction_copy_list_channels_response
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_REFRESH)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_REFRESH)
 async def page_refresh(client, event):
     """
     Refreshes the reaction-copy message.
@@ -35,7 +35,7 @@ async def page_refresh(client, event):
         return build_reaction_copy_list_channels_response(client, guild, enabled)
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_CLOSE)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_CLOSE)
 async def close_message(client, event):
     """
     Closes the message.

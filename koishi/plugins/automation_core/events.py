@@ -3,12 +3,12 @@ __all__ = ()
 from hata import Client
 from scarletio import to_coroutine
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .operations import delete_automation_configuration_of
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 @to_coroutine
 def guild_delete(client, guild, guild_profile):
     """
@@ -26,6 +26,9 @@ def guild_delete(client, guild, guild_profile):
     guild_profile : `None`, ``GuildProfile``
         The client's guild profile at the guild.
     """
+    # Do nothing if the guild still has clients left.
+    if client.guilds:
+        return
+    
     yield
     delete_automation_configuration_of(guild.id)
-

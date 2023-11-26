@@ -1,8 +1,11 @@
 __all__ = ()
 
-from hata import Client, DiscordException, ERROR_CODES
+from hata import Client, DiscordException, ERROR_CODES, GUILDS
 
-from ...bots import SLASH_CLIENT
+from ...bot_utils.multi_client_utils import (
+    get_first_client_in_guild_from, get_first_client_with_message_create_permissions_from
+)
+from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import AUTOMATION_CONFIGURATIONS, get_log_sticker_channel
 
@@ -10,7 +13,7 @@ from .embed_builder_sticker import build_sticker_create_embeds, build_sticker_de
 
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def sticker_create(client, sticker):
     """
     Handles a sticker create event. If the sticker's guild has sticker logging setup, sends a message there.
@@ -26,6 +29,9 @@ async def sticker_create(client, sticker):
     """
     channel = get_log_sticker_channel(sticker.guild_id)
     if (channel is None):
+        return
+    
+    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
         return
     
     # We get the creator of the sticker.
@@ -47,7 +53,7 @@ async def sticker_create(client, sticker):
     )
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def sticker_update(client, sticker, old_attributes):
     """
     Handles a sticker edit event. If the sticker's guild has sticker logging setup, sends a message there.
@@ -67,6 +73,9 @@ async def sticker_update(client, sticker, old_attributes):
     if (channel is None):
         return
     
+    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
+        return
+    
     await client.message_create(
         channel,
         embed = build_sticker_update_embeds(sticker, old_attributes),
@@ -74,7 +83,7 @@ async def sticker_update(client, sticker, old_attributes):
     )
 
 
-@SLASH_CLIENT.events
+@FEATURE_CLIENTS.events
 async def sticker_delete(client, sticker):
     """
     Handles a sticker delete event. If the sticker's guild has sticker logging setup, sends a message there.
@@ -92,6 +101,9 @@ async def sticker_delete(client, sticker):
     if (channel is None):
         return
     
+    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
+        return
+    
     await client.message_create(
         channel,
         embed = build_sticker_delete_embeds(sticker),
@@ -99,7 +111,7 @@ async def sticker_delete(client, sticker):
     )
 
 
-@SLASH_CLIENT.events(name = 'ready')
+@FEATURE_CLIENTS.events(name = 'ready')
 async def initial_request_stickers(client):
     """
     Requests the sticker of the guild where sticker logging is set up. On success removes itself from the events.
@@ -116,7 +128,9 @@ async def initial_request_stickers(client):
             automation_configuration for automation_configuration in AUTOMATION_CONFIGURATIONS.values()
             if automation_configuration.log_sticker_channel_id
         ]:
-            await client.sticker_get_all_guild(automation_configuration.guild_id)
+            guild = GUILDS.get(automation_configuration.guild_id, None)
+            if (guild is not None) and (client is get_first_client_in_guild_from(guild, FEATURE_CLIENTS)):
+                await client.sticker_get_all_guild(guild)
     
     except ConnectionError:
         # No internet connection

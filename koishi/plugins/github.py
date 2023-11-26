@@ -12,7 +12,7 @@ from scarletio.web_common import quote
 from scarletio.web_common.headers import DATE, USER_AGENT
 
 from ..bot_utils.constants import GUILD__SUPPORT
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
 
 GITHUB_HEADERS = IgnoreCaseMultiValueDictionary()
@@ -113,7 +113,7 @@ class GitHubQuery:
                 for waiter in waiters:
                     waiter.set_exception_if_pending(err)
             
-            raise err
+            raise
         
         else:
             try:
@@ -383,14 +383,14 @@ class OrganizationContainerType:
         return extend
 
 GET_USER_AND_ORGANIZATIONS_LIMIT = GitHubQueryLimit()
-SEARCH_USER_NAME = GitHubQuery(build_search_user_url, SLASH_CLIENT.http, SearchUserType)
-GET_USER = GitHubQuery(build_get_user_url, SLASH_CLIENT.http, UserType, limit = GET_USER_AND_ORGANIZATIONS_LIMIT)
+SEARCH_USER_NAME = GitHubQuery(build_search_user_url, MAIN_CLIENT.http, SearchUserType)
+GET_USER = GitHubQuery(build_get_user_url, MAIN_CLIENT.http, UserType, limit = GET_USER_AND_ORGANIZATIONS_LIMIT)
 GET_ORGANIZATIONS = GitHubQuery(
-    build_get_organizations_url, SLASH_CLIENT.http, OrganizationContainerType, limit = GET_USER_AND_ORGANIZATIONS_LIMIT
+    build_get_organizations_url, MAIN_CLIENT.http, OrganizationContainerType, limit = GET_USER_AND_ORGANIZATIONS_LIMIT
 )
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
+@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT)
 async def github_profile(client, event,
     user: ('str', 'The user\'s name to get'),
 ):

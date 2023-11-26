@@ -31,7 +31,7 @@ __all__ = (
 
 # Construct command(s)
 
-from ....bots import SLASH_CLIENT
+from ....bots import FEATURE_CLIENTS
 
 from .ban import ban_command
 from .is_banned import is_banned_command
@@ -48,7 +48,7 @@ from .un_mute import un_mute_command
 
 
 
-MAIN_COMMAND = SLASH_CLIENT.interactions(
+MAIN_COMMAND = FEATURE_CLIENTS.interactions(
     None,
     name = 'mod',
     description = 'Moderate users.',
@@ -66,5 +66,5 @@ MAIN_COMMAND.interactions(top_list_command, name = 'top-list')
 MAIN_COMMAND.interactions(un_ban_command, name = 'un-ban')
 MAIN_COMMAND.interactions(un_mute_command, name = 'un-mute')
 
-SLASH_CLIENT.interactions(top_list_command_component_close, custom_id = TOP_LIST_CUSTOM_ID_CLOSE)
-SLASH_CLIENT.interactions(top_list_command_component_page, custom_id = TOP_LIST_CUSTOM_ID_PAGE_RP)
+FEATURE_CLIENTS.interactions(top_list_command_component_close, custom_id = TOP_LIST_CUSTOM_ID_CLOSE)
+FEATURE_CLIENTS.interactions(top_list_command_component_page, custom_id = TOP_LIST_CUSTOM_ID_PAGE_RP)

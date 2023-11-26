@@ -17,7 +17,7 @@ from ..bot_utils.constants import (
 )
 from ..bot_utils.daily import calculate_daily_new
 from ..bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, get_create_common_user_expression, user_common_model
-from ..bots import SLASH_CLIENT
+from ..bots import FEATURE_CLIENTS
 
 
 EVENT_MAX_DURATION = timedelta(hours = 24)
@@ -67,7 +67,7 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
 
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
+@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
 async def heart_event(client, event,
     duration : ('str', 'The event\'s duration.'),
     amount : ('int', 'The hearst to earn.'),
@@ -357,7 +357,7 @@ class HeartEventGUI:
         Task(KOKORO, connector.close())
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
+@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
 async def daily_event(client, event,
     duration: ('str', 'The event\'s duration.'),
     amount: ('int', 'The extra daily steaks to earn.'),
@@ -658,7 +658,7 @@ class DailyEventGUI:
 
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def gift(client, event,
     target_user: ('user', 'Who is your heart\'s chosen one?'),
     amount: ('int', 'How much do u love them?'),
@@ -815,7 +815,7 @@ AWARD_TYPES = [
 ]
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
+@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
 async def award(client, event,
     target_user: ('user', 'Who do you want to award?'),
     amount: ('int', 'With how much love do you wanna award them?'),
@@ -948,7 +948,7 @@ async def award(client, event,
 
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
+@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
 async def take(client, event,
     target_user: ('user', 'From who do you want to take love away?'),
     amount: ('int', 'How much love do you want to take away?'),
@@ -1043,10 +1043,9 @@ async def increase_user_total_love(user_id, increase):
         
         await connector.execute(to_execute)
 
-        
 
 # yup, we are generating hearts
-@SLASH_CLIENT.events(name = 'interaction_create')
+@FEATURE_CLIENTS.events(name = 'interaction_create')
 async def heart_generator(client, event):
     user_id = event.user.id
     if user_id in HEART_GENERATOR_COOLDOWNS:

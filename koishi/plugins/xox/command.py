@@ -1,12 +1,12 @@
 __all__ = ()
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .multi_player import xox_multi_player
 from .single_player import xox_single_player
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def xox(
     client,
     event,

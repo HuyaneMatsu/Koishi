@@ -2,7 +2,7 @@ __all__ = ()
 
 from hata.ext.slash import Button
 
-from ....bots import SLASH_CLIENT
+from ....bots import FEATURE_CLIENTS
 
 from ...image_handling_core import ImageHandlerMeekMoe
 
@@ -14,7 +14,7 @@ from .vocaloid import NewVocaloid, VOCALOID_CHARACTERS, make_custom_id_of_vocalo
 HANDLERS = {character: ImageHandlerMeekMoe(character) for character in VOCALOID_CHARACTERS.values()}
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def vocaloid(
     client,
     event,
@@ -48,7 +48,7 @@ async def vocaloid(
 
 
 for character, handler in HANDLERS.items():
-    SLASH_CLIENT.interactions(
+    FEATURE_CLIENTS.interactions(
         NewVocaloid(handler, character),
         custom_id = make_custom_id_of_vocaloid(character),
     )

@@ -2,7 +2,7 @@ __all__ = ()
 
 from re import compile as re_compile, escape as re_escape
 
-from ...bots import SLASH_CLIENT
+from ...bots import FEATURE_CLIENTS
 
 from .builders import build_top_list_response
 from .constants import (
@@ -11,7 +11,7 @@ from .constants import (
 from .queries import get_top_list_entries
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(is_global = True)
 async def top_list(
     page : ('number', 'page?') = 1,
 ):
@@ -39,7 +39,7 @@ async def top_list(
     yield build_top_list_response(page_index, entries)
 
 
-@SLASH_CLIENT.interactions(custom_id = re_compile(f'{re_escape(CUSTOM_ID_PAGE_BASE)}(\d+)'))
+@FEATURE_CLIENTS.interactions(custom_id = re_compile(f'{re_escape(CUSTOM_ID_PAGE_BASE)}(\d+)'))
 async def top_list_page(page_index):
     """
     Gets the top list for the given page.
@@ -63,7 +63,7 @@ async def top_list_page(page_index):
 
 
 
-@SLASH_CLIENT.interactions(custom_id = [CUSTOM_ID_PAGE_PREVIOUS_DISABLED, CUSTOM_ID_PAGE_NEXT_DISABLED])
+@FEATURE_CLIENTS.interactions(custom_id = [CUSTOM_ID_PAGE_PREVIOUS_DISABLED, CUSTOM_ID_PAGE_NEXT_DISABLED])
 async def disabled_page_move():
     """
     Called when a disabled page-move is clicked. Does nothing.
@@ -73,7 +73,7 @@ async def disabled_page_move():
     pass
 
 
-@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_CLOSE)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_CLOSE)
 async def top_list_close(client, event):
     """
     Deletes the top-list if applicable.

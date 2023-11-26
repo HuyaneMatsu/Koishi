@@ -154,7 +154,7 @@ async def battle_manager(client, message, target: 'user' = None):
         if target is source:
             text = 'Say 2 and easier.'
             break
-
+        
         if target is client:
             text = 'NO AI opponent yet!'
             break

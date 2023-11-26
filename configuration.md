@@ -3,35 +3,40 @@ When setting up Koishi, create an importable `config.py` file, whose structure s
 ```python
 MARISA_MODE = True              # (bool) Whether Marisa or the other clients should run up.
 
-KOISHI_TOKEN = ''               # bot token. (str)
+
+KOISHI_TOKEN = ''               # bot token (str) for the feature client.
 KOISHI_ID = 0                   # bot id (int), can be 0.
 KOISHI_SECRET = None            # client secret (str) for oauth2, can be None.
 KOISHI_PREFIX = 'k!'            # default prefix. (str)
 KOISHI_TOP_GG_TOKEN = ''        # top.gg token of the bot.
 KOISHI_TOP_GG_AUTHORIZATION = ''# top.gg authorization used for received webhooks.
 
-SATORI_TOKEN = ''               # bot token (str) for second bot.
-SATORI_ID = 0                   # bot id (int) for second bot, can be 0.
+FLANDRE_TOKEN = ''              # bot token (str) for a secondary system bot.
+FLANDRE_ID = 0                  # bot id (int), can be 0.
+
+YOSHIKA_TOKEN = ''              # bot token (str) for a secondary system bot.
+YOSHIKA_ID = 0                  # bot id (int), can be 0.
+
+
+SATORI_TOKEN = ''               # bot token (str) for the system bot.
+SATORI_ID = 0                   # bot id (int). can be 0.
 SATORI_SECRET = None            # client secret (str) for oauth2, can be None.
 SATORI_PREFIX = '&'             # default prefix (str)
 
-FLAN_TOKEN = ''                 # bot token (str) for third bot.
-FLAN_ID = 0                     # bot id (int) for third bot, can be 0.
-FLAN_PREFIX = '/'               # default prefix. (str)
-
-MARISA_TOKEN = ''               # bot token (str) for third bot.
-MARISA_ID = 0                   # bot id (int) for 4th bot, can be 0.
+MARISA_TOKEN = ''               # bot token (str) for the tetsing bot.
+MARISA_ID = 0                   # bot id (int), can be 0.
 MARISA_SECRET = None            # client secret (str) for oauth2, can be None.
 MARISA_PREFIX  = '$'            # default prefix (str)
 
-NITORI_TOKEN = ''               # bot token (str) for Nitori
-NITORI_ID = 0                   # bot id (int) for Nitori
+NITORI_TOKEN = ''               # bot token (str) for Nitori.
+NITORI_ID = 0                   # bot id (int) for Nitori.
 
-RENES_TOKEN = ''                # bot token (str) for Renes
-RENES_ID = 0                    # bot id (int) for Renes
+RENES_TOKEN = ''                # bot token (str) for Renes.
+RENES_ID = 0                    # bot id (int) for Renes.
 
-SAKUYA_TOKEN = ''               # bot token (str) for Sakuya
-SAKUYA_ID = 0                   # bot id (int) for Sakuya
+SAKUYA_TOKEN = ''               # bot token (str) for Sakuya.
+SAKUYA_ID = 0                   # bot id (int) for Sakuya.
+
 
 AUDIO_PLAY_POSSIBLE = False     # Whether FFmpeg and other voice requirement as satisfied
 AUDIO_PATH = None               # path for local audio files, can be None
