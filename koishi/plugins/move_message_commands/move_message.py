@@ -4,7 +4,7 @@ from hata import KOKORO, Permission
 from hata.ext.slash import abort
 from scarletio import Task, TaskGroup
 
-from ...bots import FEATURE_CLIENTS
+from ...bots import MAIN_CLIENT
 
 from ..move_message_core.create import create_webhook_message
 from ..move_message_core.get import get_message_and_files, get_webhook
@@ -15,7 +15,7 @@ from .helpers import message_delete
 
 
 
-@FEATURE_CLIENTS.interactions(
+@MAIN_CLIENT.interactions(
     guild = ALLOWED_GUILDS,
     required_permissions = Permission().update_by_keys(manage_messages = True),
 )
