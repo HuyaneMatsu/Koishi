@@ -173,7 +173,7 @@ async def _query_more_touhou_character_preference(user_ids):
 
 if DB_ENGINE is None:
     @copy_docs(_query_more_touhou_character_preference)
-    async def _query_more_touhou_character_preference(user_ids, connector):
+    async def _query_more_touhou_character_preference(user_ids):
         return None
 
 

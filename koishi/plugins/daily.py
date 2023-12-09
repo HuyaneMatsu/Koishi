@@ -8,7 +8,7 @@ from hata.ext.slash import Button, abort
 from sqlalchemy import and_, or_
 from sqlalchemy.sql import select
 
-from ..bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY, LINK__KOISHI_TOP_GG, WAIFU_COST_DEFAULT
+from ..bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY, URL__KOISHI_TOP_GG, WAIFU_COST_DEFAULT
 from ..bot_utils.daily import (
     DAILY_INTERVAL, DAILY_STREAK_BREAK, TOP_GG_VOTE_DELAY_MAX, TOP_GG_VOTE_DELAY_MIN, calculate_daily_for,
     calculate_daily_new_only
@@ -90,7 +90,7 @@ async def claim_daily_for_yourself(client, event):
                         streak_text = (
                             f'{streak_text}\n'
                             f'\n'
-                            f'Please vote for me on [top.gg]({LINK__KOISHI_TOP_GG}) for extra {EMOJI__HEART_CURRENCY}'
+                            f'Please vote for me on [top.gg]({URL__KOISHI_TOP_GG}) for extra {EMOJI__HEART_CURRENCY}'
                         )
             
             

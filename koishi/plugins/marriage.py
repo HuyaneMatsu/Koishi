@@ -85,7 +85,6 @@ async def waifu_info(event,
     
     embed = Embed(
         f'{user:f}\'s waifu info',
-        timestamp = event.created_at,
     ).add_thumbnail(
         user.avatar_url
     )

@@ -48,6 +48,17 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ---
 
+### `chiruno-totally-sex`
+
+- Artist: *unknown*
+- Edit: *unknown*
+
+
+- Character: **Chiruno**
+- Source: **Touhou**
+
+---
+
 ### `chiruno-yes-sex`
 
 - Artist: *unknown*

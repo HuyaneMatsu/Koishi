@@ -4,7 +4,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from hata import elapsed_time, Embed
 from ..bot_utils.constants import ROLE__SUPPORT__VERIFIED, EMOJI__HEART_CURRENCY, COLOR__EVENT, \
-    CHANNEL__SUPPORT__EVENT, ROLE__SUPPORT__EVENT_MANAGER, LINK__HATA_GIT, GUILD__SUPPORT
+    CHANNEL__SUPPORT__EVENT, ROLE__SUPPORT__EVENT_MANAGER, URL__HATA_GIT, GUILD__SUPPORT
 from ..bots import MAIN_CLIENT
 
 
@@ -28,7 +28,7 @@ HATA_JAM_2_DESCRIPTION = Embed(
 ).add_field(
     'Event technology',
     '**Language**: Python3\n'
-    f'**Library**: [Hata]({LINK__HATA_GIT})\n'
+    f'**Library**: [Hata]({URL__HATA_GIT})\n'
     '**Implementations**: Pypy, Cpython\n'
     '**Python version**: >=3.6'
 ).add_field(

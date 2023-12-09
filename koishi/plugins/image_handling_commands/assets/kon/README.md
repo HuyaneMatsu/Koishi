@@ -279,6 +279,17 @@ All authors are actually known!! In case you know them better create a PR with i
 
 ---
 
+### `ran-kon-0016`
+
+- Artist: **vivo**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
 ### `tsukasa-kon-0005`
 
 - Artist: **asuzemu / あすぜむ**

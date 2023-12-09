@@ -511,15 +511,20 @@ class Feeder:
                     return
                 
                 if err.code in (
-                    ERROR_CODES.unknown_channel, # message deleted
-                    ERROR_CODES.missing_access, # client removed
                     ERROR_CODES.missing_permissions, # permissions changed meanwhile
                     ERROR_CODES.rate_limit_slowmode, # slowmode
                 ):
+                    return
+                
+                if err.code in (
+                    ERROR_CODES.unknown_channel, # channel deleted
+                    ERROR_CODES.missing_access, # client removed
+                ):
                     self.cancel()
+                    return
                 
                 raise
-        
+    
         except (GeneratorExit, CancelledError):
             raise
         

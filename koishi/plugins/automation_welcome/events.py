@@ -7,6 +7,7 @@ from ...bot_utils.multi_client_utils import get_first_client_with_message_create
 from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_welcome_channel_and_button_enabled
+from ..embed_image_refresh import schedule_image_refresh
 
 from .constants import CUSTOM_ID_WELCOME_REPLY, ONBOARDING_MASK_ALL, ONBOARDING_MASK_STARTED
 from .welcome_styles import WELCOME_STYLE_DEFAULT
@@ -56,13 +57,14 @@ async def welcome_user(client, guild, user, welcome_style, welcome_channel, welc
     else:
         welcome_button = None
     
-    await client.message_create(
+    message = await client.message_create(
         welcome_channel,
         components = welcome_button,
         content = f'> {message_content}',
         embed = Embed(color = color).add_image(image),
         silent = True,
     )
+    schedule_image_refresh(client, message)
 
 
 @FEATURE_CLIENTS.events

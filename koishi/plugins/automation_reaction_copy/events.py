@@ -80,9 +80,6 @@ async def reaction_add(client, event):
     if source_channel is None:
         return
     
-    if client is not get_first_client_in_channel_from(source_channel, FEATURE_CLIENTS):
-        return
-    
     if (role is not None) and event.user.has_role(role):
         permission_mask = PERMISSION_MASK_ROLE
     else:
@@ -107,8 +104,13 @@ async def reaction_add(client, event):
     if not target_channel.permissions_for(event.user) & permission_mask:
         return
     
-    if not target_channel.cached_permissions_for(client).can_manage_webhooks:
-        return
+    # Get the first client who satisfies the required permission requirements
+    for client_to_use in guild.clients:
+        if target_channel.cached_permissions_for(client_to_use).can_manage_webhooks:
+            if client_to_use is client:
+                break
+            
+            return
     
     message = event.message
     

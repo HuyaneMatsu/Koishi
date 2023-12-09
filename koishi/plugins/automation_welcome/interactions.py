@@ -4,6 +4,8 @@ from hata import Embed
 
 from ...bots import FEATURE_CLIENTS
 
+from ..embed_image_refresh import schedule_image_refresh
+
 from .constants import CUSTOM_ID_WELCOME_REPLY, REPLY_EXPIRES_AFTER
 from .spam_protection import is_reply_in_cache
 from .welcome_styles import WELCOME_STYLE_DEFAULT
@@ -71,10 +73,11 @@ async def welcome_reply(client, event):
     
     color = (event.id >> 22) & 0xffffff
     
-    await client.interaction_followup_message_create(
+    message = await client.interaction_followup_message_create(
         event,
         allowed_mentions = [joined_user],
         content = f'> {message_content}',
         embed = Embed(color = color).add_image(image),
         silent = True,
     )
+    schedule_image_refresh(client, message, event)

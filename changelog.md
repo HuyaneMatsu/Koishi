@@ -1,3 +1,17 @@
+### 2023-12-09
+
+- `/waifu-info` no longer sets `embed.timestamp` since it shows the same date as when the message was created at.
+- `/automation reaction-copy` did not select the first client satisfying the required permission.
+- `/automation touhou-feed` now handles permission changes without cancelling itself.
+- Add `embed_image_refresh` plugin which allows refreshing embed image if requested.
+- `/atiomation welcome` now refreshes embed image.
+- `/automation welcome button` now refreshes embed image.
+- Action commands (such as `/hug`) now refresh embed image.
+- Action replies now refresh embed mage.
+- Add **1** image to `/kon` interaction.
+- Add new sex tier (`totally sex`).
+- Add headers for all feature clients.
+
 ### 2023-11-19
 
 - Add `Satsuki Rin` touhou character.

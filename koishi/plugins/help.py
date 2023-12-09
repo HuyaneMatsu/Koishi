@@ -1,7 +1,6 @@
 __all__ = ()
 
 from functools import partial as partial_func
-from random import random
 from time import perf_counter
 
 from hata import BUILTIN_EMOJIS, Embed, Emoji
@@ -9,11 +8,12 @@ from hata.ext.slash import Button, InteractionResponse, Row, abort
 from hata.ext.slash.menus import Closer, Pagination
 
 from ..bot_utils.constants import (
-    COLOR__KOISHI_HELP, EMOJI__HEART_CURRENCY, GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT, KOISHI_HEADER,
-    KOISHI_HEADER_EASTER_EGG, LINK__KOISHI_TOP_GG, ROLE__SUPPORT__ANNOUNCEMENTS, ROLE__SUPPORT__ELEVATED,
-    ROLE__SUPPORT__EVENT_MANAGER, ROLE__SUPPORT__EVENT_PARTICIPANT, ROLE__SUPPORT__EVENT_WINNER,
-    ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__NSFW_ACCESS, ROLE__SUPPORT__VERIFIED
+    COLOR__KOISHI_HELP, EMOJI__HEART_CURRENCY, GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT, URL__KOISHI_TOP_GG,
+    ROLE__SUPPORT__ANNOUNCEMENTS, ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__EVENT_MANAGER,
+    ROLE__SUPPORT__EVENT_PARTICIPANT, ROLE__SUPPORT__EVENT_WINNER, ROLE__SUPPORT__HEART_BOOST,
+    ROLE__SUPPORT__NSFW_ACCESS, ROLE__SUPPORT__VERIFIED
 )
+from ..bot_utils.headers import get_header_for
 from ..bots import FEATURE_CLIENTS
 
 
@@ -360,11 +360,6 @@ def build_command_list_embed(header, extended):
     return embed
 
 
-COMMAND_LIST_EMBED = build_command_list_embed(KOISHI_HEADER, False)
-COMMAND_LIST_EMBED_EASTER_EGG = build_command_list_embed(KOISHI_HEADER_EASTER_EGG, False)
-COMMAND_LIST_EMBED_EXTENDED = build_command_list_embed(KOISHI_HEADER, True)
-
-
 HEARD_GUIDE_EMBED = Embed(
     'Heart Guide',
     color = COLOR__KOISHI_HELP,
@@ -377,7 +372,7 @@ HEARD_GUIDE_EMBED = Embed(
         f'**•** `/ds` - Complete dungeon sweeper stages.\n'
         f'**•** `/proposal accept` - Accept marriage proposals.\n'
         f'**•** `/heart-shop sell-daily` - Sell your daily streak.\n'
-        f'**•** [Vote]({LINK__KOISHI_TOP_GG}) on me on top.gg\n'
+        f'**•** [Vote]({URL__KOISHI_TOP_GG}) on me on top.gg\n'
         f'**•** Use any command to get hearts randomly.'
     ),
 ).add_field(
@@ -398,15 +393,7 @@ HEARD_GUIDE_EMBED = Embed(
 )
 
 async def render_help_generic(client, event):
-    if event.guild is GUILD__ORIN_PARTY_HOUSE:
-        embed = COMMAND_LIST_EMBED_EXTENDED
-    else:
-        if random() <= 0.01:
-            embed = COMMAND_LIST_EMBED_EASTER_EGG
-        else:
-            embed = COMMAND_LIST_EMBED
-    
-    return embed
+    return build_command_list_embed(get_header_for(client), event.guild is GUILD__ORIN_PARTY_HOUSE)
 
 
 async def render_help_heart_guide(client, event):

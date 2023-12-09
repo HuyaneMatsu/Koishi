@@ -20,7 +20,7 @@ from scarletio import ReuBytesIO, TaskGroup
 
 from ..bot_utils.constants import GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT
 from ..bot_utils.tools import Pagination10step
-from ..bots import FEATURE_CLIENTS
+from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
 
 UTILITY_COLOR = Color(0x5dc66f)
@@ -353,7 +353,7 @@ def in_role_pagination_check(user, event):
     
     return False
 
-@FEATURE_CLIENTS.interactions(guild = [GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT])
+@MAIN_CLIENT.interactions(guild = [GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT])
 async def in_role(
     client,
     event,
@@ -449,7 +449,7 @@ def add_user_field(embed, index, joined_at, user):
         ),
     )
 
-@FEATURE_CLIENTS.interactions(
+@MAIN_CLIENT.interactions(
     guild = [GUILD__SUPPORT, GUILD__ORIN_PARTY_HOUSE],
     required_permissions = Permission().update_by_keys(kick_users = True),
 )
@@ -482,7 +482,7 @@ async def latest_users(client, event):
     return InteractionResponse(embed = embed, allowed_mentions = None)
 
 
-@FEATURE_CLIENTS.interactions(
+@MAIN_CLIENT.interactions(
     guild = [GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT],
     required_permissions = Permission().update_by_keys(kick_users = True),
 )

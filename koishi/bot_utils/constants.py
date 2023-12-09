@@ -65,12 +65,12 @@ COLOR__MARISA_HELP = Color.from_html('#e547ed')
 COLOR__EVENT = Color(2316923)
 COLOR__GAMBLING = Color.from_rgb(254, 254, 164)
 
-LINK__KOISHI_GIT = 'https://github.com/HuyaneMatsu/Koishi'
-LINK__HATA_GIT = 'https://github.com/HuyaneMatsu/hata'
-LINK__HATA_DOCS = 'https://www.astil.dev/project/hata/docs/hata'
-LINK__PASTE = 'https://hastebin.com/'
-LINK__HATA_SLASH = 'https://github.com/HuyaneMatsu/hata/blob/master/docs/topics/slash.md'
-LINK__KOISHI_TOP_GG = f'https://discordbots.org/bot/{config.KOISHI_ID}'
+URL__KOISHI_GIT = 'https://github.com/HuyaneMatsu/Koishi'
+URL__HATA_GIT = 'https://github.com/HuyaneMatsu/hata'
+URL__HATA_DOCS = 'https://www.astil.dev/project/hata/docs/hata'
+URL__PASTE = 'https://hastebin.com/'
+URL__HATA_SLASH = 'https://github.com/HuyaneMatsu/hata/blob/master/docs/topics/slash.md'
+URL__KOISHI_TOP_GG = f'https://discordbots.org/bot/{config.KOISHI_ID}'
 
 USER__EST = User.precreate(277393805601275910)
 
@@ -138,27 +138,3 @@ WAIFU_SLOT_COSTS = {
 }
 
 MAX_WAIFU_SLOTS = 20
-
-
-KOISHI_HEADER = (
-    '```\n'
-    ' _   __      _     _     _ \n'
-    '| | / /     (_)   | |   (_)\n'
-    '| |/ /  ___  _ ___| |__  _ \n'
-    '|    \ / _ \| / __| \'_ \| |\n'
-    '| |\  \ (_) | \__ \ | | | |\n'
-    '\_| \_/\___/|_|___/_| |_|_|\n'
-    '```'
-)
-
-
-KOISHI_HEADER_EASTER_EGG = (
-    '```\n'
-    ' _____ __    ___ \n'
-    '|  ___/  |  /   |\n'
-    '|___ \`| | / /| |\n'
-    '    \ \| |/ /_| |\n'
-    '/\__/ /| |\___  |\n'
-    '\____/\___/   |_/\n'
-    '```'
-)

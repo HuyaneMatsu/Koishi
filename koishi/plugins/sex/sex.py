@@ -25,20 +25,29 @@ async def sex(event):
     embed : ``Embed``
     """
     value = random()
-    if value > 0.15:
+    if value > 0.150: # no sex
         level = 0
-    elif value > 0.10:
+    
+    elif value > 0.100: # maybe sex
         level = 1
-    elif value > 0.06:
+    
+    elif value > 0.060: # probably sex
         level = 2
-    elif value > 0.03:
+    
+    elif value > 0.035: # yes sex
         level = 3
-    elif value > 0.01:
+    
+    elif value > 0.020: # yes sex fast
         level = 4
-    elif value > 0.002:
+    
+    elif value > 0.010: # totally sex
         level = 5
-    else:
+    
+    elif value > 0.002: # sex 2.0
         level = 6
+    
+    else: # yes sex (koishi)
+        level = 7
     
     level = check_lock_and_limit_level(event, level)
     

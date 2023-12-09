@@ -5,6 +5,8 @@ from random import random
 from hata import ClientUserBase, DiscordException, Embed, Emoji, ERROR_CODES
 from hata.ext.slash import abort
 
+from ...embed_image_refresh import schedule_image_refresh
+
 from ..cooldown import CooldownHandler
 from ..helpers import add_provider
 
@@ -205,6 +207,19 @@ async def send_action_response_with_interaction_event(client, event, content, em
         
         raise
     
+    # Request the message back, so we can update its embed as required.
+    try:
+        message = client.interaction_response_message_get(event)
+    except ConnectionError:
+        pass
+    
+    except DiscordException as err:
+        if err.code != ERROR_CODES.unknown_interaction:
+            raise
+    
+    else:
+        schedule_image_refresh(client, message, event)
+    
     return True
 
 
@@ -265,7 +280,7 @@ async def send_action_response_to(client, channel_or_message, content, embed, al
         Unexpected exception from Discord.
     """
     try:
-        await client.message_create(
+        message = await client.message_create(
             channel_or_message, content, allowed_mentions = allowed_mentions, embed = embed, silent = True
         )
     except ConnectionError:
@@ -284,6 +299,7 @@ async def send_action_response_to(client, channel_or_message, content, embed, al
         
         raise
     
+    schedule_image_refresh(client, message)
     return True
 
 
@@ -458,7 +474,7 @@ class Action:
             Seed to generate the embed color from.
         source_user : ``ClientUserBase``
             The user source user who invoked the event.
-        targets : `set<Role, ClientUserBase>`
+        targets : `set<Role | ClientUserBase>`
             Target entities.
         client_in_users : `bool`
             Whether the client is in the mentioned users.

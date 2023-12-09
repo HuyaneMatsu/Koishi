@@ -4,7 +4,7 @@ import sys
 from os import listdir as list_directory
 from os.path import isdir as is_directory, isfile as is_file, join as join_paths
 from platform import platform as get_platform
-from random import choice, random
+from random import choice
 
 from hata import (
     BUILTIN_EMOJIS, CHANNELS, CLIENTS, Client, EMOJIS, Embed, GUILDS, InteractionType, MESSAGES, ROLES, STICKERS, USERS,
@@ -13,10 +13,10 @@ from hata import (
 from hata.ext.slash import Button, InteractionResponse, Row, abort
 
 from ..bot_utils.constants import (
-    COLOR__KOISHI_HELP, GUILD__ORIN_PARTY_HOUSE, INVITE__SUPPORT, KOISHI_HEADER, KOISHI_HEADER_EASTER_EGG,
-    LINK__KOISHI_TOP_GG, PATH__KOISHI, STARTUP
+    COLOR__KOISHI_HELP, GUILD__ORIN_PARTY_HOUSE, INVITE__SUPPORT, PATH__KOISHI, STARTUP, URL__KOISHI_TOP_GG
 )
 from ..bot_utils.cpu_info import CpuUsage, PROCESS
+from ..bot_utils.headers import get_header_for
 from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
 
@@ -90,13 +90,13 @@ def iter_about_components(client):
     
     # yield Button(
     #     'Source code',
-    #     url = LINK__KOISHI_GIT,
+    #     url = URL__KOISHI_GIT,
     # )
     
     if client is MAIN_CLIENT:
         yield Button(
             'Vote for me!',
-            url = LINK__KOISHI_TOP_GG,
+            url = URL__KOISHI_TOP_GG,
         )
     
     yield Button(
@@ -132,15 +132,6 @@ LINE_COUNT_FIELD_VALUE = (
 )
 
 
-def get_koishi_header():
-    if random() < 0.01:
-        header = KOISHI_HEADER_EASTER_EGG
-    else:
-        header = KOISHI_HEADER
-    
-    return header
-
-
 KOISHI_JOKES = (
     ('Shrimps', 'fried'),
     ('Apples', 'peeled'),
@@ -172,7 +163,7 @@ async def render_about_generic(client, event):
     """
     embed = Embed(
         None,
-        get_koishi_header(),
+        get_header_for(client),
         color = COLOR__KOISHI_HELP,
     ).add_field(
         UPTIME_TITLE,
@@ -317,7 +308,7 @@ async def render_about_js(client, event):
     """
     embed = Embed(
         None,
-        get_koishi_header(),
+        get_header_for(client),
         color = COLOR__KOISHI_HELP,
     ).add_field(
         UPTIME_TITLE,

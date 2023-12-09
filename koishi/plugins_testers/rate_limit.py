@@ -94,8 +94,6 @@ async def bypass_request(client, method, url, data = None, params = None, reason
         
         with RLTPrinterBuffer() as buffer:
             response_headers = response.headers
-            for k, v in response_headers.items():
-                print(k, v)
             status = response.status
             if response_headers['content-type'].startswith('application/json'):
                 response_data = from_json(response_data)
@@ -661,7 +659,7 @@ async def client_gateway_bot(client):
     )
 
 
-async def application_get_own(client):
+async def oauth2_application_get_own(client):
     return await bypass_request(
         client,
         METHOD_GET,
@@ -669,8 +667,29 @@ async def application_get_own(client):
     )
 
 
+async def application_get_own(client):
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/applications/@me',
+    )
 
-async def application_get(client, application_id):
+async def application_edit_own(client, *, description = ...):
+    data = {}
+    
+    if (description is not ...):
+        data['description'] = description
+        
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
+        f'{API_ENDPOINT}/applications/@me',
+        data,
+    )
+
+
+
+async def oauth2_application_get(client, application_id):
     return await bypass_request(
         client,
         METHOD_GET,
@@ -746,7 +765,9 @@ async def channel_edit(
         
         if type_ < 128:
             if type_ not in (0, 5):
-                raise ValueError('You can switch channel type only between only Text channel (0) and Guild news channel (5)')
+                raise ValueError(
+                    'You can switch channel type only between only Text channel (0) and Guild news channel (5)'
+                )
             if type_ != value:
                 data['type'] = type_
         
@@ -4956,7 +4977,7 @@ async def rate_limit_test_0061(client, message):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0061') as RLT:
-        await application_get_own(client)
+        await oauth2_application_get_own(client)
 
 
 @RATE_LIMIT_COMMANDS
@@ -8157,7 +8178,7 @@ async def rate_limit_test_0204(client, message):
         else:
             await RLT.send('Secondary client required.')
         
-        await Task(KOKORO, application_get(client, iterated_client.application.id)).wait_for_completion()
+        await Task(KOKORO, oauth2_application_get(client, iterated_client.application.id)).wait_for_completion()
 
 
 @RATE_LIMIT_COMMANDS
@@ -8209,3 +8230,39 @@ async def rate_limit_test_0208(client, message):
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0208') as RLT:
         await Task(KOKORO, entitlement_delete(client)).wait_for_completion()
+
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0209(client, message):
+    """
+    Gets the client's application info.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0209') as RLT:
+        await application_get_own(client)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0210(client, message):
+    """
+    Gets the client's application info many times.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0210') as RLT:
+        task_group = TaskGroup(KOKORO)
+        
+        for _ in range(10):
+            task_group.create_task(application_get_own(client))
+        
+        await task_group.wait_all()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0211(client, message):
+    """
+    Edits the client's application info.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0211') as RLT:
+        await application_edit_own(client, description = client.application.description)
