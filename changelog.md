@@ -11,6 +11,7 @@
 - Add **1** image to `/kon` interaction.
 - Add new sex tier (`totally sex`).
 - Add headers for all feature clients.
+- Fix `AttributeError` in `/automation log satori`'s `guild_delete` event handler (from feature-clients update).
 
 ### 2023-11-19
 

@@ -103,7 +103,7 @@ async def un_mute_command(
     await client.user_guild_profile_edit(
         guild,
         user,
-        timeout_duration = None,
+        timed_out_until = None,
         reason = create_auto_reason(event, reason),
     )
     

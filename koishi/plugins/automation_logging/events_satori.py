@@ -76,7 +76,7 @@ async def guild_delete(client, guild, guild_profile):
         The client's guild profile at the guild.
     """
     # Do nothing if the guild has clients left.
-    if guild.cients:
+    if guild.clients:
         return
     
     satori_channel = get_log_satori_channel(guild.id)
