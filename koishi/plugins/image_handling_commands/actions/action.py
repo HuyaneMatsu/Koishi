@@ -209,7 +209,7 @@ async def send_action_response_with_interaction_event(client, event, content, em
     
     # Request the message back, so we can update its embed as required.
     try:
-        message = client.interaction_response_message_get(event)
+        message = await client.interaction_response_message_get(event)
     except ConnectionError:
         pass
     
