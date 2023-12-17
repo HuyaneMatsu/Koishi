@@ -11,7 +11,7 @@ from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoMod
     ApplicationCommand, InteractionResponseType, VerificationScreen, WelcomeScreen, \
     ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, \
     ERROR_CODES, ComponentType, Sticker, StickerPack, Permission, EntitlementOwnerType, \
-    VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
+    VoiceRegion, VerificationLevel, MessageNotificationLevel, ExplicitContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, Oauth2User, parse_oauth2_redirect_url, Channel, Role, GUILDS, CLIENTS, \
     Team, WebhookType, Guild, ForumTag, SoundboardSound, OnboardingMode
 from scarletio import sleep, Task, TaskGroup, AsyncIO, CancelledError, IgnoreCaseMultiValueDictionary, \
@@ -896,7 +896,7 @@ async def guild_create(
     region = VoiceRegion.eu_central,
     verification_level = VerificationLevel.medium,
     message_notification_level = MessageNotificationLevel.only_mentions,
-    content_filter_level = ContentFilterLevel.disabled,
+    content_filter_level = ExplicitContentFilterLevel.disabled,
     roles = None,
     channels = None
 ):

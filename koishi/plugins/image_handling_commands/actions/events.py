@@ -263,7 +263,7 @@ async def message_create(client, message):
     allowed_mentions = [*targets]
     # Create response and send
     content, embed = await ACTIONS_BY_NAME[intended_action].create_response_content_and_embed(
-        client, None, message.author, targets, client_in_users, user_in_users, allowed_mentions,
+        client, None, message.guild_id, message.author, targets, client_in_users, user_in_users, allowed_mentions,
     )
     
     await send_action_response_to(client, referenced_message, content, embed, allowed_mentions)

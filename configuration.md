@@ -1,59 +1,62 @@
 When setting up Koishi, create an importable `config.py` file, whose structure should be the following:
 
 ```python
-MARISA_MODE = True              # (bool) Whether Marisa or the other clients should run up.
+MARISA_MODE = True               # (bool) Whether Marisa or the other clients should run up.
 
 
-KOISHI_TOKEN = ''               # bot token (str) for the feature client.
-KOISHI_ID = 0                   # bot id (int), can be 0.
-KOISHI_SECRET = None            # client secret (str) for oauth2, can be None.
-KOISHI_PREFIX = 'k!'            # default prefix. (str)
-KOISHI_TOP_GG_TOKEN = ''        # top.gg token of the bot.
-KOISHI_TOP_GG_AUTHORIZATION = ''# top.gg authorization used for received webhooks.
+KOISHI_TOKEN = ''                # bot token (str) for the feature client.
+KOISHI_ID = 0                    # bot id (int), can be 0.
+KOISHI_SECRET = None             # client secret (str) for oauth2, can be None.
+KOISHI_PREFIX = 'k!'             # default prefix. (str)
+KOISHI_TOP_GG_TOKEN = ''         # top.gg token of the bot.
+KOISHI_TOP_GG_AUTHORIZATION = '' # top.gg authorization used for received webhooks.
 
-FLANDRE_TOKEN = ''              # bot token (str) for a secondary system bot.
-FLANDRE_ID = 0                  # bot id (int), can be 0.
+FLANDRE_TOKEN = ''               # bot token (str) for a secondary system bot.
+FLANDRE_ID = 0                   # bot id (int), can be 0.
 
-YOSHIKA_TOKEN = ''              # bot token (str) for a secondary system bot.
-YOSHIKA_ID = 0                  # bot id (int), can be 0.
+YOSHIKA_TOKEN = ''               # bot token (str) for a secondary system bot.
+YOSHIKA_ID = 0                   # bot id (int), can be 0.
 
-
-SATORI_TOKEN = ''               # bot token (str) for the system bot.
-SATORI_ID = 0                   # bot id (int). can be 0.
-SATORI_SECRET = None            # client secret (str) for oauth2, can be None.
-SATORI_PREFIX = '&'             # default prefix (str)
-
-MARISA_TOKEN = ''               # bot token (str) for the tetsing bot.
-MARISA_ID = 0                   # bot id (int), can be 0.
-MARISA_SECRET = None            # client secret (str) for oauth2, can be None.
-MARISA_PREFIX  = '$'            # default prefix (str)
-
-NITORI_TOKEN = ''               # bot token (str) for Nitori.
-NITORI_ID = 0                   # bot id (int) for Nitori.
-
-RENES_TOKEN = ''                # bot token (str) for Renes.
-RENES_ID = 0                    # bot id (int) for Renes.
-
-SAKUYA_TOKEN = ''               # bot token (str) for Sakuya.
-SAKUYA_ID = 0                   # bot id (int) for Sakuya.
+CURSED_SAKUYA_TOKEN = ''         # bot token (str) for a secondary system bot.
+CURSED_SAKUYA_ID = 0             # bot id (int), can be 0.
 
 
-AUDIO_PLAY_POSSIBLE = False     # Whether FFmpeg and other voice requirement as satisfied
-AUDIO_PATH = None               # path for local audio files, can be None
-HATA_PATH = None                # path to Hata if Any (str or None)
-KOISHI_PATH = None              # path to Koishi if specific. (str or None)
-SCARLETIO_PATH = None           # path to Scarletio if Any (str or None)
+SATORI_TOKEN = ''                # bot token (str) for the system bot.
+SATORI_ID = 0                    # bot id (int). can be 0.
+SATORI_SECRET = None             # client secret (str) for oauth2, can be None.
+SATORI_PREFIX = '&'              # default prefix (str)
 
-DATABASE_NAME = None            # The database's name to connect to. (str)
+MARISA_TOKEN = ''                # bot token (str) for the tetsing bot.
+MARISA_ID = 0                    # bot id (int), can be 0.
+MARISA_SECRET = None             # client secret (str) for oauth2, can be None.
+MARISA_PREFIX  = '$'             # default prefix (str)
 
-ALLOW_KOISHI_SNEKBOX = False    # (bool) Whether Koishi can use snekbox module.
-ALLOW_MARISA_SNEKBOX = True     # (bool) Whether Marisa can load the snekbox module.
+NITORI_TOKEN = ''                # bot token (str) for Nitori.
+NITORI_ID = 0                    # bot id (int) for Nitori.
 
-RUN_WEBAPP_AS_MAIN = True       # (bool) Whether web app should be started if manage.py is the local file.
-                                # Have this as `False` if not self-hosting.
-WEBAPP_SECRET_KEY = None        # (str) Secret key for webapp.
+RENES_TOKEN = ''                 # bot token (str) for Renes.
+RENES_ID = 0                     # bot id (int) for Renes.
 
-GOOGLE_API_KEYS = None          # (None or list of str) A list of google api keys.
+SAKUYA_TOKEN = ''                # bot token (str) for Sakuya.
+SAKUYA_ID = 0                    # bot id (int) for Sakuya.
+
+
+AUDIO_PLAY_POSSIBLE = False      # Whether FFmpeg and other voice requirement as satisfied
+AUDIO_PATH = None                # path for local audio files, can be None
+HATA_PATH = None                 # path to Hata if Any (str or None)
+KOISHI_PATH = None               # path to Koishi if specific. (str or None)
+SCARLETIO_PATH = None            # path to Scarletio if Any (str or None)
+
+DATABASE_NAME = None             # The database's name to connect to. (str)
+
+ALLOW_KOISHI_SNEKBOX = False     # (bool) Whether Koishi can use snekbox module.
+ALLOW_MARISA_SNEKBOX = True      # (bool) Whether Marisa can load the snekbox module.
+
+RUN_WEBAPP_AS_MAIN = True        # (bool) Whether web app should be started if manage.py is the local file.
+                                 # Have this as `False` if not self-hosting.
+WEBAPP_SECRET_KEY = None         # (str) Secret key for webapp.
+
+GOOGLE_API_KEYS = None           # (None or list of str) A list of google api keys.
 ```
 
 #### Koishi requirements
