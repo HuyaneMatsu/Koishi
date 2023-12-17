@@ -120,7 +120,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**, **Komeiji Satori**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -153,7 +153,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**, **Yakumo Yukari**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -318,7 +318,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**, **Komeiji Satori**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -472,7 +472,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**, **Komeiji Satori**, **Yakumo Yukari**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -483,7 +483,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**, **Komeiji Satori**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -494,7 +494,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Hata no Kokoro**, **Scarlet Flandre**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -549,7 +549,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**
+- Character: **Komeiji Koishi**, **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -626,7 +626,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**, **Komeiji Satori**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -659,7 +659,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**, **Komeiji Satori**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -681,7 +681,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**, **Komeiji Satori**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -791,7 +791,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**, **Komeiji Satori**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -868,7 +868,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**
+- Character: **Komeiji Koishi**, **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -967,7 +967,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Kaenbyou Rin**, **Scarlet Flandre**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -1055,7 +1055,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**
+- Character: **Scarlet Flandre**, **Scarlet Remilia**
 - Source: **Touhou**
 
 ---
@@ -1066,7 +1066,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**
+- Character: **Scarlet Flandre**, **Scarlet Remilia**
 - Source: **Touhou**
 
 ---
@@ -1077,7 +1077,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**, **Yakumo Yukari**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -1088,7 +1088,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**, **Komeiji Satori**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -1143,7 +1143,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**, **Komeiji Satori**
+- Character: **Scarlet Flandre**
 - Source: **Touhou**
 
 ---
@@ -1154,7 +1154,7 @@ All image's author is `paragasu`. They are nice (the safe ones at least).
 - Edit: *none*
 
 
-- Character: **Scarlet Flandre**
+- Character: **Scarlet Flandre**, **Scarlet Remilia**
 - Source: **Touhou**
 
 ---
