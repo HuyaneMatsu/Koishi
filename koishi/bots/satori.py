@@ -129,177 +129,163 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages_in_threads = True,
 )
 
-@Satori.commands.from_class
-class auto_pyramid:
-    async def command(client, message, emoji:Emoji, size:int):
-        while True:
-            if size < 2:
-                error_message = 'That is pretty small. OOF'
-            elif size > 23:
-                error_message = 'That is HUGE! That\'s what she said...'
-            else:
-                break
-            
-            await client.message_create(message.channel, error_message)
-            return
-        
-        should_check_external = (emoji.is_custom_emoji() and (emoji.guild is not message.guild))
-        
-        available_clients = []
-        
-        channel = message.channel
-        for client_ in channel.clients:
-            permissions = channel.cached_permissions_for(client_)
-            if not permissions & PERMISSION_MASK_MESSAGING:
-                continue
-            
-            if not client_.can_use_emoji(emoji):
-                continue
-            
-            if should_check_external and (not permissions.can_use_external_emojis):
-                continue
-            
-            available_clients.append(client_)
-        
-        if len(available_clients) < 2:
-            await client.message_create(message.channel,f'There need to be at least 2 client at the channel, who can '
-                f'build a pyramid, meanwhile there is only {len(available_clients)}')
-            return
-        
-        
-        for client_, count in zip(cycle(available_clients), chain(range(1, size),range(size, 0, -1))):
-            await client_.message_create(channel, ' '.join(emoji.as_emoji for _ in range(count)))
-    
-    checks = checks.has_guild_permissions(manage_messages = True)
-    
-    async def description(command_context):
-        return Embed(
-            'auto-pyramid',
-            (
-                'Creates a pyramid!\n'
-                f'Usage: `{command_context.prefix}auto-pyramid <emoji> <size>`'
-            ),
-            color = COLOR__SATORI_HELP,
-        ).add_footer(
-            'Guild only! You must have manage messages permission to use it.',
-        )
 
-@Satori.commands.from_class
-class auto_pyramid_u:
-    async def command(client, message, emoji:Emoji, size:int):
-        while True:
-            if size < 2:
-                error_message = 'That is pretty small. OOF'
-            elif size > 23:
-                error_message = 'That is HUGE! That\'s what she said...'
-            else:
-                break
-            
-            await client.message_create(message.channel, error_message)
-            return
-        
-        if emoji.is_custom_emoji() and (emoji.managed or (emoji.roles is not None) or (emoji.guild is not message.guild)):
-            await client.message_create(message.channel, 'No managed, limited to role or outer custom emojis are allowed.')
-            return
-        
-        channel = message.channel
-        if not channel.cached_permissions_for(client).can_manage_webhooks:
-            await client.message_create(channel, 'I need manage webhooks permission to execute this command.')
-            return
-        
-        executor_webhook = await client.webhook_get_own_channel(channel)
-        if (executor_webhook is None):
-            executor_webhook = await client.webhook_create(channel, 'auto-pyramider')
-        
-        users = list(message.guild.users.values())
-        selected_users = []
-        needed_users = (size << 1) - 1
-        user_count = len(users)
-        while True:
-            if user_count == 0:
-                break
-            
-            if needed_users == 0:
-                break
-            
-            user = users.pop(randint(0, user_count - 1))
-            user_count -= 1
-            if user.bot:
-                continue
-            
-            selected_users.append(user)
-            needed_users -= 1
-        
-        if needed_users:
-            await client.message_create(channel, 'The guild does not have enough users for this size of pyramid.')
-            return
-        
-        for user, count in zip(selected_users, chain(range(1, size), range(size, 0, -1))):
-            await client.webhook_message_create(
-                executor_webhook,
-                ' '.join(emoji.as_emoji for _ in range(count)),
-                name = user.name_at(message.guild),
-                avatar_url = user.avatar_url_as(size = 4096),
-                wait = True,
-            )
-    
-    checks = checks.has_guild_permissions(manage_messages = True)
-    
-    async def description(command_context):
-        return Embed(
-            'auto-pyramid-u',
-            (
-                'Creates a pyramid!\n'
-                f'Usage: `{command_context.prefix}auto-pyramid-u <emoji> <size>`'
-            ),
-            color = COLOR__SATORI_HELP,
-        ).add_footer(
-            'Guild only! You must have manage messages permission to use it.',
-        )
+async def auto_pyramid_description(command_context):
+    return Embed(
+        'auto-pyramid',
+        (
+            'Creates a pyramid!\n'
+            f'Usage: `{command_context.prefix}auto-pyramid <emoji> <size>`'
+        ),
+        color = COLOR__SATORI_HELP,
+    ).add_footer(
+        'Guild only! You must have manage messages permission to use it.',
+    )
 
 
-@Satori.commands.from_class
-class reverse:
-    async def command(client, message, content):
-        if content:
-            await client.message_create(message, content[::-1], allowed_mentions = None)
+@Satori.commands(
+    checks = checks.has_guild_permissions(manage_messages = True),
+    description = auto_pyramid_description,
+)
+async def auto_pyramid(client, message, emoji:Emoji, size:int):
+    while True:
+        if size < 2:
+            error_message = 'That is pretty small. OOF'
+        elif size > 23:
+            error_message = 'That is HUGE! That\'s what she said...'
+        else:
+            break
+        
+        await client.message_create(message.channel, error_message)
+        return
     
-    async def description(command_context):
-        return Embed(
-            'reverse',
-            (
-                'Reverses your message\n'
-                f'Usage: `{command_context.prefix}reverse <content>`'
-            ),
-            color = COLOR__SATORI_HELP,
+    should_check_external = (emoji.is_custom_emoji() and (emoji.guild is not message.guild))
+    
+    available_clients = []
+    
+    channel = message.channel
+    for client_ in channel.clients:
+        permissions = channel.cached_permissions_for(client_)
+        if not permissions & PERMISSION_MASK_MESSAGING:
+            continue
+        
+        if not client_.can_use_emoji(emoji):
+            continue
+        
+        if should_check_external and (not permissions.can_use_external_emojis):
+            continue
+        
+        available_clients.append(client_)
+    
+    if len(available_clients) < 2:
+        await client.message_create(message.channel,f'There need to be at least 2 client at the channel, who can '
+            f'build a pyramid, meanwhile there is only {len(available_clients)}')
+        return
+    
+    
+    for client_, count in zip(cycle(available_clients), chain(range(1, size),range(size, 0, -1))):
+        await client_.message_create(channel, ' '.join(emoji.as_emoji for _ in range(count)))
+
+
+async def auto_pyramid_u_description(command_context):
+    return Embed(
+        'auto-pyramid-u',
+        (
+            'Creates a pyramid!\n'
+            f'Usage: `{command_context.prefix}auto-pyramid-u <emoji> <size>`'
+        ),
+        color = COLOR__SATORI_HELP,
+    ).add_footer(
+        'Guild only! You must have manage messages permission to use it.',
+    )
+
+
+@Satori.commands(
+    checks = checks.has_guild_permissions(manage_messages = True),
+    description = auto_pyramid_u_description,
+)
+async def auto_pyramid_u(client, message, emoji:Emoji, size:int):
+    while True:
+        if size < 2:
+            error_message = 'That is pretty small. OOF'
+        elif size > 23:
+            error_message = 'That is HUGE! That\'s what she said...'
+        else:
+            break
+        
+        await client.message_create(message.channel, error_message)
+        return
+    
+    if emoji.is_custom_emoji() and (emoji.managed or (emoji.roles is not None) or (emoji.guild is not message.guild)):
+        await client.message_create(message.channel, 'No managed, limited to role or outer custom emojis are allowed.')
+        return
+    
+    channel = message.channel
+    if not channel.cached_permissions_for(client).can_manage_webhooks:
+        await client.message_create(channel, 'I need manage webhooks permission to execute this command.')
+        return
+    
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
+        executor_webhook = await client.webhook_create(channel, 'auto-pyramider')
+    
+    users = list(message.guild.users.values())
+    selected_users = []
+    needed_users = (size << 1) - 1
+    user_count = len(users)
+    while True:
+        if user_count == 0:
+            break
+        
+        if needed_users == 0:
+            break
+        
+        user = users.pop(randint(0, user_count - 1))
+        user_count -= 1
+        if user.bot:
+            continue
+        
+        selected_users.append(user)
+        needed_users -= 1
+    
+    if needed_users:
+        await client.message_create(channel, 'The guild does not have enough users for this size of pyramid.')
+        return
+    
+    for user, count in zip(selected_users, chain(range(1, size), range(size, 0, -1))):
+        await client.webhook_message_create(
+            executor_webhook,
+            ' '.join(emoji.as_emoji for _ in range(count)),
+            name = user.name_at(message.guild),
+            avatar_url = user.avatar_url_as(size = 4096),
+            wait = True,
         )
 
 
-@Satori.commands.from_class
-class shutdown:
-    async def command(client, message):
-        
-        for client_ in CLIENTS.values():
-            await client_.disconnect()
-        
-        await client.message_create(message.channel, 'Clients stopped, stopping process.')
-        KOKORO.stop()
-        signal.pthread_kill(main_thread().ident, signal.SIGKILL)
+async def shutdown_description(command_context):
+    return Embed(
+        'shutdown',
+        (
+            'Shuts the clients down, then stops the process.'
+            f'Usage  `{command_context.prefix}shutdown`'
+        ),
+        color = COLOR__SATORI_HELP,
+    ).add_footer(
+        'Owner only!',
+    )
+@Satori.commands(
+    category = 'UTILITY',
+    checks = checks.owner_only(),
+)
+async def shutdown(client, message):
     
-    category = 'UTILITY'
-    checks = checks.owner_only()
+    for client_ in CLIENTS.values():
+        await client_.disconnect()
     
-    async def description(command_context):
-        return Embed(
-            'shutdown',
-            (
-                'Shuts the clients down, then stops the process.'
-                f'Usage  `{command_context.prefix}shutdown`'
-            ),
-            color = COLOR__SATORI_HELP,
-        ).add_footer(
-            'Owner only!',
-        )
+    await client.message_create(message.channel, 'Clients stopped, stopping process.')
+    KOKORO.stop()
+    signal.pthread_kill(main_thread().ident, signal.SIGKILL)
+    
 
 async def execute_description(command_context):
     return Embed(

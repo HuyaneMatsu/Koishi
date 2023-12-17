@@ -247,8 +247,9 @@ if (DB_ENGINE is not None):
         
         # Welcome
         welcome_channel_id = Column(Int64, nullable = False)
-        welcome_button_enabled = Column(Boolean, default = False, nullable = False)
-        
+        welcome_reply_buttons_enabled = Column(Boolean, default = False, nullable = False)
+        welcome_style_name = Column(String, default = None, nullable = True)
+    
     
     AUTOMATION_CONFIGURATION_TABLE = automation_configuration_model.__table__
     

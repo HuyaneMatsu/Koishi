@@ -77,7 +77,14 @@ RULES = [
     )
 ]
 
+#     (
+#         'Chat identity',
+#         lambda: f'{GUILD__SUPPORT.name} is a Touhou themed guild so everyone is identified as a Touhou girl.',
+#     ),
+
+
 RULE_CHOICES = [(f'{index}. {title}', index) for index, (title, description_builder) in enumerate(RULES)]
+
 
 @FEATURE_CLIENTS.interactions(
     guild = GUILD__SUPPORT,

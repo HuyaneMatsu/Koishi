@@ -1,19 +1,21 @@
 __all__ = ()
 
 from hata import Embed, now_as_id
-from hata.ext.slash import Button, ButtonStyle
+from hata.ext.slash import Button, ButtonStyle, Row
 
 from ...bot_utils.multi_client_utils import get_first_client_with_message_create_permissions_from
 from ...bots import FEATURE_CLIENTS
 
-from ..automation_core import get_welcome_channel_and_button_enabled
+from ..automation_core import get_welcome_field
 from ..embed_image_refresh import schedule_image_refresh
 
-from .constants import CUSTOM_ID_WELCOME_REPLY, ONBOARDING_MASK_ALL, ONBOARDING_MASK_STARTED
-from .welcome_styles import WELCOME_STYLE_DEFAULT
+from .constants import (
+    CUSTOM_ID_WELCOME_REPLY, CUSTOM_ID_WELCOME_REPLY_CUSTOM, ONBOARDING_MASK_ALL, ONBOARDING_MASK_STARTED
+)
+from .welcome_styles import get_welcome_style
 
 
-async def welcome_user(client, guild, user, welcome_style, welcome_channel, welcome_button_enabled):
+async def welcome_user(client, guild, user, welcome_style, welcome_channel, welcome_reply_buttons_enabled):
     """
     Welcomes the user.
     
@@ -31,7 +33,7 @@ async def welcome_user(client, guild, user, welcome_style, welcome_channel, welc
         The welcome style to use.
     welcome_channel : ``Channel``
         The channel to welcome the user at.
-    welcome_button_enabled : `bool`
+    welcome_reply_buttons_enabled : `bool`
         Whether welcome reply button should be added under the message.
     """
     seed = guild.id ^ user.id
@@ -44,22 +46,29 @@ async def welcome_user(client, guild, user, welcome_style, welcome_channel, welc
     
     color = (now_as_id() >> 22) & 0xffffff
     
-    if welcome_button_enabled:
-        reply_styles = welcome_style.reply_styles
-        reply_style = reply_styles[seed % len(reply_styles)]
+    if welcome_reply_buttons_enabled:
+        welcome_styles = welcome_style.welcome_styles
+        welcome_style = welcome_styles[seed % len(welcome_styles)]
         
-        welcome_button = Button(
-            reply_style.button_content,
-            reply_style.button_emoji,
-            custom_id = CUSTOM_ID_WELCOME_REPLY,
-            style = ButtonStyle.green,
+        welcome_reply_buttons = Row(
+            Button(
+                welcome_style.button_content,
+                welcome_style.button_emoji,
+                custom_id = CUSTOM_ID_WELCOME_REPLY,
+                style = ButtonStyle.green,
+            ),
+            Button(
+                'Your greeting',
+                custom_id = CUSTOM_ID_WELCOME_REPLY_CUSTOM,
+                style = ButtonStyle.green,
+            )
         )
     else:
-        welcome_button = None
+        welcome_reply_buttons = None
     
     message = await client.message_create(
         welcome_channel,
-        components = welcome_button,
+        components = welcome_reply_buttons,
         content = f'> {message_content}',
         embed = Embed(color = color).add_image(image),
         silent = True,
@@ -83,9 +92,11 @@ async def guild_user_add(client, guild, user):
     user : ``ClientUserBase``
         The added user.
     """
-    welcome_channel, welcome_button_enabled = get_welcome_channel_and_button_enabled(guild.id)
-    if (welcome_channel is None):
+    welcome_fields = get_welcome_field(guild.id)
+    if (welcome_fields is None):
         return
+    
+    welcome_channel, welcome_reply_buttons_enabled, welcome_style_name = welcome_fields
     
     if client is not get_first_client_with_message_create_permissions_from(welcome_channel, FEATURE_CLIENTS):
         return
@@ -100,8 +111,10 @@ async def guild_user_add(client, guild, user):
     if flags & ONBOARDING_MASK_ALL == ONBOARDING_MASK_STARTED:
         return
     
+    welcome_style = get_welcome_style(welcome_style_name, client.id)
+    
     # Send message
-    await welcome_user(client, guild, user, WELCOME_STYLE_DEFAULT, welcome_channel, welcome_button_enabled)
+    await welcome_user(client, guild, user, welcome_style, welcome_channel, welcome_reply_buttons_enabled)
 
 
 @FEATURE_CLIENTS.events
@@ -122,13 +135,15 @@ async def guild_user_update(client, guild, user, old_attributes):
     old_attributes : `None | dict<str, object>`
         The updated attributes.
     """
-    welcome_channel, welcome_button_enabled = get_welcome_channel_and_button_enabled(guild.id)
-    if (welcome_channel is None):
+    welcome_fields = get_welcome_field(guild.id)
+    if (welcome_fields is None):
         return
     
     # Check whether the old flags are valid.
     if old_attributes is None:
         return
+    
+    welcome_channel, welcome_reply_buttons_enabled, welcome_style_name = welcome_fields
     
     if client is not get_first_client_with_message_create_permissions_from(welcome_channel, FEATURE_CLIENTS):
         return
@@ -153,5 +168,7 @@ async def guild_user_update(client, guild, user, old_attributes):
     if new_flags & ONBOARDING_MASK_ALL != ONBOARDING_MASK_ALL:
         return
     
+    welcome_style = get_welcome_style(welcome_style_name, client.id)
+    
     # Send message
-    await welcome_user(client, guild, user, WELCOME_STYLE_DEFAULT, welcome_channel, welcome_button_enabled)
+    await welcome_user(client, guild, user, welcome_style, welcome_channel, welcome_reply_buttons_enabled)

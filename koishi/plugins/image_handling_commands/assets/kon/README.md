@@ -281,7 +281,95 @@ All authors are actually known!! In case you know them better create a PR with i
 
 ### `ran-kon-0016`
 
-- Artist: **vivo**
+- Artist: **vivo / vivoさん！**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0017`
+
+- Artist: **ananna0031 / あんチャソ**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0018`
+
+- Artist: **sarasadou dan / 更紗灯弾**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0019`
+
+- Artist: **suwaneko / すわ猫**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0020`
+
+- Artist: **deetamu / で～たむ**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0021`
+
+- Artist: **kaiza1130 / カイザ閣下**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0022`
+
+- Artist: **masanaga / 政長**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0023`
+
+- Artist: **surumeri / するめり**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0024`
+
+- Artist: **kawayabug / かわやばぐ**
 - Edit: *none*
 
 

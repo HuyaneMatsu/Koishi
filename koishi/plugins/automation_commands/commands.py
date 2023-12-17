@@ -15,8 +15,9 @@ from ..automation_touhou_feed import (
     build_touhou_feed_listing_response, try_remove_guild as touhou_feed_try_remove_guild,
     try_update_guild as touhou_feed_try_update_guild
 )
+from ..automation_welcome import WELCOME_STYLE_NAMES
 
-from .constants import LOG_SATORI_ALLOWED_IDS
+from .constants import CHOICE_DEFAULT, LOG_SATORI_ALLOWED_IDS
 from .permission_checks import (
     check_channel_and_client_permissions, check_user_permissions, default_channel_and_check_its_guild
 )
@@ -873,13 +874,13 @@ async def welcome_disable(
     return f'Welcome messages will not be sent anymore.'
 
 
-@WELCOME_COMMANDS.interactions(name = 'button')
-async def welcome_button(
+@WELCOME_COMMANDS.interactions(name = 'reply-button')
+async def welcome_reply_buttons(
     event,
-    value: (bool, 'Whether a button should shown under welcome messages to reply.'),
+    value: (bool, 'Whether reply buttons should shown under welcome messages to reply.'),
 ):
     """
-    Enable or disable putting a button under welcome messages to reply.
+    Enable or disable putting reply buttons under welcome messages.
     
     Parameters
     ----------
@@ -895,6 +896,36 @@ async def welcome_button(
     check_user_permissions(event)
     
     automation_configuration = get_automation_configuration_for(event.guild_id)
-    automation_configuration.set('welcome_button_enabled', value)
+    automation_configuration.set('welcome_reply_buttons_enabled', value)
     
-    return f'Welcome button {"will" if value else "wont"} be put under welcome messages.'
+    return f'Welcome reply buttons {"will" if value else "wont"} be put under welcome messages.'
+
+
+WELCOME_STYLE_CHOICES = [CHOICE_DEFAULT, *WELCOME_STYLE_NAMES]
+
+
+@WELCOME_COMMANDS.interactions(name = 'style')
+async def welcome_style_name(
+    event,
+    value: (WELCOME_STYLE_CHOICES, 'The welcome style to use to use.'),
+):
+    """
+    Select a custom welcome to use over the default one.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    value : `bool`
+        Whether auto start should be enabled.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('welcome_style_name', None if value == CHOICE_DEFAULT else value)
+    
+    return f'Welcome style set to {value!s}.'

@@ -3,7 +3,7 @@ __all__ = ()
 from hata import CHANNELS, Embed, ROLES
 from hata.ext.slash import InteractionResponse
 
-from .constants import LOG_SATORI_ALLOWED_IDS
+from .constants import CHOICE_DEFAULT, LOG_SATORI_ALLOWED_IDS
 
 
 def get_channel_representation(channel_id):
@@ -69,6 +69,24 @@ def get_bool_representation(value):
     """
     return 'enabled' if value else 'disabled'
 
+
+def get_choice_representation(value):
+    """
+    Returns the choice's representation.
+    
+    Parameters
+    ----------
+    value : `None | str`
+        Choice value.
+    
+    Returns
+    -------
+    representation : `str`
+    """
+    if value is None:
+        value = CHOICE_DEFAULT
+    
+    return value
 
 
 def render_logging_description(automation_configuration):
@@ -157,7 +175,8 @@ def build_response_list_all(automation_configuration, guild):
         'Welcome',
         (
             f'Channel: {get_channel_representation(automation_configuration.welcome_channel_id)}\n'
-            f'Button: {get_bool_representation(automation_configuration.welcome_button_enabled)}'
+            f'Reply buttons: {get_bool_representation(automation_configuration.welcome_reply_buttons_enabled)}'
+            f'Style: {get_choice_representation(automation_configuration.welcome_style_name)}'
         )
     )
     

@@ -48,13 +48,18 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
     welcome_channel_id : `int`
         The channel's identifier where the welcome messages will be sent.
     
-    welcome_button_enabled : `bool`
-        Whether welcome messages should be quipped with a welcome button.
+    welcome_reply_buttons_enabled : `bool`
+        Whether welcome messages should be equipped with a welcome button.
+    
+    welcome_style_name : `None | str`
+        Which welcome style should the client use. By leaving it as `None` the client's default welcome style will be
+        used if it has.
     """
     __slots__ = (
         'entry_id', 'guild_id', 'log_emoji_channel_id', 'log_mention_channel_id', 'log_satori_auto_start',
         'log_satori_channel_id', 'log_sticker_channel_id', 'log_user_channel_id', 'reaction_copy_enabled',
-        'reaction_copy_role_id', 'saver', 'touhou_feed_enabled', 'welcome_channel_id', 'welcome_button_enabled'
+        'reaction_copy_role_id', 'saver', 'touhou_feed_enabled', 'welcome_channel_id', 'welcome_reply_buttons_enabled',
+        'welcome_style_name',
     )
     
     def __new__(cls, guild_id):
@@ -80,7 +85,8 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.saver = None
         self.touhou_feed_enabled = False
         self.welcome_channel_id = 0
-        self.welcome_button_enabled = False
+        self.welcome_reply_buttons_enabled = False
+        self.welcome_style_name = None
         return self
     
     
@@ -157,11 +163,16 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
             repr_parts.append(', welcome_channel_id = ')
             repr_parts.append(repr(welcome_channel_id))
             
-            # welcome_button_enabled
-            welcome_button_enabled = self.welcome_button_enabled
-            if welcome_button_enabled:
-                repr_parts.append(', welcome_button_enabled = ')
-                repr_parts.append(repr(welcome_button_enabled))
+            # welcome_reply_buttons_enabled
+            welcome_reply_buttons_enabled = self.welcome_reply_buttons_enabled
+            if welcome_reply_buttons_enabled:
+                repr_parts.append(', welcome_reply_buttons_enabled = ')
+                repr_parts.append(repr(welcome_reply_buttons_enabled))
+            
+            welcome_style_name = self.welcome_style_name
+            if (welcome_style_name is not None):
+                repr_parts.append(', welcome_style_name = ')
+                repr_parts.append(repr(welcome_style_name))
         
         repr_parts.append('>')
         return ''.join(repr_parts)
@@ -199,7 +210,10 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         if self.welcome_channel_id:
             return True
         
-        if self.welcome_button_enabled:
+        if self.welcome_reply_buttons_enabled:
+            return True
+        
+        if self.welcome_style_name is not None:
             return True
         
         return False
@@ -297,7 +311,8 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.reaction_copy_role_id = entry['reaction_copy_role_id']
         self.touhou_feed_enabled = entry['touhou_feed_enabled']
         self.welcome_channel_id = entry['welcome_channel_id']
-        self.welcome_button_enabled = entry['welcome_button_enabled']
+        self.welcome_reply_buttons_enabled = entry['welcome_reply_buttons_enabled']
+        self.welcome_style_name = entry['welcome_style_name']
         
         return self
 
@@ -317,5 +332,6 @@ AUTOMATION_CONFIGURATION_FIELD_SETTERS = {
     'touhou_feed_enabled': AutomationConfiguration.touhou_feed_enabled.__set__,
     
     'welcome_channel_id': AutomationConfiguration.welcome_channel_id.__set__,
-    'welcome_button_enabled': AutomationConfiguration.welcome_button_enabled.__set__,
+    'welcome_reply_buttons_enabled': AutomationConfiguration.welcome_reply_buttons_enabled.__set__,
+    'welcome_style_name': AutomationConfiguration.welcome_style_name.__set__,
 }

@@ -205,7 +205,7 @@ BUYABLE_ROLES = {
 
 ROLE_CHOICES = [
     (f'Horny ({NSFW_ACCESS_COST})', NSFW_ACCESS_IDENTIFIER),
-    (f'Nekogirl Worshipper ({ELEVATED_COST})', ELEVATED_IDENTIFIER),
+    (f'Orin\'s Workcarrier ({ELEVATED_COST})', ELEVATED_IDENTIFIER),
     (f'Koishi enjoyer ({HEART_BOOST_COST})', HEART_BOOST_IDENTIFIER),
 ]
 

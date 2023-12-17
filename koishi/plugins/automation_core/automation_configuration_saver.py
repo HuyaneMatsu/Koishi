@@ -164,7 +164,8 @@ class AutomationConfigurationSaver:
                                     touhou_feed_enabled = automation_configuration.touhou_feed_enabled,
                                     
                                     welcome_channel_id = automation_configuration.welcome_channel_id,
-                                    welcome_button_enabled = automation_configuration.welcome_button_enabled,
+                                    welcome_reply_buttons_enabled = automation_configuration.welcome_reply_buttons_enabled,
+                                    welcome_style_name = automation_configuration.welcome_style_name,
                                 ).returning(
                                     automation_configuration_model.id,
                                 )

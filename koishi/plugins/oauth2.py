@@ -41,20 +41,11 @@ def _oauth2_query(message, content):
     return user
 
 
-@COMMAND_CLIENT.commands.from_class
-class oauth2_link:
-    async def command(client, message,): #just a test link
-        await client.message_create(message.channel,(
-            'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
-            '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
-            '&response_type=code&scope=identify%20connections%20guilds%20guilds.join'
-            '%20email%20applications.entitlements'))
-    
-    category = 'OAUTH2'
-    
-    async def description(command_context):
-        prefix = command_context.prefix
-        return Embed('oauth2_link',(
+async def oauth2_link_description(command_context):
+    prefix = command_context.prefix
+    return Embed(
+        'oauth2_link',
+        (
             'I ll give you a nice authorization link for some oauth 2 scopes.\n'
             f'Usage: `{prefix}oauth2_link`\n'
             'After you authorized yourself, you should call the `oauth2_feed` '
@@ -66,45 +57,34 @@ class oauth2_link:
             f'- `{prefix}oauth2_guilds <user_id>`\n'
             f'- `{prefix}oauth2_my_guild <user_id>`\n'
             f'- `{prefix}oauth2_renew <user_id>`'
-                ), color = OAUTH2_COLOR).add_footer(
-                'Owner only!')
+        ),
+        color = OAUTH2_COLOR,
+    ).add_footer(
+        'Owner only!',
+    )
 
-@COMMAND_CLIENT.commands.from_class
-class oauth2_feed:
-    async def command(client, message, content):
-        try:
-            await client.message_delete(message)
-        except BaseException as err:
-            if isinstance(err,ConnectionError):
-                # no internet
-                return
-            
-            elif isinstance(err, DiscordException):
-                if err.code == ERROR_CODES.missing_access: # client removed
-                    return
-            
-            raise
-        
-        result = parse_oauth2_redirect_url(content)
-        if result is None:
-            await client.message_create(message.channel,'Bad link')
-            return
-    
-        access = await client.activate_authorization_code(*result, VALUABLE_SCOPES)
-    
-        if access is None:
-            await client.message_create(message.channel,'Too old link')
-            return
-        
-        user = await client.user_info_get(access)
-        OA2_accesses[user.id] = user
-        await client.message_create(message.channel,'Thanks')
-    
-    category = 'OAUTH2'
-    
-    async def description(command_context):
-        prefix = command_context.prefix
-        return Embed('oauth2_feed',(
+
+@COMMAND_CLIENT.commands(
+    category = 'OAUTH2',
+    description = oauth2_link_description,
+)
+async def oauth2_link(client, message,): #just a test link
+    await client.message_create(
+        message.channel,
+        (
+            'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
+            '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
+            '&response_type=code&scope=identify%20connections%20guilds%20guilds.join'
+            '%20email%20applications.entitlements'
+        ),
+    )
+
+
+async def oauth2_feed_description(command_context):
+    prefix = command_context.prefix
+    return Embed(
+        'oauth2_feed',
+        (
             'Feeds your oauth 2 authorized redirect url.\n'
             f'Usage: `{prefix}oauth2_feed *link*`\n'
             f'How to get an oauth 2 authorization url?, use: `{prefix}oauth2_link`\n'
@@ -114,24 +94,51 @@ class oauth2_feed:
             f'- `{prefix}oauth2_guilds <user_id>`\n'
             f'- `{prefix}oauth2_my_guild <user_id>`\n'
             f'- `{prefix}oauth2_renew <user_id>`'
-                ), color = OAUTH2_COLOR).add_footer(
-                'Owner only!')
+        ),
+        color = OAUTH2_COLOR,
+    ).add_footer(
+        'Owner only!',
+    )
 
 
-@COMMAND_CLIENT.commands.from_class
-class oauth2_user:
-    async def command(client, message, content):
-        user = _oauth2_query(message, content)
-        if user is None:
-            await client.message_create(message.channel,'Could not find that user')
+@COMMAND_CLIENT.commands(
+    category = 'OAUTH2',
+    description = oauth2_feed_description,
+)
+async def oauth2_feed(client, message, content):
+    try:
+        await client.message_delete(message)
+    except BaseException as err:
+        if isinstance(err,ConnectionError):
+            # no internet
             return
         
-        await Pagination(client, message.channel, [Embed(description = repr(user))])
+        elif isinstance(err, DiscordException):
+            if err.code == ERROR_CODES.missing_access: # client removed
+                return
+        
+        raise
     
-    category = 'OAUTH2'
+    result = parse_oauth2_redirect_url(content)
+    if result is None:
+        await client.message_create(message.channel,'Bad link')
+        return
+
+    access = await client.activate_authorization_code(*result, VALUABLE_SCOPES)
+
+    if access is None:
+        await client.message_create(message.channel,'Too old link')
+        return
     
-    async def description(command_context):
-        return Embed('oauth2_user', (
+    user = await client.user_info_get(access)
+    OA2_accesses[user.id] = user
+    await client.message_create(message.channel,'Thanks')
+
+
+async def oauth2_user_description(command_context):
+    return Embed(
+        'oauth2_user',
+        (
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'Using this command, I ll show the extra user information , I '
             'received.\n'
@@ -140,26 +147,32 @@ class oauth2_user:
             'so take care, you can not trust them! *Only me!*\n'
             'If you don\'t know how to authorize yourself; use : '
             f'`{command_context.prefix}help oauth2_link`'
-                ), color = OAUTH2_COLOR).add_footer(
-                'Owner only!')
+        ),
+        color = OAUTH2_COLOR
+    ).add_footer(
+        'Owner only!'
+    )
 
 
-@COMMAND_CLIENT.commands.from_class
-class oauth2_connections:
-    async def command(client, message, content):
-        user = _oauth2_query(message,content)
-        if user is None:
-            await client.message_create(message.channel,'Could not find that user')
-            return
-        
-        connections = await client.user_connection_get_all(user.access)
-        
-        await Pagination(client, message.channel, [Embed(description = repr(connections))])
+@COMMAND_CLIENT.commands(
+    category = 'OAUTH2',
+    description = oauth2_user_description,
     
-    category = 'OAUTH2'
+)
+async def oauth2_user(client, message, content):
+    user = _oauth2_query(message, content)
+    if user is None:
+        await client.message_create(message.channel, 'Could not find that user')
+        return
     
-    async def description(command_context):
-        return Embed('oauth2_connections',(
+    await Pagination(client, message.channel, [Embed(description = repr(user))])
+
+
+
+async def oauth2_connections_description(command_context):
+    return Embed(
+        'oauth2_connections',
+        (
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'You might ask what are your connections. '
             'Those are your connected apps and sites.\n'
@@ -168,26 +181,32 @@ class oauth2_connections:
             'so take care, you can not trust them! *Only me!*\n'
             'If you don\'t know how to authorize yourself; use : '
             f'`{command_context.prefix}help oauth2_link`'
-                ), color = OAUTH2_COLOR).add_footer(
-                'Owner only!')
+        ),
+        color = OAUTH2_COLOR,
+    ).add_footer(
+        'Owner only!'
+    )
 
 
-@COMMAND_CLIENT.commands.from_class
-class oauth2_guilds:
-    async def command(client,message,content):
-        user = _oauth2_query(message,content)
-        if user is None:
-            await client.message_create(message.channel, 'Could not find that user')
-            return
-        
-        guilds = await client.user_guild_get_all(user.access)
-        
-        await Pagination(client, message.channel, [Embed(description = repr(guilds))])
+@COMMAND_CLIENT.commands(
+    category = 'OAUTH2',
+    description = oauth2_connections_description,
+)
+async def oauth2_connections(client, message, content):
+    user = _oauth2_query(message,content)
+    if user is None:
+        await client.message_create(message.channel, 'Could not find that user')
+        return
     
-    category = 'OAUTH2'
+    connections = await client.user_connection_get_all(user.access)
     
-    async def description(command_context):
-        return Embed('oauth2_guilds', (
+    await Pagination(client, message.channel, [Embed(description = repr(connections))])
+
+
+async def oauth2_guilds_description(command_context):
+    return Embed(
+        'oauth2_guilds',
+        (
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'By using this command, I ll show your guilds. '
             '*And everything, what I know about them.*\n'
@@ -196,45 +215,32 @@ class oauth2_guilds:
             'so take care, you can not trust them! *Only me!*\n'
             'If you don\'t know how to authorize yourself; use : '
             f'`{command_context.prefix}help oauth2_link`'
-                ), color = OAUTH2_COLOR).add_footer(
-                'Owner only!')
+        ),
+        color = OAUTH2_COLOR,
+    ).add_footer(
+        'Owner only!',
+    )
 
 
-@COMMAND_CLIENT.commands.from_class
-class oauth2_my_guild:
-    async def command(client,message,content):
-        user = _oauth2_query(message,content)
-        if user is None:
-            await client.message_create(message.channel,'Could not find that user')
-            return
-        
-        try:
-            guild = await client.guild_create(
-                'Luv ya',
-                channels = [
-                    Channel(name = f'Love u {message.author.name}', channel_type = ChannelType.guild_text).to_data(),
-                ],
-            )
-            
-            await sleep(1.0, client.loop)
-            await client.guild_user_add(guild, user)
-            await sleep(1.0, client.loop)
-            await client.guild_edit(guild, owner = user.id)
-        finally:
-            try:
-                guild
-            except UnboundLocalError:
-                return
-            await sleep(1.0, client.loop)
-            if client is guild.owner:
-                await client.guild_delete(guild)
-            else:
-                await client.guild_leave(guild)
+@COMMAND_CLIENT.commands(
+    category = 'OAUTH2',
+    description = oauth2_guilds_description,
+)
+async def oauth2_guilds(client,message,content):
+    user = _oauth2_query(message,content)
+    if user is None:
+        await client.message_create(message.channel, 'Could not find that user')
+        return
     
-    category = 'OAUTH2'
+    guilds = await client.user_guild_get_all(user.access)
     
-    async def description(command_context):
-        return Embed('oauth2_my_guild',(
+    await Pagination(client, message.channel, [Embed(description = repr(guilds))])
+
+
+async def oauth2_my_guild_description(command_context):
+    return Embed(
+        'oauth2_my_guild',
+        (
             'After you authorized yourself, I can create a guild for you, '
             'so just sit back!\n'
             f'Usage: `{command_context.prefix}oauth2_my_guild <user_id>`\n'
@@ -242,37 +248,83 @@ class oauth2_my_guild:
             'take care!\n'
             'If you don\'t know how to authorize yourself, use : '
             f'`{command_context.prefix}help oauth2_link`'
-                ), color = OAUTH2_COLOR).add_footer(
-                'Owner only!')
+        ),
+        color = OAUTH2_COLOR,
+    ).add_footer(
+        'Owner only!',
+    )
 
-
-@COMMAND_CLIENT.commands.from_class
-class oauth2_renew:
-    async def command(client,message,content):
-        user = _oauth2_query(message,content)
-        if user is None:
-            await client.message_create(message.channel,'Could not find that user')
+    
+@COMMAND_CLIENT.commands(
+    category = 'OAUTH2',
+    description = oauth2_my_guild_description,
+)
+async def oauth2_my_guild(client,message,content):
+    user = _oauth2_query(message,content)
+    if user is None:
+        await client.message_create(message.channel, 'Could not find that user')
+        return
+    
+    guild = None
+    try:
+        guild = await client.guild_create(
+            'Luv ya',
+            channels = [
+                Channel(name = f'Love u {message.author.name}', channel_type = ChannelType.guild_text).to_data(),
+            ],
+        )
+        
+        await sleep(1.0, client.loop)
+        await client.guild_user_add(guild, user)
+        await sleep(1.0, client.loop)
+        await client.guild_edit(guild, owner = user.id)
+    finally:
+        if guild is None:
             return
         
-        access = user.access
-        last = access.created_at
-        await client.renew_access_token(access)
-        new = access.created_at
-        await client.message_create(message.channel,
-            f'{user:f}\' access token is renewed.\n'
-            f'From creation time at: {last:%Y.%m.%d-%H:%M:%S}\n'
-            f'To creation time at: {new:%Y.%m.%d-%H:%M:%S}'
-                )
-    
-    category = 'OAUTH2'
-    
-    async def description(command_context):
-        return Embed('oauth2_renew',(
+        await sleep(1.0, client.loop)
+        if client is guild.owner:
+            await client.guild_delete(guild)
+        else:
+            await client.guild_leave(guild)
+
+
+async def oauth2_renew_description(command_context):
+    return Embed(
+        'oauth2_renew',
+        (
             'Your oauth2 authorization might expire; with this command you can '
             'renew it.\n'
             f'Usage: `{command_context.prefix}oauth2_renew <user_id>`\n'
             'Other owners can renew it for you as well!\n'
             'If you don\'t know how to authorize yourself;\n'
             f'Use : `{command_context.prefix}help oauth2_link`'
-                ), color = OAUTH2_COLOR).add_footer(
-                'Owner only!')
+        ),
+        color = OAUTH2_COLOR,
+    ).add_footer(
+        'Owner only!',
+    )
+
+
+@COMMAND_CLIENT.commands(
+    category = 'OAUTH2',
+    description = oauth2_renew_description,
+)
+async def oauth2_renew(client,message,content):
+    user = _oauth2_query(message,content)
+    if user is None:
+        await client.message_create(message.channel, 'Could not find that user')
+        return
+    
+    access = user.access
+    last = access.created_at
+    await client.renew_access_token(access)
+    new = access.created_at
+    await client.message_create(
+        message.channel,
+        (
+            f'{user:f}\' access token is renewed.\n'
+            f'From creation time at: {last:%Y.%m.%d-%H:%M:%S}\n'
+            f'To creation time at: {new:%Y.%m.%d-%H:%M:%S}'
+        ),
+    )

@@ -109,8 +109,9 @@ async def reaction_add(client, event):
         if target_channel.cached_permissions_for(client_to_use).can_manage_webhooks:
             if client_to_use is client:
                 break
-            
-            return
+    
+    else:
+        return
     
     message = event.message
     

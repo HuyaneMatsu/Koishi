@@ -1,19 +1,10 @@
+from .flandre import *
 from .koishi import *
+from .welcome_styles import *
 
 
 __all__ = (
-    'WELCOME_STYLE_DEFAULT',
-    'WELCOME_STYLES',
-    
+    *flandre.__all__,
     *koishi.__all__,
+    *welcome_styles.__all__,
 )
-
-
-from .koishi import WELCOME_STYLE as WELCOME_STYLE_KOISHI
-
-
-WELCOME_STYLES = {
-    WELCOME_STYLE_KOISHI.name: WELCOME_STYLE_KOISHI,
-}
-
-WELCOME_STYLE_DEFAULT = WELCOME_STYLE_KOISHI

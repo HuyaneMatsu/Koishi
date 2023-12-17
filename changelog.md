@@ -1,3 +1,16 @@
+### 2023-12-17
+
+- Add **8** image to `/kon` interaction.
+- Action commands (such as `/hug`) now user the color of the user.
+- Action replies now use the color of the user.
+- `/automation reaction-copy` always only selected the first client. (Messed up the fix last update.)
+- Add `flandre` themed welcome style. Flandre will use her own style by default.
+- Add `/automation welcome style` command where you can select a non-default welcome style as well.
+- Rename `/automation welcome button` to `/automation welcome reply-buttons`.
+- Add `Your greeting` welcome reply button.
+- `/automation welcome reply-buttons` now sends reply with the color of the user.
+- `/heartshop roles` costs and names adjusted.
+
 ### 2023-12-09
 
 - `/waifu-info` no longer sets `embed.timestamp` since it shows the same date as when the message was created at.

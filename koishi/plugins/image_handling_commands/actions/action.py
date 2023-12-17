@@ -450,14 +450,14 @@ class Action:
             )
         
         content, embed = await self.create_response_content_and_embed(
-            client, event, event.id, event.user, targets, client_in_users, user_in_users, allowed_mentions
+            client, event, event.user, targets, client_in_users, user_in_users, allowed_mentions
         )
         
         await send_action_response(client, event, content, embed, allowed_mentions)
 
     
     async def create_response_content_and_embed(
-        self, client, event, color_seed, source_user, targets, client_in_users, user_in_users, allowed_mentions
+        self, client, event, source_user, targets, client_in_users, user_in_users, allowed_mentions
     ):
         """
         Creates response content and embed.
@@ -470,8 +470,6 @@ class Action:
             The client who received the event.
         event : `None`, ``InteractionEvent``
             The received interaction event if called from a command.
-        color_seed : `int`
-            Seed to generate the embed color from.
         source_user : ``ClientUserBase``
             The user source user who invoked the event.
         targets : `set<Role | ClientUserBase>`
@@ -516,7 +514,8 @@ class Action:
             break
         
         
-        color = (color_seed >> 22) & 0xffffff
+        color = source_user.color_at(event.guild_id)
+        
         if image_detail is None:
             embed = Embed(
                 None,

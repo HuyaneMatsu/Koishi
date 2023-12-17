@@ -10,6 +10,8 @@ ONBOARDING_MASK_STARTED = GuildProfileFlag().update_by_keys(onboarding_started =
 ONBOARDING_MASK_COMPLETED = GuildProfileFlag().update_by_keys(onboarding_completed = True)
 ONBOARDING_MASK_ALL = ONBOARDING_MASK_STARTED | ONBOARDING_MASK_COMPLETED
 CUSTOM_ID_WELCOME_REPLY = 'automation.welcome.reply'
+CUSTOM_ID_WELCOME_REPLY_CUSTOM =  'automation.welcome.reply.custom'
+
 
 REPLY_EXPIRES_AFTER = timedelta_to_id_difference(TimeDelta(days = 7))
 
