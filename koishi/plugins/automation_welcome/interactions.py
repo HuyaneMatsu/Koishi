@@ -244,7 +244,7 @@ async def create_welcome_reply(client, event, joined_user, custom_message_conten
     reply_style = reply_styles[seed % len(reply_styles)]
 
     content = '> ' + reply_style.reply_content_builder(event.user.mention, joined_user.mention)
-        
+    
     seed = seed ^ event.user_id
     images = welcome_style.images
 
@@ -262,7 +262,7 @@ async def create_welcome_reply(client, event, joined_user, custom_message_conten
         silent = True,
     )
     schedule_image_refresh(client, message, event)
-    
+
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_WELCOME_REPLY)
 async def welcome_reply(client, event):
