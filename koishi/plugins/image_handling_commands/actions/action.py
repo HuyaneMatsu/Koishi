@@ -515,8 +515,12 @@ class Action:
             )
             break
         
+        # Get color
+        if (not targets) and (not client_in_users):
+            color = client.color_at(guild_id)
+        else:
+            color = source_user.color_at(guild_id)
         
-        color = source_user.color_at(guild_id)
         
         if image_detail is None:
             embed = Embed(

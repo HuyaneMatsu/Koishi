@@ -874,7 +874,7 @@ async def welcome_disable(
     return f'Welcome messages will not be sent anymore.'
 
 
-@WELCOME_COMMANDS.interactions(name = 'reply-button')
+@WELCOME_COMMANDS.interactions(name = 'reply-buttons')
 async def welcome_reply_buttons(
     event,
     value: (bool, 'Whether reply buttons should shown under welcome messages to reply.'),
