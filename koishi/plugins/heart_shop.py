@@ -14,7 +14,7 @@ from ..bot_utils.constants import (
 )
 from ..bot_utils.daily import ELEVATED_COST, HEART_BOOST_COST, NSFW_ACCESS_COST, calculate_daily_new
 from ..bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, user_common_model
-from ..bots import FEATURE_CLIENTS
+from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
 
 
@@ -255,7 +255,7 @@ async def roles(client, event,
             yield
             
             try:
-                await client.user_role_add(user, role)
+                await MAIN_CLIENT.user_role_add(user, role)
             except DiscordException as err:
                 if err.code in (
                     ERROR_CODES.unknown_user,

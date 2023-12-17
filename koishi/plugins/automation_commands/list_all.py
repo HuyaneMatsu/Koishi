@@ -175,7 +175,7 @@ def build_response_list_all(automation_configuration, guild):
         'Welcome',
         (
             f'Channel: {get_channel_representation(automation_configuration.welcome_channel_id)}\n'
-            f'Reply buttons: {get_bool_representation(automation_configuration.welcome_reply_buttons_enabled)}'
+            f'Reply buttons: {get_bool_representation(automation_configuration.welcome_reply_buttons_enabled)}\n'
             f'Style: {get_choice_representation(automation_configuration.welcome_style_name)}'
         )
     )
