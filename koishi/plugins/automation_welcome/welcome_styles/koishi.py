@@ -427,7 +427,7 @@ REPLY_STYLES = (
         (lambda source, target: f'{source} shares koishi fumo with {target}.'),
     ),
     ReplyStyle(
-        'To staaaaare at them.',
+        'Staaaaare at them.',
         Emoji.precreate(1083349493346480140),
         (lambda source, target: f'{source} staaaaares at {target}.'),
     ),

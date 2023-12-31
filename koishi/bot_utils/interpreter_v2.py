@@ -6,10 +6,11 @@ from types import FunctionType
 import hata
 from hata import Embed, KOKORO, cchunkify
 from hata.ext.slash.menus import Pagination
-from scarletio import Lock, is_awaitable, write_exception_async
-from scarletio.utils.trace import (
-    _render_syntax_error_representation_into, CONSOLE_LINE_CACHE, fixup_syntax_error_line_from_buffer,
-    is_syntax_error, render_exception_into
+from scarletio import Lock, add_console_input, is_awaitable, render_exception_into, write_exception_async
+from scarletio.utils.trace.rendering import _render_exception_representation_syntax_error_into
+from scarletio.utils.trace.exception_representation import ExceptionRepresentationSyntaxError
+from scarletio.utils.trace.exception_representation.syntax_error_helpers import (
+    fixup_syntax_error_line_from_buffer, is_syntax_error
 )
 
 try:
@@ -107,20 +108,14 @@ def raw_print(buffer, *args, file = None, flush = False, **kwargs):
     print(*args, file = file, **kwargs)
 
 
-def _ignore_console_frames(file_name, name, line_number, line):
+def _ignore_console_frames(frame):
     """
     Ignores the frames of the online console (``Interpreter`` type).
     
     Parameters
     ----------
-    file_name : `str`
-        The frame's respective file's name.
-    name : `str`
-        The frame's respective function's name.
-    line_number : `int`
-        The line's index where the exception occurred.
-    line : `str`
-        The frame's respective stripped line.
+    frame : ``FrameProxyBase``
+        The frame to check.
     
     Returns
     -------
@@ -128,6 +123,10 @@ def _ignore_console_frames(file_name, name, line_number, line):
         Whether the frame should be shown.
     """
     should_show_frame = True
+    
+    file_name = frame.file_name
+    name = frame.name
+    line = frame.line
     
     if file_name == __file__:
         if name == '__call__':
@@ -210,17 +209,18 @@ class Interpreter:
                     
                     if is_syntax_error(syntax_error):
                         fixup_syntax_error_line_from_buffer(syntax_error, source.splitlines())
-                        _render_syntax_error_representation_into(syntax_error, into, None)
-                        into.append('\n')
                         
+                        _render_exception_representation_syntax_error_into(
+                            ExceptionRepresentationSyntaxError(syntax_error), into, None
+                        )
                     else:
-                        render_exception_into(syntax_error, into)
+                        render_exception_into(syntax_error, into, filter = _ignore_console_frames)
                     
                     buffer.write(''.join(into))
                     into = None
                 
                 else:
-                    CONSOLE_LINE_CACHE.feed(file_name, source)
+                    add_console_input(file_name, source)
                     
                     locals_ = self.locals
                     locals_['print'] = partial_func(raw_print, buffer)

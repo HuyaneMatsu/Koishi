@@ -13,8 +13,14 @@ PROVIDER = 'waifu.pics'
 
 HEADERS = IgnoreCaseMultiValueDictionary()
 HEADERS[CONTENT_TYPE] = 'application/json'
-
 DATA = b'{}'
+
+
+# These are blacklisted images requested to be removed since they are a little bit too explicit
+BLACKLIST = {
+    'https://i.waifu.pics/sqndUwO.gif',
+    'https://i.waifu.pics/JxQolYt.gif',
+}
 
 
 class ImageHandlerWaifuPics(ImageHandlerRequestBase):
@@ -83,4 +89,4 @@ class ImageHandlerWaifuPics(ImageHandlerRequestBase):
         except KeyError:
             return None
         
-        return [ImageDetail(url, PROVIDER) for url in urls]
+        return [ImageDetail(url, PROVIDER) for url in urls if url not in BLACKLIST]

@@ -1,3 +1,14 @@
+### 2023-12-31
+
+- Separate image commands into multiple directories.
+- Add blacklist for waifu api images to filter a little bit too spicy images out.
+- Write new `/meme` command now filled with berigoos!!
+- Add headers for Cursed Sakuya.
+- Add assets & their information to `pocky-kiss (self)` interaction.
+- A few `pocky-kiss (self)` images were registered incorrectly (duplicate, bad character or being omitted).
+- Add **2** image to `/kon` interaction.
+- Separate the `image_handling_commands` into multiple plugins.
+
 ### 2023-12-17
 
 - Add **8** image to `/kon` interaction.

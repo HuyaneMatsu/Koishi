@@ -41,6 +41,17 @@ HEADER_YOSHIKA = (
     '```'
 )
 
+HEADER_CURSED_SAKUYA = (
+    ' _____ _____       _                      \n'
+    '/  __ /  ___|     | |                     \n'
+    '| /  \\\\ `--.  __ _| | ___   _ _   _  __ _ \n'
+    '| |    `--. \\/ _` | |/ | | | | | | |/ _` |\n'
+    '| \\__//\\__/ | (_| |   <| |_| | |_| | (_| |\n'
+    ' \\____\\____/ \\__,_|_|\\_\\\\__,_|\\__, |\\__,_|\n'
+    '                               __/ |      \n'
+    '                              |___/       \n'
+)
+
 
 HEADER_KOISHI_EASTER_EGG = (
     '```\n'
@@ -66,11 +77,23 @@ HEADER_FLANDRE_EASTER_EGG = (
     '```'
 )
 
+HEADER_CURSED_SAKUYA_EASTER_EGG = (
+    ' _____ _____                   \n'
+    '/  __ /  ___|                  \n'
+    '| /  \\\\ `--. _   _ _   _ _   _ \n'
+    '| |    `--. | | | | | | | | | |\n'
+    '| \\__//\\__/ | |_| | |_| | |_| |\n'
+    ' \\____\\____/ \\__,_|\\__, |\\__,_|\n'
+    '                    __/ |      \n'
+    '                   |___/\n'
+)
+
 
 HEADERS = {
     config.KOISHI_ID: (HEADER_KOISHI, HEADER_KOISHI_EASTER_EGG),
     config.FLANDRE_ID: (HEADER_FLANDRE, HEADER_FLANDRE_EASTER_EGG),
     config.YOSHIKA_ID: (HEADER_YOSHIKA, HEADER_YOSHIKA),
+    config.CURSED_SAKUYA_ID: (HEADER_CURSED_SAKUYA, HEADER_CURSED_SAKUYA_EASTER_EGG),
 }
 
 HEADER_DEFAULT = HEADER_KOISHI

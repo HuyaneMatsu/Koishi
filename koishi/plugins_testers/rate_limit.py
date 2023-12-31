@@ -17,7 +17,8 @@ from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoMod
 from scarletio import sleep, Task, TaskGroup, AsyncIO, CancelledError, IgnoreCaseMultiValueDictionary, \
     alchemy_incendiary,  EventThread, change_on_switch, to_json, from_json
 
-from scarletio.utils.trace import TracebackFrameProxy, render_frames_into, render_exception_into
+from scarletio.utils.trace import render_frames_into, render_exception_into
+from scarletio.utils.trace.frame_proxy import FrameProxyTraceback
 from scarletio.web_common.headers import DATE, METHOD_PATCH, METHOD_GET, METHOD_DELETE, METHOD_POST, METHOD_PUT, \
     AUTHORIZATION, CONTENT_TYPE, METHOD_OPTIONS, ALLOW
 from scarletio.http_client import RequestContextManager
@@ -32,7 +33,7 @@ from hata.ext.command_utils import wait_for_message, wait_for_reaction
 from hata.ext.commands_v2 import Command, checks, configure_converter
 from hata.ext.slash.menus import Pagination
 
-MAIN_CLIENT: Client
+MAIN_CLIENT : Client
 RATE_LIMIT_COMMANDS = eventlist(type_ = Command, category = 'RATE_LIMIT TESTS')
 
 
@@ -300,7 +301,7 @@ class RLTCTX:
         while True:
             if traceback is None:
                 break
-            frame = TracebackFrameProxy(traceback)
+            frame = FrameProxyTraceback(traceback)
             frames.append(frame)
             traceback = traceback.tb_next
         
