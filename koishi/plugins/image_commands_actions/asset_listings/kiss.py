@@ -1,6 +1,7 @@
 __all__ = ('TOUHOU_ACTION_KISS',)
 
 from ...image_handling_core import ImageDetail
+from ... import touhou_core # to avoid deadlock 
 from ...touhou_core.characters import KOMEIJI_KOISHI, SCARLET_FLANDRE
 
 
