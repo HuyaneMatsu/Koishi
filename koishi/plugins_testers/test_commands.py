@@ -121,7 +121,7 @@ async def test_user_data(client, message, user : User):
     """
     Prints out user data as received json
     """
-    data = await client.http.user_get(user.id)
+    data = await client.api.stage_discovery_getuser_get(user.id)
     await Pagination(
         client,
         message.channel,
@@ -169,7 +169,7 @@ async def get_guild(client, message):
     if guild is None:
         await client.message_create(message.channel, 'Please use this command at a guild.')
     
-    data = await client.http.guild_get(guild.id)
+    data = await client.api.stage_discovery_getguild_get(guild.id)
     await Pagination(
         client,
         message.channel,
@@ -192,8 +192,8 @@ async def test_webhook_response(client, message, user : User, use_user_avatar : 
     
     content = str(random_id())
     
-    http_type = type(client.http)
-    original_webhook_message_create = http_type.webhook_message_create
+    api_type = type(client.api)
+    original_webhook_message_create = api_type.webhook_message_create
     
     async def replace_webhook_message_create(client, *args):
         data = await original_webhook_message_create(client, *args)
@@ -201,14 +201,14 @@ async def test_webhook_response(client, message, user : User, use_user_avatar : 
             result[0] = str(data)
         return data
     
-    http_type.webhook_message_create = replace_webhook_message_create
+    api_type.webhook_message_create = replace_webhook_message_create
     
     executor_webhook = await client.webhook_get_own_channel(channel)
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'tester')
     
     if not use_user_avatar:
-        async with client.http.get(user.avatar_url) as response:
+        async with client.api.stage_discovery_getget(user.avatar_url) as response:
             webhook_avatar_data = await response.read()
         
         await client.webhook_edit(executor_webhook, avatar = webhook_avatar_data)
@@ -230,7 +230,7 @@ async def test_webhook_response(client, message, user : User, use_user_avatar : 
     
     message = await client.webhook_message_create(executor_webhook,content,avatar_url = avatar_url, wait = True)
     
-    http_type.webhook_message_create = original_webhook_message_create
+    api_type.webhook_message_create = original_webhook_message_create
     
     await sleep(1.0)
     
@@ -250,8 +250,8 @@ async def test_webhook_response_with_url(client, message, url):
     
     content = str(random_id())
     
-    http_type = type(client.http)
-    original_webhook_message_create = http_type.webhook_message_create
+    api_type = type(client.api)
+    original_webhook_message_create = api_type.webhook_message_create
     
     async def replace_webhook_message_create(client, *args):
         data = await original_webhook_message_create(client, *args)
@@ -259,7 +259,7 @@ async def test_webhook_response_with_url(client, message, url):
             result[0] = str(data)
         return data
     
-    http_type.webhook_message_create = replace_webhook_message_create
+    api_type.webhook_message_create = replace_webhook_message_create
     
     source_MESSAGE_CREATE = PARSERS['MESSAGE_CREATE']
     
@@ -275,7 +275,7 @@ async def test_webhook_response_with_url(client, message, url):
     
     message = await client.webhook_message_create(executor_webhook, content, wait = True)
     
-    http_type.webhook_message_create = original_webhook_message_create
+    api_type.webhook_message_create = original_webhook_message_create
     
     await sleep(1.0)
     
@@ -295,8 +295,8 @@ async def test_webhook_response_avatar_url(client, message, avatar_url):
     
     content = str(random_id())
     
-    http_type = type(client.http)
-    original_webhook_message_create = http_type.webhook_message_create
+    api_type = type(client.api)
+    original_webhook_message_create = api_type.webhook_message_create
     
     async def replace_webhook_message_create(client, *args):
         data = await original_webhook_message_create(client, *args)
@@ -304,7 +304,7 @@ async def test_webhook_response_avatar_url(client, message, avatar_url):
             result[0] = str(data)
         return data
     
-    http_type.webhook_message_create = replace_webhook_message_create
+    api_type.webhook_message_create = replace_webhook_message_create
     
     executor_webhook = await client.webhook_get_own_channel(channel)
     if (executor_webhook is None):
@@ -322,7 +322,7 @@ async def test_webhook_response_avatar_url(client, message, avatar_url):
     
     message = await client.webhook_message_create(executor_webhook,content,avatar_url = avatar_url, wait = True)
     
-    http_type.webhook_message_create = original_webhook_message_create
+    api_type.webhook_message_create = original_webhook_message_create
     
     await sleep(1.0)
     
@@ -671,7 +671,7 @@ async def test_start_channel_thread(client, message):
     """
     Does a post request to the channel's threads.
     """
-    data = await client.http.thread_create_private(message.channel.id, None)
+    data = await client.api.stage_discovery_getthread_create_private(message.channel.id, None)
     pages = [
         Embed(description = chunk) for chunk in
         cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
@@ -685,7 +685,7 @@ async def test_get_channel_thread_user_get_all(client, message):
     """
     Gets the channel's threads' users probably, no clue.
     """
-    data = await client.http.thread_user_get_all(message.channel.id)
+    data = await client.api.stage_discovery_getthread_user_get_all(message.channel.id)
     pages = [
         Embed(description = chunk) for chunk in
         cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
@@ -699,7 +699,7 @@ async def test_add_channel_thread_user(client, message):
     """
     Adds you to the channel's threads.
     """
-    data = await client.http.thread_user_add(message.channel.id, message.author.id)
+    data = await client.api.stage_discovery_getthread_user_add(message.channel.id, message.author.id)
     pages = [
         Embed(description = chunk) for chunk in
         cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
@@ -713,7 +713,7 @@ async def test_delete_channel_thread_user(client, message):
     """
     Deletes you to the channel's threads.
     """
-    data = await client.http.thread_user_delete(message.channel.id, message.author.id)
+    data = await client.api.stage_discovery_getthread_user_delete(message.channel.id, message.author.id)
     pages = [
         Embed(description = chunk) for chunk in
         cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
@@ -726,7 +726,7 @@ async def test_application_get_all_detectable(client, message):
     """
     Requests the detectable applications.
     """
-    data = await client.http.applications_detectable()
+    data = await client.api.stage_discovery_getapplications_detectable()
     
     pages = [
         Embed(description = chunk) for chunk in
@@ -740,7 +740,7 @@ async def test_get_eula(client, message):
     """
     Gets an eula.
     """
-    data = await client.http.eula_get(542074049984200704)
+    data = await client.api.stage_discovery_geteula_get(542074049984200704)
     
     pages = [
         Embed(description = chunk) for chunk in
@@ -758,7 +758,7 @@ async def test_get_welcome_screen(client, message):
     if guild is None:
         return
     
-    data = await client.http.welcome_screen_get(guild.id)
+    data = await client.api.stage_discovery_getwelcome_screen_get(guild.id)
     
     pages = [
         Embed(description = chunk) for chunk in
@@ -857,7 +857,7 @@ async def test_message_reaction_clear(client, message, channel_id : int, message
     """
     Removes the reactions from the given channel-id - message-id combination.
     """
-    await client.http.reaction_clear(channel_id, message_id)
+    await client.api.stage_discovery_getreaction_clear(channel_id, message_id)
     await client.message_create(message.channel, 'nya')
 
 
@@ -866,7 +866,7 @@ async def test_message_reaction_delete_emoji(client, message, channel_id : int, 
     """
     Removes the reactions from the given channel-id - message-id - emoji combination.
     """
-    await client.http.reaction_delete_emoji(channel_id, message_id, emoji.as_reaction)
+    await client.api.stage_discovery_getreaction_delete_emoji(channel_id, message_id, emoji.as_reaction)
     await client.message_create(message.channel, 'nya')
 
 
@@ -2000,7 +2000,7 @@ async def test_stage_discovery_get(client, message):
     """
     Tries to get stage discovery.
     """
-    data = await client.http.stage_discovery_get()
+    data = await client.api.stage_discovery_getstage_discovery_get()
     chunks = cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
     pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
@@ -2011,7 +2011,7 @@ async def test_stage_get_all(client, message):
     """
     Gets all the stages.
     """
-    data = await client.http.stage_get_all()
+    data = await client.api.stage_get_all()
     chunks = cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
     pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
@@ -2023,7 +2023,7 @@ async def test_stage_edit(client, message):
     Edits stage topic.
     """
     data = {'topic':'Ayaya'}
-    data = await client.http.stage_edit(826912003452436510, data)
+    data = await client.api.stage_edit(826912003452436510, data)
     chunks = cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
     pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
@@ -2034,7 +2034,7 @@ async def test_stage_create(client, message):
     Edits stage.
     """
     data = {'channel_id':826912003452436510, 'topic':'Ayaya', 'privacy_level': PrivacyLevel.guild_only.value}
-    data = await client.http.stage_create(data)
+    data = await client.api.stage_create(data)
     chunks = cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
     pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
@@ -2045,7 +2045,7 @@ async def test_stage_delete(client, message):
     """
     Deletes the stage topic?
     """
-    data = await client.http.stage_delete(826912003452436510)
+    data = await client.api.stage_delete(826912003452436510)
     chunks = cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
     pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
@@ -2064,7 +2064,7 @@ async def test_message_interaction(ctx, message : 'message'):
     """
     Gets message interaction?
     """
-    data = await ctx.client.http.message_interaction(message.channel.id, message.id)
+    data = await ctx.client.api.stage_discovery_getmessage_interaction(message.channel.id, message.id)
     return str(data)
 
 

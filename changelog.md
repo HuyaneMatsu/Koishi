@@ -1,3 +1,8 @@
+### 2023-11-13
+
+- When claiming roles (in rules) the original message was edited instead of new being created.
+    The fact that it worked before makes it sus.
+
 ### 2023-12-31
 
 - Separate image commands into multiple directories.

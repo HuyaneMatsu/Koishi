@@ -132,12 +132,12 @@ async def rules(
     return InteractionResponse(embed = embed, components = components, allowed_mentions = None)
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CLAIM_ROLE_VERIFIED_CUSTOM_ID, show_for_invoking_user_only = True)
+@FEATURE_CLIENTS.interactions(custom_id = CLAIM_ROLE_VERIFIED_CUSTOM_ID)
 async def claim_verified_role(client, event):
     """
     Assigns the verified role to the user.
     
-    This function is a coroutine generator.
+    This function is a coroutine.
     
     Parameters
     ----------
@@ -145,20 +145,17 @@ async def claim_verified_role(client, event):
         The client who received the interaction event.
     event : ``InteractionEvent``
         The received interaction event.
-    
-    Yields
-    ------
-    response `None | str`
     """
+    await client.interaction_component_acknowledge(event)
+    
     user = event.user
     if user.has_role(ROLE__SUPPORT__VERIFIED):
         response = f'You already have {ROLE__SUPPORT__VERIFIED.name} role claimed.'
     else:
-        yield
         await client.user_role_add(user, ROLE__SUPPORT__VERIFIED)
         response = f'You claimed {ROLE__SUPPORT__VERIFIED.name} role.'
     
-    yield response
+    await client.interaction_followup_message_create(event, content = response, show_for_invoking_user_only = True)
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID, show_for_invoking_user_only = True)
@@ -166,7 +163,7 @@ async def claim_announcements_role(client, event):
     """
     Assigns or removes the announcements role to / of the user.
     
-    This function is a coroutine generator.
+    This function is a coroutine.
     
     Parameters
     ----------
@@ -174,12 +171,9 @@ async def claim_announcements_role(client, event):
         The client who received the interaction event.
     event : ``InteractionEvent``
         The received interaction event.
-    
-    Yields
-    ------
-    response `None | str`
     """
-    yield
+    await client.interaction_component_acknowledge(event)
+    
     user = event.user
     if user.has_role(ROLE__SUPPORT__ANNOUNCEMENTS):
         await client.user_role_delete(user, ROLE__SUPPORT__ANNOUNCEMENTS)
@@ -188,7 +182,8 @@ async def claim_announcements_role(client, event):
         await client.user_role_add(user, ROLE__SUPPORT__ANNOUNCEMENTS)
         response = f'You claimed {ROLE__SUPPORT__ANNOUNCEMENTS.name} role.'
     
-    yield response
+    await client.interaction_followup_message_create(event, content = response, show_for_invoking_user_only = True)
+
 
 
 def docs_search_pagination_check(user, event):

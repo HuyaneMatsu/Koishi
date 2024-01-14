@@ -28,7 +28,7 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ### `chiruno-probably-sex`
 
-- Artist: *unknown*
+- From: **Source is Fantasy Kaleidoscope ~The Memories of Phantasm**
 - Edit: *unknown*
 
 

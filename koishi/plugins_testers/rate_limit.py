@@ -63,7 +63,7 @@ def parse_header_rate_limit(headers):
 
 
 async def bypass_request(client, method, url, data = None, params = None, reason = None, headers = None, decode = True):
-    self = client.http
+    self = client.api
     if headers is None:
         headers = self.headers.copy()
     
@@ -82,14 +82,14 @@ async def bypass_request(client, method, url, data = None, params = None, reason
             buffer.write(f'Request started : {url} {method}\n')
             
         try:
-            async with RequestContextManager(self._request(method, url, headers, data, params)) as response:
+            async with RequestContextManager(self.http._request(method, url, headers, data, params)) as response:
                 if decode:
                     response_data = await response.text(encoding = 'utf-8')
                 else:
                     response_data = ''
         except OSError as err:
             # os cant handle more, need to wait for the blocking job to be done
-            await sleep(0.1, self.loop)
+            await sleep(0.1, KOKORO)
             # invalid address causes OSError too, but we will let it run 5 times, then raise a ConnectionError
             continue
         
@@ -137,11 +137,11 @@ async def bypass_request(client, method, url, data = None, params = None, reason
             if status == 429:
                 retry_after = response_data['retry_after']
                 buffer.write(f'RATE LIMITED\nretry after : {retry_after}\n',)
-                await sleep(retry_after, self.loop)
+                await sleep(retry_after, KOKORO)
                 continue
             
             elif status == 500 or status == 502:
-                await sleep(10.0 / try_again + 1.0, self.loop)
+                await sleep(10.0 / try_again + 1.0, KOKORO)
                 continue
             
             raise DiscordException(response, response_data, data, None)
@@ -4058,7 +4058,7 @@ async def rate_limit_test_0020(client, message):
         
         data = await channel_create(client, guild, 'channel_name')
         channel_id = int(data['id'])
-        await client.http.channel_delete(channel_id, None)
+        await client.api.channel_delete(channel_id, None)
 
 
 @RATE_LIMIT_COMMANDS
@@ -4114,7 +4114,7 @@ async def rate_limit_test_0023(client, message):
         
         data = await role_create(client, guild, name = 'Yukari')
         role_id = int(data['id'])
-        await client.http.role_delete(guild.id, role_id, None)
+        await client.api.role_delete(guild.id, role_id, None)
 
 
 @RATE_LIMIT_COMMANDS
@@ -4258,8 +4258,8 @@ async def rate_limit_test_0028(client, message, guild_id : str = ''):
         role_2_data = await role_create(client, guild_2, name = 'Yoshika')
         role_1_id = int(role_1_data['id'])
         role_2_id = int(role_2_data['id'])
-        await client.http.role_delete(guild_1.id, role_1_id, None)
-        await client.http.role_delete(guild_2.id, role_2_id, None)
+        await client.api.role_delete(guild_1.id, role_1_id, None)
+        await client.api.role_delete(guild_2.id, role_2_id, None)
 
 
 @RATE_LIMIT_COMMANDS
