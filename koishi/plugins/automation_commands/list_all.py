@@ -1,97 +1,23 @@
 __all__ = ()
 
-from hata import CHANNELS, Embed, ROLES
+from hata import Embed
 from hata.ext.slash import InteractionResponse
 
-from .constants import CHOICE_DEFAULT, LOG_SATORI_ALLOWED_IDS
+from ..automation_core import (
+    COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_DEFAULT, COMMUNITY_MESSAGE_MODERATION_DOWN_VOTE_EMOJI_ID_DEFAULT,
+    COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT
+)
 
-
-def get_channel_representation(channel_id):
-    """
-    Gets channel mention for the given identifier.
-    
-    Parameters
-    ----------
-    channel_id : `int`
-        The channel's identifier.
-    
-    Returns
-    -------
-    mention : `str`
-    """
-    if channel_id:
-        try:
-            channel = CHANNELS[channel_id]
-        except KeyError:
-            pass
-        else:
-            return channel.mention
-    
-    return 'unset'
-
-
-def get_role_representation(role_id):
-    """
-    Gets role mention for the given identifier.
-    
-    Parameters
-    ----------
-    role_id : `int`
-        The role's identifier.
-    
-    Returns
-    -------
-    mention : `str`
-    """
-    if role_id:
-        try:
-            role = ROLES[role_id]
-        except KeyError:
-            pass
-        else:
-            return role.mention
-    
-    return 'unset'
-
-
-def get_bool_representation(value):
-    """
-    Gets the boolean's representation.
-    
-    Parameters
-    ----------
-    value : `bool`
-        The value to get its representation of.
-    
-    Returns
-    -------
-    representation : `str`
-    """
-    return 'enabled' if value else 'disabled'
-
-
-def get_choice_representation(value):
-    """
-    Returns the choice's representation.
-    
-    Parameters
-    ----------
-    value : `None | str`
-        Choice value.
-    
-    Returns
-    -------
-    representation : `str`
-    """
-    if value is None:
-        value = CHOICE_DEFAULT
-    
-    return value
+from .constants import LOG_SATORI_ALLOWED_IDS
+from .representation_getters import (
+    get_bool_representation, get_channel_representation, get_choice_representation, get_duration_representation,
+    get_emoji_id_representation, get_role_representation
+)
 
 
 def render_logging_description(automation_configuration):
     """
-    Renders the logging field's description.
+    Renders the logging fields' description.
     
     Parameters
     ----------
@@ -110,14 +36,15 @@ def render_logging_description(automation_configuration):
     description_parts.append(get_channel_representation(automation_configuration.log_emoji_channel_id))
     description_parts.append(
         '\n'
-        '- Mention: ')
+        '- Mention: '
+    )
     description_parts.append(get_channel_representation(automation_configuration.log_mention_channel_id))
     
     # Render satori only if allowed in the guild
     if automation_configuration.guild_id in LOG_SATORI_ALLOWED_IDS:
         description_parts.append(
-        '\n'
-        '- Satori: '
+            '\n'
+            '- Satori: '
         )
         description_parts.append(get_channel_representation(automation_configuration.log_satori_channel_id))
         description_parts.append(
@@ -136,6 +63,76 @@ def render_logging_description(automation_configuration):
         '- User: '
     )
     description_parts.append(get_channel_representation(automation_configuration.log_user_channel_id))
+    
+    return ''.join(description_parts)
+
+
+def render_community_message_moderation_description(automation_configuration):
+    """
+    Renders the community message moderation fields' description.
+    
+    Parameters
+    ----------
+    automation_configuration : ``AutomationConfiguration``
+        The automation configuration to render.
+    
+    Returns
+    -------
+    description : `str`
+    """
+    description_parts = []
+    
+    description_parts.append(
+        'State: '
+    )
+    description_parts.append(get_bool_representation(automation_configuration.community_message_moderation_enabled))
+    
+    
+    description_parts.append(
+        '\n'
+        'Down vote emoji: '
+    )
+    community_message_moderation_down_vote_emoji_id = (
+        automation_configuration.community_message_moderation_down_vote_emoji_id
+    )
+    if not community_message_moderation_down_vote_emoji_id:
+        community_message_moderation_down_vote_emoji_id = COMMUNITY_MESSAGE_MODERATION_DOWN_VOTE_EMOJI_ID_DEFAULT
+    description_parts.append(get_emoji_id_representation(community_message_moderation_down_vote_emoji_id))
+    
+    
+    description_parts.append(
+        '\n'
+        'Up vote emoji: '
+    )
+    community_message_moderation_up_vote_emoji_id = (
+        automation_configuration.community_message_moderation_up_vote_emoji_id
+    )
+    description_parts.append(get_emoji_id_representation(community_message_moderation_up_vote_emoji_id))
+    
+    
+    description_parts.append(
+        '\n'
+        'Availability duration: '
+    )
+    community_message_moderation_availability_duration = (
+        automation_configuration.community_message_moderation_availability_duration
+    )
+    if not community_message_moderation_availability_duration:
+        community_message_moderation_availability_duration = COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_DEFAULT
+    description_parts.append(get_duration_representation(community_message_moderation_availability_duration))
+    
+    
+    description_parts.append(
+        '\n'
+        'Vote threshold: '
+    )
+    community_message_moderation_vote_threshold = (
+        automation_configuration.community_message_moderation_vote_threshold
+    )
+    if not community_message_moderation_vote_threshold:
+        community_message_moderation_vote_threshold = COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT
+    description_parts.append(repr(community_message_moderation_vote_threshold))
+    
     
     return ''.join(description_parts)
 
@@ -178,6 +175,9 @@ def build_response_list_all(automation_configuration, guild):
             f'Reply buttons: {get_bool_representation(automation_configuration.welcome_reply_buttons_enabled)}\n'
             f'Style: {get_choice_representation(automation_configuration.welcome_style_name)}'
         )
+    ).add_field(
+        'Community message moderation',
+        render_community_message_moderation_description(automation_configuration),
     )
     
     return InteractionResponse(

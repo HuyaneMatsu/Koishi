@@ -6,7 +6,7 @@ from hata.ext.slash import Button, ButtonStyle, Row
 from ...bot_utils.multi_client_utils import get_first_client_with_message_create_permissions_from
 from ...bots import FEATURE_CLIENTS
 
-from ..automation_core import get_welcome_field
+from ..automation_core import get_welcome_fields
 from ..embed_image_refresh import schedule_image_refresh
 
 from .constants import (
@@ -92,7 +92,7 @@ async def guild_user_add(client, guild, user):
     user : ``ClientUserBase``
         The added user.
     """
-    welcome_fields = get_welcome_field(guild.id)
+    welcome_fields = get_welcome_fields(guild.id)
     if (welcome_fields is None):
         return
     
@@ -135,7 +135,7 @@ async def guild_user_update(client, guild, user, old_attributes):
     old_attributes : `None | dict<str, object>`
         The updated attributes.
     """
-    welcome_fields = get_welcome_field(guild.id)
+    welcome_fields = get_welcome_fields(guild.id)
     if (welcome_fields is None):
         return
     

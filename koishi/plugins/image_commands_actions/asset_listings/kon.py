@@ -1,7 +1,7 @@
 __all__ = ('TOUHOU_ACTION_KON',)
 
 from ...image_handling_core import ImageDetail
-from ...touhou_core.characters import (
+from ...touhou_core import (
     IMAIZUMI_KAGEROU, INUBASHIRI_MOMIJI, JUNKO, KAENBYOU_RIN, KONPAKU_YOUMU, KUDAMAKI_TSUKASA, YAKUMO_RAN
 )
 

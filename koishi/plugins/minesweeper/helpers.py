@@ -3,7 +3,7 @@ __all__ = ()
 from math import floor
 from random import random
 
-from .constants import SIZE_TOTAL, SIZE_X, TILE_VALUE_BOMB, TILE_VALUE_EMPTY, TILE_VALUE_FLAG, TILE_VALUE_UNIDENTIFIED
+from .constants import SIZE_TOTAL, SIZE_X, TILE_VALUE_BOMB, TILE_VALUE_EMPTY, TILE_VALUE_FLAG
 
 
 def to_index(position_x, position_y):

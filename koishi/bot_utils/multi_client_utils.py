@@ -36,6 +36,26 @@ def get_first_client_with_message_create_permissions_from(channel, client_wrappe
     
     mask |= extra
     
+    return get_first_client_with_permissions(channel, client_wrapper, mask)
+
+
+def get_first_client_with_permissions(channel, client_wrapper, mask):
+    """
+    Returns the first client who has message create permissions into the given channel.
+    
+    Parameters
+    ----------
+    chanel : ``Channel``
+        Channel to check.
+    client_wrapper : ``ClientWrapper``
+        The allowed clients.
+    mask : `int`
+        The permissions to check for.
+    
+    Returns
+    -------
+    client : `None | Client`
+    """
     for client in channel.clients:
         if client not in client_wrapper:
             continue

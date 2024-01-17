@@ -56,7 +56,12 @@ def get_allowed_users(client, event, input_targets):
     else:
         client_in_users = True
     
-    allowed_mentions = [target for target in targets if isinstance(target, ClientUserBase)]
+    # Add back `event.user` and `client`, so discord client wont derp out by not showing them up as intended.
+    allowed_mentions = [
+        event.user,
+        client,
+        *(target for target in targets if isinstance(target, ClientUserBase)),
+    ]
     
     return targets, client_in_users, user_in_users, allowed_mentions
 

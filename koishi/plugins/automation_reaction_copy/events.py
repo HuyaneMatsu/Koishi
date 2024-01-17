@@ -6,7 +6,6 @@ from itertools import chain
 from hata import KOKORO, Permission, parse_all_emojis
 from scarletio import Task, TaskGroup
 
-from ...bot_utils.multi_client_utils import get_first_client_in_channel_from
 from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_reaction_copy_enabled_and_role

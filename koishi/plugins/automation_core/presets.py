@@ -17,17 +17,33 @@ def apply_presets():
     """
     support_guild_configuration = AutomationConfiguration(GUILD__SUPPORT.id)
     
+    # Logging
     support_guild_configuration.log_emoji_channel_id = CHANNEL__SUPPORT__LOG_EMOJI.id
     support_guild_configuration.log_mention_channel_id = CHANNEL__SUPPORT__LOG_MENTION.id
-    support_guild_configuration.log_satori_auto_start = True
-    support_guild_configuration.log_satori_channel_id = CHANNEL__SUPPORT__LOG_SATORI.id
     support_guild_configuration.log_sticker_channel_id = CHANNEL__SUPPORT__LOG_STICKER.id
     support_guild_configuration.log_user_channel_id = CHANNEL__SUPPORT__LOG_USER.id
-    support_guild_configuration.welcome_channel_id = CHANNEL__SUPPORT__WELCOME.id
-    support_guild_configuration.touhou_feed_enabled = True
+    
+    # Satori
+    support_guild_configuration.log_satori_auto_start = True
+    support_guild_configuration.log_satori_channel_id = CHANNEL__SUPPORT__LOG_SATORI.id
+    
+    # Reaction copy
     support_guild_configuration.reaction_copy_enabled = True
     support_guild_configuration.reaction_copy_role_id = 0
+    
+    # Touhou feed
+    support_guild_configuration.touhou_feed_enabled = True
+    
+    # Welcome
+    support_guild_configuration.welcome_channel_id = CHANNEL__SUPPORT__WELCOME.id
     support_guild_configuration.welcome_reply_buttons_enabled = True
     support_guild_configuration.welcome_style_name = None
+    
+    # Community message moderation
+    support_guild_configuration.community_message_moderation_availability_duration = 0
+    support_guild_configuration.community_message_moderation_down_vote_emoji_id = 0
+    support_guild_configuration.community_message_moderation_enabled = False
+    support_guild_configuration.community_message_moderation_up_vote_emoji_id = 0
+    support_guild_configuration.community_message_moderation_vote_threshold = 0
     
     AUTOMATION_CONFIGURATIONS[support_guild_configuration.guild_id] = support_guild_configuration

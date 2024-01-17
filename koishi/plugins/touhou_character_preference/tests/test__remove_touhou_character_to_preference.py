@@ -1,6 +1,6 @@
 import vampytest
 
-from ...touhou_core.characters import KOMEIJI_KOISHI, KOMEIJI_SATORI
+from ...touhou_core import KOMEIJI_KOISHI, KOMEIJI_SATORI
 
 from ..cache import CHARACTER_PREFERENCE_CACHE, put_one_to_cache
 from ..character_preference import CharacterPreference

@@ -1,13 +1,17 @@
 __all__ = ()
 
-from hata import Channel, ChannelType, Client, Permission, Role
+from hata import Channel, ChannelType, Client, Permission, Role, parse_emoji
 from hata.ext.slash import P, abort
 
 from ...bots import FEATURE_CLIENTS, MAIN_CLIENT
 
 from ..automation_core import (
-    clear_satori_channel, delete_automation_configuration_of, discover_satori_channel, get_automation_configuration_for,
-    get_log_satori_channel, get_reaction_copy_enabled, get_touhou_feed_enabled
+    COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_DEFAULT, COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_MAX,
+    COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_MIN, COMMUNITY_MESSAGE_MODERATION_DOWN_VOTE_EMOJI_DEFAULT,
+    COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT, COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_MAX,
+    COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_MIN, clear_satori_channel, delete_automation_configuration_of,
+    discover_satori_channel, get_automation_configuration_for, get_log_satori_channel, get_reaction_copy_enabled,
+    get_touhou_feed_enabled
 )
 from ..automation_reaction_copy import build_reaction_copy_about_response, build_reaction_copy_list_channels_response
 from ..automation_touhou_feed import (
@@ -22,6 +26,7 @@ from .permission_checks import (
     check_channel_and_client_permissions, check_user_permissions, default_channel_and_check_its_guild
 )
 from .list_all import build_response_list_all
+from .representation_getters import get_duration_representation, get_emoji_representation
 
 
 AUTOMATION_COMMANDS = FEATURE_CLIENTS.interactions(
@@ -929,3 +934,209 @@ async def welcome_style_name(
     automation_configuration.set('welcome_style_name', None if value == CHOICE_DEFAULT else value)
     
     return f'Welcome style set to {value!s}.'
+
+# Community message moderation
+
+COMMUNITY_MESSAGE_MODERATION_COMMANDS = AUTOMATION_COMMANDS.interactions(
+    None,
+    name = 'community-message-moderation',
+    description = 'Configure community message moderation.',
+)
+
+@COMMUNITY_MESSAGE_MODERATION_COMMANDS.interactions(name = 'state')
+async def community_message_moderation_set_state(
+    event,
+    state : (['enabled', 'disabled'], 'Enable to disable.'),
+):
+    """
+    Enable or disable community message moderation.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    state : `bool`
+        Whether to enable to disable it.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('community_message_moderation_enabled', state == 'enabled')
+    
+    return f'Community message moderation has been {state!s}.'
+
+
+@COMMUNITY_MESSAGE_MODERATION_COMMANDS.interactions(name = 'availability-duration')
+async def community_message_moderation_set_availability_duration(
+    event,
+    hours : P(int, 'Duration in hours.', min_value = 0, max_value = 24) = 0,
+    minutes : P(int, 'Duration in minutes.', min_value = 0, max_value = 60) = 0,
+    seconds : P(int, 'Duration in seconds.', min_value = 0, max_value = 60) = 0,
+):
+    """
+    Sets the availability duration of community message moderation.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    hours : `int` = `0`, Optional
+        Duration in hours.
+    minutes : `int` = `0`, Optional
+        Duration in minutes.
+    seconds : `int` = `0`, Optional
+        Duration in seconds.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    duration = seconds + minutes * 60 + hours * 3600
+    
+    if duration == 0:
+        duration = COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_DEFAULT
+        case = ' (default value)'
+    elif duration >= COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_MAX:
+        duration = COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_MAX
+        case = ' (max value)'
+    elif duration <= COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_MIN:
+        duration = COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_MIN
+        case = ' (min value)'
+    else:
+        case = ''
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('community_message_moderation_availability_duration', duration)
+    
+    return (
+        f'Community message moderation availability duration has been set to: '
+        f'{get_duration_representation(duration)!s}{case}.'
+    )
+
+
+@COMMUNITY_MESSAGE_MODERATION_COMMANDS.interactions(name = 'down-vote-emoji')
+async def community_message_moderation_set_down_vote_emoji_id(
+    event,
+    emoji_value : P(str, 'The emoji to set to.', name = 'emoji') = None,
+):
+    """
+    Sets the down vote emoji of community message moderation.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    emoji_value : `None | str` = `None`, Optional
+        The emoji to set to.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    if emoji_value is None:
+        emoji = COMMUNITY_MESSAGE_MODERATION_DOWN_VOTE_EMOJI_DEFAULT
+    else:
+        emoji = parse_emoji(emoji_value)
+        if emoji is None:
+            abort(f'Could not identify {emoji_value!s} as an emoji.')
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('community_message_moderation_down_vote_emoji_id', emoji.id)
+    
+    return f'Community message moderation down vote emoji set to: {get_emoji_representation(emoji)!s}.'
+
+
+@COMMUNITY_MESSAGE_MODERATION_COMMANDS.interactions(name = 'up-vote-emoji')
+async def community_message_moderation_set_up_vote_emoji_id(
+    event,
+    emoji_value : P(str, 'The emoji to set to.', name = 'emoji') = None,
+):
+    """
+    Sets the up vote emoji of community message moderation.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    emoji_value : `None | str` = `None`, Optional
+        The emoji to set to.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    if emoji_value is None:
+        emoji = None
+    else:
+        emoji = parse_emoji(emoji_value)
+        if emoji is None:
+            abort(f'Could not identify {emoji_value!s} as an emoji.')
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('community_message_moderation_up_vote_emoji_id', 0 if emoji is None else emoji.id)
+    
+    return f'Community message moderation up vote emoji set to: {get_emoji_representation(emoji)!s}.'
+
+
+@COMMUNITY_MESSAGE_MODERATION_COMMANDS.interactions(name = 'vote-threshold')
+async def community_message_moderation_set_vote_threshold(
+    event,
+    threshold : P(
+        int,
+        'Vote threshold to delete the message.',
+        min_value = COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_MIN,
+        max_value = COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_MAX,
+    ) = 0,
+):
+    """
+    Sets the vote threshold of community message moderation.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    threshold : `int` = `0`, Optional
+        Duration in hours.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    if threshold == 0:
+        threshold = COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT
+        case = ' (default value)'
+    elif threshold >= COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_MAX:
+        threshold = COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_MAX
+        case = ' (max value)'
+    elif threshold <= COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_MIN:
+        threshold = COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_MIN
+        case = ' (min value)'
+    else:
+        case = ''
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('community_message_moderation_vote_threshold', threshold)
+    
+    return f'Community message moderation vote threshold has been set to: {threshold!s}{case}.'

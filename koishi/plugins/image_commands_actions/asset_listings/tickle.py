@@ -1,7 +1,7 @@
 __all__ = ('TOUHOU_ACTION_TICKLE',)
 
 from ...image_handling_core import ImageDetail
-from ...touhou_core.characters import KOMEIJI_KOISHI, KOMEIJI_SATORI, SCARLET_FLANDRE, SCARLET_REMILIA
+from ...touhou_core import KOMEIJI_KOISHI, KOMEIJI_SATORI, SCARLET_FLANDRE, SCARLET_REMILIA
 
 
 TOUHOU_ACTION_TICKLE = [

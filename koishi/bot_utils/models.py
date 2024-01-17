@@ -249,6 +249,13 @@ if (DB_ENGINE is not None):
         welcome_channel_id = Column(Int64, nullable = False)
         welcome_reply_buttons_enabled = Column(Boolean, default = False, nullable = False)
         welcome_style_name = Column(String, default = None, nullable = True)
+        
+        # Community message moderation
+        community_message_moderation_availability_duration = Column(Int64, default = 0, nullable = False)
+        community_message_moderation_down_vote_emoji_id = Column(Int64, default = 0, nullable = False)
+        community_message_moderation_enabled = Column(Boolean, default = False, nullable = False)
+        community_message_moderation_up_vote_emoji_id = Column(Int64, default = 0, nullable = False)
+        community_message_moderation_vote_threshold = Column(Int64, default = 0, nullable = False)
     
     
     AUTOMATION_CONFIGURATION_TABLE = automation_configuration_model.__table__

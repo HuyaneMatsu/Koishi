@@ -1,3 +1,12 @@
+### 2024-01-17
+
+- Add new `automation_community_message_moderation` plugin to allow users vote for deleting messages.
+- Add new `/automation community-message-moderation` commands to configure the feature..
+- `/automation welcome` replies now mention the invoking user as well to fix `source-user` was not showing up correctly
+    in the message's content. (Discord issue)
+- Action command and replies, such as `/hug` now mention the invoking user as well to fix `source-user` was not
+    showing up correctly in the message's content. (Discord issue)
+
 ### 2023-11-13
 
 - When claiming roles (in rules) the original message was edited instead of new being created.

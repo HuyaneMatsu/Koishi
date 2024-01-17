@@ -3,7 +3,7 @@ from hata import User
 
 from ...image_handling_core import ImageDetail, ImageHandlerStatic
 from ...touhou_character_preference import CharacterPreference
-from ...touhou_core.characters import KAENBYOU_RIN, KOMEIJI_KOISHI, KOMEIJI_SATORI
+from ...touhou_core import KAENBYOU_RIN, KOMEIJI_KOISHI, KOMEIJI_SATORI
 
 from ..character_preference import get_preferred_image
 

@@ -150,6 +150,22 @@ class AutomationConfigurationSaver:
                                 AUTOMATION_CONFIGURATION_TABLE.insert().values(
                                     guild_id = automation_configuration.guild_id,
                                     
+                                    community_message_moderation_availability_duration = (
+                                        automation_configuration.community_message_moderation_availability_duration
+                                    ),
+                                    community_message_moderation_down_vote_emoji_id = (
+                                        automation_configuration.community_message_moderation_down_vote_emoji_id
+                                    ),
+                                    community_message_moderation_enabled = (
+                                        automation_configuration.community_message_moderation_enabled
+                                    ),
+                                    community_message_moderation_up_vote_emoji_id = (
+                                        automation_configuration.community_message_moderation_up_vote_emoji_id
+                                    ),
+                                    community_message_moderation_vote_threshold = (
+                                        automation_configuration.community_message_moderation_vote_threshold
+                                    ),
+                                    
                                     log_emoji_channel_id = automation_configuration.log_emoji_channel_id,
                                     log_mention_channel_id = automation_configuration.log_mention_channel_id,
                                     log_sticker_channel_id = automation_configuration.log_sticker_channel_id,
@@ -164,7 +180,9 @@ class AutomationConfigurationSaver:
                                     touhou_feed_enabled = automation_configuration.touhou_feed_enabled,
                                     
                                     welcome_channel_id = automation_configuration.welcome_channel_id,
-                                    welcome_reply_buttons_enabled = automation_configuration.welcome_reply_buttons_enabled,
+                                    welcome_reply_buttons_enabled = (
+                                        automation_configuration.welcome_reply_buttons_enabled
+                                    ),
                                     welcome_style_name = automation_configuration.welcome_style_name,
                                 ).returning(
                                     automation_configuration_model.id,

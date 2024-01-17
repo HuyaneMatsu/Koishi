@@ -1,7 +1,7 @@
 import vampytest
 
 from ...image_handling_core import ImageDetail
-from ...touhou_core.characters import KOMEIJI_KOISHI, KOMEIJI_SATORI
+from ...touhou_core import KOMEIJI_KOISHI, KOMEIJI_SATORI
 
 from ..character_preference import select_from_match_groups
 

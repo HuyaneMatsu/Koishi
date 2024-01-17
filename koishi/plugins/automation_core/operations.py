@@ -1,15 +1,17 @@
 __all__ = (
-    'delete_automation_configuration_of', 'get_automation_configuration_for', 'get_log_emoji_channel',
-    'get_log_mention_channel', 'get_log_user_channel', 'get_log_satori_channel', 'get_log_satori_channel_if_auto_start',
-    'get_log_sticker_channel', 'get_reaction_copy_enabled', 'get_reaction_copy_enabled_and_role',
-    'get_touhou_feed_enabled', 'get_welcome_field', 'get_welcome_style_name'
+    'delete_automation_configuration_of', 'get_automation_configuration_for', 'get_community_message_moderation_fields',
+    'get_log_emoji_channel', 'get_log_mention_channel', 'get_log_user_channel', 'get_log_satori_channel',
+    'get_log_satori_channel_if_auto_start', 'get_log_sticker_channel', 'get_reaction_copy_enabled',
+    'get_reaction_copy_enabled_and_role', 'get_touhou_feed_enabled', 'get_welcome_fields', 'get_welcome_style_name'
 )
 
 from hata import CHANNELS, ROLES
 
 from .automation_configuration import AutomationConfiguration
-from .constants import AUTOMATION_CONFIGURATIONS
-
+from .constants import (
+    AUTOMATION_CONFIGURATIONS, COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_DEFAULT,
+    COMMUNITY_MESSAGE_MODERATION_DOWN_VOTE_EMOJI_ID_DEFAULT, COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT
+)
 
 def get_automation_configuration_for(guild_id):
     """
@@ -331,7 +333,7 @@ def get_touhou_feed_enabled(guild_id):
     return automation_configuration.touhou_feed_enabled
 
 
-def get_welcome_field(guild_id):
+def get_welcome_fields(guild_id):
     """
     Gets welcome channel and whether the welcome button is enabled for the given guild.
     
@@ -343,7 +345,7 @@ def get_welcome_field(guild_id):
     Returns
     -------
     welcome_fields : `None | tuple<Channel, bool, None | str>`
-        Returns `None` if disabled. A tuple of `welcome-channel`, `welcome_reply_buttons_enabled`, `welcome_style_name`
+        Returns `None` if disabled. A tuple of `welcome_channel`, `welcome_reply_buttons_enabled`, `welcome_style_name`
         if enabled.
     """
     try:
@@ -383,4 +385,43 @@ def get_welcome_style_name(guild_id):
         return None
     
     return automation_configuration.welcome_style_name
+
+
+def get_community_message_moderation_fields(guild_id):
+    """
+    Gets community message moderation fields for the given guild.
     
+    Parameters
+    ----------
+    guild_id : `int`
+        The guild's identifier.
+    
+    Returns
+    -------
+    community_message_moderation_fields : `None | tuple<int, int, int, int>`
+        Returns `None` if disabled. A tuple of `down_vote_emoji_id`, `up_vote_emoji_id`, `availability_duration`,
+        `vote_threshold` if enabled.
+    """
+    try:
+        automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
+    except KeyError:
+        return None
+    
+    if not automation_configuration.community_message_moderation_enabled:
+        return None
+    
+    return (
+        (
+            automation_configuration.community_message_moderation_down_vote_emoji_id or 
+            COMMUNITY_MESSAGE_MODERATION_DOWN_VOTE_EMOJI_ID_DEFAULT
+        ),
+        automation_configuration.community_message_moderation_up_vote_emoji_id,
+        (
+            automation_configuration.community_message_moderation_availability_duration or
+            COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_DEFAULT
+        ),
+        (
+            automation_configuration.community_message_moderation_vote_threshold or
+            COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT
+        ),
+    )

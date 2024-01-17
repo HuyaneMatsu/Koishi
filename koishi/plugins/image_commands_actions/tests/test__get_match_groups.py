@@ -1,7 +1,7 @@
 import vampytest
 
 from ...image_handling_core import ImageDetail, ImageHandlerStatic
-from ...touhou_core.characters import IZAYOI_SAKUYA, KAENBYOU_RIN, KOMEIJI_KOISHI, KOMEIJI_SATORI
+from ...touhou_core import IZAYOI_SAKUYA, KAENBYOU_RIN, KOMEIJI_KOISHI, KOMEIJI_SATORI
 
 from ..character_preference import get_match_groups
 

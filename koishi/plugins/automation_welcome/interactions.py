@@ -256,7 +256,7 @@ async def create_welcome_reply(client, event, joined_user, custom_message_conten
     
     message = await client.interaction_followup_message_create(
         event,
-        allowed_mentions = [joined_user],
+        allowed_mentions = [event.user, joined_user],
         content = content,
         embed = embed,
         silent = True,
