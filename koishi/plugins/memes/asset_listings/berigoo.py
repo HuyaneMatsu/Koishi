@@ -50,4 +50,10 @@ BERIGOO_MEMES = [
     'https://cdn.discordapp.com/attachments/568837922288173058/1190732499110858812/berigoo-meme-0046.mp4',
     'https://cdn.discordapp.com/attachments/568837922288173058/1190732336220885082/berigoo-meme-0047.mp4',
     'https://cdn.discordapp.com/attachments/568837922288173058/1190732343615443097/berigoo-meme-0048.mp4',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1201193634196881469/berigoo-meme-0049.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1201193634624716910/berigoo-meme-0050.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1201193635157389434/berigoo-meme-0051.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1201193635564224613/berigoo-meme-0052.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1201616221024563280/berigoo-meme-0053.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1201975105161269258/berigoo-meme-0054.png',
 ]

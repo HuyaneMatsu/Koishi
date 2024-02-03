@@ -1,3 +1,14 @@
+### 2024-02-03
+
+- Add `list of shame` to booru image handler to filter out artists who use ai.
+- `/automation touhou-feed` now respects `embed links` permission.
+- Action command and replies, such as `/hug` now mention the invoking user as intended.
+- Add **6** image to `/kon` interaction.
+- Add **6** image to `/meme` interaction.
+- Add new `/automation community-message-moderation log-state` and `... log-channel` commands.
+- Fix `regret-un-ban` failing. (Since last update.)
+- Add **1** image to `/like` interaction.
+
 ### 2024-01-17
 
 - Add new `automation_community_message_moderation` plugin to allow users vote for deleting messages.

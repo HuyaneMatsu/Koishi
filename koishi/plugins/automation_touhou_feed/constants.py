@@ -3,7 +3,7 @@ __all__ = ()
 import re
 
 from dateutil.relativedelta import relativedelta as RelativeDelta
-from hata import AnsiForegroundColor, BUILTIN_EMOJIS, create_ansi_format_code, elapsed_time
+from hata import AnsiForegroundColor, BUILTIN_EMOJIS, Permission, create_ansi_format_code, elapsed_time
 from hata.ext.slash import Button, Row
 
 
@@ -15,6 +15,9 @@ TAG_NAME_SOLO = 'solo'
 DEFAULT_INTERVAL = 4 * 3600
 MIN_INTERVAL = 15 * 60
 MAX_INTERVAL = 24 * 3600
+
+PERMISSION_MASK_EMBED_LINKS = Permission().update_by_keys(embed_links = True)
+
 
 TAG_REQUIRED_RP = re.compile(f'(?:\\s|^)#{TAG_NAME_REQUIRED}(?:\\s|$)', re.M | re.U)
 TAG_ITER_RP = re.compile(f'(?:\\s|^)#([\\w\\-\\_\\+\\:]+)', re.M | re.U)

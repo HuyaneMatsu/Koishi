@@ -1,6 +1,6 @@
 ### Asset Information
 
-All authors are actually known!! In case you know them better create a PR with it.
+Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
@@ -370,6 +370,81 @@ All authors are actually known!! In case you know them better create a PR with i
 ### `ran-kon-0024`
 
 - Artist: **kawayabug / かわやばぐ**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0025`
+
+- Artist: **nyong nyong**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0026`
+
+*Omitted*
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0027`
+
+- Artist: **mirufui**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0028`
+
+- Artist: **kanaria (bocmn)**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0029`
+
+- Artist: **nekurodayo**
+- Edit: **HuyaneMatsu**
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0030`
+
+- Artist: **matsukuzu**
+- Edit: **HuyaneMatsu**
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0031`
+
+- Artist: **gokuu / ごくう**
 - Edit: *none*
 
 

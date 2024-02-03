@@ -1,13 +1,16 @@
 __all__ = ()
 
 from hata import Client
+from hata.ext.slash import Button
 
 from ...bot_utils.multi_client_utils import get_first_client_with_message_create_permissions_from
 from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_log_mention_channel
-
-from .embed_builder_mention import build_mention_embed
+from ..rendering_helpers import (
+    MESSAGE_RENDER_MODE_CREATE, build_message_common_description, iter_build_attachment_message_content,
+    iter_build_attachment_message_mentions,
+)
 
 
 @FEATURE_CLIENTS.events
@@ -37,6 +40,11 @@ async def message_create(client, message):
     
     await client.message_create(
         channel,
-        embed = build_mention_embed(message),
         allowed_mentions = None,
+        components = Button('Jump there', url = message.url),
+        content = build_message_common_description(message, MESSAGE_RENDER_MODE_CREATE, title = 'Mention log'),
+        files = [
+            *iter_build_attachment_message_content(message),
+            *iter_build_attachment_message_mentions(message),
+        ]
     )

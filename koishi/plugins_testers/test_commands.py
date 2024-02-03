@@ -1893,8 +1893,10 @@ if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
                 text = 'I am not in a voice channel.'
                 break
             
-            source1 = await LocalAudio('/hdd/music/others/Ichigo - Tsuki made todoke, fushi no kemuri.mp3')
-            source2 = await LocalAudio('/hdd/music/others/Nomico - IceBreak.mp3')
+            source1 = await LocalAudio(
+                '/home/huyanematsu/Desktop/hdd/music/others/Ichigo - Tsuki made todoke, fushi no kemuri.mp3'
+            )
+            source2 = await LocalAudio('/home/huyanematsu/Desktop/hdd/music/others/Nomico - IceBreak.mp3')
             
             source = MixerStream(source1, source2)
 
@@ -2071,49 +2073,3 @@ async def test_message_interaction(ctx, message : 'message'):
 @TEST_COMMANDS
 async def voice_channels_only(channel: 'guild_voice' = None):
     return repr(channel)
-
-
-@MAIN_CLIENT.interactions(target = 'message', name = ('hey', 'mister'))
-async def check_routing_deprecation__context():
-    pass
-
-
-@MAIN_CLIENT.interactions(custom_id = 'message', name = ('hey', 'mister'))
-async def check_routing_deprecation__component():
-    pass
-
-
-@MAIN_CLIENT.interactions(custom_id = 'message', target = 'form', name = ('hey', 'mister'))
-async def check_routing_deprecation__form():
-    pass
-
-
-@MAIN_CLIENT.interactions(name = ('hey', 'mister'))
-async def check_routing_deprecation__slash():
-    pass
-
-
-@MAIN_CLIENT.commands(name = ('hey', 'mister'))
-async def check_routing_deprecation__command():
-    pass
-
-
-@MAIN_CLIENT.commands.from_class
-class check_from_class_deprecation__command:
-    async def command():
-        pass
-
-"""
-@MAIN_CLIENT.events.from_class
-class guild_delete:
-    async def guild_delete(client, guild):
-        pass
-"""
-"""
-@MAIN_CLIENT.interactions.from_class
-class check_from_class_deprecation__slash:
-    name = 'command'
-    
-    async def command():
-        pass
-"""

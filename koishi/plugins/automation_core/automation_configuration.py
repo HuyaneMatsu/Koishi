@@ -24,6 +24,12 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
     community_message_moderation_enabled : `int`
         Whether community message moderation is enabled.
     
+    community_message_moderation_log_enabled : `bool`
+        Whether community message moderation actions should be logged.
+    
+    community_message_moderation_log_channel_id : `int`
+        Where should community message moderation actions be logged.
+    
     community_message_moderation_up_vote_emoji_id : `int`
         The identifier of the up vote emoji.
     
@@ -75,7 +81,8 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
     """
     __slots__ = (
         'community_message_moderation_availability_duration', 'community_message_moderation_down_vote_emoji_id',
-        'community_message_moderation_enabled', 'community_message_moderation_up_vote_emoji_id', 
+        'community_message_moderation_enabled', 'community_message_moderation_log_enabled',
+        'community_message_moderation_log_channel_id', 'community_message_moderation_up_vote_emoji_id', 
         'community_message_moderation_vote_threshold', 'entry_id', 'guild_id', 'log_emoji_channel_id',
         'log_mention_channel_id', 'log_satori_auto_start', 'log_satori_channel_id', 'log_sticker_channel_id',
         'log_user_channel_id', 'reaction_copy_enabled', 'reaction_copy_role_id', 'saver', 'touhou_feed_enabled',
@@ -95,6 +102,8 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.community_message_moderation_availability_duration = 0
         self.community_message_moderation_down_vote_emoji_id = 0
         self.community_message_moderation_enabled = False
+        self.community_message_moderation_log_enabled = False
+        self.community_message_moderation_log_channel_id = 0
         self.community_message_moderation_up_vote_emoji_id = 0
         self.community_message_moderation_vote_threshold = 0
         self.entry_id = -1
@@ -170,6 +179,18 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
             
             repr_parts.append(', community_message_moderation_vote_threshold = ')
             repr_parts.append(repr(community_message_moderation_vote_threshold))
+            
+            # community_message_moderation_log_enabled
+            community_message_moderation_log_enabled = self.community_message_moderation_log_enabled
+            if community_message_moderation_log_enabled:
+                repr_parts.append(', community_message_moderation_log_enabled = ')
+                repr_parts.append(repr(community_message_moderation_log_enabled))
+                
+                # community_message_moderation_log_channel_id
+                community_message_moderation_log_channel_id = self.community_message_moderation_log_channel_id
+                if community_message_moderation_log_channel_id:
+                    repr_parts.append(', community_message_moderation_log_channel_id = ')
+                    repr_parts.append(repr(community_message_moderation_log_channel_id))
         
         
         # log_emoji_channel_id
@@ -262,6 +283,12 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
             return True
         
         if self.community_message_moderation_enabled:
+            return True
+        
+        if self.community_message_moderation_log_enabled:
+            return True
+        
+        if self.community_message_moderation_log_channel_id:
             return True
         
         if self.community_message_moderation_up_vote_emoji_id:
@@ -398,6 +425,8 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.community_message_moderation_availability_duration = entry['community_message_moderation_availability_duration']
         self.community_message_moderation_down_vote_emoji_id = entry['community_message_moderation_down_vote_emoji_id']
         self.community_message_moderation_enabled = entry['community_message_moderation_enabled']
+        self.community_message_moderation_log_enabled = entry['community_message_moderation_log_enabled']
+        self.community_message_moderation_log_channel_id = entry['community_message_moderation_log_channel_id']
         self.community_message_moderation_up_vote_emoji_id = entry['community_message_moderation_up_vote_emoji_id']
         self.community_message_moderation_vote_threshold = entry['community_message_moderation_vote_threshold']
         self.log_emoji_channel_id = entry['log_emoji_channel_id']
@@ -424,6 +453,12 @@ AUTOMATION_CONFIGURATION_FIELD_SETTERS = {
         AutomationConfiguration.community_message_moderation_down_vote_emoji_id.__set__
     ),
     'community_message_moderation_enabled': AutomationConfiguration.community_message_moderation_enabled.__set__,
+    'community_message_moderation_log_enabled': (
+        AutomationConfiguration.community_message_moderation_log_enabled.__set__
+    ),
+    'community_message_moderation_log_channel_id': (
+        AutomationConfiguration.community_message_moderation_log_channel_id.__set__
+    ),
     'community_message_moderation_up_vote_emoji_id': (
         AutomationConfiguration.community_message_moderation_up_vote_emoji_id.__set__
     ),

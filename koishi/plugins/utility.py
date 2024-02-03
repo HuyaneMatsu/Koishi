@@ -120,7 +120,7 @@ async def raw(client, event):
     if not event.user_permissions.can_manage_messages:
         abort('You must have manage messages permission to invoke this command.')
     
-    data = await client.http.message_get(event.channel_id, event.interaction.target_id)
+    data = await client.api.message_get(event.channel_id, event.interaction.target_id)
     chunks = cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
     
     pages = [Embed(description = chunk) for chunk in chunks]

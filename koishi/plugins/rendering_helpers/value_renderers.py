@@ -2,7 +2,7 @@ __all__ = ()
 
 from hata import DATETIME_FORMAT_CODE, elapsed_time
 
-from .constants import ROLE_MENTIONS_MAX
+from .constants import ROLE_MENTIONS_MAX, VOTERS_MAX
 
 
 def render_role_mentions_into(into, roles):
@@ -91,5 +91,185 @@ def render_flags_into(into, flags):
             field_added = True
         
         into.append(flag_name.replace('_', ' '))
+    
+    return into
+
+
+def render_user_into(into, user, guild):
+    """
+    Renders the user.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        Container to render to.
+    user : ``ClientUserBase``
+        The user to render.
+    guild : `None | Guild`
+        Respective guild to pull nick for.
+    
+    Returns
+    -------
+    into : `list<str>`
+    """
+    into.append(user.full_name)
+    
+    display_name = user.name_at(guild)
+    if user.name != display_name:
+        into.append(' [*')
+        into.append(display_name)
+        into.append('*]')
+    
+    into.append(' (')
+    into.append(str(user.id))
+    into.append(')')
+    
+    return into
+
+
+def render_channel_into(into, channel):
+    """
+    Renders the channel.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        Container to render to.
+    channel : ``Channel``
+        The channel to render.
+    
+    Returns
+    -------
+    into : `list<str>`
+    """
+    into.append(channel.display_name)
+
+    channel_type = channel.type
+    into.append(' [*')
+    into.append(channel_type.name)
+    into.append(' ~ ')
+    into.append(str(channel_type.value))
+    into.append('*]')
+    
+    into.append(' (')
+    into.append(str(channel.id))
+    into.append(')')
+    
+    return into
+
+
+def render_index_into(into, index):
+    """
+    Renders the given index.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        Container to render to.
+    index : `int`
+        The index to render.
+    
+    Returns
+    -------
+    into : `list<str>`
+    """
+    into.append(repr(index))
+    into.append('.: ')
+    return into
+
+
+def render_role_into(into, role):
+    """
+    Renders the role.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        Container to render to.
+    role : ``Role``
+        The role to render.
+    
+    Returns
+    -------
+    into : `list<str>`
+    """
+    into.append(role.name)
+    into.append(' (')
+    into.append(repr(role.id))
+    into.append(')')
+    return into
+
+
+def iter_render_listing_into(into, elements, limit):
+    """
+    Iterates over the given `elements` list yielding its elements till `limit` is reached.
+    Renders `index` before yielding and renders new line after if applicable.
+    If there were any elements truncated renders that at the of the iteration.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        Container to render to.
+    elements : `list`
+        Elements to yield from.
+    limit : `int`
+        The maximal amount of elements before truncate.
+    
+    Yields
+    ------
+    element : `object`
+    """
+    length = len(elements)
+    if not length:
+        return
+    
+    if limit >= length:
+        truncated = 0
+    else:
+        truncated = length - limit
+        length = limit
+    
+    index = 0
+    
+    while True:
+        element = elements[index]
+        index += 1
+        into = render_index_into(into, index)
+        
+        yield element
+        
+        if index == length:
+            break
+        
+        into.append('\n')
+        continue
+    
+    if truncated:
+        into.append('\n(')
+        into.append(str(truncated))
+        into.append(' truncated)')
+
+
+def render_voters_into(into, voters, guild):
+    """
+    Builds attachment content containing voters.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        Container to render to.
+    voters : `set<ClientUserBase>`
+        Voters to show.
+    guild : `None | Guild` = `None`
+        The respective guild where the votes were counted at.
+    
+    Returns
+    -------
+    into : `list<str>`
+    """
+    for user in iter_render_listing_into(into, sorted(voters), VOTERS_MAX):
+        into = render_user_into(into, user, guild)
     
     return into

@@ -1,14 +1,15 @@
 __all__ = (
-    'build_activity_description', 'build_guild_profile_description', 'build_user_description',
-    'build_user_join_or_leave_description', 'build_user_status_description', 'build_user_with_guild_profile_description'
+    'build_activity_description', 'build_guild_profile_description', 'build_message_common_description',
+    'build_user_description', 'build_user_join_or_leave_description', 'build_user_status_description',
+    'build_user_with_guild_profile_description'
 )
 
 from datetime import datetime as DateTime
 
-from .constants import GUILD_PROFILE_MODE_GENERAL, GUILD_PROFILE_MODE_JOIN, GUILD_PROFILE_MODE_LEAVE
+from .constants import GUILD_PROFILE_RENDER_MODE_GENERAL, GUILD_PROFILE_RENDER_MODE_JOIN, GUILD_PROFILE_RENDER_MODE_LEAVE
 from .field_renderers import render_date_time_difference_field_into, render_date_time_field_into
 from .solution_renderers import (
-    render_activity_description_into, render_guild_profile_description_into,
+    render_activity_description_into, render_guild_profile_description_into, render_message_common_description_into,
     render_nullable_guild_profile_description_into, render_user_description_into, render_user_status_description_into
 )
 
@@ -43,7 +44,7 @@ def build_guild_profile_description(guild_profile):
     -------
     description : `str`
     """
-    into, field_added = render_guild_profile_description_into([], False, guild_profile, GUILD_PROFILE_MODE_GENERAL)
+    into, field_added = render_guild_profile_description_into([], False, guild_profile, GUILD_PROFILE_RENDER_MODE_GENERAL)
     return ''.join(into)
 
 
@@ -71,7 +72,7 @@ def build_user_with_guild_profile_description(user, guild_profile):
         into.append('\n')
     
     into, field_added = render_nullable_guild_profile_description_into(
-        into, field_added, guild_profile, GUILD_PROFILE_MODE_GENERAL
+        into, field_added, guild_profile, GUILD_PROFILE_RENDER_MODE_GENERAL
     )
     
     return ''.join(into)
@@ -103,7 +104,7 @@ def build_user_join_or_leave_description(user, guild_profile, join):
         into.append('\n')
     
     into, field_added = render_nullable_guild_profile_description_into(
-        into, field_added, guild_profile, GUILD_PROFILE_MODE_JOIN if join else GUILD_PROFILE_MODE_LEAVE
+        into, field_added, guild_profile, GUILD_PROFILE_RENDER_MODE_JOIN if join else GUILD_PROFILE_RENDER_MODE_LEAVE
     )
     
     if not join:
@@ -153,11 +154,32 @@ def build_user_status_description(user):
     Parameters
     ----------
     user : ``ClientUserBase``
-        The User to render its status of.
+        The user to render its status of.
    
     Returns
     -------
     description : `str`
     """
     into, field_added = render_user_status_description_into([], False, user)
+    return ''.join(into)
+
+
+def build_message_common_description(message, mode, *, title = None):
+    """
+    Builds the message's common description.
+    
+    Parameters
+    ----------
+    message : ``Message``
+        The message to render.
+    mode : `int`
+        Whether the message was created or deleted.
+    title : `None | str` = `None`, Optional (Keyword only)
+        Description title to add.
+   
+    Returns
+    -------
+    description : `str`
+    """
+    into, field_added = render_message_common_description_into([], False, message, mode, title)
     return ''.join(into)

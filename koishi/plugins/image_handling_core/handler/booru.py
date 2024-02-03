@@ -16,6 +16,13 @@ from .request_base import ImageHandlerRequestBase
 PAGE_SIZE = 100
 RETRIES_MAX = 5
 
+
+BLACKLISTED_TAGS = {
+    # ai
+    'pigsir13152',
+}
+
+
 def make_url(api_endpoint, required_tags, banned_tags, requested_tags):
     """
     Builds a booru url from the given details.
@@ -175,6 +182,26 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
         return self
     
     
+    @copy_docs(ImageHandlerRequestBase.__repr__)
+    def __repr__(self):
+        repr_parts = ['<', type(self.__name__)]
+        
+        repr_parts.append(' post_parser = ')
+        repr_parts.append(repr(self.post_parser))
+        
+        repr_parts.append(', provider = ')
+        repr_parts.append(repr(self.provider))
+        
+        repr_parts.append(', random_order = ')
+        repr_parts.append(repr(self.random_order))
+        
+        repr_parts.append(', url = ')
+        repr_parts.append(repr(self.url))
+        
+        repr_parts.append('>')
+        return ''.join(repr_parts)
+    
+    
     @copy_docs(ImageHandlerRequestBase.__eq__)
     def __eq__(self, other):
         if type(self) is not type(other):
@@ -264,7 +291,11 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
         for post in soup.find_all('post'):
             url, tags = post_parser(post)
             if (url is not None) and (tags is not None):
-                image_details.append(ImageDetail(url, self._provider).with_tags(frozenset(tags.split())))
+                tags = frozenset(tags.split())
+                if tags & BLACKLISTED_TAGS:
+                    continue
+                
+                image_details.append(ImageDetail(url, self._provider).with_tags(tags))
         
         if random_order:
             shuffle(image_details)

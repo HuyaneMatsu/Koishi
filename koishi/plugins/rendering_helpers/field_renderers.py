@@ -6,7 +6,10 @@ from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import DATETIME_FORMAT_CODE, elapsed_time
 
 from .constants import DATE_TIME_CONDITION_ALL, DATE_TIME_CONDITION_PAST, DATE_TIME_CONDITION_FUTURE
-from .value_renderers import render_role_mentions_into, render_date_time_with_relative_into, render_flags_into
+from .value_renderers import (
+    render_channel_into, render_role_mentions_into, render_date_time_with_relative_into, render_flags_into,
+    render_user_into
+)
 
 
 def render_role_mentions_field_into(into, field_added, roles, *, optional = True, title = 'Roles'):
@@ -48,7 +51,7 @@ def render_role_mentions_field_into(into, field_added, roles, *, optional = True
 
 
 def render_date_time_with_relative_field_into(
-    into, field_added, date_time, *, add_ago = True, optional = True, title = 'Date', condition = 0
+    into, field_added, date_time, *, add_ago = True, optional = True, title = 'Date', condition = DATE_TIME_CONDITION_ALL
 ):
     """
     Renders date time field with relative representation into the given container.
@@ -295,5 +298,135 @@ def render_preinstanced_field_into(into, field_added, preinstanced, *, optional 
         into.append(preinstanced.name)
         into.append(' ~ ')
         into.append(str(preinstanced.value))
+    
+    return into, field_added
+
+
+def render_user_field_into(into, field_added, user, *, guild = None, optional = True, title = 'User'):
+    """
+    Renders a preinstanced field into the given container.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        The container to render into.
+    field_added : `bool`
+        Whether any fields were added already.
+    user : `None | ClientUserBase`
+        The user to render.
+    guild : `None | Guild` = `None`, Optional (Keyword only)
+        The guild to pull the user's nick name for.
+    optional : `bool` = `True`, Optional (Keyword only)
+        Whether should not render if `user` is `None`.
+    title : `str` = `'User'`, Optional (Keyword only)
+        The title of the line.
+    
+    Returns
+    -------
+    into : `list<str>`
+    field_added : `bool`
+    """
+    if (not optional) or (user is not None):
+        if field_added:
+            into.append('\n')
+        else:
+            field_added = True
+        
+        into.append(title)
+        into.append(': ')
+        
+        if user is None:
+            into.append('*none*')
+        else:
+            into = render_user_into(into, user, guild)
+    
+    return into, field_added
+
+
+def render_channel_field_into(into, field_added, channel, *, optional = True, title = 'Channel'):
+    """
+    Renders a preinstanced field into the given container.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        The container to render into.
+    field_added : `bool`
+        Whether any fields were added already.
+    channel : `None | Channel`
+        The channel to render.
+    optional : `bool` = `True`, Optional (Keyword only)
+        Whether should not render if `channel` is `None`.
+    title : `str` = `'Channel'`, Optional (Keyword only)
+        The title of the line.
+    
+    Returns
+    -------
+    into : `list<str>`
+    field_added : `bool`
+    """
+    if (not optional) or (channel is not None):
+        if field_added:
+            into.append('\n')
+        else:
+            field_added = True
+        
+        into.append(title)
+        into.append(': ')
+        
+        if channel is None:
+            into.append('*none*')
+        else:
+            into = render_channel_into(into, channel)
+    
+    return into, field_added
+
+
+def render_attachments_field_into(into, field_added, attachments, *, optional = True, title = 'Attachments'):
+    """
+    Renders a preinstanced field into the given container.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        The container to render into.
+    field_added : `bool`
+        Whether any fields were added already.
+    attachments : `None | set<Attachment>`
+        The attachments to render.
+    optional : `bool` = `True`, Optional (Keyword only)
+        Whether should not render if `attachments` is `None`.
+    title : `str` = `'Attachment'`, Optional (Keyword only)
+        The title of the line.
+    
+    Returns
+    -------
+    into : `list<str>`
+    field_added : `bool`
+    """
+    if (not optional) or (attachments is not None):
+        if field_added:
+            into.append('\n')
+        else:
+            field_added = True
+        
+        into.append(title)
+        into.append(':')
+        
+        if attachments is None:
+            into.append(' *none*')
+        
+        else:
+            for attachment in attachments:
+                url = attachment.url
+                end_index = url.find('?')
+                if end_index != -1:
+                    url = url[:end_index]
+                
+                into.append('\n- [')
+                into.append(attachment.name)
+                into.append('](')
+                into.append(url)
+                into.append(')')
     
     return into, field_added

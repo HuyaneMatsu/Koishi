@@ -4,10 +4,11 @@ from datetime import datetime as DateTime
 
 from hata import ActivityType, Status
 
-from .constants import DATE_TIME_CONDITION_FUTURE, GUILD_PROFILE_MODE_JOIN
+from .constants import DATE_TIME_CONDITION_FUTURE, GUILD_PROFILE_RENDER_MODE_JOIN, MESSAGE_RENDER_MODE_CREATE
 from .field_renderers import (
-    render_date_time_field_into, render_date_time_with_relative_field_into, render_flags_field_into,
-    render_preinstanced_field_into, render_role_mentions_field_into, render_string_field_into
+    render_attachments_field_into, render_channel_field_into, render_date_time_field_into,
+    render_date_time_with_relative_field_into, render_flags_field_into, render_preinstanced_field_into,
+    render_role_mentions_field_into, render_string_field_into, render_user_field_into
 )
 
 
@@ -95,12 +96,12 @@ def render_nulled_guild_profile_description_into(into, field_added, mode):
     into, field_added = render_date_time_field_into(
         into,
         field_added,
-        (DateTime.utcnow() if mode == GUILD_PROFILE_MODE_JOIN else None),
+        (DateTime.utcnow() if mode == GUILD_PROFILE_RENDER_MODE_JOIN else None),
         optional = False,
         title = 'Joined',
     )
     
-    if mode != GUILD_PROFILE_MODE_JOIN:
+    if mode != GUILD_PROFILE_RENDER_MODE_JOIN:
         into.append('\nRoles: *none*')
     
     return into, field_added
@@ -126,7 +127,7 @@ def render_guild_profile_description_into(into, field_added, guild_profile, mode
     into : `list<str>`
     field_added : `bool`
     """
-    if mode == GUILD_PROFILE_MODE_JOIN:
+    if mode == GUILD_PROFILE_RENDER_MODE_JOIN:
         joined_at = guild_profile.joined_at
         if (joined_at is None):
             joined_at = DateTime.utcnow()
@@ -143,7 +144,7 @@ def render_guild_profile_description_into(into, field_added, guild_profile, mode
         into,
         field_added,
         guild_profile.roles,
-        optional = (mode == GUILD_PROFILE_MODE_JOIN),
+        optional = (mode == GUILD_PROFILE_RENDER_MODE_JOIN),
     )
     into, field_added = render_string_field_into(
         into, field_added, guild_profile.nick, title = 'Nick'
@@ -276,7 +277,7 @@ def render_user_status_description_into(into, field_added, user):
     field_added : `bool`
         Whether any fields were added already.
     user : ``ClientUserBase``
-        The User to render its status of.
+        The user to render its status of.
     
     Returns
     -------
@@ -296,4 +297,67 @@ def render_user_status_description_into(into, field_added, user):
             into, field_added, user.get_status_by_platform('web').name, optional = False, title = '- Web'
         )
     
+    return into, field_added
+
+
+def render_message_common_description_into(into, field_added, message, mode, title):
+    """
+    Renders the message's common description.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        The container to render into.
+    field_added : `bool`
+        Whether any fields were added already.
+    message : ``Message``
+        The message to render.
+    mode : `int`
+        Whether the message was created or deleted.
+    title : `None | str`
+        Description title to add.
+    
+    Returns
+    -------
+    into : `list<str>`
+    field_added : `bool`
+    """
+    if (title is not None):
+        into.append('### ')
+        into.append(title)
+        into.append('\n')
+        field_added = True
+    
+    content_parst, field_added = render_string_field_into(
+        into, field_added, str(message.id), title = 'Id'
+    )
+    into, field_added = render_preinstanced_field_into(
+        into, field_added, message.type
+    )
+    if mode == MESSAGE_RENDER_MODE_CREATE:
+        into, field_added = render_date_time_field_into(
+            into, field_added, message.created_at, title = 'Created'
+        )
+        
+    else:
+        into, field_added = render_date_time_with_relative_field_into(
+            into, field_added, message.created_at, title = 'Created'
+        )
+        
+        into, field_added = render_date_time_field_into(
+            into,
+            field_added,
+            DateTime.utcnow(),
+            optional = False,
+            title = 'Deleted',
+        )
+    
+    content_parst, field_added = render_string_field_into(
+        into, field_added, str(len(message)), title = 'Length'
+    )
+    into, field_added = render_user_field_into(
+        into, field_added, message.author, guild = message.guild, title = 'Author'
+    )
+    into, field_added = render_channel_field_into(into, field_added, message.channel)
+    into, field_added = render_attachments_field_into(into, field_added, message.attachments)
     return into, field_added

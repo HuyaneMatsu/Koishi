@@ -38,9 +38,9 @@ def is_vote_valid(channel, user, mask):
     return True
 
 
-async def sum_votes(client, message, emoji_id):
+async def get_voters(client, message, emoji_id):
     """
-    Sums all the votes for the given `emoji_id`.
+    Gets all the votes for the given `emoji_id`.
     
     This function is a coroutine.
     
@@ -55,15 +55,15 @@ async def sum_votes(client, message, emoji_id):
     
     Returns
     -------
-    vote_count : `bool`
+    voters : `set<ClientUserBase>`
     """
     if not emoji_id:
-        return 0
+        return set()
     
     reactions = message.reactions
     if reactions is None:
         # Should not happen
-        return 0
+        return set()
     
     reactions = [reaction for reaction in reactions.keys() if reaction.emoji.id == emoji_id]
     
@@ -73,10 +73,12 @@ async def sum_votes(client, message, emoji_id):
     else:
         mask = PERMISSION_MASK_MESSAGING_DEFAULT
     
-    vote_count = 0
+    voters = set()
+    
     for reaction in reactions:
         users = await client.reaction_user_get_all(message, reaction)
         for user in users:
-            vote_count += is_vote_valid(channel, user, mask)
+            if is_vote_valid(channel, user, mask):
+                voters.add(user)
     
-    return vote_count
+    return voters

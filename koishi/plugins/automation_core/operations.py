@@ -398,9 +398,9 @@ def get_community_message_moderation_fields(guild_id):
     
     Returns
     -------
-    community_message_moderation_fields : `None | tuple<int, int, int, int>`
+    community_message_moderation_fields : `None | tuple<int, int, int, int, None | Channel>`
         Returns `None` if disabled. A tuple of `down_vote_emoji_id`, `up_vote_emoji_id`, `availability_duration`,
-        `vote_threshold` if enabled.
+        `vote_threshold`, `log_channel` if enabled.
     """
     try:
         automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
@@ -409,6 +409,16 @@ def get_community_message_moderation_fields(guild_id):
     
     if not automation_configuration.community_message_moderation_enabled:
         return None
+    
+    log_enabled = automation_configuration.community_message_moderation_log_enabled
+    if not log_enabled:
+        log_channel = None
+    else:
+        log_channel_id = automation_configuration.community_message_moderation_log_channel_id
+        if not log_channel_id:
+            log_channel = None
+        else:
+            log_channel = CHANNELS.get(log_channel_id, None)
     
     return (
         (
@@ -424,4 +434,5 @@ def get_community_message_moderation_fields(guild_id):
             automation_configuration.community_message_moderation_vote_threshold or
             COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT
         ),
+        log_channel,
     )

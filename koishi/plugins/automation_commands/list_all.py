@@ -134,6 +134,19 @@ def render_community_message_moderation_description(automation_configuration):
     description_parts.append(repr(community_message_moderation_vote_threshold))
     
     
+    description_parts.append(
+        '\n'
+        'Logging state: '
+    )
+    description_parts.append(get_bool_representation(automation_configuration.community_message_moderation_log_enabled))
+    description_parts.append(
+        '\n'
+        'Log channel: '
+    )
+    description_parts.append(get_channel_representation(
+        automation_configuration.community_message_moderation_log_channel_id
+    ))
+    
     return ''.join(description_parts)
 
 

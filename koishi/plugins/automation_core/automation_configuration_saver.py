@@ -159,6 +159,12 @@ class AutomationConfigurationSaver:
                                     community_message_moderation_enabled = (
                                         automation_configuration.community_message_moderation_enabled
                                     ),
+                                    community_message_moderation_log_enabled = (
+                                        automation_configuration.community_message_moderation_log_enabled
+                                    ),
+                                    community_message_moderation_log_channel_id = (
+                                        automation_configuration.community_message_moderation_log_channel_id
+                                    ),
                                     community_message_moderation_up_vote_emoji_id = (
                                         automation_configuration.community_message_moderation_up_vote_emoji_id
                                     ),

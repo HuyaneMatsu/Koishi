@@ -10,9 +10,9 @@ def test__is_vote_valid__bot():
     
     Case: The user is a bot.
     """
-    guild = Guild.precreate(202301160005)
-    channel = Channel.precreate(202301160003, guild_id = guild.id, channel_type = ChannelType.guild_text)
-    user = User.precreate(202301160004, bot = True)
+    guild = Guild.precreate(202401160005)
+    channel = Channel.precreate(202401160003, guild_id = guild.id, channel_type = ChannelType.guild_text)
+    user = User.precreate(202401160004, bot = True)
     user.guild_profiles[guild.id] = GuildProfile()
     guild.users[user.id] = user
     role = Role.precreate(
@@ -44,9 +44,9 @@ def test__is_vote_valid__missing_permissions():
     
     Case: The user has missing permissions
     """
-    guild = Guild.precreate(202301160006)
-    channel = Channel.precreate(202301160007, guild_id = guild.id, channel_type = ChannelType.guild_text)
-    user = User.precreate(202301160008, bot = False)
+    guild = Guild.precreate(202401160006)
+    channel = Channel.precreate(202401160007, guild_id = guild.id, channel_type = ChannelType.guild_text)
+    user = User.precreate(202401160008, bot = False)
     user.guild_profiles[guild.id] = GuildProfile()
     guild.users[user.id] = user
     role = Role.precreate(
@@ -78,9 +78,9 @@ def test__is_vote_valid__blacklisted():
     
     Case: The user has missing permissions
     """
-    guild = Guild.precreate(202301160009)
-    channel = Channel.precreate(202301160010, guild_id = guild.id, channel_type = ChannelType.guild_text)
-    user = User.precreate(202301160011, bot = False)
+    guild = Guild.precreate(202401160009)
+    channel = Channel.precreate(202401160010, guild_id = guild.id, channel_type = ChannelType.guild_text)
+    user = User.precreate(202401160011, bot = False)
     user.guild_profiles[guild.id] = GuildProfile()
     guild.users[user.id] = user
     role = Role.precreate(
@@ -112,9 +112,9 @@ def test__is_vote_valid_passing():
     
     Case: The user has missing permissions
     """
-    guild = Guild.precreate(202301160012)
-    channel = Channel.precreate(202301160013, guild_id = guild.id, channel_type = ChannelType.guild_text)
-    user = User.precreate(202301160014, bot = False)
+    guild = Guild.precreate(202401160012)
+    channel = Channel.precreate(202401160013, guild_id = guild.id, channel_type = ChannelType.guild_text)
+    user = User.precreate(202401160014, bot = False)
     user.guild_profiles[guild.id] = GuildProfile()
     guild.users[user.id] = user
     role = Role.precreate(

@@ -12,7 +12,9 @@ Contains control commands for other automation features.
         - `availability-duration (hours : int = 0, minutes : int = 0, seconds : int = 0)`
         - `down-vote-emoji (emoji : null | str = null)`
         - `up-vote-emoji (emoji : null | str = null)`
-        - `vote-threshold (threshold : int<min = 2, max = 100> = 0)`
+        - `vote-threshold (threshold : int<min = 2, max = 20> = 0)`
+        - `log-state (state : Choice<str>)`
+        - `log-channel (channel : null | Channel<channel_types = [0, 5]> = null)`
     - `log-emoji` (emoji create / modify / delete)
         - `enable (channel : null | Channel<channel_types = [0, 5]> = null)`
         - `disable`

@@ -1140,3 +1140,70 @@ async def community_message_moderation_set_vote_threshold(
     automation_configuration.set('community_message_moderation_vote_threshold', threshold)
     
     return f'Community message moderation vote threshold has been set to: {threshold!s}{case}.'
+
+
+@COMMUNITY_MESSAGE_MODERATION_COMMANDS.interactions(name = 'log-state')
+async def community_message_moderation_set_log_state(
+    event,
+    state : (['enabled', 'disabled'], 'Enable to disable.'),
+):
+    """
+    Enable or disable community message moderation logging.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    state : `bool`
+        Whether to enable to disable it.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('community_message_moderation_log_enabled', state == 'enabled')
+    
+    return f'Community message moderation logging has been {state!s}.'
+
+
+@COMMUNITY_MESSAGE_MODERATION_COMMANDS.interactions(name = 'log-channel')
+async def community_message_moderation_set_log_channel(
+    client,
+    event,
+    channel: P(
+        Channel,
+        'Select the channel to log to.',
+        channel_types = [ChannelType.guild_text, ChannelType.guild_announcements],
+    ) = None,
+):
+    """
+    Sets community message moderation log channel.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    channel : `None`, ``Channel`` = `None`, Optional
+        The channel to log into.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    channel = default_channel_and_check_its_guild(event, channel)
+    check_channel_and_client_permissions(client, channel)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('community_message_moderation_log_channel_id', channel.id)
+    
+    return f'Community message moderation log messages will be sent to {channel:m}.'

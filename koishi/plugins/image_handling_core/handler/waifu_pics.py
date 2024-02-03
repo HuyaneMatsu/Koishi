@@ -16,10 +16,13 @@ HEADERS[CONTENT_TYPE] = 'application/json'
 DATA = b'{}'
 
 
-# These are blacklisted images requested to be removed since they are a little bit too explicit
 BLACKLIST = {
+    # Explicit
     'https://i.waifu.pics/sqndUwO.gif',
     'https://i.waifu.pics/JxQolYt.gif',
+    
+    # Holocringe
+    'https://i.waifu.pics/tvSCzkl.gif',
 }
 
 

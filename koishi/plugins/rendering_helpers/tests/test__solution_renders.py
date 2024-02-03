@@ -6,7 +6,7 @@ from hata import (
     BUILTIN_EMOJIS, GuildProfile, GuildProfileFlag, Role, Status, User, UserFlag
 )
 
-from ..constants import GUILD_PROFILE_MODE_GENERAL, GUILD_PROFILE_MODE_JOIN, GUILD_PROFILE_MODE_LEAVE
+from ..constants import GUILD_PROFILE_RENDER_MODE_GENERAL, GUILD_PROFILE_RENDER_MODE_JOIN, GUILD_PROFILE_RENDER_MODE_LEAVE
 from ..solution_renderers import (
     render_activity_description_into, render_guild_profile_description_into,
     render_nullable_guild_profile_description_into, render_nulled_guild_profile_description_into,
@@ -111,7 +111,7 @@ def _iter_options__render_guild_profile_description_into():
     yield (
         False,
         GuildProfile(),
-        GUILD_PROFILE_MODE_GENERAL,
+        GUILD_PROFILE_RENDER_MODE_GENERAL,
         DateTime(2016, 10, 14, 21, 13, 36),
         (
             (
@@ -126,7 +126,7 @@ def _iter_options__render_guild_profile_description_into():
     yield (
         True,
         GuildProfile(),
-        GUILD_PROFILE_MODE_GENERAL,
+        GUILD_PROFILE_RENDER_MODE_GENERAL,
         DateTime(2016, 10, 14, 21, 13, 36),
         (
             (
@@ -143,7 +143,7 @@ def _iter_options__render_guild_profile_description_into():
         GuildProfile(
             timed_out_until = DateTime(2016, 10, 14, 21, 12, 46),
         ),
-        GUILD_PROFILE_MODE_GENERAL,
+        GUILD_PROFILE_RENDER_MODE_GENERAL,
         DateTime(2016, 10, 14, 21, 13, 36),
         (
             (
@@ -168,7 +168,7 @@ def _iter_options__render_guild_profile_description_into():
             boosts_since = DateTime(2016, 10, 14, 21, 13, 18),
             timed_out_until = DateTime(2016, 10, 14, 21, 14, 46),
         ),
-        GUILD_PROFILE_MODE_GENERAL,
+        GUILD_PROFILE_RENDER_MODE_GENERAL,
         DateTime(2016, 10, 14, 21, 13, 46),
         (
             (
@@ -191,7 +191,7 @@ def _iter_options__render_guild_profile_description_into():
             joined_at = DateTime(2016, 10, 14, 21, 13, 17),
             role_ids = [role_0.id, role_1.id],
         ),
-        GUILD_PROFILE_MODE_JOIN,
+        GUILD_PROFILE_RENDER_MODE_JOIN,
         DateTime(2016, 10, 14, 21, 13, 46),
         (
             (
@@ -210,7 +210,7 @@ def _iter_options__render_guild_profile_description_into():
             joined_at = DateTime(2016, 10, 14, 21, 13, 17),
             role_ids = None,
         ),
-        GUILD_PROFILE_MODE_JOIN,
+        GUILD_PROFILE_RENDER_MODE_JOIN,
         DateTime(2016, 10, 14, 21, 13, 46),
         (
             (
@@ -228,7 +228,7 @@ def _iter_options__render_guild_profile_description_into():
             joined_at = DateTime(2016, 10, 14, 21, 13, 17),
             role_ids = [role_0.id, role_1.id],
         ),
-        GUILD_PROFILE_MODE_LEAVE,
+        GUILD_PROFILE_RENDER_MODE_LEAVE,
         DateTime(2016, 10, 14, 21, 13, 46),
         (
             (
@@ -247,7 +247,7 @@ def _iter_options__render_guild_profile_description_into():
             joined_at = DateTime(2016, 10, 14, 21, 13, 17),
             role_ids = None
         ),
-        GUILD_PROFILE_MODE_LEAVE,
+        GUILD_PROFILE_RENDER_MODE_LEAVE,
         DateTime(2016, 10, 14, 21, 13, 46),
         (
             (
@@ -295,7 +295,7 @@ def _iter_options__render_nulled_guild_profile_description_into():
     # General
     yield (
         False,
-        GUILD_PROFILE_MODE_GENERAL,
+        GUILD_PROFILE_RENDER_MODE_GENERAL,
         current_date,
         (
             (
@@ -308,7 +308,7 @@ def _iter_options__render_nulled_guild_profile_description_into():
 
     yield (
         True,
-        GUILD_PROFILE_MODE_GENERAL,
+        GUILD_PROFILE_RENDER_MODE_GENERAL,
         current_date,
         (
             (
@@ -322,7 +322,7 @@ def _iter_options__render_nulled_guild_profile_description_into():
     # Join
     yield (
         False,
-        GUILD_PROFILE_MODE_JOIN,
+        GUILD_PROFILE_RENDER_MODE_JOIN,
         current_date,
         (
             (
@@ -334,7 +334,7 @@ def _iter_options__render_nulled_guild_profile_description_into():
 
     yield (
         True,
-        GUILD_PROFILE_MODE_JOIN,
+        GUILD_PROFILE_RENDER_MODE_JOIN,
         current_date,
         (
             (
@@ -348,7 +348,7 @@ def _iter_options__render_nulled_guild_profile_description_into():
     
     yield (
         False,
-        GUILD_PROFILE_MODE_LEAVE,
+        GUILD_PROFILE_RENDER_MODE_LEAVE,
         current_date,
         (
             (
@@ -361,7 +361,7 @@ def _iter_options__render_nulled_guild_profile_description_into():
 
     yield (
         True,
-        GUILD_PROFILE_MODE_LEAVE,
+        GUILD_PROFILE_RENDER_MODE_LEAVE,
         current_date,
         (
             (
@@ -407,7 +407,7 @@ def _iter_options__render_nullable_guild_profile_description_into():
     yield (
         False,
         None,
-        GUILD_PROFILE_MODE_LEAVE,
+        GUILD_PROFILE_RENDER_MODE_LEAVE,
         current_date,
         (
             (
@@ -423,7 +423,7 @@ def _iter_options__render_nullable_guild_profile_description_into():
         GuildProfile(
             joined_at = DateTime(2016, 10, 14, 21, 13, 7)
         ),
-        GUILD_PROFILE_MODE_LEAVE,
+        GUILD_PROFILE_RENDER_MODE_LEAVE,
         current_date,
         (
             (

@@ -3,8 +3,8 @@ __all__ = ('TOUHOU_ACTION_LIKE',)
 from ...image_handling_core import ImageDetail
 from ...touhou_core import (
     FUTATSUIWA_MAMIZOU, HOUJUU_NUE, INABA_TEWI, JUNKO, KAKU_SEIGA, KAZAMI_YUUKA, KOMEIJI_KOISHI, MATARA_OKINA,
-    MORICHIKA_RINNOSUKE, RUMIA, SAIGYOUJI_YUYUKO, SHIKI_EIKI_YAMAXANADU, TATARA_KOGASA, YAGOKORO_EIRIN, YAKUMO_RAN,
-    YAKUMO_YUKARI, YOMOTSU_HISAMI
+    MORICHIKA_RINNOSUKE, REIUJI_UTSUHO, RUMIA, SAIGYOUJI_YUYUKO, SHIKI_EIKI_YAMAXANADU, TATARA_KOGASA, YAGOKORO_EIRIN,
+    YAKUMO_RAN, YAKUMO_YUKARI, YOMOTSU_HISAMI
 )
 
 
@@ -51,6 +51,9 @@ TOUHOU_ACTION_LIKE = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1141454560917995611/okina-older-0000.png',
     ).with_target(MATARA_OKINA),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1202732810818027571/okuu-nuclear-0000.png',
+    ).with_target(REIUJI_UTSUHO),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1132645810908176414/ran-fluffy-tail-0000.png',
     ).with_target(YAKUMO_RAN),

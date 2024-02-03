@@ -45,5 +45,7 @@ def apply_presets():
     support_guild_configuration.community_message_moderation_enabled = False
     support_guild_configuration.community_message_moderation_up_vote_emoji_id = 0
     support_guild_configuration.community_message_moderation_vote_threshold = 0
+    support_guild_configuration.community_message_moderation_log_enabled = False
+    support_guild_configuration.community_message_moderation_log_channel_id = 0
     
     AUTOMATION_CONFIGURATIONS[support_guild_configuration.guild_id] = support_guild_configuration

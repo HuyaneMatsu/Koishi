@@ -15,10 +15,9 @@ from ..automation_core import get_touhou_feed_enabled
 from ..touhou_core import TouhouHandlerKey, get_touhou_character_like, parse_touhou_characters_from_tags
 
 from .constants import (
-    DEFAULT_INTERVAL, FEEDERS, INTERVAL_RP, INTERVAL_UNIT_RP, MAX_INTERVAL, MIN_INTERVAL, TAG_NAME_REQUIRED,
-    TAG_NAME_SOLO, TAG_REQUIRED_RP, TAG_ITER_RP
+    DEFAULT_INTERVAL, FEEDERS, INTERVAL_RP, INTERVAL_UNIT_RP, MAX_INTERVAL, MIN_INTERVAL, PERMISSION_MASK_EMBED_LINKS,
+    TAG_NAME_REQUIRED, TAG_NAME_SOLO, TAG_REQUIRED_RP, TAG_ITER_RP
 )
-
 
 
 def iter_tag_names_of(channel):
@@ -281,7 +280,11 @@ def should_touhou_feed_in_channel(client, channel):
         if topic is None:
             return False
         
-        if not channel.cached_permissions_for(client).can_send_messages:
+        permissions = channel.cached_permissions_for(client)
+        if (
+            not permissions.can_send_messages or
+            permissions & PERMISSION_MASK_EMBED_LINKS != PERMISSION_MASK_EMBED_LINKS
+        ):
             return False
         
         if TAG_REQUIRED_RP.search(topic) is not None:
@@ -297,7 +300,11 @@ def should_touhou_feed_in_channel(client, channel):
         if not parent.is_in_group_forum():
             return False
         
-        if not parent.cached_permissions_for(client).can_send_messages_in_threads:
+        permissions = parent.cached_permissions_for(client)
+        if (
+            not permissions.can_send_messages_in_threads or
+            permissions & PERMISSION_MASK_EMBED_LINKS != PERMISSION_MASK_EMBED_LINKS
+        ):
             return False
         
         for tag in channel.iter_applied_tags():
@@ -467,13 +474,15 @@ class Feeder:
         
         This method is a coroutine.
         """
-        client = get_first_client_with_message_create_permissions_from(self.channel, FEATURE_CLIENTS)
+        client = get_first_client_with_message_create_permissions_from(
+            self.channel, FEATURE_CLIENTS, PERMISSION_MASK_EMBED_LINKS
+        )
         if client is None:
             self.cancel()
             return
         
         try:
-            # SKip images if there are too many characters on it. Do 5 retries.
+            # Skip images if there are too many characters on it. Do 5 retries.
             retries = 5
             while True:
                 image_detail = await choice(self.handler_keys).get_handler().get_image(client, None)

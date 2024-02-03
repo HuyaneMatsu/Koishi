@@ -4,18 +4,24 @@ from datetime import datetime as DateTime
 from math import ceil
 
 from hata import Permission, DiscordException, ERROR_CODES
+from hata.ext.slash import Button
 
 from ...bot_utils.multi_client_utils import get_first_client_with_permissions
 from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_community_message_moderation_fields
 from ..blacklist_core import is_user_id_in_blacklist
+from ..rendering_helpers import (
+    MESSAGE_RENDER_MODE_DELETE, build_message_common_description, iter_build_attachment_message_content, 
+    iter_build_attachment_voters
+)
 
 from .cache import get_lock_for, delete_lock_of
-from .helpers import sum_votes
+from .helpers import get_voters
 
 
 PERMISSIONS_MASK_ACTION_REQUIRED = Permission().update_by_keys(manage_messages = True, view_channel = True)
+PERMISSIONS_MASK_LOG_REQUIRED = Permission().update_by_keys(attach_files = True, send_messages = True)
 
 
 @FEATURE_CLIENTS.events
@@ -35,7 +41,7 @@ async def reaction_add(client, event):
         The client who received the event.
     """
     await handle_reaction_event(client, event.message, event.emoji, event.user, True)
-    
+
 
 @FEATURE_CLIENTS.events
 async def reaction_delete(client, event):
@@ -112,7 +118,7 @@ async def handle_reaction_event(client, message, emoji, user, addition):
     if configuration is None:
         return
     
-    down_vote_emoji_id, up_vote_emoji_id, availability_duration, vote_threshold = configuration
+    down_vote_emoji_id, up_vote_emoji_id, availability_duration, vote_threshold, log_channel = configuration
     if emoji.id != (down_vote_emoji_id if addition else up_vote_emoji_id):
         return
     
@@ -144,6 +150,7 @@ async def handle_reaction_event(client, message, emoji, user, addition):
                     ERROR_CODES.unknown_channel, # channel deleted
                     ERROR_CODES.unknown_message, # message deleted
                     ERROR_CODES.missing_access, # client removed
+                    ERROR_CODES.missing_permissions, # permissions changed
                 ):
                     raise
                 
@@ -151,11 +158,11 @@ async def handle_reaction_event(client, message, emoji, user, addition):
                 return
         
         # Sum votes
-        vote_count = await sum_votes(client, message, down_vote_emoji_id)
-        vote_count -= await sum_votes(client, message, up_vote_emoji_id)
+        down_voters = await get_voters(client, message, down_vote_emoji_id)
+        up_voters = await get_voters(client, message, up_vote_emoji_id)
         
         # Return if under
-        if vote_count < vote_threshold:
+        if len(down_voters) - len(up_voters) < vote_threshold:
             return
         
         try:
@@ -168,7 +175,43 @@ async def handle_reaction_event(client, message, emoji, user, addition):
                 ERROR_CODES.unknown_channel, # channel deleted
                 ERROR_CODES.unknown_message, # message deleted
                 ERROR_CODES.missing_access, # client removed
+                ERROR_CODES.missing_permissions, # permissions changed
             ):
                 raise
+            
+            delete_lock_of(message)
+            return
         
         delete_lock_of(message)
+    
+    # Return if we should not log / cant log
+    if (
+        log_channel is None or
+        log_channel.cached_permissions_for(client) & PERMISSIONS_MASK_LOG_REQUIRED != PERMISSIONS_MASK_LOG_REQUIRED
+    ):
+        return
+    
+    # log
+    try:
+        await client.message_create(
+            log_channel,
+            allowed_mentions = None,
+            components = Button('Jump there', url = message.url),
+            content = build_message_common_description(
+                message, MESSAGE_RENDER_MODE_DELETE, title = 'Community message moderation log'
+            ),
+            file = [
+                *iter_build_attachment_message_content(message),
+                *iter_build_attachment_voters(down_voters, up_voters, message.guild)
+            ],
+        )
+    except ConnectionError:
+        return
+    
+    except DiscordException as exception:
+        if exception.code not in (
+            ERROR_CODES.unknown_channel, # channel deleted
+            ERROR_CODES.missing_access, # client removed
+            ERROR_CODES.missing_permissions, # permissions changed
+        ):
+            raise

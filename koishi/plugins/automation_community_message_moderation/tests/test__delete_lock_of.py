@@ -9,7 +9,7 @@ def test__delete_lock_of():
     """
     Tests whether ``delete_lock_of`` works as intended.
     """
-    message = Message.precreate(202301160002)
+    message = Message.precreate(202401160002)
     
     try:
         output_0 = get_lock_for(message)

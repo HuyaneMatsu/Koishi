@@ -12,7 +12,7 @@ def test__get_lock_for__output():
     
     Case: output type check.
     """
-    message = Message.precreate(202301160000)
+    message = Message.precreate(202401160000)
     
     try:
         output = get_lock_for(message)
@@ -28,7 +28,7 @@ def test__get_lock_for__repeated_access():
     
     Case: test repeated access.
     """
-    message = Message.precreate(202301160001)
+    message = Message.precreate(202401160001)
     
     try:
         output_0 = get_lock_for(message)

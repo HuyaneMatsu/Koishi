@@ -63,7 +63,7 @@ def _iter_options():
             'love koishi',
             url = f'{URL_BASE_ANIME}{12}',
         ).add_thumbnail(
-            'https://orindance.party/'
+            'https://orindance.party/',
         ).add_field(
             'Episodes', '2', inline = True,
         ).add_field(
