@@ -43,7 +43,7 @@ async def message_create(client, message):
         allowed_mentions = None,
         components = Button('Jump there', url = message.url),
         content = build_message_common_description(message, MESSAGE_RENDER_MODE_CREATE, title = 'Mention log'),
-        files = [
+        file = [
             *iter_build_attachment_message_content(message),
             *iter_build_attachment_message_mentions(message),
         ]
