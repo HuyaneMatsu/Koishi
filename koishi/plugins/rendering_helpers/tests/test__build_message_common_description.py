@@ -36,6 +36,7 @@ def test__build_message_common_description():
         output,
         (
             f'### {title!s}\n'
+            f'\n'
             f'Id: {message_id!s}\n'
             f'Type: {message_type.name!s} ~ {message_type.value}\n'
             f'Created: {id_to_datetime(message_id):{DATETIME_FORMAT_CODE}}\n'

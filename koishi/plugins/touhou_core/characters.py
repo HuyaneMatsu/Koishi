@@ -205,7 +205,7 @@ HIJIRI_BYAKUREN = TouhouCharacter(
     (
         '聖 白蓮',
         'Byakuren',
-        'Hijiri Byakuren',
+        'Byakuren Hijiri',
     ),
 )
 

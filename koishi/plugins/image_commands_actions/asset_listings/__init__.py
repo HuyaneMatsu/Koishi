@@ -1,3 +1,4 @@
+from .fluff import *
 from .kiss import *
 from .kon import *
 from .like import *
@@ -7,6 +8,7 @@ from .tickle import *
 
 
 __all__ = (
+    *fluff.__all__,
     *kiss.__all__,
     *kon.__all__,
     *like.__all__,

@@ -391,7 +391,8 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ### `ran-kon-0026`
 
-*Omitted*
+- Artist: **alto2019**
+- Edit: **HuyaneMatsu***
 
 - Character: **Yakumo Ran**
 - Source: **Touhou**
@@ -447,6 +448,16 @@ Some authors might be unknown. If you know them please create a PR with it.
 - Artist: **gokuu / ごくう**
 - Edit: *none*
 
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0032`
+
+- Artist: **kiritanpo117**
+- Edit: **HuyaneMatsu***
 
 - Character: **Yakumo Ran**
 - Source: **Touhou**

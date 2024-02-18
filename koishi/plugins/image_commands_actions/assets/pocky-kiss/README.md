@@ -521,6 +521,17 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
+### `satori-suika-pocky-0000`
+
+- Artist: **Scarristo**
+- Edit: **HuyaneMatsu*
+
+
+- Character: **Komeiji Satori**, **Ibuki Suika**
+- Source: **Touhou**
+
+---
+
 ### `shou-nazrin-pocky-0000`
 
 - Artist: **bbb**

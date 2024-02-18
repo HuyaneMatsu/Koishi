@@ -20,6 +20,7 @@ RETRIES_MAX = 5
 BLACKLISTED_TAGS = {
     # ai
     'pigsir13152',
+    'dobostorte',
 }
 
 

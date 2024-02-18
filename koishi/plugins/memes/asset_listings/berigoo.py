@@ -56,4 +56,5 @@ BERIGOO_MEMES = [
     'https://cdn.discordapp.com/attachments/568837922288173058/1201193635564224613/berigoo-meme-0052.png',
     'https://cdn.discordapp.com/attachments/568837922288173058/1201616221024563280/berigoo-meme-0053.png',
     'https://cdn.discordapp.com/attachments/568837922288173058/1201975105161269258/berigoo-meme-0054.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1205969990977593384/berigoo-meme-0055.png',
 ]

@@ -1,3 +1,12 @@
+### 2024-02-18
+
+- Add **2** blacklisted (explicit) tags to safe booru queries.
+- Add **1** image to `/meme` command.
+- Add **2** image to `/kon` interaction.
+- Add new `/fluff` interaction with **68** images.
+- Add `pocky` alternative version of `pocky-kiss` reply interaction.
+- Add **1** image to `/pocky-kiss` interaction.
+
 ### 2024-02-03
 
 - Add `list of shame` to booru image handler to filter out artists who use ai.
@@ -5,7 +14,7 @@
 - Action command replies, such as `/hug` replies now mention the invoking user as intended.
     Was intended to be part of the last update, but turned out replies work a little differently this regard.
 - Add **6** image to `/kon` interaction.
-- Add **6** image to `/meme` interaction.
+- Add **6** image to `/meme` command.
 - Add new `/automation community-message-moderation log-state` and `... log-channel` commands.
 - Fix `/mod regret-un-ban` failing. (Since last update.)
 - Add **1** image to `/like` interaction.
