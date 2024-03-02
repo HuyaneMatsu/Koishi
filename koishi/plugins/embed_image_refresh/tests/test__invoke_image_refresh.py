@@ -15,9 +15,9 @@ async def test__invoke_image_refresh__not_needed():
     """
     called = False
     
-    async def mock_image_refresh(client, message, interaction_event):
+    async def mock_image_refresh(client, message, interaction_event, retry):
         nonlocal called
-        
+        vampytest.assert_eq(retry, 1)
         called = True
     
     
@@ -58,11 +58,13 @@ async def test__invoke_image_refresh__needed():
     called_with_interaction_event = None
     
     
-    async def mock_image_refresh(client, message, interaction_event):
+    async def mock_image_refresh(client, message, interaction_event, retry):
         nonlocal called
         nonlocal called_with_client
         nonlocal called_with_message
         nonlocal called_with_interaction_event
+        
+        vampytest.assert_eq(retry, 1)
         
         called = True
         called_with_client = client

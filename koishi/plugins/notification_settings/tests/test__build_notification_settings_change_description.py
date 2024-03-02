@@ -1,11 +1,11 @@
 import vampytest
 
 from ..builders import build_notification_settings_change_description
-from ..options import OPTION_DAILY, OPTION_PROPOSAL
+from ..options import OPTION_DAILY_BY_WAIFU, OPTION_PROPOSAL
 
 
 def _iter_options():
-    yield OPTION_DAILY, True, True, 'From now on, you will receive daily-by-waifu notifications.'
+    yield OPTION_DAILY_BY_WAIFU, True, True, 'From now on, you will receive daily-by-waifu notifications.'
     yield OPTION_PROPOSAL, True, True, 'From now on, you will receive proposal notifications.'
     yield OPTION_PROPOSAL, True, False, 'You were already receiving proposal notifications.'
     yield OPTION_PROPOSAL, False, True, 'From now, you will **not** receive proposal notifications.'

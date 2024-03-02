@@ -1,10 +1,12 @@
-from datetime import datetime, timedelta
+from datetime import datetime as DateTime, timedelta as TimeDelta
 
 from .constants import ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__BOOSTER, ROLE__SUPPORT__HEART_BOOST
 
-DAILY_INTERVAL          = timedelta(hours = 22)
-DAILY_STREAK_BREAK      = timedelta(hours = 26)
-DAILY_STREAK_LOSE       = timedelta(hours = 12)
+DAILY_INTERVAL          = TimeDelta(hours = 22)
+DAILY_STREAK_BREAK      = TimeDelta(hours = 26)
+DAILY_STREAK_LOSE       = TimeDelta(hours = 12)
+DAILY_REMINDER_AFTER    = TimeDelta(hours = 22)
+
 
 DAILY_BASE              = 100
 DAILY_PER_DAY           = 5
@@ -31,8 +33,8 @@ VOTE_BASE_BONUS_WEEKEND = 100
 VOTE_PER_DAY_BONUS_WEEKEND = 1
 
 
-TOP_GG_VOTE_DELAY_MIN = timedelta(hours = 12)
-TOP_GG_VOTE_DELAY_MAX = timedelta(days = 4)
+TOP_GG_VOTE_DELAY_MIN = TimeDelta(hours = 12)
+TOP_GG_VOTE_DELAY_MAX = TimeDelta(days = 4)
 
 
 def calculate_daily_for(user, daily_streak):
@@ -83,9 +85,9 @@ def calculate_daily_new_only(daily_streak, daily_next, now):
     ----------
     daily_streak : `int`
         The user's actual daily streak.
-    daily_next : `datetime`
+    daily_next : `DateTime`
         The time when the user can claim it's next daily reward.
-    now : `datetime`
+    now : `DateTime`
         The current utc time.
     
     Returns
@@ -114,16 +116,16 @@ def calculate_daily_new(daily_streak, daily_next, now):
     ----------
     daily_streak : `int`
         The user's actual daily streak.
-    daily_next : `datetime`
+    daily_next : `DateTime`
         The time when the user can claim it's next daily reward.
-    now : `datetime`
+    now : `DateTime`
         The current utc time.
     
     Returns
     -------
     daily_streak_new : `int`
         The new daily streak value of the user.
-    daily_next_new : `datetime`
+    daily_next_new : `DateTime`
         The new daily next value of the user.
     """
     daily_next_with_break = daily_next + DAILY_STREAK_BREAK

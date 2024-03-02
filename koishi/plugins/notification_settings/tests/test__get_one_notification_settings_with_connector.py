@@ -17,7 +17,7 @@ async def test__get_one_notification_settings_with_connector__cache_hit():
     connector = object()
     
     user_id = 202309240060
-    notification_settings = NotificationSettings(user_id, daily = False)
+    notification_settings = NotificationSettings(user_id, daily_by_waifu = False)
     
     async def query(user_id, connector):
         nonlocal query_called
@@ -57,7 +57,7 @@ async def test__get_one_notification_settings_with_connector__database_hit_value
     called_connector_with = None
     
     user_id = 202309240061
-    notification_settings = NotificationSettings(user_id, daily = False)
+    notification_settings = NotificationSettings(user_id, daily_by_waifu = False)
     
     async def query(user_id, connector):
         nonlocal query_called

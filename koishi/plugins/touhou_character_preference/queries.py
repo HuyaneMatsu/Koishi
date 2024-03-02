@@ -194,7 +194,6 @@ async def get_more_touhou_character_preference_with_connector(user_ids, connecto
     -------
     character_preferences : `None`, ``CharacterPreference``
     """
-
     character_preferences, misses = get_more_from_cache(user_ids)
     if misses is not None:
         to_merge = await _query_more_touhou_character_preference_with_connector(misses, connector)

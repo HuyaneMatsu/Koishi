@@ -55,7 +55,7 @@ def test__get_one_from_cache__hit_value():
     Case: hiz, actual values.
     """
     user_id = 202309240002
-    notification_settings = NotificationSettings(user_id, daily = False)
+    notification_settings = NotificationSettings(user_id, daily_by_waifu = False)
     
     try:
         NOTIFICATION_SETTINGS_CACHE[user_id] = notification_settings

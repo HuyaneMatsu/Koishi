@@ -721,7 +721,7 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ### `ran-yukari-fluff-0004`
 
-- Artist: **peroponesosu.**
+- Artist: **peroponesosu**
 - Edit: *none*
 
 

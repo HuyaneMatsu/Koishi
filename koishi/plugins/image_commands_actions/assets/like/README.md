@@ -59,6 +59,17 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ---
 
+### `oku-older-0000`
+
+- Artist: *unknown*
+- Edit: *unknown*
+
+
+- Character: **Nagae Iku**
+- Source: **Touhou**
+
+---
+
 ### `junko-older-0000`
 
 - Artist: *unknown*

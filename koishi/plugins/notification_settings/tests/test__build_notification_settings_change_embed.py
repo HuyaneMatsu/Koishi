@@ -2,7 +2,7 @@ import vampytest
 from hata import Embed, User
 
 from ..builders import build_notification_settings_change_embed
-from ..options import OPTION_DAILY, OPTION_PROPOSAL
+from ..options import OPTION_DAILY_BY_WAIFU, OPTION_PROPOSAL
 
 
 def _iter_options():
@@ -14,7 +14,7 @@ def _iter_options():
     ).add_thumbnail(
         user.avatar_url,
     )
-    yield user, OPTION_DAILY, True, True, expected_output
+    yield user, OPTION_DAILY_BY_WAIFU, True, True, expected_output
 
 
     expected_output = Embed(

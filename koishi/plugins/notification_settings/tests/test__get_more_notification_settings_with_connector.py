@@ -19,7 +19,7 @@ async def test__get_more_notification_settings_with_connector__cache_hit():
     user_id_0 = 202309250070
     user_id_1 = 202309250071
     
-    notification_settings_0 = NotificationSettings(user_id_0, daily = False)
+    notification_settings_0 = NotificationSettings(user_id_0, daily_by_waifu = False)
     notification_settings_1 = NotificationSettings(user_id_1, proposal = False)
     
     async def query(user_ids, connector):
@@ -63,7 +63,7 @@ async def test__get_more_notification_settings_with_connector__database_hit_valu
     user_id_0 = 202309250072
     user_id_1 = 202309250073
     
-    notification_settings_0 = NotificationSettings(user_id_0, daily = False)
+    notification_settings_0 = NotificationSettings(user_id_0, daily_by_waifu = False)
     notification_settings_1 = NotificationSettings(user_id_1, proposal = False)
     
     async def query(user_ids, connector):
@@ -170,7 +170,7 @@ async def test__get_more_notification_settings_with_connector__mixed_hit_value()
     user_id_0 = 202309250076
     user_id_1 = 202309250077
     
-    notification_settings_0 = NotificationSettings(user_id_0, daily = False)
+    notification_settings_0 = NotificationSettings(user_id_0, daily_by_waifu = False)
     notification_settings_1 = NotificationSettings(user_id_1, proposal = False)
     
     async def query(user_ids, connector):

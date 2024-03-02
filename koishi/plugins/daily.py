@@ -21,7 +21,10 @@ from ..bot_utils.utils import send_embed_to
 from ..bots import FEATURE_CLIENTS
 
 
-from .notification_settings import NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_DISABLE, get_one_notification_settings_with_connector
+from .notification_settings import (
+    NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_BY_WAIFU_DISABLE, get_notifier_client,
+    get_one_notification_settings_with_connector
+)
 
 
 async def claim_daily_for_yourself(client, event):
@@ -76,6 +79,7 @@ async def claim_daily_for_yourself(client, event):
                     daily_next = now + DAILY_INTERVAL,
                     daily_streak = daily_streak,
                     count_daily_self = user_common_model.count_daily_self + 1,
+                    daily_reminded = False,
                 )
             )
             
@@ -183,8 +187,6 @@ async def claim_daily_for_waifu(client, event, target_user):
             else:
                 target_entry, source_entry = results
             
-            target_notification_settings = await get_one_notification_settings_with_connector(target_user.id, connector)
-            
             now = datetime.utcnow()
             
             target_daily_next = target_entry[4]
@@ -241,6 +243,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                     daily_streak = target_daily_streak,
                     waifu_cost = new_waifu_cost,
                     count_daily_by_waifu = user_common_model.count_daily_by_waifu + 1,
+                    daily_reminded = False,
                 )
             )
             
@@ -257,24 +260,28 @@ async def claim_daily_for_waifu(client, event, target_user):
                 )
             )
             
-            if (not target_user.bot) and target_notification_settings.daily:
-                await send_embed_to(
-                    client,
-                    target_user.id,
-                    Embed(
-                        f'{source_user.full_name} claimed daily love for you.',
-                        (
-                            f'You received {received} {EMOJI__HEART_CURRENCY} and now you have '
-                            f'{target_total_love} {EMOJI__HEART_CURRENCY}\n'
-                            f'You are on a {target_daily_streak} day streak.'
-                        ),
-                        color = COLOR__GAMBLING,
-                    ),
-                    Button(
-                        'I don\'t want notifs, nya!!',
-                        custom_id = NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_DISABLE,
-                    ),
+            if (not target_user.bot):
+                target_notification_settings = await get_one_notification_settings_with_connector(
+                    target_user.id, connector
                 )
+                if target_notification_settings.daily_by_waifu:
+                    await send_embed_to(
+                        get_notifier_client(target_user, target_notification_settings.notifier_client_id, client),
+                        target_user.id,
+                        Embed(
+                            f'{source_user.full_name} claimed daily love for you.',
+                            (
+                                f'You received {received} {EMOJI__HEART_CURRENCY} and now you have '
+                                f'{target_total_love} {EMOJI__HEART_CURRENCY}\n'
+                                f'You are on a {target_daily_streak} day streak.'
+                            ),
+                            color = COLOR__GAMBLING,
+                        ),
+                        Button(
+                            'I don\'t want notifs, nya!!',
+                            custom_id = NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_BY_WAIFU_DISABLE,
+                        ),
+                    )
             
             return
     

@@ -121,7 +121,7 @@ async def test_user_data(client, message, user : User):
     """
     Prints out user data as received json
     """
-    data = await client.api.stage_discovery_getuser_get(user.id)
+    data = await client.api.stage_discovery_get(user.id)
     await Pagination(
         client,
         message.channel,
@@ -169,7 +169,7 @@ async def get_guild(client, message):
     if guild is None:
         await client.message_create(message.channel, 'Please use this command at a guild.')
     
-    data = await client.api.stage_discovery_getguild_get(guild.id)
+    data = await client.api.stage_discovery_guild_get(guild.id)
     await Pagination(
         client,
         message.channel,
@@ -208,7 +208,7 @@ async def test_webhook_response(client, message, user : User, use_user_avatar : 
         executor_webhook = await client.webhook_create(channel, 'tester')
     
     if not use_user_avatar:
-        async with client.api.stage_discovery_getget(user.avatar_url) as response:
+        async with client.api.stage_discovery_get(user.avatar_url) as response:
             webhook_avatar_data = await response.read()
         
         await client.webhook_edit(executor_webhook, avatar = webhook_avatar_data)

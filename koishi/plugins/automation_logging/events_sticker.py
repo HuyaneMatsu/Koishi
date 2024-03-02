@@ -9,6 +9,7 @@ from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import AUTOMATION_CONFIGURATIONS, get_log_sticker_channel
 
+from .constants import PERMISSIONS_EMBED_LINKS
 from .embed_builder_sticker import build_sticker_create_embeds, build_sticker_delete_embeds, build_sticker_update_embeds
 
 
@@ -31,7 +32,9 @@ async def sticker_create(client, sticker):
     if (channel is None):
         return
     
-    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
+    if client is not get_first_client_with_message_create_permissions_from(
+        channel, FEATURE_CLIENTS, PERMISSIONS_EMBED_LINKS
+    ):
         return
     
     # We get the creator of the sticker.
@@ -73,7 +76,9 @@ async def sticker_update(client, sticker, old_attributes):
     if (channel is None):
         return
     
-    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
+    if client is not get_first_client_with_message_create_permissions_from(
+        channel, FEATURE_CLIENTS, PERMISSIONS_EMBED_LINKS
+    ):
         return
     
     await client.message_create(
@@ -101,7 +106,9 @@ async def sticker_delete(client, sticker):
     if (channel is None):
         return
     
-    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
+    if client is not get_first_client_with_message_create_permissions_from(
+        channel, FEATURE_CLIENTS, PERMISSIONS_EMBED_LINKS
+    ):
         return
     
     await client.message_create(

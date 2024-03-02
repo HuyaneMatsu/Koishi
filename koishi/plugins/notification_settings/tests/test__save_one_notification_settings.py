@@ -16,7 +16,7 @@ async def test__save_one_notification_settings__save_and_move():
     query_called = False
     user_id_0 = 202309250000
     user_id_1 = 202309250001
-    notification_settings = NotificationSettings(user_id_0, daily = False)
+    notification_settings = NotificationSettings(user_id_0, daily_by_waifu = False)
     called_with_notification_settings = None
     
     async def query(notification_settings):
@@ -62,7 +62,7 @@ async def test__save_one_notification_settings__delete_and_move():
     query_called = False
     user_id_0 = 202309250002
     user_id_1 = 202309250003
-    notification_settings = NotificationSettings(user_id_0, daily = False)
+    notification_settings = NotificationSettings(user_id_0, daily_by_waifu = False)
     called_with_notification_settings = None
     
     async def query(notification_settings):

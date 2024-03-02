@@ -5,6 +5,8 @@ from math import floor
 
 from hata import Embed
 from hata.ext.slash import InteractionResponse, abort, Button, Row
+from sqlalchemy import func as alchemy_function, and_, or_
+from sqlalchemy.sql import select
 
 from ..bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression, \
     waifu_list_model, WAIFU_LIST_TABLE, waifu_proposal_model, WAIFU_PROPOSAL_TABLE
@@ -13,11 +15,11 @@ from ..bot_utils.utils import send_embed_to
 from ..bot_utils.user_getter import get_user, get_users_unordered
 from ..bots import FEATURE_CLIENTS
 
-from sqlalchemy import func as alchemy_function, and_, or_
-from sqlalchemy.sql import select
-
 from .marriage_slot import BUY_WAIFU_SLOT_INVOKE_COMPONENT, EMOJI_YES, EMOJI_NO
-from .notification_settings import NOTIFICATION_SETTINGS_CUSTOM_ID_PROPOSAL_DISABLE, get_one_notification_settings_with_connector
+from .notification_settings import (
+    NOTIFICATION_SETTINGS_CUSTOM_ID_PROPOSAL_DISABLE, get_one_notification_settings_with_connector,
+    get_notifier_client
+)
 
 
 CUSTOM_ID_DIVORCE_CANCEL = 'marriage.divorce.cancel'
@@ -151,12 +153,12 @@ async def waifu_info(event,
 async def propose(
     client,
     event,
-    user: ('user', 'The user to propose to.'),
+    target_user: ('user', 'The user to propose to.', 'user'),
     amount: ('int', 'The amount of love to propose with.'),
 ):
     """Propose marriage to a user."""
     source_user_id = event.user.id
-    target_user_id = user.id
+    target_user_id = target_user.id
     
     if source_user_id == target_user_id:
         abort('You cannot propose to yourself.')
@@ -257,7 +259,7 @@ async def propose(
             if not target_waifu_cost:
                 target_waifu_cost = WAIFU_COST_DEFAULT
         
-        target_waifu_notification_settings = await get_one_notification_settings_with_connector(
+        target_user_notification_settings = await get_one_notification_settings_with_connector(
             target_user_id, connector
         )
         
@@ -268,7 +270,7 @@ async def propose(
             yield Embed(
                 None,
                 f'You need to propose with at least {required_love} {EMOJI__HEART_CURRENCY} to '
-                f'{user:f}.'
+                f'{target_user:f}.'
             )
             return
         
@@ -283,7 +285,7 @@ async def propose(
                 if amount == investment:
                     yield Embed(
                         None,
-                        f'You are already proposing to {user:f} with {amount} '
+                        f'You are already proposing to {target_user:f} with {amount} '
                         f'{EMOJI__HEART_CURRENCY}.'
                     )
                     return
@@ -299,7 +301,7 @@ async def propose(
                     embed_description_parts.append(' ')
                     embed_description_parts.append(EMOJI__HEART_CURRENCY)
                     embed_description_parts.append(' to propose to ')
-                    embed_description_parts.append(user.full_name)
+                    embed_description_parts.append(target_user.full_name)
                     embed_description_parts.append(
                         '.\n'
                         '\n'
@@ -348,13 +350,13 @@ async def propose(
                 
                 yield Embed(
                     None,
-                    f'You changed your proposal towards {user:f} from {investment} '
+                    f'You changed your proposal towards {target_user:f} from {investment} '
                     f'{EMOJI__HEART_CURRENCY} to {amount} {EMOJI__HEART_CURRENCY}.'
                 )
                 
-                if target_waifu_notification_settings.proposal:
+                if target_user_notification_settings.proposal:
                     await send_embed_to(
-                        client,
+                        get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
                         target_user_id,
                         Embed(
                             None,
@@ -397,7 +399,7 @@ async def propose(
             embed_description_parts.append(' ')
             embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
             embed_description_parts.append(' to propose to ')
-            embed_description_parts.append(user.full_name)
+            embed_description_parts.append(target_user.full_name)
             embed_description_parts.append(
                 '.\n'
                 '\n'
@@ -419,7 +421,7 @@ async def propose(
             return
         
         # case 7: Proposing to a bot
-        if user.bot:
+        if target_user.bot:
             love_increase = (amount >> 1)
             if target_entry_id == -1:
                 to_execute = get_create_common_user_expression(
@@ -459,19 +461,22 @@ async def propose(
             
             yield Embed(
                 None,
-                f'You married {user:f} with {amount} {EMOJI__HEART_CURRENCY}.'
+                f'You married {target_user:f} with {amount} {EMOJI__HEART_CURRENCY}.'
             )
             
             # Notify the divorced if not bot.
             if target_waifu_owner_id:
                 owner = await client.user_get(target_waifu_owner_id)
                 if not owner.bot:
+                    owner_notification_settings = await get_one_notification_settings_with_connector(
+                        target_waifu_owner_id, connector
+                    )
                     await send_embed_to(
-                        client,
+                        get_notifier_client(owner, owner_notification_settings.notifier_client_id, client),
                         target_waifu_owner_id,
                         Embed(
                             None,
-                            f'{event.user:f} divorced you in favor of marrying {user:f} instead.'
+                            f'{event.user:f} divorced you in favor of marrying {target_user:f} instead.'
                         )
                     )
             
@@ -497,13 +502,13 @@ async def propose(
         
         yield Embed(
             None,
-            f'You proposed towards {user:f} with {amount} {EMOJI__HEART_CURRENCY}.'
+            f'You proposed towards {target_user:f} with {amount} {EMOJI__HEART_CURRENCY}.'
         )
         
         
-        if target_waifu_notification_settings.proposal:
+        if target_user_notification_settings.proposal:
             await send_embed_to(
-                client,
+                get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
                 target_user_id,
                 Embed(
                     None,
@@ -666,8 +671,8 @@ async def accept(
     event,
     target_user_name: (str, 'Who\'s proposal to accept?', 'user'),
 ):
-    user = await get_one_proposing_with_name(event, target_user_name, False)
-    if (user is None):
+    target_user = await get_one_proposing_with_name(event, target_user_name, False)
+    if (target_user is None):
         if len(target_user_name) > 100:
             target_user_name = target_user_name[:100] + '...'
         
@@ -675,7 +680,7 @@ async def accept(
         return
     
     source_user_id = event.user.id
-    target_user_id = user.id
+    target_user_id = target_user.id
     
     if source_user_id == target_user_id:
         abort('Select someone else.')
@@ -696,7 +701,7 @@ async def accept(
         if not results:
             yield Embed(
                 None,
-                f'{user:f} is not proposing to you.'
+                f'{target_user:f} is not proposing to you.'
             )
             return
         
@@ -761,7 +766,7 @@ async def accept(
     
     yield Embed(
         None,
-        f'You accepted the proposal from {user:f}.\n'
+        f'You accepted the proposal from {target_user:f}.\n'
         f'\n'
         f'You received {love_increase} {EMOJI__HEART_CURRENCY}.'
     )
@@ -784,7 +789,7 @@ async def accept(
                 waifu_owner_id,
                 Embed(
                     None,
-                    f'{event.user:f} divorced you in favor of marrying {user:f} instead.',
+                    f'{event.user:f} divorced you in favor of marrying {target_user:f} instead.',
                 )
             )
 
@@ -801,15 +806,15 @@ async def reject(
     event,
     target_user_name: (str, 'The user, who\'s proposal you want to reject.', 'user'),
 ):
-    user = await get_one_proposing_with_name(event, target_user_name, False)
-    if (user is None):
+    target_user = await get_one_proposing_with_name(event, target_user_name, False)
+    if (target_user is None):
         if len(target_user_name) > 100:
             target_user_name = target_user_name[:100] + '...'
         
         abort(f'User not found: `{target_user_name}`')
         return
     
-    target_user_id = user.id
+    target_user_id = target_user.id
     source_user_id = event.user.id
     
     if source_user_id == target_user_id:
@@ -831,7 +836,7 @@ async def reject(
         if not results:
             yield Embed(
                 None,
-                f'{user:f} is not proposing to you.'
+                f'{target_user:f} is not proposing to you.'
             )
             return
         
@@ -844,15 +849,19 @@ async def reject(
                 total_love = user_common_model.total_love + investment,
             )
         )
+        
+        target_user_notification_settings = await get_one_notification_settings_with_connector(
+            target_user_id, connector
+        )
     
     
     yield Embed(
         None,
-        f'You rejected the proposal from {user:f}.'
+        f'You rejected the proposal from {target_user:f}.'
     )
     
     await send_embed_to(
-        client,
+        get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
         target_user_id,
         Embed(
             None,
@@ -877,8 +886,8 @@ async def cancel(
     event,
     target_user_name: (str, 'The user, who\'s proposal you want to cancel.', 'user'),
 ):
-    user = await get_one_proposing_with_name(event, target_user_name, True)
-    if (user is None):
+    target_user = await get_one_proposing_with_name(event, target_user_name, True)
+    if (target_user is None):
         if len(target_user_name) > 100:
             target_user_name = target_user_name[:100] + '...'
         
@@ -886,7 +895,7 @@ async def cancel(
         return
     
     source_user_id = event.user.id
-    target_user_id = user.id
+    target_user_id = target_user.id
     
     if source_user_id == target_user_id:
         abort('Select someone else.')
@@ -907,7 +916,7 @@ async def cancel(
         if not results:
             yield Embed(
                 None,
-                f'You are not proposing towards {user:f}.',
+                f'You are not proposing towards {target_user:f}.',
             )
             return
         
@@ -921,21 +930,21 @@ async def cancel(
             )
         )
         
-        target_waifu_notification_settings = await get_one_notification_settings_with_connector(
+        target_user_notification_settings = await get_one_notification_settings_with_connector(
             target_user_id, connector
         )
     
     yield Embed(
         None,
-        f'You canceled the proposal towards {user:f}.'
+        f'You canceled the proposal towards {target_user:f}.'
         f'\n'
         f'You got your {investment} {EMOJI__HEART_CURRENCY} back.'
     )
     
     
-    if (not user.bot) and target_waifu_notification_settings.proposal:
+    if (not target_user.bot) and target_user_notification_settings.proposal:
         await send_embed_to(
-            client,
+            get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
             target_user_id,
             Embed(
                 None,
@@ -1009,8 +1018,8 @@ async def divorce(
     event,
     target_user_name: (str, 'Who do you want to divorce?', 'user'),
 ):
-    user = await get_one_divorce_with_name(event, target_user_name)
-    if (user is None):
+    target_user = await get_one_divorce_with_name(event, target_user_name)
+    if (target_user is None):
         if len(target_user_name) > 100:
             target_user_name = target_user_name[:100] + '...'
         
@@ -1018,7 +1027,7 @@ async def divorce(
         return
     
     source_user_id = event.user.id
-    target_user_id = user.id
+    target_user_id = target_user.id
     
     if source_user_id == target_user_id:
         abort('Cannot divorce yourself, but nice try.')
@@ -1084,7 +1093,7 @@ async def divorce(
                 embed_description_parts.append('You don\'t have enough ')
                 embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
                 embed_description_parts.append(f' to divorce ')
-                embed_description_parts.append(user.full_name)
+                embed_description_parts.append(target_user.full_name)
                 embed_description_parts.append(
                     '.\n'
                     '\n'
@@ -1116,7 +1125,7 @@ async def divorce(
             return InteractionResponse(
                 embed = Embed(
                     None,
-                    f'Are you sure you want to divorce {user:f}?\n'
+                    f'Are you sure you want to divorce {target_user:f}?\n'
                     f'\n'
                     f'This action requires {waifu_cost} {EMOJI__HEART_CURRENCY}'
                 ),
@@ -1137,7 +1146,7 @@ async def divorce(
             return InteractionResponse(
                 embed = Embed(
                     None,
-                    f'Are you sure to divorce {user:f}?'
+                    f'Are you sure to divorce {target_user:f}?'
                 ),
                 components = Row(
                     Button(
@@ -1157,7 +1166,7 @@ async def divorce(
         
         return Embed(
             None,
-            f'You are not married to {user:f}.'
+            f'You are not married to {target_user:f}.'
         )
 
 
@@ -1286,6 +1295,10 @@ async def divorce_incoming(client, event, source_user_id, target_user):
                 waifu_list_model.waifu_id == source_user_id,
             )
         )
+        
+        target_user_notification_settings = await get_one_notification_settings_with_connector(
+            target_user.id, connector
+        )
     
     
     yield InteractionResponse(
@@ -1303,7 +1316,7 @@ async def divorce_incoming(client, event, source_user_id, target_user):
     
     if not target_user.bot:
         await send_embed_to(
-            client,
+            get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
             target_user.id,
             Embed(
                 None,
@@ -1354,6 +1367,10 @@ async def divorce_outgoing(client, event, source_user_id, target_user):
                 waifu_owner_id = 0,
             )
         )
+        
+        target_user_notification_settings = await get_one_notification_settings_with_connector(
+            target_user.id, connector
+        )
     
     yield InteractionResponse(
         embed = Embed(
@@ -1368,7 +1385,7 @@ async def divorce_outgoing(client, event, source_user_id, target_user):
     
     if not target_user.bot:
         await send_embed_to(
-            client,
+            get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
             target_user.id,
             Embed(
                 None,
@@ -1483,6 +1500,10 @@ async def divorce_circular(client, event, source_user_id, target_user):
                 waifu_list_model.id.in_(entry_ids),
             )
         )
+        
+        target_user_notification_settings = await get_one_notification_settings_with_connector(
+            target_user.id, connector
+        )
     
     yield InteractionResponse(
         embed = Embed(
@@ -1499,7 +1520,7 @@ async def divorce_circular(client, event, source_user_id, target_user):
     
     if not target_user.bot:
         await send_embed_to(
-            client,
+            get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
             target_user.id,
             Embed(
                 None,

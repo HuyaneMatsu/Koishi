@@ -1,3 +1,17 @@
+### 2024-03-02
+
+- Add **1** image to `/like` interaction.
+- Add **1** image to `/kon` interaction.
+- Refreshing embed images is now retried **2** times. Turned out once is not enough.
+- `/automation log-user`, `/automation log-emoji`, `/automation log-sticker`, `/atiomation log-satori` now requires
+    `embed links` permission as intended.
+- `/automation log-mention` now requires `attach files` permission as intended.
+- Add new `daily reminder` options to `/accessibility notification-settings change` command (false by default).
+- Add new `/accessibility notification-settings set-notifier` command allowing you to configure who should deliver
+    your configurations.
+- Add new `daily_reminder` plugin. Linked to the newly added notification setting.
+    Notifies the user about not claiming their daily just because they would lose their first streak.
+
 ### 2024-02-18
 
 - Add **2** blacklisted (explicit) tags to safe booru queries.

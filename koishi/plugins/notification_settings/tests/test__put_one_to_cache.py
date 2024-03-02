@@ -12,7 +12,7 @@ def test__put_one_to_cache__value():
     """
     user_id = 202309240021
     
-    notification_settings = NotificationSettings(user_id, daily = False)
+    notification_settings = NotificationSettings(user_id, daily_by_waifu = False)
     
     try:
         put_one_to_cache(notification_settings)

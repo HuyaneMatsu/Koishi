@@ -5,6 +5,7 @@ from hata import KOKORO, DiscordException, ERROR_CODES
 
 
 REFRESH_AFTER = 5.0
+RETRY_MAX = 2
 
 
 def schedule_image_refresh(client, message, interaction_event = None):
@@ -54,7 +55,7 @@ def _should_image_refresh(message):
     return True
 
 
-def _invoke_image_refresh(client, message, interaction_event):
+def _invoke_image_refresh(client, message, interaction_event, retry = 0):
     """
     Invokes refresh is required.
     
@@ -67,11 +68,11 @@ def _invoke_image_refresh(client, message, interaction_event):
     interaction_event : `None | InteractionEvent`
         Interaction event to refresh with if applicable.
     """
-    if _should_image_refresh(message):
-        Task(KOKORO, _image_refresh(client, message, interaction_event))
+    if _should_image_refresh(message) and retry < RETRY_MAX:
+        Task(KOKORO, _image_refresh(client, message, interaction_event, retry + 1))
 
 
-async def _image_refresh(client, message, interaction_event):
+async def _image_refresh(client, message, interaction_event, retry):
     """
     Refreshes the image.
     
@@ -115,6 +116,10 @@ async def _image_refresh(client, message, interaction_event):
         except BaseException as exception:
             await client.events.error(client, '_image_refresh', exception)
             return
+        
+        else:
+            _invoke_image_refresh(client, message, interaction_event, retry)
+            return
     
     if not message.channel.cached_permissions_for(client).can_view_channel:
         return
@@ -141,4 +146,8 @@ async def _image_refresh(client, message, interaction_event):
     
     except BaseException as exception:
         await client.events.error(client, '_image_refresh', exception)
+        return
+    
+    else:
+        _invoke_image_refresh(client, message, interaction_event, retry)
         return

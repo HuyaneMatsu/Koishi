@@ -7,6 +7,7 @@ from ...bot_utils.multi_client_utils import get_first_client_with_message_create
 from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_log_mention_channel
+from .constants import PERMISSIONS_ATTACH_FILES
 from ..rendering_helpers import (
     MESSAGE_RENDER_MODE_CREATE, build_message_common_description, iter_build_attachment_message_content,
     iter_build_attachment_message_mentions,
@@ -32,7 +33,9 @@ async def message_create(client, message):
     if (channel is None):
         return
     
-    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
+    if client is not get_first_client_with_message_create_permissions_from(
+        channel, FEATURE_CLIENTS, PERMISSIONS_ATTACH_FILES
+    ):
         return
     
     if (not message.mentioned_everyone) and (message.mentioned_users is None) and (message.mentioned_roles is None):

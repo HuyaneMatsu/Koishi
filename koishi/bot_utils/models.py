@@ -76,32 +76,33 @@ if (DB_ENGINE is not None):
     class user_common_model(BASE):
         __tablename__   = 'CURRENCY'
         # Generic
-        id              = Column(Int64, primary_key = True)
-        user_id         = Column(Int64, unique = True)
+        id              = Column(Int64, primary_key = True, nullable = False)
+        user_id         = Column(Int64, unique = True, nullable = False)
         
         # Love
-        total_love      = Column(Int64, default = 0)
-        total_allocated = Column(Int64, default = 0)
+        total_love      = Column(Int64, default = 0, nullable = False)
+        total_allocated = Column(Int64, default = 0, nullable = False)
         
         # Daily
-        daily_next      = Column(DateTime, default = func.utc_timestamp())
-        daily_streak    = Column(Int32, default = 0)
+        daily_next      = Column(DateTime, default = func.utc_timestamp(), nullable = False)
+        daily_streak    = Column(Int32, default = 0, nullable = False)
+        daily_reminded  = Column(Boolean, default = False, nullable = False)
         
         # Counters
-        count_daily_self = Column(Int32, default = 0)
-        count_daily_by_waifu = Column(Int32, default = 0)
-        count_daily_for_waifu = Column(Int32, default = 0)
-        count_top_gg_vote = Column(Int32, default = 0)
+        count_daily_self = Column(Int32, default = 0, nullable = False)
+        count_daily_by_waifu = Column(Int32, default = 0, nullable = False)
+        count_daily_for_waifu = Column(Int32, default = 0, nullable = False)
+        count_top_gg_vote = Column(Int32, default = 0, nullable = False)
         
         # Waifu
-        waifu_cost      = Column(Int64, default = 0)
-        waifu_divorces  = Column(Int32, default = 0)
-        waifu_slots     = Column(Int32, default = 1)
-        waifu_owner_id  = Column(Int64, default = 0)
+        waifu_cost      = Column(Int64, default = 0, nullable = False)
+        waifu_divorces  = Column(Int32, default = 0, nullable = False)
+        waifu_slots     = Column(Int32, default = 1, nullable = False)
+        waifu_owner_id  = Column(Int64, default = 0, nullable = False)
         
         # Notify voters that they can vote on top.gg if they can. We base this on a top.gg vote timer and whether they
         # voted before
-        top_gg_last_vote = Column(DateTime, default = func.utc_timestamp())
+        top_gg_last_vote = Column(DateTime, default = func.utc_timestamp(), nullable = False)
     
     
     USER_COMMON_TABLE = user_common_model.__table__
@@ -276,8 +277,10 @@ if (DB_ENGINE is not None):
         __tablename__ = 'NOTIFICATION_SETTINGS'
         id = Column(Int64, nullable = False, primary_key = True)
         user_id = Column(Int64, nullable = False)
-        daily = Column(Boolean, default = True, nullable = False)
+        daily_by_waifu = Column(Boolean, default = True, nullable = False)
         proposal = Column(Boolean, default = True, nullable = False)
+        daily_reminder = Column(Boolean, default = True, nullable = False)
+        notifier_client_id = Column(Int64, default = 0, nullable = False)
     
     NOTIFICATION_SETTINGS_TABLE = notification_settings_model.__table__
     
@@ -299,6 +302,7 @@ if (DB_ENGINE is not None):
         total_love = 0,
         daily_next = None,
         daily_streak = 0,
+        daily_reminded = False,
         total_allocated = 0,
         waifu_cost = 0,
         waifu_divorces = 0,
@@ -329,6 +333,7 @@ if (DB_ENGINE is not None):
             total_love      = total_love,
             daily_next      = daily_next,
             daily_streak    = daily_streak,
+            daily_reminded  = daily_reminded,
             total_allocated = total_allocated,
             waifu_cost      = waifu_cost,
             waifu_divorces  = waifu_divorces,

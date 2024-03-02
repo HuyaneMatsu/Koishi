@@ -23,6 +23,9 @@ BLACKLIST = {
     
     # Holocringe
     'https://i.waifu.pics/tvSCzkl.gif',
+    
+    # Bully looking sus
+    'https://i.waifu.pics/MjULOe4.gif',
 }
 
 

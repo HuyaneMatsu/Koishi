@@ -357,8 +357,10 @@ async def _save_notification_settings_with_connector(notification_settings, conn
         response = await connector.execute(
             NOTIFICATION_SETTINGS_TABLE.insert().values(
                 user_id = notification_settings.user_id,
-                daily = notification_settings.daily,
+                daily_by_waifu = notification_settings.daily_by_waifu,
                 proposal = notification_settings.proposal,
+                daily_reminder = notification_settings.daily_reminder,
+                notifier_client_id = notification_settings.notifier_client_id,
             ).returning(    
                 notification_settings_model.id,
             )
@@ -375,8 +377,10 @@ async def _save_notification_settings_with_connector(notification_settings, conn
                 notification_settings_model.id == entry_id,
             ).values(
                 user_id = notification_settings.user_id,
-                daily = notification_settings.daily,
+                daily_by_waifu = notification_settings.daily_by_waifu,
                 proposal = notification_settings.proposal,
+                daily_reminder = notification_settings.daily_reminder,
+                notifier_client_id = notification_settings.notifier_client_id,
             )
         )
 

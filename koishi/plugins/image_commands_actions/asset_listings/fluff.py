@@ -194,7 +194,7 @@ TOUHOU_ACTION_FLUFF = [
         'https://cdn.discordapp.com/attachments/568837922288173058/1208736565522599956/nazrin-sanae-fluff-0000.png',
     ).with_source(KOCHIYA_SANAE).with_target(NAZRIN),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1208738227171885066/ran-yukari-fluff-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1209026357812531240/ran-yukari-fluff-0000.png',
     ).with_source(YAKUMO_YUKARI).with_target(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1208737577067089950/ran-yukari-fluff-0001.png',

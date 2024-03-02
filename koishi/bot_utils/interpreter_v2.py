@@ -211,7 +211,7 @@ class Interpreter:
                         fixup_syntax_error_line_from_buffer(syntax_error, source.splitlines())
                         
                         _render_exception_representation_syntax_error_into(
-                            ExceptionRepresentationSyntaxError(syntax_error), into, None
+                            ExceptionRepresentationSyntaxError(syntax_error, None), into, None
                         )
                     else:
                         render_exception_into(syntax_error, into, filter = _ignore_console_frames)

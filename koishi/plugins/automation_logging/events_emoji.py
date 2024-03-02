@@ -9,6 +9,7 @@ from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import AUTOMATION_CONFIGURATIONS, get_log_emoji_channel
 
+from .constants import PERMISSIONS_EMBED_LINKS
 from .embed_builder_emoji import build_emoji_create_embed, build_emoji_delete_embed, build_emoji_update_embed
 
 
@@ -30,7 +31,9 @@ async def emoji_create(client, emoji):
     if (channel is None):
         return
     
-    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
+    if client is not get_first_client_with_message_create_permissions_from(
+        channel, FEATURE_CLIENTS, PERMISSIONS_EMBED_LINKS
+    ):
         return
     
     # We get the creator of the emoji.
@@ -72,7 +75,9 @@ async def emoji_update(client, emoji, old_attributes):
     if (channel is None):
         return
     
-    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
+    if client is not get_first_client_with_message_create_permissions_from(
+        channel, FEATURE_CLIENTS, PERMISSIONS_EMBED_LINKS
+    ):
         return
     
     await client.message_create(
@@ -100,7 +105,9 @@ async def emoji_delete(client, emoji):
     if (channel is None):
         return
     
-    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
+    if client is not get_first_client_with_message_create_permissions_from(
+        channel, FEATURE_CLIENTS, PERMISSIONS_EMBED_LINKS
+    ):
         return
     
     await client.message_create(

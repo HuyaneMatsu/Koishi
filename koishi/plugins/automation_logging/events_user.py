@@ -7,6 +7,7 @@ from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_log_user_channel
 
+from .constants import PERMISSIONS_EMBED_LINKS
 from .embed_builder_user import build_user_embed
 
 
@@ -30,7 +31,9 @@ async def guild_user_add(client, guild, user):
     if (channel is None):
         return
     
-    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
+    if client is not get_first_client_with_message_create_permissions_from(
+        channel, FEATURE_CLIENTS, PERMISSIONS_EMBED_LINKS
+    ):
         return
     
     await client.message_create(
@@ -62,7 +65,9 @@ async def guild_user_delete(client, guild, user, guild_profile):
     if (channel is None):
         return
     
-    if client is not get_first_client_with_message_create_permissions_from(channel, FEATURE_CLIENTS):
+    if client is not get_first_client_with_message_create_permissions_from(
+        channel, FEATURE_CLIENTS, PERMISSIONS_EMBED_LINKS
+    ):
         return
     
     # When the client itself is kicked it tries to log it, lets do that.

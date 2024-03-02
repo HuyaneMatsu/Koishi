@@ -20,8 +20,8 @@ async def test__set_notification_settings_option__no_change():
         saver_called = True
     
     
-    option = NotificationSettingsOption(NotificationSettings.daily, '', '')
-    notification_settings = NotificationSettings(202309260002, daily = False)
+    option = NotificationSettingsOption(NotificationSettings.daily_by_waifu, '', '')
+    notification_settings = NotificationSettings(202309260002, daily_by_waifu = False)
     
     mocked = vampytest.mock_globals(
         set_notification_settings_option,
@@ -53,8 +53,8 @@ async def test__set_notification_settings_option__with_change():
         saver_called = True
         saver_called_with_notification_settings = notification_settings.copy()
     
-    option = NotificationSettingsOption(NotificationSettings.daily, '', '')
-    notification_settings = NotificationSettings(202309260002, daily = False)
+    option = NotificationSettingsOption(NotificationSettings.daily_by_waifu, '', '')
+    notification_settings = NotificationSettings(202309260002, daily_by_waifu = False)
     
     mocked = vampytest.mock_globals(
         set_notification_settings_option,
@@ -66,5 +66,5 @@ async def test__set_notification_settings_option__with_change():
     vampytest.assert_true(saver_called)
     vampytest.assert_instance(output, bool)
     vampytest.assert_eq(output, True)
-    vampytest.assert_eq(notification_settings.daily, True)
+    vampytest.assert_eq(notification_settings.daily_by_waifu, True)
     vampytest.assert_eq(saver_called_with_notification_settings, notification_settings)

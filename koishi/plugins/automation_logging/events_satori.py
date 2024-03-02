@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import ChannelType, Client, DiscordException, ERROR_CODES
+from hata import ChannelType, Client, DiscordException, ERROR_CODES, Permission
 from scarletio import CancelledError
 
 from ...bots import MAIN_CLIENT
@@ -12,9 +12,14 @@ from ..automation_core import (
 )
 
 from .components_satori_auto_start import build_satori_auto_start_component_row
+from .constants import PERMISSIONS_EMBED_LINKS
 from .embed_builder_guild_profile import build_guild_profile_update_embed
 from .embed_builder_satori import build_presence_update_embeds
 from .embed_builder_satori_start import build_satori_auto_start_embeds
+
+
+REQUIRED_PERMISSIONS = PERMISSIONS_EMBED_LINKS | Permission().update_by_keys(send_messages = True)
+
 
 # Only added for 1 client.
 # Hata best wrapper
@@ -240,7 +245,7 @@ async def user_presence_update(client, user, old_attributes):
     embeds = build_presence_update_embeds(user, old_attributes)
     
     for channel in channels:
-        if not channel.cached_permissions_for(client).can_send_messages:
+        if channel.cached_permissions_for(client) & REQUIRED_PERMISSIONS != REQUIRED_PERMISSIONS:
             continue
         
         try:
@@ -301,7 +306,7 @@ async def guild_user_add(client, guild, user):
     # Channel not found -> create
     
     # Check channel permissions
-    if not satori_channel.cached_permissions_for(client).can_manage_channels:
+    if satori_channel.cached_permissions_for(client) & REQUIRED_PERMISSIONS != REQUIRED_PERMISSIONS:
         return
     
     try:
@@ -346,7 +351,7 @@ async def create_initial_message(client, channel, user_id):
         The user's identifier.
     """
     # Check permissions of the new channel
-    if not channel.cached_permissions_for(client).can_send_messages:
+    if channel.cached_permissions_for(client) & REQUIRED_PERMISSIONS != REQUIRED_PERMISSIONS:
         return
     
     # Try get user
@@ -425,7 +430,7 @@ async def guild_user_update(client, guild, user, old_attributes):
     embed = build_guild_profile_update_embed(guild_profile, old_attributes)
     
     for channel in channels:
-        if not channel.cached_permissions_for(client).can_send_messages:
+        if channel.cached_permissions_for(client) & REQUIRED_PERMISSIONS != REQUIRED_PERMISSIONS:
             continue
         
         try:

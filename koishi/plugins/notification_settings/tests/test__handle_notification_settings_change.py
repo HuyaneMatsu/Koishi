@@ -3,7 +3,7 @@ from hata import Embed, InteractionEvent, User
 from hata.ext.slash import InteractionResponse
 
 from ..notification_settings import NotificationSettings
-from ..options import OPTION_DAILY, OPTION_PROPOSAL
+from ..options import OPTION_DAILY_BY_WAIFU, OPTION_PROPOSAL
 from ..utils import handle_notification_settings_change
 
 
@@ -18,9 +18,9 @@ def _iter_options():
             202309270062,
             user = user,
         ),
-        OPTION_DAILY,
+        OPTION_DAILY_BY_WAIFU,
         True,
-        NotificationSettings(user.id, daily = False),
+        NotificationSettings(user.id, daily_by_waifu = False),
         None,
         InteractionResponse(
             embed = Embed(

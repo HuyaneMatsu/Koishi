@@ -11,7 +11,7 @@ PERMISSION_MASK_MESSAGING_THREAD = Permission().update_by_keys(send_messages_in_
 
 def is_vote_valid(channel, user, mask):
     """
-    Returns whether teh user's vote is valid.
+    Returns whether the user's vote is valid.
     
     Parameters
     ----------

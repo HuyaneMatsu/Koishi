@@ -12,7 +12,7 @@ def test__put_none_to_cache__value():
     """
     user_id = 202309240040
     
-    notification_settings = NotificationSettings(user_id, daily = False)
+    notification_settings = NotificationSettings(user_id, daily_by_waifu = False)
     
     try:
         NOTIFICATION_SETTINGS_CACHE[user_id] = notification_settings

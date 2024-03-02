@@ -25,7 +25,7 @@ def test__NotificationSettingsOption__new():
     """
     Tests whether ``NotificationSettingsOption.__new__`` works as intended.
     """
-    field_descriptor = NotificationSettings.daily
+    field_descriptor = NotificationSettings.daily_by_waifu
     name = 'daily'
     long_name = 'daily-by-waifu'
     
@@ -46,20 +46,20 @@ def test__NotificationSettingsOption__system_name():
     """
     Tests whether ``NotificationSettingsOption.system_name`` works as intended.
     """
-    field_descriptor = NotificationSettings.daily
+    field_descriptor = NotificationSettings.daily_by_waifu
     
     option = NotificationSettingsOption(field_descriptor, '', '')
     
     output = option.system_name
     vampytest.assert_instance(output, str)
-    vampytest.assert_eq(output, 'daily')
+    vampytest.assert_eq(output, 'daily_by_waifu')
 
 
 def test__NotificationSettingsOption__repr():
     """
     Tests whether ``NotificationSettingsOption.__repr__`` works as intended.
     """
-    field_descriptor = NotificationSettings.daily
+    field_descriptor = NotificationSettings.daily_by_waifu
     name = 'daily'
     long_name = 'daily-by-waifu'
     
@@ -77,37 +77,37 @@ def test__NotificationSettingsOption__get():
     """
     Tests whether ``NotificationSettingsOption.get`` works as intended.
     """
-    field_descriptor = NotificationSettings.daily
+    field_descriptor = NotificationSettings.daily_by_waifu
     
     option = NotificationSettingsOption(field_descriptor, '', '')
     
-    notification_settings = NotificationSettings(202309260000, daily = False)
+    notification_settings = NotificationSettings(202309260000, daily_by_waifu = False)
     
     output = option.get(notification_settings)
     vampytest.assert_instance(output, bool)
-    vampytest.assert_eq(output, notification_settings.daily)
+    vampytest.assert_eq(output, notification_settings.daily_by_waifu)
     
-    notification_settings.daily = True
+    notification_settings.daily_by_waifu = True
     
     output = option.get(notification_settings)
     vampytest.assert_instance(output, bool)
-    vampytest.assert_eq(output, notification_settings.daily)
+    vampytest.assert_eq(output, notification_settings.daily_by_waifu)
 
 
 def test__NotificationSettingsOption__set():
     """
     Tests whether ``NotificationSettingsOption.set`` works as intended.
     """
-    field_descriptor = NotificationSettings.daily
+    field_descriptor = NotificationSettings.daily_by_waifu
     
     option = NotificationSettingsOption(field_descriptor, '', '')
     
     notification_settings = NotificationSettings(202309260001)
     
     option.set(notification_settings, True)
-    vampytest.assert_instance(notification_settings.daily, bool)
-    vampytest.assert_eq(notification_settings.daily, True)
+    vampytest.assert_instance(notification_settings.daily_by_waifu, bool)
+    vampytest.assert_eq(notification_settings.daily_by_waifu, True)
     
     option.set(notification_settings, False)
-    vampytest.assert_instance(notification_settings.daily, bool)
-    vampytest.assert_eq(notification_settings.daily, False)
+    vampytest.assert_instance(notification_settings.daily_by_waifu, bool)
+    vampytest.assert_eq(notification_settings.daily_by_waifu, False)

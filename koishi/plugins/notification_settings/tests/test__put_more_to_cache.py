@@ -34,7 +34,7 @@ def test__put_more_to_cache__value():
     user_id_0 = 202309240032
     user_id_1 = 202309240033
     
-    notification_settings_0 = NotificationSettings(user_id_0, daily = False)
+    notification_settings_0 = NotificationSettings(user_id_0, daily_by_waifu = False)
     notification_settings_1 = NotificationSettings(user_id_1, proposal = False)
     
     try:

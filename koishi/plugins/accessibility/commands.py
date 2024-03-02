@@ -5,8 +5,9 @@ from hata.ext.slash import InteractionResponse, P, abort
 from ...bots import FEATURE_CLIENTS
 
 from ..notification_settings import (
-    NOTIFICATION_SETTINGS_CHOICES, NOTIFICATION_SETTING_RESOLUTION, build_notification_settings_embed,
-    get_one_notification_settings, handle_notification_settings_change
+    NOTIFICATION_SETTINGS_CHOICES, NOTIFICATION_SETTING_RESOLUTION, autocomplete_notification_settings_notifier,
+    build_notification_settings_embed, get_one_notification_settings, handle_notification_settings_change,
+    handle_notification_settings_set_notifier
 )
 from ..touhou_character_preference import (
     PREFERRED_CHARACTER_MAX, add_touhou_character_to_preference, build_character_preference_change_embed,
@@ -64,7 +65,6 @@ async def notification_settings_change(
     """
     Set your notification setting.
     
-    
     Parameters
     ----------
     event : ``InteractionEvent``
@@ -81,6 +81,28 @@ async def notification_settings_change(
     return await handle_notification_settings_change(
         event, NOTIFICATION_SETTING_RESOLUTION[notification_type], enabled
     )
+
+
+@NOTIFICATION_SETTINGS.interactions(name = 'set-notifier')
+async def notification_settings_set_notifier(
+    event,
+    client_name : P(str, 'Select a client', 'client', autocomplete = autocomplete_notification_settings_notifier),
+):
+    """
+    Set who should notify you.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received event.
+    client_name : `str`
+        The client's name.
+    
+    Returns
+    -------
+    response : ``InteractionResponse``
+    """
+    return await handle_notification_settings_set_notifier(event, client_name)
 
 
 CHARACTER_PREFERENCE = ACCESSIBILITY_INTERACTIONS.interactions(

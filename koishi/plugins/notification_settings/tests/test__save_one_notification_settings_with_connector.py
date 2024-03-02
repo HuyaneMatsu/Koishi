@@ -16,7 +16,7 @@ async def test__save_one_notification_settings_with_connector__save_and_move():
     query_called = False
     user_id_0 = 202309250010
     user_id_1 = 202309250011
-    notification_settings = NotificationSettings(user_id_0, daily = False)
+    notification_settings = NotificationSettings(user_id_0, daily_by_waifu = False)
     called_with_notification_settings = None
     connector = object()
     called_with_connector = None
@@ -68,7 +68,7 @@ async def test__save_one_notification_settings_with_connector__delete_and_move()
     query_called = False
     user_id_0 = 202309250012
     user_id_1 = 202309250013
-    notification_settings = NotificationSettings(user_id_0, daily = False)
+    notification_settings = NotificationSettings(user_id_0, daily_by_waifu = False)
     called_with_notification_settings = None
     connector = object()
     called_with_connector = None

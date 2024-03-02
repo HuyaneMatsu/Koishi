@@ -12,10 +12,10 @@ def _iter_options():
     user_id_2 = 202309220042
     user_id_3 = 202309220043
     
-    notification_settings_0 = NotificationSettings(user_id_0, daily = False)
-    notification_settings_1 = NotificationSettings(user_id_1, daily = False)
+    notification_settings_0 = NotificationSettings(user_id_0, daily_by_waifu = False)
+    notification_settings_1 = NotificationSettings(user_id_1, daily_by_waifu = False)
     notification_settings_2 = NotificationSettings(user_id_2, proposal = False)
-    notification_settings_3 = NotificationSettings(user_id_3, daily = False, proposal = False)
+    notification_settings_3 = NotificationSettings(user_id_3, daily_by_waifu = False, proposal = False)
     
     yield None, None, None
     yield [notification_settings_0], None, [notification_settings_0]

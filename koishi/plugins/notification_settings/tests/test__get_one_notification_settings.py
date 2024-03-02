@@ -16,7 +16,7 @@ async def test__get_one_notification_settings__cache_hit():
     query_called = False
     
     user_id = 202309240050
-    notification_settings = NotificationSettings(user_id, daily = False)
+    notification_settings = NotificationSettings(user_id, daily_by_waifu = False)
     
     async def query(user_id):
         nonlocal query_called
@@ -52,7 +52,7 @@ async def test__get_one_notification_settings__database_hit_value():
     called_with_user_id = 0
     
     user_id = 202309240051
-    notification_settings = NotificationSettings(user_id, daily = False)
+    notification_settings = NotificationSettings(user_id, daily_by_waifu = False)
     
     async def query(user_id):
         nonlocal query_called

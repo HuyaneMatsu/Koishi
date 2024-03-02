@@ -21,6 +21,7 @@ BLACKLISTED_TAGS = {
     # ai
     'pigsir13152',
     'dobostorte',
+    'oekakizuki',
 }
 
 
@@ -185,19 +186,19 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
     
     @copy_docs(ImageHandlerRequestBase.__repr__)
     def __repr__(self):
-        repr_parts = ['<', type(self.__name__)]
+        repr_parts = ['<', type(self).__name__]
         
         repr_parts.append(' post_parser = ')
-        repr_parts.append(repr(self.post_parser))
+        repr_parts.append(repr(self._post_parser))
         
         repr_parts.append(', provider = ')
-        repr_parts.append(repr(self.provider))
+        repr_parts.append(repr(self._provider))
         
         repr_parts.append(', random_order = ')
-        repr_parts.append(repr(self.random_order))
+        repr_parts.append(repr(self._random_order))
         
         repr_parts.append(', url = ')
-        repr_parts.append(repr(self.url))
+        repr_parts.append(repr(self._url))
         
         repr_parts.append('>')
         return ''.join(repr_parts)

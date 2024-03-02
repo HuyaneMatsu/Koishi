@@ -457,7 +457,17 @@ Some authors might be unknown. If you know them please create a PR with it.
 ### `ran-kon-0032`
 
 - Artist: **kiritanpo117**
-- Edit: **HuyaneMatsu***
+- Edit: **HuyaneMatsu**
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0033`
+
+- Artist: **neko bocchi**
+- Edit: *none*
 
 - Character: **Yakumo Ran**
 - Source: **Touhou**
