@@ -1,3 +1,9 @@
+### 2024-03-18
+
+- Add `feed` interaction with **13** images. (Will get more in the future obviously.)
+- Fix interactions like `/kiss` counted the invoking user into the cooldown since a previous update fixing source
+    user's mention showing up incorrectly.
+
 ### 2024-03-02
 
 - Add **1** image to `/like` interaction.

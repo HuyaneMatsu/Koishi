@@ -61,9 +61,9 @@ And much more!
 
 - Actions
     
-    `bite` • `blush` • `bully` • `cringe` • `cry` • `dance` • `fluff` • `glomp` • `handhold` • `happy` • `highfive` •
-    `hug` • `kick` • `kill` • `kiss` • `kon` • `like` • `lick` • `nom` • `pat` • `pocky-kiss` • `poke` • `slap` •
-    `smile` • `smug` • `wave` • `wink` • `yeet`
+    `bite` • `blush` • `bully` • `cringe` • `cry` • `dance` • `feed` • `fluff` • `glomp` • `handhold` • `happy` •
+    `highfive` • `hug` • `kick` • `kill` • `kiss` • `kon` • `like` • `lick` • `nom` • `pat` • `pocky-kiss` • `poke` •
+    `slap` • `smile` • `smug` • `wave` • `wink` • `yeet`
 
 - Economy
     

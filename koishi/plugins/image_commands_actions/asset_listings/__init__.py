@@ -1,3 +1,4 @@
+from .feed import *
 from .fluff import *
 from .kiss import *
 from .kon import *
@@ -8,6 +9,7 @@ from .tickle import *
 
 
 __all__ = (
+    *feed.__all__,
     *fluff.__all__,
     *kiss.__all__,
     *kon.__all__,

@@ -20,6 +20,7 @@ BLACKLIST = {
     # Explicit
     'https://i.waifu.pics/sqndUwO.gif',
     'https://i.waifu.pics/JxQolYt.gif',
+    'https://i.waifu.pics/eKNeUOR.gif',
     
     # Holocringe
     'https://i.waifu.pics/tvSCzkl.gif',

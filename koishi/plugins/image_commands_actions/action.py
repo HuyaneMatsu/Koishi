@@ -447,7 +447,7 @@ class Action:
             ),
         )
         
-        expire_after = COOLDOWN_HANDLER.get_cooldown(event, len(allowed_mentions))
+        expire_after = COOLDOWN_HANDLER.get_cooldown(event, len(targets))
         if expire_after > 0.0:
             abort(
                 f'{client.name_at(event.guild_id)} got bored of enacting your {event.interaction.name} try again in '

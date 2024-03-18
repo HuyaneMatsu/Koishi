@@ -28,7 +28,7 @@ def check_regret_permissions(client, guild):
         abort(f'{client.name_at(guild)} requires view audit logs permission for this action.')
 
 
-async def can_regret(client, guild, user, event):
+async def can_regret(client, guild, user, entry_type):
     """
     Checks whether the given action can be regret. Returns `-1` on error.
     
@@ -42,7 +42,7 @@ async def can_regret(client, guild, user, event):
         The guild to check the action at.
     user : ``ClientUserBase``
         The user to check for.
-    event : `AuditLogEntryType``
+    entry_type : `AuditLogEntryType``
         The audit log event ot search for.
     
     Returns
@@ -50,7 +50,9 @@ async def can_regret(client, guild, user, event):
     regret_mode : `int`
     """
     try:
-        audit_log = await client.audit_log_get_chunk(guild, after = DateTime.utcnow() - REGRET_INTERVAL, event = event)
+        audit_log = await client.audit_log_get_chunk(
+            guild, after = DateTime.utcnow() - REGRET_INTERVAL, entry_type = entry_type
+        )
     except ConnectionError:
         return -1
     

@@ -507,7 +507,7 @@ class battleships_game:
             self.future = Future(KOKORO)
             self.future.apply_timeout(300.0)
             
-            #startup
+            # startup
             self.process = self.process_state_0
             Task(KOKORO, player1.set_state_0())
             Task(KOKORO, player2.set_state_0())
