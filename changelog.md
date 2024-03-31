@@ -15,6 +15,7 @@
 - Grouped image handlers how will go though every registered handler before failing.
 - Sending some embeds failed.
 - Koishi, Flandre, Yoshika, Cursed Sakuya now can be user installed.
+- Fix Internal server error when requesting a non existing guide page.
 
 ### 2024-03-18
 

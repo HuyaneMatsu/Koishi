@@ -19,7 +19,7 @@ def get_markdown(name):
     try:
         item = MARKDOWN_CACHE[name]
     except KeyError:
-        return None
+        return None, ''
     
     is_path, value, title = item
     if is_path:
