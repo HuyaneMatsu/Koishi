@@ -91,5 +91,5 @@ class ImageHandlerGroup(ImageHandlerBase):
     
     @copy_docs(ImageHandlerBase.iter_character_filterable)
     def iter_character_filterable(self):
-        for handler in self._handler:
+        for handler in self._handlers:
             yield from handler.iter_character_filterable()
