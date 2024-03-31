@@ -50,7 +50,7 @@ class ImageHandlerStatic(ImageHandlerBase):
     
     
     @copy_docs(ImageHandlerBase.get_weight)
-    async def get_weight(self):
+    def get_weight(self):
         weight = len(self._images) / 100.0
         if weight > 1.0:
             weight = 1.0
