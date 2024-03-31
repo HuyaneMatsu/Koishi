@@ -10,7 +10,10 @@ from .constants import SEX_IMAGES
 from .lock import check_lock_and_limit_level
 
 
-@FEATURE_CLIENTS.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+)
 async def sex(event):
     """
     You horny? Try your luck!

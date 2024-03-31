@@ -29,7 +29,7 @@ async def check_invoking_user(client, event):
     -------
     passed : `bool`
     """
-    if event.message.interaction.user is event.user:
+    if event.message.interaction.user_id == event.user_id:
         return True
     
     await client.interaction_component_acknowledge(event)
@@ -41,7 +41,10 @@ async def check_invoking_user(client, event):
     return False
 
 
-@FEATURE_CLIENTS.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+)
 async def minesweeper(
     bomb_count: (range(4, 9), 'how much bombs should there be') = 4,
 ):

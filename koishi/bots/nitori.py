@@ -243,22 +243,8 @@ async def repeat(
     return InteractionResponse(text, allowed_mentions = None)
 
 # command end
-# command start slash guild-features
-
-@Nitori.interactions(is_global = True, allow_in_dm = False)
-async def guild_features(event):
-    """Shows the guild's features."""
-    guild = event.guild
-    
-    return Embed(
-        f'{guild.name}\'s features',
-        ', '.join(sorted(feature.name for feature in guild.iter_features())),
-    ).add_thumbnail(
-        guild.icon_url
-    )
-
-# command end
 # command start slash channel-create
+
 @Nitori.interactions(guild = TEST_GUILD, required_permissions = Permission().update_by_keys(manage_channels = True))
 async def channel_create(
     client, event, name: (str, 'The channel\'s name to create.')
@@ -1283,7 +1269,7 @@ async def waifu():
 @Nitori.interactions(custom_id = WAIFU_CUSTOM_ID)
 async def handle_waifu_select(client, event):
     # We filter out 3rd party users based on original and current invoking user.
-    if event.message.interaction.user is not event.user:
+    if event.message.interaction.user_id != event.user_id:
         return
     
     # Second we filter out incorrect selected values.
@@ -1511,7 +1497,7 @@ async def orindance():
 
 @Nitori.interactions(custom_id = CUSTOM_ID_ORIN_DANCE)
 async def party(client, event):
-    if event.user is event.message.interaction.user:
+    if event.user_id == event.message.interaction.user_id:
         
         old_url = event.message.embed.image.url
         orin_dance_images = ORIN_DANCE_IMAGES.copy()
@@ -2022,6 +2008,38 @@ async def set_difficulty(
     return 'Crazy moon rabbit mode activated!'
 
 # command end
+# command start integration banner
+
+@Nitori.interactions(integration_types = ['guild_install', 'user_install'], target = 'user')
+async def banner(target):
+    banner_url = target.banner_url_as(size = 4096)
+    
+    embed = Embed(f'{target.full_name}\'s banner')
+    if banner_url is None:
+        embed.description = 'The user has no banner'
+    
+    else:
+        embed.url = banner_url
+        embed.add_image(banner_url)
+    
+    return embed
+
+# command end
+# command start integration guild-features
+
+@Nitori.interactions(integration_context_types = ['guild'], is_global = True)
+async def guild_features(event):
+    """Shows the guild's features."""
+    guild = event.guild
+    
+    return Embed(
+        f'{guild.name}\'s features',
+        ', '.join(sorted(feature.name for feature in guild.iter_features())),
+    ).add_thumbnail(
+        guild.icon_url
+    )
+
+# command end
 
 #### >@<>@<>@<>@< Source command >@<>@<>@<>@<>@< ####
 
@@ -2252,7 +2270,7 @@ for command_type, command_type_commands in COLLECTED_COMMANDS.items():
 @Nitori.interactions(custom_id = re.compile('source\.([a-z\-]+)\.([a-z\-]+)\.(_|[0-9]+)'))
 async def switch_page(event, command_type, command_name, page_index):
     # Check for the same user
-    if event.message.interaction.user is not event.user:
+    if event.message.interaction.user_id != event.user_id:
         return
     
     # Check whether page is really valid.

@@ -6,9 +6,9 @@ from ...touhou_core import KOMEIJI_KOISHI, KOMEIJI_SATORI, SCARLET_FLANDRE, SCAR
 
 TOUHOU_ACTION_TICKLE = [
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1023271479024037928/remilia-flandre-tickle-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1220263200050774076/flandre-remilia-tickle-0000.png',
     ).with_source(SCARLET_FLANDRE).with_target(SCARLET_REMILIA),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1191081549072969788/koishi-satori-orin-tickle-0000.png',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1220263410630004756/koishi-orin-satori-tickle-0000.png',
     ).with_source(KOMEIJI_SATORI).with_target(KOMEIJI_KOISHI),
 ]

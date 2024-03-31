@@ -5,7 +5,8 @@ from ..helpers import is_event_user_same
 
 
 def _iter_options():
-    user = User()
+    user_id = 202403310000
+    user = User.precreate(user_id)
     
     yield (
         InteractionEvent(
@@ -56,14 +57,14 @@ def _iter_options():
     yield (
         InteractionEvent(
             user = None,
-            message = Message(interaction = MessageInteraction(user = user)),
+            message = Message(interaction = MessageInteraction(user_id = user_id)),
         ),
         False,
     )
     yield (
         InteractionEvent(
             user = user,
-            message = Message(interaction = MessageInteraction(user = user)),
+            message = Message(interaction = MessageInteraction(user_id = user_id)),
         ),
         True,
     )

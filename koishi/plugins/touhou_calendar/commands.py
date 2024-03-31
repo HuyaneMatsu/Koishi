@@ -50,7 +50,7 @@ async def touhou_calendar_page(client, event, year):
     -------
     response : `None`, ``InteractionResponse``
     """
-    if event.message.interaction.user is not event.user:
+    if event.message.interaction.user_id != event.user_id:
         await client.interaction_component_acknowledge(event)
         await client.interaction_followup_message_create(
             event,
@@ -87,7 +87,7 @@ async def touhou_calendar_close(client, event):
     """
     await client.interaction_component_acknowledge(event)
     
-    if event.user_permissions.can_manage_messages or event.message.interaction.user is event.user:
+    if event.user_permissions.can_manage_messages or event.message.interaction.user_id == event.user_id:
         await client.interaction_response_message_delete(event)
     
     else:

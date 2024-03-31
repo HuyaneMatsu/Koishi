@@ -548,7 +548,7 @@ def has_manage_messages_permission(event):
 @FEATURE_CLIENTS.interactions(
     is_global = True,
     required_permissions = Permission().update_by_keys(manage_messages = True),
-    allow_in_dm = False,
+    integration_context_types = ['guild'],
 )
 async def dupe_image_filter(
     client,

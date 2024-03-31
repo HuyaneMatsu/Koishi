@@ -705,6 +705,17 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
+### `tsukasa-kon-0021`
+
+- Artist: **mizore arius**
+- Edit: **HuyaneMatsu**
+
+
+- Character: **Kudamaki Tsukasa**
+- Source: **Touhou**
+
+---
+
 ### `tsukasa-ran-kon-0000`
 
 - Artist: **fe (tetsu)**

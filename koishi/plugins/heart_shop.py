@@ -110,7 +110,7 @@ async def burn_divorce_papers(client, event):
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_REDUCE_DIVORCE_PAPER_YES)
 async def reduce_divorce_yes(event):
     user = event.user
-    if event.message.interaction.user is not user:
+    if event.message.interaction.user_id != user.id:
         return
     
     async with DB_ENGINE.connect() as connector:
@@ -187,7 +187,7 @@ async def reduce_divorce_yes(event):
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_REDUCE_DIVORCE_PAPER_NO)
 async def reduce_divorce_yes(event):
     user = event.user
-    if event.message.interaction.user is not user:
+    if event.message.interaction.user_id != user.id:
         return
     
     return InteractionResponse(embed = Embed(None, 'Divorce paper exploration cancelled'), components = None)

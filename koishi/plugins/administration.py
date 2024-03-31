@@ -20,7 +20,7 @@ def match_message_author(user, message):
 @FEATURE_CLIENTS.interactions(
     is_global = True,
     show_for_invoking_user_only = True,
-    allow_in_dm = False,
+    integration_context_types = ['guild'],
     required_permissions = Permission().update_by_keys(administrator = True),
 )
 async def clear(client, event,
@@ -97,7 +97,7 @@ async def clear(client, event,
 @FEATURE_CLIENTS.interactions(
     is_global = True,
     show_for_invoking_user_only = True,
-    allow_in_dm = False,
+    integration_context_types = ['guild'],
     required_permissions = Permission().update_by_keys(create_instant_invite = True),
 )
 async def invite_create(client, event,
@@ -155,7 +155,7 @@ def bans_pagination_check(event):
 
 @FEATURE_CLIENTS.interactions(
     is_global = True,
-    allow_in_dm = False,
+    integration_context_types = ['guild'],
     required_permissions = Permission().update_by_keys(ban_users = True),
 )
 
@@ -261,7 +261,7 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
 
 @FEATURE_CLIENTS.interactions(
     is_global = True,
-    allow_in_dm = False,
+    integration_context_types = ['guild'],
     required_permissions = Permission().update_by_keys(create_instant_invite = True),
 )
 async def invites_(client, event,

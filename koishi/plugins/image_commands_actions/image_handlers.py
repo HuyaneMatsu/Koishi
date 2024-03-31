@@ -1,18 +1,18 @@
 __all__ = ()
 
-from ..image_handling_core import ImageHandlerStatic, ImageHandlerWaifuPics
+from ..image_handling_core import ImageHandlerGroup, ImageHandlerStatic, ImageHandlerWaifuPics
 
 from .asset_listings import (
-    TOUHOU_ACTION_FEED, TOUHOU_ACTION_FLUFF, TOUHOU_ACTION_KON, TOUHOU_ACTION_LIKE, TOUHOU_ACTION_POCKY_KISS,
-    TOUHOU_ACTION_POCKY_KISS_SELF
+    TOUHOU_ACTION_FEED, TOUHOU_ACTION_FLUFF, TOUHOU_ACTION_HUG, TOUHOU_ACTION_KISS, TOUHOU_ACTION_KON,
+    TOUHOU_ACTION_LICK, TOUHOU_ACTION_LIKE, TOUHOU_ACTION_PAT, TOUHOU_ACTION_POCKY_KISS, TOUHOU_ACTION_POCKY_KISS_SELF
 )
 
 
-IMAGE_HANDLER_PAT = ImageHandlerWaifuPics('pat', False)
-IMAGE_HANDLER_KISS = ImageHandlerWaifuPics('kiss', False)
-IMAGE_HANDLER_HUG = ImageHandlerWaifuPics('hug', False)
+IMAGE_HANDLER_PAT = ImageHandlerGroup(ImageHandlerWaifuPics('pat', False), ImageHandlerStatic(TOUHOU_ACTION_PAT))
+IMAGE_HANDLER_KISS = ImageHandlerGroup(ImageHandlerWaifuPics('kiss', False), ImageHandlerStatic(TOUHOU_ACTION_KISS))
+IMAGE_HANDLER_HUG = ImageHandlerGroup(ImageHandlerWaifuPics('hug', False), ImageHandlerStatic(TOUHOU_ACTION_HUG))
 IMAGE_HANDLER_CUDDLE = ImageHandlerWaifuPics('cuddle', False)
-IMAGE_HANDLER_LICK = ImageHandlerWaifuPics('lick', False)
+IMAGE_HANDLER_LICK = ImageHandlerGroup(ImageHandlerWaifuPics('lick', False), ImageHandlerStatic(TOUHOU_ACTION_LICK))
 IMAGE_HANDLER_POKE = ImageHandlerWaifuPics('poke', False)
 IMAGE_HANDLER_SLAP = ImageHandlerWaifuPics('slap', False)
 IMAGE_HANDLER_SMUG = ImageHandlerWaifuPics('smug', False)

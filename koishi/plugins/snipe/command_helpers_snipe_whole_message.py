@@ -95,8 +95,9 @@ def _iter_custom_message_reactions(message):
     reactions = message.reactions
     if (reactions is not None):
         for reaction in reactions.keys():
-            if reaction.is_custom_emoji():
-                yield reaction
+            emoji = reaction.emoji
+            if emoji.is_custom_emoji():
+                yield emoji
 
 
 def _build_snipe_choices(message):

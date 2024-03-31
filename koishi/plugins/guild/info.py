@@ -115,7 +115,7 @@ async def guild_info_component_command(client, event):
     -------
     response : `None`, ``InteractionResponse``
     """
-    if event.message.interaction.user is not event.user:
+    if event.message.interaction.user_id != event.user_id:
         return
     
     values = event.values

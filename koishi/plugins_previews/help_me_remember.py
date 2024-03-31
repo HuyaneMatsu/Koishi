@@ -812,7 +812,7 @@ CUSTOM_ID_QUESTION_BASE = 'help_me_rember.question'
 @FEATURE_CLIENTS.interactions(custom_id = re.compile(f'{re.escape(CUSTOM_ID_QUESTION_BASE)}\.(\d+)'))
 async def select_question(event, index):
     user = event.user
-    if event.message.interaction.user is not user:
+    if event.message.interaction.user_id != user_id:
         return
     
     try:

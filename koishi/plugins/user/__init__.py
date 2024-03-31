@@ -24,6 +24,7 @@ USER_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
     name = 'user',
     description = 'User commands',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 

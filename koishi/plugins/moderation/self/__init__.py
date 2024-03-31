@@ -24,7 +24,7 @@ MAIN_COMMAND = FEATURE_CLIENTS.interactions(
     None,
     name = 'self-mod',
     description = 'Moderate yourself?!',
-    allow_in_dm = False,
+    integration_context_types = ['guild'],
     is_global = True,
 )
 

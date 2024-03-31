@@ -136,6 +136,17 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ---
 
+### `miko-older-0000`
+
+- Artist: *unknown*
+- Edit: *unknown*
+
+
+- Character: **Toyosatomimi no Miko**
+- Source: **Touhou**
+
+---
+
 ### `nue-huge-surprises-0000`
 
 - Artist: *unknown*

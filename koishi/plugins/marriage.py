@@ -375,7 +375,7 @@ async def propose(
         
         if source_waifu_slots - source_waifu_count - proposed_user_count <= 0:
             yield InteractionResponse(
-                Embed(
+                embed = Embed(
                     'You can not propose to more users.',
                     (
                         f'Waifu slots: {source_waifu_slots}\n'
@@ -1182,7 +1182,7 @@ async def divorce_cancelled(event):
         return
     
     return InteractionResponse(
-        Embed(
+        embed = Embed(
             None,
             'Divorce cancelled.',
         ),

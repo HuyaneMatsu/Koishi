@@ -3895,7 +3895,7 @@ async def filter_characters(
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SELECT_CHARACTER)
 async def select_character(event):
-    if event.message.interaction.user is not event.user:
+    if event.message.interaction.user_id != event.user_id:
         return
     
     selected_character_ids = event.values
@@ -4096,7 +4096,7 @@ async def autocomplete_card_rarity(value):
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_SELECT_CARD)
 async def select_card(event):
-    if event.message.interaction.user is not event.user:
+    if event.message.interaction.user_id != event.user_id:
         return
     
     selected_card_ids = event.values

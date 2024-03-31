@@ -64,6 +64,7 @@ FEED = FEATURE_CLIENTS.interactions(
     ACTION_FEED,
     name = 'feed',
     description = 'Just a spoonful..',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 
@@ -71,6 +72,7 @@ FLUFF = FEATURE_CLIENTS.interactions(
     ACTION_FLUFF,
     name = 'fluff',
     description = 'Fuwa fuwa',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 
@@ -106,6 +108,7 @@ HUG = FEATURE_CLIENTS.interactions(
     ACTION_HUG,
     name = 'hug',
     description = 'Huh.. Huggu? HUGG YOUUU!!!',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 
@@ -127,6 +130,7 @@ KISS = FEATURE_CLIENTS.interactions(
     ACTION_KISS,
     name = 'kiss',
     description = 'If you really really like your onee, give her a kiss <3',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 
@@ -134,6 +138,7 @@ KON = FEATURE_CLIENTS.interactions(
     ACTION_KON,
     name = 'kon',
     description = 'Kon~kon',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 
@@ -141,6 +146,7 @@ LICK = FEATURE_CLIENTS.interactions(
     ACTION_LICK,
     name = 'lick',
     description = 'Licking is a favored activity of neko girls.',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 
@@ -148,6 +154,7 @@ LIKE = FEATURE_CLIENTS.interactions(
     ACTION_LIKE,
     name = 'like',
     description = 'We like older woman.',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 
@@ -162,6 +169,7 @@ PAT = FEATURE_CLIENTS.interactions(
     ACTION_PAT,
     name = 'pat',
     description = 'Do you like pats as well?',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 
@@ -169,6 +177,7 @@ POCKY_KISS = FEATURE_CLIENTS.interactions(
     ACTION_POCKY,
     name = 'pocky-kiss',
     description = 'Will they bale?',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 

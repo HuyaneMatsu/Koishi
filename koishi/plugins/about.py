@@ -78,8 +78,19 @@ def iter_about_components(client):
     yield Button(
         'Invite me!',
         url = (
-            f'https://discord.com/oauth2/authorize?client_id={client.application.id}&scope=bot%20'
-            f'applications.commands'
+            f'https://discord.com/oauth2/authorize'
+            f'?client_id={client.application.id}'
+            f'&scope=bot%20applications.commands'
+        ),
+    )
+    
+    yield Button(
+        'Install me!',
+        url = (
+            f'https://discord.com/oauth2/authorize'
+            f'?client_id={client.application.id}'
+            f'&scope=applications.commands'
+            f'&integration_type=1'
         ),
     )
     
@@ -596,7 +607,7 @@ async def about_close(client, event):
     """
     await client.interaction_component_acknowledge(event)
     
-    if event.user_permissions.can_manage_messages or event.message.interaction.user is event.user:
+    if event.user_permissions.can_manage_messages or event.message.interaction.user_id == event.user_id:
         await client.interaction_response_message_delete(event)
     
     else:

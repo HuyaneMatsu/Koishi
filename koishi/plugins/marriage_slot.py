@@ -51,7 +51,7 @@ BUY_WAIFU_SLOT_INVOKE_COMPONENT = Button(
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_BUY_WAIFU_SLOT_INVOKE)
 async def buy_waifu_slot_in_inline(event):
-    if event.message.interaction.user is event.user:
+    if event.message.interaction.user_id == event.user_id:
         return await buy_waifu_slot_invoke(event)
 
 
@@ -79,7 +79,7 @@ async def buy_waifu_slot_invoke(event):
             if waifu_slots >= MAX_WAIFU_SLOTS:
                 return
                 InteractionResponse(
-                    Embed(
+                    embed = Embed(
                         None,
                         'You reached the maximum amount of waifu slots.',
                     ),
@@ -107,7 +107,7 @@ async def buy_waifu_slot_invoke(event):
             new_waifu_slot_count = 2
     
     return InteractionResponse(
-        Embed(
+        embed = Embed(
             None,
             (
                 'You do not have enough available love to buy more waifu slots.\n'
@@ -125,7 +125,7 @@ async def buy_marriage_slot_cancel(event):
         return
     
     return InteractionResponse(
-        Embed(
+        embed = Embed(
             None,
             'The waifu slot purchase has been cancelled.',
         ),

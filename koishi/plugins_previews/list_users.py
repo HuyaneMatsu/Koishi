@@ -390,7 +390,7 @@ SERIALIZATION_MODES = ['koishi.json', 'discord.json', 'koishi.csv', 'discord.csv
 
 @FEATURE_CLIENTS.interactions(
     guild = GUILD__SUPPORT,
-    allow_in_dm = False,
+    integration_context_types = ['guild'],
     required_permissions = Permission().update_by_keys(manage_messages = True),
 )
 async def list_users(

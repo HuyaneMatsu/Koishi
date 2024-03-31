@@ -10,6 +10,7 @@ ID_GETTER_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
     name = 'id',
     description = 'Shows the id of the selected entity',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 

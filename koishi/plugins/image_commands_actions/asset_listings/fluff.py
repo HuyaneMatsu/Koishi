@@ -3,10 +3,15 @@ __all__ = ('TOUHOU_ACTION_FLUFF',)
 from ...image_handling_core import ImageDetail
 from ...touhou_core import (
     CHEN, FUJIWARA_NO_MOKOU, FUTATSUIWA_MAMIZOU, HAKUREI_REIMU, HATA_NO_KOKORO, HOUJUU_NUE, HOURAISAN_KAGUYA,
-    IMAIZUMI_KAGEROU, INABA_TEWI, INUBASHIRI_MOMIJI, KAENBYOU_RIN, KAMISHIRASAWA_KEINE, KASODANI_KYOUKO, KOCHIYA_SANAE,
-    MIZUHASHI_PARSEE, MURASA_MINAMITSU, NAZRIN, NISHIDA_SATONO, REISEN_UDONGEIN_INABA, TEIREIDA_MAI, USAMI_SUMIREKO,
-    WAKASAGIHIME, YAKUMO_RAN, YAKUMO_YUKARI
+    IIZUNAMARU_MEGUMU, IMAIZUMI_KAGEROU, INABA_TEWI, INUBASHIRI_MOMIJI, KAENBYOU_RIN, KAMISHIRASAWA_KEINE,
+    KASODANI_KYOUKO, KOCHIYA_SANAE, KUDAMAKI_TSUKASA, MIZUHASHI_PARSEE, MURASA_MINAMITSU, NAZRIN, NISHIDA_SATONO,
+    REISEN_UDONGEIN_INABA, RUMIA, TEIREIDA_MAI, USAMI_SUMIREKO, WAKASAGIHIME, YAKUMO_RAN, YAKUMO_YUKARI
 )
+
+
+# Source n:
+# From my pc actually.
+# :KoishiPc:
 
 
 TOUHOU_ACTION_FLUFF = [
@@ -185,6 +190,9 @@ TOUHOU_ACTION_FLUFF = [
         'https://cdn.discordapp.com/attachments/568837922288173058/1208734747254071336/mamizou-reimu-fluff-0000.png',
     ).with_source(HAKUREI_REIMU).with_target(FUTATSUIWA_MAMIZOU),
     ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1223563583024136202/megumu-tsukasa-fluff-0000.png',
+    ).with_source(IIZUNAMARU_MEGUMU).with_target(KUDAMAKI_TSUKASA),
+    ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1208735420377202759/momiji-sumireko-fluff-0000.png',
     ).with_source(USAMI_SUMIREKO).with_target(INUBASHIRI_MOMIJI),
     ImageDetail(
@@ -209,6 +217,12 @@ TOUHOU_ACTION_FLUFF = [
         'https://cdn.discordapp.com/attachments/568837922288173058/1208737578816249876/ran-yukari-fluff-0004.png',
     ).with_source(YAKUMO_YUKARI).with_target(YAKUMO_RAN),
     ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1223565656734306335/ran-yukari-fluff-0005.png',
+    ).with_source(YAKUMO_YUKARI).with_target(YAKUMO_RAN),
+    ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1208739850895753286/reisen-tewi-fluff-0000.png',
     ).with_source(REISEN_UDONGEIN_INABA).with_target(INABA_TEWI),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1223566216367443978/rumia-tewi-fluff-0000.png',
+    ).with_source(RUMIA).with_target(INABA_TEWI),
 ]

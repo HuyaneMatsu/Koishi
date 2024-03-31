@@ -52,7 +52,7 @@ MAIN_COMMAND = FEATURE_CLIENTS.interactions(
     None,
     name = 'mod',
     description = 'Moderate users.',
-    allow_in_dm = False,
+    integration_context_types = ['guild'],
     is_global = True,
 )
 

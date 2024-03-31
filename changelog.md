@@ -1,3 +1,21 @@
+### 2024-03-31
+
+- Add `Hakurei Miko` touhou character.
+- Add `Install me!` button under `/about`.
+- Fix a `snipe` bug when sniping reactions.
+- Add **4** images to `/pocky-kiss` (1 was there just unused).
+- Add **33** images to `/pat`.
+- Add **1** image to `/like`.
+- Add **26** image to `/lick`.
+- Add **1** image to `/kon`.
+- Add **36** images to `/kiss` (1 was there just unused).
+- Add **51** images to `/hug`.
+- Add **2** images to `/fluff`.
+- Sort `/pocky-kiss` images alphabetically.
+- Grouped image handlers how will go though every registered handler before failing.
+- Sending some embeds failed.
+- Koishi, Flandre, Yoshika, Cursed Sakuya now can be user installed.
+
 ### 2024-03-18
 
 - Add `feed` interaction with **13** images. (Will get more in the future obviously.)

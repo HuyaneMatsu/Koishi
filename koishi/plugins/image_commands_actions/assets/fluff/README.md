@@ -622,7 +622,7 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ### `mamizou-nue-fluff-0000`
 
-- Artist: **unime_seaflower**
+- Artist: **unime seaflower**
 - Edit: **HuyaneMatsu**
 
 
@@ -633,7 +633,7 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ### `mamizou-reimu-fluff-0000`
 
-- Artist: **shirane_koitsu**
+- Artist: **shirane koitsu**
 - Edit: *none*
 
 
@@ -642,9 +642,20 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
+### `megumu-tsukasa-fluff-0000`
+
+- Artist: **meimaru inuchiyo**
+- Edit: *none*
+
+
+- Character: **Iizunamaru Megumu**, **Kudamaki Tsukasa**
+- Source: **Touhou**
+
+---
+
 ### `momiji-sumireko-fluff-0000`
 
-- Artist: **kutsuki_kai**
+- Artist: **kutsuki kai**
 - Edit: *none*
 
 
@@ -655,7 +666,7 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ### `nazrin-reimu-fluff-0000`
 
-- Artist: **mochizuki_ado**
+- Artist: **mochizuki ado**
 - Edit: *none*
 
 
@@ -722,6 +733,17 @@ Some authors might be unknown. If you know them please create a PR with it.
 ### `ran-yukari-fluff-0004`
 
 - Artist: **peroponesosu**
+- Edit: *none*
+
+
+- Character: **Yakumo Ran**, **Yakumo Yukari**
+- Source: **Touhou**
+
+---
+
+### `ran-yukari-fluff-0005`
+
+- Artist: **R O T O N**
 - Edit: *none*
 
 

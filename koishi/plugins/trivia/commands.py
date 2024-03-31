@@ -279,7 +279,10 @@ async def send_user_mismatch_notification(client, event):
     )
 
 
-@FEATURE_CLIENTS.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+)
 async def trivia(
     event,
     category_id: (CATEGORY_NAME_TO_ID, 'Choose a category.', 'category') = CATEGORY_KOISHI_ALL.id,

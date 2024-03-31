@@ -51,7 +51,7 @@ def is_event_user_same(event):
     if interaction is None:
         return False
     
-    return event.user is interaction.user
+    return event.user_id == interaction.user_id
 
 
 def get_name_and_page(event):

@@ -1,6 +1,6 @@
 __all__ = (
     'AKI_MINORIKO', 'AKI_SHIZUHA', 'CHEN', 'CHIRUNO', 'CLOWNPIECE', 'DAIYOUSEI', 'DOREMY_SWEET', 'EBISU_EIKA', 'ELLY',
-    'ETERNITY_LARVA', 'FUJIWARA_NO_MOKOU', 'FUTATSUIWA_MAMIZOU', 'HAKUREI_REIMU', 'HANIYASUSHIN_KEIKI',
+    'ETERNITY_LARVA', 'FUJIWARA_NO_MOKOU', 'FUTATSUIWA_MAMIZOU', 'HAKUREI_MIKO', 'HAKUREI_REIMU', 'HANIYASUSHIN_KEIKI',
     'HATA_NO_KOKORO', 'HEARN_MARIBEL', 'HECATIA_LAPISLAZULI', 'HEI_MEILING', 'HIEDA_NO_AKYUU', 'HIJIRI_BYAKUREN',
     'HIMEKAIDOU_HATATE', 'HIMEMUSHI_MOMOYO', 'HINANAWI_TENSHI', 'HONG_MEILING', 'HORIKAWA_RAIKO', 'HOSHIGUMA_YUUGI',
     'HOUJUU_NUE', 'HOURAISAN_KAGUYA', 'IBARAKI_KASEN', 'IBUKI_SUIKA', 'IIZUNAMARU_MEGUMU', 'IMAIZUMI_KAGEROU',
@@ -147,6 +147,18 @@ HANIYASUSHIN_KEIKI = TouhouCharacter(
         'Keiki',
         'Keiki Haniyasushin',
     ),
+)
+
+HAKUREI_MIKO = TouhouCharacter(
+    'hakurei_miko',
+    'Hakurei Miko',
+    (
+        'Sendai Hakurei no Miko',
+        '先代博麗の巫女',
+        '博麗の巫女',
+        'Sendai Miko',
+        '先代巫女',
+    )
 )
 
 HAKUREI_REIMU = TouhouCharacter(

@@ -38,7 +38,7 @@ async def snipe_interaction_close(client, event):
         if interaction is None:
             can_delete = True
         
-        elif interaction.user is event.user:
+        elif interaction.user_id == event.user_id:
             can_delete = True
         
         else:

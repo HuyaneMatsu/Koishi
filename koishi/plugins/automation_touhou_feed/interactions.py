@@ -34,7 +34,7 @@ async def response_about_main(client, event):
     -------
     response : ``InteractionResponse``
     """
-    if event.user is event.message.interaction.user:
+    if event.user_id == event.message.interaction.user_id:
         return create_about_main(client, event)
 
 
@@ -56,7 +56,7 @@ async def response_about_examples(client, event):
     -------
     response : ``InteractionResponse``
     """
-    if event.user is event.message.interaction.user:
+    if event.user_id == event.message.interaction.user_id:
         return create_about_examples(client, event)
 
 
@@ -78,7 +78,7 @@ async def response_about_interval(client, event):
     -------
     response : ``InteractionResponse``
     """
-    if event.user is event.message.interaction.user:
+    if event.user_id == event.message.interaction.user_id:
         return create_about_interval(client, event)
 
 

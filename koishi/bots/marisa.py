@@ -332,7 +332,6 @@ async def debug_command(client, event,
         '**Application command**:\n'
         'Name : `', application_command.name, '`\n'
         'Id : `', repr(application_command.id), '`\n'
-        'Allow in dm : `', repr(application_command.allow_in_dm), '`\n'
         'required permissions : `', repr(application_command.required_permissions), '`\n'
         'target type : `', repr(application_command.target_type.name), '`\n'
         '**Permission overwrites**:\n'
@@ -582,3 +581,19 @@ async def show_permissions(event):
 @Marisa.commands
 async def shutdown():
     await Marisa.stop()
+
+
+@Marisa.interactions(
+    is_global = True,
+    integration_types = ['guild_install', 'user_install'],
+)
+async def user_install():
+    return 'hey'
+
+
+@Marisa.interactions(
+    is_global = True,
+    integration_context_types = ['bot_private_channel'],
+)
+async def bot_private():
+    return 'mister'

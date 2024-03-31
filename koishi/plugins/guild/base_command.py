@@ -8,5 +8,5 @@ GUILD_COMMANDS = FEATURE_CLIENTS.interactions(
     name = 'guild',
     description = 'guild utility commands',
     is_global = True,
-    allow_in_dm = False,
+    integration_context_types = ['guild'],
 )

@@ -1,8 +1,10 @@
 __all__ = ('ImageHandlerGroup',)
 
-from random import choices
+from itertools import islice
 
 from scarletio import copy_docs
+
+from ....bot_utils.random import random_index
 
 from .base import ImageHandlerBase
 
@@ -60,8 +62,22 @@ class ImageHandlerGroup(ImageHandlerBase):
     
     @copy_docs(ImageHandlerBase.get_image)
     async def get_image(self, client, event, **acknowledge_parameters):
-        handler = choices(self._handlers, self._weights)[0]
-        return await handler.get_image(client, event, **acknowledge_parameters)
+        handlers = self._handlers
+        weights = self._weights
+        
+        while True:
+            index = random_index(weights)
+            if index == -1:
+                return None
+            
+            handler = handlers[index]
+            image_detail = await handler.get_image(client, event, **acknowledge_parameters)
+            if (image_detail is not None):
+                return image_detail
+            
+            handlers = [*islice(handlers, 0, index), *islice(handlers, index + 1, None)]
+            weights = [*islice(weights, 0, index), *islice(weights, index + 1, None)]
+            continue
     
     
     @copy_docs(ImageHandlerBase.is_character_filterable)

@@ -7,7 +7,11 @@ from ...bots import FEATURE_CLIENTS
 from .command_helpers_snipe_whole_message import respond_snipe_whole_message
 
 
-@FEATURE_CLIENTS.interactions(is_global = True, target = 'message')
+@FEATURE_CLIENTS.interactions(
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+    target = 'message',
+)
 async def snipe(client, event, target):
     """
     Snipes the emojis, reactions and stickers of the message.

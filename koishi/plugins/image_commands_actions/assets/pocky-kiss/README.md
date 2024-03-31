@@ -15,6 +15,39 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
+### `alice-marisa-pocky-0000`
+
+- Artist: **manjuu teishoku / 饅頭定食**
+- Edit: *none*
+
+
+- Character: **Margatroid Alice**, **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### `alice-mystia-pocky-0000`
+
+- Artist: **ayagi daifuku**
+- Edit: **HuyaneMatsu**
+
+
+- Character: **Margatroid Alice**, **Mystia Lorelei**
+- Source: **Touhou**
+
+---
+
+### `aya-hatate-pocky-0000`
+
+- Artist: **coco (r5m)**
+- Edit: *none*
+
+
+- Character: **Shameimaru Aya**, **Himekaidou Hatate**
+- Source: **Touhou**
+
+---
+
 ### `aya-remilia-pocky-0000`
 
 - Artist: *unknown*
@@ -37,9 +70,31 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
-### `chen-ran-pocky-0000`
+### `chen-ran-pocky-0001`
 
 - Artist: **gustav / ぐすたふ**
+- Edit: *none*
+
+
+- Character: **Chen**, **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `chen-ran-pocky-0002`
+
+- Artist: **japa / じゃぱ**
+- Edit: *none*
+
+
+- Character: **Chen**, **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `chen-ran-pocky-0001`
+
+- Artist: **japa / じゃぱ**
 - Edit: *none*
 
 
@@ -55,6 +110,50 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 
 - Character: **Chiruno**, **Daiyousei**
+- Source: **Touhou**
+
+---
+
+### `chiruno-rumia-pocky-0000`
+
+- Artist: **torichiyo / とりちよ**
+- Edit: *none*
+
+
+- Character: **Chiruno**, **Rumia**
+- Source: **Touhou**
+
+---
+
+### `flandre-koishi-pocky-0000`
+
+- Artist: **minamura haruki / 皆 村**
+- Edit: *none*
+
+
+- Character:  **Scarlet Flandre**, **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### `flandre-koishi-pocky-0001`
+
+- Artist: **Teeku / てぇく**
+- Edit: *none*
+
+
+- Character: **Scarlet Flandre**, **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### `flandre-koishi-pocky-0002`
+
+- Artist: **shan**
+- Edit: *none*
+
+
+- Character: **Scarlet Flandre**, **Komeiji Koishi**
 - Source: **Touhou**
 
 ---
@@ -81,9 +180,20 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
-### `hatate-aya-pocky-0000`
+### `flandre-remilia-pocky-0000`
 
-- Artist: **coco**
+- Artist: **fumi11**
+- Edit: *none*
+
+
+- Character: **Scarlet Flandre**, **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### `flandre-remilia-pocky-0003`
+
+- Artist: **kusogappa**
 - Edit: *none*
 
 
@@ -103,13 +213,24 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
-### `kagerou-remilia-pocky-0000`
+### `kagerou-wakasagihime-pocky-0000`
 
-- Artist: **ziran de ph shizhi tuan / 自燃的ph试纸团**
+- Artist: **kaginoni / かぎのに**
 - Edit: *none*
 
 
-- Character: **Imaizumi Kagerou**, **Scarlet Remilia**
+- Character: **Imaizumi Kagerou**, **Wakasagihime**
+- Source: **Touhou**
+
+---
+
+### `kanako-suwako-pocky-0000`
+
+- Artist: **keemoringo**
+- Edit: **HuyaneMatsu**
+
+
+- Character: **Yasaka Kanako**, **Moriya Suwako**
 - Source: **Touhou**
 
 ---
@@ -136,35 +257,35 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
-### `koishi-flandre-pocky-0000`
+### `keine-mokou-pocky-0002`
 
-- Artist: **minamura haruki / 皆 村**
+- Artist: **6**
 - Edit: *none*
 
 
-- Character: **Komeiji Koishi**, **Scarlet Flandre**
+- Character: **Kamishirasawa Keine**, **Fujiwara no Mokou**
 - Source: **Touhou**
 
 ---
 
-### `koishi-flandre-pocky-0001`
+### `koakuma-sakuya-pocky-0000`
 
-- Artist: **Teeku / てぇく**
+- Artist: **3692materia / 浅間清正**
 - Edit: *none*
 
 
-- Character: **Komeiji Koishi**, **Scarlet Flandre**
+- Character: **Koakuma**, **Izaoyi Sakuya**
 - Source: **Touhou**
 
 ---
 
-### `koishi-flandre-pocky-0002`
+### `kogasa-nue-pocky-0000`
 
-- Artist: **shan**
+- Artist: **kitano / きたの！**
 - Edit: *none*
 
 
-- Character: **Komeiji Koishi**, **Scarlet Flandre**
+- Character: **Tatara Kogasa**, **Houjuu Nue**
 - Source: **Touhou**
 
 ---
@@ -172,6 +293,28 @@ Some authors might be unknown. If you know them please create a PR with it.
 ### `koishi-kokoro-pocky-0000`
 
 - Artist: **cato**
+- Edit: *none*
+
+
+- Character: **Komeiji Koishi**, **Hata no Kokoro**
+- Source: **Touhou**
+
+---
+
+### `koishi-kokoro-pocky-0001`
+
+- Artist: **kiryuu soma**
+- Edit: *none*
+
+
+- Character: **Komeiji Koishi**, **Hata no Kokoro**
+- Source: **Touhou**
+
+---
+
+### `koishi-kokoro-pocky-0000`
+
+- Artist: **Zan / ざん**
 - Edit: *none*
 
 
@@ -202,13 +345,13 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
-### `kokoro-koishi-pocky-0000`
+### `koishi-satori-pocky-0002`
 
-- Artist: **Zan / ざん**
+- Artist: **satori suki**
 - Edit: *none*
 
 
-- Character: **Hata no Kokoro**, **Komeiji Koishi**
+- Character: **Komeiji Koishi**, **Komeiji Satori**
 - Source: **Touhou**
 
 ---
@@ -235,13 +378,24 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
-### `marisa-alice-pocky-0000`
+### `maribel-renko-pocky-0000`
 
-- Artist: **manjuu teishoku / 饅頭定食**
+- Artist: **imi_humei / フメイ**
 - Edit: *none*
 
 
-- Character: **Kirisame Marisa**, **Margatroid Alice**
+- Character: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### `maribel-renko-pocky-0001`
+
+- Artist: **tsukiori sasa / 月居咲々**
+- Edit: *none*
+
+
+- Character: **Hearn Maribel**, **Usami Renko**
 - Source: **Touhou**
 
 ---
@@ -290,6 +444,17 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
+### `marisa-reimu-pocky-0004`
+
+- Artist: **iwatobi hiro / いわとび ひろ**
+- Edit: *none*
+
+
+- Character: **Kirisame Marisa**, **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
 ### `meiling-sakuya-pocky-0000`
 
 - Artist: **yuuta / 勇太**
@@ -297,6 +462,17 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 
 - Character: **Hong Meiling**, **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### `meiling-sakuya-pocky-0001`
+
+- Artist: **tima**
+- Edit: *none*
+
+
+- Character: **Hong Meiling**, **Izaoyi Sakuya**
 - Source: **Touhou**
 
 ---
@@ -312,35 +488,24 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
-### `mokou-keine-pocky-0000`
+### `mystia-yuyuko-pocky-0000`
 
-- Artist: **6**
+- Artist: **earlgrey**
 - Edit: *none*
 
 
-- Character: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Character: **Mystia Lorelei**, **Rumia**
 - Source: **Touhou**
 
 ---
 
-### `mokou-keine-pocky-0000`
+### `mystia-yuyuko-pocky-0000`
 
-- Artist: **6**
+- Artist: **nise nanatsura**
 - Edit: *none*
 
 
-- Character: **Fujiwara no Mokou**, **Kamishirasawa Keine**
-- Source: **Touhou**
-
----
-
-### `mystia-alice-pocky-0000`
-
-- Artist: **ayagi daifuku**
-- Edit: **HuyaneMatsu**
-
-
-- Character: **Mystia Lorelei**, **Margatroid Alice**
+- Character: **Mystia Lorelei**, **Saigyouji Yuyuko**
 - Source: **Touhou**
 
 ---
@@ -356,13 +521,13 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
-### `nue-kogasa-pocky-0000`
+### `nazrin-shou-pocky-0001`
 
-- Artist: **kitano / きたの！**
+- Artist: **bbb**
 - Edit: *none*
 
 
-- Character: **Houjuu Nue**, **Tatara Kogasa**
+- Character: **Nazrin**, **Toramaru Shou**
 - Source: **Touhou**
 
 ---
@@ -378,145 +543,79 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
-### `patchouli-remilia-pocky-0000`
+### `patchouli-youmo-pocky-0000`
 
-- Artist: **sakaetomoyuu / 栄智ゆう**
+- Artist: **nigo**
 - Edit: *none*
 
 
-- Character: **Patchouli Knowledge**, **Scarlet Remilia**
+- Character: **Patchouli Knowledge**, **Konpaku Youmu**
 - Source: **Touhou**
 
 ---
 
-### `ran-chen-pocky-0000`
+### `reimu-suika-pocky-0000`
 
-- Artist: **japa / じゃぱ**
+- Artist: **shinekalta**
 - Edit: *none*
 
 
-- Character: **Yakumo Ran**, **Chen**
+- Character: **Hakurei Reimu**, **Ibuki Suika**
 - Source: **Touhou**
 
 ---
 
-### `ran-chen-pocky-0001`
+### `reimu-tenshi-pocky-0000`
 
-- Artist: **japa / じゃぱ**
+- Artist: **ichiyan**
 - Edit: *none*
 
 
-- Character: **Yakumo Ran**, **Chen**
+- Character: **Hakurei Reimu**, **Hinanawi tenshi**
 - Source: **Touhou**
 
 ---
 
-### `reimu-marisa-pocky-0000`
+### `reimu-yukari-youmu-yuyuko-pocky-0000`
 
-- Artist: **iwatobi hiro / いわとび ひろ**
-- Edit: *none*
+- Artist: **terimayo**
+- Edit: **HuyaneMatsu**
 
 
-- Character: **Hakurei Reimu**, **Kirisame Marisa**
+- Character: **Hakurei Reimu**, **Yakumo Yukari**, **Konpaku Youmu**, **Saigyouji Yuyuko**
 - Source: **Touhou**
 
 ---
 
-### `remilia-flandre-pocky-0000`
-
-- Artist: **fumi11**
-- Edit: *none*
-
-
-- Character: **Scarlet Remilia**, **Scarlet Flandre**
-- Source: **Touhou**
-
----
-
-### `remilia-flandre-pocky-0001`
-
-- Artist: **kusogappa**
-- Edit: *none*
-
-
-- Character: **Scarlet Remilia**, **Scarlet Flandre**
-- Source: **Touhou**
-
----
-
-### `renko-maribel-pocky-0000`
-
-- Artist: **imi_humei / フメイ**
-- Edit: *none*
-
-
-- Character: **Usami Renko**, **Hearn Maribel**
-- Source: **Touhou**
-
----
-
-### `renko-maribel-pocky-0001`
-
-- Artist: **tsukiori sasa / 月居咲々**
-- Edit: *none*
-
-
-- Character: **Usami Renko**, **Hearn Maribel**
-- Source: **Touhou**
-
----
-
-### `rumia-chiruno-pocky-0000`
-
-- Artist: **torichiyo / とりちよ**
-- Edit: *none*
-
-
-- Character: **Rumia**, **Chiruno**
-- Source: **Touhou**
-
----
-
-### `sakuya-koakuma-pocky-0000`
-
-- Artist: **3692materia / 浅間清正**
-- Edit: *none*
-
-
-- Character: **Izaoyi Sakuya**, **Koakuma**
-- Source: **Touhou**
-
----
-
-### `sakuya-meiling-pocky-0000`
-
-- Artist: **tima**
-- Edit: *none*
-
-
-- Character: **Izaoyi Sakuya**, **Hong Meiling**
-- Source: **Touhou**
-
----
-
-### `sakuya-meiling-pocky-0000`
-
-- Artist: **tima**
-- Edit: *none*
-
-
-- Character: **Izaoyi Sakuya**, **Hong Meiling**
-- Source: **Touhou**
-
----
-
-### `satori-remilia-pocky-0000`
+### `remilia-satori-pocky-0000`
 
 - Artist: **Genbu / げんぶ**
 - Edit: *none*
 
 
-- Character: **Komeiji Satori**, **Scarlet Remilia**
+- Character: **Scarlet Remilia**,**Komeiji Satori**
+- Source: **Touhou**
+
+---
+
+### `sanae-suwako-pocky-0000`
+
+- Artist: **cis**
+- Edit: *none*
+
+
+- Character: **Kochiya Sanae**, **Moriya Suwako**
+- Source: **Touhou**
+
+---
+
+### `sanae-youmu-pocky-0000`
+
+- Artist: **Shirota Shinobu / 白田 忍**
+- Edit: *none*
+
+
+- Character: **Kochiya Sanae**, **Konpaku Youmu**
 - Source: **Touhou**
 
 ---
@@ -528,116 +627,6 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 
 - Character: **Komeiji Satori**, **Ibuki Suika**
-- Source: **Touhou**
-
----
-
-### `shou-nazrin-pocky-0000`
-
-- Artist: **bbb**
-- Edit: *none*
-
-
-- Character: **Toramaru Shou**, **Nazrin**
-- Source: **Touhou**
-
----
-
-### `suwako-kanako-pocky-0000`
-
-- Artist: **keemoringo**
-- Edit: **HuyaneMatsu**
-
-
-- Character: **Moriya Suwako**, **Yasaka Kanako**
-- Source: **Touhou**
-
----
-
-### `suwako-sanae-pocky-0000`
-
-- Artist: **cis**
-- Edit: *none*
-
-
-- Character: **Moriya Suwako**, **Kochiya Sanae**
-- Source: **Touhou**
-
----
-
-### `tenshi-reimu-pocky-0000`
-
-- Artist: **ichiyan**
-- Edit: *none*
-
-
-- Character: **Hinanawi tenshi**, **Hakurei Reimu**
-- Source: **Touhou**
-
----
-
-### `wakasagihime-kagerou-pocky-0000`
-
-- Artist: **kaginoni / かぎのに**
-- Edit: *none*
-
-
-- Character: **Wakasagihime**, **Imaizumi Kagerou**
-- Source: **Touhou**
-
----
-
-### `youmo-patchouli-pocky-0000`
-
-- Artist: **nigo**
-- Edit: *none*
-
-
-- Character: **Patchouli Knowledge**, **Konpaku Youmu**
-- Source: **Touhou**
-
----
-
-### `youmo-sanae-pocky-0000`
-
-- Artist: **Shirota Shinobu / 白田 忍**
-- Edit: *none*
-
-
-- Character: **Patchouli Knowledge**, **Kochiya Sanae**
-- Source: **Touhou**
-
----
-
-### `youmo-sanae-pocky-0000`
-
-- Artist: **Shirota Shinobu / 白田 忍**
-- Edit: *none*
-
-
-- Character: **Patchouli Knowledge**, **Kochiya Sanae**
-- Source: **Touhou**
-
----
-
-### `yuyuko-mystia-pocky-0000`
-
-- Artist: **nise nanatsura**
-- Edit: *none*
-
-
-- Character: **Saigyouji Yuyuko**, **Mystia Lorelei**
-- Source: **Touhou**
-
----
-
-### `yuyuko-yukari-pocky-0000`
-
-- Artist: **terimayo**
-- Edit: **HuyaneMatsu**
-
-
-- Character: **Saigyouji Yuyuko**, **Yakumo Yukari**
 - Source: **Touhou**
 
 ---

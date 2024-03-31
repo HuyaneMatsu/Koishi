@@ -433,10 +433,6 @@ class Action:
         DiscordException
             Unexpected exception from Discord.
         """
-        guild_id = event.guild_id
-        if not guild_id:
-            abort('Guild only command')
-        
         targets, client_in_users, user_in_users, allowed_mentions = get_allowed_users(
             client,
             event,

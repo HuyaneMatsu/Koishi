@@ -16,6 +16,7 @@ SNIPE_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
     name = 'snipe',
     description = 'snipe emojis or stickers!',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 

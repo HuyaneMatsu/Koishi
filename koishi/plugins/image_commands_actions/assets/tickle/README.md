@@ -1,10 +1,10 @@
 ### Asset Information
 
-Many creators and editors are unknown. If you know them please create a PR with it.
+Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### `remilia-flandre-tickle-0000`
+### `flandre-remilia-tickle-0000`
 
 - Artist: **yukiririn**
 - Edit: *none*
@@ -15,13 +15,13 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ---
 
-### `koishi-satori-orin-tickle-0000`
+### `koishi-orin-satori-tickle-0000`
 
 - Artist: **13-gou**
 - Edit: *none*
 
 
-- Character: **Kaenbyou Rin**, **Komeiji Koishi**, **Komeiji Satori**
+- Character: **Komeiji Koishi**, **Kaenbyou Rin**, **Komeiji Satori**
 - Source: **Touhou**
 
 ---

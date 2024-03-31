@@ -156,7 +156,7 @@ def is_command_invoker_same(event):
     if interaction is None:
         return False
     
-    if interaction.user is not event.user:
+    if interaction.user_id != event.user_id:
         return False
     
     return True

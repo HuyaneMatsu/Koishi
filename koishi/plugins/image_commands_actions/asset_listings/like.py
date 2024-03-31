@@ -4,7 +4,7 @@ from ...image_handling_core import ImageDetail
 from ...touhou_core import (
     FUTATSUIWA_MAMIZOU, HOUJUU_NUE, INABA_TEWI, JUNKO, KAKU_SEIGA, KAZAMI_YUUKA, KOMEIJI_KOISHI, MATARA_OKINA,
     MORICHIKA_RINNOSUKE, NAGAE_IKU, REIUJI_UTSUHO, RUMIA, SAIGYOUJI_YUYUKO, SHIKI_EIKI_YAMAXANADU, TATARA_KOGASA,
-    YAGOKORO_EIRIN, YAKUMO_RAN, YAKUMO_YUKARI, YOMOTSU_HISAMI
+    TOYOSATOMIMI_NO_MIKO, YAGOKORO_EIRIN, YAKUMO_RAN, YAKUMO_YUKARI, YOMOTSU_HISAMI
 )
 
 
@@ -45,6 +45,9 @@ TOUHOU_ACTION_LIKE = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683127049195590/koishi-happy-0000.png',
     ).with_target(KOMEIJI_KOISHI),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1223308356111040653/miko-older-0000.png',
+    ).with_target(TOYOSATOMIMI_NO_MIKO),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1132645810635550830/nue-huge-surprises-0000.png',
     ).with_target(HOUJUU_NUE),
