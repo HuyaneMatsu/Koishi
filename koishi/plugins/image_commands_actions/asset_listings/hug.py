@@ -4,9 +4,9 @@ from ...image_handling_core import ImageDetail
 from ...touhou_core import (
     CHEN, FUJIWARA_NO_MOKOU, HAKUREI_REIMU, HANIYASUSHIN_KEIKI, HATA_NO_KOKORO, HIJIRI_BYAKUREN, HOUJUU_NUE,
     HOURAISAN_KAGUYA, INABA_TEWI, IZAYOI_SAKUYA, JOUTOUGUU_MAYUMI, KAENBYOU_RIN, KAMISHIRASAWA_KEINE, KAZAMI_YUUKA,
-    KIRISAME_MARISA, KOMEIJI_KOISHI, KOMEIJI_SATORI, KONPAKU_YOUMU, MORIYA_SUWAKO, MURASA_MINAMITSU,
-    REISEN_UDONGEIN_INABA, REIUJI_UTSUHO, SCARLET_FLANDRE, SCARLET_REMILIA, YAGOKORO_EIRIN, YAKUMO_RAN, YAKUMO_YUKARI,
-    YASAKA_KANAKO
+    KIRISAME_MARISA, KOMEIJI_KOISHI, KOMEIJI_SATORI, KONPAKU_YOUMU, MARGATROID_ALICE, MORIYA_SUWAKO, MURASA_MINAMITSU,
+    REISEN_UDONGEIN_INABA, REIUJI_UTSUHO, SCARLET_FLANDRE, SCARLET_REMILIA, SHINKI, YAGOKORO_EIRIN, YAKUMO_RAN,
+    YAKUMO_YUKARI, YASAKA_KANAKO
 )
 
 # Source 0:
@@ -19,10 +19,17 @@ from ...touhou_core import (
 # :KoishiPc:
 
 
+
 TOUHOU_ACTION_HUG = [
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232754036675973281/alice-shinki-hug-0000.png',
+    ).with_source(SHINKI).with_target(MARGATROID_ALICE),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1223583582220456029/chen-ran-hug-0000.png',
     ).with_source(YAKUMO_RAN).with_target(CHEN),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232755638321545246/chen-ran-hug-0001.png',
+    ).with_any(CHEN).with_any(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1220328524653793303/chen-ran-yukari-hug-0000.png',
     ).with_source(CHEN).with_source(YAKUMO_RAN).with_target(YAKUMO_RAN),
@@ -112,6 +119,9 @@ TOUHOU_ACTION_HUG = [
         'https://cdn.discordapp.com/attachments/568837922288173058/1223600484682825879/koishi-satori-hug-0004.png',
     ).with_source(KOMEIJI_KOISHI).with_target(KOMEIJI_SATORI),
     ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232757559597989908/koishi-satori-hug-0005.png',
+    ).with_source(KOMEIJI_KOISHI).with_target(KOMEIJI_SATORI),
+    ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1220261434416693308/marisa-reimu-hug-0000.png',
     ).with_any(KIRISAME_MARISA).with_any(HAKUREI_REIMU),
     ImageDetail(
@@ -171,6 +181,9 @@ TOUHOU_ACTION_HUG = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1223588897133695046/remilia-satori-hug-0000.png',
     ).with_any(SCARLET_REMILIA).with_any(KOMEIJI_SATORI),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232756624452616335/remilia-satori-hug-0001.png',
+    ).with_source(KOMEIJI_SATORI).with_target(SCARLET_REMILIA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1220450004808896513/youmu-yukari-hug-0000.png',
     ).with_source(YAKUMO_YUKARI).with_target(KONPAKU_YOUMU),

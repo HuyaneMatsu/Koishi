@@ -4,9 +4,31 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
+### `alice-shinki-hug-0000`
+
+- Artist: **hiyaya (kochi michikaze)**
+- Edit: *none*
+
+
+- Character: **Margatroid Alice**, **Shinki**
+- Source: **Touhou**
+
+---
+
 ### `chen-ran-hug-0000`
 
 - Artist: **miiko (somnolent)**
+- Edit: *none*
+
+
+- Character: **Chen**, **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `chen-ran-hug-0001`
+
+- Artist: **kalmia495**
 - Edit: *none*
 
 
@@ -334,6 +356,17 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
+### `koishi-satori-hug-0005`
+
+- Artist: **senzaicha kasukadoki**
+- Edit: **HuyaneMatsu**
+
+
+- Character: **Komeiji Koishi**, **Komeiji Satori**
+- Source: **Touhou**
+
+---
+
 ### `marisa-reimu-hug-0000`
 
 - Artist: **haru aki**
@@ -547,6 +580,17 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Artist: **eringi (rmrafrn)**
 - Edit: *none*
+
+
+- Character: **Scarlet Remilia**, **Komeiji Satori**
+- Source: **Touhou**
+
+---
+
+### `remilia-satori-hug-0001`
+
+- Artist: **kameyan**
+- Edit: **HuyaneMatsu**
 
 
 - Character: **Scarlet Remilia**, **Komeiji Satori**

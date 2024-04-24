@@ -114,6 +114,17 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
+### `reisen-youmu-feed-0000`
+
+- Artist: **evandragon**
+- Edit: *none*
+
+
+- Character: **Reisen Udongein Inaba**, **Konpaku Youmu**
+- Source: **Touhou**
+
+---
+
 ### `ringo-siran-feed-0000`
 
 - Artist: **chamaruku**

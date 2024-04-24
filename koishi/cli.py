@@ -2,18 +2,11 @@ __all__ = ('main',)
 
 import sys
 
-import hata.main
+from hata.main import execute_command_from_system_parameters
 
 import config
 
-
-@hata.main.register
-def run_webapp():
-    """
-    Runs the webapp of Koishi.
-    """
-    from .web import WEBAPP
-    WEBAPP.run()
+from .commands import *
 
 
 def load_plugins():
@@ -60,7 +53,16 @@ def load_plugins():
 
 
 def main():
-    from .bot_utils import async_engine
+    from scarletio import write_exception_sync
+    
+    try:
+        from .bot_utils import async_engine
+    except ImportError as exception:
+        if not config.MARISA_MODE:
+            raise
+        
+        write_exception_sync(exception)
+        
     
     load_plugins()
     if config.MARISA_MODE:
@@ -68,4 +70,4 @@ def main():
         warn_auto_reloader_availability()
         start_auto_reloader()
     
-    hata.main.execute_command_from_system_parameters()
+    execute_command_from_system_parameters()

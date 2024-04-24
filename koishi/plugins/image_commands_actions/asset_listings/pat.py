@@ -53,6 +53,9 @@ TOUHOU_ACTION_PAT = [
         'https://cdn.discordapp.com/attachments/568837922288173058/1223524331145924648/chen-ran-pat-0002.png',
     ).with_source(YAKUMO_RAN).with_target(CHEN),
     ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232760095473930290/chen-ran-pat-0003.png',
+    ).with_source(YAKUMO_RAN).with_target(CHEN),
+    ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1223527236238442597/chiurno-pat-0000.gif',
     ).with_target(CHIRUNO),
     ImageDetail(

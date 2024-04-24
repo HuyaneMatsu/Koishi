@@ -2,9 +2,10 @@ __all__ = ('TOUHOU_ACTION_LIKE',)
 
 from ...image_handling_core import ImageDetail
 from ...touhou_core import (
-    FUTATSUIWA_MAMIZOU, HOUJUU_NUE, INABA_TEWI, JUNKO, KAKU_SEIGA, KAZAMI_YUUKA, KOMEIJI_KOISHI, MATARA_OKINA,
-    MORICHIKA_RINNOSUKE, NAGAE_IKU, REIUJI_UTSUHO, RUMIA, SAIGYOUJI_YUYUKO, SHIKI_EIKI_YAMAXANADU, TATARA_KOGASA,
-    TOYOSATOMIMI_NO_MIKO, YAGOKORO_EIRIN, YAKUMO_RAN, YAKUMO_YUKARI, YOMOTSU_HISAMI
+    FUTATSUIWA_MAMIZOU, HOUJUU_NUE, IBARAKI_KASEN, INABA_TEWI, JUNKO, KAKU_SEIGA, KAWASHIRO_NITORI, KAZAMI_YUUKA,
+    KOMEIJI_KOISHI, MATARA_OKINA, MORICHIKA_RINNOSUKE, NAGAE_IKU, REIUJI_UTSUHO, RUMIA, SAIGYOUJI_YUYUKO,
+    SHIKI_EIKI_YAMAXANADU, TATARA_KOGASA, TOYOSATOMIMI_NO_MIKO, YAGOKORO_EIRIN, YAKUMO_RAN, YAKUMO_YUKARI,
+    YOMOTSU_HISAMI
 )
 
 
@@ -40,6 +41,9 @@ TOUHOU_ACTION_LIKE = [
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683126713667756/junko-racist-0000.png',
     ).with_target(JUNKO),
     ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232733282597208174/kasen-oder-0000.png',
+    ).with_target(IBARAKI_KASEN),
+    ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1141454561563914250/kogasa-umbrella-0000.png',
     ).with_target(TATARA_KOGASA),
     ImageDetail(
@@ -48,6 +52,9 @@ TOUHOU_ACTION_LIKE = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1223308356111040653/miko-older-0000.png',
     ).with_target(TOYOSATOMIMI_NO_MIKO),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232733283100528700/nitori-smart-0000.png',
+    ).with_target(KAWASHIRO_NITORI),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1132645810635550830/nue-huge-surprises-0000.png',
     ).with_target(HOUJUU_NUE),
@@ -113,5 +120,11 @@ TOUHOU_ACTION_LIKE = [
     ).with_target(SAIGYOUJI_YUYUKO),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683106320957561/yuyuko-older-0001.png',
+    ).with_target(SAIGYOUJI_YUYUKO),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232732235858182195/yuyuko-older-0002.png',
+    ).with_target(SAIGYOUJI_YUYUKO),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232732236848173116/yuyuko-older-0003.png',
     ).with_target(SAIGYOUJI_YUYUKO),
 ]

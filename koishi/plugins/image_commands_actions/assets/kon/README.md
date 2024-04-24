@@ -466,6 +466,16 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ### `ran-kon-0033`
 
+- Artist: **kakone**
+- Edit: *none*
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-kon-0034`
+
 - Artist: **neko bocchi**
 - Edit: *none*
 
@@ -709,6 +719,17 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 - Artist: **mizore arius**
 - Edit: **HuyaneMatsu**
+
+
+- Character: **Kudamaki Tsukasa**
+- Source: **Touhou**
+
+---
+
+### `tsukasa-kon-0022`
+
+- Artist: **chunjiu**
+- Edit: *none*
 
 
 - Character: **Kudamaki Tsukasa**

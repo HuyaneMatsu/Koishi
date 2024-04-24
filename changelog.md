@@ -1,16 +1,29 @@
+### 2024-04-??
+
+- Add new `link-assets` cli command.
+- Add **4** image to `/like`.
+- Add **9** image to `/kiss`. Also remove 1 for being too explicit.
+- Add **1** image to `/pocky-kiss`.
+- Add `Shinki` touhou character.
+- Add **4** image to `/hug`.
+- Add **1** image to `/pat`.
+- Add **1** image to `/feed`.
+- Add **2** image to `/kon`.
+- Add **1** image to `/lick`.
+
 ### 2024-03-31
 
 - Add `Hakurei Miko` touhou character.
 - Add `Install me!` button under `/about`.
 - Fix a `snipe` bug when sniping reactions.
-- Add **4** images to `/pocky-kiss` (1 was there just unused).
-- Add **33** images to `/pat`.
+- Add **4** image to `/pocky-kiss` (1 was there just unused).
+- Add **33** image to `/pat`.
 - Add **1** image to `/like`.
 - Add **26** image to `/lick`.
 - Add **1** image to `/kon`.
-- Add **36** images to `/kiss` (1 was there just unused).
-- Add **51** images to `/hug`.
-- Add **2** images to `/fluff`.
+- Add **36** image to `/kiss` (1 was there just unused).
+- Add **51** image to `/hug`.
+- Add **2** image to `/fluff`.
 - Sort `/pocky-kiss` images alphabetically.
 - Grouped image handlers how will go though every registered handler before failing.
 - Sending some embeds failed.
@@ -19,7 +32,7 @@
 
 ### 2024-03-18
 
-- Add `feed` interaction with **13** images. (Will get more in the future obviously.)
+- Add `feed` interaction with **13** image. (Will get more in the future obviously.)
 - Fix interactions like `/kiss` counted the invoking user into the cooldown since a previous update fixing source
     user's mention showing up incorrectly.
 
@@ -42,7 +55,7 @@
 - Add **2** blacklisted (explicit) tags to safe booru queries.
 - Add **1** image to `/meme` command.
 - Add **2** image to `/kon` interaction.
-- Add new `/fluff` interaction with **68** images.
+- Add new `/fluff` interaction with **68** image.
 - Add `pocky` alternative version of `pocky-kiss` reply interaction.
 - Add **1** image to `/pocky-kiss` interaction.
 
@@ -176,7 +189,7 @@
 ### 2023-09-09
 
 - Add **1** image to `/like` interaction.
-- Add new `/kon` interaction (with **41** images!!).
+- Add new `/kon` interaction (with **41** image!!).
 - Fix `/automation log-satori` sent `guild_user_update` events to all guilds instead of just the current.
 
 ### 2023-09-03

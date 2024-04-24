@@ -70,6 +70,17 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
+### `chen-ran-pat-0003`
+
+- Artist: **chahan (fried rice0614)**
+- Edit: *none*
+
+
+- Character: **Chen**, **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
 ### `chiruno-pat-0000`
 
 - Artist: *unknown*

@@ -103,6 +103,39 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
+### `flandre-koishi-kiss-0003`
+
+- Artist: **sorani (kaeru0768)**
+- Edit: *none*
+
+
+- Character: **Scarlet Flandre**, **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### `flandre-koishi-kiss-0004`
+
+- Artist: **sorani (kaeru0768)**
+- Edit: *none*
+
+
+- Character: **Scarlet Flandre**, **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### `flandre-koishi-kiss-0005`
+
+- Artist: **sorani (kaeru0768)**
+- Edit: *none*
+
+
+- Character: **Scarlet Flandre**, **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
 ### `flandre-meiling-remilia-sakuya-kiss-0000`
 
 - Artist: **busuneko**
@@ -143,6 +176,28 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 
 - Character: **Yasaka Kanako**, **Moriya Suwako**, **Kochiya Sanae**
+- Source: **Touhou**
+
+---
+
+### `kasen-komachi-kiss-0000`
+
+- Artist: **orz (kagewaka)**
+- Edit: *none*
+
+
+- Character: **Ibaraki Kasen**, **Onozuka Komachi**
+- Source: **Touhou**
+
+---
+
+### `keine-mokou-kiss-0000`
+
+- Artist: **harusame (unmei no ikasumi)**
+- Edit: *none*
+
+
+- Character: **Kamishirasawa Keine**, **Fujiwara no Mokou**
 - Source: **Touhou**
 
 ---
@@ -202,6 +257,28 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
+### `mamizou-ran-kiss-0000`
+
+- Artist: **littlecloudie**
+- Edit: *none*
+
+
+- Character: **Futatsuiwa Mamizou**, **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `maribel-renko-kiss-0000`
+
+- Artist: **re ghotion**
+- Edit: *none*
+
+
+- Character: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
 ### `koishi-satori-kiss-0001`
 
 - Artist: **Echigo yaya / 越後やや**
@@ -227,6 +304,17 @@ Some authors might be unknown. If you know them please create a PR with it.
 ### `marisa-reimu-kiss-0000`
 
 - Artist: **sorairo porin**
+- Edit: *none*
+
+
+- Character: **Kirisame Marisa**, **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### `marisa-reimu-kiss-0001`
+
+- Artist: *unknown*
 - Edit: *none*
 
 
@@ -301,6 +389,17 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
+### `parsee-satori-kiss-0000`
+
+- Artist: **ootsuki wataru**
+- Edit: *none*
+
+
+- Character: **Mizuhashi Parsee**, **Komeiji Satori**
+- Source: **Touhou**
+
+---
+
 ### `ran-yukari-kiss-0000`
 
 - Artist: **masanaga (tsukasa)**
@@ -363,17 +462,6 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 
 - Character: **Ibuki Suika**, **Yakumo Yukari**, **Saigyouji Yuyuko**
-- Source: **Touhou**
-
----
-
-### `youmu-yuyuko-kiss-0000`
-
-- Artist: **petenshi (dr. vermilion)**
-- Edit: *none*
-
-
-- Character: **Konpaku Youmu**, **Saigyouji Yuyuko**
 - Source: **Touhou**
 
 ---

@@ -137,6 +137,9 @@ TOUHOU_ACTION_KON = [
         'https://cdn.discordapp.com/attachments/568837922288173058/1213440394717691934/ran-kon-0033.png',
     ).with_source(YAKUMO_RAN),
     ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232772387989225522/ran-kon-0034.png',
+    ).with_source(YAKUMO_RAN),
+    ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1149990400476598332/tsukasa-kon-0000.png',
     ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
@@ -201,6 +204,9 @@ TOUHOU_ACTION_KON = [
     ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1223570385669460088/tsukasa-kon-0021.png',
+    ).with_source(KUDAMAKI_TSUKASA),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232772388421111870/tsukasa-kon-0022.png',
     ).with_source(KUDAMAKI_TSUKASA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1150011131721695292/tsukasa-ran-kon-0000.png',

@@ -367,6 +367,17 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
+### `mamizou-ran-pocky-0000`
+
+- Artist: **littlecloudie**
+- Edit: **HuyaneMatsu**
+
+
+- Character: **Futatsuiwa Mamizou**, **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
 ### `maribel-renko-pocky-0000`
 
 - Artist: **senba chidori / 千羽チドリ**

@@ -13,7 +13,7 @@ from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoMod
     ERROR_CODES, ComponentType, Sticker, StickerPack, Permission, EntitlementOwnerType, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ExplicitContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, Oauth2User, parse_oauth2_redirect_url, Channel, Role, GUILDS, CLIENTS, \
-    Team, WebhookType, Guild, ForumTag, SoundboardSound, OnboardingMode
+    Team, WebhookType, Guild, ForumTag, SoundboardSound, OnboardingMode, Poll
 from scarletio import sleep, Task, TaskGroup, AsyncIO, CancelledError, IgnoreCaseMultiValueDictionary, \
     alchemy_incendiary,  EventThread, change_on_switch, to_json, from_json
 
@@ -3488,6 +3488,22 @@ async def entitlement_delete(client):
         client,
         METHOD_DELETE,
         f'{API_ENDPOINT}/applications/{client.application.id}/entitlements{entitlement_id}',
+    )
+
+
+async def poll_finalize(client, message):
+    await bypass_request(
+        client,
+        METHOD_POST,
+        f'{API_ENDPOINT}/channels/{message.channel_id}/polls/{message.id}/expire',
+    )
+
+
+async def poll_result_user_get_chunk(client, message):
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/channels/{message.channel_id}/polls/{message.id}/answers/{1!s}',
     )
 
 
@@ -8267,3 +8283,51 @@ async def rate_limit_test_0211(client, message):
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0211') as RLT:
         await application_edit_own(client, description = client.application.description)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0212(client, message):
+    """
+    Poll finalize.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0212') as RLT:
+        message = await client.message_create(
+            channel, Poll(question = 'hey', answers = ['mister', 'sister'], duration = 3600)
+        )
+        await poll_finalize(client, message)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0213(client, message):
+    """
+    Mass poll finalize.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0213') as RLT:
+        
+        messages = []
+        for _ in range(10):
+            message = await client.message_create(
+                channel, Poll(question = 'hey', answers = ['mister', 'sister'], duration = 3600)
+            )
+            messages.append(message)
+        
+        task_group = TaskGroup(KOKORO)
+        for message in messages:
+            task_group.create_task(poll_finalize(client, message))
+        
+        await task_group.wait_all()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0214(client, message):
+    """
+    Poll user get user chunk.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0214') as RLT:
+        message = await client.message_create(
+            channel, Poll(question = 'hey', answers = ['mister', 'sister'], duration = 3600)
+        )
+        await poll_result_user_get_chunk(client, message)

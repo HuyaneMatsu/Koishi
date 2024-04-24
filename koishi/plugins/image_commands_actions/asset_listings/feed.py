@@ -3,7 +3,8 @@ __all__ = ('TOUHOU_ACTION_FEED',)
 from ...image_handling_core import ImageDetail
 from ...touhou_core import (
     CHIRUNO, HAKUREI_REIMU, HINANAWI_TENSHI, IZAYOI_SAKUYA, KIRISAME_MARISA, KOMEIJI_KOISHI, KONPAKU_YOUMU, NAGAE_IKU,
-    RINGO, RUMIA, SAIGYOUJI_YUYUKO, SCARLET_FLANDRE, SCARLET_REMILIA, SEIRAN, TOUTETSU_YUUMA, TOYOSATOMIMI_NO_MIKO
+    REISEN_UDONGEIN_INABA, RINGO, RUMIA, SAIGYOUJI_YUYUKO, SCARLET_FLANDRE, SCARLET_REMILIA, SEIRAN, TOUTETSU_YUUMA,
+    TOYOSATOMIMI_NO_MIKO
 )
 
 # https://safebooru.org/index.php?page=post&s=list&tags=touhou+feeding+
@@ -40,6 +41,9 @@ TOUHOU_ACTION_FEED = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1219259653997723749/reimu-sakuya-feed-0000.png',
     ).with_source(IZAYOI_SAKUYA).with_target(HAKUREI_REIMU),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232761508631547914/reisen-youmu-feed-0000.gif',
+    ).with_source(REISEN_UDONGEIN_INABA).with_target(KONPAKU_YOUMU),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1219261244368883722/ringo-seiran-feed-0000.png',
     ).with_source(SEIRAN).with_target(RINGO),

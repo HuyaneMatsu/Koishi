@@ -92,6 +92,17 @@ Some authors might be unknown. If you know them please create a PR with it.
 
 ---
 
+### `chen-orin-lick-0000`
+
+- Artist: **masanaga (tsukasa)**
+- Edit: *none*
+
+
+- Character: **Chen**, **Kaenbyou Rin**
+- Source: **Touhou**
+
+---
+
 ### `chiruno-letty-lick-0000`
 
 - Artist: **hirosato**

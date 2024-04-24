@@ -2,11 +2,12 @@ __all__ = ('TOUHOU_ACTION_KISS',)
 
 from ...image_handling_core import ImageDetail
 from ...touhou_core import (
-    CHEN, FUJIWARA_NO_MOKOU, HAKUREI_REIMU, HATA_NO_KOKORO, HIMEKAIDOU_HATATE, HONG_MEILING, HOUJUU_NUE,
-    HOURAISAN_KAGUYA, INABA_TEWI, IZAYOI_SAKUYA, KAENBYOU_RIN, KIRISAME_MARISA, KOCHIYA_SANAE, KOMEIJI_KOISHI,
-    KOMEIJI_SATORI, KONPAKU_YOUMU, MARGATROID_ALICE, MORICHIKA_RINNOSUKE, MORIYA_SUWAKO, MURASA_MINAMITSU,
+    CHEN, FUJIWARA_NO_MOKOU, FUTATSUIWA_MAMIZOU, HAKUREI_REIMU, HATA_NO_KOKORO, HEARN_MARIBEL, HIMEKAIDOU_HATATE,
+    HONG_MEILING, HOUJUU_NUE, HOURAISAN_KAGUYA, IBARAKI_KASEN, INABA_TEWI, IZAYOI_SAKUYA, KAENBYOU_RIN,
+    KAMISHIRASAWA_KEINE, KIRISAME_MARISA, KOCHIYA_SANAE, KOMEIJI_KOISHI, KOMEIJI_SATORI, KONPAKU_YOUMU,
+    MARGATROID_ALICE, MIZUHASHI_PARSEE, MORICHIKA_RINNOSUKE, MORIYA_SUWAKO, MURASA_MINAMITSU, ONOZUKA_KOMACHI,
     PATCHOULI_KNOWLEDGE, REISEN_UDONGEIN_INABA, REIUJI_UTSUHO, SAIGYOUJI_YUYUKO, SCARLET_FLANDRE, SCARLET_REMILIA,
-    SHAMEIMARU_AYA, YAGOKORO_EIRIN, YAKUMO_RAN, YAKUMO_YUKARI, YASAKA_KANAKO
+    SHAMEIMARU_AYA, USAMI_RENKO, YAGOKORO_EIRIN, YAKUMO_RAN, YAKUMO_YUKARI, YASAKA_KANAKO
 )
 
 # Source 0:
@@ -51,6 +52,15 @@ TOUHOU_ACTION_KISS = [
         'https://cdn.discordapp.com/attachments/568837922288173058/1223985953857867787/flandre-koishi-kiss-0002.png',
     ).with_source(KOMEIJI_KOISHI).with_target(SCARLET_FLANDRE),
     ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232740729609261066/flandre-koishi-kiss-0003.png',
+    ).with_source(SCARLET_FLANDRE).with_target(KOMEIJI_KOISHI),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232740729944674345/flandre-koishi-kiss-0004.png',
+    ).with_any(SCARLET_FLANDRE).with_any(KOMEIJI_KOISHI),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232740730292666368/flandre-koishi-kiss-0005.png',
+    ).with_any(SCARLET_FLANDRE).with_any(KOMEIJI_KOISHI),
+    ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1223978928780083331/flandre-meiling-remilia-sakuya-kiss-0000.png',
     ).with_source(SCARLET_REMILIA).with_target(IZAYOI_SAKUYA),
     ImageDetail(
@@ -62,6 +72,12 @@ TOUHOU_ACTION_KISS = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1220254791570292898/kanako-sanae-sawuko-kiss-0000.png',
     ).with_source(YASAKA_KANAKO).with_source(MORIYA_SUWAKO).with_target(KOCHIYA_SANAE),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232738040825512047/kasen-komachi-kiss-0000.png',
+    ).with_source(IBARAKI_KASEN).with_target(ONOZUKA_KOMACHI),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232735515577684079/keine-mokou-kiss-0000.png',
+    ).with_source(KAMISHIRASAWA_KEINE).with_target(FUJIWARA_NO_MOKOU),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1223989690118570044/koishi-kokoro-kiss-0000.png',
     ).with_source(KOMEIJI_KOISHI).with_target(HATA_NO_KOKORO),
@@ -81,14 +97,23 @@ TOUHOU_ACTION_KISS = [
         'https://cdn.discordapp.com/attachments/568837922288173058/1223986287342653590/koishi-satori-kiss-0001.png',
     ).with_source(KOMEIJI_KOISHI).with_target(KOMEIJI_SATORI),
     ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232736399153954966/mamizou-ran-kisss-0000.png',
+    ).with_source(YAKUMO_RAN).with_target(FUTATSUIWA_MAMIZOU),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232741928832073825/maribel-renko-kiss-0000.png',
+    ).with_source(HEARN_MARIBEL).with_target(USAMI_RENKO),
+    ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1220250378562703371/marisa-patchouli-kiss-0000.png',
     ).with_any(KIRISAME_MARISA).with_any(PATCHOULI_KNOWLEDGE),
     ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1220255012069048320/marisa-sakuya-kiss-0000.png',
-    ).with_source(KIRISAME_MARISA).with_target(IZAYOI_SAKUYA),
-    ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1220247261976592494/marisa-reimu-kiss-0000.png',
     ).with_source(HAKUREI_REIMU).with_target(KIRISAME_MARISA),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232744135073468416/marisa-reimu-kiss-0001.png',
+    ).with_any(HAKUREI_REIMU).with_any(KIRISAME_MARISA),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1220255012069048320/marisa-sakuya-kiss-0000.png',
+    ).with_source(KIRISAME_MARISA).with_target(IZAYOI_SAKUYA),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1220257838161461308/meiling-sakuya-kiss-0000.png',
     ).with_source(HONG_MEILING).with_target(IZAYOI_SAKUYA),
@@ -104,6 +129,9 @@ TOUHOU_ACTION_KISS = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1223889656362569728/orin-reimu-kiss-0000.png',
     ).with_source(KAENBYOU_RIN).with_target(HAKUREI_REIMU),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232746386378719242/parsee-satori-kiss-0000.png',
+    ).with_source(KOMEIJI_SATORI).with_target(MIZUHASHI_PARSEE),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1223976841182707762/ran-yukari-kiss-0000.png',
     ).with_source(YAKUMO_YUKARI).with_target(YAKUMO_RAN),
@@ -122,9 +150,6 @@ TOUHOU_ACTION_KISS = [
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1223980216804835360/suika-yukari-yuyuko-kiss-0000.png',
     ).with_any(YAKUMO_YUKARI).with_any(SAIGYOUJI_YUYUKO),
-    ImageDetail(
-        'https://cdn.discordapp.com/attachments/568837922288173058/1220246770051715143/youmu-yuyuko-kiss-0000.png',
-    ).with_source(SAIGYOUJI_YUYUKO).with_target(KONPAKU_YOUMU),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1223982548124831885/yukari-yuyuko-kiss-0000.png',
     ).with_any(YAKUMO_YUKARI).with_any(SAIGYOUJI_YUYUKO),

@@ -114,6 +114,17 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ---
 
+### `kasen-older-0000`
+
+- Artist: *unknown*
+- Edit: *unknown*
+
+
+- Character: **Ibaraki Kasen**
+- Source: **Touhou**
+
+---
+
 ### `kogasa-umbrella-0000`
 
 - Artist: *unknown*
@@ -143,6 +154,17 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 
 - Character: **Toyosatomimi no Miko**
+- Source: **Touhou**
+
+---
+
+### `nitori-smart-0000`
+
+- Artist: *unknown*
+- Edit: *unknown*
+
+
+- Character: **Kawashiro Nitori**
 - Source: **Touhou**
 
 ---
@@ -375,6 +397,28 @@ Many creators and editors are unknown. If you know them please create a PR with 
 ---
 
 ### `yuyuko-older-0001`
+
+- Artist: *unknown*
+- Edit: *unknown*
+
+
+- Character: **Saigyouji Yuyuko**
+- Source: **Touhou**
+
+---
+
+### `yuyuko-older-0002`
+
+- Artist: *unknown*
+- Edit: *unknown*
+
+
+- Character: **Saigyouji Yuyuko**
+- Source: **Touhou**
+
+---
+
+### `yuyuko-older-0003`
 
 - Artist: *unknown*
 - Edit: *unknown*
