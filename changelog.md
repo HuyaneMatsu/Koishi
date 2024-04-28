@@ -17,7 +17,7 @@
 - Add `/accessibility preference-settings set-preferred-image-source`.
 - Action commands such as `/hug` now respect `preferred-client` when replying.
 - Action commands now respect `preferred-image-source`.
-- Action commands now respect `/automation log-satori` now also logs `reaction-add` and `reaction-delete` events.
+- `/automation log-satori` now also logs `reaction-add` and `reaction-delete` events.
 
 ### 2024-03-31
 
