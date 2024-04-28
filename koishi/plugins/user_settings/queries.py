@@ -357,9 +357,9 @@ async def _save_user_settings_with_connector(user_settings, connector):
         response = await connector.execute(
             USER_SETTINGS_TABLE.insert().values(
                 user_id = user_settings.user_id,
-                user_daily_by_waifu = user_settings.user_daily_by_waifu,
-                user_proposal = user_settings.user_proposal,
-                user_daily_reminder = user_settings.user_daily_reminder,
+                notification_daily_by_waifu = user_settings.notification_daily_by_waifu,
+                notification_proposal = user_settings.notification_proposal,
+                notification_daily_reminder = user_settings.notification_daily_reminder,
                 preferred_client_id = user_settings.preferred_client_id,
                 preferred_image_source = user_settings.preferred_image_source,
             ).returning(    
@@ -378,9 +378,9 @@ async def _save_user_settings_with_connector(user_settings, connector):
                 user_settings_model.id == entry_id,
             ).values(
                 user_id = user_settings.user_id,
-                user_daily_by_waifu = user_settings.user_daily_by_waifu,
-                user_proposal = user_settings.user_proposal,
-                user_daily_reminder = user_settings.user_daily_reminder,
+                notification_daily_by_waifu = user_settings.notification_daily_by_waifu,
+                notification_proposal = user_settings.notification_proposal,
+                notification_daily_reminder = user_settings.notification_daily_reminder,
                 preferred_client_id = user_settings.preferred_client_id,
                 preferred_image_source = user_settings.preferred_image_source,
             )

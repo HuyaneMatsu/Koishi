@@ -514,7 +514,7 @@ class Action:
                 if (image_detail is not None):
                     break
             
-            if handler.is_weightale():
+            if handler.supports_weight_mapping():
                 weight_map = await get_preferred_image_source_weight_map(
                     [*source_user.id, *(target.id for target in target_users)]
                 )

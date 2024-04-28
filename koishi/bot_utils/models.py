@@ -274,14 +274,14 @@ if (DB_ENGINE is not None):
     
     
     class user_settings_model(BASE):
-        __tablename__ = 'NOTIFICATION_SETTINGS'
+        __tablename__ = 'USER_SETTINGS'
         id = Column(Int64, nullable = False, primary_key = True)
         user_id = Column(Int64, nullable = False)
         notification_daily_by_waifu = Column(Boolean, default = True, nullable = False)
         notification_proposal = Column(Boolean, default = True, nullable = False)
         notification_daily_reminder = Column(Boolean, default = True, nullable = False)
         preferred_client_id = Column(Int64, default = 0, nullable = False)
-        preferred_image_source = Column(Int16, defualt = 0, nullable = False)
+        preferred_image_source = Column(Int16, default = 0, nullable = False)
     
     
     USER_SETTINGS_TABLE = user_settings_model.__table__
