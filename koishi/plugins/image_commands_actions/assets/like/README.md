@@ -26,6 +26,17 @@ Many creators and editors are unknown. If you know them please create a PR with 
 
 ---
 
+### `eirin-older-0001`
+
+- Artist: *unknown*
+- Edit: *unknown*
+
+
+- Character: **Yagokoro Eirin**
+- Source: **Touhou**
+
+---
+
 ### `futatsuiwa-older-0000`
 
 - Artist: *unknown*
@@ -211,7 +222,20 @@ Many creators and editors are unknown. If you know them please create a PR with 
 - Character: **Reiuji Utsuho**
 - Source: **Touhou**
 
+---
+
 ### `ran-fluffy-tail-0000`
+
+- Artist: *unknown*
+- Edit: *unknown*
+
+
+- Character: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### `ran-older-tail-0000`
 
 - Artist: *unknown*
 - Edit: *unknown*

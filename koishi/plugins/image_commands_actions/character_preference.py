@@ -18,7 +18,7 @@ async def get_preferred_image(image_handler, source_user, target_users):
         Image handler.
     source_user : ``ClientUserBase``
         Source user.
-    target_users : `set<ClientUserBase>`
+    target_users : `list<ClientUserBase>`
         Target users(s).
     
     Returns

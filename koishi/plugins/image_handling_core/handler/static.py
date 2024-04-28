@@ -14,10 +14,13 @@ class ImageHandlerStatic(ImageHandlerBase):
     Attributes
     ----------
     _images : `list` of ``ImageDetail``
+        The registered imaged.
+    _source : `int`
+        Image source identifier for preference adjustment.
     """
-    __slots__ = ('_images', )
+    __slots__ = ('_images', '_source')
     
-    def __new__(cls, images):
+    def __new__(cls, images, source):
         """
         Creates a new static image handler.
         
@@ -25,9 +28,12 @@ class ImageHandlerStatic(ImageHandlerBase):
         ---------
         images : `list` of ``ImageDetail``
             The images to return values from if required.
+        source : `int`
+            Image source identifier for preference adjustment.
         """
         self = object.__new__(cls)
         self._images = images
+        self._source = source
         return self
     
     
@@ -66,3 +72,8 @@ class ImageHandlerStatic(ImageHandlerBase):
     @copy_docs(ImageHandlerBase.iter_character_filterable)
     def iter_character_filterable(self):
         yield from self._images
+
+    
+    @copy_docs(ImageHandlerBase.get_image_source)
+    def get_image_source(self):
+        return self._source

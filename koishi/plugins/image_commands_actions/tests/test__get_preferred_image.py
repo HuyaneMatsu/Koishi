@@ -4,6 +4,7 @@ from hata import User
 from ...image_handling_core import ImageDetail, ImageHandlerStatic
 from ...touhou_character_preference import CharacterPreference
 from ...touhou_core import KAENBYOU_RIN, KOMEIJI_KOISHI, KOMEIJI_SATORI
+from ...user_settings import PREFERRED_IMAGE_SOURCE_TOUHOU
 
 from ..character_preference import get_preferred_image
 
@@ -20,12 +21,15 @@ def _iter_options():
     image_detail_2 = ImageDetail('https://orindance.party/').with_source(KOMEIJI_KOISHI).with_target(KAENBYOU_RIN)
     image_detail_3 = ImageDetail('https://orindance.party/').with_source(KAENBYOU_RIN).with_target(KOMEIJI_KOISHI)
     
-    image_handler = ImageHandlerStatic([
-        image_detail_0,
-        image_detail_1,
-        image_detail_2,
-        image_detail_3,
-    ])
+    image_handler = ImageHandlerStatic(
+        [
+            image_detail_0,
+            image_detail_1,
+            image_detail_2,
+            image_detail_3,
+        ],
+        PREFERRED_IMAGE_SOURCE_TOUHOU,
+    )
     
     yield (
         image_handler,

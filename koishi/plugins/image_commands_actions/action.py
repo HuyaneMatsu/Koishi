@@ -7,6 +7,7 @@ from hata.ext.slash import abort
 
 from ..embed_image_refresh import schedule_image_refresh
 from ..image_handling_core import add_embed_provider
+from ..user_settings import get_preferred_image_source_weight_map, is_preferred_image_source_weight_map_valuable
 
 from .cooldown import CooldownHandler
 
@@ -504,13 +505,25 @@ class Action:
             content = build_response(client, self.verb, source_user, targets, client_in_users)
             handler = self.handler
         
+        target_users = [target for target in targets if isinstance(target, ClientUserBase)]
+        
         # Use goto
         while True:
             if handler.is_character_filterable():
-                image_detail = await get_preferred_image(handler, source_user, targets)
+                image_detail = await get_preferred_image(handler, source_user, target_users)
                 if (image_detail is not None):
                     break
-        
+            
+            if handler.is_weightale():
+                weight_map = await get_preferred_image_source_weight_map(
+                    [*source_user.id, *(target.id for target in target_users)]
+                )
+                if is_preferred_image_source_weight_map_valuable(weight_map):
+                    image_detail = await handler.get_image_weighted(
+                        client, event, content = content, allowed_mentions = allowed_mentions, silent = True,
+                    )
+                    break
+            
             image_detail = await handler.get_image(
                 client, event, content = content, allowed_mentions = allowed_mentions, silent = True,
             )

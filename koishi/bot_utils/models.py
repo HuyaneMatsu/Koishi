@@ -47,8 +47,8 @@ AUTOMATION_CONFIGURATION_TABLE = None
 character_preference_model = None
 CHARACTER_PREFERENCE_TABLE = None
 
-notification_settings_model = None
-NOTIFICATION_SETTINGS_TABLE = None
+user_settings_model = None
+USER_SETTINGS_TABLE = None
 
 blacklist_model = None
 BLACKLIST_TABLE = None
@@ -273,16 +273,18 @@ if (DB_ENGINE is not None):
     CHARACTER_PREFERENCE_TABLE = character_preference_model.__table__
     
     
-    class notification_settings_model(BASE):
+    class user_settings_model(BASE):
         __tablename__ = 'NOTIFICATION_SETTINGS'
         id = Column(Int64, nullable = False, primary_key = True)
         user_id = Column(Int64, nullable = False)
-        daily_by_waifu = Column(Boolean, default = True, nullable = False)
-        proposal = Column(Boolean, default = True, nullable = False)
-        daily_reminder = Column(Boolean, default = True, nullable = False)
-        notifier_client_id = Column(Int64, default = 0, nullable = False)
+        notification_daily_by_waifu = Column(Boolean, default = True, nullable = False)
+        notification_proposal = Column(Boolean, default = True, nullable = False)
+        notification_daily_reminder = Column(Boolean, default = True, nullable = False)
+        preferred_client_id = Column(Int64, default = 0, nullable = False)
+        preferred_image_source = Column(Int16, defualt = 0, nullable = False)
     
-    NOTIFICATION_SETTINGS_TABLE = notification_settings_model.__table__
+    
+    USER_SETTINGS_TABLE = user_settings_model.__table__
     
     
     class blacklist_model(BASE):

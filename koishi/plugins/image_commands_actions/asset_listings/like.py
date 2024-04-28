@@ -17,6 +17,9 @@ TOUHOU_ACTION_LIKE = [
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683125082062958/eirin-older-0000.png',
     ).with_target(YAGOKORO_EIRIN),
     ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232790794923020411/eirin-older-0001.png',
+    ).with_target(YAGOKORO_EIRIN),
+    ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683125367296040/futatsuiwa-older-0000.png',
     ).with_target(FUTATSUIWA_MAMIZOU),
     ImageDetail(
@@ -69,6 +72,9 @@ TOUHOU_ACTION_LIKE = [
     ).with_target(REIUJI_UTSUHO),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1132645810908176414/ran-fluffy-tail-0000.png',
+    ).with_target(YAKUMO_RAN),
+    ImageDetail(
+        'https://cdn.discordapp.com/attachments/568837922288173058/1232790795405230202/ran-older-0000.png',
     ).with_target(YAKUMO_RAN),
     ImageDetail(
         'https://cdn.discordapp.com/attachments/568837922288173058/1119683127468621824/rumia-older-0000.png',

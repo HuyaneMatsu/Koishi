@@ -5,7 +5,7 @@ from hata.ext.slash import Button
 
 from config import FLANDRE_ID
 
-from ..notification_settings import NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_REMINDER_DISABLE
+from ..user_settings import USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_REMINDER_DISABLE
 
 
 IMAGE_ORIN_POKE = 'https://cdn.discordapp.com/attachments/568837922288173058/1211958360107257856/orin-poke-0000.png'
@@ -29,7 +29,7 @@ def _notification_builder_daily_reminder_default():
         ),
         Button(
             'I don\'t want notifs, nya!!',
-            custom_id = NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_REMINDER_DISABLE,
+            custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_REMINDER_DISABLE,
         ),
     )
 
@@ -51,7 +51,7 @@ def _notification_builder_daily_reminder_flandre():
         ),
         Button(
             'Go back to your basement!!',
-            custom_id = NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_REMINDER_DISABLE,
+            custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_REMINDER_DISABLE,
         ),
     )
 
@@ -61,13 +61,13 @@ NOTIFICATION_BUILDERS_DAILY_REMINDER = {
 }
 
 
-def build_notification_daily_reminder(notifier_client_id):
+def build_notification_daily_reminder(preferred_client_id):
     """
     Notification builder for daily reminder.
     
     Parameters
     ----------
-    notifier_client_id : `int`
+    preferred_client_id : `int`
         The notifier client's identifier to select style for.
     
     Returns
@@ -76,6 +76,6 @@ def build_notification_daily_reminder(notifier_client_id):
     components : ``Component``
     """
     notification_builder = NOTIFICATION_BUILDERS_DAILY_REMINDER.get(
-        notifier_client_id, _notification_builder_daily_reminder_default
+        preferred_client_id, _notification_builder_daily_reminder_default
     )
     return notification_builder()

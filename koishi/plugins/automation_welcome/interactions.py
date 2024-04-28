@@ -34,7 +34,7 @@ def get_censor_reason_for_message_content(message_content):
         return 'Urls in the message content are forbidden.'
 
 
-async def check_should_censor_and_notify(client, event, message_content):
+async def check_censor_and_notify(client, event, message_content):
     """
     Checks whether the given message should be censored and censors it if applicable.
     
@@ -51,11 +51,11 @@ async def check_should_censor_and_notify(client, event, message_content):
     
     Returns
     -------
-    passed : `bool`
+    notified : `bool`
     """
     censor_reason = get_censor_reason_for_message_content(message_content)
     if censor_reason is None:
-        return False
+        return True
     
     await client.interaction_component_acknowledge(event)
     await client.interaction_followup_message_create(
@@ -63,7 +63,7 @@ async def check_should_censor_and_notify(client, event, message_content):
         content = censor_reason,
         show_for_invoking_user_only = True,
     )
-    return True
+    return False
 
 
 def get_joined_user(event):
@@ -107,13 +107,13 @@ async def check_joined_user_and_notify(client, event, joined_user):
     
     Returns
     -------
-    passed : `bool`
+    notified : `bool`
     """
     if joined_user is None:
-        return True
+        return False
     
     if joined_user is not event.user:
-        return False
+        return True
     
     await client.interaction_component_acknowledge(event)
     await client.interaction_followup_message_create(
@@ -121,7 +121,50 @@ async def check_joined_user_and_notify(client, event, joined_user):
         content = 'Sorry, but you shall not welcome yourself. Please wait for someone else to join to welcome them.',
         show_for_invoking_user_only = True,
     )
-    return True
+    return False
+
+
+async def check_user_left_and_notify(client, event, joined_user):
+    """
+    Checks whether the joined user is not in the guild. If yes notifies.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    joined_user : `None | ClientUserBase`
+        The user who joined.
+    
+    Returns
+    -------
+    notified : `bool`
+    """
+    if joined_user is None:
+        return False
+    
+    guild = event.guild
+    if guild is None:
+        return False
+    
+    if joined_user.id in guild.users.keys():
+        return True
+    
+    await client.interaction_component_acknowledge(event)
+    await client.interaction_followup_message_create(
+        event,
+        content = 'They left, I wonder what happened to them, ehehe..',
+        show_for_invoking_user_only = True,
+    )
+    
+    await client.interaction_response_message_edit(
+        event,
+        components = None,
+    )
+    return False
     
 
 async def check_expired_and_notify(client, event):
@@ -139,10 +182,10 @@ async def check_expired_and_notify(client, event):
     
     Returns
     -------
-    passed : `bool`
+    notified : `bool`
     """
     if event.id - event.message.id <= REPLY_EXPIRES_AFTER:
-        return False
+        return True
     
     await client.interaction_component_acknowledge(event)
     await client.interaction_followup_message_create(
@@ -155,7 +198,7 @@ async def check_expired_and_notify(client, event):
         event,
         components = None,
     )
-    return True
+    return False
 
 
 async def check_cache_and_notify(client, event, actioning):
@@ -175,7 +218,7 @@ async def check_cache_and_notify(client, event, actioning):
     
     Returns
     -------
-    passed : `bool`
+    notified : `bool`
     """
     if actioning:
         check = put_reply_in_cache
@@ -183,7 +226,7 @@ async def check_cache_and_notify(client, event, actioning):
         check = is_reply_in_cache
     
     if not check(event.guild_id, event.message.id, event.user_id):
-        return False
+        return True
     
     await client.interaction_component_acknowledge(event)
     await client.interaction_followup_message_create(
@@ -191,7 +234,7 @@ async def check_cache_and_notify(client, event, actioning):
         content = 'You shall not welcome twice :3',
         show_for_invoking_user_only = True,
     )
-    return True
+    return False
 
 
 def process_custom_message(custom_message_content):
@@ -279,13 +322,16 @@ async def welcome_reply(client, event):
         The received interaction event.
     """
     joined_user = get_joined_user(event)
-    if await check_joined_user_and_notify(client, event, joined_user):
+    if not await check_joined_user_and_notify(client, event, joined_user):
         return
     
-    if await check_expired_and_notify(client, event):
+    if not await check_user_left_and_notify(client, event, joined_user):
         return
     
-    if await check_cache_and_notify(client, event, True):
+    if not await check_expired_and_notify(client, event):
+        return
+    
+    if not await check_cache_and_notify(client, event, True):
         return
     
     await create_welcome_reply(client, event, joined_user, None)
@@ -310,13 +356,16 @@ async def welcome_reply_custom_form(client, event):
     form : `None | InteractionForm`
     """
     joined_user = get_joined_user(event)
-    if await check_joined_user_and_notify(client, event, joined_user):
+    if not await check_joined_user_and_notify(client, event, joined_user):
         return
     
-    if await check_expired_and_notify(client, event):
+    if not await check_user_left_and_notify(client, event, joined_user):
         return
     
-    if await check_cache_and_notify(client, event, False):
+    if not await check_expired_and_notify(client, event):
+        return
+    
+    if not await check_cache_and_notify(client, event, False):
         return
     
     
@@ -352,16 +401,19 @@ async def welcome_reply_custom_form(client, event, *, message_content):
         Content to send.
     """
     joined_user = get_joined_user(event)
-    if await check_joined_user_and_notify(client, event, joined_user):
+    if not await check_joined_user_and_notify(client, event, joined_user):
         return
     
-    if await check_expired_and_notify(client, event):
+    if not await check_user_left_and_notify(client, event, joined_user):
         return
     
-    if await check_cache_and_notify(client, event, True):
+    if not await check_expired_and_notify(client, event):
         return
     
-    if await check_should_censor_and_notify(client, event, message_content):
+    if not await check_cache_and_notify(client, event, True):
+        return
+    
+    if not await check_censor_and_notify(client, event, message_content):
         return
     
     await create_welcome_reply(client, event, joined_user, message_content)

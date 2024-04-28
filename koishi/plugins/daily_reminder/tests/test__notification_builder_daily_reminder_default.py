@@ -1,7 +1,7 @@
 import vampytest
 from hata import Component, ComponentType, Embed
 
-from ...notification_settings import NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_REMINDER_DISABLE
+from ...user_settings import USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_REMINDER_DISABLE
 
 from ..builders import _notification_builder_daily_reminder_default, IMAGE_ORIN_POKE
 
@@ -33,6 +33,6 @@ def test__notification_builder_daily_reminder_default():
         Component(
             component_type = ComponentType.button,
             label = 'I don\'t want notifs, nya!!',
-            custom_id = NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_REMINDER_DISABLE,
+            custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_REMINDER_DISABLE,
         ),
     )

@@ -1,7 +1,7 @@
-### 2024-04-??
+### 2024-04-28
 
 - Add new `link-assets` cli command.
-- Add **4** image to `/like`.
+- Add **6** image to `/like`.
 - Add **9** image to `/kiss`. Also remove 1 for being too explicit.
 - Add **1** image to `/pocky-kiss`.
 - Add `Shinki` touhou character.
@@ -10,6 +10,14 @@
 - Add **1** image to `/feed`.
 - Add **2** image to `/kon`.
 - Add **1** image to `/lick`.
+- `/automation welcome reply` now will prompt an error message if the user already left.
+- Fix an error in `/automation logging satori` when rendering activity type change.
+- Move `/accessibility notification-settings set-notifier` to `/accessibility preference-settings set-preferred-client`.
+- Add `/accessibility preference-settings show`.
+- Add `/accessibility preference-settings set-preferred-image-source`.
+- Action commands such as `/hug` now respect `preferred-client` when replying.
+- Action commands now respect `preferred-image-source`.
+- Action commands now respect `/automation log-satori` now also logs `reaction-add` and `reaction-delete` events.
 
 ### 2024-03-31
 

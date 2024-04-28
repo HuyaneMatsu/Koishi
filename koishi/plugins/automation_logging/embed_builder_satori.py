@@ -40,8 +40,7 @@ def render_presence_update(user, old_attributes):
     
     into.append('At: ')
     into.append(format(DateTime.utcnow(), DATETIME_FORMAT_CODE))
-    into.append('\n')
-    into.append('\n')
+    into.append('\n\n')
     
     try:
         statuses = old_attributes['statuses']
@@ -246,7 +245,7 @@ def render_type_difference_into(into, old_type, activity):
     """
     new_type = activity.type
     into.append('Type: ')
-    into.append(old_type.anme)
+    into.append(old_type.name)
     into.append(' ~ ')
     into.append(repr(old_type.value))
     into.append(' -> ')

@@ -3,6 +3,8 @@ __all__ = ('ImageHandlerWaifuPics', )
 from scarletio import IgnoreCaseMultiValueDictionary, copy_docs
 from scarletio.web_common.headers import CONTENT_TYPE
 
+from ...user_settings import PREFERRED_IMAGE_SOURCE_WAIFU_PICS
+
 from ..image_detail import ImageDetail
 
 from .request_base import ImageHandlerRequestBase
@@ -27,6 +29,9 @@ BLACKLIST = {
     
     # Bully looking sus
     'https://i.waifu.pics/MjULOe4.gif',
+    
+    # Glitchy
+    'https://i.waifu.pics/j63gPVc.gif',
 }
 
 
@@ -97,3 +102,8 @@ class ImageHandlerWaifuPics(ImageHandlerRequestBase):
             return None
         
         return [ImageDetail(url, PROVIDER) for url in urls if url not in BLACKLIST]
+
+    
+    @copy_docs(ImageHandlerRequestBase.get_image_source)
+    def get_image_source(self):
+        return PREFERRED_IMAGE_SOURCE_WAIFU_PICS

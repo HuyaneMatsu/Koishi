@@ -8,6 +8,7 @@ from ...bot_utils.multi_client_utils import get_first_client_with_message_create
 from ...bots import FEATURE_CLIENTS
 
 from ..blacklist_core import is_user_id_in_blacklist
+from ..user_settings import get_one_user_settings, get_preferred_client_in_channel
 
 from .action import COOLDOWN_HANDLER, send_action_response_to
 from .actions import (
@@ -56,7 +57,8 @@ ACTIONS_BY_NAME = {
 MAX_ACTION_COMMAND_LENGTH = max(len(name) for name in ACTIONS_BY_NAME.keys())
 
 ACTION_CONTENT_RP = re_compile(f'> .*?{USER_MENTION_RP.pattern}', re_multiline | re_unicode)
-MANAGE_MESSAGES_PERMISSION = Permission().update_by_keys(manage_messages = True)
+PERMISSION_MANAGE_MESSAGES = Permission().update_by_keys(manage_messages = True)
+PERMISSION_IMAGES = Permission().update_by_keys(attach_files = True, embed_links = True)
 
 
 def is_message_action_interaction(client, message):
@@ -180,7 +182,9 @@ async def message_create(client, message):
     message : ``Message``
         The created message.
     """
-    if client is not get_first_client_with_message_create_permissions_from(message.channel, FEATURE_CLIENTS, MANAGE_MESSAGES_PERMISSION):
+    if client is not get_first_client_with_message_create_permissions_from(
+        message.channel, FEATURE_CLIENTS, PERMISSION_MANAGE_MESSAGES
+    ):
         return
     
     if message.author.bot or is_user_id_in_blacklist(message.author.id):
@@ -204,6 +208,7 @@ async def message_create(client, message):
     if (target_user is None):
         return
     
+    
     # Delete created message
     try:
         await client.message_delete(message)
@@ -224,6 +229,11 @@ async def message_create(client, message):
         if err.code != ERROR_CODES.unknown_message:
             raise
     
+    # Select client based on user settings if available.
+    user_settings = await get_one_user_settings(message.author.id)
+    client = get_preferred_client_in_channel(
+        message.channel, user_settings.preferred_client_id, client, PERMISSION_IMAGES
+    )
     
     # Get context information for generating content (and cooldown)
     targets = set()

@@ -21,9 +21,9 @@ from ..bot_utils.utils import send_embed_to
 from ..bots import FEATURE_CLIENTS
 
 
-from .notification_settings import (
-    NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_BY_WAIFU_DISABLE, get_notifier_client,
-    get_one_notification_settings_with_connector
+from .user_settings import (
+    USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_BY_WAIFU_DISABLE, get_preferred_client_for_user,
+    get_one_user_settings_with_connector
 )
 
 
@@ -242,7 +242,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                     daily_next = now + DAILY_INTERVAL,
                     daily_streak = target_daily_streak,
                     waifu_cost = new_waifu_cost,
-                    count_daily_by_waifu = user_common_model.count_daily_by_waifu + 1,
+                    count_notification_daily_by_waifu = user_common_model.count_notification_daily_by_waifu + 1,
                     daily_reminded = False,
                 )
             )
@@ -261,12 +261,12 @@ async def claim_daily_for_waifu(client, event, target_user):
             )
             
             if (not target_user.bot):
-                target_notification_settings = await get_one_notification_settings_with_connector(
+                target_user_settings = await get_one_user_settings_with_connector(
                     target_user.id, connector
                 )
-                if target_notification_settings.daily_by_waifu:
+                if target_user_settings.notification_daily_by_waifu:
                     await send_embed_to(
-                        get_notifier_client(target_user, target_notification_settings.notifier_client_id, client),
+                        get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
                         target_user.id,
                         Embed(
                             f'{source_user.full_name} claimed daily love for you.',
@@ -279,7 +279,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                         ),
                         Button(
                             'I don\'t want notifs, nya!!',
-                            custom_id = NOTIFICATION_SETTINGS_CUSTOM_ID_DAILY_BY_WAIFU_DISABLE,
+                            custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_BY_WAIFU_DISABLE,
                         ),
                     )
             

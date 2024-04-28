@@ -4,10 +4,11 @@ from hata.ext.slash import InteractionResponse, P, abort
 
 from ...bots import FEATURE_CLIENTS
 
-from ..notification_settings import (
-    NOTIFICATION_SETTINGS_CHOICES, NOTIFICATION_SETTING_RESOLUTION, autocomplete_notification_settings_notifier,
-    build_notification_settings_embed, get_one_notification_settings, handle_notification_settings_change,
-    handle_notification_settings_set_notifier
+from ..user_settings import (
+    NOTIFICATION_SETTINGS_CHOICES, NOTIFICATION_SETTING_RESOLUTION, PREFERRED_IMAGE_SOURCE_NAMES,
+    autocomplete_user_settings_preferred_client, build_notification_settings_embed, build_preference_settings_embed,
+    get_one_user_settings, handle_user_settings_change, handle_user_settings_set_preferred_client,
+    handle_user_settings_set_preferred_image_source
 )
 from ..touhou_character_preference import (
     PREFERRED_CHARACTER_MAX, add_touhou_character_to_preference, build_character_preference_change_embed,
@@ -33,7 +34,7 @@ NOTIFICATION_SETTINGS = ACCESSIBILITY_INTERACTIONS.interactions(
 
 
 @NOTIFICATION_SETTINGS.interactions(name = 'show')
-async def notification_settings_show(event):
+async def notification_settings_show_show(event):
     """
     Shows your notification settings.
     
@@ -49,21 +50,23 @@ async def notification_settings_show(event):
     response : ``InteractionResponse``
     """
     user = event.user
-    notification_settings = await get_one_notification_settings(user.id)
+    user_settings = await get_one_user_settings(user.id)
     return InteractionResponse(
-        embed = build_notification_settings_embed(user, notification_settings),
+        embed = build_notification_settings_embed(user, user_settings),
         show_for_invoking_user_only = True,
     )
 
 
 @NOTIFICATION_SETTINGS.interactions(name = 'change')
-async def notification_settings_change(
+async def notification_settings_show_change(
     event,
     notification_type: (NOTIFICATION_SETTINGS_CHOICES, 'Select the notification to change.'),
     enabled: (bool, 'Whether the notification should be enabled.'),
 ):
     """
     Set your notification setting.
+    
+    This function is a coroutine.
     
     Parameters
     ----------
@@ -78,18 +81,50 @@ async def notification_settings_change(
     -------
     response : ``InteractionResponse``
     """
-    return await handle_notification_settings_change(
+    return await handle_user_settings_change(
         event, NOTIFICATION_SETTING_RESOLUTION[notification_type], enabled
     )
 
 
-@NOTIFICATION_SETTINGS.interactions(name = 'set-notifier')
-async def notification_settings_set_notifier(
+PREFERENCE_SETTINGS = ACCESSIBILITY_INTERACTIONS.interactions(
+    None,
+    name = 'preference-settings',
+    description = 'Customize your preference settings. (Really just a few things.)'
+)
+
+@PREFERENCE_SETTINGS.interactions(name = 'show')
+async def preference_settings_show_show(event):
+    """
+    Shows your preference settings.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received event.
+    
+    Returns
+    -------
+    response : ``InteractionResponse``
+    """
+    user = event.user
+    user_settings = await get_one_user_settings(user.id)
+    return InteractionResponse(
+        embed = build_preference_settings_embed(user, user_settings),
+        show_for_invoking_user_only = True,
+    )
+
+
+@PREFERENCE_SETTINGS.interactions(name = 'set-preferred-client')
+async def preference_settings_set_preferred_client(
     event,
-    client_name : P(str, 'Select a client', 'client', autocomplete = autocomplete_notification_settings_notifier),
+    client_name : P(str, 'Select a client', 'client', autocomplete = autocomplete_user_settings_preferred_client),
 ):
     """
-    Set who should notify you.
+    Set which client you would like to get / send messages with if option is available.
+    
+    This function is a coroutine.
     
     Parameters
     ----------
@@ -102,7 +137,35 @@ async def notification_settings_set_notifier(
     -------
     response : ``InteractionResponse``
     """
-    return await handle_notification_settings_set_notifier(event, client_name)
+    return await handle_user_settings_set_preferred_client(event, client_name)
+
+
+@PREFERENCE_SETTINGS.interactions(name = 'set-preferred-image-source')
+async def preference_settings_set_preferred_image_source(
+    event,
+    value : (
+        [(value, key) for key, value in sorted(PREFERRED_IMAGE_SOURCE_NAMES.items())],
+        'Select an image source',
+        'source',
+    ),
+):
+    """
+    Set which image source you would like to pool images from if option is available.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received event.
+    client_name : `str`
+        The client's name.
+    
+    Returns
+    -------
+    response : ``InteractionResponse``
+    """
+    return await handle_user_settings_set_preferred_image_source(event, value)
 
 
 CHARACTER_PREFERENCE = ACCESSIBILITY_INTERACTIONS.interactions(

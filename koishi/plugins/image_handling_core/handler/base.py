@@ -1,7 +1,8 @@
 __all__ = ('ImageHandlerBase', )
 
-
 from scarletio import RichAttributeErrorBaseType
+
+from ...user_settings import PREFERRED_IMAGE_SOURCE_NONE
 
 
 class ImageHandlerBase(RichAttributeErrorBaseType):
@@ -28,14 +29,12 @@ class ImageHandlerBase(RichAttributeErrorBaseType):
     
     async def get_image(self, client, event, **acknowledge_parameters):
         """
-        Gets an image's url from the handler.
+        Gets an image's details from the handler.
         
         This method is a coroutine.
         
-        Returns
-        -------
-        url : `None`, ``ImageDetail``
-            Returns `None` if image request failed.
+        Parameters
+        ----------
         client : ``Client``
             The respective client who received the event.
         event : `None`, ``InteractionEvent``
@@ -45,9 +44,33 @@ class ImageHandlerBase(RichAttributeErrorBaseType):
         
         Returns
         -------
-        image : ``ImageDetail``
+        image_detail : `None`, ``ImageDetail``
         """
         return None
+    
+    
+    async def get_image_weighted(self, client, event, weight_map, **acknowledge_parameters):
+        """
+        Gets an image's details from the handler.
+        
+        This method is a coroutine.
+        
+        Returns
+        -------
+        client : ``Client``
+            The respective client who received the event.
+        event : `None`, ``InteractionEvent``
+            The respective interaction event.
+        weight_map : `dict<int, int>`
+            Weight map to prefer an image source over an other.
+        **acknowledge_parameters : Keyword parameters
+            Additional parameter used when acknowledging.
+        
+        Returns
+        -------
+        image_detail : `None`, ``ImageDetail``
+        """
+        return await self.get_image(client, event, **acknowledge_parameters)
     
     
     def get_weight(self):
@@ -84,3 +107,25 @@ class ImageHandlerBase(RichAttributeErrorBaseType):
         """
         return
         yield
+    
+    
+    def get_image_source(self):
+        """
+        Returns the handler's images' source.
+        
+        Returns
+        -------
+        image_source : `int`
+        """
+        return PREFERRED_IMAGE_SOURCE_NONE
+    
+    
+    def supports_weight_mapping(self):
+        """
+        Returns whether the image handler supports weighting.
+        
+        Returns
+        -------
+        supports_weighting : `bool`
+        """
+        return False

@@ -16,9 +16,9 @@ from ..bot_utils.user_getter import get_user, get_users_unordered
 from ..bots import FEATURE_CLIENTS
 
 from .marriage_slot import BUY_WAIFU_SLOT_INVOKE_COMPONENT, EMOJI_YES, EMOJI_NO
-from .notification_settings import (
-    NOTIFICATION_SETTINGS_CUSTOM_ID_PROPOSAL_DISABLE, get_one_notification_settings_with_connector,
-    get_notifier_client
+from .user_settings import (
+    USER_SETTINGS_CUSTOM_ID_NOTIFICATION_PROPOSAL_DISABLE, get_one_user_settings_with_connector,
+    get_preferred_client_for_user
 )
 
 
@@ -259,7 +259,7 @@ async def propose(
             if not target_waifu_cost:
                 target_waifu_cost = WAIFU_COST_DEFAULT
         
-        target_user_notification_settings = await get_one_notification_settings_with_connector(
+        target_user_user_settings = await get_one_user_settings_with_connector(
             target_user_id, connector
         )
         
@@ -354,9 +354,9 @@ async def propose(
                     f'{EMOJI__HEART_CURRENCY} to {amount} {EMOJI__HEART_CURRENCY}.'
                 )
                 
-                if target_user_notification_settings.proposal:
+                if target_user_user_settings.notification_proposal:
                     await send_embed_to(
-                        get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
+                        get_preferred_client_for_user(target_user, target_user_user_settings.preferred_client_id, client),
                         target_user_id,
                         Embed(
                             None,
@@ -468,11 +468,11 @@ async def propose(
             if target_waifu_owner_id:
                 owner = await client.user_get(target_waifu_owner_id)
                 if not owner.bot:
-                    owner_notification_settings = await get_one_notification_settings_with_connector(
+                    owner_user_settings = await get_one_user_settings_with_connector(
                         target_waifu_owner_id, connector
                     )
                     await send_embed_to(
-                        get_notifier_client(owner, owner_notification_settings.notifier_client_id, client),
+                        get_preferred_client_for_user(owner, owner_user_settings.preferred_client_id, client),
                         target_waifu_owner_id,
                         Embed(
                             None,
@@ -506,9 +506,9 @@ async def propose(
         )
         
         
-        if target_user_notification_settings.proposal:
+        if target_user_user_settings.notification_proposal:
             await send_embed_to(
-                get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
+                get_preferred_client_for_user(target_user, target_user_user_settings.preferred_client_id, client),
                 target_user_id,
                 Embed(
                     None,
@@ -516,7 +516,7 @@ async def propose(
                 ),
                 Button(
                     'I don\'t want notifs, nya!!',
-                    custom_id = NOTIFICATION_SETTINGS_CUSTOM_ID_PROPOSAL_DISABLE,
+                    custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_PROPOSAL_DISABLE,
                 )
             )
 
@@ -850,7 +850,7 @@ async def reject(
             )
         )
         
-        target_user_notification_settings = await get_one_notification_settings_with_connector(
+        target_user_user_settings = await get_one_user_settings_with_connector(
             target_user_id, connector
         )
     
@@ -861,7 +861,7 @@ async def reject(
     )
     
     await send_embed_to(
-        get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
+        get_preferred_client_for_user(target_user, target_user_user_settings.preferred_client_id, client),
         target_user_id,
         Embed(
             None,
@@ -930,7 +930,7 @@ async def cancel(
             )
         )
         
-        target_user_notification_settings = await get_one_notification_settings_with_connector(
+        target_user_user_settings = await get_one_user_settings_with_connector(
             target_user_id, connector
         )
     
@@ -942,9 +942,9 @@ async def cancel(
     )
     
     
-    if (not target_user.bot) and target_user_notification_settings.proposal:
+    if (not target_user.bot) and target_user_user_settings.notification_proposal:
         await send_embed_to(
-            get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
+            get_preferred_client_for_user(target_user, target_user_user_settings.preferred_client_id, client),
             target_user_id,
             Embed(
                 None,
@@ -1296,7 +1296,7 @@ async def divorce_incoming(client, event, source_user_id, target_user):
             )
         )
         
-        target_user_notification_settings = await get_one_notification_settings_with_connector(
+        target_user_user_settings = await get_one_user_settings_with_connector(
             target_user.id, connector
         )
     
@@ -1316,7 +1316,7 @@ async def divorce_incoming(client, event, source_user_id, target_user):
     
     if not target_user.bot:
         await send_embed_to(
-            get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
+            get_preferred_client_for_user(target_user, target_user_user_settings.preferred_client_id, client),
             target_user.id,
             Embed(
                 None,
@@ -1368,7 +1368,7 @@ async def divorce_outgoing(client, event, source_user_id, target_user):
             )
         )
         
-        target_user_notification_settings = await get_one_notification_settings_with_connector(
+        target_user_user_settings = await get_one_user_settings_with_connector(
             target_user.id, connector
         )
     
@@ -1385,7 +1385,7 @@ async def divorce_outgoing(client, event, source_user_id, target_user):
     
     if not target_user.bot:
         await send_embed_to(
-            get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
+            get_preferred_client_for_user(target_user, target_user_user_settings.preferred_client_id, client),
             target_user.id,
             Embed(
                 None,
@@ -1501,7 +1501,7 @@ async def divorce_circular(client, event, source_user_id, target_user):
             )
         )
         
-        target_user_notification_settings = await get_one_notification_settings_with_connector(
+        target_user_user_settings = await get_one_user_settings_with_connector(
             target_user.id, connector
         )
     
@@ -1520,7 +1520,7 @@ async def divorce_circular(client, event, source_user_id, target_user):
     
     if not target_user.bot:
         await send_embed_to(
-            get_notifier_client(target_user, target_user_notification_settings.notifier_client_id, client),
+            get_preferred_client_for_user(target_user, target_user_user_settings.preferred_client_id, client),
             target_user.id,
             Embed(
                 None,

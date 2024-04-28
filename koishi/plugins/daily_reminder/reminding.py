@@ -8,7 +8,7 @@ from scarletio import CauseGroup, copy_docs
 from ...bot_utils.models import DB_ENGINE
 from ...bots import MAIN_CLIENT
 
-from ..notification_settings import get_notifier_client
+from ..user_settings import get_preferred_client_for_user
 
 from .builders import build_notification_daily_reminder
 from .queries import get_entries_to_notify_with_connector, set_entry_as_notified_with_connector
@@ -23,7 +23,7 @@ async def notify_user(entry, connector):
     
     Parameters
     ----------
-    entry : `sqlalchemy.engine.result.RowProxy<id: int, user_id: int, notifier_client_id: int>`
+    entry : `sqlalchemy.engine.result.RowProxy<id: int, user_id: int, preferred_client_id: int>`
         The entry representing a user and its configuration to notify.
     connector : ``AsyncConnection``
         Database connector.
@@ -32,17 +32,17 @@ async def notify_user(entry, connector):
     -------
     success : `bool`
     """
-    entry_id, user_id, notifier_client_id = entry
+    entry_id, user_id, preferred_client_id = entry
     user = await try_user_get(user_id, entry_id, connector)
     if user is None:
         return False
     
-    client = get_notifier_client(user, notifier_client_id, None)
+    client = get_preferred_client_for_user(user, preferred_client_id, None)
     channel = await try_channel_create(client, user_id, entry_id, connector)
     if channel is None:
         return False
     
-    embed, components = build_notification_daily_reminder(notifier_client_id)
+    embed, components = build_notification_daily_reminder(preferred_client_id)
     message = await try_message_create(client, channel, embed, components, entry_id, connector)
     if message is None:
         return False

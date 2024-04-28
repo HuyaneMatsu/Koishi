@@ -1,6 +1,7 @@
 __all__ = ()
 
 from hata import ChannelType, Client, DiscordException, ERROR_CODES, Permission
+from hata.ext.slash import Button
 from scarletio import CancelledError
 
 from ...bots import MAIN_CLIENT
@@ -14,6 +15,7 @@ from ..automation_core import (
 from .components_satori_auto_start import build_satori_auto_start_component_row
 from .constants import PERMISSIONS_EMBED_LINKS
 from .embed_builder_guild_profile import build_guild_profile_update_embed
+from .embed_builder_reaction import build_reaction_event_embed
 from .embed_builder_satori import build_presence_update_embeds
 from .embed_builder_satori_start import build_satori_auto_start_embeds
 
@@ -453,5 +455,66 @@ async def guild_user_update(client, guild, user, old_attributes):
             ):
                 continue
             
-            await client.events.error(client, 'log.satori.user_presence_update', err)
+            await client.events.error(client, 'log.satori.guild_user_update', err)
+            continue
+
+
+@MAIN_CLIENT.events(name = 'reaction_add')
+@MAIN_CLIENT.events(name = 'reaction_delete')
+async def reaction_event(client, event):
+    """
+    Handles a reaction add event.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``ReactionAddEvent``
+        The triggered event.
+    """
+    channels = get_watcher_channels_for(event.user.id)
+    if channels is None:
+        return
+    
+    guild_id = event.message.guild_id
+    
+    # We want to send messages only in channels in the current guild!
+    channels = [channel for channel in channels if channel.guild_id == guild_id]
+    if (not channels):
+        return
+    
+    embed = build_reaction_event_embed(event)
+    components = Button('Jump there', url = event.message.url)
+    
+    for channel in channels:
+        if channel.cached_permissions_for(client) & REQUIRED_PERMISSIONS != REQUIRED_PERMISSIONS:
+            continue
+        
+        try:
+            await client.message_create(
+                channel,
+                allowed_mentions = None,
+                embed = embed,
+                components = components
+            )
+        except GeneratorExit:
+            raise
+        
+        except CancelledError:
+            raise
+        
+        except ConnectionError:
+            break
+        
+        except BaseException as err:
+            if isinstance(err, DiscordException) and err.code in (
+                ERROR_CODES.unknown_channel, # channel deleted
+                ERROR_CODES.missing_access, # client removed
+                ERROR_CODES.missing_permissions, # permissions changed
+            ):
+                continue
+            
+            await client.events.error(client, 'log.satori.reaction_event', err)
             continue

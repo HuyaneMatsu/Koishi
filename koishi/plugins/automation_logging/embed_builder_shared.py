@@ -383,6 +383,7 @@ def maybe_add_modified_nullable_string_field(embed, entity, old_attributes, attr
         get_nullable_string_repr,
     )
 
+
 def maybe_add_modified_nullable_container_field(embed, entity, old_attributes, attribute_name, pretty_name):
     """
     Adds modified nullable container into the given embed if the value was modified.
