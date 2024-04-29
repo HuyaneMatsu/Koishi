@@ -242,7 +242,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                     daily_next = now + DAILY_INTERVAL,
                     daily_streak = target_daily_streak,
                     waifu_cost = new_waifu_cost,
-                    count_notification_daily_by_waifu = user_common_model.count_notification_daily_by_waifu + 1,
+                    count_daily_by_waifu = user_common_model.count_daily_by_waifu + 1,
                     daily_reminded = False,
                 )
             )
