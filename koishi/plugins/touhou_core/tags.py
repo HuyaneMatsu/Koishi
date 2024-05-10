@@ -24,7 +24,7 @@ def parse_touhou_characters_from_tags(image_detail):
     
     Parameters
     ----------
-    image_detail : ``ImageDetail``
+    image_detail : ``ImageDetailBase``
         The image detail to parse its tag of.
     
     Returns

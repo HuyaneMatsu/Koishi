@@ -2,7 +2,7 @@ __all__ = ('ImageHandlerMeekMoe', )
 
 from scarletio import copy_docs
 
-from ..image_detail import ImageDetail
+from ..image_detail import ImageDetailProvided
 
 from .request_base import ImageHandlerRequestBase
 
@@ -17,7 +17,7 @@ class ImageHandlerMeekMoe(ImageHandlerRequestBase):
     
     Attributes
     ----------
-    _cache : `list` of ``ImageDetail``
+    _cache : `list` of ``ImageDetailBase``
         Additional requested card details.
     _waiters : `Deque` of ``Future``
         Waiter futures for card detail.
@@ -67,4 +67,4 @@ class ImageHandlerMeekMoe(ImageHandlerRequestBase):
         if not isinstance(data, dict):
             return
         
-        return [ImageDetail(data['url'], PROVIDER)]
+        return [ImageDetailProvided(data['url']).with_provider(PROVIDER)]

@@ -25,21 +25,32 @@ async def create_webhook_message(client, webhook, message, thread_id, files):
     files : `None`, `list` of `tuple` (`str`, `bytes`, (`None`, `str`))
         Files of the message.
     """
+    if not message.has_any_content_field():
+        return
+    
     name = _get_user_name(message)
     avatar_url = message.author.avatar_url_at(message.guild_id)
+    
+    poll = message.poll
+    if (poll is not None):
+        poll = poll.copy_with(duration = 3600)
     
     content = message.content
     if (content is not None):
         while len(content) > 2000:
-            await _repeat_create_webhook_message(
-                client, webhook, content[:2000], None, None, name, avatar_url, thread_id,
-            )
+            try:
+                await _repeat_create_webhook_message(
+                    client, webhook, content[:2000], None, None, name, None, avatar_url, thread_id,
+                )
+            except:
+                files = None
+                raise
             
             content = content[2000:]
     
     try:
         await _repeat_create_webhook_message(
-            client, webhook, content, message.clean_embeds, files, name, avatar_url, thread_id,
+            client, webhook, content, message.clean_embeds, files, name, poll, avatar_url, thread_id
         )
     except:
         # Unallocate files if any exception occurs.
@@ -47,7 +58,7 @@ async def create_webhook_message(client, webhook, message, thread_id, files):
         raise
 
 
-async def _repeat_create_webhook_message(client, webhook, content, embeds, files, name, avatar_url, thread_id):
+async def _repeat_create_webhook_message(client, webhook, content, embeds, files, name, poll, avatar_url, thread_id):
     """
     Sends a webhook message. If encounters unique rate limits then repeats.
     
@@ -67,6 +78,8 @@ async def _repeat_create_webhook_message(client, webhook, content, embeds, files
         Attachments of the message.
     name : `str`
         The user's name to use.
+    poll : `None | Poll`
+        The message's poll.
     avatar_url : `None`, `str`
         User avatar url to use.
     thread_id : `int`
@@ -81,6 +94,7 @@ async def _repeat_create_webhook_message(client, webhook, content, embeds, files
                 file = files,
                 allowed_mentions = None,
                 name = name,
+                poll = poll,
                 avatar_url = avatar_url,
                 thread = thread_id,
             )
@@ -88,6 +102,9 @@ async def _repeat_create_webhook_message(client, webhook, content, embeds, files
             if err.code == ERROR_CODES.rate_limit_resource:
                 await sleep(err.retry_after, KOKORO)
                 continue
+            
+            if err.code == ERROR_CODES.cannot_create_empty_message:
+                break
             
             raise
         

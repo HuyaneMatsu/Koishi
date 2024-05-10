@@ -1,3 +1,11 @@
+### 2024-05-10
+
+- Moving message now wont fail on empty messages (they are ignored).
+- Moving message now also moves polls.
+- Action commands such as `/hug` now also attaches who created the image if known. 
+- Add new `generate-action-assets` cli command.
+- Action commands preference system is redone to provide better output. Preferred count is also lowered to 6 (from 10).
+
 ### 2024-04-28
 
 - Add new `link-assets` cli command.

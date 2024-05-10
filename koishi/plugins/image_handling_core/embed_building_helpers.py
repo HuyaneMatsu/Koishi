@@ -9,7 +9,7 @@ def add_embed_provider(embed, image_detail):
     ----------
     embed : ``Embed``
         The embed to add the provider to.
-    image_detail : ``ImageDetail``
+    image_detail : ``ImageDetailBase``
         The respective image detail.
     
     Returns
@@ -18,8 +18,14 @@ def add_embed_provider(embed, image_detail):
     """
     provider = image_detail.provider
     if (provider is not None):
-        embed.add_footer(
-            f'Image provided by {provider}'
+        return embed.add_footer(
+            f'Image provided by {provider!s}.'
         )
-
+    
+    creators = image_detail.creators
+    if (creators is not None):
+        return embed.add_footer(
+            f'By {" & ".join(creators)!s}.'
+        )
+    
     return embed

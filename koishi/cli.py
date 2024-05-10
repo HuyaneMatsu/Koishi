@@ -62,7 +62,7 @@ def main():
             raise
         
         write_exception_sync(exception)
-        
+    
     
     load_plugins()
     if config.MARISA_MODE:

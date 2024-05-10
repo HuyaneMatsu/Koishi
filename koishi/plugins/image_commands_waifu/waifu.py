@@ -14,7 +14,7 @@ def build_waifu_embed(image_detail):
     
     Parameters
     ----------
-    image_detail : ``ImageDetail``
+    image_detail : ``ImageDetailBase``
         The image detail to work from.
     
     Returns

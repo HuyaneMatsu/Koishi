@@ -128,7 +128,7 @@ class ImageHandlerGroup(ImageHandlerBase):
         
         Returns
         -------
-        image_detail : `None`, ``ImageDetail``
+        image_detail : `None`, ``ImageDetailBase``
         """
         handlers = self._handlers
         while True:

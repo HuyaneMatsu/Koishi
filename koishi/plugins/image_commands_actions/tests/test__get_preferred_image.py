@@ -1,7 +1,7 @@
 import vampytest
 from hata import User
 
-from ...image_handling_core import ImageDetail, ImageHandlerStatic
+from ...image_handling_core import ImageDetailStatic, ImageHandlerStatic
 from ...touhou_character_preference import CharacterPreference
 from ...touhou_core import KAENBYOU_RIN, KOMEIJI_KOISHI, KOMEIJI_SATORI
 from ...user_settings import PREFERRED_IMAGE_SOURCE_TOUHOU
@@ -15,20 +15,41 @@ def _iter_options():
     
     user_0 = User.precreate(user_id_0)
     user_1 = User.precreate(user_id_1)
-
-    image_detail_0 = ImageDetail('https://orindance.party/').with_source(KOMEIJI_KOISHI).with_target(KOMEIJI_SATORI)
-    image_detail_1 = ImageDetail('https://orindance.party/').with_any(KOMEIJI_SATORI).with_any(KAENBYOU_RIN)
-    image_detail_2 = ImageDetail('https://orindance.party/').with_source(KOMEIJI_KOISHI).with_target(KAENBYOU_RIN)
-    image_detail_3 = ImageDetail('https://orindance.party/').with_source(KAENBYOU_RIN).with_target(KOMEIJI_KOISHI)
+    
+    image_detail_0 = ImageDetailStatic(
+        'https://orindance.party/',
+    ).with_action(
+        'kiss', KOMEIJI_KOISHI, KOMEIJI_SATORI,
+    )
+    
+    image_detail_1 = ImageDetailStatic(
+        'https://orindance.party/',
+    ).with_actions(
+        ('kiss', KOMEIJI_SATORI, KAENBYOU_RIN),
+        ('kiss', KAENBYOU_RIN, KOMEIJI_SATORI),
+    )
+    
+    image_detail_2 = ImageDetailStatic(
+        'https://orindance.party/'
+    ).with_action(
+        'kiss', KOMEIJI_KOISHI, KAENBYOU_RIN
+    )
+    
+    image_detail_3 = ImageDetailStatic(
+        'https://orindance.party/'
+    ).with_action(
+        'kiss', KAENBYOU_RIN, KOMEIJI_KOISHI,
+    )
     
     image_handler = ImageHandlerStatic(
+        PREFERRED_IMAGE_SOURCE_TOUHOU,
+    ).with_images(
         [
             image_detail_0,
             image_detail_1,
             image_detail_2,
             image_detail_3,
         ],
-        PREFERRED_IMAGE_SOURCE_TOUHOU,
     )
     
     yield (
@@ -102,7 +123,7 @@ async def test__get_preferred_image(image_handler, source_user, target_users, ch
     
     Returns
     -------
-    selected : `None | ImageDetail`
+    selected : `None | ImageDetailBase`
         The selected image detail.
     """
     query_called = False

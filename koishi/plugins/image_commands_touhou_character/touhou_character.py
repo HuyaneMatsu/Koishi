@@ -17,7 +17,7 @@ def build_touhou_character_embed(touhou_character, image_detail):
     ----------
     touhou_character : ``TouhouCharacter``
         The respective touhou character.
-    image_detail : ``ImageDetail``
+    image_detail : ``ImageDetailBase``
         The image detail to work from.
     
     Returns

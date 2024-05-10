@@ -20,10 +20,10 @@ from ..bots import FEATURE_CLIENTS
 HATA_DOCS_BASE_URL = 'https://www.astil.dev/project/hata/docs/'
 HATA_DOCS_SEARCH_API = HATA_DOCS_BASE_URL + 'api/v1/search'
 
-CLAIM_ROLE_VERIFIED_EMOJI = Emoji.precreate(690550890045898812)
+CLAIM_ROLE_VERIFIED_EMOJI = Emoji.precreate(931503291957919744)
 CLAIM_ROLE_VERIFIED_CUSTOM_ID = 'rules.claim_role.verified'
 
-CLAIM_ROLE_ANNOUNCEMENTS_EMOJI = Emoji.precreate(717841004383961221)
+CLAIM_ROLE_ANNOUNCEMENTS_EMOJI = Emoji.precreate(1175518140390707332)
 CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID = 'rules.claim_role.announcements'
 
 RULES_COMPONENTS = Row(
@@ -61,7 +61,10 @@ RULES = [
         lambda: 'Keep explicit content in nsfw channels.',
     ), (
         'Shitposting, earrape and other cursed contents',
-        lambda: 'Just no.',
+        lambda: (
+            'Including tiktok cringe, ai shit, pictures taken of a screen, '
+            'and making the same joke 3 times in a row are all a big NO!!!'
+        ),
     ), (
         'Advertisements',
         lambda: 'Advertising other social medias, servers, communities or services in chat or in DM-s are disallowed.',

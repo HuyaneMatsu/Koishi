@@ -47,7 +47,7 @@ def build_booru_embed(image_detail):
     
     Parameters
     ----------
-    image_detail : ``ImageDetail``
+    image_detail : ``ImageDetailBase``
         The image detail to work from.
     
     Returns
@@ -94,7 +94,7 @@ def build_booru_components(image_detail, cache_id):
     
     Parameters
     ----------
-    image_detail : ``ImageDetail``
+    image_detail : ``ImageDetailBase``
         The image detail to work from.
     cache_id : `int`
         The identifier of the cache.
@@ -167,7 +167,7 @@ def build_tag_embed(image_detail):
     
     Parameters
     ----------
-    image_detail : `None`, ``ImageDetail``
+    image_detail : `None`, ``ImageDetailBase``
         The image detail to build embed for.
     
     Returns
@@ -216,7 +216,7 @@ class ImageCache:
         The identifier of the cache.
     handler : ``ImageHandlerBooru``
         Handler used to request images.
-    last : `None`, ``ImageDetail``
+    last : `None`, ``ImageDetailBase``
         The last show image detail.
     last_call : `float`
         When was the handler last called.

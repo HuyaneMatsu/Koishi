@@ -5,7 +5,7 @@ from scarletio.web_common.headers import CONTENT_TYPE
 
 from ...user_settings import PREFERRED_IMAGE_SOURCE_WAIFU_PICS
 
-from ..image_detail import ImageDetail
+from ..image_detail import ImageDetailProvided
 
 from .request_base import ImageHandlerRequestBase
 
@@ -41,7 +41,7 @@ class ImageHandlerWaifuPics(ImageHandlerRequestBase):
     
     Attributes
     ----------
-    _cache : `list` of ``ImageDetail``
+    _cache : `list` of ``ImageDetailBase``
         Additional requested card details.
     _waiters : `Deque` of ``Future``
         Waiter futures for card detail.
@@ -101,7 +101,7 @@ class ImageHandlerWaifuPics(ImageHandlerRequestBase):
         except KeyError:
             return None
         
-        return [ImageDetail(url, PROVIDER) for url in urls if url not in BLACKLIST]
+        return [ImageDetailProvided(url).with_provider(PROVIDER) for url in urls if url not in BLACKLIST]
 
     
     @copy_docs(ImageHandlerRequestBase.get_image_source)

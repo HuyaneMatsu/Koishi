@@ -44,7 +44,7 @@ class ImageHandlerBase(RichAttributeErrorBaseType):
         
         Returns
         -------
-        image_detail : `None`, ``ImageDetail``
+        image_detail : `None`, ``ImageDetailBase``
         """
         return None
     
@@ -68,7 +68,7 @@ class ImageHandlerBase(RichAttributeErrorBaseType):
         
         Returns
         -------
-        image_detail : `None`, ``ImageDetail``
+        image_detail : `None`, ``ImageDetailBase``
         """
         return await self.get_image(client, event, **acknowledge_parameters)
     
@@ -103,7 +103,7 @@ class ImageHandlerBase(RichAttributeErrorBaseType):
         
         Yields
         ------
-        image_detail : ``ImageDetail``
+        image_detail : ``ImageDetailBase``
         """
         return
         yield

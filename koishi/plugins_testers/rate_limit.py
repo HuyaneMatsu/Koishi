@@ -13,7 +13,7 @@ from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoMod
     ERROR_CODES, ComponentType, Sticker, StickerPack, Permission, EntitlementOwnerType, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ExplicitContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, Oauth2User, parse_oauth2_redirect_url, Channel, Role, GUILDS, CLIENTS, \
-    Team, WebhookType, Guild, ForumTag, SoundboardSound, OnboardingMode, Poll
+    Team, WebhookType, Guild, ForumTag, SoundboardSound, OnboardingMode, Poll, create_partial_user_from_id
 from scarletio import sleep, Task, TaskGroup, AsyncIO, CancelledError, IgnoreCaseMultiValueDictionary, \
     alchemy_incendiary,  EventThread, change_on_switch, to_json, from_json
 
@@ -1016,10 +1016,21 @@ async def guild_ban_get(client, guild, user_id):
     )
 
 
+async def guild_ban_add_multiple(client, guild, user_ids):
+    data = {'delete_message_seconds': 0, 'user_ids': user_ids}
+    guild_id = guild.id
+    return await bypass_request(
+        client,
+        METHOD_POST,
+        f'{API_ENDPOINT}/guilds/{guild_id}/bulk-ban',
+        data,
+    )
+
+
 async def channel_move(
     client, channel, visual_position, category = ..., parent = ..., lock_permissions = False, reason = None,
 ):
-    
+        
     if parent is not ...:
         category = parent
     
@@ -3487,7 +3498,17 @@ async def entitlement_delete(client):
     await bypass_request(
         client,
         METHOD_DELETE,
-        f'{API_ENDPOINT}/applications/{client.application.id}/entitlements{entitlement_id}',
+        f'{API_ENDPOINT}/applications/{client.application.id}/entitlements/{entitlement_id}',
+    )
+
+
+async def entitlement_consume(client):
+    entitlement_id = 1122121212121
+    
+    await bypass_request(
+        client,
+        METHOD_POST,
+        f'{API_ENDPOINT}/applications/{client.application.id}/entitlements/{entitlement_id}/consume',
     )
 
 
@@ -4758,6 +4779,9 @@ async def rate_limit_test_0048(client, message, user : 'user' = None):
     
     Derpy, right?
     """
+    if user is None:
+        user = create_partial_user_from_id(806181811817676860)
+    
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0048') as RLT:
         guild = message.guild
@@ -8249,7 +8273,6 @@ async def rate_limit_test_0208(client, message):
         await Task(KOKORO, entitlement_delete(client)).wait_for_completion()
 
 
-
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0209(client, message):
     """
@@ -8331,3 +8354,32 @@ async def rate_limit_test_0214(client, message):
             channel, Poll(question = 'hey', answers = ['mister', 'sister'], duration = 3600)
         )
         await poll_result_user_get_chunk(client, message)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0215(client, message):
+    """
+    Consumes an entitlement.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0215') as RLT:
+        await Task(KOKORO, entitlement_consume(client)).wait_for_completion()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0216(client, message):
+    """
+    Batch bans.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0216') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        
+        await guild_ban_add_multiple(client, guild, [806181811817676860])
+

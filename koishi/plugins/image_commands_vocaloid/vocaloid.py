@@ -74,7 +74,7 @@ def build_vocaloid_embed(character, image_detail):
     ----------
     character : `str`
         The vocaloid character's system name.
-    image_detail : ``ImageDetail``
+    image_detail : ``ImageDetailBase``
         The image detail to work from.
     
     Returns

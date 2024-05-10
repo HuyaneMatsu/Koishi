@@ -15,7 +15,7 @@ class ImageHandlerRequestBase(ImageHandlerBase):
     
     Attributes
     ----------
-    _cache : `list` of ``ImageDetail``
+    _cache : `list` of ``ImageDetailBase``
         Additional requested card details.
     _waiters : `Deque` of ``Future``
         Waiter futures for card detail.
@@ -149,7 +149,7 @@ class ImageHandlerRequestBase(ImageHandlerBase):
         
         Returns
         -------
-        card_details : `None`,  list` of ``ImageDetail``
+        card_details : `None`,  list` of ``ImageDetailBase``
         """
         return None
     
@@ -172,7 +172,7 @@ class ImageHandlerRequestBase(ImageHandlerBase):
         
         Parameters
         ----------
-        details : `list` of ``ImageDetail``
+        details : `list` of ``ImageDetailBase``
         """
         waiters = self._waiters
         while True:

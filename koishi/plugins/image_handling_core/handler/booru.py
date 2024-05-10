@@ -8,7 +8,7 @@ from scarletio.web_common import quote
 
 from ....bot_utils.tools import BeautifulSoup
 
-from ..image_detail import ImageDetail
+from ..image_detail import ImageDetailProvided
 
 from .request_base import ImageHandlerRequestBase
 
@@ -135,7 +135,7 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
     
     Attributes
     ----------
-    _cache : `list` of ``ImageDetail``
+    _cache : `list` of ``ImageDetailBase``
         Additional requested card details.
     _waiters : `Deque` of ``Future``
         Waiter futures for card detail.
@@ -297,7 +297,7 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
                 if tags & BLACKLISTED_TAGS:
                     continue
                 
-                image_details.append(ImageDetail(url, self._provider).with_tags(tags))
+                image_details.append(ImageDetailProvided(url).with_provider(self._provider).with_tags(tags))
         
         if random_order:
             shuffle(image_details)

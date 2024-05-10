@@ -2,10 +2,13 @@ __all__ = ()
 
 from random import choice, random
 
+from ...bot_utils.random import random_index
+
+from ..image_handling_core import ImageDetailMatcherContextSensitive
 from ..touhou_character_preference import get_more_touhou_character_preference
 
 
-OPTIMAL_GROUP_LENGTH = 10
+OPTIMAL_GROUP_LENGTH = 6
 
 
 async def get_preferred_image(image_handler, source_user, target_users):
@@ -23,7 +26,7 @@ async def get_preferred_image(image_handler, source_user, target_users):
     
     Returns
     -------
-    selected : `None | ImageDetail`
+    selected : `None | ImageDetailBase`
         The selected image detail.
     """
     character_preferences = await get_more_touhou_character_preference(
@@ -33,7 +36,9 @@ async def get_preferred_image(image_handler, source_user, target_users):
         return None
     
     source_and_target_system_names = process_character_preferences(character_preferences, source_user)
-    match_groups = get_match_groups(image_handler, *source_and_target_system_names)
+    matcher = ImageDetailMatcherContextSensitive(*source_and_target_system_names)
+    
+    match_groups = get_match_groups(image_handler, matcher)
     return select_from_match_groups(match_groups)
 
 
@@ -68,9 +73,9 @@ def process_character_preferences(character_preferences, source_user):
             target_character_system_names.add(character_preference.system_name)
     
     return source_character_system_names, target_character_system_names
-    
 
-def get_match_groups(image_handler, source_character_system_names, target_character_system_names):
+
+def get_match_groups(image_handler, matcher):
     """
     Gets match groups.
     
@@ -78,54 +83,67 @@ def get_match_groups(image_handler, source_character_system_names, target_charac
     ----------
     image_handler : `ImageHandlerBase`
         Image handler.
-    source_character_system_names : `None | set<str>`
-        Character system names to match the source user.
-    target_character_system_names : `None | set<str>`
-        Character system names to match the target user.
+    matcher : ``ImageDetailMatcherBase``
+        Matcher to use.
     
     Returns
     -------
-    match_groups : `tuple<list<ImageDetail>>`
-        A tuple of image details. Image details at higher position in the tuple are matched better.
+    match_groups_by_weight : `dict<int, list<ImageDetailBase>>`
+        The matched image details by weight.
     """
-    match_groups = ([], [])
+    match_groups_by_weight = {}
     
     for image_detail in image_handler.iter_character_filterable():
-        match_level = -1
+        match_rate = matcher.get_match_rate(image_detail)
+        if match_rate <= 0:
+            continue
         
-        if (source_character_system_names is not None):
-            match_level += any(
-                (system_name in source_character_system_names) for system_name in
-                image_detail.iter_source_character_system_names()
-            )
+        try:
+            image_details = match_groups_by_weight[match_rate]
+        except KeyError:
+            image_details = []
+            match_groups_by_weight[match_rate] = image_details
         
-        if (target_character_system_names is not None):
-            match_level += any(
-                (system_name in target_character_system_names) for system_name in
-                image_detail.iter_target_character_system_names()
-            )
-        
-        if match_level > -1:
-            match_groups[match_level].append(image_detail)
+        image_details.append(image_detail)
     
-    return match_groups
+    return match_groups_by_weight
 
 
-def select_from_match_groups(match_groups):
+def select_from_match_groups(match_groups_by_weight):
     """
     Selects an image from the match groups.
     
     Parameters
     ----------
-    match_groups : `tuple<list<ImageDetail>>`
+    match_groups : `tuple<list<ImageDetailBase>>`
         A tuple of image details.
     
     Returns
     -------
-    selected : `None | ImageDetail`
+    match_groups_by_weight : `dict<int, list<ImageDetailBase>>`
         The selected image detail.
     """
-    for match_group in reversed(match_groups):
-        match_group_length = len(match_group)
-        if match_group_length >= OPTIMAL_GROUP_LENGTH or (random() * OPTIMAL_GROUP_LENGTH < match_group_length):
-            return choice(match_group)
+    if not match_groups_by_weight:
+        return
+    
+    weights = []
+    image_groups = []
+    counter = 0
+    
+    for weight, images in sorted(match_groups_by_weight.items()):
+        weights.append(weight * len(images))
+        image_groups.append(images)
+        counter += len(images)
+        
+        if counter >= OPTIMAL_GROUP_LENGTH:
+            break
+        
+        continue
+    
+    else:
+    # If we dont have enough images, randomly return
+        if random() * OPTIMAL_GROUP_LENGTH > counter:
+            return
+    
+    # Select image based on weights
+    return choice(image_groups[random_index(weights)])

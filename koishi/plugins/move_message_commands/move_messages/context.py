@@ -1,10 +1,10 @@
 __all__ = ()
 
-from hata import Embed, KOKORO, TIMESTAMP_STYLES, format_loop_time, mention_channel_by_id
+from hata import DiscordException, Embed, ERROR_CODES, KOKORO, TIMESTAMP_STYLES, format_loop_time, mention_channel_by_id
 from scarletio import Future, LOOP_TIME, Task, TaskGroup
 
-from ...move_message_core.get import get_webhook
-from ...move_message_core.get import get_files
+from ...move_message_core import create_webhook_message
+from ...move_message_core.get import get_files, get_webhook
 
 from ..helpers import message_delete
 
@@ -253,22 +253,13 @@ class MessageMoverContext:
     
     
     async def move_message(self, message):
-        files = await get_files(self.client, message)
         webhook = await self.get_webhook_waiter()
+        files = await get_files(self.client, message)
         
-        guild_id = self.event.guild_id
-        
-        await self.client.webhook_message_create(
-            webhook,
-            message.content,
-            embed = message.clean_embeds,
-            file = files,
-            allowed_mentions = None,
-            name = message.author.name_at(guild_id),
-            avatar_url = message.author.avatar_url_at(guild_id),
-            thread = self.target_thread_id,
-        )
-        
-        files = None
+        try:
+            await create_webhook_message(self.client, webhook, message, self.target_thread_id, files)
+        finally:
+            files = None
+            raise
         
         Task(KOKORO, message_delete(self.client, message))

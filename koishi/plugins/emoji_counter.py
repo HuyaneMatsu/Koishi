@@ -5,6 +5,7 @@ from math import floor, log
 
 from dateutil.relativedelta import relativedelta
 from hata import EMOJIS, Embed, USERS, parse_custom_emojis, parse_emoji
+from hata.ext.plugin_loader import require
 from hata.ext.slash import abort
 from sqlalchemy import and_, func as alchemy_function
 from sqlalchemy.dialects.postgresql import insert
@@ -14,6 +15,9 @@ from ..bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__EMOJI_MANAGER
 from ..bot_utils.models import (
     DB_ENGINE, EMOJI_COUNTER_TABLE, STICKER_COUNTER_TABLE, emoji_counter_model, sticker_counter_model
 )
+
+require('Satori')
+
 from ..bots import MAIN_CLIENT, Satori
 
 

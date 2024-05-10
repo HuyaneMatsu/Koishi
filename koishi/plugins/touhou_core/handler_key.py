@@ -1,12 +1,12 @@
 __all__ = ('TouhouHandlerKey',)
 
-
 from scarletio import RichAttributeErrorBaseType
 
-from ..image_handling_core import ImageHandlerBooru, ImageHandlerGroup
-from ..image_handling_core.constants import (
-    SAFE_BOORU_ENDPOINT, SAFE_BOORU_PROVIDER, SOLO_REQUIRED_TAGS, TOUHOU_TAGS_BANNED
+from ..image_handling_core import (
+    ImageHandlerBooru, ImageHandlerGroup, SAFE_BOORU_ENDPOINT, SAFE_BOORU_PROVIDER, SOLO_REQUIRED_TAGS,
+    TOUHOU_TAGS_BANNED
 )
+
 from .character import TOUHOU_CHARACTERS
 from .safe_booru_tags import TOUHOU_SAFE_BOORU_TAGS
 
