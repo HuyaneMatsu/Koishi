@@ -1,6 +1,7 @@
 import vampytest
 from hata import (
-    Channel, ChannelType, Client, DiscordApiClient, Emoji, Guild, GuildProfile, Message, ReactionMapping, Role, User
+    Channel, ChannelType, Client, DiscordApiClient, Emoji, Guild, GuildProfile, Message, ReactionMapping,
+    ReactionMappingLine, Role, User
 )
 
 from ..helpers import PERMISSION_MASK_MESSAGING_DEFAULT, get_voters
@@ -42,7 +43,7 @@ async def test__get_voters():
         
         message = Message.precreate(
             202401160021,
-            reactions = ReactionMapping({emoji: [user_0, user_1]}),
+            reactions = ReactionMapping( lines = {emoji: ReactionMappingLine(users = [user_0, user_1])}),
             channel_id = channel.id,
         )
         

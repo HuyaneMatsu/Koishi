@@ -161,7 +161,7 @@ def generate_love_level():
             'The chance of this relationship working is not very high, but its '
             'not that low either. If you both want this relationship to work, '
             'and put time and effort into it, meaning spending time together, '
-            'talking to each other etc., than nothing shall stand in your way.'
+            'talking to each other etc., then nothing shall stand in your way.'
         ),
     }
     

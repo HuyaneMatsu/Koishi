@@ -16,7 +16,7 @@ def _build_allowed_names_and_lookup_map(characters):
     
     Parameters
     ----------
-    characters : `list<TouhouCharacter>`
+    characters : `iterable<TouhouCharacter>`
         Characters to build the output for.
     
     Returns
@@ -59,7 +59,7 @@ def _get_touhou_character_like_from(name, allowed_names, lookup_map):
     if name_length == 0:
         return None
     
-    name = name.replace('-', ' ').replace('_', ' ').casefold()
+    name = name.casefold().replace('-', ' ').replace('_', ' ')
     
     if name_length > 10:
         name_length = 10
@@ -210,7 +210,7 @@ def get_touhou_character_like_from(name, characters):
     ----------
     name : `str`
         Input value.
-    characters : `list<TouhouCharacter>`
+    characters : `iterable<TouhouCharacter>`
         Characters to build the output for.
     
     Returns
@@ -245,7 +245,7 @@ def get_touhou_character_names_like_from(name, characters):
     ----------
     name : `str`
         Input value.
-    characters : `list<TouhouCharacter>`
+    characters : `iterable<TouhouCharacter>`
         Characters to build the output for.
     
     Returns
@@ -282,7 +282,7 @@ def get_familiar_touhou_matches_from(name, characters):
     ----------
     name : `str`
         Input value.
-    characters : `list<TouhouCharacter>`
+    characters : `iterable<TouhouCharacter>`
         Characters to build the output for.
     
     Returns

@@ -65,7 +65,7 @@ async def get_voters(client, message, emoji_id):
         # Should not happen
         return set()
     
-    reactions = [reaction for reaction in reactions.keys() if reaction.emoji.id == emoji_id]
+    reactions = [reaction for reaction in reactions.iter_reactions() if reaction.emoji.id == emoji_id]
     
     channel = message.channel
     if channel.is_in_group_thread():

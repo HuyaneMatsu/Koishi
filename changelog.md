@@ -1,3 +1,17 @@
+### 2024-05-14
+
+- Add new `/lap-sleep` interaction with **18** image.
+- Add **1** image to `/lick`.
+- Add **3** image to `/hug`.
+- Add **2** image to `/like`.
+- Add **5** image to `/kiss`.
+- Make the text on `orin-body-collecting` more readable.
+- Fix Cursed Sakuya's headers.
+- Orin joins the club.
+- Add new hidden `/action` command. You have to user install a bot to use it.
+- Fix a bug in action commands such as `/hug` that reverse sorted images by match rate producing wrong results
+    if many images were matched partially.
+
 ### 2024-05-10
 
 - Moving message now wont fail on empty messages (they are ignored).

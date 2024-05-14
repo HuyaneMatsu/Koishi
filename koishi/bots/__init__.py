@@ -24,6 +24,7 @@ if LOAD_KOISHI:
     from .flandre import *
     from .koishi import *
     from .nitori import *
+    from .orin import *
     from .renes import *
     from .satori import *
     from .yoshika import *
@@ -36,6 +37,7 @@ if LOAD_KOISHI:
         CursedSakuya,
         Flandre,
         Koishi,
+        Orin,
         Yoshika,
     )
     
@@ -45,6 +47,7 @@ if LOAD_KOISHI:
         *flandre.__all__,
         *koishi.__all__,
         *nitori.__all__,
+        *orin.__all__,
         *renes.__all__,
         *satori.__all__,
         *yoshika.__all__,

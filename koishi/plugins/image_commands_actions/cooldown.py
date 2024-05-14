@@ -33,7 +33,7 @@ class CooldownUnit:
     
     def __repr__(self):
         """Returns the object's representation."""
-        return f'{self.__class__.__name__}(expires_at={self.expires_at}, uses_left={self.uses_left})'
+        return f'{type(self).__name__!s}(expires_at = {self.expires_at!r}, uses_left = {self.uses_left!r})'
 
 
 def _check_user(cooldown_handler, event_or_message, weight):

@@ -62,8 +62,8 @@ And much more!
 - Actions
     
     `bite` • `blush` • `bully` • `cringe` • `cry` • `dance` • `feed` • `fluff` • `glomp` • `handhold` • `happy` •
-    `highfive` • `hug` • `kick` • `kill` • `kiss` • `kon` • `like` • `lick` • `nom` • `pat` • `pocky-kiss` • `poke` •
-    `slap` • `smile` • `smug` • `wave` • `wink` • `yeet`
+    `highfive` • `hug` • `kick` • `kill` • `kiss` • `kon` • `lap-sleep` • `like` • `lick` • `nom` • `pat` •
+    `pocky-kiss` • `poke` • `slap` • `smile` • `smug` • `wave` • `wink` • `yeet`
 
 - Economy
     
@@ -96,6 +96,12 @@ And much more!
     
     `nsfwbooru` • `safebooru` • `touhou-calendar` • `touhou-character` • `vocaloid` • `waifu-sfw` •
     `waifu-nsfw`
+
+<h3 align="center">
+    Hidden commands
+</h3>
+
+`action`
 
 <h3 align="center">
     Support server only commands

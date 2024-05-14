@@ -130,7 +130,7 @@ def select_from_match_groups(match_groups_by_weight):
     image_groups = []
     counter = 0
     
-    for weight, images in sorted(match_groups_by_weight.items()):
+    for weight, images in sorted(match_groups_by_weight.items(), reverse = True):
         weights.append(weight * len(images))
         image_groups.append(images)
         counter += len(images)
@@ -141,7 +141,7 @@ def select_from_match_groups(match_groups_by_weight):
         continue
     
     else:
-    # If we dont have enough images, randomly return
+        # If we dont have enough images, randomly return
         if random() * OPTIMAL_GROUP_LENGTH > counter:
             return
     

@@ -1,231 +1,129 @@
 __all__ = ()
 
+from hata import DiscordException, ERROR_CODES
+from hata.ext.slash import P, abort
+
 from ...bots import FEATURE_CLIENTS
 
-from .actions import (
-    ACTION_BITE, ACTION_BLUSH, ACTION_BULLY, ACTION_CRINGE, ACTION_CRY, ACTION_CUDDLE, ACTION_DANCE, ACTION_FEED,
-    ACTION_FLUFF, ACTION_GLOMP, ACTION_HANDHOLD, ACTION_HAPPY, ACTION_HIGHFIVE, ACTION_HUG, ACTION_KICK, ACTION_KILL,
-    ACTION_KISS, ACTION_KON, ACTION_LICK, ACTION_LIKE, ACTION_NOM, ACTION_PAT, ACTION_POCKY_KISS, ACTION_POKE,
-    ACTION_SLAP, ACTION_SMILE, ACTION_SMUG, ACTION_WAVE, ACTION_WINK, ACTION_YEET
+from .action import (
+    COOLDOWN_HANDLER, build_response, can_send_response_to_channel, create_action_command_function,
+    create_response_embed, get_allowed_users, send_action_response_to
 )
+from .action_filtering import (
+    PARAMETER_NAME_ACTION_TAG, PARAMETER_NAME_NAME, PARAMETER_NAME_SOURCE, PARAMETER_NAME_TARGET,
+    autocomplete_action_tag, autocomplete_name, autocomplete_source, autocomplete_target, get_action_and_image_detail
+)
+from .actions import ACTIONS
 
 
+# Register action commands.
 
-BITE = FEATURE_CLIENTS.interactions(
-    ACTION_BITE,
-    name = 'bite',
-    description = 'Vampy.',
+for action in ACTIONS:
+    
+    FEATURE_CLIENTS.interactions(
+        create_action_command_function(action),
+        name = action.name,
+        description = action.description,
+        is_global = True,
+        integration_types = (
+            ['guild_install', 'user_install']
+            if action.handler.is_character_filterable() else
+            ['guild_install']
+        ),
+    )
+
+# cleanup
+del action
+
+
+@FEATURE_CLIENTS.interactions(
+    name = 'action',
+    description = 'Reality is subjective and all is mental.',
     is_global = True,
+    integration_types = ['user_install'],
 )
-
-BLUSH = FEATURE_CLIENTS.interactions(
-    ACTION_BLUSH,
-    name = 'blush',
-    description = 'Oh.',
-    is_global = True,
-)
-
-BULLY = FEATURE_CLIENTS.interactions(
-    ACTION_BULLY,
-    name = 'bully',
-    description = 'No Bully!',
-    is_global = True,
-)
-
-CUDDLE = FEATURE_CLIENTS.interactions(
-    ACTION_CUDDLE,
-    name = 'cuddle',
-    description = 'Come here my pog champion.',
-    is_global = True,
-)
-
-CRINGE = FEATURE_CLIENTS.interactions(
-    ACTION_CRINGE,
-    name = 'cringe',
-    description = 'Cringe, run!',
-    is_global = True,
-)
-
-CRY = FEATURE_CLIENTS.interactions(
-    ACTION_CRY,
-    name = 'cry',
-    description = 'The saddest.',
-    is_global = True,
-)
-
-DANCE = FEATURE_CLIENTS.interactions(
-    ACTION_DANCE,
-    name = 'dance',
-    description = 'Dancy, dancy.',
-    is_global = True,
-)
-
-FEED = FEATURE_CLIENTS.interactions(
-    ACTION_FEED,
-    name = 'feed',
-    description = 'Just a spoonful..',
-    integration_types = ['guild_install', 'user_install'],
-    is_global = True,
-)
-
-FLUFF = FEATURE_CLIENTS.interactions(
-    ACTION_FLUFF,
-    name = 'fluff',
-    description = 'Fuwa fuwa',
-    integration_types = ['guild_install', 'user_install'],
-    is_global = True,
-)
-
-GLOMP = FEATURE_CLIENTS.interactions(
-    ACTION_GLOMP,
-    name = 'glomp',
-    description = 'You can run, but you cant hide!',
-    is_global = True,
-)
-
-HANDHOLD = FEATURE_CLIENTS.interactions(
-    ACTION_HANDHOLD,
-    name = 'handhold',
-    description = 'Lewd!!',
-    is_global = True,
-)
-
-HAPPY = FEATURE_CLIENTS.interactions(
-    ACTION_HAPPY,
-    name = 'happy',
-    description = 'If you are happy, clap your..',
-    is_global = True,
-)
-
-HIGHFIVE = FEATURE_CLIENTS.interactions(
-    ACTION_HIGHFIVE,
-    name = 'highfive',
-    description = 'Lets go boiz!',
-    is_global = True,
-)
-
-HUG = FEATURE_CLIENTS.interactions(
-    ACTION_HUG,
-    name = 'hug',
-    description = 'Huh.. Huggu? HUGG YOUUU!!!',
-    integration_types = ['guild_install', 'user_install'],
-    is_global = True,
-)
-
-KICK = FEATURE_CLIENTS.interactions(
-    ACTION_KICK,
-    name = 'kick',
-    description = 'Kicks butt!',
-    is_global = True,
-)
-
-KILL = FEATURE_CLIENTS.interactions(
-    ACTION_KILL,
-    name = 'kill',
-    description = 'Finally, some action.',
-    is_global = True,
-)
-
-KISS = FEATURE_CLIENTS.interactions(
-    ACTION_KISS,
-    name = 'kiss',
-    description = 'If you really really like your onee, give her a kiss <3',
-    integration_types = ['guild_install', 'user_install'],
-    is_global = True,
-)
-
-KON = FEATURE_CLIENTS.interactions(
-    ACTION_KON,
-    name = 'kon',
-    description = 'Kon~kon',
-    integration_types = ['guild_install', 'user_install'],
-    is_global = True,
-)
-
-LICK = FEATURE_CLIENTS.interactions(
-    ACTION_LICK,
-    name = 'lick',
-    description = 'Licking is a favored activity of neko girls.',
-    integration_types = ['guild_install', 'user_install'],
-    is_global = True,
-)
-
-LIKE = FEATURE_CLIENTS.interactions(
-    ACTION_LIKE,
-    name = 'like',
-    description = 'We like older woman.',
-    integration_types = ['guild_install', 'user_install'],
-    is_global = True,
-)
-
-NOM = FEATURE_CLIENTS.interactions(
-    ACTION_NOM,
-    name = 'nom',
-    description = 'Feed your fumo, or else',
-    is_global = True,
-)
-
-PAT = FEATURE_CLIENTS.interactions(
-    ACTION_PAT,
-    name = 'pat',
-    description = 'Do you like pats as well?',
-    integration_types = ['guild_install', 'user_install'],
-    is_global = True,
-)
-
-POCKY_KISS = FEATURE_CLIENTS.interactions(
-    ACTION_POCKY_KISS,
-    name = 'pocky-kiss',
-    description = 'Will they bale?',
-    integration_types = ['guild_install', 'user_install'],
-    is_global = True,
-)
-
-POKE = FEATURE_CLIENTS.interactions(
-    ACTION_POKE,
-    name = 'poke',
-    description = 'It hurts!',
-    is_global = True,
-)
-
-SLAP = FEATURE_CLIENTS.interactions(
-    ACTION_SLAP,
-    name = 'slap',
-    description = 'Slapping others is not nice.',
-    is_global = True,
-)
-
-SMILE = FEATURE_CLIENTS.interactions(
-    ACTION_SMILE,
-    name = 'smile',
-    description = 'Oh, really?',
-    is_global = True,
-)
-
-SMUG = FEATURE_CLIENTS.interactions(
-    ACTION_SMUG,
-    name = 'smug',
-    description = 'Smug face.',
-    is_global = True,
-)
-
-WAVE = FEATURE_CLIENTS.interactions(
-    ACTION_WAVE,
-    name = 'wave',
-    description = 'Flap flap',
-    is_global = True,
-)
-
-WINK = FEATURE_CLIENTS.interactions(
-    ACTION_WINK,
-    name = 'wink',
-    description = 'Ara-ara',
-    is_global = True,
-)
-
-YEET = FEATURE_CLIENTS.interactions(
-    ACTION_YEET,
-    name = 'yeet',
-    description = 'Yeet!',
-    is_global = True,
-)
+async def wild_card_action(
+    client,
+    event,
+    action_tag_name : P(str, 'Select action tag', PARAMETER_NAME_ACTION_TAG, autocomplete = autocomplete_action_tag) = None,
+    source_character_name : P(str, 'Source character name.', PARAMETER_NAME_SOURCE, autocomplete = autocomplete_source) = None,
+    target_character_name : P(str, 'Target character mame.', PARAMETER_NAME_TARGET, autocomplete = autocomplete_target) = None,
+    image_name : P(str, 'Image name', PARAMETER_NAME_NAME, autocomplete = autocomplete_name) = None,
+    target_00: ('mentionable', 'Select someone.', 'target-1') = None,
+    target_01: ('mentionable', 'Select someone', 'target-2') = None,
+    target_02: ('mentionable', 'Select someone', 'target-3') = None,
+    target_03: ('mentionable', 'Select someone', 'target-4') = None,
+    target_04: ('mentionable', 'Select someone', 'target-5') = None,
+    target_05: ('mentionable', 'Select someone', 'target-6') = None,
+    target_06: ('mentionable', 'Select someone', 'target-7') = None,
+    target_07: ('mentionable', 'Select someone', 'target-8') = None,
+    target_08: ('mentionable', 'Select someone', 'target-9') = None,
+    target_09: ('mentionable', 'Select someone', 'target-10') = None,
+):
+    """
+    Wild card action call.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    action_tag_name : `None | str` = `None`, Optional
+        Selected action tag name.
+    source_character_name : `None | str` = `None`, Optional
+        Name of the source character.
+    target_character_name : `None | str` = `None`, Optional
+        Name of the target character.
+    image_name : `None | str` = `None`, Optional
+        The name of the image.
+    user_{n} : `None`, ``ClientUserBase`` = `None`, Optional
+        Additional users to target.
+    """
+    targets, client_in_users, user_in_users, allowed_mentions = get_allowed_users(
+        client,
+        event,
+        (
+            target_00, target_01, target_02, target_03, target_04, target_05, target_06, target_07, target_08,
+            target_09,
+        ),
+    )
+    
+    expire_after = COOLDOWN_HANDLER.get_cooldown(event, len(targets))
+    if expire_after > 0.0:
+        abort(
+            f'{client.name_at(event.guild_id)} got bored of enacting your {event.interaction.name} try again in '
+            f'{expire_after:.2f} seconds.'
+        )
+    
+    action, image_detail = get_action_and_image_detail(
+        action_tag_name, source_character_name, target_character_name, image_name
+    )
+    if (action is None):
+        abort('Could not match any actions.')
+    
+    if (image_detail is None):
+        abort('Could not match any images.')
+    
+    content = build_response(client, action.verb, event.user, targets, client_in_users)
+    embed = create_response_embed(client, event.guild_id, event.user, targets, client_in_users, image_detail)
+    
+    guild = event.guild
+    if (guild is None) or (client not in guild.clients) or (not can_send_response_to_channel(client, event.channel)):
+        await send_action_response_to(client, event.channel, content, embed, allowed_mentions)
+        return
+    
+    try:
+        await client.interaction_response_message_create(
+            event, 'Reality is subjective and all is mental.', show_for_invoking_user_only = True
+        )
+    except ConnectionError:
+        return
+    
+    except DiscordException as err:
+        if err.code != ERROR_CODES.unknown_interaction:
+            raise
+    
+    await send_action_response_to(client, event.channel, content, embed, allowed_mentions)

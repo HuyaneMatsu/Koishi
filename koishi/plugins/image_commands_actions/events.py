@@ -10,48 +10,18 @@ from ...bots import FEATURE_CLIENTS
 from ..blacklist_core import is_user_id_in_blacklist
 from ..user_settings import get_one_user_settings, get_preferred_client_in_channel
 
-from .action import COOLDOWN_HANDLER, send_action_response_to
-from .actions import (
-    ACTION_BITE, ACTION_BLUSH, ACTION_BULLY, ACTION_CRINGE, ACTION_CRY, ACTION_CUDDLE, ACTION_DANCE, ACTION_FEED,
-    ACTION_FLUFF, ACTION_GLOMP, ACTION_HANDHOLD, ACTION_HAPPY, ACTION_HIGHFIVE, ACTION_HUG, ACTION_KICK, ACTION_KILL,
-    ACTION_KISS, ACTION_KON, ACTION_LICK, ACTION_LIKE, ACTION_NOM, ACTION_PAT, ACTION_POCKY_KISS, ACTION_POKE,
-    ACTION_SLAP, ACTION_SMILE, ACTION_SMUG, ACTION_WAVE, ACTION_WINK, ACTION_YEET
-)
+from .action import COOLDOWN_HANDLER, create_response_content_and_embed, send_action_response_to
+from .actions import ACTIONS
 
 
-ACTIONS_BY_NAME = {
-    'bite': ACTION_BITE,
-    'blush': ACTION_BLUSH,
-    'bully': ACTION_BULLY,
-    'cringe': ACTION_CRINGE,
-    'cry': ACTION_CRY,
-    'cuddle': ACTION_CUDDLE,
-    'dance': ACTION_DANCE,
-    'feed': ACTION_FEED,
-    'fluff': ACTION_FLUFF,
-    'glomp': ACTION_GLOMP,
-    'handhold': ACTION_HANDHOLD,
-    'happy': ACTION_HAPPY,
-    'highfive': ACTION_HIGHFIVE,
-    'hug': ACTION_HUG,
-    'kick': ACTION_KICK,
-    'kill': ACTION_KILL,
-    'kiss': ACTION_KISS,
-    'kon': ACTION_KON,
-    'lick': ACTION_LICK,
-    'like': ACTION_LIKE,
-    'nom': ACTION_NOM,
-    'pat': ACTION_PAT,
-    'pocky': ACTION_POCKY_KISS,
-    'pocky-kiss': ACTION_POCKY_KISS,
-    'poke': ACTION_POKE,
-    'slap': ACTION_SLAP,
-    'smile': ACTION_SMILE,
-    'smug': ACTION_SMUG,
-    'wave': ACTION_WAVE,
-    'wink': ACTION_WINK,
-    'yeet': ACTION_YEET,
-}
+ACTIONS_BY_NAME = {}
+
+for action in ACTIONS:
+    for name in action.iter_names():
+        ACTIONS_BY_NAME[name] = action
+
+# cleanup
+del action
 
 
 MAX_ACTION_COMMAND_LENGTH = max(len(name) for name in ACTIONS_BY_NAME.keys())
@@ -275,8 +245,9 @@ async def message_create(client, message):
     
     allowed_mentions = [*targets, message.author, client]
     # Create response and send
-    content, embed = await ACTIONS_BY_NAME[intended_action].create_response_content_and_embed(
-        client, None, message.guild_id, message.author, targets, client_in_users, user_in_users, allowed_mentions,
+    action = ACTIONS_BY_NAME[intended_action]
+    content, embed = await create_response_content_and_embed(
+        action, client, None, message.guild_id, message.author, targets, client_in_users, user_in_users, allowed_mentions,
     )
     
     await send_action_response_to(client, referenced_message, content, embed, allowed_mentions)

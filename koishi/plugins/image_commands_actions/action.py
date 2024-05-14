@@ -4,6 +4,7 @@ from random import random
 
 from hata import ClientUserBase, DiscordException, Embed, Emoji, ERROR_CODES
 from hata.ext.slash import abort
+from scarletio import RichAttributeErrorBaseType
 
 from ..embed_image_refresh import schedule_image_refresh
 from ..image_handling_core import add_embed_provider
@@ -350,12 +351,66 @@ async def send_action_response(client, event, content, embed, allowed_mentions):
     return False
 
 
-class Action:
+def create_response_embed(client, guild_id, source_user, targets, client_in_users, image_detail):
+    """
+    Creates response embed of an action.
+    
+    Parameters
+    ----------
+    client : ``ClientUserBase``
+        The client who received the event.
+    guild_id : `int`
+        The guild's identifier where the command was called from.
+    source_user : ``ClientUserBase``
+        The user source user who invoked the event.
+    targets : `set<Role | ClientUserBase>`
+        Target entities.
+    client_in_users : `bool`
+        Whether the client is in the mentioned users.
+    allowed_mentions : `list<ClientUserBase>`
+        The allowed mentions.
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
+    if (not targets) and (not client_in_users):
+        color = client.color_at(guild_id)
+    else:
+        color = source_user.color_at(guild_id)
+    
+    
+    if image_detail is None:
+        embed = Embed(
+            None,
+            '*Could not get any images, please try again later.*',
+            color = color,
+        )
+    
+    else:
+        embed = Embed(
+            color = color,
+        ).add_image(
+            image_detail.url,
+        )
+        
+        add_embed_provider(embed, image_detail)
+    
+    return embed
+
+
+class Action(RichAttributeErrorBaseType):
     """
     Represents an action.
     
     Attributes
     ----------
+    aliases : `None | tuple<str>`
+        Name aliases.
+    name : `str`
+        The name of the action.
+    description : `str`
+        Description for the action.
     handler : ``ImageHandlerBase``
         Image handler to use when invoking self-action.
     handler : ``ImageHandlerBase``
@@ -363,30 +418,109 @@ class Action:
     verb : `str`
         Verb used in the action.
     """
-    __slots__ = ('handler', 'handler_self', 'verb')
+    __slots__ = ('aliases', 'description', 'handler', 'handler_self', 'name',  'verb')
     
-    def __new__(cls, handler, verb, *, handler_self = None):
+    def __new__(cls, name, description, handler, verb, *, aliases = None, handler_self = None):
         """
         Creates a new action.
         
         Parameters
         ----------
+        name : `str`
+            The name of the action.
+        description : `str`
+            Description for the action.
         handler : ``ImageHandlerBase``
             Image handler to use.
         verb : `str`
             Verb used in the action.
+        aliases : `None | tuple<str>` = `None`, Optional (Keyword only)
+            Name aliases
         handler_self : `None`, ``ImageHandlerBase`` = `None`, Optional (Keyword only)
             Image handler to use when invoking self-action.
         """
         self = object.__new__(cls)
+        self.aliases = aliases
+        self.description = description
         self.handler = handler
         self.handler_self = handler_self
+        self.name = name
         self.verb = verb
         return self
     
     
-    async def __call__(
-        self,
+    def __repr__(self):
+        """Returns the action's representation."""
+        repr_parts = ['<', type(self).__name__]
+        
+        # name
+        repr_parts.append(' name = ')
+        repr_parts.append(repr(self.name))
+        
+        repr_parts.append('>')
+        return ''.join(repr_parts)
+    
+    
+    def iter_names(self):
+        """
+        Iterates over the names of the action.
+        
+        This method is an iterable generator.
+        
+        Yields
+        ------
+        name : `str`
+        """
+        yield self.name
+        
+        aliases = self.aliases
+        if (aliases is not None):
+            yield from aliases
+    
+    
+    def get_action_tag(self):
+        """
+        Gets the tag of the represented action if available.
+        
+        Returns
+        -------
+        action_tag : `None | str`
+        """
+        image_handler = self.handler
+        for image_detail in image_handler.iter_character_filterable():
+            for action in image_detail.iter_actions():
+                return action.tag
+    
+    
+    def get_action_tag_self(self):
+        """
+        Gets the tag of the represented action's self call if available.
+        
+        Returns
+        -------
+        action_tag : `None | str`
+        """
+        image_handler = self.handler_self
+        if (image_handler is not None):
+            for image_detail in image_handler.iter_character_filterable():
+                for action in image_detail.iter_actions():
+                    return action.tag
+
+
+def create_action_command_function(action):
+    """
+    Creates an action command function bound to the given `action`
+    
+    Parameters
+    ----------
+    action : ``Action``
+        Action to create command for.
+    
+    Returns
+    -------
+    action_command_function : `CoroutineFunctionType`
+    """
+    async def action_command_function(
         client,
         event,
         target_00: ('mentionable', 'Select someone.', 'target-1') = None,
@@ -427,13 +561,15 @@ class Action:
         event : ``InteractionEvent``
             The received interaction event.
         user_{n} : `None`, ``ClientUserBase`` = `None`, Optional
-            Additional users to pat.
+            Additional users to target.
         
         Raises
         ------
         DiscordException
             Unexpected exception from Discord.
         """
+        nonlocal action
+        
         targets, client_in_users, user_in_users, allowed_mentions = get_allowed_users(
             client,
             event,
@@ -451,105 +587,87 @@ class Action:
                 f'{expire_after:.2f} seconds.'
             )
         
-        content, embed = await self.create_response_content_and_embed(
-            client, event, event.guild_id, event.user, targets, client_in_users, user_in_users, allowed_mentions
+        content, embed = await create_response_content_and_embed(
+            action, client, event, event.guild_id, event.user, targets, client_in_users, user_in_users, allowed_mentions
         )
         
         await send_action_response(client, event, content, embed, allowed_mentions)
-
     
-    async def create_response_content_and_embed(
-        self, client, event, guild_id, source_user, targets, client_in_users, user_in_users, allowed_mentions
+    return action_command_function
+
+
+async def create_response_content_and_embed(
+    action, client, event, guild_id, source_user, targets, client_in_users, user_in_users, allowed_mentions
+):
+    """
+    Creates response content and embed.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    action : ``Action``
+        The action to work on.
+    client : ``Client``
+        The client who received the event.
+    event : `None`, ``InteractionEvent``
+        The received interaction event if called from a command.
+    guild_id : `int`
+        The guild's identifier where the command was called from.
+    source_user : ``ClientUserBase``
+        The user source user who invoked the event.
+    targets : `set<Role | ClientUserBase>`
+        Target entities.
+    client_in_users : `bool`
+        Whether the client is in the mentioned users.
+    user_in_users : `bool`
+        Whether the user in in the mentioned users as well.
+    allowed_mentions : `list<ClientUserBase>`
+        The allowed mentions.
+    
+    Returns
+    -------
+    content : `str`
+        Response content.
+    embed : ``Embed``
+        Response embed.
+    """
+    if (
+        user_in_users and
+        (not targets) and
+        (action.handler_self is not None)
+        and ((random() < 0.5) if client_in_users else True)
     ):
-        """
-        Creates response content and embed.
+        content = build_response_self(action.verb, source_user)
+        handler = action.handler_self
         
-        This function is a coroutine.
+    else:
+        content = build_response(client, action.verb, source_user, targets, client_in_users)
+        handler = action.handler
+    
+    target_users = [target for target in targets if isinstance(target, ClientUserBase)]
+    
+    # Use goto
+    while True:
+        if handler.is_character_filterable():
+            image_detail = await get_preferred_image(handler, source_user, target_users)
+            if (image_detail is not None):
+                break
         
-        Parameters
-        ----------
-        client : ``Client``
-            The client who received the event.
-        event : `None`, ``InteractionEvent``
-            The received interaction event if called from a command.
-        guild_id : `int`
-            The guild's identifier where the command was called from.
-        source_user : ``ClientUserBase``
-            The user source user who invoked the event.
-        targets : `set<Role | ClientUserBase>`
-            Target entities.
-        client_in_users : `bool`
-            Whether the client is in the mentioned users.
-        user_in_users : `bool`
-            Whether the user in in the mentioned users as well.
-        allowed_mentions : `list<ClientUserBase>`
-            The allowed mentions.
-        
-        Returns
-        -------
-        content : `str`
-            Response content.
-        embed : ``Embed``
-            Response embed.
-        """
-        if (
-            user_in_users and
-            (not targets) and
-            (self.handler_self is not None)
-            and ((random() < 0.5) if client_in_users else True)
-        ):
-            content = build_response_self(self.verb, source_user)
-            handler = self.handler_self
-            
-        else:
-            content = build_response(client, self.verb, source_user, targets, client_in_users)
-            handler = self.handler
-        
-        target_users = [target for target in targets if isinstance(target, ClientUserBase)]
-        
-        # Use goto
-        while True:
-            if handler.is_character_filterable():
-                image_detail = await get_preferred_image(handler, source_user, target_users)
-                if (image_detail is not None):
-                    break
-            
-            if handler.supports_weight_mapping():
-                weight_map = await get_preferred_image_source_weight_map(
-                    [*source_user.id, *(target.id for target in target_users)]
+        if handler.supports_weight_mapping():
+            weight_map = await get_preferred_image_source_weight_map(
+                [*source_user.id, *(target.id for target in target_users)]
+            )
+            if is_preferred_image_source_weight_map_valuable(weight_map):
+                image_detail = await handler.get_image_weighted(
+                    client, event, content = content, allowed_mentions = allowed_mentions, silent = True,
                 )
-                if is_preferred_image_source_weight_map_valuable(weight_map):
-                    image_detail = await handler.get_image_weighted(
-                        client, event, content = content, allowed_mentions = allowed_mentions, silent = True,
-                    )
-                    break
-            
-            image_detail = await handler.get_image(
-                client, event, content = content, allowed_mentions = allowed_mentions, silent = True,
-            )
-            break
+                break
         
-        # Get color
-        if (not targets) and (not client_in_users):
-            color = client.color_at(guild_id)
-        else:
-            color = source_user.color_at(guild_id)
-        
-        
-        if image_detail is None:
-            embed = Embed(
-                None,
-                '*Could not get any images, please try again later.*',
-                color = color,
-            )
-        
-        else:
-            embed = Embed(
-                color = color,
-            ).add_image(
-                image_detail.url,
-            )
-            
-            add_embed_provider(embed, image_detail)
-        
-        return content, embed
+        image_detail = await handler.get_image(
+            client, event, content = content, allowed_mentions = allowed_mentions, silent = True,
+        )
+        break
+    
+    embed = create_response_embed(client, guild_id, source_user, targets, client_in_users, image_detail)
+    return content, embed

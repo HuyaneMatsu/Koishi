@@ -9,7 +9,7 @@ from ..base import ImageDetailMatcherBase
 
 def _assert_fields_set(image_detail_matcher):
     """
-    Asserts whether every fields are set of teh given image detail matcher.
+    Asserts whether every fields are set of the given image detail matcher.
     
     Parameters
     ----------
@@ -124,7 +124,7 @@ def test__ImageDetailMatcherBase__get_match_rate(keyword_parameters, image_detai
     
     Returns
     -------
-    output : `bool`
+    output : `int`
     """
     image_detail_matcher = ImageDetailMatcherBase(**keyword_parameters)
     
@@ -158,7 +158,7 @@ def test__ImageDetailMatcherBase__get_match_rate_action(keyword_parameters, imag
     
     Returns
     -------
-    output : `bool`
+    output : `int`
     """
     image_detail_matcher = ImageDetailMatcherBase(**keyword_parameters)
     

@@ -11,14 +11,17 @@ KOISHI_PREFIX = 'k!'             # default prefix. (str)
 KOISHI_TOP_GG_TOKEN = ''         # top.gg token of the bot.
 KOISHI_TOP_GG_AUTHORIZATION = '' # top.gg authorization used for received webhooks.
 
-FLANDRE_TOKEN = ''               # bot token (str) for a secondary system bot.
+FLANDRE_TOKEN = ''               # bot token (str) for a secondary feature bot.
 FLANDRE_ID = 0                   # bot id (int), can be 0.
 
-YOSHIKA_TOKEN = ''               # bot token (str) for a secondary system bot.
+YOSHIKA_TOKEN = ''               # bot token (str) for a secondary feature bot.
 YOSHIKA_ID = 0                   # bot id (int), can be 0.
 
-CURSED_SAKUYA_TOKEN = ''         # bot token (str) for a secondary system bot.
+CURSED_SAKUYA_TOKEN = ''         # bot token (str) for a secondary feature bot.
 CURSED_SAKUYA_ID = 0             # bot id (int), can be 0.
+
+ORIN_TOKEN = ''                  # bot token (str) for a secondary feature bot.
+ORIN_ID = 0                      # bot id (int), can be 0.
 
 
 SATORI_TOKEN = ''                # bot token (str) for the system bot.

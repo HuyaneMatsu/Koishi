@@ -21,6 +21,7 @@ def _assert_fields_set(image_detail):
     vampytest.assert_instance(image_detail.characters, tuple, nullable = True)
     vampytest.assert_instance(image_detail.creators, tuple, nullable = True)
     vampytest.assert_instance(image_detail.editors, tuple, nullable = True)
+    vampytest.assert_instance(image_detail._cache_name, str, nullable = True)
 
 
 def test__ImageDetailStatic__new():
@@ -906,4 +907,5 @@ def test__ImageDetailStatic__name(url):
     
     output = image_detail.name
     vampytest.assert_instance(output, str)
+    vampytest.assert_eq(image_detail._cache_name, output)
     return output

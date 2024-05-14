@@ -92,15 +92,6 @@ class ImageDetailMatcherContextSensitive(ImageDetailMatcherBase):
         return True
     
     
-    @copy_docs(ImageDetailMatcherBase.get_match_rate)
-    def get_match_rate(self, image_detail):
-        match_rate = 0
-        for image_detail_action in image_detail.iter_actions():
-            match_rate = max(match_rate, self.get_match_rate_action(image_detail_action))
-        
-        return match_rate
-    
-    
     @copy_docs(ImageDetailMatcherBase.get_match_rate_action)
     def get_match_rate_action(self, image_detail_action):
         match_rate = 0

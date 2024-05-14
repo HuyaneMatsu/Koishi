@@ -9,7 +9,7 @@ from ..shared_constants import REASON_RP
 
 
 ORIN_IMAGE_URL = (
-    'https://cdn.discordapp.com/attachments/568837922288173058/1080519059663241378/orin_body_collecting.png'
+    'https://cdn.discordapp.com/attachments/568837922288173058/1239516656099790868/orin-body-collecting.png'
 )
 ORIN_COLOR = Color(0x9E4D4C)
 

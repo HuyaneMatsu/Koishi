@@ -11,6 +11,8 @@ class ImageDetailStatic(ImageDetailBase):
     
     Attributes
     ----------
+    _cache_name : `None | str`
+        Cache slot for `.name`.
     actions : `None | tuple<ImageDetailAction>`
         Actions done on the image.
     characters : `None`, `tuple<TouhouCharacter>`
@@ -22,12 +24,13 @@ class ImageDetailStatic(ImageDetailBase):
     url : `str`
         Url to the image.
     """
-    __slots__ = ('actions', 'characters', 'creators', 'editors')
+    __slots__ = ('_cache_name', 'actions', 'characters', 'creators', 'editors')
     
     
     @copy_docs(ImageDetailBase.__new__)
     def __new__(cls, url):
         self = ImageDetailBase.__new__(cls, url)
+        self._cache_name = None
         self.actions = None
         self.characters = None
         self.creators = None
@@ -65,8 +68,20 @@ class ImageDetailStatic(ImageDetailBase):
     @copy_docs(ImageDetailBase.copy)
     def copy(self):
         new = ImageDetailBase.copy(self)
+        new._cache_name = self._cache_name
         new.actions = self.actions
         new.characters = self.characters
         new.creators = self.creators
         new.editors = self.editors
         return new
+    
+    
+    @property
+    @copy_docs(ImageDetailBase.name)
+    def name(self):
+        name = self._cache_name
+        if name is None:
+            name = ImageDetailBase.name.fget(self)
+            self._cache_name = name
+        
+        return name

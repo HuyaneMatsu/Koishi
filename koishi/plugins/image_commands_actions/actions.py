@@ -5,161 +5,202 @@ from .image_handlers import (
     IMAGE_HANDLER_BITE, IMAGE_HANDLER_BLUSH, IMAGE_HANDLER_BULLY, IMAGE_HANDLER_CRINGE, IMAGE_HANDLER_CRY,
     IMAGE_HANDLER_CUDDLE, IMAGE_HANDLER_DANCE, IMAGE_HANDLER_FEED, IMAGE_HANDLER_FLUFF, IMAGE_HANDLER_GLOMP,
     IMAGE_HANDLER_HANDHOLD, IMAGE_HANDLER_HAPPY, IMAGE_HANDLER_HIGHFIVE, IMAGE_HANDLER_HUG, IMAGE_HANDLER_KICK,
-    IMAGE_HANDLER_KILL, IMAGE_HANDLER_KISS, IMAGE_HANDLER_KON, IMAGE_HANDLER_LICK, IMAGE_HANDLER_LIKE,
-    IMAGE_HANDLER_NOM, IMAGE_HANDLER_PAT, IMAGE_HANDLER_POCKY_KISS, IMAGE_HANDLER_POCKY_KISS_SELF, IMAGE_HANDLER_POKE,
-    IMAGE_HANDLER_SLAP, IMAGE_HANDLER_SMILE, IMAGE_HANDLER_SMUG, IMAGE_HANDLER_WAVE, IMAGE_HANDLER_WINK,
-    IMAGE_HANDLER_YEET
+    IMAGE_HANDLER_KILL, IMAGE_HANDLER_KISS, IMAGE_HANDLER_KON, IMAGE_HANDLER_LAP_SLEEP, IMAGE_HANDLER_LICK,
+    IMAGE_HANDLER_LIKE, IMAGE_HANDLER_NOM, IMAGE_HANDLER_PAT, IMAGE_HANDLER_POCKY_KISS, IMAGE_HANDLER_POCKY_KISS_SELF,
+    IMAGE_HANDLER_POKE, IMAGE_HANDLER_SLAP, IMAGE_HANDLER_SMILE, IMAGE_HANDLER_SMUG, IMAGE_HANDLER_WAVE,
+    IMAGE_HANDLER_WINK, IMAGE_HANDLER_YEET
 )
 
 
-ACTION_BITE = Action(
-    IMAGE_HANDLER_BITE,
-    'bites',
-)
-
-ACTION_BLUSH = Action(
-    IMAGE_HANDLER_BLUSH,
-    'blushes at',
-)
-
-ACTION_BULLY = Action(
-    IMAGE_HANDLER_BULLY,
-    'bullies',
-)
-
-ACTION_CRINGE = Action(
-    IMAGE_HANDLER_CRINGE,
-    'cringes at',
-)
-
-ACTION_CRY = Action(
-    IMAGE_HANDLER_CRY,
-    'cries because of',
-)
-
-ACTION_CUDDLE = Action(
-    IMAGE_HANDLER_CUDDLE,
-    'cuddles',
-)
-
-ACTION_DANCE = Action(
-    IMAGE_HANDLER_DANCE,
-    'dancing for',
-)
-
-ACTION_FEED = Action(
-    IMAGE_HANDLER_FEED,
-    'feeds',
-)
-
-
-ACTION_FLUFF = Action(
-    IMAGE_HANDLER_FLUFF,
-    'fluffs',
-)
-
-ACTION_GLOMP = Action(
-    IMAGE_HANDLER_GLOMP,
-    'glomps',
-)
-
-ACTION_HANDHOLD = Action(
-    IMAGE_HANDLER_HANDHOLD,
-    'holds hands of',
-)
-
-ACTION_HAPPY = Action(
-    IMAGE_HANDLER_HAPPY,
-    'is happy for',
-)
-
-ACTION_HIGHFIVE = Action(
-    IMAGE_HANDLER_HIGHFIVE,
-    'highfives',
-)
-
-ACTION_HUG = Action(
-    IMAGE_HANDLER_HUG,
-    'hugs',
-)
-
-ACTION_KICK = Action(
-    IMAGE_HANDLER_KICK,
-    'kicks',
-)
-
-ACTION_KILL = Action(
-    IMAGE_HANDLER_KILL,
-    'murders',
-)
-
-ACTION_KISS = Action(
-    IMAGE_HANDLER_KISS,
-    'kisses',
-)
-
-ACTION_KON = Action(
-    IMAGE_HANDLER_KON,
-    'kons at',
-)
-
-ACTION_LICK = Action(
-    IMAGE_HANDLER_LICK,
-    'licks',
-)
-
-ACTION_LIKE = Action(
-    IMAGE_HANDLER_LIKE,
-    'likes',
-)
-
-ACTION_NOM = Action(
-    IMAGE_HANDLER_NOM,
-    'noms',
-)
-
-ACTION_PAT = Action(
-    IMAGE_HANDLER_PAT,
-    'pats',
-)
-
-ACTION_POCKY_KISS = Action(
-    IMAGE_HANDLER_POCKY_KISS,
-    'pocky kisses',
-    handler_self = IMAGE_HANDLER_POCKY_KISS_SELF,
-)
-
-ACTION_POKE = Action(
-    IMAGE_HANDLER_POKE,
-    'pokes',
-)
-
-ACTION_SLAP = Action(
-    IMAGE_HANDLER_SLAP,
-    'slaps',
-)
-
-ACTION_SMILE = Action(
-    IMAGE_HANDLER_SMILE,
-    'smiles at',
-)
-
-ACTION_SMUG = Action(
-    IMAGE_HANDLER_SMUG,
-    'smugs at',
-)
-
-ACTION_WAVE = Action(
-    IMAGE_HANDLER_WAVE,
-    'waves at',
-)
-
-ACTION_WINK = Action(
-    IMAGE_HANDLER_WINK,
-    'winks at',
-)
-
-ACTION_YEET = Action(
-    IMAGE_HANDLER_YEET,
-    'yeets',
-)
+ACTIONS = [
+    Action(
+        'bite',
+        'Vampy.',
+        IMAGE_HANDLER_BITE,
+        'bites',
+    ),
+    Action(
+        'blush',
+        'Oh.',
+        IMAGE_HANDLER_BLUSH,
+        'blushes at',
+    ),
+    Action(
+        'bully',
+        'No Bully!',
+        IMAGE_HANDLER_BULLY,
+        'bullies',
+    ),
+    Action(
+        'cringe',
+        'Cringe, run!',
+        IMAGE_HANDLER_CRINGE,
+        'cringes at',
+    ),
+    Action(
+        'cry',
+        'The saddest.',
+        IMAGE_HANDLER_CRY,
+        'cries because of',
+    ),
+    Action(
+        'cuddle',
+        'Come here my pog champion.',
+        IMAGE_HANDLER_CUDDLE,
+        'cuddles',
+    ),
+    Action(
+        'dance',
+        'Dancy, dancy.',
+        IMAGE_HANDLER_DANCE,
+        'dancing for',
+    ),
+    Action(
+        'feed',
+        'Just a spoonful..',
+        IMAGE_HANDLER_FEED,
+        'feeds',
+    ),
+    Action(
+        'fluff',
+        'Fuwa fuwa',
+        IMAGE_HANDLER_FLUFF,
+        'fluffs',
+    ),
+    Action(
+        'glomp',
+        'You can run, but you cant hide!',
+        IMAGE_HANDLER_GLOMP,
+        'glomps',
+    ),
+    Action(
+        'handhold',
+        'Lewd!!',
+        IMAGE_HANDLER_HANDHOLD,
+        'holds hands of',
+    ),
+    Action(
+        'happy',
+        'If you are happy, clap your..',
+        IMAGE_HANDLER_HAPPY,
+        'is happy for',
+    ),
+    Action(
+        'highfive',
+        'Lets go boiz!',
+        IMAGE_HANDLER_HIGHFIVE,
+        'highfives',
+    ),
+    Action(
+        'hug',
+        'Huh.. Huggu? HUGG YOUUU!!!',
+        IMAGE_HANDLER_HUG,
+        'hugs',
+    ),
+    Action(
+        'kick',
+        'Kicks butt!',
+        IMAGE_HANDLER_KICK,
+        'kicks',
+    ),
+    Action(
+        'murder',
+        'Finally, some action.',
+        IMAGE_HANDLER_KILL,
+        'murders',
+        aliases = ('kill',),
+    ),
+    Action(
+        'kiss',
+        'If you really really like your onee, give her a kiss <3',
+        IMAGE_HANDLER_KISS,
+        'kisses',
+    ),
+    Action(
+        'kon',
+        'Kon~kon',
+        IMAGE_HANDLER_KON,
+        'kons at',
+    ),
+    Action(
+        'lap-sleep',
+        'Its eep time...',
+        IMAGE_HANDLER_LAP_SLEEP,
+        'sleeps on the lap of',
+        aliases = ('sleep',),
+    ),
+    Action(
+        'lick',
+        'Licking is a favored activity of neko girls.',
+        IMAGE_HANDLER_LICK,
+        'licks',
+    ),
+    Action(
+        'like',
+        'We like older woman.',
+        IMAGE_HANDLER_LIKE,
+        'likes',
+    ),
+    Action(
+        'nom',
+        'Feed your fumo, or else',
+        IMAGE_HANDLER_NOM,
+        'noms',
+    ),
+    Action(
+        'pat',
+        'Do you like pats as well?',
+        IMAGE_HANDLER_PAT,
+        'pats',
+    ),
+    Action(
+        'pocky-kiss',
+        'Will they bale?',
+        IMAGE_HANDLER_POCKY_KISS,
+        'pocky kisses',
+        aliases = ('pocky',),
+        handler_self = IMAGE_HANDLER_POCKY_KISS_SELF,
+    ),
+    Action(
+        'poke',
+        'It hurts!',
+        IMAGE_HANDLER_POKE,
+        'pokes',
+    ),
+    Action(
+        'slap',
+        'Slapping others is not nice.',
+        IMAGE_HANDLER_SLAP,
+        'slaps',
+    ),
+    Action(
+        'smile',
+        'Oh, really?',
+        IMAGE_HANDLER_SMILE,
+        'smiles at',
+    ),
+    Action(
+        'smug',
+        'Smug face.',
+        IMAGE_HANDLER_SMUG,
+        'smugs at',
+    ),
+    Action(
+        'wave',
+        'Flap flap',
+        IMAGE_HANDLER_WAVE,
+        'waves at',
+    ),
+    Action(
+        'wink',
+        'Ara-ara',
+        IMAGE_HANDLER_WINK,
+        'winks at',
+    ),
+    Action(
+        'yeet',
+        'Yeet!',
+        IMAGE_HANDLER_YEET,
+        'yeets',
+    )
+]

@@ -4894,6 +4894,306 @@ Source: **Touhou**
 
 ---
 
+### doremy-sagume-lap-sleep-0000
+
+Creator: **muyue**
+Editor: **HuyaneMatsu**
+
+Characters: **Doremy Sweet**, **Kishin Sagume**
+Source: **Touhou**
+
+---
+
+### reisen-tewi-lap-sleep-0000
+
+Creator: **shirosato**
+Editor: **HuyaneMatsu**
+
+Characters: **Inaba Tewi**, **Reisen Udongein Inaba**
+Source: **Touhou**
+
+---
+
+### aya-reimu-lap-sleep-0000
+
+Creator: **chilwell seele**
+Editor: **HuyaneMatsu**
+
+Characters: **Hakurei Reimu**, **Shameimaru Aya**
+Source: **Touhou**
+
+---
+
+### kanako-suwako-lap-sleep-0000
+
+Creator: **ame iru**
+Editor: *none*
+
+Characters: **Moriya Suwako**, **Yasaka Kanako**
+Source: **Touhou**
+
+---
+
+### marisa-nazrin-lap-sleep-0000
+
+Creator: **sznkrs**
+Editor: *none*
+
+Characters: **Kirisame Marisa**, **Nazrin**
+Source: **Touhou**
+
+---
+
+### kaguya-mokou-lap-sleep-0000
+
+Creator: **jiege**
+Editor: *none*
+
+Characters: **Fujiwara no Mokou**, **Houraisan Kaguya**
+Source: **Touhou**
+
+---
+
+### keine-mokou-lap-sleep-0000
+
+Creator: **eichi yuu**
+Editor: *none*
+
+Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+Source: **Touhou**
+
+---
+
+### koishi-satori-lap-sleep-0000
+
+Creator: **tsugetsuge**
+Editor: *none*
+
+Characters: **Komeiji Koishi**, **Komeiji Satori**
+Source: **Touhou**
+
+---
+
+### keiki-mayumi-lap-sleep-0000
+
+Creator: **yamase**
+Editor: *none*
+
+Characters: **Haniyasushin Keiki**, **Joutouguu Mayumi**
+Source: **Touhou**
+
+---
+
+### futo-miko-tojiko-lap-sleep-0000
+
+Creator: **ashiyu (ashu ashu)**
+Editor: *none*
+
+Characters: **Mononobe no Futo**, **Soga no Tojiko**, **Toyosatomimi no Miko**
+Source: **Touhou**
+
+---
+
+### marisa-reimu-lap-sleep-0000
+
+Creator: **muzuki uruu**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kirisame Marisa**
+Source: **Touhou**
+
+---
+
+### maribel-renko-lap-sleep-0000
+
+Creator: **fuukadia (narcolepsy)**
+Editor: *none*
+
+Characters: **Hearn Maribel**, **Usami Renko**
+Source: **Touhou**
+
+---
+
+### chen-ran-yukari-lap-sleep-0000
+
+Creator: **chanta (ayatakaoisii)**
+Editor: *none*
+
+Characters: **Chen**, **Yakumo Ran**, **Yakumo Yukari**
+Source: **Touhou**
+
+---
+
+### chen-ran-lap-sleep-0000
+
+Creator: **namuko**
+Editor: *none*
+
+Characters: **Chen**, **Yakumo Ran**
+Source: **Touhou**
+
+---
+
+### kanako-suwako-lap-sleep-0001
+
+Creator: **wataichi meko**
+Editor: *none*
+
+Characters: **Moriya Suwako**, **Yasaka Kanako**
+Source: **Touhou**
+
+---
+
+### mamizou-nue-lap-sleep-0000
+
+Creator: **daniwae**
+Editor: *none*
+
+Characters: **Futatsuiwa Mamizou**, **Houjuu Nue**
+Source: **Touhou**
+
+---
+
+### flandre-remilia-sakuya-lap-sleep-0000
+
+Creator: **satou kibi**
+Editor: *none*
+
+Characters: **Izayoi Sakuya**, **Scarlet Flandre**, **Scarlet Remilia**
+Source: **Touhou**
+
+---
+
+### shion-tenshi-lap-sleep-0000
+
+Creator: **piyodesu**
+Editor: *none*
+
+Characters: **Hinanawi Tenshi**, **Yorigami Shion**
+Source: **Touhou**
+
+---
+
+### kanako-suwako-lick-0000
+
+Creator: **ame iru**
+Editor: **HuyaneMatsu**
+
+Characters: **Moriya Suwako**, **Yasaka Kanako**
+Source: **Touhou**
+
+---
+
+### patchouli-remilia-hug-0000
+
+Creator: **eichi yuu**
+Editor: *none*
+
+Characters: **Patchouli Knowledge**, **Scarlet Remilia**
+Source: **Touhou**
+
+---
+
+### yuyuko-older-0004
+
+Creator: *unknown*
+Editor: *none*
+
+Characters: **Saigyouji Yuyuko**
+Source: **Touhou**
+
+---
+
+### flandre-okina-help-0000
+
+Creator: *unknown*
+Editor: *none*
+
+Characters: **Matara Okina**, **Scarlet Flandre**
+Source: **Touhou**
+
+---
+
+### aya-megumu-kiss-0000
+
+Creator: **raptor7**
+Editor: *none*
+
+Characters: **Iizunamaru Megumu**, **Shameimaru Aya**
+Source: **Touhou**
+
+---
+
+### chiruno-sunny-kiss-0000
+
+Creator: **senmura**
+Editor: *none*
+
+Characters: **Chiruno**, **Sunny Milk**
+Source: **Touhou**
+
+---
+
+### chiruno-sunny-kiss-0000
+
+Creator: **senmura**
+Editor: *none*
+
+Characters: **Chiruno**, **Sunny Milk**
+Source: **Touhou**
+
+---
+
+### koishi-satori-kiss-0002
+
+Creator: **meno~n**
+Editor: **HuyaneMatsu**
+
+Characters: **Komeiji Koishi**, **Komeiji Satori**
+Source: **Touhou**
+
+---
+
+### aya-reimu-hug-0000
+
+Creator: **sakic43899**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Shameimaru Aya**
+Source: **Touhou**
+
+---
+
+### aya-reimu-hug-0001
+
+Creator: **sakic43899**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Shameimaru Aya**
+Source: **Touhou**
+
+---
+
+### aya-reimu-kiss-0000
+
+Creator: **sakic43899**
+Editor: **HuyaneMatsu**
+
+Characters: **Hakurei Reimu**, **Shameimaru Aya**
+Source: **Touhou**
+
+---
+
+### aya-reimu-kiss-0001
+
+Creator: **sakic43899**
+Editor: **HuyaneMatsu**
+
+Characters: **Hakurei Reimu**, **Shameimaru Aya**
+Source: **Touhou**
+
+---
+
 I don't own the image files. The credits goes their respective owners.
 This feature is purely fan-made, and will not be used for profit or illegal sharing!
 Please contact me if you're the owner of an image and want to remove it from this repository!

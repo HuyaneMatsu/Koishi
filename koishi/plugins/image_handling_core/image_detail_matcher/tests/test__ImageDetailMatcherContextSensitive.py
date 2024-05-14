@@ -10,7 +10,7 @@ from ..context_sensitive import ImageDetailMatcherContextSensitive
 
 def _assert_fields_set(image_detail_matcher):
     """
-    Asserts whether every fields are set of teh given image detail matcher.
+    Asserts whether every fields are set of the given image detail matcher.
     
     Parameters
     ----------
@@ -195,7 +195,7 @@ def test__ImageDetailMatcherContextSensitive__get_match_rate(keyword_parameters,
     
     Returns
     -------
-    output : `bool`
+    output : `int`
     """
     image_detail_matcher = ImageDetailMatcherContextSensitive(**keyword_parameters)
     
@@ -264,12 +264,12 @@ def test__ImageDetailMatcherContextSensitive__get_match_rate_action(keyword_para
     ----------
     keyword_parameters_0 : `dict<str, object>`
         Keyword parameters to create instance with.
-    image_detail_action : ``ImageDetailAction``
+    image_detail_action : ``ImageDetailContextSensitive``
         The image detail action to match.
     
     Returns
     -------
-    output : `bool`
+    output : `int`
     """
     image_detail_matcher = ImageDetailMatcherContextSensitive(**keyword_parameters)
     
