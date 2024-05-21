@@ -1,7 +1,8 @@
 import vampytest
 
 from ...image_handling_core import (
-    WEIGHT_DIRECT_MATCH, ImageDetailMatcherContextSensitive, ImageDetailStatic, ImageHandlerStatic
+    ImageDetailMatcherContextSensitive, ImageDetailStatic, ImageHandlerStatic, WEIGHT_DIRECT_MATCH,
+    WEIGHT_OPPOSITE_MATCH
 )
 from ...touhou_core import IZAYOI_SAKUYA, KAENBYOU_RIN, KOMEIJI_KOISHI, KOMEIJI_SATORI
 from ...user_settings import PREFERRED_IMAGE_SOURCE_TOUHOU
@@ -101,7 +102,9 @@ def _iter_options():
         {KOMEIJI_KOISHI.system_name},
         {KOMEIJI_KOISHI.system_name},
         {
-            WEIGHT_DIRECT_MATCH + 0: [image_detail_0, image_detail_1, image_detail_2, image_detail_3, image_detail_6],
+            WEIGHT_DIRECT_MATCH + 0 + WEIGHT_OPPOSITE_MATCH: [
+                image_detail_0, image_detail_1, image_detail_2, image_detail_3, image_detail_6
+            ],
         },
     )
 

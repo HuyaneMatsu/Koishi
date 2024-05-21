@@ -4,7 +4,7 @@ from ....touhou_core import CHEN, YAKUMO_RAN, YAKUMO_YUKARI
 
 from ...image_detail import ImageDetailAction, ImageDetailStatic
 
-from ..constants import WEIGHT_DIRECT_MATCH, WEIGHT_NONE_MATCH
+from ..constants import WEIGHT_DIRECT_MATCH, WEIGHT_NONE_MATCH, WEIGHT_OPPOSITE_MATCH
 from ..context_sensitive import ImageDetailMatcherContextSensitive
 
 
@@ -215,7 +215,7 @@ def _iter_options__get_match_rate_action():
             'targets': {YAKUMO_RAN.system_name, YAKUMO_YUKARI.system_name},
         },
         image_detail_action_0,
-        0 + WEIGHT_DIRECT_MATCH,
+        0 + WEIGHT_DIRECT_MATCH + WEIGHT_OPPOSITE_MATCH,
     )
     
     yield (

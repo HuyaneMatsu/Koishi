@@ -2,7 +2,7 @@ __all__ = ()
 
 from hata import Embed, INVITE_URL_RP
 from hata.discord.utils import URL_RP
-from hata.ext.slash import Form, TextInput, TextInputStyle
+from hata.ext.slash import Form, Row, TextInput, TextInputStyle
 
 from ...bots import FEATURE_CLIENTS
 
@@ -12,6 +12,30 @@ from ..embed_image_refresh import schedule_image_refresh
 from .constants import CUSTOM_ID_WELCOME_REPLY, CUSTOM_ID_WELCOME_REPLY_CUSTOM, REPLY_EXPIRES_AFTER
 from .spam_protection import is_reply_in_cache, put_reply_in_cache
 from .welcome_styles import get_welcome_style
+
+
+def get_disabled_components(event):
+    """
+    Returns the components on the event's message as disabled.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        Event to get its components as disabled.
+    
+    Returns
+    -------
+    components : `None`, `list<Component>`
+    """
+    message = event.message
+    if message is None:
+        return None
+    
+    components = message.components
+    if components is None:
+        return None
+    
+    return [Row(*(component.copy_with(enabled = False) for component in row.components)) for row in components]
 
 
 def get_censor_reason_for_message_content(message_content):
@@ -162,7 +186,7 @@ async def check_user_left_and_notify(client, event, joined_user):
     
     await client.interaction_response_message_edit(
         event,
-        components = None,
+        components = get_disabled_components(event),
     )
     return False
     
@@ -196,7 +220,7 @@ async def check_expired_and_notify(client, event):
     
     await client.interaction_response_message_edit(
         event,
-        components = None,
+        components = get_disabled_components(event),
     )
     return False
 

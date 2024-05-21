@@ -4,7 +4,7 @@ from hata import (
     InteractionOption, InteractionType
 )
 
-from ...touhou_core import KAENBYOU_RIN
+from ...touhou_core import KAENBYOU_RIN, KOMEIJI_KOISHI, REIUJI_UTSUHO
 
 from ..action_filtering import (
     PARAMETER_NAME_ACTION_TAG, PARAMETER_NAME_SOURCE, PARAMETER_NAME_TARGET, PARAMETER_WILD_CARD, autocomplete_source
@@ -57,8 +57,9 @@ def _iter_options():
             )
         ),
         None,
-        [PARAMETER_WILD_CARD, 'Kaenbyou Rin'],
+        [PARAMETER_WILD_CARD, KOMEIJI_KOISHI.name, REIUJI_UTSUHO.name],
     )
+    
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
@@ -104,7 +105,38 @@ def _iter_options():
             )
         ),
         'rei',
-        ['rin'],
+        [REIUJI_UTSUHO.name.casefold()],
+    )
+    
+    # Allow duplication only if source == target
+    yield (
+        InteractionEvent(
+            interaction_type = InteractionType.application_command_autocomplete,
+            interaction = InteractionMetadataApplicationCommandAutocomplete(
+                options = [
+                    InteractionOption(
+                        focused = True,
+                        option_type = ApplicationCommandOptionType.string,
+                        name = PARAMETER_NAME_SOURCE,
+                        value = 'koi',
+                    ),
+                    InteractionOption(
+                        focused = False,
+                        option_type = ApplicationCommandOptionType.string,
+                        name = PARAMETER_NAME_ACTION_TAG,
+                        value = 'hug',
+                    ),
+                    InteractionOption(
+                        focused = False,
+                        option_type = ApplicationCommandOptionType.string,
+                        name = PARAMETER_NAME_TARGET,
+                        value = KOMEIJI_KOISHI.name,
+                    ),
+                ],
+            )
+        ),
+        'koi',
+        ['koishi'],
     )
 
 

@@ -25,8 +25,9 @@ def test__check_user_cannot_be_admin__admin():
         InteractionAbortedError(
             InteractionResponse(
                 f'Cannot {WORD_CONFIG__MUTE.name} admins.',
+                abort = True,
                 show_for_invoking_user_only = True,
-            ).set_abort(),
+            ),
         )
     ):
         check_user_cannot_be_admin(guild, user, WORD_CONFIG__MUTE)

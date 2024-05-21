@@ -3,7 +3,7 @@ __all__ = ('ImageDetailMatcherContextSensitive',)
 from scarletio import copy_docs
 
 from .base import ImageDetailMatcherBase
-from .constants import WEIGHT_DIRECT_MATCH, WEIGHT_NONE_MATCH
+from .constants import WEIGHT_DIRECT_MATCH, WEIGHT_NONE_MATCH, WEIGHT_OPPOSITE_MATCH
 
 
 class ImageDetailMatcherContextSensitive(ImageDetailMatcherBase):
@@ -95,23 +95,31 @@ class ImageDetailMatcherContextSensitive(ImageDetailMatcherBase):
     @copy_docs(ImageDetailMatcherBase.get_match_rate_action)
     def get_match_rate_action(self, image_detail_action):
         match_rate = 0
+        sources = self.sources
+        targets = self.targets
         
         # source
         source = image_detail_action.source
         if source is None:
             match_rate += WEIGHT_NONE_MATCH
         else:
-            sources = self.sources
-            if (sources is not None) and (source.system_name in sources):
+            system_name = source.system_name
+            if (sources is not None) and (system_name in sources):
                 match_rate += WEIGHT_DIRECT_MATCH
+        
+            if (targets is not None) and (system_name in targets):
+                match_rate += WEIGHT_OPPOSITE_MATCH
         
         # target
         target = image_detail_action.target
         if target is None:
             match_rate += WEIGHT_NONE_MATCH
         else:
-            targets = self.targets
-            if (targets is not None) and (target.system_name in targets):
+            system_name = target.system_name
+            if (targets is not None) and (system_name in targets):
                 match_rate += WEIGHT_DIRECT_MATCH
+            
+            if (sources is not None) and (system_name in sources):
+                match_rate += WEIGHT_OPPOSITE_MATCH
         
         return match_rate

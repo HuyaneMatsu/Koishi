@@ -37,7 +37,7 @@ def block_bots():
     if not any(bot_name in user_agent_header for bot_name in BOT_NAMES):
         return
     
-    return make_response(418)
+    return make_response('I am a teapot', 418)
 
 
 @WEBAPP.route('/')

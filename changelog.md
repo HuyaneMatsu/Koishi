@@ -1,3 +1,16 @@
+### 2024-05-21
+
+- Fix `/action` suggestion cases where `source == target` (Now they can suggest the same user).
+- Action commands such as `/hug` now have reduced chance to select a character for the other user(s) that you
+    preferred yourself.
+- `cosplay` is now a new action tag, so `tsukasa` + `ran` kons are now separated to `kon` + `tsukasa`
+    and `cosplay` + `tsuaksa` + `ran`. In short tsukasa cosplaying as ran wont count as ran anymore!!
+- Add **4** image to `/kiss`.
+- Add **6** image to `/hug`.
+- Add **2** image to `/feed`.
+- Add **1** image to `/lick`.
+- `/automation welcome` now instead of removing the components disables them.
+
 ### 2024-05-14
 
 - Add new `/lap-sleep` interaction with **18** image.

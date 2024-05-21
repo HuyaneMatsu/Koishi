@@ -225,7 +225,11 @@ async def autocomplete_action_tag(event, input_value):
     if not action_tags:
         return None
     
-    action_tag_names = [ACTION_TAG_TO_NAME[action_tag] for action_tag in action_tags]
+    action_tag_names = [
+        action_tag_name for action_tag_name
+        in (ACTION_TAG_TO_NAME.get(action_tag, None) for action_tag in action_tags) 
+        if (action_tag_name is not None)
+    ]
     if input_value is None:
         action_tag_names.sort()
         action_tag_names.insert(0, PARAMETER_WILD_CARD)
@@ -266,10 +270,10 @@ async def autocomplete_source(event, input_value):
                 allow_wild_card = True
                 continue
             
+            if (target is not None) and (target is not action.target):
+                continue
+            
             characters.add(action_source)
-    
-    if (target is not None):
-        characters.discard(target)
     
     return get_character_suggestions(characters, allow_wild_card, input_value)
 
@@ -303,10 +307,10 @@ async def autocomplete_target(event, input_value):
                 allow_wild_card = True
                 continue
             
+            if (source is not None) and (source is not action.source):
+                continue
+            
             characters.add(action_target)
-    
-    if (source is not None):
-        characters.discard(source)
     
     return get_character_suggestions(characters, allow_wild_card, input_value)
 

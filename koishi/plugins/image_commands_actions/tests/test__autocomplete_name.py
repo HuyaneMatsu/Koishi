@@ -29,8 +29,11 @@ def _iter_options():
         ),
         None,
         [
-            PARAMETER_WILD_CARD, 'akyuu-kosuzu-pocky-0000', 'alice-marisa-kiss-0000', 'alice-marisa-kiss-0001',
-            'alice-marisa-lick-0000',
+            PARAMETER_WILD_CARD,
+            'akyuu-kosuzu-pocky-0000',
+            'alice-aya-hug-0000',
+            'alice-marisa-feed-0000',
+            'alice-marisa-kiss-0000',
         ],
     )
     
