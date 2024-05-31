@@ -231,13 +231,18 @@ if (DB_ENGINE is not None):
         
         # Logging
         log_emoji_channel_id = Column(Int64, nullable = False)
+        log_emoji_enabled = Column(Boolean, default = False, nullable = False)
         log_mention_channel_id = Column(Int64, nullable = False)
+        log_mention_enabled = Column(Boolean, default = False, nullable = False)
         log_sticker_channel_id = Column(Int64, nullable = False)
+        log_sticker_enabled = Column(Boolean, default = False, nullable = False)
         log_user_channel_id = Column(Int64, nullable = False)
+        log_user_enabled = Column(Boolean, default = False, nullable = False)
         
         # Satori
         log_satori_auto_start = Column(Boolean, default = False, nullable = False)
         log_satori_channel_id = Column(Int64, nullable = False)
+        log_satori_enabled = Column(Boolean, default = False, nullable = False)
         
         # Reaction copy
         reaction_copy_enabled = Column(Boolean, default = False, nullable = False)
@@ -248,6 +253,7 @@ if (DB_ENGINE is not None):
         
         # Welcome
         welcome_channel_id = Column(Int64, nullable = False)
+        welcome_enabled = Column(Boolean, default = False, nullable = False)
         welcome_reply_buttons_enabled = Column(Boolean, default = False, nullable = False)
         welcome_style_name = Column(String, default = None, nullable = True)
         

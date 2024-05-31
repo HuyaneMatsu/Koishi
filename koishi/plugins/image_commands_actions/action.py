@@ -523,7 +523,7 @@ def create_action_command_function(action):
     async def action_command_function(
         client,
         event,
-        target_00: ('mentionable', 'Select someone.', 'target-1') = None,
+        target_00: ('mentionable', 'Select someone', 'target-1') = None,
         target_01: ('mentionable', 'Select someone', 'target-2') = None,
         target_02: ('mentionable', 'Select someone', 'target-3') = None,
         target_03: ('mentionable', 'Select someone', 'target-4') = None,

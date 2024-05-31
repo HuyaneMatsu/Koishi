@@ -28,6 +28,7 @@ SAFE_TAGS_BANNED = frozenset((
     'clothes_lift',
     'slingshot_swimsuit',
     'bikini',
+    'ai-generated'
 ))
 
 
@@ -46,6 +47,7 @@ NSFW_TAGS_BANNED = frozenset((
     'shota',
     'shotacon',
     'huge_filesize',
+    'ai-generated',
 ))
 
 

@@ -1,6 +1,7 @@
 __all__ = ()
 
 ACTION_TAG_COSPLAY = 'cosplay'
+ACTION_TAG_DANCE = 'dance'
 ACTION_TAG_FEED = 'feed'
 ACTION_TAG_FLUFF = 'fluff'
 ACTION_TAG_HANDHOLD = 'handhold'

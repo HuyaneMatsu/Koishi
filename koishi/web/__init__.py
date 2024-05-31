@@ -24,6 +24,8 @@ BOT_NAMES = [
     'bingbot',
     'googlebot',
     'semrush',
+    'wpbot',
+    'yandexbot',
 ]
 
 

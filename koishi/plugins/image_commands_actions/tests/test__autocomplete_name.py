@@ -30,10 +30,10 @@ def _iter_options():
         None,
         [
             PARAMETER_WILD_CARD,
+            'akyuu-kosuzu-lap-sleep-0000',
             'akyuu-kosuzu-pocky-0000',
             'alice-aya-hug-0000',
             'alice-marisa-feed-0000',
-            'alice-marisa-kiss-0000',
         ],
     )
     
@@ -70,7 +70,13 @@ def _iter_options():
             )
         ),
         None,
-        [PARAMETER_WILD_CARD, 'okuu-orin-hug-0002', 'okuu-orin-hug-0005', 'okuu-orin-hug-0007'],
+        [
+            PARAMETER_WILD_CARD,
+            'okuu-orin-hug-0002',
+            'okuu-orin-hug-0005',
+            'okuu-orin-hug-0007',
+            'okuu-orin-hug-0008',
+        ],
     )
     yield (
         InteractionEvent(

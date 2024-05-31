@@ -1,5 +1,8 @@
 __all__ = ()
 
+import sys
+
+
 from scarletio import copy_docs
 
 from ...bot_utils.models import DB_ENGINE, AUTOMATION_CONFIGURATION_TABLE
@@ -21,10 +24,16 @@ async def load():
 
 
 # Apply presets if we do not have DB
-if DB_ENGINE is None:
-    @copy_docs(load)
-    async def load():
-        apply_presets()
+if (DB_ENGINE is None):
+    if 'vampytest' in sys.modules:
+        @copy_docs(load)
+        async def load():
+            pass
+    
+    else:
+        @copy_docs(load)
+        async def load():
+            apply_presets()
 
 
 async def setup(module):

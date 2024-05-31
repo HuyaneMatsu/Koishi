@@ -22,6 +22,7 @@ BLACKLISTED_TAGS = {
     'pigsir13152',
     'dobostorte',
     'oekakizuki',
+    'ai-generated',
 }
 
 

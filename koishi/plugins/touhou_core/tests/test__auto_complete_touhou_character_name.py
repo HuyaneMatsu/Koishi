@@ -46,6 +46,7 @@ def _iter_options():
             'yoshika',
             'yuyuko',
             'yuuma toutetsu',
+            'yatsuhashi tsukumo',
             'yorihime',
             'yagokoro eirin',
             'yakumo ran',
@@ -56,7 +57,7 @@ def _iter_options():
             'yomotsu hisami',
             'yorigami joon',
             'yorigami shion',
-        ],
+        ]
     )
     
     yield (

@@ -1,12 +1,12 @@
 __all__ = ()
 
-from scarletio import Task, copy_docs
+from scarletio import RichAttributeErrorBaseType, Task, copy_docs
 from hata import KOKORO
 
 from ...bot_utils.models import DB_ENGINE, AUTOMATION_CONFIGURATION_TABLE, automation_configuration_model
 
 
-class AutomationConfigurationSaver:
+class AutomationConfigurationSaver(RichAttributeErrorBaseType):
     """
     Used to save automation configuration.
     
@@ -18,7 +18,7 @@ class AutomationConfigurationSaver:
     ensured_for_deletion : `bool`
         Whether the entry should be deleted.
     
-    modified_fields : `None`, `dict` of (`str`, `object`) items
+    modified_fields : `None | dict<str, object>`
         The fields to modify.
     
     running : `bool`
@@ -45,7 +45,7 @@ class AutomationConfigurationSaver:
     
     def __repr__(self):
         """Returns the representation of the automation configuration saver."""
-        repr_parts = ['<', self.__class__.__name__]
+        repr_parts = ['<', type(self).__name__]
         
         repr_parts.append(' automation_configuration = ')
         repr_parts.append(repr(self.automation_configuration))
@@ -95,6 +95,13 @@ class AutomationConfigurationSaver:
         self.ensured_for_deletion = True
     
     
+    def is_modified(self):
+        """
+        Returns whether the saver was modified.
+        """
+        return self.ensured_for_deletion or (self.modified_fields is not None)
+    
+    
     def begin(self):
         """
         Begins saving.
@@ -104,13 +111,6 @@ class AutomationConfigurationSaver:
         
         self.running = True
         Task(KOKORO, self.run())
-    
-    
-    def is_modified(self):
-        """
-        Returns whether the saver was modified.
-        """
-        return self.ensured_for_deletion or (self.modified_fields is not None)
     
     
     async def run(self):
@@ -173,12 +173,17 @@ class AutomationConfigurationSaver:
                                     ),
                                     
                                     log_emoji_channel_id = automation_configuration.log_emoji_channel_id,
+                                    log_emoji_enabled = automation_configuration.log_emoji_enabled,
                                     log_mention_channel_id = automation_configuration.log_mention_channel_id,
+                                    log_mention_enabled = automation_configuration.log_mention_enabled,
                                     log_sticker_channel_id = automation_configuration.log_sticker_channel_id,
+                                    log_sticker_enabled = automation_configuration.log_sticker_enabled,
                                     log_user_channel_id = automation_configuration.log_user_channel_id,
+                                    log_user_enabled = automation_configuration.log_user_enabled,
                                     
                                     log_satori_channel_id = automation_configuration.log_satori_channel_id,
                                     log_satori_auto_start = automation_configuration.log_satori_auto_start,
+                                    log_satori_enabled = automation_configuration.log_satori_enabled,
                                     
                                     reaction_copy_enabled = automation_configuration.reaction_copy_enabled,
                                     reaction_copy_role_id = automation_configuration.reaction_copy_role_id,
@@ -186,6 +191,7 @@ class AutomationConfigurationSaver:
                                     touhou_feed_enabled = automation_configuration.touhou_feed_enabled,
                                     
                                     welcome_channel_id = automation_configuration.welcome_channel_id,
+                                    welcome_enabled = automation_configuration.welcome_enabled,
                                     welcome_reply_buttons_enabled = (
                                         automation_configuration.welcome_reply_buttons_enabled
                                     ),

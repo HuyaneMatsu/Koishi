@@ -49,7 +49,7 @@ async def wild_card_action(
     source_character_name : P(str, 'Source character name.', PARAMETER_NAME_SOURCE, autocomplete = autocomplete_source) = None,
     target_character_name : P(str, 'Target character mame.', PARAMETER_NAME_TARGET, autocomplete = autocomplete_target) = None,
     image_name : P(str, 'Image name', PARAMETER_NAME_NAME, autocomplete = autocomplete_name) = None,
-    target_00: ('mentionable', 'Select someone.', 'target-1') = None,
+    target_00: ('mentionable', 'Select someone', 'target-1') = None,
     target_01: ('mentionable', 'Select someone', 'target-2') = None,
     target_02: ('mentionable', 'Select someone', 'target-3') = None,
     target_03: ('mentionable', 'Select someone', 'target-4') = None,

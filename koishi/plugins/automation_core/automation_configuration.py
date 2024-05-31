@@ -1,4 +1,4 @@
-__all__ = ()
+__all__ = ('AutomationConfiguration',)
 
 from scarletio import RichAttributeErrorBaseType
 
@@ -45,8 +45,14 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
     log_emoji_channel_id : `int`
         The channel's identifier where the emoji log messages will be sent.
     
+    log_emoji_enabled : `bool`
+        Whether emoji logging is enabled.
+    
     log_mention_channel_id : `int`
         The channel's identifier where the mention log messages will be sent.
+    
+    log_mention_enabled : `bool`
+        Whether mention logging is enabled.
     
     log_satori_auto_start : `bool`
         Whether satori channels should be automatically started.
@@ -54,11 +60,20 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
     log_satori_channel_id : `int`
         The channel's identifier where the satori log messages will be sent. Must be a guild category channel.
     
+    log_satori_enabled : `bool`
+        Whether satori logging is enabled.
+    
     log_sticker_channel_id : `int`
         The channel's identifier where the sticker log messages will be sent.
     
+    log_sticker_enabled : `bool`
+        Whether sticker logging is enabled.
+    
     log_user_channel_id : `int`
         The channel's identifier where the user log messages will be sent.
+    
+    log_user_enabled : `bool`
+        Whether user logging is enabled.
     
     reaction_copy_enabled : `bool`
         Whether reaction-copy feature is enabled in the guild.
@@ -72,6 +87,9 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
     welcome_channel_id : `int`
         The channel's identifier where the welcome messages will be sent.
     
+    welcome_enabled : `bool`
+        Whether welcoming is enabled.
+    
     welcome_reply_buttons_enabled : `bool`
         Whether welcome messages should be equipped with a welcome button.
     
@@ -84,9 +102,11 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         'community_message_moderation_enabled', 'community_message_moderation_log_enabled',
         'community_message_moderation_log_channel_id', 'community_message_moderation_up_vote_emoji_id', 
         'community_message_moderation_vote_threshold', 'entry_id', 'guild_id', 'log_emoji_channel_id',
-        'log_mention_channel_id', 'log_satori_auto_start', 'log_satori_channel_id', 'log_sticker_channel_id',
-        'log_user_channel_id', 'reaction_copy_enabled', 'reaction_copy_role_id', 'saver', 'touhou_feed_enabled',
-        'welcome_channel_id', 'welcome_reply_buttons_enabled', 'welcome_style_name',
+        'log_emoji_enabled', 'log_mention_channel_id', 'log_mention_enabled', 'log_satori_auto_start',
+        'log_satori_channel_id', 'log_satori_enabled', 'log_sticker_channel_id', 'log_sticker_enabled',
+        'log_user_channel_id', 'log_user_enabled', 'reaction_copy_enabled', 'reaction_copy_role_id', 'saver',
+        'touhou_feed_enabled', 'welcome_channel_id', 'welcome_enabled', 'welcome_reply_buttons_enabled',
+        'welcome_style_name',
     )
     
     def __new__(cls, guild_id):
@@ -109,16 +129,22 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.entry_id = -1
         self.guild_id = guild_id
         self.log_emoji_channel_id = 0
+        self.log_emoji_enabled = False
         self.log_mention_channel_id = 0
+        self.log_mention_enabled = False
         self.log_satori_auto_start = False
         self.log_satori_channel_id = 0
+        self.log_satori_enabled = False
         self.log_sticker_channel_id = 0
+        self.log_sticker_enabled = False
         self.log_user_channel_id = 0
+        self.log_user_enabled = False
         self.reaction_copy_enabled = False
         self.reaction_copy_role_id = 0
         self.saver = None
         self.touhou_feed_enabled = False
         self.welcome_channel_id = 0
+        self.welcome_enabled = False
         self.welcome_reply_buttons_enabled = False
         self.welcome_style_name = None
         return self
@@ -126,7 +152,7 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
     
     def __repr__(self):
         """Returns the automation configuration's representation."""
-        repr_parts = ['<', self.__class__.__name__]
+        repr_parts = ['<', type(self).__name__]
         
         # entry_id
         entry_id = self.entry_id
@@ -193,40 +219,71 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
                     repr_parts.append(repr(community_message_moderation_log_channel_id))
         
         
-        # log_emoji_channel_id
-        log_emoji_channel_id = self.log_emoji_channel_id
-        if log_emoji_channel_id:
-            repr_parts.append(', log_emoji_channel_id = ')
-            repr_parts.append(repr(log_emoji_channel_id))
-        
-        # log_mention_channel_id
-        log_mention_channel_id = self.log_mention_channel_id
-        if log_mention_channel_id:
-            repr_parts.append(', log_mention_channel_id = ')
-            repr_parts.append(repr(log_mention_channel_id))
-        
-        # log_satori_channel_id
-        log_satori_channel_id = self.log_satori_channel_id
-        if log_satori_channel_id:
-            repr_parts.append(', log_satori_channel_id = ')
-            repr_parts.append(repr(log_satori_channel_id))
+        # log_emoji_enabled
+        log_emoji_enabled = self.log_emoji_enabled
+        if log_emoji_enabled:
+            repr_parts.append(', log_emoji_enabled = ')
+            repr_parts.append(repr(log_emoji_enabled))
             
+            # log_emoji_channel_id
+            log_emoji_channel_id = self.log_emoji_channel_id
+            if log_emoji_channel_id:
+                repr_parts.append(', log_emoji_channel_id = ')
+                repr_parts.append(repr(log_emoji_channel_id))
+        
+        # log_mention_enabled
+        log_mention_enabled = self.log_mention_enabled
+        if log_mention_enabled:
+            repr_parts.append(', log_mention_enabled = ')
+            repr_parts.append(repr(log_mention_enabled))
+            
+            # log_mention_channel_id
+            log_mention_channel_id = self.log_mention_channel_id
+            if log_mention_channel_id:
+                repr_parts.append(', log_mention_channel_id = ')
+                repr_parts.append(repr(log_mention_channel_id))
+        
+        # log_satori_enabled
+        log_satori_enabled = self.log_satori_enabled
+        if log_satori_enabled:
+            repr_parts.append(', log_satori_enabled = ')
+            repr_parts.append(repr(log_satori_enabled))
+            
+            # log_satori_channel_id
+            log_satori_channel_id = self.log_satori_channel_id
+            if log_satori_channel_id:
+                repr_parts.append(', log_satori_channel_id = ')
+                repr_parts.append(repr(log_satori_channel_id))
+            
+            # log_satori_auto_start
             log_satori_auto_start = self.log_satori_auto_start
             if log_satori_auto_start:
                 repr_parts.append(', log_satori_auto_start = ')
                 repr_parts.append(repr(log_satori_auto_start))
         
-        # log_sticker_channel_id
-        log_sticker_channel_id = self.log_sticker_channel_id
-        if log_sticker_channel_id:
-            repr_parts.append(', log_sticker_channel_id = ')
-            repr_parts.append(repr(log_sticker_channel_id))
+        # log_sticker_enabled
+        log_sticker_enabled = self.log_sticker_enabled
+        if log_sticker_enabled:
+            repr_parts.append(', log_sticker_enabled = ')
+            repr_parts.append(repr(log_sticker_enabled))
+            
+            # log_sticker_channel_id
+            log_sticker_channel_id = self.log_sticker_channel_id
+            if log_sticker_channel_id:
+                repr_parts.append(', log_sticker_channel_id = ')
+                repr_parts.append(repr(log_sticker_channel_id))
         
-        # log_user_channel_id
-        log_user_channel_id = self.log_user_channel_id
-        if log_user_channel_id:
-            repr_parts.append(', log_user_channel_id = ')
-            repr_parts.append(repr(log_user_channel_id))
+        # log_user_enabled
+        log_user_enabled = self.log_user_enabled
+        if log_user_enabled:
+            repr_parts.append(', log_user_enabled = ')
+            repr_parts.append(repr(log_user_enabled))
+            
+            # log_user_channel_id
+            log_user_channel_id = self.log_user_channel_id
+            if log_user_channel_id:
+                repr_parts.append(', log_user_channel_id = ')
+                repr_parts.append(repr(log_user_channel_id))
         
         # reaction_copy_enabled
         reaction_copy_enabled = self.reaction_copy_enabled
@@ -245,11 +302,17 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
             repr_parts.append(', touhou_feed_enabled = ')
             repr_parts.append(repr(touhou_feed_enabled))
         
-        # welcome_channel_id
-        welcome_channel_id = self.welcome_channel_id
-        if welcome_channel_id:
-            repr_parts.append(', welcome_channel_id = ')
-            repr_parts.append(repr(welcome_channel_id))
+        # welcome_enabled
+        welcome_enabled = self.welcome_enabled
+        if welcome_enabled:
+            repr_parts.append(', welcome_enabled = ')
+            repr_parts.append(repr(welcome_enabled))
+            
+            # welcome_channel_id
+            welcome_channel_id = self.welcome_channel_id
+            if welcome_channel_id:
+                repr_parts.append(', welcome_channel_id = ')
+                repr_parts.append(repr(welcome_channel_id))
             
             # welcome_reply_buttons_enabled
             welcome_reply_buttons_enabled = self.welcome_reply_buttons_enabled
@@ -304,19 +367,34 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         if self.log_emoji_channel_id:
             return True
         
+        if self.log_emoji_enabled:
+            return True
+        
         if self.log_mention_channel_id:
             return True
         
-        if self.log_satori_channel_id:
+        if self.log_mention_enabled:
             return True
         
         if self.log_satori_auto_start:
             return True
         
+        if self.log_satori_channel_id:
+            return True
+        
+        if self.log_satori_enabled:
+            return True
+        
         if self.log_sticker_channel_id:
             return True
         
+        if self.log_sticker_enabled:
+            return True
+        
         if self.log_user_channel_id:
+            return True
+        
+        if self.log_user_enabled:
             return True
         
         if self.reaction_copy_enabled:
@@ -329,6 +407,9 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
             return True
         
         if self.welcome_channel_id:
+            return True
+        
+        if self.welcome_enabled:
             return True
         
         if self.welcome_reply_buttons_enabled:
@@ -373,12 +454,12 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
             saver.add_modification(field_name, field_value)
         
         else:
+            saver.ensure_deletion()
+            
             try:
                 del AUTOMATION_CONFIGURATIONS[self.guild_id]
             except KeyError:
                 pass
-            
-            saver.ensure_deletion()
         
         saver.begin()
     
@@ -430,15 +511,21 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.community_message_moderation_up_vote_emoji_id = entry['community_message_moderation_up_vote_emoji_id']
         self.community_message_moderation_vote_threshold = entry['community_message_moderation_vote_threshold']
         self.log_emoji_channel_id = entry['log_emoji_channel_id']
+        self.log_emoji_enabled = entry['log_emoji_enabled']
         self.log_mention_channel_id = entry['log_mention_channel_id']
+        self.log_mention_enabled = entry['log_mention_enabled']
         self.log_satori_auto_start = entry['log_satori_auto_start']
         self.log_satori_channel_id = entry['log_satori_channel_id']
+        self.log_satori_enabled = entry['log_satori_enabled']
         self.log_sticker_channel_id = entry['log_sticker_channel_id']
+        self.log_sticker_enabled = entry['log_sticker_enabled']
         self.log_user_channel_id = entry['log_user_channel_id']
+        self.log_user_enabled = entry['log_user_enabled']
         self.reaction_copy_enabled = entry['reaction_copy_enabled']
         self.reaction_copy_role_id = entry['reaction_copy_role_id']
         self.touhou_feed_enabled = entry['touhou_feed_enabled']
         self.welcome_channel_id = entry['welcome_channel_id']
+        self.welcome_enabled = entry['welcome_enabled']
         self.welcome_reply_buttons_enabled = entry['welcome_reply_buttons_enabled']
         self.welcome_style_name = entry['welcome_style_name']
         
@@ -467,12 +554,17 @@ AUTOMATION_CONFIGURATION_FIELD_SETTERS = {
     ),
     
     'log_emoji_channel_id': AutomationConfiguration.log_emoji_channel_id.__set__,
+    'log_emoji_enabled': AutomationConfiguration.log_emoji_enabled.__set__,
     'log_mention_channel_id': AutomationConfiguration.log_mention_channel_id.__set__,
+    'log_mention_enabled': AutomationConfiguration.log_mention_enabled.__set__,
     'log_sticker_channel_id': AutomationConfiguration.log_sticker_channel_id.__set__,
+    'log_sticker_enabled': AutomationConfiguration.log_sticker_enabled.__set__,
     'log_user_channel_id': AutomationConfiguration.log_user_channel_id.__set__,
+    'log_user_enabled': AutomationConfiguration.log_user_enabled.__set__,
     
     'log_satori_channel_id': AutomationConfiguration.log_satori_channel_id.__set__,
     'log_satori_auto_start': AutomationConfiguration.log_satori_auto_start.__set__,
+    'log_satori_enabled': AutomationConfiguration.log_satori_enabled.__set__,
     
     'reaction_copy_enabled': AutomationConfiguration.reaction_copy_enabled.__set__,
     'reaction_copy_role_id': AutomationConfiguration.reaction_copy_role_id.__set__,
@@ -480,6 +572,7 @@ AUTOMATION_CONFIGURATION_FIELD_SETTERS = {
     'touhou_feed_enabled': AutomationConfiguration.touhou_feed_enabled.__set__,
     
     'welcome_channel_id': AutomationConfiguration.welcome_channel_id.__set__,
+    'welcome_enabled': AutomationConfiguration.welcome_enabled.__set__,
     'welcome_reply_buttons_enabled': AutomationConfiguration.welcome_reply_buttons_enabled.__set__,
     'welcome_style_name': AutomationConfiguration.welcome_style_name.__set__,
 }

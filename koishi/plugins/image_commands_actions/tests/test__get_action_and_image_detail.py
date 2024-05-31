@@ -14,11 +14,11 @@ def _iter_options():
         None,
         None,
         (
-            next((action for action in ACTIONS if action.name == 'pocky-kiss'), None),
+            next((action for action in ACTIONS if action.name == 'lap-sleep'), None),
             next(
                 (
                     image_detail for image_detail in TOUHOU_ACTION_ALL.iter_character_filterable()
-                    if image_detail.url.endswith('akyuu-kosuzu-pocky-0000.png')
+                    if image_detail.url.endswith('akyuu-kosuzu-lap-sleep-0000.png')
                 ),
                 None,
             ),

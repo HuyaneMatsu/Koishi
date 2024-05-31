@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import Channel, ChannelType, Client, Permission, Role, parse_emoji
+from hata import CHANNELS, Channel, ChannelType, Client, Permission, Role, parse_emoji
 from hata.ext.slash import P, abort
 
 from ...bots import FEATURE_CLIENTS, MAIN_CLIENT
@@ -125,8 +125,37 @@ LOG_EMOJI_COMMANDS = AUTOMATION_COMMANDS.interactions(
 )
 
 
-@LOG_EMOJI_COMMANDS.interactions(name = 'enable')
-async def log_emoji_enable(
+@LOG_EMOJI_COMMANDS.interactions(name = 'state')
+async def log_emoji_set_state(
+    event,
+    state : (['enabled', 'disabled'], 'Enable or disable.'),
+):
+    """
+    Set emoji logging state.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    state : `str`
+        Whether to enable to disable it.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('log_emoji_enabled', state == 'enabled')
+    
+    return f'Emoji logging has been {state!s}.'
+
+
+@LOG_EMOJI_COMMANDS.interactions(name = 'channel')
+async def log_emoji_set_channel(
     client,
     event,
     channel: P(
@@ -136,7 +165,7 @@ async def log_emoji_enable(
     ) = None,
 ):
     """
-    Enables emoji logging in the specified channel.
+    Define to which channel should emoji log messages be sent to.
     
     This function is a coroutine.
     
@@ -163,32 +192,6 @@ async def log_emoji_enable(
     return f'Emoji log messages will be sent to {channel:m}.'
 
 
-@LOG_EMOJI_COMMANDS.interactions(name = 'disable')
-async def log_emoji_disable(
-    event,
-):
-    """
-    Disables emoji logging.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    event : ``InteractionEvent``
-        The received interaction event.
-    
-    Returns
-    -------
-    response : `str`
-    """
-    check_user_permissions(event)
-    
-    automation_configuration = get_automation_configuration_for(event.guild_id)
-    automation_configuration.set('log_emoji_channel_id', 0)
-    
-    return f'Emoji log messages will not be sent anymore.'
-
-
 # Mention Logging
 
 LOG_MENTION_COMMANDS = AUTOMATION_COMMANDS.interactions(
@@ -198,8 +201,37 @@ LOG_MENTION_COMMANDS = AUTOMATION_COMMANDS.interactions(
 )
 
 
-@LOG_MENTION_COMMANDS.interactions(name = 'enable')
-async def log_mention_enable(
+@LOG_MENTION_COMMANDS.interactions(name = 'state')
+async def log_mention_set_state(
+    event,
+    state : (['enabled', 'disabled'], 'Enable or disable.'),
+):
+    """
+    Set mention logging state.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    state : `str`
+        Whether to enable to disable it.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('log_mention_enabled', state == 'enabled')
+    
+    return f'Mention logging has been {state!s}.'
+
+
+@LOG_MENTION_COMMANDS.interactions(name = 'channel')
+async def log_mention_set_channel(
     client,
     event,
     channel: P(
@@ -209,7 +241,7 @@ async def log_mention_enable(
     ) = None,
 ):
     """
-    Enables mention logging in the specified channel.
+    Define to which channel should mention log messages be sent to.
     
     This function is a coroutine.
     
@@ -236,33 +268,6 @@ async def log_mention_enable(
     return f'Mention log messages will be sent to {channel:m}.'
 
 
-@LOG_MENTION_COMMANDS.interactions(name = 'disable')
-async def log_mention_disable(
-    event,
-):
-    """
-    Disables mention logging.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    event : ``InteractionEvent``
-        The received interaction event.
-    
-    This function is a coroutine.
-    
-    Returns
-    -------
-    response : `str`
-    """
-    check_user_permissions(event)
-    
-    automation_configuration = get_automation_configuration_for(event.guild_id)
-    automation_configuration.set('log_mention_channel_id', 0)
-    
-    return f'Mention log messages will not be sent anymore.'
-
 # Satori Logging
 
 LOG_SATORI_COMMANDS = AUTOMATION_COMMANDS_SATORI.interactions(
@@ -272,8 +277,51 @@ LOG_SATORI_COMMANDS = AUTOMATION_COMMANDS_SATORI.interactions(
 )
 
 
-@LOG_SATORI_COMMANDS.interactions(name = 'enable')
-async def log_satori_enable(
+@LOG_SATORI_COMMANDS.interactions(name = 'state')
+async def log_satori_set_state(
+    event,
+    state : (['enabled', 'disabled'], 'Enable or disable.'),
+):
+    """
+    Set satori (presence) logging state.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    state : `str`
+        Whether to enable to disable it.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    enable = state == 'enabled'
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    if enable != automation_configuration.log_satori_enabled:
+        log_satori_channel_id = automation_configuration.log_satori_channel_id
+        if not log_satori_channel_id:
+            log_satori_channel = None
+        else:
+            log_satori_channel = CHANNELS.get(log_satori_channel_id, None)
+        
+        if (log_satori_channel is not None):
+            if enable:
+                discover_satori_channel(log_satori_channel)
+            else:
+                clear_satori_channel(log_satori_channel)
+        
+        automation_configuration.set('log_satori_enabled', enable)
+    
+    return f'Satori logging has been {state!s}.'
+
+
+@LOG_SATORI_COMMANDS.interactions(name = 'channel')
+async def log_satori_set_channel(
     event,
     channel: P(
         Channel,
@@ -282,7 +330,7 @@ async def log_satori_enable(
     ),
 ):
     """
-    Enables satori (presence) logging in the specified category.
+    Define in which category should satori work in.
     
     This function is a coroutine.
     
@@ -290,7 +338,7 @@ async def log_satori_enable(
     ----------
     event : ``InteractionEvent``
         The received interaction event.
-    channel : `None`, ``Channel``
+    channel : `None`, ``Channel`` = `None`, Optional
         The channel to log into.
     
     Returns
@@ -305,53 +353,28 @@ async def log_satori_enable(
     if not channel.is_guild_category():
         abort('Please select a guild category channel.')
     
-    satori_channel = get_log_satori_channel(event.guild_id)
-    if (satori_channel is not channel):
-        if (satori_channel is not None):
-            clear_satori_channel(satori_channel)
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    if automation_configuration.log_satori_enabled:
+        log_satori_channel_id = automation_configuration.log_satori_channel_id
+        if not log_satori_channel_id:
+            log_satori_channel = None
+        else:
+            log_satori_channel = CHANNELS.get(log_satori_channel_id, None)
         
-        discover_satori_channel(channel)
+        if (log_satori_channel is not None):
+            clear_satori_channel(log_satori_channel)
         
-        automation_configuration = get_automation_configuration_for(event.guild_id)
-        automation_configuration.set('log_satori_channel_id', channel.id)
+        discover_satori_channel(log_satori_channel)
     
-    return f'Satori (presence) log messages will be sent to {channel:m}.'
-
-
-@LOG_SATORI_COMMANDS.interactions(name = 'disable')
-async def log_satori_disable(
-    event,
-):
-    """
-    Disables satori logging.
+    automation_configuration.set('log_satori_channel_id', channel.id)
     
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    event : ``InteractionEvent``
-        The received interaction event.
-    
-    Returns
-    -------
-    response : `str`
-    """
-    check_user_permissions(event)
-    
-    satori_channel = get_log_satori_channel(event.guild_id)
-    if (satori_channel is not None):
-        clear_satori_channel(satori_channel)
-        
-        automation_configuration = get_automation_configuration_for(event.guild_id)
-        automation_configuration.set('log_satori_channel_id', 0)
-    
-    return 'Satori (presence) log messages will not be sent anymore.'
+    return f'Satori log messages will be sent under {channel:m}.'
 
 
 @LOG_SATORI_COMMANDS.interactions(name = 'auto-start')
 async def log_satori_auto_start(
     event,
-    value: (bool, 'Whether satori channels should be auto started.'),
+    state : (['enabled', 'disabled'], 'Enable or disable.'),
 ):
     """
     Enable or disable auto starting satori channels when a user joins.
@@ -360,8 +383,8 @@ async def log_satori_auto_start(
     ----------
     event : ``InteractionEvent``
         The received interaction event.
-    value : `bool`
-        Whether auto start should be enabled.
+    state : `str`
+        Whether to enable to disable it.
     
     Returns
     -------
@@ -369,10 +392,11 @@ async def log_satori_auto_start(
     """
     check_user_permissions(event)
     
+    enabled = state == 'enabled'
     automation_configuration = get_automation_configuration_for(event.guild_id)
-    automation_configuration.set('log_satori_auto_start', value)
+    automation_configuration.set('log_satori_auto_start', enabled)
     
-    return f'Satori channels {"will" if value else "wont"} be auto started when a user joins.'
+    return f'Satori channels {"will" if enabled else "wont"} be auto started when a user joins.'
 
 
 # Sticker Logging
@@ -384,8 +408,37 @@ LOG_STICKER_COMMANDS = AUTOMATION_COMMANDS.interactions(
 )
 
 
-@LOG_STICKER_COMMANDS.interactions(name = 'enable')
-async def log_sticker_enable(
+@LOG_STICKER_COMMANDS.interactions(name = 'state')
+async def log_sticker_set_state(
+    event,
+    state : (['enabled', 'disabled'], 'Enable or disable.'),
+):
+    """
+    Set sticker logging state.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    state : `str`
+        Whether to enable to disable it.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('log_sticker_enabled', state == 'enabled')
+    
+    return f'Sticker logging has been {state!s}.'
+
+
+@LOG_STICKER_COMMANDS.interactions(name = 'channel')
+async def log_sticker_set_channel(
     client,
     event,
     channel: P(
@@ -395,7 +448,7 @@ async def log_sticker_enable(
     ) = None,
 ):
     """
-    Enables sticker logging in the specified channel.
+    Define to which channel should sticker log messages be sent to.
     
     This function is a coroutine.
     
@@ -422,32 +475,6 @@ async def log_sticker_enable(
     return f'Sticker log messages will be sent to {channel:m}.'
 
 
-@LOG_STICKER_COMMANDS.interactions(name = 'disable')
-async def log_sticker_disable(
-    event,
-):
-    """
-    Disables sticker logging.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    event : ``InteractionEvent``
-        The received interaction event.
-    
-    Returns
-    -------
-    response : `str`
-    """
-    check_user_permissions(event)
-    
-    automation_configuration = get_automation_configuration_for(event.guild_id)
-    automation_configuration.set('log_sticker_channel_id', 0)
-    
-    return f'Sticker log messages will not be sent anymore.'
-
-
 # User Logging
 
 LOG_USER_COMMANDS = AUTOMATION_COMMANDS.interactions(
@@ -457,8 +484,37 @@ LOG_USER_COMMANDS = AUTOMATION_COMMANDS.interactions(
 )
 
 
-@LOG_USER_COMMANDS.interactions(name = 'enable')
-async def log_user_enable(
+@LOG_USER_COMMANDS.interactions(name = 'state')
+async def log_user_set_state(
+    event,
+    state : (['enabled', 'disabled'], 'Enable or disable.'),
+):
+    """
+    Set user logging state.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    state : `str`
+        Whether to enable to disable it.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('log_user_enabled', state == 'enabled')
+    
+    return f'User logging has been {state!s}.'
+
+
+@LOG_USER_COMMANDS.interactions(name = 'channel')
+async def log_user_set_channel(
     client,
     event,
     channel: P(
@@ -468,7 +524,7 @@ async def log_user_enable(
     ) = None,
 ):
     """
-    Enables user logging in the specified channel.
+    Define to which channel should user log messages be sent to.
     
     This function is a coroutine.
     
@@ -494,31 +550,6 @@ async def log_user_enable(
     
     return f'User log messages will be sent to {channel:m}.'
 
-
-@LOG_USER_COMMANDS.interactions(name = 'disable')
-async def log_user_disable(
-    event,
-):
-    """
-    Disables user logging.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    event : ``InteractionEvent``
-        The received interaction event.
-    
-    Returns
-    -------
-    response : `str`
-    """
-    check_user_permissions(event)
-    
-    automation_configuration = get_automation_configuration_for(event.guild_id)
-    automation_configuration.set('log_user_channel_id', 0)
-    
-    return 'User log messages will not be sent anymore.'
 
 # Reaction copy
 
@@ -578,8 +609,11 @@ async def reaction_copy_list_channels(client, event):
     return build_reaction_copy_list_channels_response(client, guild, get_reaction_copy_enabled(guild.id))
 
 
-@REACTION_COPY_COMMANDS.interactions(name = 'enable')
-async def reaction_copy_enable(event):
+@REACTION_COPY_COMMANDS.interactions(name = 'state')
+async def reaction_copy_enable(
+    event,
+    state : (['enabled', 'disabled'], 'Enable or disable.'),
+):
     """
     Enables reaction-copy in the guild.
     
@@ -589,6 +623,8 @@ async def reaction_copy_enable(event):
     ----------
     event : ``InteractionEvent``
         The received interaction event.
+    state : `str`
+        Whether to enable to disable it.
     
     Returns
     -------
@@ -597,39 +633,15 @@ async def reaction_copy_enable(event):
     check_user_permissions(event)
     
     automation_configuration = get_automation_configuration_for(event.guild_id)
-    automation_configuration.set('reaction_copy_enabled', True)
+    automation_configuration.set('reaction_copy_enabled', state == 'enabled')
     
-    return 'Reaction-copy has been enabled.'
+    return f'Reaction-copy has been {state!s}.'
 
 
-@REACTION_COPY_COMMANDS.interactions(name = 'disable')
-async def reaction_copy_disable(event):
-    """
-    Disables reaction-copy in the guild.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    event : ``InteractionEvent``
-        The received interaction event.
-    
-    Returns
-    -------
-    response : `str`
-    """
-    check_user_permissions(event)
-    
-    automation_configuration = get_automation_configuration_for(event.guild_id)
-    automation_configuration.set('reaction_copy_enabled', False)
-    
-    return f'Reaction-copy has been disabled.'
-
-
-@REACTION_COPY_COMMANDS.interactions(name = 'role-set')
-async def reaction_copy_role_set(
+@REACTION_COPY_COMMANDS.interactions(name = 'role')
+async def reaction_copy_set_role(
     event,
-    role: (Role, 'select a role.'),
+    role: (Role, 'select a role.') = None,
 ):
     """
     Sets a role for who reaction-copy is additional enabled.
@@ -638,7 +650,7 @@ async def reaction_copy_role_set(
     ----------
     event : ``InteractionEvent``
         The received interaction event.
-    role : ``Role``
+    role : `None | Role` = `None`, Optional
         The role to set.
     
     Returns
@@ -648,33 +660,13 @@ async def reaction_copy_role_set(
     check_user_permissions(event)
     
     automation_configuration = get_automation_configuration_for(event.guild_id)
-    automation_configuration.set('reaction_copy_role_id', role.id)
+    
+    automation_configuration.set('reaction_copy_role_id', 0 if role is None else role.id)
+    
+    if role is None:
+        return f'Reaction-copy will no logger be additionally available for users with any role.'
     
     return f'Reaction-copy can be used by users with role {role.name} as well.'
-
-
-@REACTION_COPY_COMMANDS.interactions(name = 'role-remove')
-async def reaction_copy_role_set(
-    event,
-):
-    """
-    Sets a role for who reaction-copy is additional enabled.
-    
-    Parameters
-    ----------
-    event : ``InteractionEvent``
-        The received interaction event.
-    
-    Returns
-    -------
-    response : `str`
-    """
-    check_user_permissions(event)
-    
-    automation_configuration = get_automation_configuration_for(event.guild_id)
-    automation_configuration.set('reaction_copy_role_id', 0)
-    
-    return f'Reaction-copy will no logger be additionally available for users with any role.'
 
 
 # Touhou feed
@@ -744,8 +736,12 @@ async def touhou_feed_list_channels(
     return build_touhou_feed_listing_response(client, guild, page, get_touhou_feed_enabled(guild.id))
 
 
-@TOUHOU_FEED_COMMANDS.interactions(name = 'enable')
-async def touhou_feed_enable(client, event):
+@TOUHOU_FEED_COMMANDS.interactions(name = 'state')
+async def touhou_feed_set_state(
+    client,
+    event,
+    state : (['enabled', 'disabled'], 'Enable or disable.'),
+):
     """
     Enables touhou-feed in the guild.
     
@@ -757,6 +753,8 @@ async def touhou_feed_enable(client, event):
         The client who received the event.
     event : ``InteractionEvent``
         The received interaction event.
+    state : `str`
+        Whether to enable to disable it.
     
     Returns
     -------
@@ -768,43 +766,17 @@ async def touhou_feed_enable(client, event):
     if (guild is None):
         abort('Guild out of cache.')
     
-    automation_configuration = get_automation_configuration_for(guild.id)
-    automation_configuration.set('touhou_feed_enabled', True)
-    
-    touhou_feed_try_update_guild(client, guild)
-    
-    return f'Touhou feed has been enabled.'
-
-
-@TOUHOU_FEED_COMMANDS.interactions(name = 'disable')
-async def touhou_feed_disable(event):
-    """
-    Disables touhou-feed in the guild.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    event : ``InteractionEvent``
-        The received interaction event.
-    
-    Returns
-    -------
-    response : `str`
-    """
-    check_user_permissions(event)
-    
-    guild = event.guild
-    if (guild is None):
-        abort('Guild out of cache.')
+    enable = state == 'enabled'
     
     automation_configuration = get_automation_configuration_for(guild.id)
-    automation_configuration.set('touhou_feed_enabled', False)
+    automation_configuration.set('touhou_feed_enabled', enable)
     
-    touhou_feed_try_remove_guild(guild)
+    if state == enable:
+        touhou_feed_try_update_guild(client, guild)
+    else:
+        touhou_feed_try_remove_guild(guild)
     
-    return f'Touhou feed has been disabled.'
-
+    return f'Touhou feed has been {state!s}.'
 
 # Welcome messages
 
@@ -815,8 +787,38 @@ WELCOME_COMMANDS = AUTOMATION_COMMANDS.interactions(
 )
 
 
-@WELCOME_COMMANDS.interactions(name = 'enable')
-async def welcome_enable(
+
+@WELCOME_COMMANDS.interactions(name = 'state')
+async def welcome_set_state(
+    event,
+    state : (['enabled', 'disabled'], 'Enable or disable.'),
+):
+    """
+    Sets welcoming state.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    state : `str`
+        Whether to enable to disable it.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('welcome_enabled', state == 'enabled')
+    
+    return f'Welcoming has been {state!s}.'
+
+
+@WELCOME_COMMANDS.interactions(name = 'channel')
+async def welcome_set_channel(
     client,
     event,
     channel: P(
@@ -826,7 +828,7 @@ async def welcome_enable(
     ) = None,
 ):
     """
-    Enables welcome messages in the specified channel.
+    Define to which channel should welcome messages be sent to.
     
     This function is a coroutine.
     
@@ -853,36 +855,11 @@ async def welcome_enable(
     return f'Welcome messages will be sent to {channel:m}.'
 
 
-@WELCOME_COMMANDS.interactions(name = 'disable')
-async def welcome_disable(
-    event,
-):
-    """
-    Disables welcome messages.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    event : ``InteractionEvent``
-        The received interaction event.
-    
-    Returns
-    -------
-    response : `str`
-    """
-    check_user_permissions(event)
-    
-    automation_configuration = get_automation_configuration_for(event.guild_id)
-    automation_configuration.set('welcome_channel_id', 0)
-    
-    return f'Welcome messages will not be sent anymore.'
-
 
 @WELCOME_COMMANDS.interactions(name = 'reply-buttons')
-async def welcome_reply_buttons(
+async def welcome_set_reply_buttons(
     event,
-    value: (bool, 'Whether reply buttons should shown under welcome messages to reply.'),
+    state : (['enabled', 'disabled'], 'Enable or disable.'),
 ):
     """
     Enable or disable putting reply buttons under welcome messages.
@@ -891,8 +868,8 @@ async def welcome_reply_buttons(
     ----------
     event : ``InteractionEvent``
         The received interaction event.
-    value : `bool`
-        Whether auto start should be enabled.
+    state : `str`
+        Whether to enable to disable it.
     
     Returns
     -------
@@ -900,17 +877,18 @@ async def welcome_reply_buttons(
     """
     check_user_permissions(event)
     
+    enabled = state == 'enabled'
     automation_configuration = get_automation_configuration_for(event.guild_id)
-    automation_configuration.set('welcome_reply_buttons_enabled', value)
+    automation_configuration.set('welcome_reply_buttons_enabled', enabled)
     
-    return f'Welcome reply buttons {"will" if value else "wont"} be put under welcome messages.'
+    return f'Welcome reply buttons {"will" if enabled else "wont"} be put under welcome messages.'
 
 
 WELCOME_STYLE_CHOICES = [CHOICE_DEFAULT, *WELCOME_STYLE_NAMES]
 
 
 @WELCOME_COMMANDS.interactions(name = 'style')
-async def welcome_style_name(
+async def welcome_set_style_name(
     event,
     value: (WELCOME_STYLE_CHOICES, 'The welcome style to use to use.'),
 ):
@@ -921,8 +899,8 @@ async def welcome_style_name(
     ----------
     event : ``InteractionEvent``
         The received interaction event.
-    value : `bool`
-        Whether auto start should be enabled.
+    value : `str`
+        Welcome style name.
     
     Returns
     -------
@@ -946,7 +924,7 @@ COMMUNITY_MESSAGE_MODERATION_COMMANDS = AUTOMATION_COMMANDS.interactions(
 @COMMUNITY_MESSAGE_MODERATION_COMMANDS.interactions(name = 'state')
 async def community_message_moderation_set_state(
     event,
-    state : (['enabled', 'disabled'], 'Enable to disable.'),
+    state : (['enabled', 'disabled'], 'Enable or disable.'),
 ):
     """
     Enable or disable community message moderation.
@@ -1145,7 +1123,7 @@ async def community_message_moderation_set_vote_threshold(
 @COMMUNITY_MESSAGE_MODERATION_COMMANDS.interactions(name = 'log-state')
 async def community_message_moderation_set_log_state(
     event,
-    state : (['enabled', 'disabled'], 'Enable to disable.'),
+    state : (['enabled', 'disabled'], 'Enable or disable.'),
 ):
     """
     Enable or disable community message moderation logging.
@@ -1156,7 +1134,7 @@ async def community_message_moderation_set_log_state(
     ----------
     event : ``InteractionEvent``
         The received interaction event.
-    state : `bool`
+    state : `str`
         Whether to enable to disable it.
     
     Returns

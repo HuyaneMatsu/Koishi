@@ -13,6 +13,7 @@ from .constants import (
     COMMUNITY_MESSAGE_MODERATION_DOWN_VOTE_EMOJI_ID_DEFAULT, COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT
 )
 
+
 def get_automation_configuration_for(guild_id):
     """
     Gets automation configuration logic for the given guild identifier.
@@ -67,17 +68,20 @@ def get_log_emoji_channel(guild_id):
     except KeyError:
         return None
     
+    if not automation_configuration.log_emoji_enabled:
+        return None
+    
     log_emoji_channel_id = automation_configuration.log_emoji_channel_id
     if not log_emoji_channel_id:
         return None
     
     try:
-        return CHANNELS[log_emoji_channel_id]
+        channel = CHANNELS[log_emoji_channel_id]
     except KeyError:
-        pass
+        automation_configuration.set('log_emoji_channel_id', 0)
+        return None
     
-    automation_configuration.set('log_emoji_channel_id', 0)
-    return None
+    return channel
 
 
 def get_log_mention_channel(guild_id):
@@ -98,17 +102,20 @@ def get_log_mention_channel(guild_id):
     except KeyError:
         return None
     
+    if not automation_configuration.log_mention_enabled:
+        return None
+    
     log_mention_channel_id = automation_configuration.log_mention_channel_id
     if not log_mention_channel_id:
         return None
     
     try:
-        return CHANNELS[log_mention_channel_id]
+        channel = CHANNELS[log_mention_channel_id]
     except KeyError:
-        pass
+        automation_configuration.set('log_mention_channel_id', 0)
+        return None
     
-    automation_configuration.set('log_mention_channel_id', 0)
-    return None
+    return channel
 
 
 def get_log_satori_channel(guild_id):
@@ -129,17 +136,20 @@ def get_log_satori_channel(guild_id):
     except KeyError:
         return None
     
+    if not automation_configuration.log_satori_enabled:
+        return None
+    
     log_satori_channel_id = automation_configuration.log_satori_channel_id
     if not log_satori_channel_id:
         return None
     
     try:
-        return CHANNELS[log_satori_channel_id]
+        channel = CHANNELS[log_satori_channel_id]
     except KeyError:
-        pass
+        automation_configuration.set('log_satori_channel_id', 0)
+        return None
     
-    automation_configuration.set('log_satori_channel_id', 0)
-    return None
+    return channel
 
 
 def get_log_satori_channel_if_auto_start(guild_id):
@@ -160,6 +170,9 @@ def get_log_satori_channel_if_auto_start(guild_id):
     except KeyError:
         return None
     
+    if not automation_configuration.log_satori_enabled:
+        return None
+    
     if not automation_configuration.log_satori_auto_start:
         return None
     
@@ -168,12 +181,12 @@ def get_log_satori_channel_if_auto_start(guild_id):
         return None
     
     try:
-        return CHANNELS[log_satori_channel_id]
+        channel = CHANNELS[log_satori_channel_id]
     except KeyError:
-        pass
+        automation_configuration.set('log_satori_channel_id', 0)
+        return None
     
-    automation_configuration.set('log_satori_channel_id', 0)
-    return None
+    return channel
 
 
 def iter_log_satori_channels():
@@ -187,14 +200,19 @@ def iter_log_satori_channels():
     channel : ``Channel``
     """
     for automation_configuration in AUTOMATION_CONFIGURATIONS.values():
+        if not automation_configuration.log_satori_enabled:
+            continue
+        
         log_satori_channel_id = automation_configuration.log_satori_channel_id
-        if log_satori_channel_id:
-            try:
-                channel = CHANNELS[log_satori_channel_id]
-            except KeyError:
-                pass
-            else:
-                yield channel
+        if not log_satori_channel_id:
+            continue
+        
+        try:
+            channel = CHANNELS[log_satori_channel_id]
+        except KeyError:
+            continue
+        
+        yield channel
 
 
 def get_log_sticker_channel(guild_id):
@@ -215,17 +233,20 @@ def get_log_sticker_channel(guild_id):
     except KeyError:
         return None
     
+    if not automation_configuration.log_sticker_enabled:
+        return None
+    
     log_sticker_channel_id = automation_configuration.log_sticker_channel_id
     if not log_sticker_channel_id:
         return None
     
     try:
-        return CHANNELS[log_sticker_channel_id]
+        channel = CHANNELS[log_sticker_channel_id]
     except KeyError:
-        pass
+        automation_configuration.set('log_sticker_channel_id', 0)
+        return None
     
-    automation_configuration.set('log_sticker_channel_id', 0)
-    return None
+    return channel
 
 
 def get_log_user_channel(guild_id):
@@ -246,17 +267,20 @@ def get_log_user_channel(guild_id):
     except KeyError:
         return None
     
+    if not automation_configuration.log_user_enabled:
+        return None
+    
     log_user_channel_id = automation_configuration.log_user_channel_id
     if not log_user_channel_id:
         return None
     
     try:
-        return CHANNELS[log_user_channel_id]
+        channel = CHANNELS[log_user_channel_id]
     except KeyError:
-        pass
+        automation_configuration.set('log_user_channel_id', 0)
+        return None
     
-    automation_configuration.set('log_user_channel_id', 0)
-    return None
+    return channel
 
 
 def get_reaction_copy_enabled(guild_id):
@@ -291,8 +315,7 @@ def get_reaction_copy_enabled_and_role(guild_id):
     
     Returns
     -------
-    enabled : `bool`
-    role : `None`, ``Role``
+    enabled_and_role : `(bool, None | Role)`
     """
     try:
         automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
@@ -300,16 +323,20 @@ def get_reaction_copy_enabled_and_role(guild_id):
         return False, None
     
     enabled = automation_configuration.reaction_copy_enabled
-    if enabled:
-        role_id = automation_configuration.reaction_copy_role_id
-        if role_id:
-            role = ROLES.get(role_id, None)
-        else:
-            role = None
-    else:
+    if not enabled:
+        return False, None
+    
+    role_id = automation_configuration.reaction_copy_role_id
+    if not role_id:
+        return True, None
+    
+    try:
+        role = ROLES[role_id]
+    except KeyError:
+        automation_configuration.set('reaction_copy_role_id', 0)
         role = None
     
-    return enabled, role
+    return True, role
 
 
 def get_touhou_feed_enabled(guild_id):
@@ -344,13 +371,16 @@ def get_welcome_fields(guild_id):
     
     Returns
     -------
-    welcome_fields : `None | tuple<Channel, bool, None | str>`
+    welcome_fields : `None | (Channel, bool, None | str)`
         Returns `None` if disabled. A tuple of `welcome_channel`, `welcome_reply_buttons_enabled`, `welcome_style_name`
         if enabled.
     """
     try:
         automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
     except KeyError:
+        return None
+    
+    if not automation_configuration.welcome_enabled:
         return None
     
     welcome_channel_id = automation_configuration.welcome_channel_id
@@ -363,7 +393,11 @@ def get_welcome_fields(guild_id):
         automation_configuration.set('welcome_channel_id', 0)
         return None
     
-    return channel, automation_configuration.welcome_reply_buttons_enabled, automation_configuration.welcome_style_name
+    return (
+        channel,
+        automation_configuration.welcome_reply_buttons_enabled,
+        automation_configuration.welcome_style_name,
+    )
 
 
 def get_welcome_style_name(guild_id):
@@ -377,7 +411,7 @@ def get_welcome_style_name(guild_id):
     
     Returns
     -------
-    welcome_style_name : `str`
+    welcome_style_name : `None | str`
     """
     try:
         automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
@@ -398,7 +432,7 @@ def get_community_message_moderation_fields(guild_id):
     
     Returns
     -------
-    community_message_moderation_fields : `None | tuple<int, int, int, int, None | Channel>`
+    community_message_moderation_fields : `None | (int, int, int, int, None | Channel)`
         Returns `None` if disabled. A tuple of `down_vote_emoji_id`, `up_vote_emoji_id`, `availability_duration`,
         `vote_threshold`, `log_channel` if enabled.
     """
@@ -410,15 +444,19 @@ def get_community_message_moderation_fields(guild_id):
     if not automation_configuration.community_message_moderation_enabled:
         return None
     
-    log_enabled = automation_configuration.community_message_moderation_log_enabled
-    if not log_enabled:
+    community_message_moderation_log_enabled = automation_configuration.community_message_moderation_log_enabled
+    if not community_message_moderation_log_enabled:
         log_channel = None
     else:
-        log_channel_id = automation_configuration.community_message_moderation_log_channel_id
-        if not log_channel_id:
+        community_message_moderation_log_channel_id = automation_configuration.community_message_moderation_log_channel_id
+        if not community_message_moderation_log_channel_id:
             log_channel = None
         else:
-            log_channel = CHANNELS.get(log_channel_id, None)
+            try:
+                log_channel = CHANNELS[community_message_moderation_log_channel_id]
+            except KeyError:
+                automation_configuration.set('community_message_moderation_log_channel_id', 0)
+                log_channel = None
     
     return (
         (

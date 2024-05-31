@@ -16,38 +16,36 @@ Contains control commands for other automation features.
         - `log-state (state : Choice<str>)`
         - `log-channel (channel : null | Channel<channel_types = [0, 5]> = null)`
     - `log-emoji` (emoji create / modify / delete)
-        - `enable (channel : null | Channel<channel_types = [0, 5]> = null)`
-        - `disable`
+        - `channel (channel : null | Channel<channel_types = [0, 5]> = null)`
+        - `state (state : Choice<str>)`
     - `log-mention` (message create / edit)
-        - `enable (channel : null | Channel<channel_types = [0, 5]> = null)`
-        - `disable`
+        - `channel (channel : null | Channel<channel_types = [0, 5]> = null)`
+        - `state (state : Choice<str>)`
     - `log-sticker` (sticker create / modify / delete)
-        - `enable (channel : null | Channel<channel_types = [0, 5]> = null)`
-        - `disable`
+        - `channel (channel : null | Channel<channel_types = [0, 5]> = null)`
+        - `state (state : Choice<str>)`
     - `log-user` (user join / leave)
-        - `enable (channel : null | Channel<channel_types = [0, 5]> = null)`
-        - `disable`
+        - `channel (channel : null | Channel<channel_types = [0, 5]> = null)`
+        - `state (state : Choice<str>)`
     - `reaction-copy`
-        - `enable`
-        - `disable`
         - `about`
         - `list-channels`
+        - `state (state : Choice<str>)`
     - `touhou-feed`
-        - `enable`
-        - `disable`
         - `about`
         - `list-channels (page : int<min = 1, max = 100> = 1)`
+        - `state (state : Choice<str>)`
     - `welcome`
-        - `enable (channel : null | Channel<channel_types = [0, 5]> = null)`
-        - `disable`
-        - `reply-buttons (value : bool)`
+        - `channel (channel : null | Channel<channel_types = [0, 5]> = null)`
+        - `reply-buttons (state : Choice<str>)`
+        - `state (state : Choice<str>)`
         - `style (value : Choice<str>)`
 
 
 Additional commands limited for a few guilds (KW, KU and OD):
 
 - `/automation`
-  - `log-satori` 
-    - `enable (channel : Channel<channel_types = [4]>)`
-    - `disable`
-    - `auto-start (value : bool)`
+    - `log-satori` 
+        - `channel (channel : Channel<channel_types = [4]>)`
+        - `state (state : Choice<str>)`
+        - `auto-start (state : Choice<str>)`

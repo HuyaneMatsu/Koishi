@@ -5344,6 +5344,916 @@ Source: **Touhou**
 
 ---
 
+### koishi-kokoro-hug-kiss-0000
+
+Creator: **mino (minori)**
+Editor: **HuyaneMatsu**
+
+Characters: **Hata no Kokoro**, **Komeiji Koishi**
+Source: **Touhou**
+
+---
+
+### ran-yukari-kiss-0002
+
+Creator: **kirisita**
+Editor: **HuyaneMatsu**
+
+Characters: **Yakumo Ran**, **Yakumo Yukari**
+Source: **Touhou**
+
+---
+
+### mamizou-ran-kiss-0001
+
+Creator: **littlecloudie**
+Editor: *none*
+
+Characters: **Futatsuiwa Mamizou**, **Yakumo Ran**
+Source: **Touhou**
+
+---
+
+### flandre-koishi-kiss-0006
+
+Creator: *unknown*
+Editor: *none*
+
+Characters: **Komeiji Koishi**, **Scarlet Flandre**
+Source: **Touhou**
+
+---
+
+### kogasa-sekibanki-kiss-0000
+
+Creator: **puchimirin**
+Editor: *none*
+
+Characters: **Sekibanki**, **Tatara Kogasa**
+Source: **Touhou**
+
+---
+
+### kanako-suwako-kiss-0000
+
+Creator: *unknown*
+Editor: **HuyaneMatsu**
+
+Characters: **Moriya Suwako**, **Yasaka Kanako**
+Source: **Touhou**
+
+---
+
+### hecatia-junko-kiss-0000
+
+Creator: **neold**
+Editor: *none*
+
+Characters: **Hecatia Lapislazuli**, **Junko**
+Source: **Touhou**
+
+---
+
+### saki-yachie-kiss-0000
+
+Creator: **inuko (ink0425)**
+Editor: *none*
+
+Characters: **Kicchou Yachie**, **Kurokoma Saki**
+Source: **Touhou**
+
+---
+
+### meiling-sakuya-kiss-0001
+
+Creator: **soubi**
+Editor: *none*
+
+Characters: **Hong Meiling**, **Izayoi Sakuya**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-hug-0000
+
+Creator: **tsuno no hito**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-kiss-0000
+
+Creator: **tsuno no hito**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### alice-marisa-hug-kiss-0000
+
+Creator: **tsuno no hito**
+Editor: *none*
+
+Characters: **Kirisame Marisa**, **Margatroid Alice**
+Source: **Touhou**
+
+---
+
+### alice-marisa-kiss-0003
+
+Creator: **tsuno no hito**
+Editor: *none*
+
+Characters: **Kirisame Marisa**, **Margatroid Alice**
+Source: **Touhou**
+
+---
+
+### alice-marisa-hug-0003
+
+Creator: **tsuno no hito**
+Editor: *none*
+
+Characters: **Kirisame Marisa**, **Margatroid Alice**
+Source: **Touhou**
+
+---
+
+### alice-marisa-hug-0002
+
+Creator: **tsuno no hito**
+Editor: *none*
+
+Characters: **Kirisame Marisa**, **Margatroid Alice**
+Source: **Touhou**
+
+---
+
+### alice-marisa-hug-0001
+
+Creator: **tsuno no hito**
+Editor: *none*
+
+Characters: **Kirisame Marisa**, **Margatroid Alice**
+Source: **Touhou**
+
+---
+
+### alice-marisa-kiss-0002
+
+Creator: **tsuno no hito**
+Editor: *none*
+
+Characters: **Kirisame Marisa**, **Margatroid Alice**
+Source: **Touhou**
+
+---
+
+### alice-marisa-hug-0000
+
+Creator: **tsuno no hito**
+Editor: *none*
+
+Characters: **Kirisame Marisa**, **Margatroid Alice**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-hug-0001
+
+Creator: **tsuno no hito**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### alice-marisa-hug-0004
+
+Creator: **tsuno no hito**
+Editor: *none*
+
+Characters: **Kirisame Marisa**, **Margatroid Alice**
+Source: **Touhou**
+
+---
+
+### alice-marisa-kiss-0004
+
+Creator: **tsuno no hito**
+Editor: *none*
+
+Characters: **Kirisame Marisa**, **Margatroid Alice**
+Source: **Touhou**
+
+---
+
+### akyuu-kosuzu-lap-sleep-0000
+
+Creator: **nekolina**
+Editor: *none*
+
+Characters: **Hieda no Akyuu**, **Motoori Kosuzu**
+Source: **Touhou**
+
+---
+
+### koishi-kokoro-kiss-0001
+
+Creator: **nekolina**
+Editor: *none*
+
+Characters: **Hata no Kokoro**, **Komeiji Koishi**
+Source: **Touhou**
+
+---
+
+### hecatia-junko-lap-sleep-0000
+
+Creator: **nekolina**
+Editor: *none*
+
+Characters: **Hecatia Lapislazuli**, **Junko**
+Source: **Touhou**
+
+---
+
+### eiki-komachi-hug-0000
+
+Creator: **nekolina**
+Editor: *none*
+
+Characters: **Onozuka Komachi**, **Shiki Eiki Yamaxanadu**
+Source: **Touhou**
+
+---
+
+### maribel-renko-hug-kiss-0000
+
+Creator: **nekolina**
+Editor: *none*
+
+Characters: **Hearn Maribel**, **Usami Renko**
+Source: **Touhou**
+
+---
+
+### alice-sakuya-kiss-0000
+
+Creator: **nekolina**
+Editor: *none*
+
+Characters: **Izayoi Sakuya**, **Margatroid Alice**
+Source: **Touhou**
+
+---
+
+### kogasa-raiko-hug-0000
+
+Creator: **nekolina**
+Editor: *none*
+
+Characters: **Horikawa Raiko**, **Tatara Kogasa**
+Source: **Touhou**
+
+---
+
+### marisa-reimu-kiss-0003
+
+Creator: **nekolina**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kirisame Marisa**
+Source: **Touhou**
+
+---
+
+### hecatia-junko-kiss-0001
+
+Creator: **nekolina**
+Editor: *none*
+
+Characters: **Hecatia Lapislazuli**, **Junko**
+Source: **Touhou**
+
+---
+
+### marisa-reimu-hug-0004
+
+Creator: **nekolina**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kirisame Marisa**
+Source: **Touhou**
+
+---
+
+### koishi-okuu-orin-satori-lap-sleep-0000
+
+Creator: **eru aise**
+Editor: *none*
+
+Characters: **Kaenbyou Rin**, **Komeiji Koishi**, **Komeiji Satori**, **Reiuji Utsuho**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-hug-0002
+
+Creator: **mokutan (link machine)**
+Editor: **HuyaneMatsu**
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-kiss-0001
+
+Creator: **mokutan (link machine)**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-kiss-0002
+
+Creator: **mokutan (link machine)**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-kiss-0003
+
+Creator: **mokutan (link machine)**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-handhold-0000
+
+Creator: **mokutan (link machine)**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-kiss-0004
+
+Creator: **mokutan (link machine)**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-hug-0005
+
+Creator: **mokutan (link machine)**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-hug-kiss-0000
+
+Creator: **mokutan (link machine)**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-hug-0004
+
+Creator: **mokutan (link machine)**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-hug-0003
+
+Creator: **mokutan (link machine)**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-kiss-0005
+
+Creator: **mokutan (link machine)**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### hecatia-junko-hug-0000
+
+Creator: **frogsnake**
+Editor: *none*
+
+Characters: **Hecatia Lapislazuli**, **Junko**
+Source: **Touhou**
+
+---
+
+### aya-hatate-kiss-0001
+
+Creator: **springarashi02**
+Editor: *none*
+
+Characters: **Himekaidou Hatate**, **Shameimaru Aya**
+Source: **Touhou**
+
+---
+
+### flandre-koishi-marisa-handhold-hug-0000
+
+Creator: **springarashi02**
+Editor: *none*
+
+Characters: **Kirisame Marisa**, **Komeiji Koishi**, **Scarlet Flandre**
+Source: **Touhou**
+
+---
+
+### marisa-reimu-fluff-0000
+
+Creator: **springarashi02**
+Editor: **HuyaneMatsu**
+
+Characters: **Hakurei Reimu**, **Kirisame Marisa**
+Source: **Touhou**
+
+---
+
+### megumu-tsukasa-handhold-0000
+
+Creator: **springarashi02**
+Editor: *none*
+
+Characters: **Iizunamaru Megumu**, **Kudamaki Tsukasa**
+Source: **Touhou**
+
+---
+
+### hecatia-junko-hug-0000
+
+Creator: **springarashi02**
+Editor: *none*
+
+Characters: **Hecatia Lapislazuli**, **Junko**
+Source: **Touhou**
+
+---
+
+### okuu-orin-hug-0009
+
+Creator: **mizuga**
+Editor: **HuyaneMatsu**
+
+Characters: **Kaenbyou Rin**, **Reiuji Utsuho**
+Source: **Touhou**
+
+---
+
+### luna-star-sunny-poke-0000
+
+Creator: **mizuga**
+Editor: *none*
+
+Characters: **Luna Child**, **Star Sapphire**, **Sunny Milk**
+Source: **Touhou**
+
+---
+
+### momiji-ran-hug-0000
+
+Creator: **mizuga**
+Editor: *none*
+
+Characters: **Inubashiri Momiji**, **Yakumo Ran**
+Source: **Touhou**
+
+---
+
+### koishi-ran-hug-0000
+
+Creator: **mizuga**
+Editor: *none*
+
+Characters: **Komeiji Koishi**, **Yakumo Ran**
+Source: **Touhou**
+
+---
+
+### hatate-momiji-hug-0000
+
+Creator: **mizuga**
+Editor: *none*
+
+Characters: **Inubashiri Momiji**, **Yakumo Ran**
+Source: **Touhou**
+
+---
+
+### okuu-orin-hug-0008
+
+Creator: **mizuga**
+Editor: *none*
+
+Characters: **Kaenbyou Rin**, **Reiuji Utsuho**
+Source: **Touhou**
+
+---
+
+### orin-dance-0000
+
+Creator: **azurereindeer**
+Editor: *none*
+
+Characters: **Kaenbyou Rin**
+Source: **Touhou**
+
+---
+
+### seiga-yoshika-pat-0000
+
+Creator: **azurereindeer**
+Editor: *none*
+
+Characters: **Kaku Seiga**, **Miyako Yoshika**
+Source: **Touhou**
+
+---
+
+### reisen-youmu-hug-0000
+
+Creator: **diving penguin**
+Editor: *none*
+
+Characters: **Konpaku Youmu**, **Reisen Udongein Inaba**
+Source: **Touhou**
+
+---
+
+### reisen-youmu-hug-0000
+
+Creator: **diving penguin**
+Editor: *none*
+
+Characters: **Konpaku Youmu**, **Reisen Udongein Inaba**
+Source: **Touhou**
+
+---
+
+### youmu-hug-0000
+
+Creator: **nyarocks**
+Editor: *none*
+
+Characters: **Konpaku Youmu**
+Source: **Touhou**
+
+---
+
+### wriggle-yamame-hug-0000
+
+Creator: **bwell**
+Editor: *none*
+
+Characters: **Kurodani Yamame**, **Wriggle Nightbug**
+Source: **Touhou**
+
+---
+
+### koishi-satori-handhold-0000
+
+Creator: **bwell**
+Editor: *none*
+
+Characters: **Komeiji Koishi**, **Komeiji Satori**
+Source: **Touhou**
+
+---
+
+### alice-marisa-hug-0005
+
+Creator: **bwell**
+Editor: *none*
+
+Characters: **Kirisame Marisa**, **Margatroid Alice**
+Source: **Touhou**
+
+---
+
+### nazrin-orin-hug-0000
+
+Creator: **bwell**
+Editor: *none*
+
+Characters: **Kaenbyou Rin**, **Nazrin**
+Source: **Touhou**
+
+---
+
+### flandre-remilia-handhold-0000
+
+Creator: **bwell**
+Editor: *none*
+
+Characters: **Scarlet Flandre**, **Scarlet Remilia**
+Source: **Touhou**
+
+---
+
+### reimu-sanae-tickle-0000
+
+Creator: **bwell**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kochiya Sanae**
+Source: **Touhou**
+
+---
+
+### hina-nitori-lap-sleep-0000
+
+Creator: **bwell**
+Editor: *none*
+
+Characters: **Kagiyama Hina**, **Kawashiro Nitori**
+Source: **Touhou**
+
+---
+
+### futo-ichirin-poke-0000
+
+Creator: **bwell**
+Editor: *none*
+
+Characters: **Kumoi Ichirin**, **Mononobe no Futo**
+Source: **Touhou**
+
+---
+
+### junko-reisen-hug-0000
+
+Creator: **guming diban**
+Editor: *none*
+
+Characters: **Junko**, **Reisen Udongein Inaba**
+Source: **Touhou**
+
+---
+
+### marisa-reimu-kiss-0004
+
+Creator: **amaama**
+Editor: **HuyaneMatsu**
+
+Characters: **Hakurei Reimu**, **Kirisame Marisa**
+Source: **Touhou**
+
+---
+
+### marisa-reimu-hug-0005
+
+Creator: **amaama**
+Editor: **HuyaneMatsu**
+
+Characters: **Hakurei Reimu**, **Kirisame Marisa**
+Source: **Touhou**
+
+---
+
+### chen-ran-yukari-hug-0001
+
+Creator: **amaama**
+Editor: **HuyaneMatsu**
+
+Characters: **Chen**, **Yakumo Ran**, **Yakumo Yukari**
+Source: **Touhou**
+
+---
+
+### marisa-reimu-lap-sleep-0001
+
+Creator: **amaama**
+Editor: *none*
+
+Characters: **Hakurei Reimu**, **Kirisame Marisa**
+Source: **Touhou**
+
+---
+
+### flandre-remilia-pocky-kiss-0000
+
+Creator: **misha (hoongju)**
+Editor: *none*
+
+Characters: **Scarlet Flandre**, **Scarlet Remilia**
+Source: **Touhou**
+
+---
+
+### kogasa-nue-hug-0000
+
+Creator: **misha (hoongju)**
+Editor: *none*
+
+Characters: **Houjuu Nue**, **Tatara Kogasa**
+Source: **Touhou**
+
+---
+
+### kogasa-nue-hug-0000
+
+Creator: **misha (hoongju)**
+Editor: *none*
+
+Characters: **Houjuu Nue**, **Tatara Kogasa**
+Source: **Touhou**
+
+---
+
+### chiruno-wakasagihime-kiss-0000
+
+Creator: **misha (hoongju)**
+Editor: *none*
+
+Characters: **Chiruno**, **Wakasagihime**
+Source: **Touhou**
+
+---
+
+### kagerou-sekibanki-kiss-0000
+
+Creator: **misha (hoongju)**
+Editor: *none*
+
+Characters: **Imaizumi Kagerou**, **Sekibanki**
+Source: **Touhou**
+
+---
+
+### kagerou-yatsuhashi-kiss-0000
+
+Creator: **misha (hoongju)**
+Editor: *none*
+
+Characters: **Imaizumi Kagerou**, **Tsukumo Yatsuhashi**
+Source: **Touhou**
+
+---
+
+### benben-yatsuhashi-kiss-0000
+
+Creator: **misha (hoongju)**
+Editor: *none*
+
+Characters: **Tsukumo Benben**, **Tsukumo Yatsuhashi**
+Source: **Touhou**
+
+---
+
+### benben-seija-kiss-0000
+
+Creator: **misha (hoongju)**
+Editor: *none*
+
+Characters: **Kijin Seija**, **Tsukumo Benben**
+Source: **Touhou**
+
+---
+
+### chiruno-raiko-kiss-0000
+
+Creator: **misha (hoongju)**
+Editor: *none*
+
+Characters: **Chiruno**, **Horikawa Raiko**
+Source: **Touhou**
+
+---
+
+### clownpiece-junko-hug-0000
+
+Creator: **misha (hoongju)**
+Editor: *none*
+
+Characters: **Clownpiece**, **Junko**
+Source: **Touhou**
+
+---
+
+### kagerou-tewi-lick-0000
+
+Creator: **haruwaka 064**
+Editor: **HuyaneMatsu**
+
+Characters: **Imaizumi Kagerou**, **Inaba Tewi**
+Source: **Touhou**
+
+---
+
+### kogasa-sanae-pat-0000
+
+Creator: **piyodesu**
+Editor: *none*
+
+Characters: **Kochiya Sanae**, **Tatara Kogasa**
+Source: **Touhou**
+
+---
+
+### kogasa-pat-0000
+
+Creator: **piyodesu**
+Editor: *none*
+
+Characters: **Tatara Kogasa**
+Source: **Touhou**
+
+---
+
+### aya-momiji-pat-0000
+
+Creator: **shimouki izui**
+Editor: *none*
+
+Characters: **Inubashiri Momiji**, **Shameimaru Aya**
+Source: **Touhou**
+
+---
+
+### hina-momiji-pat-0000
+
+Creator: **1641 (chfhrtor94)**
+Editor: *none*
+
+Characters: **Inubashiri Momiji**, **Kagiyama Hina**
+Source: **Touhou**
+
+---
+
+### meiling-sakuya-pat-0000
+
+Creator: **ayano (ayn398)**
+Editor: *none*
+
+Characters: **Hong Meiling**, **Izayoi Sakuya**
+Source: **Touhou**
+
+---
+
+### koishi-satori-pat-0000
+
+Creator: **yimudesu**
+Editor: *none*
+
+Characters: **Komeiji Koishi**, **Komeiji Satori**
+Source: **Touhou**
+
+---
+
+### alice-yuuka-kiss-0000
+
+Creator: **yimudesu**
+Editor: *none*
+
+Characters: **Kazami Yuuka**, **Margatroid Alice**
+Source: **Touhou**
+
+---
+
 I don't own the image files. The credits goes their respective owners.
 This feature is purely fan-made, and will not be used for profit or illegal sharing!
 Please contact me if you're the owner of an image and want to remove it from this repository!

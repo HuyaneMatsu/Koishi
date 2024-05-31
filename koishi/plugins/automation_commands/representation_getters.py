@@ -3,10 +3,10 @@ __all__ = ()
 from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import CHANNELS, EMOJIS, ROLES, elapsed_time
 
-from .constants import CHOICE_DEFAULT
+from .constants import CHOICE_DEFAULT, ENTITY_REPRESENTATION_DEFAULT
 
 
-def get_channel_representation(channel_id):
+def get_channel_id_representation(channel_id):
     """
     Gets channel mention for the given identifier.
     
@@ -19,15 +19,15 @@ def get_channel_representation(channel_id):
     -------
     representation : `str`
     """
-    if channel_id:
-        try:
-            channel = CHANNELS[channel_id]
-        except KeyError:
-            pass
-        else:
-            return channel.mention
+    if not channel_id:
+        return ENTITY_REPRESENTATION_DEFAULT
+        
+    try:
+        channel = CHANNELS[channel_id]
+    except KeyError:
+        return ENTITY_REPRESENTATION_DEFAULT
     
-    return 'unset'
+    return channel.mention
 
 
 def get_emoji_representation(emoji):
@@ -44,7 +44,7 @@ def get_emoji_representation(emoji):
     representation : `str`
     """
     if emoji is None:
-        return 'unset'
+        return ENTITY_REPRESENTATION_DEFAULT
     
     return emoji.as_emoji
 
@@ -63,7 +63,7 @@ def get_emoji_id_representation(emoji_id):
     representation : `str`
     """
     if not emoji_id:
-        return 'unset'
+        return ENTITY_REPRESENTATION_DEFAULT
     
     try:
         emoji = EMOJIS[emoji_id]
@@ -73,7 +73,7 @@ def get_emoji_id_representation(emoji_id):
     return emoji.as_emoji
 
 
-def get_role_representation(role_id):
+def get_role_id_representation(role_id):
     """
     Gets role mention for the given identifier.
     
@@ -86,15 +86,15 @@ def get_role_representation(role_id):
     -------
     representation : `str`
     """
-    if role_id:
-        try:
-            role = ROLES[role_id]
-        except KeyError:
-            pass
-        else:
-            return role.mention
+    if not role_id:
+        return ENTITY_REPRESENTATION_DEFAULT
+        
+    try:
+        role = ROLES[role_id]
+    except KeyError:
+        return ENTITY_REPRESENTATION_DEFAULT
     
-    return 'unset'
+    return role.mention
 
 
 def get_bool_representation(value):
@@ -127,7 +127,7 @@ def get_choice_representation(value):
     representation : `str`
     """
     if value is None:
-        value = CHOICE_DEFAULT
+        return CHOICE_DEFAULT
     
     return value
 

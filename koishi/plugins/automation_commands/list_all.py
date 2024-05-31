@@ -10,61 +10,9 @@ from ..automation_core import (
 
 from .constants import LOG_SATORI_ALLOWED_IDS
 from .representation_getters import (
-    get_bool_representation, get_channel_representation, get_choice_representation, get_duration_representation,
-    get_emoji_id_representation, get_role_representation
+    get_bool_representation, get_channel_id_representation, get_choice_representation, get_duration_representation,
+    get_emoji_id_representation, get_role_id_representation
 )
-
-
-def render_logging_description(automation_configuration):
-    """
-    Renders the logging fields' description.
-    
-    Parameters
-    ----------
-    automation_configuration : ``AutomationConfiguration``
-        The automation configuration to render.
-    
-    Returns
-    -------
-    description : `str`
-    """
-    description_parts = []
-    
-    description_parts.append(
-        '- Emoji: '
-    )
-    description_parts.append(get_channel_representation(automation_configuration.log_emoji_channel_id))
-    description_parts.append(
-        '\n'
-        '- Mention: '
-    )
-    description_parts.append(get_channel_representation(automation_configuration.log_mention_channel_id))
-    
-    # Render satori only if allowed in the guild
-    if automation_configuration.guild_id in LOG_SATORI_ALLOWED_IDS:
-        description_parts.append(
-            '\n'
-            '- Satori: '
-        )
-        description_parts.append(get_channel_representation(automation_configuration.log_satori_channel_id))
-        description_parts.append(
-            '\n'
-            f'  - Auto start: '
-        )
-        description_parts.append(get_bool_representation(automation_configuration.log_satori_auto_start))
-    
-    description_parts.append(
-        '\n'
-        f'- Sticker: '
-    )
-    description_parts.append(get_channel_representation(automation_configuration.log_sticker_channel_id))
-    description_parts.append(
-        '\n'
-        '- User: '
-    )
-    description_parts.append(get_channel_representation(automation_configuration.log_user_channel_id))
-    
-    return ''.join(description_parts)
 
 
 def render_community_message_moderation_description(automation_configuration):
@@ -131,7 +79,7 @@ def render_community_message_moderation_description(automation_configuration):
     )
     if not community_message_moderation_vote_threshold:
         community_message_moderation_vote_threshold = COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT
-    description_parts.append(repr(community_message_moderation_vote_threshold))
+    description_parts.append(str(community_message_moderation_vote_threshold))
     
     
     description_parts.append(
@@ -143,7 +91,7 @@ def render_community_message_moderation_description(automation_configuration):
         '\n'
         'Log channel: '
     )
-    description_parts.append(get_channel_representation(
+    description_parts.append(get_channel_id_representation(
         automation_configuration.community_message_moderation_log_channel_id
     ))
     
@@ -166,32 +114,68 @@ def build_response_list_all(automation_configuration, guild):
     response : ``InteractionResponse``
     """
     embed = Embed(
-        f'{guild.name}\'s automations',
+        f'{guild.name!s}\'s automations',
     ).add_thumbnail(
         guild.icon_url,
     ).add_field(
-        'Logging',
-        render_logging_description(automation_configuration),
+        'Log-emoji',
+        (
+            f'State: {get_bool_representation(automation_configuration.log_emoji_enabled)!s}\n'
+            f'Channel: {get_channel_id_representation(automation_configuration.log_emoji_channel_id)!s}'
+        ),
+    ).add_field(
+        'Log-mention',
+        (
+            f'State: {get_bool_representation(automation_configuration.log_mention_enabled)!s}\n'
+            f'Channel: {get_channel_id_representation(automation_configuration.log_mention_channel_id)!s}'
+        ),
+    )
+    
+    # Render satori only if allowed in the guild
+    if guild.id in LOG_SATORI_ALLOWED_IDS:
+        embed.add_field(
+            'Log-satori',
+            (
+                f'State: {get_bool_representation(automation_configuration.log_satori_enabled)!s}\n'
+                f'Channel: {get_channel_id_representation(automation_configuration.log_satori_channel_id)!s}\n'
+                f'Auto start: {get_bool_representation(automation_configuration.log_satori_auto_start)!s}'
+            )
+        )
+    
+    embed.add_field(
+        'Log-sticker',
+        (
+            f'State: {get_bool_representation(automation_configuration.log_sticker_enabled)!s}\n'
+            f'Channel: {get_channel_id_representation(automation_configuration.log_sticker_channel_id)!s}'
+        ),
+    ).add_field(
+        'Log-user',
+        (
+            f'State: {get_bool_representation(automation_configuration.log_user_enabled)!s}\n'
+            f'Channel: {get_channel_id_representation(automation_configuration.log_user_channel_id)!s}'
+        ),
     ).add_field(
         'Reaction-copy',
         (
-            f'State: {get_bool_representation(automation_configuration.reaction_copy_enabled)}\n'
-            f'Role: {get_role_representation(automation_configuration.reaction_copy_role_id)}'
+            f'State: {get_bool_representation(automation_configuration.reaction_copy_enabled)!s}\n'
+            f'Role: {get_role_id_representation(automation_configuration.reaction_copy_role_id)!s}'
         ),
     ).add_field(
         'Touhou-feed',
-        f'State: {get_bool_representation(automation_configuration.touhou_feed_enabled)}',
+        f'State: {get_bool_representation(automation_configuration.touhou_feed_enabled)!s}',
     ).add_field(
         'Welcome',
         (
-            f'Channel: {get_channel_representation(automation_configuration.welcome_channel_id)}\n'
-            f'Reply buttons: {get_bool_representation(automation_configuration.welcome_reply_buttons_enabled)}\n'
-            f'Style: {get_choice_representation(automation_configuration.welcome_style_name)}'
+            f'State: {get_bool_representation(automation_configuration.welcome_enabled)!s}\n'
+            f'Channel: {get_channel_id_representation(automation_configuration.welcome_channel_id)!s}\n'
+            f'Reply buttons: {get_bool_representation(automation_configuration.welcome_reply_buttons_enabled)!s}\n'
+            f'Style: {get_choice_representation(automation_configuration.welcome_style_name)!s}'
         )
     ).add_field(
-        'Community message moderation',
+        'Community-message-moderation',
         render_community_message_moderation_description(automation_configuration),
     )
+    
     
     return InteractionResponse(
         allowed_mentions = None,

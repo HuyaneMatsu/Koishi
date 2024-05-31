@@ -1,15 +1,35 @@
+### 2024-05-31
+
+- Fix `user_settings` table primary key stopped working (???). Could restore 3 / 5 affected entries.
+- Add `Tsukumo Benben` touhou character.
+- Add `Tsukumo Yatsuhashi` touhou character.
+- Add `Kotohime` touhou character.
+- Add `Asakura Rikako` touhou character.
+- Add `Anaberal Kana` touhou character.
+- Add `Ellen` touhou character.
+- Add `Sokrates` touhou character.
+- Add **34** image to `/kiss`.
+- Add **38** image to `/hug`.
+- Add **1** image to `/lick`.
+- Add **5** image to `/lap-sleep`.
+- Add **1** image to `/fluff`.
+- Add **7** image to `/pat`.
+- Add **1** image to `/pocky-kiss`.
+
 ### 2024-05-21
 
-- Fix `/action` suggestion cases where `source == target` (Now they can suggest the same user).
+- Fix `/action` suggestion cases where `source == target` (Now they can suggest the same character as expected).
 - Action commands such as `/hug` now have reduced chance to select a character for the other user(s) that you
     preferred yourself.
 - `cosplay` is now a new action tag, so `tsukasa` + `ran` kons are now separated to `kon` + `tsukasa`
-    and `cosplay` + `tsuaksa` + `ran`. In short tsukasa cosplaying as ran wont count as ran anymore!!
+    and `cosplay` + `tsukasa` + `ran`. In short tsukasa cosplaying as ran wont count as ran anymore!!
 - Add **4** image to `/kiss`.
 - Add **6** image to `/hug`.
 - Add **2** image to `/feed`.
 - Add **1** image to `/lick`.
 - `/automation welcome` now instead of removing the components disables them.
+- Each automation under `/automation` now has separate `enabled` and `channel` fields.
+     This also changes the command structure.
 
 ### 2024-05-14
 
