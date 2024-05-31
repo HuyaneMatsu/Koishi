@@ -15,6 +15,9 @@
 - Add **1** image to `/fluff`.
 - Add **7** image to `/pat`.
 - Add **1** image to `/pocky-kiss`.
+- `/automation welcome` now instead of removing the components disables them.
+- Each automation under `/automation` now has separate `enabled` and `channel` fields.
+     This also changes the command structure.
 
 ### 2024-05-21
 
@@ -27,9 +30,6 @@
 - Add **6** image to `/hug`.
 - Add **2** image to `/feed`.
 - Add **1** image to `/lick`.
-- `/automation welcome` now instead of removing the components disables them.
-- Each automation under `/automation` now has separate `enabled` and `channel` fields.
-     This also changes the command structure.
 
 ### 2024-05-14
 
