@@ -186,6 +186,7 @@ class AutomationConfigurationSaver(RichAttributeErrorBaseType):
                                     log_satori_enabled = automation_configuration.log_satori_enabled,
                                     
                                     reaction_copy_enabled = automation_configuration.reaction_copy_enabled,
+                                    reaction_copy_flags = automation_configuration.reaction_copy_flags,
                                     reaction_copy_role_id = automation_configuration.reaction_copy_role_id,
                                     
                                     touhou_feed_enabled = automation_configuration.touhou_feed_enabled,

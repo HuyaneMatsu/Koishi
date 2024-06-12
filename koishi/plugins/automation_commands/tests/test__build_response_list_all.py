@@ -1,5 +1,5 @@
 import vampytest
-from hata import BUILTIN_EMOJIS, Channel, ChannelType, EMOJIS, Embed, Guild, Role
+from hata import Channel, ChannelType, EMOJIS, Embed, Guild, Role
 from hata.ext.slash import InteractionResponse
 
 from ....bot_utils.constants import GUILD__SUPPORT
@@ -8,6 +8,7 @@ from ...automation_core import (
     AutomationConfiguration, COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_DEFAULT,
     COMMUNITY_MESSAGE_MODERATION_DOWN_VOTE_EMOJI_ID_DEFAULT, COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT
 )
+from ...automation_reaction_copy import MASK_PARSE_NAME_UNICODE, MASK_PARSE_TOPIC_CUSTOM, MASK_PARSE_TOPIC_UNICODE
 
 from ..constants import CHOICE_DEFAULT, ENTITY_REPRESENTATION_DEFAULT
 from ..list_all import build_response_list_all
@@ -59,6 +60,7 @@ def _iter_options():
                 'Reaction-copy',
                 (
                     f'State: disabled\n'
+                    f'Parse: none in name, none in topic\n'
                     f'Role: {ENTITY_REPRESENTATION_DEFAULT!s}'
                 ),
             ).add_field(
@@ -135,6 +137,9 @@ def _iter_options():
     automation_configuration.log_user_enabled = True
     automation_configuration.log_user_channel_id = log_user_channel_id
     automation_configuration.reaction_copy_enabled = True
+    automation_configuration.reaction_copy_flags = (
+        MASK_PARSE_NAME_UNICODE | MASK_PARSE_TOPIC_CUSTOM | MASK_PARSE_TOPIC_UNICODE
+    )
     automation_configuration.reaction_copy_role_id = reaction_copy_role_id
     automation_configuration.touhou_feed_enabled = True
     automation_configuration.welcome_enabled = True
@@ -196,6 +201,7 @@ def _iter_options():
                 'Reaction-copy',
                 (
                     f'State: enabled\n'
+                    f'Parse: unicode in name, all in topic\n'
                     f'Role: {reaction_copy_role.mention!s}'
                 ),
             ).add_field(

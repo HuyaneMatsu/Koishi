@@ -34,6 +34,7 @@ def apply_presets():
     
     # Reaction copy
     support_guild_configuration.reaction_copy_enabled = True
+    support_guild_configuration.reaction_copy_flags = 3
     support_guild_configuration.reaction_copy_role_id = 0
     
     # Touhou feed

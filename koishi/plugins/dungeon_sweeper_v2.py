@@ -2226,14 +2226,14 @@ def load_stages():
     for expected_chapter_index, (chapter_index, chapter_dictionary) in enumerate(sorted(chapter_dictionaries.items())):
         if expected_chapter_index != chapter_index:
             raise RuntimeError(
-                f'expected_chapter_index={expected_chapter_index!r} != '
-                f'chapter_index={chapter_index!r})'
+                f'expected_chapter_index = {expected_chapter_index!r} != '
+                f'chapter_index = {chapter_index!r})'
             )
         
         if chapter_index not in CHAPTERS:
             raise RuntimeError(
-                f'chapter_index={chapter_index} not in '
-                f'CHAPTERS={CHAPTERS}'
+                f'chapter_index = {chapter_index} not in '
+                f'CHAPTERS = {CHAPTERS}'
             )
         
         sorted_difficulty = []
@@ -2244,8 +2244,8 @@ def load_stages():
             
             if expected_difficulty_index != difficulty_index:
                 raise RuntimeError(
-                    f'expected_difficulty_index={expected_difficulty_index!r} != '
-                    f'difficulty_index={difficulty_index!r})'
+                    f'expected_difficulty_index = {expected_difficulty_index!r} != '
+                    f'difficulty_index = {difficulty_index!r})'
                 )
                 
             sorted_stages = []
@@ -2253,8 +2253,8 @@ def load_stages():
             for expected_stage_index, (stage_index, stage) in enumerate(sorted(difficulty_dictionary.items())):
                 if expected_difficulty_index != difficulty_index:
                     raise RuntimeError(
-                        f'expected_stage_index={expected_stage_index!r} != '
-                        f'stage_index={stage_index!r})'
+                        f'expected_stage_index = {expected_stage_index!r} != '
+                        f'stage_index = {stage_index!r})'
                     )
                     
                 sorted_stages.append(stage)
@@ -2280,21 +2280,27 @@ def load_stages():
         for sorted_difficulty in sorted_chapter:
             chapter_stages_sorted.extend(sorted_difficulty)
         
-        chapter_stages_sorted_length = len(chapter_stages_sorted)
-        if chapter_stages_sorted_length > 1:
-            stage = chapter_stages_sorted[0]
-            stage.after_stage_source = chapter_stages_sorted[1]
-            stage.index = 0
+        # set first links
+        stage = chapter_stages_sorted[0]
+        if chapter_index:
+            previous_stage = sorted_chapters[chapter_index - 1][-1][-1]
             
-            index = chapter_stages_sorted_length - 1
+            previous_stage.after_stage_source = stage
+            stage.before_stage_source = previous_stage
+        
+        previous_stage = stage
+        
+        # set rest links
+        for index in range(1, len(chapter_stages_sorted)):
             stage = chapter_stages_sorted[index]
-            stage.before_stage_source = chapter_stages_sorted[chapter_stages_sorted_length - 2]
             
-            for index in range(1, chapter_stages_sorted_length - 1):
-                stage = chapter_stages_sorted[index]
-                stage.after_stage_source = chapter_stages_sorted[index + 1]
-                stage.before_stage_source = chapter_stages_sorted[index - 1]
-                stage.index = index
+            stage.index = index
+            previous_stage.after_stage_source = stage
+            stage.before_stage_source = previous_stage
+            
+            previous_stage = stage
+            continue
+
 
 load_stages()
 
@@ -2835,10 +2841,8 @@ class GameState:
         if (best == -1) or (steps < best):
             self.best = steps
         
-        stage = self.stage
-        self.stage = stage
-        self.map = stage.map.copy()
-        self.position = stage.start
+        self.map = self.stage.map.copy()
+        self.position = self.stage.start
         self.history.clear()
         self.has_skill = True
         self.next_skill = False
@@ -3394,6 +3398,7 @@ class GameState:
         self.position = self.stage.start
         self.map = self.stage.map.copy()
         self.has_skill = True
+        self.next_skill = False
         
         return True
 
@@ -3472,11 +3477,12 @@ def get_selectable_stages(user_state):
         user_state.selected_stage_id = selected_stage.id
     
     stages = []
+    chapter_index = selected_stage.chapter_index
     
     stage_source = selected_stage
     for times in range(3):
         stage_source = stage_source.before_stage_source
-        if stage_source is None:
+        if (stage_source is None) or (stage_source.chapter_index != chapter_index):
             break
         
         stages.append(stage_source)
@@ -3488,7 +3494,7 @@ def get_selectable_stages(user_state):
     stage_source = selected_stage
     for times in range(3):
         stage_source = stage_source.after_stage_source
-        if stage_source is None:
+        if (stage_source is None) or (stage_source.chapter_index != chapter_index):
             break
         
         stages.append(stage_source)
@@ -3679,10 +3685,11 @@ async def action_processor_up2(dungeon_sweeper_runner):
             return False
         
         selected_stage = STAGES_BY_ID[selected_stage_id]
+        chapter_index = selected_stage.chapter_index
         
         for x in range(STAGE_STEP_MULTI_STEP_BUTTON):
             next_stage = selected_stage.after_stage_source
-            if next_stage is None:
+            if (next_stage is None) or (next_stage.chapter_index != chapter_index):
                 if x:
                     break
                 
@@ -3752,10 +3759,11 @@ async def action_processor_down2(dungeon_sweeper_runner):
         
         selected_stage_id = user_state.selected_stage_id
         selected_stage = STAGES_BY_ID[selected_stage_id]
+        chapter_index = selected_stage.chapter_index
         
         for x in range(STAGE_STEP_MULTI_STEP_BUTTON):
             next_stage = selected_stage.before_stage_source
-            if next_stage is None:
+            if (next_stage is None) or (next_stage.chapter_index != chapter_index):
                 if x:
                     break
                 
@@ -4158,31 +4166,29 @@ async def action_processor_next(dungeon_sweeper_runner):
     success : `bool`
         Whether the `next` button could be pressed.
     """
-    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_END_SCREEN:
-        user_state = dungeon_sweeper_runner.user_state
-        game_state = user_state.game_state
-        stage_source = game_state.stage
-        selected_stage = stage_source.after_stage_source
-        if selected_stage is None:
-            return False
-        
-        
-        dungeon_sweeper_runner._runner_state = RUNNER_STATE_PLAYING
-        
-        selected_stage_id = selected_stage.id
-        user_state.selected_stage_id = selected_stage_id
-        
-        try:
-            stage_result = user_state.stage_results[selected_stage_id]
-        except KeyError:
-            best = -1
-        else:
-            best = stage_result.best
-        
-        user_state.game_state = GameState(selected_stage, best)
-        return True
+    if dungeon_sweeper_runner._runner_state != RUNNER_STATE_END_SCREEN:
+        return False
     
-    return False
+    user_state = dungeon_sweeper_runner.user_state
+    selected_stage = user_state.game_state.stage.after_stage_source
+    if selected_stage is None:
+        return False
+    
+    
+    dungeon_sweeper_runner._runner_state = RUNNER_STATE_PLAYING
+    
+    selected_stage_id = selected_stage.id
+    user_state.selected_stage_id = selected_stage_id
+    
+    try:
+        stage_result = user_state.stage_results[selected_stage_id]
+    except KeyError:
+        best = -1
+    else:
+        best = stage_result.best
+    
+    user_state.game_state = GameState(selected_stage, best)
+    return True
 
 
 async def action_processor_restart(dungeon_sweeper_runner):
@@ -4498,10 +4504,10 @@ class DungeonSweeperRunner:
         event : ``InteractionEvent``
             The received client.
         """
-        if not event.channel.cached_permissions_for(client).can_manage_messages:
+        if not event.channel.cached_permissions_for(client).can_use_external_emojis:
             await client.interaction_response_message_create(
                 event,
-                'I need manage messages permission in the channel to execute this command.',
+                'I need use external emojis permission to execute this command.',
                 show_for_invoking_user_only = True,
             )
             return

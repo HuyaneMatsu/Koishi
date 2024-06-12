@@ -10,10 +10,13 @@ from ..automation_core import (
     COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_MIN, COMMUNITY_MESSAGE_MODERATION_DOWN_VOTE_EMOJI_DEFAULT,
     COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT, COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_MAX,
     COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_MIN, clear_satori_channel, delete_automation_configuration_of,
-    discover_satori_channel, get_automation_configuration_for, get_log_satori_channel, get_reaction_copy_enabled,
+    discover_satori_channel, get_automation_configuration_for, get_log_satori_channel, get_reaction_copy_fields_forced,
     get_touhou_feed_enabled
 )
-from ..automation_reaction_copy import build_reaction_copy_about_response, build_reaction_copy_list_channels_response
+from ..automation_reaction_copy import (
+    MASK_PARSE_NAME_UNICODE, MASK_PARSE_TOPIC_CUSTOM, MASK_PARSE_TOPIC_UNICODE, build_reaction_copy_about_response,
+    build_reaction_copy_list_channels_response, get_reaction_copy_flag_parse_names
+)
 from ..automation_touhou_feed import (
     TOUHOU_FEED_ABOUT_BUILDERS, TOUHOU_FEED_ABOUT_FIELDS, TOUHOU_FEED_ABOUT_TOPIC_MAIN,
     build_touhou_feed_listing_response, try_remove_guild as touhou_feed_try_remove_guild,
@@ -591,8 +594,6 @@ async def reaction_copy_list_channels(client, event):
     
     Parameters
     ----------
-    client : ``Client``
-        The client who received the message.
     event : ``InteractionEvent``
         The received interaction event.
     
@@ -606,11 +607,12 @@ async def reaction_copy_list_channels(client, event):
     if guild is None:
         return abort('Guild out of cache.')
     
-    return build_reaction_copy_list_channels_response(client, guild, get_reaction_copy_enabled(guild.id))
+    enabled, role, flags = get_reaction_copy_fields_forced(guild.id)
+    return build_reaction_copy_list_channels_response(guild, enabled, flags)
 
 
 @REACTION_COPY_COMMANDS.interactions(name = 'state')
-async def reaction_copy_enable(
+async def reaction_copy_set_state(
     event,
     state : (['enabled', 'disabled'], 'Enable or disable.'),
 ):
@@ -667,6 +669,58 @@ async def reaction_copy_set_role(
         return f'Reaction-copy will no logger be additionally available for users with any role.'
     
     return f'Reaction-copy can be used by users with role {role.name} as well.'
+
+
+
+@REACTION_COPY_COMMANDS.interactions(name = 'parse')
+async def reaction_copy_set_parse(
+    event,
+    name_unicode : (bool, 'Whether to parse unicode emojis from name.') = None,
+    topic_custom : (bool, 'Whether to parse custom emojis from topic.') = None,
+    topic_unicode : (bool, 'Whether to parse unicode emojis from topic.') = None,
+):
+    """
+    Sets parse rules.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    name_unicode : `None | bool` = `None`, Optional
+        Whether to parse unicode emojis from name.
+    topic_custom : `None | bool` = `None`, Optional
+        Whether to parse custom emojis from topic.
+    topic_unicode : `None | bool` = `None`, Optional
+        Whether to parse unicode emojis from topic.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    flags = automation_configuration.reaction_copy_flags
+    
+    # calculate new flags value
+    for value, mask in (
+        (name_unicode, MASK_PARSE_NAME_UNICODE),
+        (topic_custom, MASK_PARSE_TOPIC_CUSTOM),
+        (topic_unicode, MASK_PARSE_TOPIC_UNICODE),
+    ):
+        if value is None:
+            continue
+        
+        if value:
+            flags |= mask
+        else:
+            flags &= ~mask
+    
+    automation_configuration.set('reaction_copy_flags', flags)
+    
+    return f'Reaction-copy has been set to: {get_reaction_copy_flag_parse_names(flags)!s}.'
 
 
 # Touhou feed

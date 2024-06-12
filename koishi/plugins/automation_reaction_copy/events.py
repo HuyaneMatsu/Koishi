@@ -3,15 +3,17 @@ __all__ = ()
 from collections import deque
 from itertools import chain
 
-from hata import KOKORO, Permission, parse_all_emojis
+from hata import KOKORO, Permission
 from scarletio import Task, TaskGroup
 
 from ...bots import FEATURE_CLIENTS
 
-from ..automation_core import get_reaction_copy_enabled_and_role
+from ..automation_core import get_reaction_copy_fields
 from ..blacklist_core import is_user_id_in_blacklist
 from ..move_message_core import create_webhook_message, get_message_and_files, get_webhook
 
+from .constants import MASK_PARSE_ANY_CUSTOM, MAKS_PARSE_ANY_UNICODE
+from .list_channels import collect_channel_emojis
 
 ACTION_QUEUE = deque(maxlen = 100)
 
@@ -19,7 +21,33 @@ PERMISSION_MASK_ROLE = Permission().update_by_keys(view_channel = True)
 PERMISSION_MASK_DEFAULT = Permission().update_by_keys(manage_messages = True)
 
 
-def check_channel_emojis(channel, emoji):
+def check_is_emoji_allowed(emoji, flags):
+    """
+    Returns whether the emoji is allowed by the given flags.
+    
+    Parameters
+    ----------
+    emoji : ``Emoji``
+        The emoji to check for.
+    flags : `int`
+        Bitwise flags to determine from where and what kind of emojis should we collect.
+    
+    Returns
+    -------
+    allowed : `bool`
+    """
+    if emoji.is_unicode_emoji():
+        if flags & MAKS_PARSE_ANY_UNICODE:
+            return True
+    
+    elif emoji.is_custom_emoji():
+        if flags & MASK_PARSE_ANY_CUSTOM:
+            return True
+    
+    return False
+
+
+def check_has_channel_emoji(channel, emoji, flags):
     """
     Returns whether the channel has the given emoji in it.
     
@@ -28,22 +56,48 @@ def check_channel_emojis(channel, emoji):
     channel : ``Channel``
         The channel to check.
     emoji : ``Emoji``
-        The emoji to find.
+        The emoji to check for.
+    flags : `int`
+        Bitwise flags to determine from where and what kind of emojis should we collect.
     
     Returns
     -------
+    has_emoji : `bool`
     """
     if not channel.is_in_group_guild_textual():
         return False
     
-    if emoji in parse_all_emojis(channel.name):
-        return True
-    
-    topic = channel.topic
-    if (topic is not None) and (emoji in parse_all_emojis(topic)):
+    if emoji in collect_channel_emojis(channel, flags):
         return True
     
     return False
+
+
+def try_get_target_channel(guild, emoji, flags):
+    """
+    Tries to get the target channel from the guild.
+    
+    Parameters
+    ----------
+    guild : ``Guild``
+        The guild where reaction was added at.
+    emoji : ``Emoji``
+        The emoji to check for.
+    flags : `int`
+        Bitwise flags to determine from where and what kind of emojis should we collect.
+    
+    Returns
+    -------
+    target_channel : `None | Channel`
+    """
+    target_channels = [
+        channel for channel
+        in chain(guild.channels.values(), guild.threads.values())
+        if check_has_channel_emoji(channel, emoji, flags)
+    ]
+    
+    if len(target_channels) == 1:
+        return target_channels[0]
 
 
 @FEATURE_CLIENTS.events
@@ -68,15 +122,19 @@ async def reaction_add(client, event):
         return
     
     emoji = event.emoji
-    if emoji.is_custom_emoji():
-        return
-    
-    enabled, role = get_reaction_copy_enabled_and_role(guild.id)
-    if not enabled:
+    if emoji.is_custom_emoji() and guild.id != emoji.guild_id:
         return
     
     source_channel = event.message.channel
     if source_channel is None:
+        return
+    
+    reaction_copy_fields = get_reaction_copy_fields(guild.id)
+    if reaction_copy_fields is None:
+        return
+    
+    role, flags = reaction_copy_fields
+    if not check_is_emoji_allowed(emoji, flags):
         return
     
     if (role is not None) and event.user.has_role(role):
@@ -84,23 +142,15 @@ async def reaction_add(client, event):
     else:
         permission_mask = PERMISSION_MASK_DEFAULT
         
-    if not source_channel.permissions_for(event.user) & permission_mask:
+    if source_channel.permissions_for(event.user) & permission_mask != permission_mask:
         return
     
-    target_channels = [
-        channel for channel
-        in chain(guild.channels.values(), guild.threads.values())
-        if check_channel_emojis(channel, emoji)
-    ]
-    if len(target_channels) != 1:
-        return
-    
-    target_channel = target_channels[0]
+    target_channel = try_get_target_channel(guild, emoji, flags)
     if target_channel is source_channel:
         return
     
     # If the user does not have permissions in the target channel they should not be able to target it.
-    if not target_channel.permissions_for(event.user) & permission_mask:
+    if target_channel.permissions_for(event.user) & permission_mask != permission_mask:
         return
     
     # Get the first client who satisfies the required permission requirements

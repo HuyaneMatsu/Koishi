@@ -3528,6 +3528,14 @@ async def poll_result_user_get_chunk(client, message):
     )
 
 
+async def channel_get(client, channel):
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel.id}',
+    )
+
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0000(client, message):
     """
@@ -8383,3 +8391,12 @@ async def rate_limit_test_0216(client, message):
         
         await guild_ban_add_multiple(client, guild, [806181811817676860])
 
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0217(client, message):
+    """
+    Channel get.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0217') as RLT:
+        await channel_get(client, channel)

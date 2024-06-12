@@ -4,7 +4,7 @@ from hata import Role
 from ....bot_utils.models import DB_ENGINE
 
 from ..automation_configuration import AutomationConfiguration
-from ..operations import get_reaction_copy_enabled_and_role
+from ..operations import get_reaction_copy_fields
 from ..constants import AUTOMATION_CONFIGURATIONS
 
 
@@ -16,7 +16,7 @@ def _iter_options():
         guild_id,
         [],
         (
-            (False, None),
+            None,
             0,
         ),
     )
@@ -25,13 +25,14 @@ def _iter_options():
     automation_configuration = AutomationConfiguration(guild_id)
     automation_configuration.reaction_copy_enabled = False
     automation_configuration.reaction_copy_role_id = 0
+    automation_configuration.reaction_copy_flags = 12
     
     yield (
         automation_configuration,
         guild_id,
         [],
         (
-            (False, None),
+            None,
             0,
         ),
     )
@@ -40,13 +41,14 @@ def _iter_options():
     automation_configuration = AutomationConfiguration(guild_id)
     automation_configuration.reaction_copy_enabled = True
     automation_configuration.reaction_copy_role_id = 0
+    automation_configuration.reaction_copy_flags = 12
     
     yield (
         automation_configuration,
         guild_id,
         [],
         (
-            (True, None),
+            (None, 12),
             0,
         ),
     )
@@ -56,13 +58,14 @@ def _iter_options():
     automation_configuration = AutomationConfiguration(guild_id)
     automation_configuration.reaction_copy_enabled = False
     automation_configuration.reaction_copy_role_id = role_id
+    automation_configuration.reaction_copy_flags = 12
     
     yield (
         automation_configuration,
         guild_id,
         [],
         (
-            (False, None),
+            None,
             role_id,
         ),
     )
@@ -72,13 +75,14 @@ def _iter_options():
     automation_configuration = AutomationConfiguration(guild_id)
     automation_configuration.reaction_copy_enabled = True
     automation_configuration.reaction_copy_role_id = role_id
+    automation_configuration.reaction_copy_flags = 12
     
     yield (
         automation_configuration,
         guild_id,
         [],
         (
-            (True, None),
+            (None, 12),
             0,
         ),
     )
@@ -89,13 +93,14 @@ def _iter_options():
     automation_configuration = AutomationConfiguration(guild_id)
     automation_configuration.reaction_copy_enabled = False
     automation_configuration.reaction_copy_role_id = role_id
+    automation_configuration.reaction_copy_flags = 12
     
     yield (
         automation_configuration,
         guild_id,
         [role],
         (
-            (False, None),
+            None,
             role_id,
         ),
     )
@@ -106,13 +111,32 @@ def _iter_options():
     automation_configuration = AutomationConfiguration(guild_id)
     automation_configuration.reaction_copy_enabled = True
     automation_configuration.reaction_copy_role_id = role_id
+    automation_configuration.reaction_copy_flags = 12
     
     yield (
         automation_configuration,
         guild_id,
         [role],
         (
-            (True, role),
+            (role, 12),
+            role_id,
+        ),
+    )
+
+    guild_id = 202406100013
+    role_id = 202406100014
+    role = Role.precreate(role_id)
+    automation_configuration = AutomationConfiguration(guild_id)
+    automation_configuration.reaction_copy_enabled = True
+    automation_configuration.reaction_copy_role_id = role_id
+    automation_configuration.reaction_copy_flags = 0
+    
+    yield (
+        automation_configuration,
+        guild_id,
+        [role],
+        (
+            None,
             role_id,
         ),
     )
@@ -120,9 +144,9 @@ def _iter_options():
 
 @vampytest.skip_if(DB_ENGINE is not None)
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__get_reaction_copy_enabled_and_role(automation_configuration, guild_id, extras):
+def test__get_reaction_copy_fields(automation_configuration, guild_id, extras):
     """
-    Tests whether ``get_reaction_copy_enabled_and_role`` works as intended.
+    Tests whether ``get_reaction_copy_fields`` works as intended.
     
     Parameters
     ----------
@@ -135,18 +159,20 @@ def test__get_reaction_copy_enabled_and_role(automation_configuration, guild_id,
     
     Returns
     -------
-    output : `(bool, None | Role)`
+    output : `None | (None | Role, int)`
     role_id : `int`
     """
     try:
         if (automation_configuration is not None):
             AUTOMATION_CONFIGURATIONS[automation_configuration.guild_id] = automation_configuration
         
-        output = get_reaction_copy_enabled_and_role(guild_id)
-        vampytest.assert_instance(output, tuple)
-        vampytest.assert_eq(len(output), 2)
-        vampytest.assert_instance(output[0], bool)
-        vampytest.assert_instance(output[1], Role, nullable = True)
+        output = get_reaction_copy_fields(guild_id)
+        vampytest.assert_instance(output, tuple, nullable = True)
+        
+        if (output is not None):
+            vampytest.assert_eq(len(output), 2)
+            vampytest.assert_instance(output[0], Role, nullable = True)
+            vampytest.assert_instance(output[1], int)
         
         return(
             output,

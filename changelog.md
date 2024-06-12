@@ -1,3 +1,13 @@
+### 2024-06-12
+
+- `/ds` does not require `manage messages` permission anymore, only `use external emojis`.
+- Fix `/ds` did not reset `skill` on restart.
+- Fix `/ds` had `next` button inactive when finishing the last stage of a chapter.
+- `/automation reaction-copy list-channels` did not sort channels without categories.
+- `/automation reaction-copy list-channels` showed different output for each client.
+- `/automation reaction-copy list-channels` now also shows in which channels the client(s) cannot copy the message.
+- Add `/automation reaction-copy parse` command.
+
 ### 2024-05-31
 
 - Fix `user_settings` table primary key stopped working (???). Could restore 3 / 5 affected entries.
@@ -15,7 +25,6 @@
 - Add **1** image to `/fluff`.
 - Add **7** image to `/pat`.
 - Add **1** image to `/pocky-kiss`.
-- `/automation welcome` now instead of removing the components disables them.
 - Each automation under `/automation` now has separate `enabled` and `channel` fields.
      This also changes the command structure.
 
@@ -30,6 +39,7 @@
 - Add **6** image to `/hug`.
 - Add **2** image to `/feed`.
 - Add **1** image to `/lick`.
+- `/automation welcome` now instead of removing the components disables them.
 
 ### 2024-05-14
 

@@ -7,6 +7,7 @@ from ..automation_core import (
     COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_DEFAULT, COMMUNITY_MESSAGE_MODERATION_DOWN_VOTE_EMOJI_ID_DEFAULT,
     COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT
 )
+from ..automation_reaction_copy import get_reaction_copy_flag_parse_names
 
 from .constants import LOG_SATORI_ALLOWED_IDS
 from .representation_getters import (
@@ -158,6 +159,7 @@ def build_response_list_all(automation_configuration, guild):
         'Reaction-copy',
         (
             f'State: {get_bool_representation(automation_configuration.reaction_copy_enabled)!s}\n'
+            f'Parse: {get_reaction_copy_flag_parse_names(automation_configuration.reaction_copy_flags)!s}\n'
             f'Role: {get_role_id_representation(automation_configuration.reaction_copy_role_id)!s}'
         ),
     ).add_field(

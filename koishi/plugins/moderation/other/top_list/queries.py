@@ -107,7 +107,7 @@ async def request_mutes(client, guild, after, actions):
     actions : `set` of `tuple` (`int`, ``ClientUserBase``, ``ClientUserBase``)
         The executed actions to extend.
     """
-    async for audit_log_entry in (await client.audit_log_iterator(guild, event = AuditLogEntryType.member_update)):
+    async for audit_log_entry in (await client.audit_log_iterator(guild, event = AuditLogEntryType.user_update)):
         if audit_log_entry.created_at < after:
             break
         

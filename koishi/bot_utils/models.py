@@ -246,6 +246,7 @@ if (DB_ENGINE is not None):
         
         # Reaction copy
         reaction_copy_enabled = Column(Boolean, default = False, nullable = False)
+        reaction_copy_flags = Column(Int64, nullable = False)
         reaction_copy_role_id = Column(Int64, nullable = False)
         
         # Touhou feed

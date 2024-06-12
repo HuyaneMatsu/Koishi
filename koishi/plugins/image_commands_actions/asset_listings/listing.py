@@ -5355,7 +5355,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1244741526307737611/aya-momiji-pat-0000.gif',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1246935653485379584/aya-momiji-pat-0001.gif',
 ).with_action(
     ACTION_TAG_PAT, SHAMEIMARU_AYA, INUBASHIRI_MOMIJI,
 ).with_creator(

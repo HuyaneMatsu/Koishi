@@ -44,6 +44,7 @@ def _assert_fields_set(automation_configuration):
     vampytest.assert_instance(automation_configuration.log_user_channel_id, int)
     vampytest.assert_instance(automation_configuration.log_user_enabled, bool)
     vampytest.assert_instance(automation_configuration.reaction_copy_enabled, int)
+    vampytest.assert_instance(automation_configuration.reaction_copy_flags, int)
     vampytest.assert_instance(automation_configuration.reaction_copy_role_id, int)
     vampytest.assert_instance(automation_configuration.saver, AutomationConfigurationSaver, nullable = True)
     vampytest.assert_instance(automation_configuration.touhou_feed_enabled, bool)
@@ -102,6 +103,7 @@ def test__AutomationConfiguration__repr():
         log_user_channel_id = 202405280007
         log_user_enabled = True
         reaction_copy_enabled = True
+        reaction_copy_flags = 12
         reaction_copy_role_id = 202405280008
         touhou_feed_enabled = True
         welcome_channel_id = 202405280009
@@ -131,6 +133,7 @@ def test__AutomationConfiguration__repr():
         automation_configuration.log_user_channel_id = log_user_channel_id
         automation_configuration.log_user_enabled = log_user_enabled
         automation_configuration.reaction_copy_enabled = reaction_copy_enabled
+        automation_configuration.reaction_copy_flags = 12
         automation_configuration.reaction_copy_role_id = reaction_copy_role_id
         automation_configuration.touhou_feed_enabled = touhou_feed_enabled
         automation_configuration.welcome_channel_id = welcome_channel_id
@@ -164,6 +167,7 @@ def test__AutomationConfiguration__repr():
         vampytest.assert_in(f'log_user_channel_id = {log_user_channel_id!r}', output)
         vampytest.assert_in(f'log_user_enabled = {log_user_enabled!r}', output)
         vampytest.assert_in(f'reaction_copy_enabled = {reaction_copy_enabled!r}', output)
+        vampytest.assert_in(f'reaction_copy_flags = {reaction_copy_flags!r}', output)
         vampytest.assert_in(f'reaction_copy_role_id = {reaction_copy_role_id!r}', output)
         vampytest.assert_in(f'touhou_feed_enabled = {touhou_feed_enabled!r}', output)
         vampytest.assert_in(f'welcome_channel_id = {welcome_channel_id!r}', output)
@@ -201,6 +205,7 @@ def _iter_options__bool():
     log_user_channel_id = 202405280015
     log_user_enabled = True
     reaction_copy_enabled = True
+    reaction_copy_flags = 12
     reaction_copy_role_id = 202405280016
     touhou_feed_enabled = True
     welcome_channel_id = 202405280017
@@ -363,6 +368,13 @@ def _iter_options__bool():
     yield (
         {
             'reaction_copy_enabled': reaction_copy_enabled,
+        },
+        True,
+    )
+    
+    yield (
+        {
+            'reaction_copy_flags': reaction_copy_flags,
         },
         True,
     )
@@ -533,6 +545,7 @@ def test__AutomationConfiguration__from_entry():
         log_user_channel_id = 202405280038
         log_user_enabled = True
         reaction_copy_enabled = True
+        reaction_copy_flags = 12
         reaction_copy_role_id = 202405280039
         touhou_feed_enabled = True
         welcome_channel_id = 202405280040
@@ -562,6 +575,7 @@ def test__AutomationConfiguration__from_entry():
             'log_user_channel_id': log_user_channel_id,
             'log_user_enabled': log_user_enabled,
             'reaction_copy_enabled': reaction_copy_enabled,
+            'reaction_copy_flags': reaction_copy_flags,
             'reaction_copy_role_id': reaction_copy_role_id,
             'touhou_feed_enabled': touhou_feed_enabled,
             'welcome_channel_id': welcome_channel_id,
@@ -617,6 +631,7 @@ def test__AutomationConfiguration__from_entry():
         vampytest.assert_eq(automation_configuration.log_user_channel_id, log_user_channel_id)
         vampytest.assert_eq(automation_configuration.log_user_enabled, log_user_enabled)
         vampytest.assert_eq(automation_configuration.reaction_copy_enabled, reaction_copy_enabled)
+        vampytest.assert_eq(automation_configuration.reaction_copy_flags, reaction_copy_flags)
         vampytest.assert_eq(automation_configuration.reaction_copy_role_id, reaction_copy_role_id)
         vampytest.assert_eq(automation_configuration.touhou_feed_enabled, touhou_feed_enabled)
         vampytest.assert_eq(automation_configuration.welcome_channel_id, welcome_channel_id)
@@ -660,6 +675,7 @@ def test__AutomationConfiguration__from_entry__cache():
         log_user_channel_id = 202405290006
         log_user_enabled = True
         reaction_copy_enabled = True
+        reaction_copy_flags = 12
         reaction_copy_role_id = 202405290007
         touhou_feed_enabled = True
         welcome_channel_id = 202405290008
@@ -692,6 +708,7 @@ def test__AutomationConfiguration__from_entry__cache():
             'log_user_channel_id': log_user_channel_id,
             'log_user_enabled': log_user_enabled,
             'reaction_copy_enabled': reaction_copy_enabled,
+            'reaction_copy_flags': reaction_copy_flags,
             'reaction_copy_role_id': reaction_copy_role_id,
             'touhou_feed_enabled': touhou_feed_enabled,
             'welcome_channel_id': welcome_channel_id,
@@ -744,6 +761,7 @@ def test__AutomationConfiguration__from_entry__cache():
         vampytest.assert_eq(automation_configuration.log_user_channel_id, log_user_channel_id)
         vampytest.assert_eq(automation_configuration.log_user_enabled, log_user_enabled)
         vampytest.assert_eq(automation_configuration.reaction_copy_enabled, reaction_copy_enabled)
+        vampytest.assert_eq(automation_configuration.reaction_copy_flags, reaction_copy_flags)
         vampytest.assert_eq(automation_configuration.reaction_copy_role_id, reaction_copy_role_id)
         vampytest.assert_eq(automation_configuration.touhou_feed_enabled, touhou_feed_enabled)
         vampytest.assert_eq(automation_configuration.welcome_channel_id, welcome_channel_id)

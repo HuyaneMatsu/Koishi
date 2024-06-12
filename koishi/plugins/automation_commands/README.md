@@ -30,6 +30,7 @@ Contains control commands for other automation features.
     - `reaction-copy`
         - `about`
         - `list-channels`
+        - `parse (name-unicode : bool, topic-custom : bool, topic-unicode : bool)`
         - `state (state : Choice<str>)`
     - `touhou-feed`
         - `about`

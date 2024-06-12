@@ -168,7 +168,7 @@ def _iter_options():
     automation_configuration.community_message_moderation_log_enabled = False
     automation_configuration.community_message_moderation_log_channel_id = 0
     automation_configuration.community_message_moderation_down_vote_emoji_id = BUILTIN_EMOJIS['black_heart'].id
-    automation_configuration.community_message_moderation_up_vote_emoji_id = BUILTIN_EMOJIS['red_heart'].id
+    automation_configuration.community_message_moderation_up_vote_emoji_id = BUILTIN_EMOJIS['blue_heart'].id
     automation_configuration.community_message_moderation_availability_duration = 1801
     automation_configuration.community_message_moderation_vote_threshold = 6
     
@@ -179,7 +179,7 @@ def _iter_options():
         (
             (
                 BUILTIN_EMOJIS['black_heart'].id,
-                BUILTIN_EMOJIS['red_heart'].id,
+                BUILTIN_EMOJIS['blue_heart'].id,
                 1801,
                 6,
                 None,

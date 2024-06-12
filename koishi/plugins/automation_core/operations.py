@@ -1,8 +1,8 @@
 __all__ = (
     'delete_automation_configuration_of', 'get_automation_configuration_for', 'get_community_message_moderation_fields',
     'get_log_emoji_channel', 'get_log_mention_channel', 'get_log_user_channel', 'get_log_satori_channel',
-    'get_log_satori_channel_if_auto_start', 'get_log_sticker_channel', 'get_reaction_copy_enabled',
-    'get_reaction_copy_enabled_and_role', 'get_touhou_feed_enabled', 'get_welcome_fields', 'get_welcome_style_name'
+    'get_log_satori_channel_if_auto_start', 'get_log_sticker_channel', 'get_reaction_copy_fields',
+    'get_reaction_copy_fields_forced', 'get_touhou_feed_enabled', 'get_welcome_fields', 'get_welcome_style_name'
 )
 
 from hata import CHANNELS, ROLES
@@ -283,9 +283,9 @@ def get_log_user_channel(guild_id):
     return channel
 
 
-def get_reaction_copy_enabled(guild_id):
+def get_reaction_copy_fields(guild_id):
     """
-    Gets whether reaction-copy is enabled for the given guild.
+    Gets whether reaction-copy fields. Returns `None` if reaction-copy is disabled.
     
     Parameters
     ----------
@@ -294,49 +294,69 @@ def get_reaction_copy_enabled(guild_id):
     
     Returns
     -------
-    enabled : `bool`
+    fields : `None | (None | Role, int)`
     """
     try:
         automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
     except KeyError:
-        return False
-    
-    return automation_configuration.reaction_copy_enabled
-
-
-def get_reaction_copy_enabled_and_role(guild_id):
-    """
-    Gets whether reaction-copy is enabled for the given guild and the role it is limited to.
-    
-    Parameters
-    ----------
-    guild_id : `int`
-        The guild's identifier.
-    
-    Returns
-    -------
-    enabled_and_role : `(bool, None | Role)`
-    """
-    try:
-        automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
-    except KeyError:
-        return False, None
+        return None
     
     enabled = automation_configuration.reaction_copy_enabled
     if not enabled:
-        return False, None
+        return None
+    
+    flags = automation_configuration.reaction_copy_flags
+    if not flags:
+        return None
     
     role_id = automation_configuration.reaction_copy_role_id
     if not role_id:
-        return True, None
-    
-    try:
-        role = ROLES[role_id]
-    except KeyError:
-        automation_configuration.set('reaction_copy_role_id', 0)
         role = None
     
-    return True, role
+    else:
+        try:
+            role = ROLES[role_id]
+        except KeyError:
+            automation_configuration.set('reaction_copy_role_id', 0)
+            role = None
+        
+    return role, flags
+
+
+def get_reaction_copy_fields_forced(guild_id):
+    """
+    Gets all reaction-copy fields even if disabled.
+    
+    Parameters
+    ----------
+    guild_id : `int`
+        The guild's identifier.
+    
+    Returns
+    -------
+    fields : `(bool, None | Role, int)`
+    """
+    try:
+        automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
+    except KeyError:
+        return False, None, 0
+    
+    role_id = automation_configuration.reaction_copy_role_id
+    if not role_id:
+        role = None
+    
+    else:
+        try:
+            role = ROLES[role_id]
+        except KeyError:
+            automation_configuration.set('reaction_copy_role_id', 0)
+            role = None
+    
+    return (
+        automation_configuration.reaction_copy_enabled,
+        role,
+        automation_configuration.reaction_copy_flags,
+    )
 
 
 def get_touhou_feed_enabled(guild_id):

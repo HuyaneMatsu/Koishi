@@ -78,6 +78,9 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
     reaction_copy_enabled : `bool`
         Whether reaction-copy feature is enabled in the guild.
     
+    reaction_copy_flags : `int`
+        Bitwise flags to determine from where and what kind of emojis should we collect.
+    
     reaction_copy_role_id : `bool`
         Additional role assigned to the `reaction-copy` feature.
     
@@ -104,9 +107,9 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         'community_message_moderation_vote_threshold', 'entry_id', 'guild_id', 'log_emoji_channel_id',
         'log_emoji_enabled', 'log_mention_channel_id', 'log_mention_enabled', 'log_satori_auto_start',
         'log_satori_channel_id', 'log_satori_enabled', 'log_sticker_channel_id', 'log_sticker_enabled',
-        'log_user_channel_id', 'log_user_enabled', 'reaction_copy_enabled', 'reaction_copy_role_id', 'saver',
-        'touhou_feed_enabled', 'welcome_channel_id', 'welcome_enabled', 'welcome_reply_buttons_enabled',
-        'welcome_style_name',
+        'log_user_channel_id', 'log_user_enabled', 'reaction_copy_enabled', 'reaction_copy_flags',
+        'reaction_copy_role_id', 'saver', 'touhou_feed_enabled', 'welcome_channel_id', 'welcome_enabled',
+        'welcome_reply_buttons_enabled', 'welcome_style_name',
     )
     
     def __new__(cls, guild_id):
@@ -140,6 +143,7 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.log_user_channel_id = 0
         self.log_user_enabled = False
         self.reaction_copy_enabled = False
+        self.reaction_copy_flags = 0
         self.reaction_copy_role_id = 0
         self.saver = None
         self.touhou_feed_enabled = False
@@ -291,6 +295,11 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
             repr_parts.append(', reaction_copy_enabled = ')
             repr_parts.append(repr(reaction_copy_enabled))
             
+            reaction_copy_flags = self.reaction_copy_flags
+            if reaction_copy_flags:
+                repr_parts.append(', reaction_copy_flags = ')
+                repr_parts.append(repr(reaction_copy_flags))
+            
             reaction_copy_role_id = self.reaction_copy_role_id
             if reaction_copy_role_id:
                 repr_parts.append(', reaction_copy_role_id = ')
@@ -398,6 +407,9 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
             return True
         
         if self.reaction_copy_enabled:
+            return True
+        
+        if self.reaction_copy_flags:
             return True
         
         if self.reaction_copy_role_id:
@@ -522,6 +534,7 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.log_user_channel_id = entry['log_user_channel_id']
         self.log_user_enabled = entry['log_user_enabled']
         self.reaction_copy_enabled = entry['reaction_copy_enabled']
+        self.reaction_copy_flags = entry['reaction_copy_flags']
         self.reaction_copy_role_id = entry['reaction_copy_role_id']
         self.touhou_feed_enabled = entry['touhou_feed_enabled']
         self.welcome_channel_id = entry['welcome_channel_id']
@@ -567,6 +580,7 @@ AUTOMATION_CONFIGURATION_FIELD_SETTERS = {
     'log_satori_enabled': AutomationConfiguration.log_satori_enabled.__set__,
     
     'reaction_copy_enabled': AutomationConfiguration.reaction_copy_enabled.__set__,
+    'reaction_copy_flags': AutomationConfiguration.reaction_copy_flags.__set__,
     'reaction_copy_role_id': AutomationConfiguration.reaction_copy_role_id.__set__,
     
     'touhou_feed_enabled': AutomationConfiguration.touhou_feed_enabled.__set__,

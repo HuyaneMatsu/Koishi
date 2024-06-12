@@ -705,7 +705,7 @@ def create_kanako_join_message(event, map_name, length):
             'Joined users',
             event.user.full_name,
         ),
-        allowed_mentions = event.user,
+        allowed_mentions = [event.user],
         components = COMPONENTS_KANAKO,
     )
 
