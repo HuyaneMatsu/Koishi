@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 from hata import DATETIME_FORMAT_CODE, ROLES, ZEROUSER
 
 
@@ -747,6 +747,6 @@ def add_expression_context_fields_to(embed, entity):
         icon_url = user.avatar_url
     
     embed.add_author(author_text, icon_url)
-    embed.add_footer(format(DateTime.utcnow(), DATETIME_FORMAT_CODE))
+    embed.add_footer(format(DateTime.now(TimeZone.utc), DATETIME_FORMAT_CODE))
     
     return embed

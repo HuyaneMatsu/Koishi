@@ -1,13 +1,13 @@
 __all__ = ()
 
 import re
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import BUILTIN_EMOJIS, Color, datetime_to_unix_time
 from hata.ext.slash import Button
 
 
-SESSION_ID = datetime_to_unix_time(DateTime.utcnow())
+SESSION_ID = datetime_to_unix_time(DateTime.now(TimeZone.utc))
 
 CLEANUP_AFTER = 300.0
 CLEANUP_INTERVAL = 300.0

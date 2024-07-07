@@ -9,10 +9,10 @@ class DateTimeMock(DateTime):
         cls.current_date_time = value
     
     @classmethod
-    def utcnow(cls):
+    def now(cls, time_zone):
         value = cls.current_date_time
         if value is None:
-            value = DateTime.utcnow()
+            value = DateTime.now(time_zone)
         return value
 
 

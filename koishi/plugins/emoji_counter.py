@@ -1,9 +1,9 @@
 __all__ = ()
 
-from datetime import datetime, timedelta
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from math import floor, log
 
-from dateutil.relativedelta import relativedelta
+from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import EMOJIS, Embed, USERS, parse_custom_emojis, parse_emoji
 from hata.ext.plugin_loader import require
 from hata.ext.slash import abort
@@ -24,9 +24,9 @@ from ..bots import MAIN_CLIENT, Satori
 EMOJI_ACTION_TYPE_MESSAGE_CONTENT = 1
 EMOJI_ACTION_TYPE_REACTION = 2
 
-RELATIVE_MONTH = relativedelta(months = 1)
+RELATIVE_MONTH = RelativeDelta(months = 1)
 
-MONTH = timedelta(days = 367, hours = 6) / 12
+MONTH = TimeDelta(days = 367, hours = 6) / 12
 
 MOST_USED_PER_PAGE = 90
 
@@ -175,7 +175,7 @@ async def reaction_add(client, event):
         return
     
     user_id = user.id
-    timestamp = datetime.utcnow()
+    timestamp = DateTime.now(TimeZone.utc)
     
     async with DB_ENGINE.connect() as connector:
         await connector.execute(
@@ -255,7 +255,7 @@ async def user_top(event,
             ).where(
                 and_(
                     emoji_counter_model.user_id == user.id,
-                    emoji_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
+                    emoji_counter_model.timestamp > DateTime.now(TimeZone.utc) - RELATIVE_MONTH * months,
                 )
             ).limit(
                 count,
@@ -313,7 +313,7 @@ async def emoji_top(
             ).where(
                 and_(
                     emoji_counter_model.emoji_id == emoji.id,
-                    emoji_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
+                    emoji_counter_model.timestamp > DateTime.now(TimeZone.utc) - RELATIVE_MONTH * months,
                 ),
             ).limit(
                 30,
@@ -478,7 +478,7 @@ def _populate_embed_with_fields(embed, query_result, type_, order, page, page_si
     emoji_filter = EMOJI_MOST_USED_FILTERS[type_]
     
     guild_emojis = set(emoji for emoji in GUILD__SUPPORT.emojis.values() if emoji_filter(emoji))
-    is_new_limit = datetime.utcnow() - MONTH
+    is_new_limit = DateTime.now(TimeZone.utc) - MONTH
     
     items = []
     
@@ -553,7 +553,7 @@ async def most_used(
     if page < 1:
         abort('Page value can be only positive')
     
-    low_date_limit = datetime.utcnow() - RELATIVE_MONTH * months
+    low_date_limit = DateTime.now(TimeZone.utc) - RELATIVE_MONTH * months
     
     async with DB_ENGINE.connect() as connector:
         

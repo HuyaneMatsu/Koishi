@@ -221,11 +221,10 @@ def _build_asset_information_for(image_handler):
         into.append(image_detail.name)
         into.append('\n\n')
         
-        into = _put_strings_field_into('Creator', image_detail.creators, 'unknown', into)
-        into = _put_strings_field_into('Editor', image_detail.editors, 'none', into)
-        into.append('\n')
-        into = _put_strings_field_into('Characters', _get_character_names(image_detail.characters), 'none', into)
-        into = _put_string_field_into('Source', 'Touhou', 'original', into)
+        into = _put_strings_field_into('- Creator', image_detail.creators, 'unknown', into)
+        into = _put_strings_field_into('- Editor', image_detail.editors, 'none', into)
+        into = _put_strings_field_into('- Characters', _get_character_names(image_detail.characters), 'none', into)
+        into = _put_string_field_into('- Source', 'Touhou', 'original', into)
         into.append(BREAK_LINE)
     
     into.append(

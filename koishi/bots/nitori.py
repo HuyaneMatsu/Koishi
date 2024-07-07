@@ -1032,7 +1032,7 @@ async def role_claimer(event):
     return InteractionResponse('Claim role by clicking on it', components = ROLE_CLAIMER_COMPONENTS)
 
 
-@Nitori.interactions(custom_id = re.compile('role_claimer\.(\d+)'))
+@Nitori.interactions(custom_id = re.compile('role_claimer\\.(\\d+)'))
 async def give_role(client, event, role_id):
     role_id = int(role_id)
     
@@ -1600,7 +1600,7 @@ async def add_role(
     )
 
 
-@Nitori.interactions(custom_id = re.compile('add_role\.(\d+)\.(\d+)'), target = 'form')
+@Nitori.interactions(custom_id = re.compile('add_role\\.(\\d+)\\.(\\d+)'), target = 'form')
 async def add_role(client, event, user_id, role_id, *, message):
     user_id = int(user_id)
     role_id = int(role_id)
@@ -1660,7 +1660,7 @@ CUSTOM_ID_WAIFU_BIO = 'waifu.bio'
 CUSTOM_ID_WAIFU_HAIR = 'waifu.hair'
 CUSTOM_ID_WAIFU_NAME = 'waifu.name'
 
-CUSTOM_ID_WAIFU_BIO_REGEX = re.compile('waifu\.(?:description|bio)')
+CUSTOM_ID_WAIFU_BIO_REGEX = re.compile('waifu\\.(?:description|bio)')
 
 class Waifu:
     __slots__ = ('age', 'bio', 'hair', 'name', 'user')
@@ -1783,8 +1783,8 @@ async def autocomplete_waifu_name(value):
 # command start edit-waifu
 
 CUSTOM_ID_WAIFU_EDIT_BASE = 'waifu.edit.'
-CUSTOM_ID_WAIFU_EDIT_REGEX = re.compile('waifu\.edit\.(.*)')
-CUSTOM_ID_WAIFU_FIELD_ALL = re.compile('waifu\.(?P<field>age|bio|hair)')
+CUSTOM_ID_WAIFU_EDIT_REGEX = re.compile('waifu\\.edit\\.(.*)')
+CUSTOM_ID_WAIFU_FIELD_ALL = re.compile('waifu\\.(?P<field>age|bio|hair)')
 
 FIELD_TO_TEXT_INPUT = {
     'age': TEXT_INPUT_WAIFU_AGE,
@@ -1900,7 +1900,7 @@ async def autocomplete_cake_name(value):
 @Nitori.interactions(custom_id = CUSTOM_ID_RATE_CAKE, target = 'form')
 async def rate_cake_form_submit(
     event,
-    *cakes: re.compile(f'{CUSTOM_ID_RATE_CAKE_FIELD}\[(\w+)\]'),
+    *cakes: re.compile(f'{CUSTOM_ID_RATE_CAKE_FIELD}\\[(\\w+)\\]'),
 ):
     user = event.user
     embed = Embed(f'{user:f}\'s cake ratings').add_thumbnail(user.avatar_url)
@@ -2043,7 +2043,7 @@ async def guild_features(event):
 
 #### >@<>@<>@<>@< Source command >@<>@<>@<>@<>@< ####
 
-COMMAND_START_RP = re.compile('# command start ([a-z\-]+) ([a-z\-]+)')
+COMMAND_START_RP = re.compile('# command start ([a-z\\-]+) ([a-z\\-]+)')
 COMMAND_END_RP = re.compile('# command end')
 
 EMPTY_UNICODE = '\u200b'
@@ -2267,7 +2267,7 @@ for command_type, command_type_commands in COLLECTED_COMMANDS.items():
         function = AutoCompleteInteractionCommandSource(command_type_commands)
     )
 
-@Nitori.interactions(custom_id = re.compile('source\.([a-z\-]+)\.([a-z\-]+)\.(_|[0-9]+)'))
+@Nitori.interactions(custom_id = re.compile('source\\.([a-z\\-]+)\\.([a-z\\-]+)\\.(_|[0-9]+)'))
 async def switch_page(event, command_type, command_name, page_index):
     # Check for the same user
     if event.message.interaction.user_id != event.user_id:

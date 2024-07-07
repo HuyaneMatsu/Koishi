@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import DiscordException, ERROR_CODES, Embed, Sticker
 from hata.ext.slash import Button, InteractionResponse, Row, abort
@@ -379,7 +379,7 @@ async def sell_daily(client, event,
         results = await response.fetchall()
         if results:
             entry_id, total_love, daily_streak, daily_next = results[0]
-            now = datetime.utcnow()
+            now = DateTime.now(TimeZone.utc)
             if daily_next < now:
                 daily_streak, daily_next = calculate_daily_new(daily_streak, daily_next, now)
         

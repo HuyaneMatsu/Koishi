@@ -1,6 +1,6 @@
 __all__ = ('render_activity_description_into',)
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import ActivityType, Status
 
@@ -96,7 +96,7 @@ def render_nulled_guild_profile_description_into(into, field_added, mode):
     into, field_added = render_date_time_field_into(
         into,
         field_added,
-        (DateTime.utcnow() if mode == GUILD_PROFILE_RENDER_MODE_JOIN else None),
+        (DateTime.now(TimeZone.utc) if mode == GUILD_PROFILE_RENDER_MODE_JOIN else None),
         optional = False,
         title = 'Joined',
     )
@@ -130,7 +130,7 @@ def render_guild_profile_description_into(into, field_added, guild_profile, mode
     if mode == GUILD_PROFILE_RENDER_MODE_JOIN:
         joined_at = guild_profile.joined_at
         if (joined_at is None):
-            joined_at = DateTime.utcnow()
+            joined_at = DateTime.now(TimeZone.utc)
         
         into, field_added = render_date_time_field_into(
             into, field_added, joined_at, title = 'Joined'
@@ -347,7 +347,7 @@ def render_message_common_description_into(into, field_added, message, mode, tit
         into, field_added = render_date_time_field_into(
             into,
             field_added,
-            DateTime.utcnow(),
+            DateTime.now(TimeZone.utc),
             optional = False,
             title = 'Deleted',
         )

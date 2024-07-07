@@ -1,4 +1,4 @@
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
 from hata import (
@@ -14,8 +14,8 @@ class DateTimeMock(DateTime):
     
     
     @classmethod
-    def utcnow(cls):
-        return DateTime(2016, 5, 14)
+    def now(cls, time_zone):
+        return DateTime(2016, 5, 14, tzinfo = time_zone)
     
     
     def __instancecheck__(cls, instance):
@@ -46,7 +46,7 @@ def test__build_reaction_event_embed():
     emoji = Emoji.precreate(emoji_id, name = emoji_name)
     message = Message.precreate(message_id, channel_id = channel_id, guild_id = guild_id)
     user = User.precreate(user_id)
-    user.guild_profiles[guild_id] = GuildProfile(joined_at = DateTimeMock(2016, 5, 13))
+    user.guild_profiles[guild_id] = GuildProfile(joined_at = DateTimeMock(2016, 5, 13, tzinfo = TimeZone.utc))
     event = ReactionAddEvent(message, emoji, user, reaction_type = reaction_type)
     channel = Channel.precreate(
         channel_id, channel_type = ChannelType.guild_text, guild_id = guild_id, name = channel_name

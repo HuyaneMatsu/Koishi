@@ -42,7 +42,7 @@ PATH__PYTHON_EXECUTABLE_C_3_6 = '/usr/bin/pypy3'
 PATH__SNEKBOX = Path('/snekbox')
 
 
-LOG_RP = re.compile('\[[IDWEF]\]\[.+?\] (.*)')
+LOG_RP = re.compile('\\[[IDWEF]\\]\\[.+?\\] (.*)')
 
 EVAL_LOCK = ScarletLock(KOKORO, 2)
 

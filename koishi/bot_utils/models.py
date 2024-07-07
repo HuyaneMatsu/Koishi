@@ -1,8 +1,6 @@
 from config import DATABASE_NAME
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 from warnings import warn
-
-utc_now = DateTime.utcnow
 
 user_common_model = None
 USER_COMMON_TABLE = None
@@ -327,13 +325,13 @@ if (DB_ENGINE is not None):
         
         if daily_next is None:
             if now is None:
-                now = utc_now()
+                now = DateTime.now(TimeZone.utc)
 
             daily_next = now
         
         if top_gg_last_vote is None:
             if now is None:
-                now = utc_now()
+                now = DateTime.now(TimeZone.utc)
             
             top_gg_last_vote = now
         

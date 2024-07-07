@@ -2,13 +2,13 @@ __all__ = ()
 
 import json
 from colorsys import rgb_to_hsv, rgb_to_yiq
-from datetime import datetime, timedelta
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from functools import partial as partial_func
 from math import ceil
 from random import choice
 
 from PIL import Image as PIL
-from dateutil.relativedelta import relativedelta
+from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import (
     BUILTIN_EMOJIS, Color, DATETIME_FORMAT_CODE, Embed, ICON_TYPE_NONE, InviteTargetType, KOKORO, Permission, Status,
     cchunkify, elapsed_time, escape_markdown, parse_color
@@ -445,7 +445,7 @@ def add_user_field(embed, index, joined_at, user):
             '\n'
             f'Joined : {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]\n'
             f'Created : {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
-            f'Difference : {elapsed_time(relativedelta(created_at, joined_at))}'
+            f'Difference : {elapsed_time(RelativeDelta(created_at, joined_at))}'
         ),
     )
 
@@ -458,7 +458,7 @@ async def latest_users(client, event):
     if not event.user_permissions.can_kick_users:
         abort('You must have kick users to invoke this command.')
     
-    date_limit = datetime.now() - timedelta(days = 7)
+    date_limit = DateTime.now(TimeZone.utc) - TimeDelta(days = 7)
     
     users = []
     guild = event.guild

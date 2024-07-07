@@ -1,5 +1,7 @@
 __all__ = ()
 
+ACTION_TAG_BLUSH = 'blush'
+ACTION_TAG_BULLY = 'bully'
 ACTION_TAG_COSPLAY = 'cosplay'
 ACTION_TAG_DANCE = 'dance'
 ACTION_TAG_FEED = 'feed'
@@ -17,3 +19,4 @@ ACTION_TAG_POCKY_KISS = 'pocky_kiss'
 ACTION_TAG_POCKY_KISS_SELF = 'pocky_kiss_self'
 ACTION_TAG_POKE = 'poke'
 ACTION_TAG_TICKLE = 'tickle'
+ACTION_TAG_WAVE = 'wave'

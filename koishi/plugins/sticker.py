@@ -1,9 +1,9 @@
 __all__ = ()
 
-from datetime import datetime, timedelta
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from functools import partial as partial_func
 
-from dateutil.relativedelta import relativedelta
+from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import Color, DiscordException, ERROR_CODES, Embed, Permission, STICKERS, USERS, parse_emoji
 from hata.ext.slash import Button, ButtonStyle, InteractionResponse, Row, abort, wait_for_component_interaction
 from scarletio import to_json
@@ -16,8 +16,8 @@ from ..bot_utils.models import DB_ENGINE, STICKER_COUNTER_TABLE, sticker_counter
 from ..bots import MAIN_CLIENT
 
 
-RELATIVE_MONTH = relativedelta(months = 1)
-MONTH = timedelta(days = 367, hours = 6) / 12
+RELATIVE_MONTH = RelativeDelta(months = 1)
+MONTH = TimeDelta(days = 367, hours = 6) / 12
 MOST_USED_PER_PAGE = 30
 
 
@@ -61,7 +61,7 @@ async def user_top(
             ).where(
                 and_(
                     sticker_counter_model.user_id == user.id,
-                    sticker_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
+                    sticker_counter_model.timestamp > DateTime.now(TimeZone.utc) - RELATIVE_MONTH * months,
                 ),
             ).limit(
                 count,
@@ -145,7 +145,7 @@ async def sticker_top(
             ).where(
                 and_(
                     sticker_counter_model.sticker_id == sticker.id,
-                    sticker_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
+                    sticker_counter_model.timestamp > DateTime.now(TimeZone.utc) - RELATIVE_MONTH * months,
                 )
             ).limit(
                 30,
@@ -285,8 +285,8 @@ async def most_used(
     if page < 1:
         abort('Page value can be only positive')
     
-    low_date_limit = datetime.utcnow() - RELATIVE_MONTH * months
-    is_new_limit = datetime.utcnow() - MONTH
+    low_date_limit = DateTime.now(TimeZone.utc) - RELATIVE_MONTH * months
+    is_new_limit = DateTime.now(TimeZone.utc) - MONTH
     
     async with DB_ENGINE.connect() as connector:
         
@@ -662,7 +662,7 @@ async def edit_(client, event,
 
 
 def get_month_keys():
-    now = datetime.utcnow()
+    now = DateTime.now(TimeZone.utc)
     year = now.year
     month = now.month
     
@@ -754,7 +754,7 @@ async def user_sticker_compare(
             ).where(
                 and_(
                     sticker_counter_model.sticker_id.in_([sticker.id for sticker in stickers]),
-                    sticker_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * 12,
+                    sticker_counter_model.timestamp > DateTime.now(TimeZone.utc) - RELATIVE_MONTH * 12,
                 )
             ).group_by(
                 sticker_counter_model.sticker_id,

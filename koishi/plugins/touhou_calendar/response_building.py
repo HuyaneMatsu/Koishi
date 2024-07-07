@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import Embed
 from hata.ext.slash import Button, InteractionResponse, Row
@@ -40,7 +40,9 @@ def add_month_field(embed, year, month_number):
         while True:
             day_number, in_day = by_day[by_day_index]
             
-            description_parts.append(DAY_NAMES_SHORT[DateTime(year, month_number, day_number).weekday()])
+            description_parts.append(
+                DAY_NAMES_SHORT[DateTime(year, month_number, day_number, tzinfo = TimeZone.utc).weekday()]
+            )
             description_parts.append(' ')
             description_parts.append(format(day_number, '>2'))
             

@@ -49,7 +49,7 @@ def teardown(lib):
 def parse_date_to_datetime(data):
     *date_tuple, tz = _parsedate_tz(data)
     if tz is None:
-        return DateTime(*date_tuple[:6])
+        return DateTime(*date_tuple[:6], tzinfo = TimeZone.utc)
     return DateTime(*date_tuple[:6], tzinfo = TimeZone(TimeDelta(seconds = tz)))
 
 
@@ -372,7 +372,7 @@ class RLTPrinterUnit:
     def write(self, content):
         if self.start_new_block:
             buffer = []
-            self.buffer.append((DateTime.utcnow(), buffer),)
+            self.buffer.append((DateTime.now(TimeZone.utc), buffer),)
             self.start_new_block = False
         else:
             buffer = self.buffer[-1][1]
@@ -2669,7 +2669,7 @@ async def voice_state_client_edit(client, channel, suppress = False, request_to_
     guild_id = channel.guild.id
     
     if request_to_speak:
-        request_to_speak_timestamp = DateTime.utcnow().isoformat()
+        request_to_speak_timestamp = DateTime.now(TimeZone.utc).isoformat()
     else:
         request_to_speak_timestamp = None
     
@@ -3175,7 +3175,7 @@ async def scheduled_event_create(client, guild, voice, name):
         'channel_id': voice.id,
         'entity_metadata': None,
         'entity_type': ScheduledEventEntityType.voice.value,
-        'scheduled_start_time': datetime_to_timestamp(DateTime.utcnow() + TimeDelta(hours = 1)),
+        'scheduled_start_time': datetime_to_timestamp(DateTime.now(TimeZone.utc) + TimeDelta(hours = 1)),
     }
     
     await bypass_request(
@@ -8121,7 +8121,7 @@ async def rate_limit_test_0197(client, message, guild_1: 'guild' = None):
             await RLT.send('Current and the given guilds are the same.')
             
             
-        until = DateTime.utcnow() + TimeDelta(hours = 1)
+        until = DateTime.now(TimeZone.utc) + TimeDelta(hours = 1)
         
         task_group = TaskGroup(KOKORO)
         task_group.create_task(guild_incidents_edit(client, guild_0.id, invites_disabled_until = until))

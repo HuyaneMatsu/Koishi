@@ -1,4 +1,4 @@
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
 from hata import Role, UserFlag
@@ -41,15 +41,15 @@ def test__render_role_mentions_into(input_roles):
 
 def _iter_options__render_date_time_with_relative_into():
     yield (
-        DateTime(2016, 10, 14, 21, 13, 16),
-        DateTime(2016, 10, 14, 21, 13, 26),
+        DateTime(2016, 10, 14, 21, 13, 16, tzinfo = TimeZone.utc),
+        DateTime(2016, 10, 14, 21, 13, 26, tzinfo = TimeZone.utc),
         True,
         '2016-10-14 21:13:16 [*10 seconds ago*]',
     )
     
     yield (
-        DateTime(2016, 10, 14, 21, 13, 16),
-        DateTime(2016, 10, 14, 21, 13, 26),
+        DateTime(2016, 10, 14, 21, 13, 16, tzinfo = TimeZone.utc),
+        DateTime(2016, 10, 14, 21, 13, 26, tzinfo = TimeZone.utc),
         False,
         '2016-10-14 21:13:16 [*10 seconds*]',
     )
@@ -65,7 +65,7 @@ def test__render_date_time_with_relative_into(input_date_time, current_date_time
     input_date_time : `DateTime`
         Input datetime to render.
     current_date_time : `DateTime`
-        The current datetime. Used for mocking.
+        The current date time. Used for mocking.
     add_ago : `bool`
         Whether `ago` should be added into the representation.
     

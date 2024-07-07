@@ -1,4 +1,4 @@
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
 from hata import ApplicationType, Role, UserFlag
@@ -69,8 +69,8 @@ def test__render_role_mentions_field_into(field_added, roles, optional, title):
 
 
 def _iter_options__render_date_time_with_relative_field_into():
-    date_time = DateTime(2016, 10, 14, 21, 13, 16)
-    current = DateTime(2016, 10, 14, 21, 13, 26)
+    date_time = DateTime(2016, 10, 14, 21, 13, 16, tzinfo = TimeZone.utc)
+    current = DateTime(2016, 10, 14, 21, 13, 26, tzinfo = TimeZone.utc)
     
     yield current, False, None, False, False, 'Date', ('Date: *none*', True)
     yield current, True, None, False, False, 'Date', ('\nDate: *none*', True)
@@ -130,19 +130,52 @@ def test__render_date_time_with_relative_field_into(current_date, field_added, d
 
 
 def _iter_options__render_date_time_with_relative_field_into():
-    current = DateTime(2016, 10, 14, 21, 13, 26)
+    current = DateTime(2016, 10, 14, 21, 13, 26, tzinfo = TimeZone.utc)
     
     yield current, None, DATE_TIME_CONDITION_PAST, ('', False)
     yield current, None, DATE_TIME_CONDITION_ALL, ('', False)
     yield current, None, DATE_TIME_CONDITION_FUTURE, ('', False)
     
-    yield current, DateTime(2016, 10, 14, 21, 13, 36), DATE_TIME_CONDITION_PAST, ('', False)
-    yield current, DateTime(2016, 10, 14, 21, 13, 36), DATE_TIME_CONDITION_ALL, ('Date: 2016-10-14 21:13:36 [*10 seconds*]', True)
-    yield current, DateTime(2016, 10, 14, 21, 13, 36), DATE_TIME_CONDITION_FUTURE, ('Date: 2016-10-14 21:13:36 [*10 seconds*]', True)
+    yield (
+        current,
+        DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc),
+        DATE_TIME_CONDITION_PAST,
+        ('', False),
+    )
     
-    yield current, DateTime(2016, 10, 14, 21, 13, 16), DATE_TIME_CONDITION_PAST, ('Date: 2016-10-14 21:13:16 [*10 seconds*]', True)
-    yield current, DateTime(2016, 10, 14, 21, 13, 16), DATE_TIME_CONDITION_ALL, ('Date: 2016-10-14 21:13:16 [*10 seconds*]', True)
-    yield current, DateTime(2016, 10, 14, 21, 13, 16), DATE_TIME_CONDITION_FUTURE,  ('', False)
+    yield (
+        current,
+        DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc),
+        DATE_TIME_CONDITION_ALL,
+        ('Date: 2016-10-14 21:13:36 [*10 seconds*]', True),
+    )
+    
+    yield (
+        current,
+        DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc),
+        DATE_TIME_CONDITION_FUTURE,
+        ('Date: 2016-10-14 21:13:36 [*10 seconds*]', True),
+    )
+    
+    yield (
+        current,
+        DateTime(2016, 10, 14, 21, 13, 16, tzinfo = TimeZone.utc),
+        DATE_TIME_CONDITION_PAST, ('Date: 2016-10-14 21:13:16 [*10 seconds*]', True),
+    )
+    
+    yield (
+        current,
+        DateTime(2016, 10, 14, 21, 13, 16, tzinfo = TimeZone.utc),
+        DATE_TIME_CONDITION_ALL,
+        ('Date: 2016-10-14 21:13:16 [*10 seconds*]', True),
+    )
+    
+    yield (
+        current,
+        DateTime(2016, 10, 14, 21, 13, 16, tzinfo = TimeZone.utc),
+        DATE_TIME_CONDITION_FUTURE,
+        ('', False),
+    )
 
 
 @vampytest._(vampytest.call_from(_iter_options__render_date_time_with_relative_field_into()).returning_last())
@@ -178,7 +211,7 @@ def test__render_date_time_with_relative_field_into__condition(current_date, dat
 
 
 def _iter_options__render_date_time_field_into():
-    date_time = DateTime(2016, 10, 14, 21, 13, 16)
+    date_time = DateTime(2016, 10, 14, 21, 13, 16, tzinfo = TimeZone.utc)
     
     yield False, None, False, 'Date', ('Date: *none*', True)
     yield True, None, False, 'Date', ('\nDate: *none*', True)
@@ -315,8 +348,8 @@ def test__render_string_field_into(field_added, string, optional, title):
 
 
 def _iter_options__render_date_time_difference_field_into():
-    date_time_0 = DateTime(2016, 10, 14, 21, 13, 16)
-    date_time_1 = DateTime(2016, 10, 14, 21, 13, 26)
+    date_time_0 = DateTime(2016, 10, 14, 21, 13, 16, tzinfo = TimeZone.utc)
+    date_time_1 = DateTime(2016, 10, 14, 21, 13, 26, tzinfo = TimeZone.utc)
     
     yield False, None, None, False, 'Date', ('Date difference: N/A', True)
     yield True, None, None, False, 'Date', ('\nDate difference: N/A', True)

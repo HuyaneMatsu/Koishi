@@ -1,7 +1,7 @@
 __all__ = ()
 
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
+from datetime import datetime as DateTime, timezone as TimeZone
+from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import elapsed_time, Embed
 from ..bot_utils.constants import ROLE__SUPPORT__VERIFIED, EMOJI__HEART_CURRENCY, COLOR__EVENT, \
     CHANNEL__SUPPORT__EVENT, ROLE__SUPPORT__EVENT_MANAGER, URL__HATA_GIT, GUILD__SUPPORT
@@ -170,9 +170,10 @@ async def qualifier(client, event):
     """Hata jam 2's qualifier."""
     return HATA_JAM_2_QUALIFIER
 
-QUALIFIER_DEADLINE = datetime(2021, 1, 27, 0, 0, 0)
-JAM_START = datetime(2021, 1, 29, 0, 0, 0)
-JAM_DEADLINE = datetime(2021, 2, 12, 0, 0, 0)
+
+QUALIFIER_DEADLINE = DateTime(2021, 1, 27, 0, 0, 0, tzinfo = TimeZone.utc)
+JAM_START = DateTime(2021, 1, 29, 0, 0, 0, tzinfo = TimeZone.utc)
+JAM_DEADLINE = DateTime(2021, 2, 12, 0, 0, 0, tzinfo = TimeZone.utc)
 
 
 @EVENTS.interactions
@@ -187,7 +188,7 @@ async def submit(client, event,
         return Embed('Permission denied', f'You must have {ROLE__SUPPORT__VERIFIED.mention} role to invoke this '
             f'command.')
     
-    if datetime.utcnow() >= QUALIFIER_DEADLINE:
+    if DateTime.now(TimeZone.utc) >= QUALIFIER_DEADLINE:
         return Embed('Oh No!', 'Qualifier over', color = COLOR__EVENT)
     
     user = event.user
@@ -199,10 +200,9 @@ async def submit(client, event,
 @EVENTS.interactions
 async def countdown(client, event):
     """Countdown till the end of the event\'s next important date."""
-    now = datetime.utcnow()
+    now = DateTime.now(TimeZone.utc)
     for date in (QUALIFIER_DEADLINE, JAM_START, JAM_DEADLINE):
         if now < date:
-            return elapsed_time(relativedelta(now, date))
+            return elapsed_time(RelativeDelta(now, date))
     
     return 'Countdown over!'
-

@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import Embed, User
 from hata.ext.slash import abort
@@ -27,7 +27,7 @@ def check_can_un_mute(user, guild):
         abort('The user must be in the guild to be un-muted.')
     
     timed_out_until = guild_profile.timed_out_until
-    if (timed_out_until is None) or timed_out_until < DateTime.utcnow():
+    if (timed_out_until is None) or timed_out_until < DateTime.now(TimeZone.utc):
         abort('The user is not muted.')
 
 

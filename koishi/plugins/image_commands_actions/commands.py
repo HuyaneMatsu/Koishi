@@ -7,7 +7,7 @@ from ...bots import FEATURE_CLIENTS
 
 from .action import (
     COOLDOWN_HANDLER, build_response, can_send_response_to_channel, create_action_command_function,
-    create_response_embed, get_allowed_users, send_action_response_to
+    create_response_embed, get_allowed_users, send_action_response
 )
 from .action_filtering import (
     PARAMETER_NAME_ACTION_TAG, PARAMETER_NAME_NAME, PARAMETER_NAME_SOURCE, PARAMETER_NAME_TARGET,
@@ -110,20 +110,4 @@ async def wild_card_action(
     content = build_response(client, action.verb, event.user, targets, client_in_users)
     embed = create_response_embed(client, event.guild_id, event.user, targets, client_in_users, image_detail)
     
-    guild = event.guild
-    if (guild is None) or (client not in guild.clients) or (not can_send_response_to_channel(client, event.channel)):
-        await send_action_response_to(client, event.channel, content, embed, allowed_mentions)
-        return
-    
-    try:
-        await client.interaction_response_message_create(
-            event, 'Reality is subjective and all is mental.', show_for_invoking_user_only = True
-        )
-    except ConnectionError:
-        return
-    
-    except DiscordException as err:
-        if err.code != ERROR_CODES.unknown_interaction:
-            raise
-    
-    await send_action_response_to(client, event.channel, content, embed, allowed_mentions)
+    await send_action_response(client, event, content, embed, allowed_mentions)

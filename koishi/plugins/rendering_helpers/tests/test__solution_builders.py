@@ -1,4 +1,4 @@
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
 from hata import (
@@ -22,7 +22,7 @@ def _iter_options__build_user_description():
     
     yield (
         user_0,
-        DateTime(2016, 10, 14, 21, 13, 36),
+        DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc),
         (
             f'Created: 2016-10-14 21:13:16 [*20 seconds ago*]\n'
             f'Profile: <@{user_0.id}>\n'
@@ -39,7 +39,7 @@ def _iter_options__build_user_description():
     
     yield (
         user_1,
-        DateTime(2016, 10, 14, 21, 13, 46),
+        DateTime(2016, 10, 14, 21, 13, 46, tzinfo = TimeZone.utc),
         (
             f'Created: 2016-10-14 21:13:17 [*29 seconds ago*]\n'
             f'Profile: <@{user_1.id}>\n'
@@ -78,7 +78,7 @@ def _iter_options__build_guild_profile_description():
     # No fields
     yield (
         GuildProfile(),
-        DateTime(2016, 10, 14, 21, 13, 36),
+        DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc),
         (
             f'Joined: *none*\n'
             f'Roles: *none*'
@@ -88,9 +88,9 @@ def _iter_options__build_guild_profile_description():
     # Timed out until is in the past
     yield (
         GuildProfile(
-            timed_out_until = DateTime(2016, 10, 14, 21, 12, 46),
+            timed_out_until = DateTime(2016, 10, 14, 21, 12, 46, tzinfo = TimeZone.utc),
         ),
-        DateTime(2016, 10, 14, 21, 13, 36),
+        DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc),
         (
             f'Joined: *none*\n'
             f'Roles: *none*'
@@ -103,14 +103,14 @@ def _iter_options__build_guild_profile_description():
     
     yield (
         GuildProfile(
-            joined_at = DateTime(2016, 10, 14, 21, 13, 17),
+            joined_at = DateTime(2016, 10, 14, 21, 13, 17, tzinfo = TimeZone.utc),
             role_ids = [role_0.id, role_1.id],
             nick = 'koi',
             flags = GuildProfileFlag().update_by_keys(rejoined = True, onboarding_completed = True),
-            boosts_since = DateTime(2016, 10, 14, 21, 13, 18),
-            timed_out_until = DateTime(2016, 10, 14, 21, 14, 46),
+            boosts_since = DateTime(2016, 10, 14, 21, 13, 18, tzinfo = TimeZone.utc),
+            timed_out_until = DateTime(2016, 10, 14, 21, 14, 46, tzinfo = TimeZone.utc),
         ),
-        DateTime(2016, 10, 14, 21, 13, 46),
+        DateTime(2016, 10, 14, 21, 13, 46, tzinfo = TimeZone.utc),
         (
             f'Joined: 2016-10-14 21:13:17 [*29 seconds ago*]\n'
             f'Roles: <@&{role_1.id}>, <@&{role_0.id}>\n'
@@ -159,18 +159,18 @@ def _iter_options__test__build_user_join_or_leave_description():
         flags = UserFlag().update_by_keys(staff = True),
     )
     
-    current_date = DateTime(2016, 10, 14, 21, 13, 46)
+    current_date = DateTime(2016, 10, 14, 21, 13, 46, tzinfo = TimeZone.utc)
     
     role_0 = Role.precreate(202307240000)
     role_1 = Role.precreate(202307240001)
     
     guild_profile = GuildProfile(
-        joined_at = DateTime(2016, 10, 14, 21, 13, 27),
+        joined_at = DateTime(2016, 10, 14, 21, 13, 27, tzinfo = TimeZone.utc),
         role_ids = [role_0.id, role_1.id],
         nick = 'koi',
         flags = GuildProfileFlag().update_by_keys(rejoined = True, onboarding_completed = True),
-        boosts_since = DateTime(2016, 10, 14, 21, 13, 18),
-        timed_out_until = DateTime(2016, 10, 14, 21, 14, 46),
+        boosts_since = DateTime(2016, 10, 14, 21, 13, 18, tzinfo = TimeZone.utc),
+        timed_out_until = DateTime(2016, 10, 14, 21, 14, 46, tzinfo = TimeZone.utc),
     )
     
     # Join no fields
@@ -288,7 +288,7 @@ def test__build_user_join_or_leave_description(user, guild_profile, join, curren
 
 
 def _iter_options__build_activity_description():
-    current_date = DateTime(2016, 10, 14, 21, 13, 36)
+    current_date = DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc)
     
     # Maximal
     yield (
@@ -303,7 +303,7 @@ def _iter_options__build_activity_description():
                 text_large = 'Yuyuko',
                 text_small = 'Youmu',
             ),
-            created_at = DateTime(2016, 10, 14, 21, 13, 26),
+            created_at = DateTime(2016, 10, 14, 21, 13, 26, tzinfo = TimeZone.utc),
             details = 'Satori',
             flags = ActivityFlag().update_by_keys(play = True, embedded = True),
             party = ActivityParty(
@@ -320,8 +320,8 @@ def _iter_options__build_activity_description():
             state = 'Okuu',
             sync_id = 'Mr. spider',
             timestamps = ActivityTimestamps(
-                end = DateTime(2016, 10, 14, 21, 13, 46),
-                start = DateTime(2016, 10, 14, 21, 13, 16),
+                end = DateTime(2016, 10, 14, 21, 13, 46, tzinfo = TimeZone.utc),
+                start = DateTime(2016, 10, 14, 21, 13, 16, tzinfo = TimeZone.utc),
             ),
             url = 'https://orindance.party/',
         ),
@@ -431,18 +431,18 @@ def _iter_options__build_user_with_guild_profile_description():
         flags = UserFlag().update_by_keys(staff = True),
     )
     
-    current_date = DateTime(2016, 10, 14, 21, 13, 46)
+    current_date = DateTime(2016, 10, 14, 21, 13, 46, tzinfo = TimeZone.utc)
     
     role_0 = Role.precreate(202308110000)
     role_1 = Role.precreate(202308110001)
     
     guild_profile = GuildProfile(
-        joined_at = DateTime(2016, 10, 14, 21, 13, 27),
+        joined_at = DateTime(2016, 10, 14, 21, 13, 27, tzinfo = TimeZone.utc),
         role_ids = [role_0.id, role_1.id],
         nick = 'koi',
         flags = GuildProfileFlag().update_by_keys(rejoined = True, onboarding_completed = True),
-        boosts_since = DateTime(2016, 10, 14, 21, 13, 18),
-        timed_out_until = DateTime(2016, 10, 14, 21, 14, 46),
+        boosts_since = DateTime(2016, 10, 14, 21, 13, 18, tzinfo = TimeZone.utc),
+        timed_out_until = DateTime(2016, 10, 14, 21, 14, 46, tzinfo = TimeZone.utc),
     )
 
     # No guild profile

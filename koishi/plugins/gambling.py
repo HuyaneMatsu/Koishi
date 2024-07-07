@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime, timedelta
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from functools import partial as partial_func
 from random import random
 
@@ -20,8 +20,8 @@ from ..bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, get_create_common_u
 from ..bots import FEATURE_CLIENTS
 
 
-EVENT_MAX_DURATION = timedelta(hours = 24)
-EVENT_MIN_DURATION = timedelta(minutes = 30)
+EVENT_MAX_DURATION = TimeDelta(hours = 24)
+EVENT_MIN_DURATION = TimeDelta(minutes = 30)
 EVENT_HEART_MIN_AMOUNT = 50
 EVENT_HEART_MAX_AMOUNT = 3000
 EVENT_OK_EMOJI = BUILTIN_EMOJIS['ok_hand']
@@ -193,8 +193,8 @@ async def heart_event(client, event,
 
 
 class HeartEventGUI:
-    _update_time = 60.
-    _update_delta = timedelta(seconds = _update_time)
+    _update_time = 60.0
+    _update_delta = TimeDelta(seconds = _update_time)
     
     __slots__ = ('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
     
@@ -251,7 +251,7 @@ class HeartEventGUI:
             return
 
         if new_ln == self.user_limit:
-            self.duration = timedelta()
+            self.duration = TimeDelta()
             self.waiter.set_result(None)
         
         connector = self.connector
@@ -291,7 +291,7 @@ class HeartEventGUI:
         
         sleep_time = (self.duration % update_delta).seconds
         if sleep_time:
-            self.duration -= timedelta(seconds = sleep_time)
+            self.duration -= TimeDelta(seconds = sleep_time)
             KOKORO.call_after(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
             self.waiter = waiter = Future(KOKORO)
@@ -484,7 +484,7 @@ async def daily_event(client, event,
 
 class DailyEventGUI:
     _update_time = 60.0
-    _update_delta = timedelta(seconds = _update_time)
+    _update_delta = TimeDelta(seconds = _update_time)
     
     __slots__ = ('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
     
@@ -543,7 +543,7 @@ class DailyEventGUI:
             return
         
         if new_ln == self.user_limit:
-            self.duration = timedelta()
+            self.duration = TimeDelta()
             self.waiter.set_result(None)
         
         connector = self.connector
@@ -563,7 +563,7 @@ class DailyEventGUI:
         results = await response.fetchall()
         if results:
             entry_id, daily_streak, daily_next = results[0]
-            now = datetime.utcnow()
+            now = DateTime.now(TimeZone.utc)
             
             daily_streak, daily_next = calculate_daily_new(daily_streak, daily_next, now)
             daily_streak = daily_streak + self.amount
@@ -591,7 +591,7 @@ class DailyEventGUI:
         
         sleep_time = (self.duration % update_delta).seconds
         if sleep_time:
-            self.duration -= timedelta(seconds = sleep_time)
+            self.duration -= TimeDelta(seconds = sleep_time)
             KOKORO.call_after(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
             self.waiter = waiter = Future(KOKORO)
@@ -858,14 +858,14 @@ async def award(client, event,
             target_user_entry_id = -1
             target_user_total_love = 0
             target_user_daily_streak = 0
-            target_user_daily_next = datetime.utcnow()
+            target_user_daily_next = DateTime.now(TimeZone.utc)
         
         
         if with_ == 'hearts':
             target_user_new_total_love = target_user_total_love + amount
             target_user_new_daily_streak = target_user_daily_streak
         else:
-            now = datetime.utcnow()
+            now = DateTime.now(TimeZone.utc)
             target_user_new_total_love = target_user_total_love
             if target_user_daily_next < now:
                 target_user_daily_streak, target_user_daily_next = calculate_daily_new(

@@ -1,4 +1,4 @@
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
 from hata import (
@@ -48,7 +48,7 @@ async def test__create_webhook_message__stuffed():
     components = [create_row(Component(ComponentType.button, label = 'koishi', custom_id = 'satori'))]
     content = 'suika' * 600
     embeds = [Embed('orin')]
-    poll = Poll(answers = [PollAnswer(text = 'sister')], expires_at = DateTime(2016, 5, 14))
+    poll = Poll(answers = [PollAnswer(text = 'sister')], expires_at = DateTime(2016, 5, 14, tzinfo = TimeZone.utc))
     
     message = Message.precreate(
         message_id,

@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import Embed, DiscordException, ERROR_CODES, User, Permission
 from hata.ext.slash import abort
@@ -134,7 +134,7 @@ async def do_transfer(client, event, source_user, target_user, message):
                 target_user_result, source_user_result = source_user_result, target_user_result
         
         
-        now = datetime.utcnow()
+        now = DateTime.now(TimeZone.utc)
         
         if (source_user_result is None):
             source_user_entry_id = -1
@@ -219,7 +219,7 @@ async def do_transfer(client, event, source_user, target_user, message):
             target_user_waifu_slots, \
                 = target_user_result
             
-            now = datetime.utcnow()
+            now = DateTime.now(TimeZone.utc)
             if target_user_daily_next > now:
                 target_user_daily_streak = calculate_daily_new_only(
                 target_user_daily_streak,

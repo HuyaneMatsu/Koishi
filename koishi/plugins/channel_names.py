@@ -1,10 +1,10 @@
 __all__ = ()
 
 import os
+from datetime import datetime as DateTime, timezone as TimeZone
 from csv import reader as CSVReader, writer as CSVWriter
 from time import time as time_now
 from random import random
-from datetime import datetime
 from difflib import get_close_matches
 
 from ..bot_utils.constants import CATEGORY__SUPPORT__BOTS, PATH__KOISHI, ROLE__SUPPORT__MODERATOR
@@ -234,7 +234,7 @@ COMMAND_CLIENT.command_processor.create_category('CHANNEL NAMES', checks = [chec
 
 def setup(lib):
     NAME_CYCLER_HANDLER.value = KOKORO.call_after(
-        datetime.utcnow().replace(microsecond = 0, second = 0, minute = 0, hour = 0).timestamp() - time_now() + DAY,
+        DateTime.now(TimeZone.utc).replace(microsecond = 0, second = 0, minute = 0, hour = 0).timestamp() - time_now() + DAY,
         cycle_rename,
     )
 

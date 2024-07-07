@@ -1,7 +1,7 @@
 __all__ = ()
 
 from random import random
-from datetime import datetime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import Embed, Emoji
 from hata.ext.slash import abort, InteractionResponse
@@ -85,7 +85,7 @@ async def get_generic_fields(target_user):
         if results:
             entry_id, total_love, daily_streak, daily_next, total_allocated = results[0]
             
-            now = datetime.utcnow()
+            now = DateTime.now(TimeZone.utc)
             if daily_next > now:
                 ready_to_claim = False
             else:
@@ -256,7 +256,7 @@ async def render_hearts_vote_extended(client, event, target_user):
         if results:
             entry_id, total_love, daily_streak, daily_next, total_allocated = results[0]
             
-            now = datetime.utcnow()
+            now = DateTime.now(TimeZone.utc)
             if daily_next > now:
                 daily_streak = calculate_daily_new_only(daily_streak, daily_next, now)
         
@@ -314,7 +314,7 @@ async def render_hearts_vote_extended(client, event, target_user):
     vote_base = VOTE_BASE
     vote_per_day = VOTE_PER_DAY
     
-    is_weekend = (datetime.utcnow().weekday() > 4)
+    is_weekend = (DateTime.now(TimeZone.utc).weekday() > 4)
     
     if is_weekend:
         field_value_parts.append('\n\n**Weekend bonus:**\n')
@@ -387,7 +387,7 @@ async def render_hearts_stats(client, event, target_user):
             entry_id, total_love, daily_streak, daily_next, total_allocated, count_daily_self, \
                 count_daily_by_waifu, count_daily_for_waifu, count_top_gg_vote = results[0]
             
-            now = datetime.utcnow()
+            now = DateTime.now(TimeZone.utc)
             if daily_next > now:
                 daily_streak = calculate_daily_new_only(daily_streak, daily_next, now)
             

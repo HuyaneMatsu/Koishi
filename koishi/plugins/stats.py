@@ -6,7 +6,7 @@ IS_PYPY = (sys.implementation.name == 'pypy')
 if IS_PYPY:
     from gc import get_stats as get_gc_stats
 
-from datetime import datetime
+from datetime import datetime as DateTime, timezone as TimeZone
 from threading import enumerate as list_threads, _MainThread as MainThreadType
 
 from scarletio import EventThread, ExecutorThread
@@ -326,7 +326,7 @@ if (CpuUsage is not None):
             '\n'
             'Created: '
         )
-        description.append(elapsed_time(datetime.utcfromtimestamp(PROCESS.create_time())))
+        description.append(elapsed_time(DateTime.fromtimestamp(PROCESS.create_time(), TimeZone.utc)))
         description.append(
             ' ago\n'
             '\n'

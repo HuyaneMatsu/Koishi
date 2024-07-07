@@ -5,8 +5,8 @@ from hata import Embed, User
 from ..shared_constants import PERMISSIONS__KICK, WORD_CONFIG__KICK
 from ..shared_helpers import add_reason_field, add_standalone_field, create_auto_reason, process_reason
 
+from .easter_eggs import apply_mode_orin, should_show_orin
 from .helpers import build_action_completed_embed, check_required_permissions, confirm_action, notify_user_action
-from .orin import apply_orin_mode, should_show_orin
 
 
 def build_kick_embed(user, title, description, reason, notify_user, orin_mode):
@@ -35,7 +35,7 @@ def build_kick_embed(user, title, description, reason, notify_user, orin_mode):
     add_standalone_field(embed, 'Notify user', 'true' if notify_user else 'false')
     add_reason_field(embed, reason)
     if orin_mode:
-        apply_orin_mode(embed)
+        apply_mode_orin(embed)
     return embed
 
 

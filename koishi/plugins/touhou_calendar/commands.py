@@ -1,7 +1,7 @@
 __all__ = ()
 
 import re
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import Client
 
@@ -27,7 +27,7 @@ async def touhou_calendar():
     -------
     response : ``InteractionResponse``
     """
-    return get_response_for_year(DateTime.utcnow().year)
+    return get_response_for_year(DateTime.now(TimeZone.utc).year)
 
 
 @FEATURE_CLIENTS.interactions(custom_id = re.compile('touhou_calendar.year.(\d+)'))

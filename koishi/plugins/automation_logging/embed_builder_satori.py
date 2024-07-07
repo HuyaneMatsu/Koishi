@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import ActivityType, DATETIME_FORMAT_CODE, Embed, Status, elapsed_time
 
@@ -39,7 +39,7 @@ def render_presence_update(user, old_attributes):
     into.append(')\n')
     
     into.append('At: ')
-    into.append(format(DateTime.utcnow(), DATETIME_FORMAT_CODE))
+    into.append(format(DateTime.now(TimeZone.utc), DATETIME_FORMAT_CODE))
     into.append('\n\n')
     
     try:

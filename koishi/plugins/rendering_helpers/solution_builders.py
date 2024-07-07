@@ -4,7 +4,7 @@ __all__ = (
     'build_user_with_guild_profile_description'
 )
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from .constants import GUILD_PROFILE_RENDER_MODE_GENERAL, GUILD_PROFILE_RENDER_MODE_JOIN, GUILD_PROFILE_RENDER_MODE_LEAVE
 from .field_renderers import render_date_time_difference_field_into, render_date_time_field_into
@@ -114,7 +114,7 @@ def build_user_join_or_leave_description(user, guild_profile, join):
         into, field_added = render_date_time_field_into(
             into,
             field_added,
-            DateTime.utcnow(),
+            DateTime.now(TimeZone.utc),
             optional = False,
             title = 'Left',
         )

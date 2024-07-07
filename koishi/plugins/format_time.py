@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime, timedelta as TimeDelta
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 
 from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import (
@@ -108,7 +108,7 @@ async def format_relative(
         seconds = seconds,
     )
     
-    return build_format_embed(DateTime.utcnow() + delta)
+    return build_format_embed(DateTime.now(TimeZone.utc) + delta)
 
 
 @FORMAT_TIME_COMMANDS.interactions(name = 'absolute')
@@ -123,7 +123,7 @@ async def format_absolute(
 ):
     """Formats the given time."""
     try:
-        date_time = DateTime(year, month, day, hour, minute, second)
+        date_time = DateTime(year, month, day, hour, minute, second, tzinfo = TimeZone.utc)
     except (ValueError, OverflowError) as err:
         error_parameters = err.args
         if error_parameters:
@@ -161,12 +161,12 @@ async def format_snowflake(
 @FORMAT_TIME_COMMANDS.interactions(name = 'now')
 async def format_now():
     """Formats he current time"""
-    return build_format_embed(DateTime.utcnow())
+    return build_format_embed(DateTime.now(TimeZone.utc))
 
 
 def build_format_embed(date_time):
     unix_time = datetime_to_unix_time(date_time)
-    now = DateTime.utcnow()
+    now = DateTime.now(TimeZone.utc)
     
     formatted_date_times = [format_unix_time(unix_time, format_style) for format_style in FORMAT_STYLES]
     

@@ -1,4 +1,4 @@
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
 from hata import (
@@ -25,7 +25,7 @@ def _iter_options__render_user_description_into():
     yield (
         False,
         user_0,
-        DateTime(2016, 10, 14, 21, 13, 36),
+        DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc),
         (
             (
                 f'Created: 2016-10-14 21:13:16 [*20 seconds ago*]\n'
@@ -40,7 +40,7 @@ def _iter_options__render_user_description_into():
     yield (
         True,
         user_0,
-        DateTime(2016, 10, 14, 21, 13, 36),
+        DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc),
         (
             (
                 f'\n'
@@ -63,7 +63,7 @@ def _iter_options__render_user_description_into():
     yield (
         False,
         user_1,
-        DateTime(2016, 10, 14, 21, 13, 46),
+        DateTime(2016, 10, 14, 21, 13, 46, tzinfo = TimeZone.utc),
         (
             (
                 f'Created: 2016-10-14 21:13:17 [*29 seconds ago*]\n'
@@ -112,7 +112,7 @@ def _iter_options__render_guild_profile_description_into():
         False,
         GuildProfile(),
         GUILD_PROFILE_RENDER_MODE_GENERAL,
-        DateTime(2016, 10, 14, 21, 13, 36),
+        DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc),
         (
             (
                 f'Joined: *none*\n'
@@ -127,7 +127,7 @@ def _iter_options__render_guild_profile_description_into():
         True,
         GuildProfile(),
         GUILD_PROFILE_RENDER_MODE_GENERAL,
-        DateTime(2016, 10, 14, 21, 13, 36),
+        DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc),
         (
             (
                 f'\n'
@@ -141,10 +141,10 @@ def _iter_options__render_guild_profile_description_into():
     yield (
         False,
         GuildProfile(
-            timed_out_until = DateTime(2016, 10, 14, 21, 12, 46),
+            timed_out_until = DateTime(2016, 10, 14, 21, 12, 46, tzinfo = TimeZone.utc),
         ),
         GUILD_PROFILE_RENDER_MODE_GENERAL,
-        DateTime(2016, 10, 14, 21, 13, 36),
+        DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc),
         (
             (
                 f'Joined: *none*\n'
@@ -161,15 +161,15 @@ def _iter_options__render_guild_profile_description_into():
     yield (
         False,
         GuildProfile(
-            joined_at = DateTime(2016, 10, 14, 21, 13, 17),
+            joined_at = DateTime(2016, 10, 14, 21, 13, 17, tzinfo = TimeZone.utc),
             role_ids = [role_0.id, role_1.id],
             nick = 'koi',
             flags = GuildProfileFlag().update_by_keys(rejoined = True, onboarding_completed = True),
-            boosts_since = DateTime(2016, 10, 14, 21, 13, 18),
-            timed_out_until = DateTime(2016, 10, 14, 21, 14, 46),
+            boosts_since = DateTime(2016, 10, 14, 21, 13, 18, tzinfo = TimeZone.utc),
+            timed_out_until = DateTime(2016, 10, 14, 21, 14, 46, tzinfo = TimeZone.utc),
         ),
         GUILD_PROFILE_RENDER_MODE_GENERAL,
-        DateTime(2016, 10, 14, 21, 13, 46),
+        DateTime(2016, 10, 14, 21, 13, 46, tzinfo = TimeZone.utc),
         (
             (
                 f'Joined: 2016-10-14 21:13:17 [*29 seconds ago*]\n'
@@ -188,11 +188,11 @@ def _iter_options__render_guild_profile_description_into():
     yield (
         False,
         GuildProfile(
-            joined_at = DateTime(2016, 10, 14, 21, 13, 17),
+            joined_at = DateTime(2016, 10, 14, 21, 13, 17, tzinfo = TimeZone.utc),
             role_ids = [role_0.id, role_1.id],
         ),
         GUILD_PROFILE_RENDER_MODE_JOIN,
-        DateTime(2016, 10, 14, 21, 13, 46),
+        DateTime(2016, 10, 14, 21, 13, 46, tzinfo = TimeZone.utc),
         (
             (
                 f'Joined: 2016-10-14 21:13:17\n'
@@ -207,11 +207,11 @@ def _iter_options__render_guild_profile_description_into():
     yield (
         False,
         GuildProfile(
-            joined_at = DateTime(2016, 10, 14, 21, 13, 17),
+            joined_at = DateTime(2016, 10, 14, 21, 13, 17, tzinfo = TimeZone.utc),
             role_ids = None,
         ),
         GUILD_PROFILE_RENDER_MODE_JOIN,
-        DateTime(2016, 10, 14, 21, 13, 46),
+        DateTime(2016, 10, 14, 21, 13, 46, tzinfo = TimeZone.utc),
         (
             (
                 f'Joined: 2016-10-14 21:13:17'
@@ -225,11 +225,11 @@ def _iter_options__render_guild_profile_description_into():
     yield (
         False,
         GuildProfile(
-            joined_at = DateTime(2016, 10, 14, 21, 13, 17),
+            joined_at = DateTime(2016, 10, 14, 21, 13, 17, tzinfo = TimeZone.utc),
             role_ids = [role_0.id, role_1.id],
         ),
         GUILD_PROFILE_RENDER_MODE_LEAVE,
-        DateTime(2016, 10, 14, 21, 13, 46),
+        DateTime(2016, 10, 14, 21, 13, 46, tzinfo = TimeZone.utc),
         (
             (
                 f'Joined: 2016-10-14 21:13:17 [*29 seconds ago*]\n'
@@ -244,11 +244,11 @@ def _iter_options__render_guild_profile_description_into():
     yield (
         False,
         GuildProfile(
-            joined_at = DateTime(2016, 10, 14, 21, 13, 17),
+            joined_at = DateTime(2016, 10, 14, 21, 13, 17, tzinfo = TimeZone.utc),
             role_ids = None
         ),
         GUILD_PROFILE_RENDER_MODE_LEAVE,
-        DateTime(2016, 10, 14, 21, 13, 46),
+        DateTime(2016, 10, 14, 21, 13, 46, tzinfo = TimeZone.utc),
         (
             (
                 f'Joined: 2016-10-14 21:13:17 [*29 seconds ago*]\n'
@@ -290,7 +290,7 @@ def test__render_guild_profile_description_into(field_added, guild_profile, mode
 
 
 def _iter_options__render_nulled_guild_profile_description_into():
-    current_date = DateTime(2016, 10, 14, 21, 13, 36)
+    current_date = DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc)
     
     # General
     yield (
@@ -402,7 +402,7 @@ def test__render_nulled_guild_profile_description_into(field_added, mode, curren
 
 
 def _iter_options__render_nullable_guild_profile_description_into():
-    current_date = DateTime(2016, 10, 14, 21, 13, 36)
+    current_date = DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc)
     
     yield (
         False,
@@ -421,7 +421,7 @@ def _iter_options__render_nullable_guild_profile_description_into():
     yield (
         False,
         GuildProfile(
-            joined_at = DateTime(2016, 10, 14, 21, 13, 7)
+            joined_at = DateTime(2016, 10, 14, 21, 13, 7, tzinfo = TimeZone.utc)
         ),
         GUILD_PROFILE_RENDER_MODE_LEAVE,
         current_date,
@@ -466,7 +466,7 @@ def test__render_nullable_guild_profile_description_into(field_added, guild_prof
 
 
 def _iter_options__render_activity_description_into():
-    current_date = DateTime(2016, 10, 14, 21, 13, 36)
+    current_date = DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc)
     
     # Minimal
     yield (
@@ -511,7 +511,7 @@ def _iter_options__render_activity_description_into():
                 text_large = 'Yuyuko',
                 text_small = 'Youmu',
             ),
-            created_at = DateTime(2016, 10, 14, 21, 13, 26),
+            created_at = DateTime(2016, 10, 14, 21, 13, 26, tzinfo = TimeZone.utc),
             details = 'Satori',
             flags = ActivityFlag().update_by_keys(play = True, embedded = True),
             party = ActivityParty(
@@ -528,8 +528,8 @@ def _iter_options__render_activity_description_into():
             state = 'Okuu',
             sync_id = 'Mr. spider',
             timestamps = ActivityTimestamps(
-                end = DateTime(2016, 10, 14, 21, 13, 46),
-                start = DateTime(2016, 10, 14, 21, 13, 16),
+                end = DateTime(2016, 10, 14, 21, 13, 46, tzinfo = TimeZone.utc),
+                start = DateTime(2016, 10, 14, 21, 13, 16, tzinfo = TimeZone.utc),
             ),
             url = 'https://orindance.party/',
         ),
@@ -570,7 +570,7 @@ def _iter_options__render_activity_description_into():
         False,
         Activity(
             activity_type = ActivityType.custom,
-            created_at = DateTime(2016, 10, 14, 21, 13, 26),
+            created_at = DateTime(2016, 10, 14, 21, 13, 26, tzinfo = TimeZone.utc),
             emoji = BUILTIN_EMOJIS['heart'],
             state = 'Koishi Love!'
         ),

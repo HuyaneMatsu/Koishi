@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime
+from datetime import datetime as DateTime, timezone as TimeZone
 from functools import partial as partial_func
 
 from hata import Color, DiscordException, ERROR_CODES, parse_rdelta, datetime_to_id, Emoji, Permission
@@ -62,7 +62,7 @@ async def clear(client, event,
         if delta is None:
             abort('`before` could not be parsed.')
         
-        before = datetime_to_id(datetime.utcnow() - delta)
+        before = datetime_to_id(DateTime.now(TimeZone.utc) - delta)
     
     if (after is None) or (not after):
         after = 0
@@ -71,7 +71,7 @@ async def clear(client, event,
         if delta is None:
             abort('`before` could not be parsed.')
         
-        after = datetime_to_id(datetime.utcnow() - delta)
+        after = datetime_to_id(DateTime.now(TimeZone.utc) - delta)
     
     yield 'Yeeting messages began'
     

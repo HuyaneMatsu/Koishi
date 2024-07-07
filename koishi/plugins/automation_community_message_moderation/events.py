@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 from math import ceil
 
 from hata import Permission, DiscordException, ERROR_CODES
@@ -129,7 +129,7 @@ async def handle_reaction_event(client, message, emoji, user, addition):
         return
     
     # Check availability duration
-    if ceil((DateTime.utcnow() - message.created_at).total_seconds()) > availability_duration:
+    if ceil((DateTime.now(TimeZone.utc) - message.created_at).total_seconds()) > availability_duration:
         return
     
     async with get_lock_for(message):

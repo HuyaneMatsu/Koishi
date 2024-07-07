@@ -1,30 +1,32 @@
+from .easter_eggs import *
+from .top_list import *
+
 from .ban import *
 from .constants import *
 from .helpers import *
 from .is_banned import *
 from .kick import *
 from .mute import *
-from .orin import *
 from .regret_helpers import *
 from .regret_un_ban import *
 from .regret_un_kick import *
-from .top_list import *
 from .un_ban import *
 from .un_mute import *
 
 
 __all__ = (
+    *easter_eggs.__all__,
+    *top_list.__all__,
+    
     *ban.__all__,
     *constants.__all__,
     *helpers.__all__,
     *is_banned.__all__,
     *kick.__all__,
     *mute.__all__,
-    *orin.__all__,
     *regret_helpers.__all__,
     *regret_un_ban.__all__,
     *regret_un_kick.__all__,
-    *top_list.__all__,
     *un_ban.__all__,
     *un_mute.__all__,
 )

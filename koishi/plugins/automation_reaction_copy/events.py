@@ -146,7 +146,7 @@ async def reaction_add(client, event):
         return
     
     target_channel = try_get_target_channel(guild, emoji, flags)
-    if target_channel is source_channel:
+    if (target_channel is None) or (target_channel is source_channel):
         return
     
     # If the user does not have permissions in the target channel they should not be able to target it.

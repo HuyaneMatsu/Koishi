@@ -1,3 +1,13 @@
+### 2024-07-07
+
+- Add `nazrin` easter egg to `/mod mute`.
+- Add **6** image to `/pat`.
+- Add **10** image to `/kiss`.
+- Add **16** image to `/hug`.
+- Add **3** image to `/pocky-kiss`.
+- Add **7** image to `/feed`.
+- Add **1** image to `/lap-sleep`.
+
 ### 2024-06-12
 
 - `/ds` does not require `manage messages` permission anymore, only `use external emojis`.

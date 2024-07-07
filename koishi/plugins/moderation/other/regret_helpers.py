@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 from scarletio import LOOP_TIME
 
 from hata import DiscordException, ERROR_CODES
@@ -51,7 +51,7 @@ async def can_regret(client, guild, user, entry_type):
     """
     try:
         audit_log = await client.audit_log_get_chunk(
-            guild, after = DateTime.utcnow() - REGRET_INTERVAL, entry_type = entry_type
+            guild, after = DateTime.now(TimeZone.utc) - REGRET_INTERVAL, entry_type = entry_type
         )
     except ConnectionError:
         return -1

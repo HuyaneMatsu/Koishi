@@ -1,7 +1,7 @@
 __all__ = ()
 
 import os
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import Channel, Color, Emoji, Guild, Invite, Role, User
 
@@ -76,7 +76,7 @@ USER__EST = User.precreate(277393805601275910)
 
 DEFAULT_CATEGORY_NAME = 'Uncategorized'
 
-STARTUP = DateTime.utcnow()
+STARTUP = DateTime.now(TimeZone.utc)
 
 IN_GAME_IDS = set()
 

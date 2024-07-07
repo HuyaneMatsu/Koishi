@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import Embed, DATETIME_FORMAT_CODE, ReactionDeleteEvent
 
@@ -109,7 +109,7 @@ def build_reaction_event_embed(event):
         'Reaction',
         _build_reaction_description(event),
     ).add_footer(
-        format(DateTime.utcnow(), DATETIME_FORMAT_CODE),
+        format(DateTime.now(TimeZone.utc), DATETIME_FORMAT_CODE),
     ).add_thumbnail(
         user.avatar_url,
     )

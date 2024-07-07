@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import DATETIME_FORMAT_CODE, Embed
 
@@ -31,7 +31,7 @@ def build_guild_profile_update_embed(guild_profile, old_attributes):
         f'Guild profile updated',
         color = COLOR_UPDATE,
     ).add_footer(
-        format(DateTime.utcnow(), DATETIME_FORMAT_CODE),
+        format(DateTime.now(TimeZone.utc), DATETIME_FORMAT_CODE),
     )
     
     maybe_add_modified_icon_field(embed, guild_profile, old_attributes, 'avatar', 'Avatar')

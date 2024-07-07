@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from sqlalchemy import and_, not_
 from sqlalchemy.sql import select
@@ -34,7 +34,7 @@ async def get_entries_to_notify_with_connector(connector):
         ).where(
             and_(
                 user_common_model.user_id == user_settings_model.user_id,
-                user_common_model.daily_next <= DateTime.utcnow() - DAILY_REMINDER_AFTER,
+                user_common_model.daily_next <= DateTime.now(TimeZone.utc) - DAILY_REMINDER_AFTER,
                 user_settings_model.notification_daily_reminder,
                 not_(user_common_model.daily_reminded),
             )

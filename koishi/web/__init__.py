@@ -34,6 +34,9 @@ BOT_NAMES = [
     'applebot',
     'baiduspider',
     'gptbot',
+    'amazonbot',
+    'barkrowler',
+    'go-http-client',
     
     # From google:
     'googlebot',
@@ -89,6 +92,9 @@ BLOCKED_IPS = {
     # I dont use any shitty js framework that they could get into.
     '118.193.44.32',
     '152.32.192.176',
+    
+    # Tries to request Wordpress Blog login page (and then login), for real its not a wordpress site
+    '34.64.218.102',
 }
 
 

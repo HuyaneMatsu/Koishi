@@ -1,7 +1,7 @@
 import os, re, sys
 from os.path import join, isdir, isfile, getmtime, exists
 from os import mkdir as make_dir
-from datetime import datetime, timedelta
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 
 from config import HATA_PATH, SCARLETIO_PATH
 
@@ -24,7 +24,7 @@ RELATIONS = {
 }
 
 DATETIME_FORMAT_CODE = '%Y.%m.%d-%H:%M:%S'
-DATETIME_RP = re.compile('(\d{4})\.(\d{2})\.(\d{2})\-(\d{2})\:(\d{2})\:(\d{2})')
+DATETIME_RP = re.compile('(\\d{4})\\.(\\d{2})\\.(\\d{2})\\-(\\d{2})\\:(\\d{2})\\:(\\d{2})')
 
 IGNORED_NAMES = frozenset((
     '__pycache__',
@@ -68,7 +68,7 @@ class File:
     
     def __init__(self, path, name, access_path):
         self.path = path
-        self.modified = datetime.utcfromtimestamp(getmtime(path))
+        self.modified = DateTime.fromtimestamp(getmtime(path), TimeZone.utc)
         self.name = name
         self.access_path = access_path
 
@@ -104,10 +104,10 @@ SYNC_DONE = 'message_done'
 SYNC_LOCK = Lock(KOKORO)
 
 def get_modified_files(days_allowed):
-    days_allowed = timedelta(days = days_allowed)
+    days_allowed = TimeDelta(days = days_allowed)
     should_send = []
     
-    min_time = datetime.now() - days_allowed
+    min_time = DateTime.now(TimeZone.utc) - days_allowed
     for file in flatten_paths():
         if file.modified > min_time:
             should_send.append(file)

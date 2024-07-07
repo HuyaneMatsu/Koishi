@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from flask import Blueprint, request, abort, Response
 from sqlalchemy.sql import select
@@ -38,7 +38,7 @@ def vote():
         
         results = response.fetchall()
         
-        now = datetime.utcnow()
+        now = DateTime.now(TimeZone.utc)
         
         if results:
             entry_id, daily_streak, daily_next = results[0]
@@ -56,7 +56,7 @@ def vote():
         base = VOTE_BASE
         per_day = VOTE_PER_DAY
         
-        if  (datetime.utcnow().weekday() > 4):
+        if  (DateTime.now(TimeZone.utc).weekday() > 4):
             base += VOTE_BASE_BONUS_WEEKEND
             per_day += VOTE_PER_DAY_BONUS_WEEKEND
         

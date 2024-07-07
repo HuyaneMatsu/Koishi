@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime
+from datetime import datetime as DateTime, timezone as TimeZone
 from math import floor
 
 from hata import Embed, elapsed_time
@@ -46,7 +46,7 @@ async def claim_daily_for_yourself(client, event):
             )
         )
         
-        now = datetime.utcnow()
+        now = DateTime.now(TimeZone.utc)
         
         results = await response.fetchall()
         if results:
@@ -187,7 +187,7 @@ async def claim_daily_for_waifu(client, event, target_user):
             else:
                 target_entry, source_entry = results
             
-            now = datetime.utcnow()
+            now = DateTime.now(TimeZone.utc)
             
             target_daily_next = target_entry[4]
             if target_daily_next > now:
@@ -319,7 +319,7 @@ async def get_waifu_ids(user_id):
                             )
                         )
                     ),
-                user_common_model.daily_next < datetime.utcnow(),
+                user_common_model.daily_next < DateTime.now(TimeZone.utc),
                 )
             )
         )

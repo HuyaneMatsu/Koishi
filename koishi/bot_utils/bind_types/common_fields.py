@@ -1,6 +1,7 @@
 __all__ = ('CommonFields',)
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
+from functools import partial as partial_func
 
 from ...bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, user_common_model
 from ...bot_utils.model_linker import ModelLink, Field
@@ -20,7 +21,10 @@ class CommonFields(ModelLink, model = user_common_model, table = USER_COMMON_TAB
     total_love = Field(getattr(user_common_model, 'total_love', None), 0)
     total_allocated = Field(getattr(user_common_model, 'total_allocated', None), 0)
     
-    daily_next = Field(getattr(user_common_model, 'daily_next', None), DateTime.utcnow)
+    daily_next = Field(
+        getattr(user_common_model, 'daily_next', None),
+        partial_func(DateTime.now, tz = TimeZone.utc),
+    )
     daily_streak = Field(getattr(user_common_model, 'daily_streak', None), 0)
     
     count_daily_self = Field(getattr(user_common_model, 'count_daily_self', None), 0)
@@ -33,4 +37,7 @@ class CommonFields(ModelLink, model = user_common_model, table = USER_COMMON_TAB
     waifu_slots = Field(getattr(user_common_model, 'waifu_slots', None), 0)
     waifu_owner_id = Field(getattr(user_common_model, 'waifu_owner_id', None), 0)
     
-    top_gg_last_vote = Field(getattr(user_common_model, 'top_gg_last_vote', None), DateTime.utcnow)
+    top_gg_last_vote = Field(
+        getattr(user_common_model, 'top_gg_last_vote', None),
+        partial_func(DateTime.now, tz = TimeZone.utc),
+    )

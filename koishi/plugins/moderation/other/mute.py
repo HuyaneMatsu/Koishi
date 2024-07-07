@@ -9,11 +9,11 @@ from ..shared_helpers import (
 from ..shared_helpers_mute import (
     PARAMETER_DAYS, PARAMETER_HOURS, PARAMETER_MINUTES, PARAMETER_SECONDS, build_duration_string, get_duration
 )
-
+from .easter_eggs import apply_mode_nazrin, should_show_nazrin
 from .helpers import build_action_completed_embed, check_required_permissions, confirm_action, notify_user_action
 
 
-def build_mute_embed(user, title, description, reason, notify_user, duration_string):
+def build_mute_embed(user, title, description, reason, notify_user, duration_string, nazrin_mode):
     """
     Builds a mute embed.
     
@@ -31,6 +31,8 @@ def build_mute_embed(user, title, description, reason, notify_user, duration_str
         Whether the user should be notified.
     duration_string : `str`
         The duration in string.
+    nazrin_mode : `bool`
+        Whether nazrin mode should be applied on the embed.
     
     Returns
     -------
@@ -40,6 +42,8 @@ def build_mute_embed(user, title, description, reason, notify_user, duration_str
     add_standalone_field(embed, 'Duration', duration_string)
     add_standalone_field(embed, 'Notify user', 'true' if notify_user else 'false')
     add_reason_field(embed, reason)
+    if nazrin_mode:
+        apply_mode_nazrin(embed)
     return embed
 
 
@@ -89,10 +93,11 @@ async def mute_command(
     duration_string = build_duration_string(duration)
     
     await client.interaction_application_command_acknowledge(event, wait = False)
+    nazrin_mode = should_show_nazrin(duration)
     
     # Ask, whether the user should be muted.
     component_interaction = await confirm_action(
-        client, event, guild, user, build_mute_embed, WORD_CONFIG__MUTE, reason, notify_user, duration_string
+        client, event, guild, user, build_mute_embed, WORD_CONFIG__MUTE, reason, notify_user, duration_string, False
     )
     if (component_interaction is None):
         return
@@ -116,6 +121,6 @@ async def mute_command(
         allowed_mentions = None,
         components = None,
         embed = build_action_completed_embed(
-            user, build_mute_embed, WORD_CONFIG__MUTE, notify_note, reason, notify_user, duration_string
+            user, build_mute_embed, WORD_CONFIG__MUTE, notify_note, reason, notify_user, duration_string, nazrin_mode
         )
     )

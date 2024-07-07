@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import AuditLogEntryType, CLIENTS, Client, KOKORO
 from scarletio import TaskGroup
@@ -27,7 +27,7 @@ async def request_bans(client, guild, after, actions):
     actions : `set` of `tuple` (`int`, ``ClientUserBase``, ``ClientUserBase``)
         The executed actions to extend.
     """
-    async for audit_log_entry in (await client.audit_log_iterator(guild, event = AuditLogEntryType.user_ban_add)):
+    async for audit_log_entry in (await client.audit_log_iterator(guild, entry_type = AuditLogEntryType.user_ban_add)):
         if audit_log_entry.created_at < after:
             break
         
@@ -67,7 +67,7 @@ async def request_kicks(client, guild, after, actions):
     actions : `set` of `tuple` (`int`, ``ClientUserBase``, ``ClientUserBase``)
         The executed actions to extend.
     """
-    async for audit_log_entry in (await client.audit_log_iterator(guild, event = AuditLogEntryType.user_kick)):
+    async for audit_log_entry in (await client.audit_log_iterator(guild, entry_type = AuditLogEntryType.user_kick)):
         if audit_log_entry.created_at < after:
             break
         
@@ -107,7 +107,7 @@ async def request_mutes(client, guild, after, actions):
     actions : `set` of `tuple` (`int`, ``ClientUserBase``, ``ClientUserBase``)
         The executed actions to extend.
     """
-    async for audit_log_entry in (await client.audit_log_iterator(guild, event = AuditLogEntryType.user_update)):
+    async for audit_log_entry in (await client.audit_log_iterator(guild, entry_type = AuditLogEntryType.user_update)):
         if audit_log_entry.created_at < after:
             break
         
@@ -193,7 +193,7 @@ async def request_top_list(client, guild, sort_by, days):
     -------
     top_list : `list` of `tuple` (``ClientUserBase``, ``ActionCounter``)
     """
-    actions = await request_actions(client, guild, DateTime.utcnow() - (DELTA_DAY * days))
+    actions = await request_actions(client, guild, DateTime.now(TimeZone.utc) - (DELTA_DAY * days))
     
     by_user = {}
     for action in actions:

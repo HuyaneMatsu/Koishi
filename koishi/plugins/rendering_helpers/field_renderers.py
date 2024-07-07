@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone as TimeZone
 
 from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import DATETIME_FORMAT_CODE, elapsed_time
@@ -83,9 +83,9 @@ def render_date_time_with_relative_field_into(
     elif condition == DATE_TIME_CONDITION_ALL:
         date_time_nulled = False
     elif condition == DATE_TIME_CONDITION_FUTURE:
-        date_time_nulled = date_time <= DateTime.utcnow()
+        date_time_nulled = date_time <= DateTime.now(TimeZone.utc)
     elif condition == DATE_TIME_CONDITION_PAST:
-        date_time_nulled = date_time >= DateTime.utcnow()
+        date_time_nulled = date_time >= DateTime.now(TimeZone.utc)
     else:
         date_time_nulled = False
     
