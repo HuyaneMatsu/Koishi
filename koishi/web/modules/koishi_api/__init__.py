@@ -42,6 +42,7 @@ def vote():
         
         if results:
             entry_id, daily_streak, daily_next = results[0]
+            daily_next = daily_next.replace(tzinfo = TimeZone.utc)
             daily_streak = calculate_daily_new_only(daily_streak, daily_next, now)
             
             if now > daily_next:

@@ -5615,6 +5615,8 @@ TOUHOU_ACTION_ALL.add(
     (ACTION_TAG_HANDHOLD, KOMEIJI_KOISHI, SCARLET_FLANDRE),
 ).with_creator(
     'sorani (kaeru0768)',
+).with_editor(
+    'HuyaneMatsu',
 )
 
 TOUHOU_ACTION_ALL.add(

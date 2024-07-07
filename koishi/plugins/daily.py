@@ -51,6 +51,8 @@ async def claim_daily_for_yourself(client, event):
         results = await response.fetchall()
         if results:
             entry_id, total_love, daily_streak, daily_next, count_top_gg_vote, top_gg_last_vote = results[0]
+            daily_next = daily_next.replace(tzinfo = TimeZone.utc)
+            top_gg_last_vote = top_gg_last_vote.replace(tzinfo = TimeZone.utc)
             
             if daily_next > now:
                 return Embed(
@@ -190,6 +192,8 @@ async def claim_daily_for_waifu(client, event, target_user):
             now = DateTime.now(TimeZone.utc)
             
             target_daily_next = target_entry[4]
+            target_daily_next = target_daily_next.replace(tzinfo = TimeZone.utc)
+            
             if target_daily_next > now:
                 return Embed(
                     f'{target_user.name} already claimed their daily love for today~',
