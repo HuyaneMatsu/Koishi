@@ -55,7 +55,8 @@ def is_message_action_interaction(client, message):
     if message_type is MessageType.slash_command:
         interaction = message.interaction
         if (interaction is not None):
-            return interaction.name in ACTIONS_BY_NAME.keys()
+            interaction_name = interaction.name
+            return interaction_name in ACTIONS_BY_NAME.keys() or interaction_name == 'action'
     
     # We do not receive nonce for requested or referenced messages, so we cannot match that reliable.
     # Try to match message by structure~
