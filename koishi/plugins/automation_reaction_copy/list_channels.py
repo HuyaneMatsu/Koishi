@@ -65,7 +65,7 @@ def collect_emojis_to_channels(guild, flags):
     """
     emojis_to_channels = {}
     
-    for channel in chain(guild.channels.values(), guild.threads.values()):
+    for channel in chain(guild.iter_channels(), guild.iter_threads()):
         if not channel.is_in_group_guild_textual():
             continue
         

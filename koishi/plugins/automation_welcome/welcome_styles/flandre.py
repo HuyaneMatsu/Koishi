@@ -2,7 +2,7 @@ __all__ = ()
 
 from hata import Emoji
 
-from ..reply_style import ReplyStyle
+from ..welcome_style_reply import WelcomeStyleReply
 from ..welcome_style import WelcomeStyle
 
 
@@ -163,108 +163,110 @@ IMAGES = (
 )
 
 
+IMAGE_CREATOR = 'paragasu (parags112)'
+
 REPLY_STYLES = (
-    ReplyStyle(
+    WelcomeStyleReply(
         'Welcome them into the Scarlet Devil Mansion.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} welcomes {target} into the Scarlet Devil Mansion.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Welcome them into the basement.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} welcomes {target} into the basement.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Engage them into the extra stage.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} engages {target} in the extra stage!'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Invite them onto the path of destruction.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} invites {target} onto the path of destruction!'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Greet them innocuously.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} greets {target}... or is it a clone?!'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Ask them to play with you.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} wants to play with {target}.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Check how strong they are.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} wants to see how strong {target} is.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Play with them.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} is tempted to KYUUU\~ {target}, but will play with them first.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Offer homemade flan to them.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} offers homemade flan to {target}!'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Check how easily they break.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} wants to know how easily {target} breaks.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Wonder whether they bought sweets.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} wonders whether {target} bought sweets...'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Invite them to a tea party!',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} invites {target} to a tea party!'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Invite them to a tea party!',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} invites {target} to a tea party!'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Wonder how they got past Meiling and Sakuya.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} wonders how {target} got past Meiling and Sakuya...'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Wonder how they got past Meiling and Sakuya.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} wonders how {target} got past Meiling and Sakuya...'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Wait for a certain pebble.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} is waiting for a certain pebble, oh its just {target}...'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Play with them until there will be none!',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} plays with {target} until there will be none!'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Play hide and seek with them.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} wants to play hide and seek with {target}!'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Wonder how many lives they have left.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} wonders how many lives {target} has left.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Wait for a certain thieving magician.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} waits for a certain thieving magician. Oh it\'s just {target}...'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Check whether they are food or playmate.',
         Emoji.precreate(852859406496301066),
         (lambda source, target: f'{source} is confused whether {target} is food or playmate.'),
@@ -276,5 +278,6 @@ WELCOME_STYLE = WelcomeStyle(
     NAME,
     MESSAGE_CONTENT_BUILDERS,
     IMAGES,
+    IMAGE_CREATOR,
     REPLY_STYLES,
 )

@@ -1,8 +1,9 @@
 __all__ = (
     'delete_automation_configuration_of', 'get_automation_configuration_for', 'get_community_message_moderation_fields',
-    'get_log_emoji_channel', 'get_log_mention_channel', 'get_log_user_channel', 'get_log_satori_channel',
-    'get_log_satori_channel_if_auto_start', 'get_log_sticker_channel', 'get_reaction_copy_fields',
-    'get_reaction_copy_fields_forced', 'get_touhou_feed_enabled', 'get_welcome_fields', 'get_welcome_style_name'
+    'get_farewell_fields', 'get_log_emoji_channel', 'get_log_mention_channel', 'get_log_user_channel',
+    'get_log_satori_channel', 'get_log_satori_channel_if_auto_start', 'get_log_sticker_channel',
+    'get_reaction_copy_fields', 'get_reaction_copy_fields_forced', 'get_touhou_feed_enabled', 'get_welcome_fields',
+    'get_welcome_style_name'
 )
 
 from hata import CHANNELS, ROLES
@@ -382,7 +383,7 @@ def get_touhou_feed_enabled(guild_id):
 
 def get_welcome_fields(guild_id):
     """
-    Gets welcome channel and whether the welcome button is enabled for the given guild.
+    Gets welcome channel, whether the welcome button is enabled and the farewell style for the given guild.
     
     Parameters
     ----------
@@ -493,4 +494,42 @@ def get_community_message_moderation_fields(guild_id):
             COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT
         ),
         log_channel,
+    )
+
+
+def get_farewell_fields(guild_id):
+    """
+    Gets farewell channel and the farewell style for the given guild.
+    
+    Parameters
+    ----------
+    guild_id : `int`
+        The guild's identifier.
+    
+    Returns
+    -------
+    farewell_fields : `None | (Channel, None | str)`
+        Returns `None` if disabled. A tuple of `farewell_channel`, `farewell_style_name` if enabled.
+    """
+    try:
+        automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
+    except KeyError:
+        return None
+    
+    if not automation_configuration.farewell_enabled:
+        return None
+    
+    farewell_channel_id = automation_configuration.farewell_channel_id
+    if not farewell_channel_id:
+        return None
+    
+    try:
+        channel = CHANNELS[farewell_channel_id]
+    except KeyError:
+        automation_configuration.set('farewell_channel_id', 0)
+        return None
+    
+    return (
+        channel,
+        automation_configuration.farewell_style_name,
     )

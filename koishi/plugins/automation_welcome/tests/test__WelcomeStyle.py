@@ -1,7 +1,7 @@
 import vampytest
 from hata import BUILTIN_EMOJIS
 
-from ..reply_style import ReplyStyle
+from ..welcome_style_reply import WelcomeStyleReply
 from ..welcome_style import WelcomeStyle
 
 
@@ -16,6 +16,7 @@ def _assert_fields_set(welcome_style):
     """
     vampytest.assert_instance(welcome_style, WelcomeStyle)
     vampytest.assert_instance(welcome_style.images, tuple)
+    vampytest.assert_instance(welcome_style.image_creator, str)
     vampytest.assert_instance(welcome_style.message_content_builders, tuple)
     vampytest.assert_instance(welcome_style.name, str)
     vampytest.assert_instance(welcome_style.reply_styles, tuple)
@@ -27,24 +28,27 @@ def test__WelcomeStyle__new():
     """
     name = 'koishi'
     message_content_builders = (
-        (lambda mention: 'content'),
+        (lambda target: 'content'),
     )
     images = (
         'image.png',
     )
+    image_creator = 'remilia'
     reply_styles = (
-        ReplyStyle('Stare at them', BUILTIN_EMOJIS['heart'], lambda source, target: f'{source} stares at {target}'),
+        WelcomeStyleReply('Stare at them', BUILTIN_EMOJIS['heart'], lambda source, target: f'{source} stares at {target}'),
     )
     
     welcome_style = WelcomeStyle(
         name,
         message_content_builders,
         images,
+        image_creator,
         reply_styles,
     )
     _assert_fields_set(welcome_style)
     
     vampytest.assert_eq(welcome_style.images, images)
+    vampytest.assert_eq(welcome_style.image_creator, image_creator)
     vampytest.assert_eq(welcome_style.message_content_builders, message_content_builders)
     vampytest.assert_eq(welcome_style.name, name)
     vampytest.assert_eq(welcome_style.reply_styles, reply_styles)
@@ -56,19 +60,21 @@ def test__WelcomeStyle__repr():
     """
     name = 'koishi'
     message_content_builders = (
-        (lambda mention: 'content'),
+        (lambda target: 'content'),
     )
     images = (
         'image.png',
     )
+    image_creator = 'remilia'
     reply_styles = (
-        ReplyStyle('Stare at them', BUILTIN_EMOJIS['heart'], lambda source, target: f'{source} stares at {target}'),
+        WelcomeStyleReply('Stare at them', BUILTIN_EMOJIS['heart'], lambda source, target: f'{source} stares at {target}'),
     )
     
     welcome_style = WelcomeStyle(
         name,
         message_content_builders,
         images,
+        image_creator,
         reply_styles,
     )
     

@@ -400,7 +400,7 @@ async def test_receive_voice(client, message, target: User = None):
         await client.message_create(channel, 'Please define a user as well')
         return
     
-    state = guild.voice_states.get(message.author.id, None)
+    state = guild.get_voice_state(message.author.id)
     if state is None:
         await client.message_create(channel, 'You are not at a voice channel!')
         return
@@ -442,7 +442,7 @@ async def test_receive_voice_decoded(client, event, target : User):
     if guild is None:
         return
     
-    state = guild.voice_states.get(event.user.id, None)
+    state = guild.get_voice_state(event.user.id)
     if state is None:
         yield 'You are not at a voice channel!' 
         return
@@ -484,7 +484,7 @@ async def test_receive_voice_repeat(client, event, target : User):
     if guild is None:
         return
     
-    state = guild.voice_states.get(event.user.id, None)
+    state = guild.get_voice_state(event.user.id)
     if state is None:
         yield 'You are not at a voice channel!'
         return
@@ -1926,7 +1926,7 @@ if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
             
             self_voice_client = client.voice_client_for(message)
             if self_voice_client is None:
-                voice_state = self_guild.voice_states.get(message.author.id, None)
+                voice_state = self_guild.get_voice_state(message.author.id)
                 if voice_state is None:
                     text = 'You are not at a voice channel.'
                     break
@@ -1945,7 +1945,7 @@ if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
                     text = 'The client cannot play voice, some libraries are not loaded'
                     break
             
-            other_voice_states = list(other_guild.voice_states.values())
+            other_voice_states = [*other_guild.iter_voice_states()]
             for voice_state in other_voice_states:
                 if voice_state.user is not client:
                     break

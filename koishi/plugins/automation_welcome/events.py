@@ -70,7 +70,7 @@ async def welcome_user(client, guild, user, welcome_style, welcome_channel, welc
         welcome_channel,
         components = welcome_reply_buttons,
         content = f'> {message_content}',
-        embed = Embed(color = color).add_image(image),
+        embed = Embed(color = color).add_image(image).add_footer(f'By {welcome_style.image_creator}.'),
         silent = True,
     )
     schedule_image_refresh(client, message)

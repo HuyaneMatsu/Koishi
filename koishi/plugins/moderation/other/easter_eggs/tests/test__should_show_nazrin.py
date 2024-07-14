@@ -24,6 +24,11 @@ def test__should_show_nazrin(duration):
     -------
     output : `bool`
     """
-    output = should_show_nazrin(duration)
+    mocked = vampytest.mock_globals(
+        should_show_nazrin,
+        random = lambda : 1.0,
+    )
+    
+    output = mocked(duration)
     vampytest.assert_instance(output, bool)
     return output

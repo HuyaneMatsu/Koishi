@@ -190,7 +190,7 @@ else:
 
 
 async def join(client, user, guild, volume):
-    state = guild.voice_states.get(user.id, None)
+    state = guild.get_voice_state(user.id)
     if state is None:
         yield 'You are not at a voice channel!'
         return
@@ -504,7 +504,7 @@ async def stop(client, event_or_message):
 async def move(client, event_or_message, user, voice_channel):
     if voice_channel is None:
         
-        state = GUILD__SUPPORT.voice_states.get(user.id, None)
+        state = GUILD__SUPPORT.get_voice_state(user.id)
         if state is None:
             yield 'You must be in voice channel, or you should pass a voice channel.'
             return
@@ -544,7 +544,7 @@ async def party_is_over(client, event_or_message):
     tasks.append(task)
     
     users = []
-    for state in GUILD__SUPPORT.voice_states.values():
+    for state in GUILD__SUPPORT.iter_voice_states():
         if (state.channel is not channel):
             continue
             

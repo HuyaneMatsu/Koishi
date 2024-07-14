@@ -38,7 +38,7 @@ class Player(SolarPlayer):
             if not channel_id:
                 channel_id = self.channel_id
             
-            for voice_state in guild.voice_states.values():
+            for voice_state in guild.iter_voice_states():
                 if (voice_state.channel_id != channel_id):
                     continue
                 

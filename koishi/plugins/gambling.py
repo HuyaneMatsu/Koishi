@@ -854,6 +854,7 @@ async def award(client, event,
         results = await response.fetchall()
         if results:
             target_user_entry_id, target_user_total_love, target_user_daily_streak, target_user_daily_next = results[0]
+            target_user_daily_next = target_user_daily_next.replace(tzinfo = TimeZone.utc)
         else:
             target_user_entry_id = -1
             target_user_total_love = 0
@@ -871,7 +872,7 @@ async def award(client, event,
                 target_user_daily_streak, target_user_daily_next = calculate_daily_new(
                     target_user_daily_streak, 
                     target_user_daily_next,
-                    now
+                    now,
                 )
             
             target_user_new_daily_streak = target_user_daily_streak + amount

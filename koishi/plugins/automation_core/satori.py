@@ -165,4 +165,3 @@ def get_watcher_channels_for(user_id):
             channel_ids.discard(channel_id)
     
     return channels
-

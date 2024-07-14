@@ -601,11 +601,8 @@ async def create_activity(
         
         guild = event.guild
         if (guild is not None):
-            try:
-                voice_state = guild.voice_states[event.user.id]
-            except KeyError:
-                pass
-            else:
+            voice_state = guild.get_voice_state(event.user.id)
+            if (voice_state is not None):
                 channel = voice_state.channel
                 if channel.is_guild_voice():
                     break

@@ -30,7 +30,7 @@ async def play_(client, event,
         if guild is None:
             abort('Please use this command inside of a guild.')
         
-        state = guild.voice_states.get(user.id, None)
+        state = guild.get_voice_state(user.id)
         if state is None:
             abort(f'Please join a voice channel first, so I will know where to play.')
         

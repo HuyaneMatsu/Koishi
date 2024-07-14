@@ -172,6 +172,10 @@ class AutomationConfigurationSaver(RichAttributeErrorBaseType):
                                         automation_configuration.community_message_moderation_vote_threshold
                                     ),
                                     
+                                    farewell_channel_id = automation_configuration.farewell_channel_id,
+                                    farewell_enabled = automation_configuration.farewell_enabled,
+                                    farewell_style_name = automation_configuration.farewell_style_name,
+                                    
                                     log_emoji_channel_id = automation_configuration.log_emoji_channel_id,
                                     log_emoji_enabled = automation_configuration.log_emoji_enabled,
                                     log_mention_channel_id = automation_configuration.log_mention_channel_id,

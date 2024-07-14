@@ -54,7 +54,7 @@ def iter_channels(client, guild):
     ------
     channel : ``Channel``
     """
-    for channel in chain(guild.channels.values(), guild.threads.values()):
+    for channel in chain(guild.iter_channels(), guild.iter_threads()):
         if should_touhou_feed_in_channel(client, channel):
             yield channel
 

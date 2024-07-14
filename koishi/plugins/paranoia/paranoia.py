@@ -148,9 +148,8 @@ async def try_play_paranoia(client, event, user_is_satori):
     if guild.id in client.voice_clients:
         return
     
-    try:
-        voice_state = guild.voice_states[event.user.id]
-    except KeyError:
+    voice_state = guild.get_voice_state(event.user.id)
+    if voice_state is None:
         return
     
     if voice_state.deaf or voice_state.self_deaf:

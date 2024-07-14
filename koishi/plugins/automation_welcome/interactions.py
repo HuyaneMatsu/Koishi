@@ -314,8 +314,10 @@ async def create_welcome_reply(client, event, joined_user, custom_message_conten
     
     seed = seed ^ event.user_id
     images = welcome_style.images
-
-    embed = Embed(color = event.user.color_at(event.guild_id)).add_image(images[seed % len(images)])
+    image = images[seed % len(images)]
+    color = event.user.color_at(event.guild_id)
+    
+    embed = Embed(color).add_image(image).add_footer(f'By {welcome_style.image_creator}.')
     
     custom_message_content = process_custom_message(custom_message_content)
     if custom_message_content is not None:

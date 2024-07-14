@@ -1,3 +1,21 @@
+### 2024-07-14
+
+- Fix anilist query returned on rate limit instead of retrying.
+- Fix various errors when handing date times. Couldn't compare date time with timezone without. (Since last update)
+- Add new `/automation farewell` commands. Sends farewell messages when a user is removed from a guild.
+    Add initial styles for: flandre, koishi, orin and yoshika.
+- `/automation welcome` messages now also mention who created the image.
+- Fix discord misbehaving at a few cases when `/action` responding.
+- Add **3** image to `/pat`.
+- Add **12** image to `/kiss`.
+- Add **26** image to `/hug`.
+- Add **2** image to `/pocky-kiss`.
+- Add **1** image to `/feed`.
+- Add **2** image to `/lap-sleep`.
+- Add **1** image to `/pocky-kiss` (self).
+- Add **7** image to `/like`.
+- Add **1** image to `/fluff`.
+
 ### 2024-07-07
 
 - Add `nazrin` easter egg to `/mod mute`.

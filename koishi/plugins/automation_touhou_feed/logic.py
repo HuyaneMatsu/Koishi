@@ -586,7 +586,7 @@ def try_update_guild(client, guild):
     guild : ``Guild``
         The guild to scan.
     """
-    for channel in chain(guild.channels.values(), guild.threads.values()):
+    for channel in chain(guild.iter_channels(), guild.iter_threads()):
         if should_touhou_feed_in_channel(client, channel):
             try_update_channel(channel)
 
@@ -600,7 +600,7 @@ def try_remove_guild(guild):
     guild : ``Guild``
         The guild to scan.
     """
-    for channel in chain(guild.channels.values(), guild.threads.values()):
+    for channel in chain(guild.iter_channels(), guild.iter_threads()):
          try_remove_channel(channel)
 
 
@@ -620,7 +620,7 @@ def reset_touhou_feeders(client):
         if not get_touhou_feed_enabled(guild.id):
             continue
             
-        for channel in chain(guild.channels.values(), guild.threads.values()):
+        for channel in chain(guild.iter_channels(), guild.iter_threads()):
             reset_channel_single(client, channel)
 
 

@@ -55,4 +55,9 @@ def apply_presets():
     support_guild_configuration.community_message_moderation_log_enabled = False
     support_guild_configuration.community_message_moderation_log_channel_id = 0
     
+    # Farewell
+    support_guild_configuration.farewell_channel_id = 0
+    support_guild_configuration.farewell_enabled = False
+    support_guild_configuration.farewell_style_name = None
+    
     AUTOMATION_CONFIGURATIONS[support_guild_configuration.guild_id] = support_guild_configuration

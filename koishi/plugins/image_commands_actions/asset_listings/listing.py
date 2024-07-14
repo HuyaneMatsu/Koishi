@@ -3,21 +3,22 @@ __all__ = ('TOUHOU_ACTION_ALL',)
 
 from ...image_handling_core import ImageHandlerStatic
 from ...touhou_core import (
-    CHEN, CHIRUNO, CLOWNPIECE, DAIYOUSEI, DOREMY_SWEET, FUJIWARA_NO_MOKOU, FUTATSUIWA_MAMIZOU, HAKUREI_MIKO,
-    HAKUREI_REIMU, HANIYASUSHIN_KEIKI, HATA_NO_KOKORO, HEARN_MARIBEL, HECATIA_LAPISLAZULI, HIEDA_NO_AKYUU,
-    HIJIRI_BYAKUREN, HIMEKAIDOU_HATATE, HINANAWI_TENSHI, HONG_MEILING, HORIKAWA_RAIKO, HOSHIGUMA_YUUGI, HOUJUU_NUE,
-    HOURAISAN_KAGUYA, IBARAKI_KASEN, IBUKI_SUIKA, IIZUNAMARU_MEGUMU, IMAIZUMI_KAGEROU, INABA_TEWI, INUBASHIRI_MOMIJI,
-    IZAYOI_SAKUYA, JOUTOUGUU_MAYUMI, JUNKO, KAENBYOU_RIN, KAGIYAMA_HINA, KAKU_SEIGA, KAMISHIRASAWA_KEINE,
-    KASODANI_KYOUKO, KAWASHIRO_NITORI, KAZAMI_YUUKA, KIRISAME_MARISA, KICCHOU_YACHIE, KIJIN_SEIJA, KISHIN_SAGUME,
-    KOAKUMA, KOCHIYA_SANAE, KOMEIJI_KOISHI, KOMEIJI_SATORI, KONPAKU_YOUMU, KUDAMAKI_TSUKASA, KUMOI_ICHIRIN,
-    KUROKOMA_SAKI, LETTY_WHITEROCK, LILY_BLACK, LILY_WHITE, LUNA_CHILD, MARGATROID_ALICE, MATARA_OKINA,
-    MEDICINE_MELANCHOLY, MITSUGASHIRA_ENOKO, MIYAKO_YOSHIKA, MIZUHASHI_PARSEE, MONONOBE_NO_FUTO, MORICHIKA_RINNOSUKE,
-    MORIYA_SUWAKO, MOTOORI_KOSUZU, MURASA_MINAMITSU, MYSTIA_LORELEI, NAGAE_IKU, NAZRIN, NISHIDA_SATONO, ONOZUKA_KOMACHI,
-    PATCHOULI_KNOWLEDGE, REISEN_UDONGEIN_INABA, REIUJI_UTSUHO, RINGO, RUMIA, SAIGYOUJI_YUYUKO, SCARLET_FLANDRE,
-    SCARLET_REMILIA, SEIRAN, SEKIBANKI, SHAMEIMARU_AYA, SHIKI_EIKI_YAMAXANADU, SHINKI, SOGA_NO_TOJIKO, STAR_SAPPHIRE,
-    SUKUNA_SHINMYOUMARU, SUNNY_MILK, TATARA_KOGASA, TEIREIDA_MAI, TORAMARU_SHOU, TSUKUMO_BENBEN, TSUKUMO_YATSUHASHI,
-    TOUTETSU_YUUMA, TOYOSATOMIMI_NO_MIKO, USAMI_RENKO, USAMI_SUMIREKO, WAKASAGIHIME, WRIGGLE_NIGHTBUG, YAGOKORO_EIRIN,
-    YAKUMO_RAN, YAKUMO_YUKARI, KURODANI_YAMAME, YASAKA_KANAKO, YOMOTSU_HISAMI, YORIGAMI_SHION
+    AKI_MINORIKO, AKI_SHIZUHA, CHEN, CHIRUNO, CLOWNPIECE, DAIYOUSEI, DOREMY_SWEET, FUJIWARA_NO_MOKOU,
+    FUTATSUIWA_MAMIZOU, HAKUREI_MIKO, HAKUREI_REIMU, HANIYASUSHIN_KEIKI, HATA_NO_KOKORO, HEARN_MARIBEL,
+    HECATIA_LAPISLAZULI, HIEDA_NO_AKYUU, HIJIRI_BYAKUREN, HIMEKAIDOU_HATATE, HINANAWI_TENSHI, HONG_MEILING,
+    HORIKAWA_RAIKO, HOSHIGUMA_YUUGI, HOUJUU_NUE, HOURAISAN_KAGUYA, IBARAKI_KASEN, IBUKI_SUIKA, IIZUNAMARU_MEGUMU,
+    IMAIZUMI_KAGEROU, INABA_TEWI, INUBASHIRI_MOMIJI, IZAYOI_SAKUYA, JOUTOUGUU_MAYUMI, JUNKO, KAENBYOU_RIN,
+    KAGIYAMA_HINA, KAKU_SEIGA, KAMISHIRASAWA_KEINE, KASODANI_KYOUKO, KAWASHIRO_NITORI, KAZAMI_YUUKA, KIRISAME_MARISA,
+    KICCHOU_YACHIE, KIJIN_SEIJA, KISHIN_SAGUME, KOAKUMA, KOCHIYA_SANAE, KOMEIJI_KOISHI, KOMEIJI_SATORI, KONPAKU_YOUMU,
+    KUDAMAKI_TSUKASA, KUMOI_ICHIRIN, KUROKOMA_SAKI, LETTY_WHITEROCK, LILY_BLACK, LILY_WHITE, LUNA_CHILD,
+    MARGATROID_ALICE, MATARA_OKINA, MEDICINE_MELANCHOLY, MITSUGASHIRA_ENOKO, MIYAKO_YOSHIKA, MIZUHASHI_PARSEE,
+    MONONOBE_NO_FUTO, MORICHIKA_RINNOSUKE, MORIYA_SUWAKO, MOTOORI_KOSUZU, MURASA_MINAMITSU, MYSTIA_LORELEI, NAGAE_IKU,
+    NAZRIN, NIPPAKU_ZANMU, NISHIDA_SATONO, ONOZUKA_KOMACHI, PATCHOULI_KNOWLEDGE, REISEN_UDONGEIN_INABA, REIUJI_UTSUHO,
+    RINGO, RUMIA, SAIGYOUJI_YUYUKO, SCARLET_FLANDRE, SCARLET_REMILIA, SEIRAN, SEKIBANKI, SHAMEIMARU_AYA,
+    SHIKI_EIKI_YAMAXANADU, SHINKI, SOGA_NO_TOJIKO, STAR_SAPPHIRE, SUKUNA_SHINMYOUMARU, SUNNY_MILK, TATARA_KOGASA,
+    TEIREIDA_MAI, TORAMARU_SHOU, TSUKUMO_BENBEN, TSUKUMO_YATSUHASHI, TOUTETSU_YUUMA, TOYOSATOMIMI_NO_MIKO, USAMI_RENKO,
+    USAMI_SUMIREKO, WAKASAGIHIME, WRIGGLE_NIGHTBUG, YAGOKORO_EIRIN, YAKUMO_RAN, YAKUMO_YUKARI, KURODANI_YAMAME,
+    YASAKA_KANAKO, YOMOTSU_HISAMI, YORIGAMI_JOON, YORIGAMI_SHION
 )
 from ...user_settings import PREFERRED_IMAGE_SOURCE_TOUHOU
 
@@ -5856,4 +5857,506 @@ TOUHOU_ACTION_ALL.add(
     'yomogi 9392',
 ).with_editor(
     'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262016689592074300/marisa-reimu-kiss-0008.png',
+).with_action(
+    ACTION_TAG_KISS, KIRISAME_MARISA, HAKUREI_REIMU,
+).with_creator(
+    'Mito / みと❁',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262016690393317447/marisa-reimu-kiss-0007.png',
+).with_actions(
+    (ACTION_TAG_KISS, KIRISAME_MARISA, HAKUREI_REIMU),
+    (ACTION_TAG_KISS, HAKUREI_REIMU, KIRISAME_MARISA),
+).with_creator(
+    'Mito / みと❁',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262016691802603552/meiling-sakuya-hug-0001.png',
+).with_action(
+    ACTION_TAG_KISS, HONG_MEILING, IZAYOI_SAKUYA,
+).with_creator(
+    'Mito / みと❁',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262016694302412930/marisa-reimu-pocky-0007.png',
+).with_action(
+    ACTION_TAG_POCKY_KISS, KIRISAME_MARISA, HAKUREI_REIMU,
+).with_creator(
+    'Mito / みと❁',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262016695195668581/marisa-reimu-pocky-0006.png',
+).with_actions(
+    (ACTION_TAG_POCKY_KISS, KIRISAME_MARISA, HAKUREI_REIMU),
+    (ACTION_TAG_POCKY_KISS, HAKUREI_REIMU, KIRISAME_MARISA),
+).with_creator(
+    'Mito / みと❁',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262016696206622801/flandre-reimu-hug-0000.png',
+).with_action(
+    ACTION_TAG_HUG, SCARLET_FLANDRE, HAKUREI_REIMU,
+).with_creator(
+    'Mito / みと❁',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262019335929729145/hijiri-ichirin-koishi-kyouko-mamizou-murasa-nue-shou-kiss-0000.png',
+).with_actions(
+    (ACTION_TAG_KISS, MURASA_MINAMITSU, HOUJUU_NUE),
+    (ACTION_TAG_KISS, HOUJUU_NUE, MURASA_MINAMITSU),
+).with_characters(
+    HIJIRI_BYAKUREN, KASODANI_KYOUKO, FUTATSUIWA_MAMIZOU, TORAMARU_SHOU, KOMEIJI_KOISHI
+).with_creator(
+    'k0269323474256',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262019336420458556/murasa-nue-hug-0003.png',
+).with_action(
+    ACTION_TAG_HUG, MURASA_MINAMITSU, HOUJUU_NUE,
+).with_creator(
+    'k0269323474256',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262019336902676510/murasa-nue-hug-0002.png',
+).with_action(
+    ACTION_TAG_HUG, HOUJUU_NUE, MURASA_MINAMITSU,
+).with_creator(
+    'k0269323474256',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262019337280290856/murasa-nue-handhold-0000.gif',
+).with_actions(
+    (ACTION_TAG_HANDHOLD, MURASA_MINAMITSU, HOUJUU_NUE),
+    (ACTION_TAG_HANDHOLD, HOUJUU_NUE, MURASA_MINAMITSU),
+).with_creator(
+    'k0269323474256',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262021560642834513/ran-yuuma-hug-0000.png',
+).with_action(
+    ACTION_TAG_HUG, YAKUMO_RAN, TOUTETSU_YUUMA,
+).with_creator(
+    'chima_q',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262025388453007471/alice-patchouli-feed-0000.png',
+).with_action(
+    ACTION_TAG_FEED, MARGATROID_ALICE, PATCHOULI_KNOWLEDGE,
+).with_creator(
+    'arnest',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262025388813582468/flandre-sakuya-hug-0000.png',
+).with_action(
+    ACTION_TAG_HUG, SCARLET_FLANDRE, IZAYOI_SAKUYA,
+).with_creator(
+    'arnest',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262025389182550036/minoriko-shizuha-handhold-0000.png',
+).with_actions(
+    (ACTION_TAG_HUG, AKI_MINORIKO, AKI_SHIZUHA),
+    (ACTION_TAG_HUG, AKI_SHIZUHA, AKI_MINORIKO),
+).with_creator(
+    'arnest',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262025389753241621/alice-pocky-0000.png',
+).with_action(
+    ACTION_TAG_POCKY_KISS_SELF, MARGATROID_ALICE, MARGATROID_ALICE,
+).with_creator(
+    'arnest',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262025390138982481/alice-patchouli-kiss-0000.png',
+).with_action(
+    ACTION_TAG_KISS, MARGATROID_ALICE, PATCHOULI_KNOWLEDGE,
+).with_creator(
+    'arnest',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262025390617002024/flandre-pat-0000.png',
+).with_action(
+    ACTION_TAG_PAT, None, SCARLET_FLANDRE,
+).with_creator(
+    'arnest',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262025391313256493/alice-patchouli-hug-0000.png',
+).with_action(
+    ACTION_TAG_HUG, MARGATROID_ALICE, PATCHOULI_KNOWLEDGE,
+).with_creator(
+    'arnest',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262026532097097728/minoriko-shizuha-hug-0000.png',
+).with_action(
+    ACTION_TAG_HUG, AKI_MINORIKO, AKI_SHIZUHA,
+).with_creator(
+    'arnest',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262028750980251718/tewi-pat-0000.png',
+).with_action(
+    ACTION_TAG_PAT, None, INABA_TEWI,
+).with_creator(
+    'maromi gou',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262029613383684157/remilia-satori-hug-0002.png',
+).with_actions(
+    (ACTION_TAG_HUG, SCARLET_REMILIA, KOMEIJI_SATORI),
+    (ACTION_TAG_HUG, KOMEIJI_SATORI, SCARLET_REMILIA),
+).with_creator(
+    'sorani (kaeru0768)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262030222757462077/youmu-yuyuko-hug-0001.png',
+).with_action(
+    ACTION_TAG_HUG, SAIGYOUJI_YUYUKO, KONPAKU_YOUMU,
+).with_creator(
+    'ehehe52921343',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262031422932254832/marisa-youmu-kiss-0000.png',
+).with_action(
+    ACTION_TAG_KISS, KONPAKU_YOUMU, KIRISAME_MARISA,
+).with_creator(
+    'leon0705',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262031423288643584/marisa-reimu-kiss-0010.png',
+).with_action(
+    ACTION_TAG_KISS, HAKUREI_REIMU, KIRISAME_MARISA,
+).with_creator(
+    'leon0705',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262031423704006757/marisa-reimu-kiss-0009.png',
+).with_action(
+    ACTION_TAG_KISS, KIRISAME_MARISA, HAKUREI_REIMU,
+).with_creator(
+    'leon0705',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262032197414551552/yuuka-older-0001.png',
+).with_action(
+    ACTION_TAG_LIKE, None, KAZAMI_YUUKA,
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262032769228210195/junko-older-0003.png',
+).with_action(
+    ACTION_TAG_LIKE, None, JUNKO,
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262041047283011624/kanako-older-0000.png',
+).with_action(
+    ACTION_TAG_LIKE, None, YASAKA_KANAKO,
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262041472270598205/junko-older-0004.png',
+).with_action(
+    ACTION_TAG_LIKE, None, JUNKO,
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262041471629135933/junko-older-0005.png',
+).with_action(
+    ACTION_TAG_LIKE, None, JUNKO,
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262042013189275699/junko-older-0006.png',
+).with_action(
+    ACTION_TAG_LIKE, None, JUNKO,
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262042012287369226/okina-older-0001.png',
+).with_action(
+    ACTION_TAG_LIKE, None, MATARA_OKINA,
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262046917513449564/hisami-zanmu-hug-0000.png',
+).with_action(
+    ACTION_TAG_HUG, YOMOTSU_HISAMI, NIPPAKU_ZANMU,
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262046913566347294/maribel-renko-kiss-0002.png',
+).with_action(
+    ACTION_TAG_KISS, USAMI_RENKO, HEARN_MARIBEL,
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262046913943961632/maribel-renko-kiss-0001.png',
+).with_actions(
+    (ACTION_TAG_KISS, HEARN_MARIBEL, USAMI_RENKO),
+    (ACTION_TAG_KISS, USAMI_RENKO, HEARN_MARIBEL),
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262046914493419540/maribel-renko-hug-0004.png',
+).with_actions(
+    (ACTION_TAG_HUG, HEARN_MARIBEL, USAMI_RENKO),
+    (ACTION_TAG_HUG, USAMI_RENKO, HEARN_MARIBEL),
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262046914938142750/maribel-renko-hug-0003.png',
+).with_actions(
+    (ACTION_TAG_HUG, HEARN_MARIBEL, USAMI_RENKO),
+    (ACTION_TAG_HUG, USAMI_RENKO, HEARN_MARIBEL),
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262046915327955096/maribel-renko-hug-0002.png',
+).with_actions(
+    (ACTION_TAG_HUG, HEARN_MARIBEL, USAMI_RENKO),
+    (ACTION_TAG_HUG, USAMI_RENKO, HEARN_MARIBEL),
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262046915831529612/maribel-renko-hug-0001.png',
+).with_action(
+    ACTION_TAG_HUG, HEARN_MARIBEL, USAMI_RENKO,
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262046916557017249/maribel-renko-hug-0000.png',
+).with_actions(
+    (ACTION_TAG_HUG, HEARN_MARIBEL, USAMI_RENKO),
+    (ACTION_TAG_HUG, USAMI_RENKO, HEARN_MARIBEL),
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262048693566308359/maribel-renko-hug-0007.png',
+).with_actions(
+    (ACTION_TAG_HUG, HEARN_MARIBEL, USAMI_RENKO),
+    (ACTION_TAG_HUG, USAMI_RENKO, HEARN_MARIBEL),
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262048693817839698/maribel-renko-hug-0006.png',
+).with_action(
+    ACTION_TAG_HUG, USAMI_RENKO, HEARN_MARIBEL,
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262048694082076723/maribel-renko-hug-0005.png',
+).with_actions(
+    (ACTION_TAG_HUG, HEARN_MARIBEL, USAMI_RENKO),
+    (ACTION_TAG_HUG, USAMI_RENKO, HEARN_MARIBEL),
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262048694325219338/maribel-renko-kiss-0003.png',
+).with_action(
+    ACTION_TAG_KISS, USAMI_RENKO, HEARN_MARIBEL,
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262048694610563195/maribel-renko-handhold-0000.png',
+).with_actions(
+    (ACTION_TAG_HANDHOLD, HEARN_MARIBEL, USAMI_RENKO),
+    (ACTION_TAG_HANDHOLD, USAMI_RENKO, HEARN_MARIBEL),
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262048692299628614/joon-shion-hug-0003.png',
+).with_action(
+    ACTION_TAG_HUG, YORIGAMI_SHION, YORIGAMI_JOON,
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262048692609876088/joon-shion-hug-0002.png',
+).with_action(
+    ACTION_TAG_HUG, YORIGAMI_SHION, YORIGAMI_JOON,
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262048692966523004/joon-shion-hug-0001.png',
+).with_action(
+    ACTION_TAG_HUG, YORIGAMI_SHION, YORIGAMI_JOON,
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262048693297741955/joon-shion-hug-0000.png',
+).with_action(
+    ACTION_TAG_HUG, YORIGAMI_SHION, YORIGAMI_JOON,
+).with_creator(
+    'Kureko / くれく',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262050606454145167/ran-yuuma-fluff-0000.png',
+).with_action(
+    ACTION_TAG_FLUFF, TOUTETSU_YUUMA, YAKUMO_RAN,
+).with_creator(
+    'polpol',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262051233653461002/flandre-yuuma-nom-0000.png',
+).with_action(
+    ACTION_TAG_NOM, TOUTETSU_YUUMA, SCARLET_FLANDRE,
+).with_creator(
+    'Pura / ぷら',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262054241355169852/aya-chiruno-hug-0004.png',
+).with_action(
+    ACTION_TAG_HUG, CHIRUNO, SHAMEIMARU_AYA,
+).with_creator(
+    'roke (taikodon)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262054241678262404/aya-chiruno-hug-0002.png',
+).with_action(
+    ACTION_TAG_HUG, SHAMEIMARU_AYA, CHIRUNO,
+).with_creator(
+    'roke (taikodon)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262054242450014228/parsee-yuugi-hug-0000.png',
+).with_action(
+    ACTION_TAG_HUG, MIZUHASHI_PARSEE, HOSHIGUMA_YUUGI,
+).with_creator(
+    'roke (taikodon)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262054243024769064/koishi-kokoro-handhold-0000.png',
+).with_actions(
+    (ACTION_TAG_HANDHOLD, KOMEIJI_KOISHI, HATA_NO_KOKORO),
+    (ACTION_TAG_HANDHOLD, HATA_NO_KOKORO, KOMEIJI_KOISHI),
+).with_creator(
+    'roke (taikodon)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262054243712368761/aya-chiruno-pat-0000.png',
+).with_action(
+    ACTION_TAG_PAT, SHAMEIMARU_AYA, CHIRUNO,
+).with_creator(
+    'roke (taikodon)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262054244366811227/ichirin-murasa-kiss-0000.png',
+).with_actions(
+    (ACTION_TAG_KISS, KUMOI_ICHIRIN, MURASA_MINAMITSU),
+    (ACTION_TAG_KISS, MURASA_MINAMITSU, KUMOI_ICHIRIN),
+).with_creator(
+    'roke (taikodon)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262054244912205844/minoriko-shizuha-lap-sleep-0000.png',
+).with_action(
+    ACTION_TAG_LAP_SLEEP, AKI_MINORIKO, AKI_SHIZUHA,
+).with_creator(
+    'roke (taikodon)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262054245436358738/aya-chiruno-hug-0003.png',
+).with_action(
+    ACTION_TAG_HUG, SHAMEIMARU_AYA, CHIRUNO,
+).with_creator(
+    'roke (taikodon)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1262054245964972163/aya-chiruno-lap-sleep-0000.png',
+).with_action(
+    ACTION_TAG_LAP_SLEEP, CHIRUNO, SHAMEIMARU_AYA,
+).with_creator(
+    'roke (taikodon)',
 )

@@ -5857,7 +5857,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 ### flandre-koishi-handhold-0001
 
 - Creator: **sorani (kaeru0768)**
-- Editor: *none*
+- Editor: **HuyaneMatsu**
 - Characters: **Komeiji Koishi**, **Scarlet Flandre**
 - Source: **Touhou**
 
@@ -6093,6 +6093,546 @@ Some creators may be unknown. If you know them please create a PR with it.
 - Creator: **yomogi 9392**
 - Editor: **HuyaneMatsu**
 - Characters: **Kirisame Marisa**, **Mitsugashira Enoko**
+- Source: **Touhou**
+
+---
+
+### marisa-reimu-kiss-0008
+
+- Creator: **Mito / みと❁**
+- Editor: *none*
+- Characters: **Hakurei Reimu**, **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### marisa-reimu-kiss-0007
+
+- Creator: **Mito / みと❁**
+- Editor: *none*
+- Characters: **Hakurei Reimu**, **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### meiling-sakuya-hug-0001
+
+- Creator: **Mito / みと❁**
+- Editor: *none*
+- Characters: **Hong Meiling**, **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### marisa-reimu-pocky-0007
+
+- Creator: **Mito / みと❁**
+- Editor: *none*
+- Characters: **Hakurei Reimu**, **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### marisa-reimu-pocky-0006
+
+- Creator: **Mito / みと❁**
+- Editor: *none*
+- Characters: **Hakurei Reimu**, **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### flandre-reimu-hug-0000
+
+- Creator: **Mito / みと❁**
+- Editor: *none*
+- Characters: **Hakurei Reimu**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### hijiri-ichirin-koishi-kyouko-mamizou-murasa-nue-shou-kiss-0000
+
+- Creator: **k0269323474256**
+- Editor: *none*
+- Characters: **Futatsuiwa Mamizou**, **Hijiri Byakuren**, **Houjuu Nue**, **Kasodani Kyouko**, **Komeiji Koishi**, **Murasa Minamitsu**, **Toramaru Shou**
+- Source: **Touhou**
+
+---
+
+### murasa-nue-hug-0003
+
+- Creator: **k0269323474256**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Murasa Minamitsu**
+- Source: **Touhou**
+
+---
+
+### murasa-nue-hug-0002
+
+- Creator: **k0269323474256**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Murasa Minamitsu**
+- Source: **Touhou**
+
+---
+
+### murasa-nue-handhold-0000
+
+- Creator: **k0269323474256**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Murasa Minamitsu**
+- Source: **Touhou**
+
+---
+
+### ran-yuuma-hug-0000
+
+- Creator: **chima_q**
+- Editor: *none*
+- Characters: **Toutetsu Yuuma**, **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### alice-patchouli-feed-0000
+
+- Creator: **arnest**
+- Editor: **HuyaneMatsu**
+- Characters: **Margatroid Alice**, **Patchouli Knowledge**
+- Source: **Touhou**
+
+---
+
+### flandre-sakuya-hug-0000
+
+- Creator: **arnest**
+- Editor: **HuyaneMatsu**
+- Characters: **Izayoi Sakuya**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### minoriko-shizuha-handhold-0000
+
+- Creator: **arnest**
+- Editor: **HuyaneMatsu**
+- Characters: **Aki Minoriko**, **Aki Shizuha**
+- Source: **Touhou**
+
+---
+
+### alice-pocky-0000
+
+- Creator: **arnest**
+- Editor: **HuyaneMatsu**
+- Characters: **Margatroid Alice**
+- Source: **Touhou**
+
+---
+
+### alice-patchouli-kiss-0000
+
+- Creator: **arnest**
+- Editor: **HuyaneMatsu**
+- Characters: **Margatroid Alice**, **Patchouli Knowledge**
+- Source: **Touhou**
+
+---
+
+### flandre-pat-0000
+
+- Creator: **arnest**
+- Editor: **HuyaneMatsu**
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### alice-patchouli-hug-0000
+
+- Creator: **arnest**
+- Editor: **HuyaneMatsu**
+- Characters: **Margatroid Alice**, **Patchouli Knowledge**
+- Source: **Touhou**
+
+---
+
+### minoriko-shizuha-hug-0000
+
+- Creator: **arnest**
+- Editor: **HuyaneMatsu**
+- Characters: **Aki Minoriko**, **Aki Shizuha**
+- Source: **Touhou**
+
+---
+
+### tewi-pat-0000
+
+- Creator: **maromi gou**
+- Editor: *none*
+- Characters: **Inaba Tewi**
+- Source: **Touhou**
+
+---
+
+### remilia-satori-hug-0002
+
+- Creator: **sorani (kaeru0768)**
+- Editor: *none*
+- Characters: **Komeiji Satori**, **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### youmu-yuyuko-hug-0001
+
+- Creator: **ehehe52921343**
+- Editor: *none*
+- Characters: **Konpaku Youmu**, **Saigyouji Yuyuko**
+- Source: **Touhou**
+
+---
+
+### marisa-youmu-kiss-0000
+
+- Creator: **leon0705**
+- Editor: **HuyaneMatsu**
+- Characters: **Kirisame Marisa**, **Konpaku Youmu**
+- Source: **Touhou**
+
+---
+
+### marisa-reimu-kiss-0010
+
+- Creator: **leon0705**
+- Editor: *none*
+- Characters: **Hakurei Reimu**, **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### marisa-reimu-kiss-0009
+
+- Creator: **leon0705**
+- Editor: *none*
+- Characters: **Hakurei Reimu**, **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### yuuka-older-0001
+
+- Creator: *unknown*
+- Editor: *none*
+- Characters: **Kazami Yuuka**
+- Source: **Touhou**
+
+---
+
+### junko-older-0003
+
+- Creator: *unknown*
+- Editor: *none*
+- Characters: **Junko**
+- Source: **Touhou**
+
+---
+
+### kanako-older-0000
+
+- Creator: *unknown*
+- Editor: *none*
+- Characters: **Yasaka Kanako**
+- Source: **Touhou**
+
+---
+
+### junko-older-0004
+
+- Creator: *unknown*
+- Editor: *none*
+- Characters: **Junko**
+- Source: **Touhou**
+
+---
+
+### junko-older-0005
+
+- Creator: *unknown*
+- Editor: *none*
+- Characters: **Junko**
+- Source: **Touhou**
+
+---
+
+### junko-older-0006
+
+- Creator: *unknown*
+- Editor: *none*
+- Characters: **Junko**
+- Source: **Touhou**
+
+---
+
+### okina-older-0001
+
+- Creator: *unknown*
+- Editor: *none*
+- Characters: **Matara Okina**
+- Source: **Touhou**
+
+---
+
+### hisami-zanmu-hug-0000
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Nippaku Zanmu**, **Yomotsu Hisami**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-kiss-0002
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-kiss-0001
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-hug-0004
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-hug-0003
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-hug-0002
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-hug-0001
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-hug-0000
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-hug-0007
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-hug-0006
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-hug-0005
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-kiss-0003
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-handhold-0000
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### joon-shion-hug-0003
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Yorigami Joon**, **Yorigami Shion**
+- Source: **Touhou**
+
+---
+
+### joon-shion-hug-0002
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Yorigami Joon**, **Yorigami Shion**
+- Source: **Touhou**
+
+---
+
+### joon-shion-hug-0001
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Yorigami Joon**, **Yorigami Shion**
+- Source: **Touhou**
+
+---
+
+### joon-shion-hug-0000
+
+- Creator: **Kureko / くれく**
+- Editor: *none*
+- Characters: **Yorigami Joon**, **Yorigami Shion**
+- Source: **Touhou**
+
+---
+
+### ran-yuuma-fluff-0000
+
+- Creator: **polpol**
+- Editor: *none*
+- Characters: **Toutetsu Yuuma**, **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### flandre-yuuma-nom-0000
+
+- Creator: **Pura / ぷら**
+- Editor: *none*
+- Characters: **Scarlet Flandre**, **Toutetsu Yuuma**
+- Source: **Touhou**
+
+---
+
+### aya-chiruno-hug-0004
+
+- Creator: **roke (taikodon)**
+- Editor: *none*
+- Characters: **Chiruno**, **Shameimaru Aya**
+- Source: **Touhou**
+
+---
+
+### aya-chiruno-hug-0002
+
+- Creator: **roke (taikodon)**
+- Editor: *none*
+- Characters: **Chiruno**, **Shameimaru Aya**
+- Source: **Touhou**
+
+---
+
+### parsee-yuugi-hug-0000
+
+- Creator: **roke (taikodon)**
+- Editor: *none*
+- Characters: **Hoshiguma Yuugi**, **Mizuhashi Parsee**
+- Source: **Touhou**
+
+---
+
+### koishi-kokoro-handhold-0000
+
+- Creator: **roke (taikodon)**
+- Editor: *none*
+- Characters: **Hata no Kokoro**, **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### aya-chiruno-pat-0000
+
+- Creator: **roke (taikodon)**
+- Editor: *none*
+- Characters: **Chiruno**, **Shameimaru Aya**
+- Source: **Touhou**
+
+---
+
+### ichirin-murasa-kiss-0000
+
+- Creator: **roke (taikodon)**
+- Editor: *none*
+- Characters: **Kumoi Ichirin**, **Murasa Minamitsu**
+- Source: **Touhou**
+
+---
+
+### minoriko-shizuha-lap-sleep-0000
+
+- Creator: **roke (taikodon)**
+- Editor: *none*
+- Characters: **Aki Minoriko**, **Aki Shizuha**
+- Source: **Touhou**
+
+---
+
+### aya-chiruno-hug-0003
+
+- Creator: **roke (taikodon)**
+- Editor: *none*
+- Characters: **Chiruno**, **Shameimaru Aya**
+- Source: **Touhou**
+
+---
+
+### aya-chiruno-lap-sleep-0000
+
+- Creator: **roke (taikodon)**
+- Editor: *none*
+- Characters: **Chiruno**, **Shameimaru Aya**
 - Source: **Touhou**
 
 ---

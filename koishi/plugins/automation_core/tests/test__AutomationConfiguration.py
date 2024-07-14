@@ -31,6 +31,9 @@ def _assert_fields_set(automation_configuration):
     vampytest.assert_instance(automation_configuration.community_message_moderation_up_vote_emoji_id, int)
     vampytest.assert_instance(automation_configuration.community_message_moderation_vote_threshold, int)
     vampytest.assert_instance(automation_configuration.entry_id, int)
+    vampytest.assert_instance(automation_configuration.farewell_channel_id, int)
+    vampytest.assert_instance(automation_configuration.farewell_enabled, bool)
+    vampytest.assert_instance(automation_configuration.farewell_style_name, str, nullable = True)
     vampytest.assert_instance(automation_configuration.guild_id, int)
     vampytest.assert_instance(automation_configuration.log_emoji_channel_id, int)
     vampytest.assert_instance(automation_configuration.log_emoji_enabled, bool)
@@ -91,6 +94,9 @@ def test__AutomationConfiguration__repr():
         community_message_moderation_up_vote_emoji_id = BUILTIN_EMOJIS['green_heart'].id
         community_message_moderation_vote_threshold = 6
         entry_id = 1222222222222222
+        farewell_channel_id = 202407140000
+        farewell_enabled = True
+        farewell_style_name = 'flandre'
         log_emoji_channel_id = 202405280003
         log_emoji_enabled = True
         log_mention_channel_id = 202405280004
@@ -121,6 +127,9 @@ def test__AutomationConfiguration__repr():
         automation_configuration.community_message_moderation_up_vote_emoji_id = community_message_moderation_up_vote_emoji_id
         automation_configuration.community_message_moderation_vote_threshold = community_message_moderation_vote_threshold
         automation_configuration.entry_id = entry_id
+        automation_configuration.farewell_channel_id = farewell_channel_id
+        automation_configuration.farewell_enabled = farewell_enabled
+        automation_configuration.farewell_style_name = farewell_style_name
         automation_configuration.log_emoji_channel_id = log_emoji_channel_id
         automation_configuration.log_emoji_enabled = log_emoji_enabled
         automation_configuration.log_mention_channel_id = log_mention_channel_id
@@ -155,6 +164,9 @@ def test__AutomationConfiguration__repr():
         vampytest.assert_in(f'community_message_moderation_up_vote_emoji_id = {community_message_moderation_up_vote_emoji_id!r}', output)
         vampytest.assert_in(f'community_message_moderation_vote_threshold = {community_message_moderation_vote_threshold!r}', output)
         vampytest.assert_in(f'entry_id = {entry_id!r}', output)
+        vampytest.assert_in(f'farewell_channel_id = {farewell_channel_id!r}', output)
+        vampytest.assert_in(f'farewell_enabled = {farewell_enabled!r}', output)
+        vampytest.assert_in(f'farewell_style_name = {farewell_style_name!r}', output)
         vampytest.assert_in(f'log_emoji_channel_id = {log_emoji_channel_id!r}', output)
         vampytest.assert_in(f'log_emoji_enabled = {log_emoji_enabled!r}', output)
         vampytest.assert_in(f'log_mention_channel_id = {log_mention_channel_id!r}', output)
@@ -193,6 +205,9 @@ def _iter_options__bool():
     community_message_moderation_up_vote_emoji_id = BUILTIN_EMOJIS['green_heart'].id
     community_message_moderation_vote_threshold = 6
     entry_id = 1222222222222222
+    farewell_channel_id = 202407140001
+    farewell_enabled = True
+    farewell_style_name = 'flandre'
     log_emoji_channel_id = 202405280011
     log_emoji_enabled = True
     log_mention_channel_id = 202405280012
@@ -283,7 +298,28 @@ def _iter_options__bool():
     
     yield (
         {
-            'entry_id': guild_id,
+            'farewell_channel_id': farewell_channel_id,
+        },
+        True,
+    )
+    
+    yield (
+        {
+            'farewell_enabled': farewell_enabled,
+        },
+        True,
+    )
+    
+    yield (
+        {
+            'farewell_style_name': farewell_style_name,
+        },
+        True,
+    )
+    
+    yield (
+        {
+            'guild_id': guild_id,
         },
         False,
     )
@@ -533,6 +569,9 @@ def test__AutomationConfiguration__from_entry():
         community_message_moderation_up_vote_emoji_id = BUILTIN_EMOJIS['green_heart'].id
         community_message_moderation_vote_threshold = 6
         entry_id = 1222222222222222
+        farewell_channel_id = 202407140002
+        farewell_enabled = True
+        farewell_style_name = 'flandre'
         log_emoji_channel_id = 202405280034
         log_emoji_enabled = True
         log_mention_channel_id = 202405280035
@@ -562,6 +601,9 @@ def test__AutomationConfiguration__from_entry():
             'community_message_moderation_up_vote_emoji_id': community_message_moderation_up_vote_emoji_id,
             'community_message_moderation_vote_threshold': community_message_moderation_vote_threshold,
             'id': entry_id,
+            'farewell_channel_id': farewell_channel_id,
+            'farewell_enabled': farewell_enabled,
+            'farewell_style_name': farewell_style_name,
             'guild_id': guild_id,
             'log_emoji_channel_id': log_emoji_channel_id,
             'log_emoji_enabled': log_emoji_enabled,
@@ -619,6 +661,9 @@ def test__AutomationConfiguration__from_entry():
             community_message_moderation_vote_threshold,
         )
         vampytest.assert_eq(automation_configuration.entry_id, entry_id)
+        vampytest.assert_eq(automation_configuration.farewell_channel_id, farewell_channel_id)
+        vampytest.assert_eq(automation_configuration.farewell_enabled, farewell_enabled)
+        vampytest.assert_eq(automation_configuration.farewell_style_name, farewell_style_name)
         vampytest.assert_eq(automation_configuration.log_emoji_channel_id, log_emoji_channel_id)
         vampytest.assert_eq(automation_configuration.log_emoji_enabled, log_emoji_enabled)
         vampytest.assert_eq(automation_configuration.log_mention_channel_id, log_mention_channel_id)
@@ -663,6 +708,9 @@ def test__AutomationConfiguration__from_entry__cache():
         community_message_moderation_up_vote_emoji_id = BUILTIN_EMOJIS['green_heart'].id
         community_message_moderation_vote_threshold = 6
         entry_id = 1222222222222222
+        farewell_channel_id = 202407140003
+        farewell_enabled = True
+        farewell_style_name = 'flandre'
         log_emoji_channel_id = 202405290002
         log_emoji_enabled = True
         log_mention_channel_id = 202405290003
@@ -695,6 +743,9 @@ def test__AutomationConfiguration__from_entry__cache():
             'community_message_moderation_up_vote_emoji_id': community_message_moderation_up_vote_emoji_id,
             'community_message_moderation_vote_threshold': community_message_moderation_vote_threshold,
             'id': entry_id,
+            'farewell_channel_id': farewell_channel_id,
+            'farewell_enabled': farewell_enabled,
+            'farewell_style_name': farewell_style_name,
             'guild_id': guild_id,
             'log_emoji_channel_id': log_emoji_channel_id,
             'log_emoji_enabled': log_emoji_enabled,
@@ -749,6 +800,9 @@ def test__AutomationConfiguration__from_entry__cache():
             community_message_moderation_vote_threshold,
         )
         vampytest.assert_eq(automation_configuration.entry_id, entry_id)
+        vampytest.assert_eq(automation_configuration.farewell_channel_id, farewell_channel_id)
+        vampytest.assert_eq(automation_configuration.farewell_enabled, farewell_enabled)
+        vampytest.assert_eq(automation_configuration.farewell_style_name, farewell_style_name)
         vampytest.assert_eq(automation_configuration.log_emoji_channel_id, log_emoji_channel_id)
         vampytest.assert_eq(automation_configuration.log_emoji_enabled, log_emoji_enabled)
         vampytest.assert_eq(automation_configuration.log_mention_channel_id, log_mention_channel_id)

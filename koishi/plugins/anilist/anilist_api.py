@@ -47,7 +47,8 @@ async def search(client, json_query):
                     if (retry_after is None):
                         retry_after = 5
                     
-                    return await sleep(retry_after, KOKORO)
+                    await sleep(retry_after, KOKORO)
+                    continue
                 
                 if status_code == 404:
                     return abort('Internal server error occurred, please try again later.')

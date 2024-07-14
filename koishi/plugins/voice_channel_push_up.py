@@ -36,7 +36,7 @@ def should_channel_be_pushed_up(channel):
     
     user_count = 0
     
-    for voice_state in GUILD__KOISHI_CLAN.voice_states.values():
+    for voice_state in GUILD__KOISHI_CLAN.iter_voice_states():
         if voice_state.channel_id != channel_id:
             continue
         

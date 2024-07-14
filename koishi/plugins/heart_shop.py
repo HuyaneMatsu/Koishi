@@ -379,9 +379,12 @@ async def sell_daily(client, event,
         results = await response.fetchall()
         if results:
             entry_id, total_love, daily_streak, daily_next = results[0]
+            daily_next = daily_next.replace(tzinfo = TimeZone.utc)
+            
             now = DateTime.now(TimeZone.utc)
             if daily_next < now:
                 daily_streak, daily_next = calculate_daily_new(daily_streak, daily_next, now)
+                daily_next = daily_next.replace(tzinfo = TimeZone.utc)
         
         else:
             entry_id = -1

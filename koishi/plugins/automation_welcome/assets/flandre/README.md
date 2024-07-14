@@ -1,6 +1,6 @@
 ### Asset Information
 
-All image's author is `paragasu`. They are nice (the safe ones at least).
+All image's author is `paragasu (parags112)`. They are nice (the safe ones at least).
 
 ---
     

@@ -39,6 +39,16 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
     entry_id : `int`
         The entry's identifier in the database.
     
+    farewell_channel_id : `int`
+        The channel's identifier where farewell messages should be ent.
+    
+    farewell_enabled : `bool`
+        Whether farewell messages are enabled.
+    
+    farewell_style_name : `None | str`
+        Which farewell style should the client use. By leaving it as `None` the client's default farewell style will be
+        used if it has.
+    
     guild_id : `int`
         The automation's parent guild identifier.
     
@@ -104,12 +114,12 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         'community_message_moderation_availability_duration', 'community_message_moderation_down_vote_emoji_id',
         'community_message_moderation_enabled', 'community_message_moderation_log_enabled',
         'community_message_moderation_log_channel_id', 'community_message_moderation_up_vote_emoji_id', 
-        'community_message_moderation_vote_threshold', 'entry_id', 'guild_id', 'log_emoji_channel_id',
-        'log_emoji_enabled', 'log_mention_channel_id', 'log_mention_enabled', 'log_satori_auto_start',
-        'log_satori_channel_id', 'log_satori_enabled', 'log_sticker_channel_id', 'log_sticker_enabled',
-        'log_user_channel_id', 'log_user_enabled', 'reaction_copy_enabled', 'reaction_copy_flags',
-        'reaction_copy_role_id', 'saver', 'touhou_feed_enabled', 'welcome_channel_id', 'welcome_enabled',
-        'welcome_reply_buttons_enabled', 'welcome_style_name',
+        'community_message_moderation_vote_threshold', 'entry_id', 'farewell_channel_id', 'farewell_enabled',
+        'farewell_style_name', 'guild_id', 'log_emoji_channel_id', 'log_emoji_enabled', 'log_mention_channel_id',
+        'log_mention_enabled', 'log_satori_auto_start', 'log_satori_channel_id', 'log_satori_enabled',
+        'log_sticker_channel_id', 'log_sticker_enabled', 'log_user_channel_id', 'log_user_enabled',
+        'reaction_copy_enabled', 'reaction_copy_flags', 'reaction_copy_role_id', 'saver', 'touhou_feed_enabled',
+        'welcome_channel_id', 'welcome_enabled', 'welcome_reply_buttons_enabled', 'welcome_style_name',
     )
     
     def __new__(cls, guild_id):
@@ -130,6 +140,9 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.community_message_moderation_up_vote_emoji_id = 0
         self.community_message_moderation_vote_threshold = 0
         self.entry_id = -1
+        self.farewell_channel_id = 0
+        self.farewell_enabled = False
+        self.farewell_style_name = None
         self.guild_id = guild_id
         self.log_emoji_channel_id = 0
         self.log_emoji_enabled = False
@@ -334,6 +347,24 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
                 repr_parts.append(', welcome_style_name = ')
                 repr_parts.append(repr(welcome_style_name))
         
+        # farewell_enabled
+        farewell_enabled = self.farewell_enabled
+        if farewell_enabled:
+            repr_parts.append(', farewell_enabled = ')
+            repr_parts.append(repr(farewell_enabled))
+            
+            # farewell_channel_id
+            farewell_channel_id = self.farewell_channel_id
+            if farewell_channel_id:
+                repr_parts.append(', farewell_channel_id = ')
+                repr_parts.append(repr(farewell_channel_id))
+            
+            farewell_style_name = self.farewell_style_name
+            if (farewell_style_name is not None):
+                repr_parts.append(', farewell_style_name = ')
+                repr_parts.append(repr(farewell_style_name))
+        
+        
         repr_parts.append('>')
         return ''.join(repr_parts)
     
@@ -371,6 +402,15 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
             community_message_moderation_vote_threshold != 0 and
             community_message_moderation_vote_threshold != COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT
         ):
+            return True
+        
+        if self.farewell_channel_id:
+            return True
+        
+        if self.farewell_enabled:
+            return True
+        
+        if (self.farewell_style_name is not None):
             return True
         
         if self.log_emoji_channel_id:
@@ -522,6 +562,9 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.community_message_moderation_log_channel_id = entry['community_message_moderation_log_channel_id']
         self.community_message_moderation_up_vote_emoji_id = entry['community_message_moderation_up_vote_emoji_id']
         self.community_message_moderation_vote_threshold = entry['community_message_moderation_vote_threshold']
+        self.farewell_channel_id = entry['farewell_channel_id']
+        self.farewell_enabled = entry['farewell_enabled']
+        self.farewell_style_name = entry['farewell_style_name']
         self.log_emoji_channel_id = entry['log_emoji_channel_id']
         self.log_emoji_enabled = entry['log_emoji_enabled']
         self.log_mention_channel_id = entry['log_mention_channel_id']
@@ -565,6 +608,10 @@ AUTOMATION_CONFIGURATION_FIELD_SETTERS = {
     'community_message_moderation_vote_threshold': (
         AutomationConfiguration.community_message_moderation_vote_threshold.__set__
     ),
+    
+    'farewell_channel_id': AutomationConfiguration.farewell_channel_id.__set__,
+    'farewell_enabled': AutomationConfiguration.farewell_enabled.__set__,
+    'farewell_style_name': AutomationConfiguration.farewell_style_name.__set__,
     
     'log_emoji_channel_id': AutomationConfiguration.log_emoji_channel_id.__set__,
     'log_emoji_enabled': AutomationConfiguration.log_emoji_enabled.__set__,

@@ -13,6 +13,7 @@ from ..automation_core import (
     discover_satori_channel, get_automation_configuration_for, get_log_satori_channel, get_reaction_copy_fields_forced,
     get_touhou_feed_enabled
 )
+from ..automation_farewell import FAREWELL_STYLE_NAMES
 from ..automation_reaction_copy import (
     MASK_PARSE_NAME_UNICODE, MASK_PARSE_TOPIC_CUSTOM, MASK_PARSE_TOPIC_UNICODE, build_reaction_copy_about_response,
     build_reaction_copy_list_channels_response, get_reaction_copy_flag_parse_names
@@ -841,7 +842,6 @@ WELCOME_COMMANDS = AUTOMATION_COMMANDS.interactions(
 )
 
 
-
 @WELCOME_COMMANDS.interactions(name = 'state')
 async def welcome_set_state(
     event,
@@ -966,6 +966,113 @@ async def welcome_set_style_name(
     automation_configuration.set('welcome_style_name', None if value == CHOICE_DEFAULT else value)
     
     return f'Welcome style set to {value!s}.'
+
+
+# Farewell messages
+
+FAREWELL_COMMANDS = AUTOMATION_COMMANDS.interactions(
+    None,
+    name = 'farewell',
+    description = 'Enable or disable farewell messages.',
+)
+
+
+@FAREWELL_COMMANDS.interactions(name = 'state')
+async def farewell_set_state(
+    event,
+    state : (['enabled', 'disabled'], 'Enable or disable.'),
+):
+    """
+    Sets farewelling state.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    state : `str`
+        Whether to enable to disable it.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('farewell_enabled', state == 'enabled')
+    
+    return f'Welcoming has been {state!s}.'
+
+
+@FAREWELL_COMMANDS.interactions(name = 'channel')
+async def farewell_set_channel(
+    client,
+    event,
+    channel: P(
+        Channel,
+        'Select the channel to farewell at.',
+        channel_types = [ChannelType.guild_text, ChannelType.guild_announcements],
+    ) = None,
+):
+    """
+    Define to which channel should farewell messages be sent to.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    channel : `None`, ``Channel`` = `None`, Optional
+        The channel to log into.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    channel = default_channel_and_check_its_guild(event, channel)
+    check_channel_and_client_permissions(client, channel)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('farewell_channel_id', channel.id)
+    
+    return f'Farewell messages will be sent to {channel:m}.'
+
+
+FAREWELL_STYLE_CHOICES = [CHOICE_DEFAULT, *FAREWELL_STYLE_NAMES]
+
+
+@FAREWELL_COMMANDS.interactions(name = 'style')
+async def farewell_set_style_name(
+    event,
+    value: (FAREWELL_STYLE_CHOICES, 'The farewell style to use to use.'),
+):
+    """
+    Select a custom farewell to use over the default one.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    value : `str`
+        Farewell style name.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.set('farewell_style_name', None if value == CHOICE_DEFAULT else value)
+    
+    return f'Farewell style set to {value!s}.'
+
 
 # Community message moderation
 

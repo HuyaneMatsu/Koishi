@@ -1,5 +1,4 @@
 from config import DATABASE_NAME
-from datetime import datetime as DateTime, timezone as TimeZone
 from warnings import warn
 
 user_common_model = None
@@ -256,6 +255,11 @@ if (DB_ENGINE is not None):
         welcome_reply_buttons_enabled = Column(Boolean, default = False, nullable = False)
         welcome_style_name = Column(String, default = None, nullable = True)
         
+        # Farewell
+        farewell_channel_id = Column(Int64, nullable = False)
+        farewell_enabled = Column(Boolean, default = False, nullable = False)
+        farewell_style_name = Column(String, default = None, nullable = True)
+        
         # Community message moderation
         community_message_moderation_availability_duration = Column(Int64, default = 0, nullable = False)
         community_message_moderation_down_vote_emoji_id = Column(Int64, default = 0, nullable = False)
@@ -303,6 +307,7 @@ if (DB_ENGINE is not None):
     
     DB_ENGINE.dispose()
     # BASE.metadata.create_all(DB_ENGINE)
+    from datetime import datetime as DateTime, timezone as TimeZone
     
     def get_create_common_user_expression(
         user_id,

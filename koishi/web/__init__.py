@@ -37,6 +37,7 @@ BOT_NAMES = [
     'amazonbot',
     'barkrowler',
     'go-http-client',
+    'turnitin',
     
     # From google:
     'googlebot',

@@ -174,6 +174,13 @@ def build_response_list_all(automation_configuration, guild):
             f'Style: {get_choice_representation(automation_configuration.welcome_style_name)!s}'
         )
     ).add_field(
+        'Farewell',
+        (
+            f'State: {get_bool_representation(automation_configuration.farewell_enabled)!s}\n'
+            f'Channel: {get_channel_id_representation(automation_configuration.farewell_channel_id)!s}\n'
+            f'Style: {get_choice_representation(automation_configuration.farewell_style_name)!s}'
+        )
+    ).add_field(
         'Community-message-moderation',
         render_community_message_moderation_description(automation_configuration),
     )

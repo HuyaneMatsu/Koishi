@@ -2,7 +2,7 @@ __all__ = ()
 
 from hata import Emoji
 
-from ..reply_style import ReplyStyle
+from ..welcome_style_reply import WelcomeStyleReply
 from ..welcome_style import WelcomeStyle
 
 
@@ -374,89 +374,91 @@ IMAGES = (
     'https://cdn.discordapp.com/attachments/568837922288173058/1151772310215348244/koishi-welcome-0318.png',
 )
 
+IMAGE_CREATOR = 'zunusama'
+
 
 REPLY_STYLES = (
-    ReplyStyle(
+    WelcomeStyleReply(
         'Share mr. hat with them.',
         Emoji.precreate(1175509886902218874),
         (lambda source, target: f'{source} shares mr. hat with {target}.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Share shrimp fry with them.',
         Emoji.precreate(1175513087156166821),
         (lambda source, target: f'{source} shares shrimp fry with {target}.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Help them embrace mr. unconsciousness.',
         Emoji.precreate(828622013798547466),
         (lambda source, target: f'{source} helps {target} embrace mr. unconsciousness.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Share your fishing rod with them.',
         Emoji.precreate(1175508286267728053),
         (lambda source, target: f'{source} shares their fishing rod with {target}.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Share croissant with them.',
         Emoji.precreate(1175513903518711838),
         (lambda source, target: f'{source} shares croissant with {target}.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Share shrimp fry and croissant with them.',
         Emoji.precreate(1052193063222661151),
         (lambda source, target: f'{source} shares shrimp fry and croissant with {target}.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Hug them.',
         Emoji.precreate(1148897323414454323),
         (lambda source, target: f'{source} hugs {target}.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Share subconscious love with them.',
         Emoji.precreate(852856143528853514),
         (lambda source, target: f'{source} shares subconscious love with {target}.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Help them stop thinking.',
         Emoji.precreate(813390875408203787),
         (lambda source, target: f'{source} helps {target} stop thinking.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Share koishi fumo with them.',
         Emoji.precreate(1175520338793201816),
         (lambda source, target: f'{source} shares koishi fumo with {target}.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Staaaaare at them.',
         Emoji.precreate(1083349493346480140),
         (lambda source, target: f'{source} staaaaares at {target}.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Go fishing with them.',
         Emoji.precreate(1056922454884364318),
         (lambda source, target: f'{source} goes fishing with {target}.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Welcome them to the Extra Stage.',
         Emoji.precreate(1048978997838614618),
         (lambda source, target: f'{source} welcomes {target} to the Extra Stage.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Welcome them to a heart throbbing adventure.',
         Emoji.precreate(1029100558264586250),
         (lambda source, target: f'{source} welcomes {target} to a heart throbbing adventure.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Become their imaginary friend.',
         Emoji.precreate(1029100497526865920),
         (lambda source, target: f'{source} becomes {target}\'s imaginary friend.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Call them.',
         Emoji.precreate(1175506548022321262),
         (lambda source, target: f'{source} calls {target}.'),
     ),
-    ReplyStyle(
+    WelcomeStyleReply(
         'Welcome them to the Palace of the Earth Spirits.',
         Emoji.precreate(1031941507881644093),
         (lambda source, target: f'{source} welcomes {target} to the Palace of the Earth Spirits.'),
@@ -468,5 +470,6 @@ WELCOME_STYLE = WelcomeStyle(
     NAME,
     MESSAGE_CONTENT_BUILDERS,
     IMAGES,
+    IMAGE_CREATOR,
     REPLY_STYLES,
 )

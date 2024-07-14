@@ -77,6 +77,13 @@ def _iter_options():
                     f'Style: {CHOICE_DEFAULT!s}'
                 )
             ).add_field(
+                'Farewell',
+                (
+                    f'State: disabled\n'
+                    f'Channel: {ENTITY_REPRESENTATION_DEFAULT!s}\n'
+                    f'Style: {CHOICE_DEFAULT!s}'
+                )
+            ).add_field(
                 'Community-message-moderation',
                 (
                     f'State: disabled\n'
@@ -95,6 +102,11 @@ def _iter_options():
     guild = GUILD__SUPPORT
     guild.name = guild_name
     
+    farewell_channel_id = 202407140017
+    farewell_channel = Channel.precreate(
+        farewell_channel_id, channel_type = ChannelType.guild_text, name = 'hug'
+    )
+    farewell_style_name = 'koishi'
     log_emoji_channel_id = 202405310003
     log_emoji_channel = Channel.precreate(
         log_emoji_channel_id, channel_type = ChannelType.guild_text, name = 'pocky'
@@ -125,6 +137,10 @@ def _iter_options():
     welcome_style_name = 'flandre'
     
     automation_configuration = AutomationConfiguration(0)
+    
+    automation_configuration.farewell_enabled = True
+    automation_configuration.farewell_channel_id = farewell_channel_id
+    automation_configuration.farewell_style_name = farewell_style_name
     automation_configuration.log_emoji_enabled = True
     automation_configuration.log_emoji_channel_id = log_emoji_channel_id
     automation_configuration.log_mention_enabled = True
@@ -159,6 +175,7 @@ def _iter_options():
             log_user_channel,
             reaction_copy_role,
             welcome_channel,
+            farewell_channel,
         ],
         InteractionResponse(
             allowed_mentions = None,
@@ -216,6 +233,13 @@ def _iter_options():
                     f'Channel: {welcome_channel.mention!s}\n'
                     f'Reply buttons: enabled\n'
                     f'Style: {welcome_style_name!s}'
+                )
+            ).add_field(
+                'Farewell',
+                (
+                    f'State: enabled\n'
+                    f'Channel: {farewell_channel.mention!s}\n'
+                    f'Style: {farewell_style_name!s}'
                 )
             ).add_field(
                 'Community-message-moderation',

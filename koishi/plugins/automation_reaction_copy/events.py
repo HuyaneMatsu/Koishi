@@ -92,7 +92,7 @@ def try_get_target_channel(guild, emoji, flags):
     """
     target_channels = [
         channel for channel
-        in chain(guild.channels.values(), guild.threads.values())
+        in chain(guild.iter_channels(), guild.iter_threads())
         if check_has_channel_emoji(channel, emoji, flags)
     ]
     

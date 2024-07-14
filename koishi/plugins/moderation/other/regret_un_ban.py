@@ -78,7 +78,7 @@ async def regret_un_ban_command(
     reason = process_reason(reason)
     await client.interaction_application_command_acknowledge(event, wait = False)
     
-    regret_mode = await can_regret(client, guild, user, AuditLogEntryType.member_ban_add)
+    regret_mode = await can_regret(client, guild, user, AuditLogEntryType.member_user_add)
     if regret_mode == -1:
         return
     

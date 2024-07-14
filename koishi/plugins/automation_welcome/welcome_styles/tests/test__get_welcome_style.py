@@ -11,7 +11,6 @@ def _iter_options():
     yield None, config.FLANDRE_ID, WELCOME_STYLE_FLANDRE
 
 
-
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__get_welcome_style(welcome_style_name, client_id):
     """

@@ -1,5 +1,7 @@
 __all__ = ('apply_mode_nazrin', 'should_show_nazrin',)
 
+from random import random
+
 from .constants import COLOR_NAZRIN, IMAGE_URL_NAZRIN , TIMEOUT_DURATION_MIN_NAZRIN
 
 
@@ -29,4 +31,4 @@ def should_show_nazrin(duration):
     -------
     should_show_nazrin : `bool`
     """
-    return duration >= TIMEOUT_DURATION_MIN_NAZRIN
+    return duration >= TIMEOUT_DURATION_MIN_NAZRIN and random() > 0.5
