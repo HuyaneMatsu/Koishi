@@ -245,7 +245,7 @@ async def roles(client, event,
             total_love = 0
             available_love = 0
         
-        if available_love > cost:
+        if available_love >= cost:
             can_buy = True
         else:
             can_buy = False

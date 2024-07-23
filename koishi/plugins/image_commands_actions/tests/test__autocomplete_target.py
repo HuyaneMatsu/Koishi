@@ -27,7 +27,7 @@ def _iter_options():
             )
         ),
         None,
-        [PARAMETER_WILD_CARD, 'Chen', 'Chiruno', 'Clownpiece', 'Daiyousei'],
+        [PARAMETER_WILD_CARD, 'Aki Minoriko', 'Aki Shizuha', 'Chen', 'Chiruno'],
     )
     
     yield (

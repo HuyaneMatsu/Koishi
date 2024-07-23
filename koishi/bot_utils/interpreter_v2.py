@@ -81,19 +81,9 @@ def parse_code_content(content, no_code_output = None):
                     break
                 else:
                     return 'Code block was never ended.', True
-                    
-    index = len(lines)
-    while index:
-        index = index - 1
-        line = lines[index]
-        start = LINE_START.match(line).end()
-        if (start != len(line)) and (line[0] != '#'):
-            continue
-
-        del lines[index]
     
     if not lines:
-        return no_code_output,True
+        return no_code_output, True
     
     return '\n'.join(lines), False
 
@@ -203,7 +193,7 @@ class Interpreter:
                             raise SyntaxError(*err.args)
                         
                 except SyntaxError as syntax_error:
-                    # Wer re-raise exceptions of compiling instead of capturing extra exceptions from the warning
+                    # We re-raise exceptions of compiling instead of capturing extra exceptions from the warning
                     # module.
                     into = []
                     

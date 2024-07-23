@@ -1,5 +1,6 @@
 __all__ = ()
 
+from decimal import Decimal
 from random import random
 from math import floor
 
@@ -13,7 +14,7 @@ from ..bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE
 from ..bots import FEATURE_CLIENTS
 
 
-MULTIPLIERS = (1.7, 2.4, 1.2, 0.5, 0.3, 0.1, 0.2, 1.5,)
+MULTIPLIERS = (*(Decimal(value) / 100 for value in (170, 240, 120, 50, 30, 10, 20, 150,)),)
 
 ARROW_BLOCKS = tuple(
     (
@@ -74,7 +75,7 @@ async def lucky_spin(client, event,
             if not enough_hearts:
                 abort(f'You have only {available_love} {EMOJI__HEART_CURRENCY} available hearts.')
             
-            change = floor((MULTIPLIERS[index]-1.0) * bet)
+            change = floor((MULTIPLIERS[index] - 1.0) * bet)
             
             await connector.execute(
                 USER_COMMON_TABLE.update(

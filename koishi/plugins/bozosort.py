@@ -154,6 +154,12 @@ class IdentifierPartBase:
     def __new__(cls):
         return object.__new__(cls)
     
+    
+    def __repr__(self):
+        """Returns the identifier part's representation."""
+        return ''.join(['<', type(self).__name__, '>'])
+    
+    
     def __eq__(self, other):
         if type(self) is not type(other):
             return NotImplemented
@@ -303,6 +309,19 @@ class IdentifierPartString(IdentifierPartBase):
         self.value = value
         return self
     
+    
+    def __repr__(self):
+        """Returns the identifier part's representation."""
+        repr_parts = ['<', type(self).__name__]
+        
+        # value
+        repr_parts.append(' value = ')
+        repr_parts.append(repr(self.value))
+        
+        repr_parts.append('>')
+        return ''.join(repr_parts)
+    
+    
     def __eq__(self, other):
         other_type = type(other)
         if other_type is IdentifierPartDot:
@@ -402,6 +421,22 @@ class Identifier:
         self.before_parts = before_parts
         self.after_part = after_part
         return self
+    
+    
+    def __repr__(self):
+        """Returns the identifier's representation."""
+        repr_parts = ['<', type(self).__name__]
+        
+        # before_parts
+        repr_parts.append(' before_parts = ')
+        repr_parts.append(repr(self.before_parts))
+        
+        # after_part
+        repr_parts.append(', after_part = ')
+        repr_parts.append(repr(self.after_part))
+        
+        repr_parts.append('>')
+        return ''.join(repr_parts)
     
     
     def get_group_level(self):
@@ -646,6 +681,22 @@ class ImportStatement:
         self.import_from = import_from
         self.import_what = import_what
         return self
+    
+    
+    def __repr__(self):
+        """Returns the import statement's representation."""
+        repr_parts = ['<', type(self).__name__]
+        
+        # import_from
+        repr_parts.append(' import_from = ')
+        repr_parts.append(repr(self.import_from))
+    
+        # import_what
+        repr_parts.append(' import_what = ')
+        repr_parts.append(repr(self.import_what))
+        
+        repr_parts.append('>')
+        return ''.join(repr_parts)
     
     
     def get_group_level(self):
@@ -1402,7 +1453,7 @@ def check_keyword_as_recursive(tokens):
             continue
         
         # should not happen
-        if (index < 2) or (index >= len(tokens) - 1):
+        if (index < 1) or (index >= len(tokens) - 1):
             raise EvaluationError(
                 [token],
                 f'{get_token_name(token_type)} at invalid position',
@@ -1466,15 +1517,16 @@ def build_keyword_as_recursively(tokens):
             index += 1
         
         else:
-            if (index < 1) or (index >= tokens_length - 1):
+            if (index >= tokens_length - 1):
                 index += 1
-            else:
                 
+            else:
                 if (
                     token_type != TOKEN_TYPE_IDENTIFIER and
                     token_type != TOKEN_GROUP_TYPE_IDENTIFIER
                 ):
                     index += 1
+                
                 else:
                     after_token = tokens[index + 1]
                     if after_token.type == TOKEN_TYPE_KEYWORD_AS:
@@ -1488,7 +1540,7 @@ def build_keyword_as_recursively(tokens):
                         index += 1
         
         new_tokens.append(token)
-            
+        
         continue
     
     return new_tokens

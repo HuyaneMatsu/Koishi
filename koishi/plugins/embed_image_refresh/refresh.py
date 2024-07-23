@@ -87,7 +87,13 @@ async def _image_refresh(client, message, interaction_event, retry):
     interaction_event : `None | InteractionEvent`
         Interaction event to refresh with if applicable.
     """
-    if interaction_event is not None:
+    if (interaction_event is not None):
+        # if the interaction client is not in the guild we are not receiving
+        if not interaction_event.application_permissions.can_view_channel:
+            await client.interaction_followup_message_get(interaction_event, message)
+            if not _should_image_refresh(message):
+                return
+        
         try:
             await client.interaction_followup_message_edit(
                 interaction_event,

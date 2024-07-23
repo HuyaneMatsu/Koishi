@@ -41,6 +41,10 @@ PATHS_TO_LINK = (
         ('plugins', 'sex', 'assets'),
         'sex',
     ),
+    (
+        ('plugins', 'error_messages', 'assets'),
+        'error_messages',
+    ),
 )
 
 

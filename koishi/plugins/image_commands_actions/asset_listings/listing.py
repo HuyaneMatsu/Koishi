@@ -4650,6 +4650,8 @@ TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1244253103910551674/flandre-koishi-kiss-0006.png',
 ).with_action(
     ACTION_TAG_KISS, KOMEIJI_KOISHI, SCARLET_FLANDRE,
+).with_creator(
+    'kirby (tiokirby)'
 )
 
 TOUHOU_ACTION_ALL.add(
@@ -5746,7 +5748,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1259524955058737223/orin-satori-pat-0001.png',
 ).with_action(
-    ACTION_TAG_KISS, KOMEIJI_SATORI, KAENBYOU_RIN,
+    ACTION_TAG_PAT, KOMEIJI_SATORI, KAENBYOU_RIN,
 ).with_creator(
     'de17a',
 )
@@ -5976,8 +5978,8 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1262025389182550036/minoriko-shizuha-handhold-0000.png',
 ).with_actions(
-    (ACTION_TAG_HUG, AKI_MINORIKO, AKI_SHIZUHA),
-    (ACTION_TAG_HUG, AKI_SHIZUHA, AKI_MINORIKO),
+    (ACTION_TAG_HANDHOLD, AKI_MINORIKO, AKI_SHIZUHA),
+    (ACTION_TAG_HANDHOLD, AKI_SHIZUHA, AKI_MINORIKO),
 ).with_creator(
     'arnest',
 ).with_editor(

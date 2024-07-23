@@ -1,3 +1,13 @@
+### 2024-07-23
+
+- Fix `/heart-shop roles` rejected if you had the same amount as required.
+- Fix `/lucky-spin` float precision issues causing heart loss.
+- Fix `/9ball` displayed who invoked the command in both `embed.author` and in the command headers as well.
+- Fix `bozosort` now should handle listings with `as` keywords correctly.
+- Fix `&execute` removed empty lines from input causing unexpected behaviors when working with multi-line strings.
+- Fix `embed_image_refresh` now does not force update external images that the client(s) cant see.
+- Add new error messages when an interaction raises.
+
 ### 2024-07-14
 
 - Fix anilist query returned on rate limit instead of retrying.

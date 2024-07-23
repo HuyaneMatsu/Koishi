@@ -256,6 +256,7 @@ async def render_hearts_vote_extended(client, event, target_user):
         
         if results:
             entry_id, total_love, daily_streak, daily_next, total_allocated = results[0]
+            daily_next = daily_next.replace(tzinfo = TimeZone.utc)
             
             now = DateTime.now(TimeZone.utc)
             if daily_next > now:
@@ -387,6 +388,8 @@ async def render_hearts_stats(client, event, target_user):
         if results:
             entry_id, total_love, daily_streak, daily_next, total_allocated, count_daily_self, \
                 count_daily_by_waifu, count_daily_for_waifu, count_top_gg_vote = results[0]
+            
+            daily_next = daily_next.replace(tzinfo = TimeZone.utc)
             
             now = DateTime.now(TimeZone.utc)
             if daily_next > now:

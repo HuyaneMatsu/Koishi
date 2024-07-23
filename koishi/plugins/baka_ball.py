@@ -58,9 +58,6 @@ async def baka_ball(
     embed = Embed(
         description = question,
         color = EMBED_COLOR,
-    ).add_author(
-        user.full_name,
-        user.avatar_url,
     )
     
     if response is None:

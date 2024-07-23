@@ -15,6 +15,10 @@ Contains control commands for other automation features.
         - `vote-threshold (threshold : int<min = 2, max = 20> = 0)`
         - `log-state (state : Choice<str>)`
         - `log-channel (channel : null | Channel<channel_types = [0, 5]> = null)`
+    - `farewell`
+        - `channel (channel : null | Channel<channel_types = [0, 5]> = null)`
+        - `state (state : Choice<str>)`
+        - `style (value : Choice<str>)`
     - `log-emoji` (emoji create / modify / delete)
         - `channel (channel : null | Channel<channel_types = [0, 5]> = null)`
         - `state (state : Choice<str>)`
