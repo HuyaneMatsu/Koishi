@@ -1,15 +1,20 @@
 import os
-from flask import Flask, make_response, redirect, request
+from os.path import join as join_paths, split as split_path
+from flask import Flask, make_response, redirect, request, send_from_directory
+
 
 from ..bot_utils.constants import PATH__KOISHI
 
+from .patches import *
+
 
 ROUTE = (__spec__.parent, 'modules')
+ASSETS_DIRECTORY = join_paths(split_path(__file__)[0], 'assets')
+
 
 WEBAPP = Flask(
     'koishi_web',
     template_folder = os.path.join(PATH__KOISHI, 'koishi', 'web', 'templates'),
-    static_folder = os.path.join(PATH__KOISHI, 'koishi', 'web', 'static'),
 )
 
 from config import WEBAPP_SECRET_KEY as SECRET_KEY
@@ -38,6 +43,7 @@ BOT_NAMES = [
     'barkrowler',
     'go-http-client',
     'turnitin',
+    'meta-externalagent',
     
     # From google:
     'googlebot',
@@ -96,6 +102,9 @@ BLOCKED_IPS = {
     
     # Tries to request Wordpress Blog login page (and then login), for real its not a wordpress site
     '34.64.218.102',
+    
+    # Tries to request env variable file & redirect to google???
+    '79.110.62.123',
 }
 
 
@@ -107,6 +116,14 @@ def check_is_ip_banned():
 def block_bots():
     if check_is_user_agent_banned() or check_is_ip_banned():
         return make_response('I am a teapot', 418)
+
+
+@WEBAPP.route('/assets/<path:file_name>', endpoint = 'assets')
+def assets(file_name):
+    response = make_response(send_from_directory(ASSETS_DIRECTORY, file_name))
+    response.headers['Cache-Control'] = 'public, max-age=31536000'
+    response.headers['Expires'] = '31536000'
+    return response
 
 
 @WEBAPP.route('/')

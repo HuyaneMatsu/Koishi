@@ -184,7 +184,7 @@ class EvalUserLock:
         stdin.write(b'\n')
         await stdin.drain()
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exception_type, exception_value, exception_traceback):
         ACTIVE_EXECUTORS.discard(self.user_id)
         
         self.client.command_processor.remove(self.channel, self)

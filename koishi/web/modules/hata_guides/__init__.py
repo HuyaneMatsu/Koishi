@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, abort, send_from_directory, redire
 
 from ....bot_utils.http_builder import HttpText, HttpUrl, HttpContent
 
-from .utils import get_markdown, has_markdown, TOPICS_ASSETS_FOLDER
+from .utils import get_markdown, has_markdown, TOPICS_ASSETS_DIRECTORY
 
 URL_PREFIX = '/project/hata/guides'
 
@@ -28,9 +28,13 @@ def get_topic(name):
         markdown = markdown,
     )
 
+
 @ROUTES.route('/assets/<name>')
 def get_asset(name):
-    return send_from_directory(TOPICS_ASSETS_FOLDER, name)
+    response = send_from_directory(TOPICS_ASSETS_DIRECTORY, name)
+    response.headers['Cache-Control'] = 'public, max-age=31536000'
+    response.headers['Expires'] = '31536000'
+    return response
 
 
 @ROUTES.route('/')

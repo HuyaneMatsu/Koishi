@@ -75,7 +75,7 @@ async def lucky_spin(client, event,
             if not enough_hearts:
                 abort(f'You have only {available_love} {EMOJI__HEART_CURRENCY} available hearts.')
             
-            change = floor((MULTIPLIERS[index] - 1.0) * bet)
+            change = floor(MULTIPLIERS[index] * bet)
             
             await connector.execute(
                 USER_COMMON_TABLE.update(

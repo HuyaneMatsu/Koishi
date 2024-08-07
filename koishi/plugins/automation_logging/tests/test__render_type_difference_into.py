@@ -8,7 +8,7 @@ def test__render_type_difference_into():
     """
     Tests whether ``render_type_difference_into`` works as intended.
     """
-    old_type = ActivityType.game
+    old_type = ActivityType.playing
     new_type = ActivityType.stream
     
     activity = Activity('mister', activity_type = new_type)

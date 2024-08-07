@@ -661,7 +661,7 @@ class DailyEventGUI:
 @FEATURE_CLIENTS.interactions(is_global = True)
 async def gift(client, event,
     target_user: ('user', 'Who is your heart\'s chosen one?'),
-    amount: ('int', 'How much do u love them?'),
+    amount: ('expression', 'How much do u love them?'),
     message: ('str', 'Optional message to send with the gift.') = None,
 ):
     """Gifts hearts to the chosen by your heart."""

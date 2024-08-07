@@ -115,7 +115,7 @@ async def _image_refresh(client, message, interaction_event, retry):
             ):
                 return
             
-            if exception.code not in ERROR_CODES.unknown_interaction: # interaction expired
+            if exception.code != ERROR_CODES.unknown_interaction: # interaction expired
                 await client.events.error(client, '_image_refresh', exception)
                 return
         

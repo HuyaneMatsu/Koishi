@@ -526,7 +526,7 @@ async def escape(message):
     return InteractionResponse(content, allowed_mentions = None)
 
 
-@FEATURE_CLIENTS.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(integration_types = ['guild_install', 'user_install'], is_global = True)
 async def calc(
     expression: ('expression', 'Mathematical expression to evaluate')
 ):

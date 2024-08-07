@@ -1,7 +1,7 @@
 {% extends 'hata_docs_layout.html' %}
 
 {% block head_extra %}
-<script src="{{ url_for('static', filename='hata_content_table_20210419.js') }}"></script>
+<script src="/assets/hata_content_table_20210419.js"></script>
 <script>
     var ct = new CT({{ structure_js|safe }});
 </script>
@@ -40,3 +40,4 @@
     </div>
 </div>
 {% endblock body %}
+

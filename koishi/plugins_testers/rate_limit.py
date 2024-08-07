@@ -95,6 +95,7 @@ async def bypass_request(client, method, url, data = None, params = None, reason
         
         with RLTPrinterBuffer() as buffer:
             response_headers = response.headers
+            print(response_headers)
             status = response.status
             if response_headers['content-type'].startswith('application/json'):
                 response_data = from_json(response_data)
@@ -180,7 +181,7 @@ class RLTCTX:
         return self
 
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exception_type, exception_value, exception_traceback):
         type(self).active_ctx = None
         if exc_type is CancelledError:
             return True
@@ -189,7 +190,7 @@ class RLTCTX:
             Task(KOKORO, self._render_exit_result())
             return True
         
-        Task(KOKORO, self._render_exit_exc(exc_val, exc_tb))
+        Task(KOKORO, self._render_exit_exc(exception_value, exception_traceback))
         return True
     
     
@@ -410,7 +411,7 @@ class RLTPrinterBuffer:
         return self.buffer
     
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exception_type, exception_value, exception_traceback):
         self.buffer.start_new_block = True
         return False
 
@@ -1215,7 +1216,7 @@ async def channel_move(
         # loop at -1 block start
         
         if info_line[3].order_group in before:
-            possible_indexes.append((index_0 + 1, restricted_positions[index_0]+1,),)
+            possible_indexes.append((index_0 + 1, restricted_positions[index_0] + 1,),)
 
         # loop at -1 block ended
         # loop ended
@@ -1233,7 +1234,7 @@ async def channel_move(
         info_line = possible_indexes[index_0]
         
         # loop at 0 block start
-        if info_line[0]>visual_position:
+        if info_line[0] > visual_position:
             result_position = info_line[1]
             
             #GOTO end
@@ -1425,7 +1426,7 @@ async def channel_create(client, guild, name, category = None, type_ = 0):
     return Channel.from_data(data, client, guild_id)
 
 
-async def emoji_guild_get_all(client, guild):
+async def emoji_get_all_guild(client, guild):
     guild_id = guild.id
     return await bypass_request(
         client,
@@ -1434,7 +1435,7 @@ async def emoji_guild_get_all(client, guild):
     )
 
 
-async def emoji_create(client, guild, name, image):
+async def emoji_create_guild(client, guild, name, image):
     image = image_to_base64(image)
     name = ''.join(re.findall('([0-9A-Za-z_]+)', name))
     if not (1 < len(name) < 33):
@@ -1457,7 +1458,7 @@ async def emoji_create(client, guild, name, image):
     return Emoji.from_data(data, guild_id)
 
 
-async def emoji_get(client, emoji):
+async def emoji_get_guild(client, emoji):
     guild = emoji.guild
     if guild is None:
         return
@@ -1470,7 +1471,7 @@ async def emoji_get(client, emoji):
     )
 
 
-async def emoji_delete(client, emoji):
+async def emoji_delete_guild(client, emoji):
     guild_id = emoji.guild.id
     emoji_id = emoji.id
     return await bypass_request(
@@ -1480,7 +1481,7 @@ async def emoji_delete(client, emoji):
     )
 
 
-async def emoji_edit(client, emoji, name): # keep it short
+async def emoji_edit_guild(client, emoji, name): # keep it short
     data = {'name': name}
     guild_id = emoji.guild.id
     emoji_id = emoji.id
@@ -3536,6 +3537,70 @@ async def channel_get(client, channel):
     )
 
 
+async def emoji_get_all_application(client):
+    application_id = client.application.id
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/applications/{application_id}/emojis',
+    )
+
+
+async def emoji_create_application(client, name, image):
+    image = image_to_base64(image)
+    name = ''.join(re.findall('([0-9A-Za-z_]+)', name))
+    if not (1 < len(name) < 33):
+        raise ValueError(f'The length of the name can be between 2-32, got {len(name)}')
+    
+    data = {
+        'name'      : name,
+        'image'     : image,
+        'role_ids'  : []
+    }
+        
+    application_id = client.application.id
+    data = await bypass_request(
+        client,
+        METHOD_POST,
+        f'{API_ENDPOINT}/applications/{application_id}/emojis',
+        data,
+    )
+    
+    return Emoji.from_data(data, application_id)
+
+
+async def emoji_get_application(client, emoji):
+    application_id = client.application.id
+    emoji_id = emoji.id
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/applications/{application_id}/emojis/{emoji_id}',
+    )
+
+
+async def emoji_delete_application(client, emoji):
+    application_id = client.application.id
+    emoji_id = emoji.id
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
+        f'{API_ENDPOINT}/applications/{application_id}/emojis/{emoji_id}',
+    )
+
+
+async def emoji_edit_application(client, emoji, name): # keep it short
+    data = {'name': name}
+    application_id = client.application.id
+    emoji_id = emoji.id
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
+        f'{API_ENDPOINT}/applications/{application_id}/emojis/{emoji_id}',
+        data,
+    )
+
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0000(client, message):
     """
@@ -4879,7 +4944,7 @@ async def rate_limit_test_0052(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        await emoji_guild_get_all(client, guild)
+        await emoji_get_all_guild(client, guild)
 
 
 @RATE_LIMIT_COMMANDS
@@ -4899,7 +4964,7 @@ async def rate_limit_test_0053(client, message):
         
         emoji = next(iter(emojis.values()))
         
-        await emoji_get(client, emoji)
+        await emoji_get_guild(client, emoji)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5372,18 +5437,18 @@ async def rate_limit_test_0082(client, message, name : str, emoji : 'Emoji'):
         for index, guild_id in enumerate(client.guild_profiles.keys()):
             guild = GUILDS[guild_id]
             if index == 0:
-                guild1 = guild
+                guild_0 = guild
             else:
                 guild_2 = guild
         
         async with client.http.get(emoji.url) as response:
             emoji_data = await response.read()
         
-        emoji_1 = await client.emoji_create(guild1, name, emoji_data)
-        emoji_2 = await client.emoji_create(guild_2, name, emoji_data)
+        emoji_1 = await client.emoji_create_guild(guild_0, emoji_data, name = name)
+        emoji_2 = await client.emoji_create_guild(guild_2, emoji_data, name = name)
         
-        await emoji_delete(client, emoji_1)
-        await emoji_delete(client, emoji_2)
+        await emoji_delete_guild(client, emoji_1)
+        await emoji_delete_guild(client, emoji_2)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5401,18 +5466,18 @@ async def rate_limit_test_0083(client, message, name : str, emoji : 'Emoji'):
         for index, guild_id in enumerate(client.guild_profiles.keys()):
             guild = GUILDS[guild_id]
             if index == 0:
-                guild1 = guild
+                guild_0 = guild
             else:
                 guild_2 = guild
         
         async with client.http.get(emoji.url) as response:
             emoji_data = await response.read()
         
-        emoji_1 = await emoji_create(client, guild1, name, emoji_data)
-        emoji_2 = await emoji_create(client, guild_2, name, emoji_data)
+        emoji_1 = await emoji_create_guild(client, guild_0, emoji_data, name = name)
+        emoji_2 = await emoji_create_guild(client, guild_2, name, emoji_data)
         
-        await client.emoji_delete(emoji_1)
-        await client.emoji_delete(emoji_2)
+        await client.emoji_delete_guild(emoji_1)
+        await client.emoji_delete_guild(emoji_2)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5431,11 +5496,11 @@ async def rate_limit_test_0084(client, message, name : str, emoji : 'Emoji'):
         async with client.http.get(emoji.url) as response:
             emoji_data = await response.read()
         
-        emoji_1 = await emoji_create(client, guild, name, emoji_data)
-        await client.emoji_delete(emoji_1)
+        emoji_1 = await emoji_create_guild(client, guild, name, emoji_data)
+        await client.emoji_delete_guild(emoji_1)
         
-        emoji_2 = await emoji_create(client, guild, name, emoji_data)
-        await client.emoji_delete(emoji_2)
+        emoji_2 = await emoji_create_guild(client, guild, name, emoji_data)
+        await client.emoji_delete_guild(emoji_2)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5454,9 +5519,9 @@ async def rate_limit_test_0085(client, message, name : str, emoji : 'Emoji'):
         async with client.http.get(emoji.url) as response:
             emoji_data = await response.read()
         
-        emoji = await client.emoji_create( guild, name, emoji_data)
-        await emoji_edit(client, emoji, name = 'cake_hater')
-        await client.emoji_delete(emoji)
+        emoji = await client.emoji_create_guild( guild, name, emoji_data)
+        await emoji_edit_guild(client, emoji, name = 'cake_hater')
+        await client.emoji_delete_guild(emoji)
 
 
 @RATE_LIMIT_COMMANDS
@@ -8400,3 +8465,93 @@ async def rate_limit_test_0217(client, message):
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0217') as RLT:
         await channel_get(client, channel)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0218(client, message):
+    """
+    Gets the emojis of the application.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0218') as RLT:
+        await emoji_get_all_application(client)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0219(client, message):
+    """
+    Gets the emojis of the application.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0219') as RLT:
+        emojis = client.application._cache_emojis
+        if (emojis is None) or (not emojis):
+            await RLT.send('The application should have at least 1 emoji.')
+        
+        emoji = next(iter(emojis.values()))
+        
+        await emoji_get_application(client, emoji)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0220(client, message, name : str, emoji : 'Emoji'):
+    """
+    Creates 2 emoji in 1 application and then deletes it. Checks emoji creation.
+    
+    Please also give a name for the emoji and an emoji as well.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0220') as RLT:
+        async with client.http.get(emoji.url) as response:
+            emoji_data = await response.read()
+        
+        emoji_0 = await emoji_create_application(client, name + '0', emoji_data)
+        await client.emoji_delete_application(emoji_0)
+        
+        emoji_1 = await emoji_create_application(client, name + '1', emoji_data)
+        await client.emoji_delete_application(emoji_1)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0221(client, message, name : str, emoji : 'Emoji'):
+    """
+    Creates an emoji, edits and then deletes it. Checks emoji edition.
+    
+    Please also give a name for the emoji and an emoji as well.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0221') as RLT:
+        async with client.http.get(emoji.url) as response:
+            emoji_data = await response.read()
+        
+        emoji = await client.emoji_create_application(emoji_data, name = name)
+        await emoji_edit_application(client, emoji, name = 'cake_hater')
+        await client.emoji_delete_application(emoji)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0222(client, message):
+    """
+    Gets the emojis of the application 3 times.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0222') as RLT:
+        await emoji_get_all_application(client)
+        await emoji_get_all_application(client)
+        await emoji_get_all_application(client)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0223(client, message, name : str, emoji : 'Emoji'):
+    """
+    Deletes an emoji.
+    
+    Please also give a name for the emoji and an emoji as well.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0223') as RLT:
+        async with client.http.get(emoji.url) as response:
+            emoji_data = await response.read()
+        
+        emoji = await client.emoji_create_application(emoji_data, name = name)
+        await emoji_delete_application(client, emoji)

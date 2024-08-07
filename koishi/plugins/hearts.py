@@ -506,8 +506,13 @@ HEARTS_FIELD_NAME_TO_RENDERER = {
     HEARTS_FIELD_NAME_STATS: (False, render_hearts_stats),
 }
 
-@FEATURE_CLIENTS.interactions(is_global = True)
-async def hearts(client, event,
+@FEATURE_CLIENTS.interactions(
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+)
+async def hearts(
+    client,
+    event,
     target_user: ('user', 'Do you wanna know some1 else\'s hearts?') = None,
     field: (HEARTS_FIELD_CHOICES, 'Choose a field!') = HEARTS_FIELD_NAME_SHORT,
 ):

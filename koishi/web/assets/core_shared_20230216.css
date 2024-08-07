@@ -576,12 +576,12 @@ p[align="right"] a::after, p[align="left"] a::before {
 
 p[align="right"] a::after {
     margin-left: var(--size-header-icon-spacing);
-    background-image: url(/static/arrow_left_to_right.svg);
+    background-image: url(/assets/arrow_left_to_right.svg);
 }
 
 p[align="left"] a::before {
     margin-right: var(--size-header-icon-spacing);
-    background-image: url(/static/arrow_right_to_left.svg);
+    background-image: url(/assets/arrow_right_to_left.svg);
 }
 
 .header_menu a, p[align] a {
@@ -818,7 +818,7 @@ input {
 }
 
 .background {
-    background-image: url(/static/koishi_kokoro_graffiti_censored_by_ashy_opt.jpg);
+    background-image: url(/assets/koishi_kokoro_graffiti_censored_by_ashy_opt.jpg);
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
@@ -1234,7 +1234,7 @@ h7:hover .anchor, .with_anchor:hover .anchor {
 /* Anchor */
 
 .md .anchor {
-    content: url('/static/anchor.svg');
+    content: url('/assets/anchor.svg');
     filter: var(--color-svg-filter);
     padding-right: var(--size-anchor-spacing);
     visibility: hidden;

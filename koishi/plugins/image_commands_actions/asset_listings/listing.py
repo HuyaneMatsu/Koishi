@@ -397,6 +397,8 @@ TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1208515753079476314/chen-ran-fluff-0014.png',
 ).with_action(
     ACTION_TAG_FLUFF, CHEN, YAKUMO_RAN,
+).with_creator(
+    'yukitarou (awamori)',
 )
 
 TOUHOU_ACTION_ALL.add(
@@ -5359,7 +5361,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1246935653485379584/aya-momiji-pat-0001.gif',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1270701692425601086/aya-momiji-pat-0002.gif',
 ).with_action(
     ACTION_TAG_PAT, SHAMEIMARU_AYA, INUBASHIRI_MOMIJI,
 ).with_creator(
@@ -5488,7 +5490,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1259047640059084862/chiruno-day-hug-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1270672046636007435/chiruno-dai-hug-0000.png',
 ).with_actions(
     (ACTION_TAG_HUG, CHIRUNO, DAIYOUSEI),
     (ACTION_TAG_HUG, DAIYOUSEI, CHIRUNO),
@@ -5497,7 +5499,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1259047639727603743/chiruno-day-hug-0001.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1270672047013625916/chiruno-dai-hug-0001.png',
 ).with_actions(
     (ACTION_TAG_HUG, CHIRUNO, DAIYOUSEI),
     (ACTION_TAG_HUG, DAIYOUSEI, CHIRUNO),
@@ -5881,7 +5883,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1262016691802603552/meiling-sakuya-hug-0001.png',
 ).with_action(
-    ACTION_TAG_KISS, HONG_MEILING, IZAYOI_SAKUYA,
+    ACTION_TAG_HUG, HONG_MEILING, IZAYOI_SAKUYA,
 ).with_creator(
     'Mito / みと❁',
 )

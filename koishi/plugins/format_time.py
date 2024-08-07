@@ -31,6 +31,7 @@ FORMAT_STYLES = (
 
 FORMAT_TIME_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
     name = 'format-time',
     description = 'Formats the given time.',

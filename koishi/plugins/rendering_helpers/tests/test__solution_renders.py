@@ -476,7 +476,7 @@ def _iter_options__render_activity_description_into():
         (
             (
                 f'Name: with Kokoro\n'
-                f'Type: game ~ 0'
+                f'Type: playing ~ 0'
             ),
             True,
         )
@@ -491,7 +491,7 @@ def _iter_options__render_activity_description_into():
             (
                 f'\n'
                 f'Name: with Kokoro\n'
-                f'Type: game ~ 0'
+                f'Type: playing ~ 0'
             ),
             True,
         )

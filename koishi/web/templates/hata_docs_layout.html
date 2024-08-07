@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='core_shared_20230216.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_docs_20220411.css') }}">
+    <link rel="stylesheet" type="text/css" href="/assets/core_shared_20230216.css">
+    <link rel="stylesheet" type="text/css" href="/assets/hata_docs_20220411.css">
 
     <!-- JS -->
     {% include "hata_header_js.html" %}
@@ -20,7 +20,7 @@
         <div class="header_left">
             <details class="burger_1200" id="header_left_burger">
                 <summary>
-                    <img src="/static/hamburger.svg">
+                    <img src="/assets/hamburger.svg">
                 </summary>
                 <details-menu>
                     <a href="/project/hata">
@@ -59,12 +59,12 @@
 
         </div>
         <div class="header_right">
-            <form class="header_search" method="POST" action="{{ url_for('docs.search') }}">
+            <form class="header_search" method="POST" action="/project/hata/docs/search">
                 {{ search_form.hidden_tag() }}
-                <img src="/static/search.svg">
+                <img src="/assets/search.svg">
                 {{ search_form.query }}
                 <div class="submit">
-                    <img src="/static/arrow_left_to_right.svg">
+                    <img src="/assets/arrow_left_to_right.svg">
                     {{ search_form.submit }}
                 </div>
             </form>

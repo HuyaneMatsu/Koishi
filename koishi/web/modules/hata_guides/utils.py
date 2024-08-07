@@ -10,8 +10,9 @@ from os.path import join as join_paths, isfile as is_file, split as split_path
 from os import listdir as list_directory
 import hata
 
-TOPICS_FOLDER = join_paths(split_path(split_path(hata.__file__)[0])[0], 'docs', 'topics')
-TOPICS_ASSETS_FOLDER = join_paths(TOPICS_FOLDER, 'assets')
+TOPICS_DIRECTORY = join_paths(split_path(split_path(hata.__file__)[0])[0], 'docs', 'topics')
+TOPICS_ASSETS_DIRECTORY = join_paths(TOPICS_DIRECTORY, 'assets')
+
 
 MARKDOWN_CACHE = {}
 
@@ -47,7 +48,7 @@ def markdown_name_to_title(name):
 
 def find_markdowns():
     try:
-        names = list_directory(TOPICS_FOLDER)
+        names = list_directory(TOPICS_DIRECTORY)
     except FileNotFoundError:
         return
     
@@ -59,7 +60,7 @@ def find_markdowns():
         if ('readme' in case_fold_name) or ('wip' in case_fold_name) or ('deprecated' in case_fold_name):
             continue
         
-        file_path = join_paths(TOPICS_FOLDER, name)
+        file_path = join_paths(TOPICS_DIRECTORY, name)
         if not is_file(file_path):
             continue
         

@@ -1,3 +1,14 @@
+### 2024-08-07
+
+- `/calc` is now available when user installed.
+- Allow expressions in `/gift` command for `amount` parameter.
+- `/format-time` is now available when user installed.
+- `/hearts` is now available when user installed.
+- `/21` is now available when user installed. Also available in private channels too.
+- `/21` multiplayer now uses invoking user only messages instead of private messages.
+- `/21` multiplayer now also refunds if everyone loses.
+- Fix unsupported operand in `/lucky-spin`. (since 2024-07-23)
+
 ### 2024-07-23
 
 - Fix `/heart-shop roles` rejected if you had the same amount as required.
