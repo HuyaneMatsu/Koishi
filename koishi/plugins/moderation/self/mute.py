@@ -71,7 +71,7 @@ async def mute_command(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = re.compile(f'{re.escape(CUSTOM_ID_SELF_MUTE)}\.(\d+)'), target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = re.compile(f'{re.escape(CUSTOM_ID_SELF_MUTE)}\\.(\\d+)'), target = 'form')
 async def self_mute(client, event, duration_seconds, *, reason = None):
     """Self-mutes the user."""
     guild = event.guild

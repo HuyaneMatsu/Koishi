@@ -1,27 +1,29 @@
 __all__ = (
     'AKI_MINORIKO', 'AKI_SHIZUHA', 'ANABERAL_KANA', 'ASAKURA_RIKAKO', 'CHEN', 'CHIRUNO', 'CLOWNPIECE', 'DAIYOUSEI',
-    'DOREMY_SWEET', 'EBISU_EIKA', 'ELLEN', 'ELLY', 'ETERNITY_LARVA', 'FUJIWARA_NO_MOKOU', 'FUTATSUIWA_MAMIZOU',
-    'HAKUREI_MIKO', 'HAKUREI_REIMU', 'HANIYASUSHIN_KEIKI', 'HATA_NO_KOKORO', 'HEARN_MARIBEL', 'HECATIA_LAPISLAZULI',
-    'HEI_MEILING', 'HIEDA_NO_AKYUU', 'HIJIRI_BYAKUREN', 'HIMEKAIDOU_HATATE', 'HIMEMUSHI_MOMOYO', 'HINANAWI_TENSHI',
-    'HONG_MEILING', 'HORIKAWA_RAIKO', 'HOSHIGUMA_YUUGI', 'HOUJUU_NUE', 'HOURAISAN_KAGUYA', 'IBARAKI_KASEN',
-    'IBUKI_SUIKA', 'IIZUNAMARU_MEGUMU', 'IMAIZUMI_KAGEROU', 'INABA_TEWI', 'INUBASHIRI_MOMIJI', 'IZAYOI_SAKUYA',
-    'JOUTOUGUU_MAYUMI', 'JUNKO', 'KAENBYOU_RIN', 'KAGIYAMA_HINA', 'KAKU_SEIGA', 'KAMISHIRASAWA_KEINE',
-    'KASODANI_KYOUKO', 'KAWASHIRO_NITORI', 'KAZAMI_YUUKA', 'KICCHOU_YACHIE', 'KIJIN_SEIJA', 'KIRISAME_MARISA',
+    'DOREMY_SWEET', 'EBISU_EIKA', 'ELIS', 'ELLEN', 'ELLY', 'ETERNITY_LARVA', 'FUJIWARA_NO_MOKOU', 'FUTATSUIWA_MAMIZOU',
+    'GENGETSU', 'HAKUREI_MIKO', 'HAKUREI_REIMU', 'HANIYASUSHIN_KEIKI', 'HATA_NO_KOKORO', 'HEARN_MARIBEL',
+    'HECATIA_LAPISLAZULI', 'HEI_MEILING', 'HIEDA_NO_AKYUU', 'HIJIRI_BYAKUREN', 'HIMEKAIDOU_HATATE', 'HIMEMUSHI_MOMOYO',
+    'HINANAWI_TENSHI', 'HONG_MEILING', 'HORIKAWA_RAIKO', 'HOSHIGUMA_YUUGI', 'HOUJUU_NUE', 'HOURAISAN_KAGUYA',
+    'IBARAKI_KASEN', 'IBUKI_SUIKA', 'IIZUNAMARU_MEGUMU', 'IMAIZUMI_KAGEROU', 'INABA_TEWI', 'INUBASHIRI_MOMIJI',
+    'IZAYOI_SAKUYA', 'JOUTOUGUU_MAYUMI', 'JUNKO', 'KAENBYOU_RIN', 'KAGIYAMA_HINA', 'KAKU_SEIGA', 'KAMISHIRASAWA_KEINE',
+    'KASODANI_KYOUKO', 'KAWASHIRO_NITORI', 'KAZAMI_YUUKA', 'KICCHOU_YACHIE', 'KIKURI', 'KIJIN_SEIJA', 'KIRISAME_MARISA',
     'KISHIN_SAGUME', 'KISUME', 'KITASHIRAKAWA_CHIYURI', 'KOAKUMA', 'KOCHIYA_SANAE', 'KOKUU_HARUTO', 'KOMANO_AUNN',
     'KOMAKUSA_SANNYO', 'KOMEIJI_KOISHI', 'KOMEIJI_SATORI', 'KONNGARA', 'KONPAKU_YOUMU', 'KUDAMAKI_TSUKASA',
-    'KUMOI_ICHIRIN', 'KURODANI_YAMAME', 'KUROKOMA_SAKI', 'LETTY_WHITEROCK', 'LILY_BLACK', 'LILY_WHITE',
-    'LUNASA_PRISMRIVER', 'LUNA_CHILD', 'LYRICA_PRISMRIVER', 'MARGATROID_ALICE', 'MATARA_OKINA', 'MEDICINE_MELANCHOLY',
-    'MERLIN_PRISMRIVER', 'MIMA', 'MITSUGASHIRA_ENOKO', 'MIYAKO_YOSHIKA', 'MIZUHASHI_PARSEE', 'MONONOBE_NO_FUTO',
-    'MORICHIKA_RINNOSUKE', 'MORIYA_SUWAKO', 'MOTOORI_KOSUZU', 'MURASA_MINAMITSU', 'MYSTIA_LORELEI', 'NAGAE_IKU',
-    'NAZRIN', 'NIPPAKU_ZANMU', 'NISHIDA_SATONO', 'NIWATARI_KUTAKA', 'OKUNODA_MIYOI', 'ONOZUKA_KOMACHI',
-    'PATCHOULI_KNOWLEDGE', 'REISEN_UDONGEIN_INABA', 'REIUJI_UTSUHO', 'RINGO', 'RUMIA', 'SAIGYOUJI_YUYUKO',
-    'SAKATA_NEMUNO', 'SATSUKI_RIN', 'SCARLET_FLANDRE', 'SCARLET_REMILIA', 'SEIRAN', 'SEKIBANKI', 'SHAMEIMARU_AYA',
-    'SHIKI_EIKI_YAMAXANADU', 'SHINKI', 'SOGA_NO_TOJIKO', 'SOKRATES', 'SON_BITEN', 'STAR_SAPPHIRE',
+    'KUMOI_ICHIRIN', 'KURUMI', 'KURODANI_YAMAME', 'KUROKOMA_SAKI', 'MAI', 'LETTY_WHITEROCK', 'LOUISE', 'LILY_BLACK',
+    'LILY_WHITE', 'LUNASA_PRISMRIVER', 'LUNA_CHILD', 'LYRICA_PRISMRIVER', 'MARGATROID_ALICE', 'MATARA_OKINA',
+    'MATENSHI', 'MEDICINE_MELANCHOLY', 'MEIRA', 'MERLIN_PRISMRIVER', 'MIMA', 'MITSUGASHIRA_ENOKO', 'MIYAKO_YOSHIKA',
+    'MIZUHASHI_PARSEE', 'MONONOBE_NO_FUTO', 'MORICHIKA_RINNOSUKE', 'MORIYA_SUWAKO', 'MOTOORI_KOSUZU', 'MUGETSU',
+    'MURASA_MINAMITSU', 'MYSTIA_LORELEI', 'NAGAE_IKU', 'NAZRIN', 'NIPPAKU_ZANMU', 'NISHIDA_SATONO', 'NIWATARI_KUTAKA',
+    'NOROIKO', 'OKUNODA_MIYOI', 'ONOZUKA_KOMACHI', 'ORANGE', 'PATCHOULI_KNOWLEDGE', 'REISEN_UDONGEIN_INABA',
+    'REIUJI_UTSUHO', 'RENGETEKI', 'RIKA', 'RINGO', 'RUMIA', 'SAIGYOUJI_YUYUKO', 'SAKATA_NEMUNO', 'SARA', 'SARIEL',
+    'SATSUKI_RIN', 'SCARLET_FLANDRE', 'SCARLET_REMILIA', 'SEIRAN', 'SEKIBANKI', 'SHAMEIMARU_AYA',
+    'SHIKI_EIKI_YAMAXANADU', 'SHINKI', 'SHINGYOKU', 'SOGA_NO_TOJIKO', 'SOKRATES', 'SON_BITEN', 'STAR_SAPPHIRE',
     'SUKUNA_SHINMYOUMARU', 'SUNNY_MILK', 'TAMATSUKURI_MISUMARU', 'TATARA_KOGASA', 'TEIREIDA_MAI', 'TENKAJIN_CHIYARI',
     'TENKYUU_CHIMATA', 'TORAMARU_SHOU', 'TOUTETSU_YUUMA', 'TOYOSATOMIMI_NO_MIKO', 'TSUKUMO_BENBEN',
     'TSUKUMO_YATSUHASHI', 'USAMI_RENKO', 'USAMI_SUMIREKO', 'USHIZAKI_URUMI', 'WAKASAGIHIME', 'WATATSUKI_NO_TOYOHIME',
-    'WATATSUKI_NO_YORIHIME', 'WRIGGLE_NIGHTBUG', 'YAGOKORO_EIRIN', 'YAKUMO_RAN', 'YAKUMO_YUKARI', 'YAMASHIRO_TAKANE',
-    'YASAKA_KANAKO', 'YATADERA_NARUMI', 'YOMOTSU_HISAMI', 'YORIGAMI_JOON', 'YORIGAMI_SHION'
+    'WATATSUKI_NO_YORIHIME', 'WAYOUSEI', 'WRIGGLE_NIGHTBUG', 'YAGOKORO_EIRIN', 'YAKUMO_RAN', 'YAKUMO_YUKARI',
+    'YAMASHIRO_TAKANE', 'YASAKA_KANAKO', 'YATADERA_NARUMI', 'YOMOTSU_HISAMI', 'YORIGAMI_JOON', 'YORIGAMI_SHION',
+    'YUUGEN_MAGAN', 'YUKI',
 )
 
 from .character import TouhouCharacter
@@ -61,6 +63,14 @@ ASAKURA_RIKAKO = TouhouCharacter(
     (
         '朝倉 理香子',
         'Rikako Asakura',
+    ),
+)
+
+AYANA = TouhouCharacter(
+    'ayana',
+    'Ayana',
+    (
+        'あやな',
     ),
 )
 
@@ -105,6 +115,14 @@ EBISU_EIKA = TouhouCharacter(
     (
         '戎 瓔花',
         'Eika Ebisu',
+    ),
+)
+
+ELIS = TouhouCharacter(
+    'elis',
+    'Elis',
+    (
+        'エリス',
     ),
 )
 
@@ -153,6 +171,14 @@ FUTATSUIWA_MAMIZOU = TouhouCharacter(
         '二ッ岩 マミゾウ',
         'Mamizou',
         'Mamizou Futatsuiwa',
+    ),
+)
+
+GENGETSU = TouhouCharacter(
+    'gengetsu',
+    'Gengetsu',
+    (
+        '幻月',
     ),
 )
 
@@ -358,6 +384,16 @@ LETTY_WHITEROCK = TouhouCharacter(
     ),
 )
 
+
+LOUISE = TouhouCharacter(
+    'louise',
+    'Louise',
+    (
+        'ルイズ',
+        'Ruizu',
+    ),
+)
+
 LUNA_CHILD = TouhouCharacter(
     'luna_child',
     'Luna Child',
@@ -560,6 +596,16 @@ KICCHOU_YACHIE = TouhouCharacter(
     ),
 )
 
+
+KIKURI = TouhouCharacter(
+    'kikuri',
+    'Kikuri',
+    (
+        '菊理',
+        'きくり',
+    )
+)
+
 KIJIN_SEIJA = TouhouCharacter(
     'kijin_seija',
     'Kijin Seija',
@@ -668,12 +714,21 @@ KOMEIJI_SATORI = TouhouCharacter(
     ),
 )
 
+KOKUU_HARUTO = TouhouCharacter(
+    'kokuu_haruto',
+    'Kokuu Haruto',
+    (
+        'Haruto Kokuu',
+    ),
+)
+
 KONNGARA = TouhouCharacter(
     'konngara',
     'Konngara',
     (
         '矜羯羅',
-        'Konngara',
+        'Kimkara',
+        'こんがら',
     ),
 )
 
@@ -684,14 +739,6 @@ KONPAKU_YOUMU = TouhouCharacter(
         '魂魄 妖夢',
         'Youmu',
         'Youmu Konpaku',
-    ),
-)
-
-KOKUU_HARUTO = TouhouCharacter(
-    'kokuu_haruto',
-    'Kokuu Haruto',
-    (
-        'Haruto Kokuu',
     ),
 )
 
@@ -723,6 +770,14 @@ KUMOI_ICHIRIN = TouhouCharacter(
     ),
 )
 
+KURUMI = TouhouCharacter(
+    'kurumi',
+    'Kurumi',
+    (
+        'くるみ',
+    ),
+)
+
 CLOWNPIECE = TouhouCharacter(
     'clownpiece',
     'Clownpiece',
@@ -751,6 +806,14 @@ KUROKOMA_SAKI = TouhouCharacter(
     ),
 )
 
+MAI = TouhouCharacter(
+    'mai',
+    'Mai',
+    (
+        'マイ',
+    ),
+)
+
 MARGATROID_ALICE = TouhouCharacter(
     'margatroid_alice',
     'Margatroid Alice',
@@ -773,12 +836,29 @@ MATARA_OKINA = TouhouCharacter(
     ),
 )
 
+MATENSHI = TouhouCharacter(
+    'matenshi',
+    'Matenshi',
+    (
+        'まてんし',
+    )
+)
+
 MEDICINE_MELANCHOLY = TouhouCharacter(
     'medicine_melancholy',
     'Medicine Melancholy',
     (
         'メディスン メランコリー',
         'Merankorii Medisun',
+    ),
+)
+
+MEIRA = TouhouCharacter(
+    'meira',
+    'Meira',
+    (
+        '明羅',
+        'めいら',
     ),
 )
 
@@ -871,6 +951,14 @@ MOTOORI_KOSUZU = TouhouCharacter(
     ),
 )
 
+MUGETSU = TouhouCharacter(
+    'mugetsu',
+    'Mugetsu',
+    (
+        '夢月',
+    )
+)
+
 MURASA_MINAMITSU = TouhouCharacter(
     'murasa_minamitsu',
     'Murasa Minamitsu',
@@ -935,6 +1023,14 @@ NIWATARI_KUTAKA = TouhouCharacter(
     ),
 )
 
+NOROIKO = TouhouCharacter(
+    'noroiko',
+    'Noroiko',
+    (
+        'のろいこ',
+    )
+)
+
 OKUNODA_MIYOI = TouhouCharacter(
     'okunoda_miyoi',
     'Okunoda Miyoi',
@@ -950,6 +1046,15 @@ ONOZUKA_KOMACHI = TouhouCharacter(
     (
         '小野塚 小町',
         'Komachi Onozuka',
+    ),
+)
+
+ORANGE = TouhouCharacter(
+    'orange',
+    'Orange',
+    (
+        'オレンジ',
+        'Orenjii',
     ),
 )
 
@@ -982,12 +1087,37 @@ REIUJI_UTSUHO = TouhouCharacter(
     ),
 )
 
+RENGETEKI = TouhouCharacter(
+    'rengeteki',
+    'Rengeteki',
+    (
+        'れんげてき',
+    ),
+)
+
+RIKA = TouhouCharacter(
+    'rika',
+    'Rika',
+    (
+        '里香',
+        'りか',
+    ),
+)
+
 RINGO = TouhouCharacter(
     'ringo',
     'Ringo',
     (
         '鈴瑚',
         'Ringo',
+    ),
+)
+
+RUUKOTO = TouhouCharacter(
+    'ruukoto',
+    'Ruukoto',
+    (
+        'るーこと',
     ),
 )
 
@@ -1028,6 +1158,22 @@ SAKATA_NEMUNO = TouhouCharacter(
         '坂田 ネムノ',
         'Nemuno',
         'Nemuno Sakata',
+    ),
+)
+
+SARA = TouhouCharacter(
+    'sara',
+    'Sara',
+    (
+        'サラ',
+    ),
+)
+
+SARIEL = TouhouCharacter(
+    'sariel',
+    'Sariel',
+    (
+        'サリエル',
     ),
 )
 
@@ -1091,6 +1237,14 @@ SHIKI_EIKI_YAMAXANADU = TouhouCharacter(
         'Eiki',
         'Shiki Eiki Yamazanadu',
         'Eiki Shiki, Yamaxanadu',
+    ),
+)
+
+SHINGYOKU = TouhouCharacter(
+    'shingyoku',
+    'Shingyoku',
+    (
+        'しんぎょく',
     ),
 )
 
@@ -1312,6 +1466,14 @@ WATATSUKI_NO_YORIHIME = TouhouCharacter(
     ),
 )
 
+WAYOUSEI = TouhouCharacter(
+    'wayousei',
+    'Wayousei',
+    (
+        'わようせい',
+    )
+)
+
 WRIGGLE_NIGHTBUG = TouhouCharacter(
     'wriggle_nightbug',
     'Wriggle Nightbug',
@@ -1410,5 +1572,23 @@ YORIGAMI_SHION = TouhouCharacter(
         '依神 紫苑',
         'Shion',
         'Shion Yorigami',
+    ),
+)
+
+YUUGEN_MAGAN = TouhouCharacter(
+    'yuugen_magan',
+    'Yuugen Magan',
+    (
+        'YuugenMagan',
+        '幽玄魔眼',
+        'ゆうげんまがん',
+    ),
+)
+
+YUKI = TouhouCharacter(
+    'yuki',
+    'Yuki',
+    (
+        'ユキ',
     ),
 )

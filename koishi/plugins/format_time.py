@@ -13,7 +13,7 @@ from hata.ext.slash import P, abort
 from ..bots import FEATURE_CLIENTS
 
 
-P_TIME_ZONE = P('float', 'timezone offset from utc 0', min_value = -26.0, max_value = +26.0)
+P_TIME_ZONE = P('float', 'timezone offset from utc 0 (in hours)', min_value = -26.0, max_value = +26.0)
 ID_MIN = 0
 ID_MAX = unix_time_to_id(UNIX_TIME_MAX)
 

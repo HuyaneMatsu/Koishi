@@ -12,7 +12,7 @@ from .response_builder import build_initial_response_parts
 
 
 DELETED_EMOJI_RP = re.compile(
-    '(?:data\.)?components\[\d+\]\.components\[\d+\]\.options\[(\d+)\]\.emoji\.id\.BUTTON_COMPONENT_INVALID_EMOJI.*'
+    '(?:data\\.)?components\\[\\d+\\]\\.components\\[\\d+\\]\\.options\\[(\\d+)\\]\\.emoji\\.id\\.BUTTON_COMPONENT_INVALID_EMOJI.*'
 )
 
 

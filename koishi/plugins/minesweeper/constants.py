@@ -57,8 +57,8 @@ STYLE_DEFAULT = ButtonStyle.blue
 
 
 CUSTOM_ID_INITIAL = lambda index, bomb_count: f'ms.i.{index}.{bomb_count}'
-CUSTOM_ID_INITIAL_RP = re.compile('ms\.i\.(\d+)\.(\d+)')
+CUSTOM_ID_INITIAL_RP = re.compile('ms\\.i\\.(\\d+)\\.(\\d+)')
 CUSTOM_ID_CONTINUOUS = lambda index, value : f'ms.c.{index}.{value}'
-CUSTOM_ID_CONTINUOUS_RP = re.compile('ms\.c\.(\d+)\.\d+')
+CUSTOM_ID_CONTINUOUS_RP = re.compile('ms\\.c\\.(\\d+)\\.\\d+')
 
-CONTINUOUS_VALUE_RP = re.compile('ms\.c\.\d+\.(\d+)')
+CONTINUOUS_VALUE_RP = re.compile('ms\\.c\\.\\d+\\.(\\d+)')

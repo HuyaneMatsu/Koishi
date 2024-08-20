@@ -28,3 +28,19 @@ ICON_KINDS = {
 }
 
 ICON_KINDS_REVERSED = {value: key for key, value in ICON_KINDS.items()}
+
+
+ICON_SOURCE_CHOICES_AVATAR = [
+    ('local', ICON_SOURCE_LOCAL),
+    ('guild', ICON_SOURCE_GUILD),
+    ('global', ICON_SOURCE_GLOBAL),
+    ('default', ICON_SOURCE_DEFAULT),
+]
+
+
+ICON_SOURCE_CHOICES_BANNER = [
+    ('local', ICON_SOURCE_LOCAL),
+    ('guild', ICON_SOURCE_GUILD),
+    ('global', ICON_SOURCE_GLOBAL),
+    ('default', ICON_SOURCE_DEFAULT),
+]

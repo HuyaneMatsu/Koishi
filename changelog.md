@@ -1,3 +1,45 @@
+### 2024-08-20
+
+- `/gift` is now available when user installed.
+- `/touhou_calendar` is now available when user installed.
+- `/touhou_character` is now available when user installed.
+- All action commands (like `/handhold`) are available when user installed.
+- Fix an error in `/21` multiplayer timeout not updating the embed.
+- `image_refresh` now handles the case when the message is deleted.
+    Apparently this edge case is pretty common scenario.
+- `/kanako` now handles the case if the message is deleted on timeout.
+    Apparently this edge case is pretty common scenario.
+- `/minesweeper` now aborts the command if the client is affected by slowmode in the channel.
+    Apparently this edge case is pretty common scenario. It is an api bug too.
+- Add `/user banner` command.
+- Add `Gengetsu` touhou character.
+- Add `Mugetsu` touhou character.
+- Add `Mai` touhou character.
+- Add `Yuki` touhou character.
+- Add `Sariel` touhou character.
+- Add `Kurumi` touhou character.
+- Add `Meira` touhou character.
+- Add `Louise` touhou character.
+- Add `Elis` touhou character.
+- Add `Rika` touhou character.
+- Add `Sara` touhou character.
+- Add `Kikuri` touhou character.
+- Add `Shingyoku` touhou character.
+- Add `Orange` touhou character.
+- Add `Yuugen Magan` touhou character.
+- Add `Ruukoto` touhou character.
+- Add `Noroiko` touhou character.
+- Add `Rengeteki` touhou character.
+- Add `Matenshi` touhou character.
+- Add `Wayousei` touhou character.
+- Add `Ayana` touhou character.
+- Add `Kokuu Haruto` touhou character.
+- Add **5** image to `/kon`.
+- Add **5** image to `/kiss`.
+- Add **1** image to `/pat`.
+- Add **3** image to `/hug`.
+- Add **1** image to `/lick`.
+
 ### 2024-08-07
 
 - `/calc` is now available when user installed.

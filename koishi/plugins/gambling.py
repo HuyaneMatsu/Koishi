@@ -67,8 +67,13 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
 
 
 
-@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
-async def heart_event(client, event,
+@FEATURE_CLIENTS.interactions(
+    guild = GUILD__SUPPORT,
+    required_permissions = Permission().update_by_keys(administrator = True),
+)
+async def heart_event(
+    client,
+    event,
     duration : ('str', 'The event\'s duration.'),
     amount : ('int', 'The hearst to earn.'),
     user_limit : ('int', 'The maximal amount fo claimers.') = 0,
@@ -357,8 +362,13 @@ class HeartEventGUI:
         Task(KOKORO, connector.close())
 
 
-@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
-async def daily_event(client, event,
+@FEATURE_CLIENTS.interactions(
+    guild = GUILD__SUPPORT,
+    required_permissions = Permission().update_by_keys(administrator = True),
+)
+async def daily_event(
+    client,
+    event,
     duration: ('str', 'The event\'s duration.'),
     amount: ('int', 'The extra daily steaks to earn.'),
     user_limit: ('int', 'The maximal amount fo claimers.') = 0,
@@ -658,13 +668,39 @@ class DailyEventGUI:
 
 
 
-@FEATURE_CLIENTS.interactions(is_global = True)
-async def gift(client, event,
+@FEATURE_CLIENTS.interactions(
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+)
+async def gift(
+    client,
+    event,
     target_user: ('user', 'Who is your heart\'s chosen one?'),
     amount: ('expression', 'How much do u love them?'),
     message: ('str', 'Optional message to send with the gift.') = None,
 ):
-    """Gifts hearts to the chosen by your heart."""
+    """
+    Gifts hearts to the chosen by your heart.
+    
+    This function is a coroutine generator.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received event.
+    target_user : ``ClientUserBase``
+        The targeted user.
+    amount : `int`
+        The amount of hearts to gift.
+    message : `None | str` = `None`, Optional
+        Additional message to send.
+    
+    Yields
+    ------
+    response : `None | Embed`
+    """
     source_user = event.user
     
     if not (source_user.has_role(ROLE__SUPPORT__ELEVATED) or source_user.has_role(ROLE__SUPPORT__BOOSTER)):
@@ -680,7 +716,7 @@ async def gift(client, event,
         abort('You cannot gift non-positive amount of hearts..')
     
     if (message is not None) and len(message) > 1000:
-        message = message[:1000]+'...'
+        message = message[:1000] + '...'
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -816,7 +852,9 @@ AWARD_TYPES = [
 
 
 @FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
-async def award(client, event,
+async def award(
+    client,
+    event,
     target_user: ('user', 'Who do you want to award?'),
     amount: ('int', 'With how much love do you wanna award them?'),
     message : ('str', 'Optional message to send with the gift.') = None,
@@ -948,9 +986,10 @@ async def award(client, event,
         raise
 
 
-
 @FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
-async def take(client, event,
+async def take(
+    client,
+    event,
     target_user: ('user', 'From who do you want to take love away?'),
     amount: ('int', 'How much love do you want to take away?'),
 ):

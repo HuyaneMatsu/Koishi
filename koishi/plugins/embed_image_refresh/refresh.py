@@ -90,7 +90,23 @@ async def _image_refresh(client, message, interaction_event, retry):
     if (interaction_event is not None):
         # if the interaction client is not in the guild we are not receiving
         if not interaction_event.application_permissions.can_view_channel:
-            await client.interaction_followup_message_get(interaction_event, message)
+            try:
+                await client.interaction_followup_message_get(interaction_event, message)
+            except GeneratorExit:
+                raise
+            
+            except CancelledError:
+                raise
+            
+            except ConnectionError:
+                return
+            
+            except DiscordException as exception:
+                if exception.code == ERROR_CODES.unknown_message: # message deleted
+                    return
+                
+                raise
+            
             if not _should_image_refresh(message):
                 return
         

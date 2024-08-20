@@ -14,13 +14,25 @@ from .touhou_character import (
 )
 
 
-@FEATURE_CLIENTS.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+)
 async def touhou_character(
     client,
     event,
     name: P('str', 'Who\'s?', autocomplete = auto_complete_touhou_character_name),
 ):
-    """Shows you the given Touhou character's portrait."""
+    """
+    Shows you the given Touhou character's portrait.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    name : `str`
+        the character's name.
+    """
     name_length = len(name)
     if name_length == 0:
         abort('Empty name was given.')

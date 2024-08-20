@@ -410,7 +410,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
             try_edit_response(
                 self.client,
                 None,
-                self.player.latest_interaction_event,
+                self.players[0].latest_interaction_event,
                 self.message,
                 self.player,
                 self.session,

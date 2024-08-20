@@ -208,29 +208,29 @@ create_emoji_add_form_custom_id = lambda emoji: f'snipe.emoji.add.{emoji.id}.{em
 create_soundboard_sound_add_form_custom_id = lambda sound: f'snipe.soundboard_sound.add.{sound.guild_id}.{sound.id}'
 create_sticker_add_form_custom_id = lambda sticker: f'snipe.sticker.add.{sticker.id}'
 
-EMOJI_ADD_FORM_PATTERN = re.compile('snipe\.emoji\.add\.(\d+)\.(\w+)\.([01])')
-SOUNDBOARD_SOUND_ADD_FORM_PATTERN = re.compile('snipe\.soundboard_sound\.add\.(\d+)\.(\d+)')
-STICKER_ADD_FORM_PATTERN = re.compile('snipe\.sticker\.add\.(\d+)')
+EMOJI_ADD_FORM_PATTERN = re.compile('snipe\\.emoji\\.add\\.(\\d+)\\.(\\w+)\\.([01])')
+SOUNDBOARD_SOUND_ADD_FORM_PATTERN = re.compile('snipe\\.soundboard_sound\\.add\\.(\\d+)\\.(\\d+)')
+STICKER_ADD_FORM_PATTERN = re.compile('snipe\\.sticker\\.add\\.(\\d+)')
 
 create_emoji_remove_form_custom_id = lambda emoji: f'snipe.emoji.remove.{emoji.id}.{emoji.name}.{emoji.animated:d}'
 create_soundboard_sound_remove_form_custom_id = lambda sound: f'snipe.soundboard_sound.remove.{sound.guild_id}.{sound.id}'
 create_sticker_remove_form_custom_id = lambda sticker: f'snipe.sticker.remove.{sticker.id}'
 
-EMOJI_REMOVE_FORM_PATTERN = re.compile('snipe\.emoji\.remove\.(\d+)\.(\w+)\.([01])')
-SOUNDBOARD_SOUND_REMOVE_FORM_PATTERN = re.compile('snipe\.soundboard_sound\.remove\.(\d+)\.(\d+)')
-STICKER_REMOVE_FORM_PATTERN = re.compile('snipe\.sticker\.remove\.(\d+)')
+EMOJI_REMOVE_FORM_PATTERN = re.compile('snipe\\.emoji\\.remove\\.(\\d+)\\.(\\w+)\\.([01])')
+SOUNDBOARD_SOUND_REMOVE_FORM_PATTERN = re.compile('snipe\\.soundboard_sound\\.remove\\.(\\d+)\\.(\\d+)')
+STICKER_REMOVE_FORM_PATTERN = re.compile('snipe\\.sticker\\.remove\\.(\\d+)')
 
 create_emoji_edit_form_custom_id = lambda emoji: f'snipe.emoji.edit.{emoji.id}.{emoji.name}.{emoji.animated:d}'
 create_soundboard_sound_edit_form_custom_id = lambda sound: f'snipe.soundboard_sound.edit.{sound.guild_id}.{sound.id}'
 create_sticker_edit_form_custom_id = lambda sticker: f'snipe.sticker.edit.{sticker.id}'
 
-EMOJI_EDIT_FORM_PATTERN = re.compile('snipe\.emoji\.edit\.(\d+)\.(\w+)\.([01])')
-SOUNDBOARD_SOUND_EDIT_FORM_PATTERN = re.compile('snipe\.soundboard_sound\.edit\.(\d+)\.(\d+)')
-STICKER_EDIT_FORM_PATTERN = re.compile('snipe\.sticker\.edit\.(\d+)')
+EMOJI_EDIT_FORM_PATTERN = re.compile('snipe\\.emoji\\.edit\\.(\\d+)\\.(\\w+)\\.([01])')
+SOUNDBOARD_SOUND_EDIT_FORM_PATTERN = re.compile('snipe\\.soundboard_sound\\.edit\\.(\\d+)\\.(\\d+)')
+STICKER_EDIT_FORM_PATTERN = re.compile('snipe\\.sticker\\.edit\\.(\\d+)')
 
 
-EMBED_AUTHOR_ID_PATTERN = re.compile('.+?\((\d+)\)')
+EMBED_AUTHOR_ID_PATTERN = re.compile('.+?\\((\\d+)\\)')
 
 MATCH_ID_IN_FIELD_VALUE = re.compile('[0-9]+')
-MATCH_GUILD_ID_IN_FOOTER = re.compile('.*?\(([0-9]+)\)')
-MATCH_NAME_IN_FIELD_VALUE = re.compile('[0-9a-zA-Z_\-]+')
+MATCH_GUILD_ID_IN_FOOTER = re.compile('.*?\\(([0-9]+)\\)')
+MATCH_NAME_IN_FIELD_VALUE = re.compile('[0-9a-zA-Z_\\-]+')

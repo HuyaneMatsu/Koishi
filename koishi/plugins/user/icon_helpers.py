@@ -57,12 +57,18 @@ def get_banner_of(user, guild_id, icon_source):
     -------
     icon_url : `None`, `str`
     """
-    if icon_source == ICON_SOURCE_GLOBAL:
+    if icon_source == ICON_SOURCE_LOCAL:
+        icon_url = user.banner_url_at_as(guild_id, size = 4096)
+    
+    elif icon_source == ICON_SOURCE_GLOBAL:
         icon_url = user.banner_url_as(size = 4096)
+    
+    elif icon_source == ICON_SOURCE_GUILD:
+        icon_url = user.banner_url_for_as(guild_id, size = 4096)
     
     else:
         icon_url = None
-        
+    
     return icon_url
 
 

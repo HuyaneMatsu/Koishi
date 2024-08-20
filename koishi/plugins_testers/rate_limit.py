@@ -183,10 +183,10 @@ class RLTCTX:
     
     def __exit__(self, exception_type, exception_value, exception_traceback):
         type(self).active_ctx = None
-        if exc_type is CancelledError:
+        if exception_type is CancelledError:
             return True
         
-        if exc_type is None:
+        if exception_type is None:
             Task(KOKORO, self._render_exit_result())
             return True
         
@@ -2665,7 +2665,7 @@ async def application_command_permission_edit(client, access, guild, application
     )
 
 
-async def voice_state_client_edit(client, channel, suppress = False, request_to_speak = False):
+async def voice_state_edit_own(client, channel, suppress = False, request_to_speak = False):
     channel_id = channel.id
     guild_id = channel.guild.id
     
@@ -2688,7 +2688,7 @@ async def voice_state_client_edit(client, channel, suppress = False, request_to_
     )
 
 
-async def voice_state_user_edit(client, channel, user, suppress = False):
+async def voice_state_edit(client, channel, user, suppress = False):
     channel_id = channel.id
     guild_id = channel.guild.id
     user_id = user.id
@@ -3478,6 +3478,14 @@ async def application_role_connection_metadata_edit_all(client):
     )
 
 
+async def application_role_connection_metadata_delete_all(client):
+    await bypass_request(
+        client,
+        METHOD_DELETE,
+        f'{API_ENDPOINT}/applications/{client.application.id}/role-connections/metadata',
+    )
+
+
 async def entitlement_create(client):
     data = {
         'owner_type': EntitlementOwnerType.user.value,
@@ -3599,6 +3607,28 @@ async def emoji_edit_application(client, emoji, name): # keep it short
         f'{API_ENDPOINT}/applications/{application_id}/emojis/{emoji_id}',
         data,
     )
+
+
+async def voice_state_get_own(client, guild):
+    guild_id = guild.id
+    
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/voice-states/@me',
+    )
+
+
+async def voice_state_get(client, guild, user):
+    guild_id = guild.id
+    user_id = user.id
+    
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/voice-states/{user_id}',
+    )
+
 
 
 @RATE_LIMIT_COMMANDS
@@ -6352,53 +6382,54 @@ async def rate_limit_test_0118(client, message):
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        stage_channels = guild.stage_channels
-        if not stage_channels:
+        for stage_channel in guild.iter_channels(Channel.is_guild_stage):
+            break
+        else:
             await RLT.send('The guild has no stage channels.')
         
-        stage_channel = stage_channels[0]
-        
         voice_client = await client.join_voice(stage_channel)
-        await voice_state_client_edit(client, stage_channel)
+        await voice_state_edit_own(client, stage_channel)
         await voice_client.disconnect()
 
 
 async def rate_limit_test_0119_parallel(client, stage_channel):
     voice_client = await client.join_voice(stage_channel)
-    await voice_state_client_edit(client, stage_channel)
+    await voice_state_edit_own(client, stage_channel)
     await voice_client.disconnect()
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0119(client, message, guild_2 : 'guild' = None):
+async def rate_limit_test_0119(client, message, guild_1 : 'guild' = None):
     """
     Joins to 2 stage channels. Please also define a second guild.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0119') as RLT:
-        guild = channel.guild
-        if guild is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild_0.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        if guild_2 is None:
+        if guild_1 is None:
             await RLT.send('Second guild unknown.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild_0.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
-        stage_channels_1 = guild.stage_channels
-        if not stage_channels_1:
+        for stage_channel_0 in guild_0.iter_channels(Channel.is_guild_stage):
+            break
+        else:
             await RLT.send('The guild has no stage channels.')
         
-        stage_channels_2 = guild.stage_channels
-        if not stage_channels_2:
-            await RLT.send('The second guild has no stage channels.')
+        for stage_channel_1 in guild_1.iter_channels(Channel.is_guild_stage):
+            break
+        else:
+            await RLT.send('The guild has no stage channels.')
         
         tasks = []
-        for stage_channel in (stage_channels_1[0], stage_channels_2[0]):
+        for stage_channel in (stage_channel_0, stage_channel_1):
             task = Task(KOKORO, rate_limit_test_0119_parallel(client, stage_channel))
             tasks.append(task)
         
@@ -6407,56 +6438,54 @@ async def rate_limit_test_0119(client, message, guild_2 : 'guild' = None):
 
 async def rate_limit_test_0120_parallel(client, stage_channel, user):
     voice_client = await client.join_voice(stage_channel)
-    await voice_state_user_edit(client, stage_channel, user, True)
+    await voice_state_edit(client, stage_channel, user, True)
     await voice_client.disconnect()
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0120(client, message, guild_2 : 'guild' = None):
+async def rate_limit_test_0120(client, message, guild_1 : 'guild' = None):
     """
     Moves 2 users in stage channels. Please also define an other guild.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0120') as RLT:
-        guild = channel.guild
-        if guild is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild_0.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        if guild_2 is None:
+        if guild_1 is None:
             await RLT.send('Second guild unknown.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild_0.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
-        stage_channels_1 = guild.stage_channels
-        if not stage_channels_1:
+        for stage_channel_0 in guild_0.iter_channels(Channel.is_guild_stage):
+            break
+        else:
             await RLT.send('The guild has no stage channels.')
         
-        stage_channel_1 = stage_channels_1[0]
+        for stage_channel_1 in guild_1.iter_channels(Channel.is_guild_stage):
+            break
+        else:
+            await RLT.send('The guild has no stage channels.')
+        
+        users_0 = stage_channel_0.voice_users
+        if not users_0:
+            await RLT.send('The stage channel has no users in it.')
+        
         
         users_1 = stage_channel_1.voice_users
         if not users_1:
-            await RLT.send('The stage channel has no users in it.')
+            await RLT.send('The second guild has no stage channels.')
         
+        user_0 = users_0[0]
         user_1 = users_1[0]
         
-        stage_channels_2 = guild.stage_channels
-        if not stage_channels_2:
-            await RLT.send('The second guild has no stage channels.')
-        
-        stage_channel_2 = stage_channels_2[0]
-        
-        users_2 = stage_channel_2.voice_users
-        if not users_2:
-            await RLT.send('The second guild has no stage channels.')
-        
-        user_2 = users_2[0]
-        
         tasks = []
-        for stage_channel, user in ((stage_channel_1, user_1), (stage_channel_2, user_2)):
+        for stage_channel, user in ((stage_channel_0, user_0), (stage_channel_1, user_1)):
             task = Task(KOKORO, rate_limit_test_0120_parallel(client, stage_channel, user))
             tasks.append(task)
         
@@ -8555,3 +8584,86 @@ async def rate_limit_test_0223(client, message, name : str, emoji : 'Emoji'):
         
         emoji = await client.emoji_create_application(emoji_data, name = name)
         await emoji_delete_application(client, emoji)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0224(client, message):
+    """
+    Gets own voice state.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0224') as RLT:
+        guild = channel.guild
+        if (guild is None):
+            await RLT.send('Guild only.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        for voice_channel in guild.iter_channels(Channel.is_guild_voice):
+            break
+        else:
+            await RLT.send('The guild has no voice channels.')
+        
+        voice_client = await client.join_voice(voice_channel)
+        await voice_state_get_own(client, guild)
+        await voice_client.disconnect()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0225(client, message):
+    """
+    Gets voice state of the invoker.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0225') as RLT:
+        guild = channel.guild
+        if (guild is None):
+            await RLT.send('Guild only.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        user = message.author
+        if guild.get_voice_state(user.id) is None:
+            return RLT.send('Invoking user must be in a voice channel.')
+        
+        await voice_state_get(client, guild, user)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0226(client, message):
+    """
+    Gets own and not own voice state also an edit, wohooo!
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0226') as RLT:
+        guild = channel.guild
+        if (guild is None):
+            await RLT.send('Guild only.')
+        
+        for stage_channel in guild.iter_channels(Channel.is_guild_stage):
+            break
+        else:
+            await RLT.send('The guild has no stage channels.')
+        
+        user = message.author
+        if guild.get_voice_state(user.id) is None:
+            return RLT.send('Invoking user must be in a voice channel.')
+        
+        voice_client = await client.join_voice(stage_channel)
+        await voice_state_get_own(client, guild)
+        await voice_state_get(client, guild, message.author)
+        await voice_state_edit_own(client, stage_channel)
+        await voice_state_get(client, guild, user)
+        await voice_client.disconnect()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0227(client, message):
+    """
+    Deletes the application's role connection metadata.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0227') as RLT:
+        await Task(KOKORO, application_role_connection_metadata_delete_all(client)).wait_for_completion()

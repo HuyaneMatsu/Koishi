@@ -1191,7 +1191,7 @@ async def divorce_cancelled(event):
 
 
 @FEATURE_CLIENTS.interactions(
-    custom_id = re.compile('marriage\.divorce\.([cio])\-([0-9a-f]{6,16})\-([0-9a-f]{6,16})')
+    custom_id = re.compile('marriage\\.divorce\\.([cio])\\-([0-9a-f]{6,16})\\-([0-9a-f]{6,16})')
 )
 async def divorce_execute(client, event, mode, source_user_id, target_user_id):
     if event.user is not event.message.interaction.user:

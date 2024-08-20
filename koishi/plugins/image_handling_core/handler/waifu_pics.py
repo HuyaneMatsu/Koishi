@@ -27,12 +27,16 @@ BLACKLIST = {
     # Holocringe
     'https://i.waifu.pics/tvSCzkl.gif',
     'https://i.waifu.pics/jFOkv3O.gif',
+    'https://i.waifu.pics/GNw8eK7.gif',
     
     # Bully looking sus
     'https://i.waifu.pics/MjULOe4.gif',
     
     # Glitchy
     'https://i.waifu.pics/j63gPVc.gif',
+    
+    # In touhou pool
+    'https://i.waifu.pics/szHC1yJ.gif',
 }
 
 

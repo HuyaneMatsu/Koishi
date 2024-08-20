@@ -44,6 +44,7 @@ BOT_NAMES = [
     'go-http-client',
     'turnitin',
     'meta-externalagent',
+    'dataprovider',
     
     # From google:
     'googlebot',
@@ -105,6 +106,9 @@ BLOCKED_IPS = {
     
     # Tries to request env variable file & redirect to google???
     '79.110.62.123',
+    
+    # Tries to request env variable file
+    '78.153.140.223',
 }
 
 

@@ -1,15 +1,15 @@
 __all__ = ()
 
 import os
-from random import randint, choice
 from itertools import chain
+from random import choice, randint
 
-from scarletio import ReuBytesIO, Future, Task, LOOP_TIME, any_to_any
-from hata import Color, Embed, KOKORO
-from hata.ext.slash import abort, Row, Button, ButtonStyle, InteractionResponse
 from PIL import Image as PIL
+from hata import Color, DiscordException, Embed, ERROR_CODES, KOKORO
+from hata.ext.slash import Button, ButtonStyle, InteractionResponse, Row, abort
+from scarletio import CancelledError, Future, LOOP_TIME, ReuBytesIO, Task, any_to_any
 
-from ..bot_utils.constants import PATH__KOISHI, GUILD__STORAGE
+from ..bot_utils.constants import GUILD__STORAGE, PATH__KOISHI
 from ..bot_utils.tools import Pagination10step
 from ..bots import FEATURE_CLIENTS
 
@@ -933,13 +933,17 @@ class KanakoRunner:
                 )
                 
                 try:
-                    await client.interaction_component_message_edit(self.event, embed = embed, components = components)
-                except BaseException as err:
-                    self.cancel()
-                    if isinstance(err, ConnectionError):
-                        return
-                    
-                    raise
+                    try:
+                        await client.interaction_component_message_edit(
+                            self.event, embed = embed, components = components
+                        )
+                    except:
+                        self.cancel()
+                        raise
+                        
+                except ConnectionError:
+                    return
+                
                 finally:
                     if (waiter is not None):
                         waiter.set_result_if_pending(None)
@@ -979,15 +983,21 @@ class KanakoRunner:
                     )
                     
                     try:
-                        await client.interaction_response_message_edit(
-                            self.event,
-                            embed = embed,
-                            components = None,
-                        )
-                    except BaseException as err:
-                        self.cancel()
-                        
-                        if isinstance(err, ConnectionError):
+                        try:
+                            await client.interaction_response_message_edit(
+                                self.event,
+                                embed = embed,
+                                components = None,
+                            )
+                        except:
+                            self.cancel()
+                            raise
+                    
+                    except ConnectionError:
+                        return
+                    
+                    except DiscordException as exception:
+                        if exception.code == ERROR_CODES.unknown_message:
                             return
                         
                         raise
@@ -999,7 +1009,7 @@ class KanakoRunner:
                 
                 self.history.append(HistoryElement(
                     answer,
-                    [(value[0], value[1]-circle_start) for value in (answers[user] for user in self.users)],
+                    [(value[0], value[1] - circle_start) for value in (answers[user] for user in self.users)],
                     self.options,
                     question,
                 ))

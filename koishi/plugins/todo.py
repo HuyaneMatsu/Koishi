@@ -286,7 +286,7 @@ async def get(
     client,
     name: PARAMETER_ENTRY_NAME_ANNOTATION,
 ):
-    """Shows the defined entry"""
+    """Shows the defined entry."""
     entry = await try_resolve_entry(name)
     user = await client.user_get(entry.creator_id)
     return create_entry_embed(entry, user)
@@ -299,7 +299,7 @@ async def list_(
     page: 'number' = 1,
     creator: ('user', 'Filter by the creator of the entry') = None,
 ):
-    """Lists to do entries"""
+    """Lists to do entries."""
     if page < 0:
         abort('Page cannot be non-positive')
     
@@ -355,7 +355,7 @@ async def list_(
 
 
 DELETE_ENTRY_BASE = 'todo.del'
-DELETE_ENTRY_RP = re.compile('todo\.del\.(\d+)\.([01])')
+DELETE_ENTRY_RP = re.compile('todo\\.del\\.(\\d+)\\.([01])')
 
 
 DELETE_ENTRY_APPROVE = Button(
@@ -439,7 +439,7 @@ async def del_approval(
 
 
 CUSTOM_ID_EDIT_BASE = 'todo.edit'
-CUSTOM_ID_EDIT_RP = re.compile('todo\.edit\.(\d+)\.form')
+CUSTOM_ID_EDIT_RP = re.compile('todo\\.edit\\.(\\d+)\\.form')
 
 
 @TODO.interactions

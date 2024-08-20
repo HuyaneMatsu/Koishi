@@ -13,8 +13,8 @@ from .item import ITEMS
 from .trivias import CATEGORY_KOISHI_ALL, CATEGORY_KOISHI_CANON
 
 
-OPTION_PATTERN = re.compile('trivia\.([0-9a-fA-F]+)\.option\.([0-9a-fA-F]+)\.([0-9a-fA-F]+)\.([0-9a-fA-F]+)')
-NEW_PATTERN = re.compile('trivia\.([0-9a-fA-F]+)\.new\.([0-9a-fA-F]+)\.([0-9a-fA-F]+)')
+OPTION_PATTERN = re.compile('trivia\\.([0-9a-fA-F]+)\\.option\\.([0-9a-fA-F]+)\\.([0-9a-fA-F]+)\\.([0-9a-fA-F]+)')
+NEW_PATTERN = re.compile('trivia\\.([0-9a-fA-F]+)\\.new\\.([0-9a-fA-F]+)\\.([0-9a-fA-F]+)')
 
 
 EMOJI_NEW = Emoji.precreate(1079504073981693962)

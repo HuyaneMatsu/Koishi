@@ -1,32 +1,14 @@
+from .commands import *
 from .constants import *
-from .avatar import *
+from .embed_builders import *
 from .icon_helpers import *
-from .info import *
+from .interactions import *
 
 
 __all__ = (
+    *commands.__all__,
     *constants.__all__,
-    *avatar.__all__,
+    *embed_builders.__all__,
     *icon_helpers.__all__,
-    *info.__all__,
+    *interactions.__all__,
 )
-
-
-# Construct command
-
-from ...bots import FEATURE_CLIENTS
-
-from .info import user_info_command
-from .avatar import user_avatar_command
-
-
-USER_COMMANDS = FEATURE_CLIENTS.interactions(
-    None,
-    name = 'user',
-    description = 'User commands',
-    integration_types = ['guild_install', 'user_install'],
-    is_global = True,
-)
-
-USER_COMMANDS.interactions(user_avatar_command, name = 'avatar')
-USER_COMMANDS.interactions(user_info_command, name = 'info')

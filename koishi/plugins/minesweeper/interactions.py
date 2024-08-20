@@ -1,7 +1,7 @@
 __all__ = ()
 
 from hata import Client
-from hata.ext.slash import InteractionResponse
+from hata.ext.slash import InteractionResponse, abort
 
 from ...bots import FEATURE_CLIENTS
 
@@ -46,6 +46,8 @@ async def check_invoking_user(client, event):
     is_global = True,
 )
 async def minesweeper(
+    client,
+    event,
     bomb_count: (range(4, 9), 'how much bombs should there be') = 4,
 ):
     """
@@ -55,6 +57,10 @@ async def minesweeper(
     
     Parameters
     ----------
+    client : ``Client``
+        The client who received the interaction.
+    event : ``InteractionEvent``
+        The source interaction event.
     bomb_count : `int` = `4`, Optional
         The amount of bombs to initialise the game with.
     
@@ -62,6 +68,9 @@ async def minesweeper(
     -------
     response : ``InteractionResponse``
     """
+    if event.channel.slowmode and (not event.channel.cached_permissions_for(client).can_manage_messages):
+        return abort('Please use the command in a channel without slowmode.')
+    
     return InteractionResponse(components = render_initial(bomb_count))
 
 

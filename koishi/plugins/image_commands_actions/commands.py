@@ -25,14 +25,10 @@ for action in ACTIONS:
     
     FEATURE_CLIENTS.interactions(
         create_action_command_function(action),
-        name = action.name,
         description = action.description,
+        integration_types = ['guild_install', 'user_install'],
         is_global = True,
-        integration_types = (
-            ['guild_install', 'user_install']
-            if action.handler.is_character_filterable() else
-            ['guild_install']
-        ),
+        name = action.name,
     )
 
 # cleanup

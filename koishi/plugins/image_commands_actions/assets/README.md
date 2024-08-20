@@ -267,7 +267,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ### chen-ran-fluff-0014
 
-- Creator: *unknown*
+- Creator: **yukitarou (awamori)**
 - Editor: *none*
 - Characters: **Chen**, **Yakumo Ran**
 - Source: **Touhou**
@@ -2094,7 +2094,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ### tsukasa-kon-0005
 
-- Creator: **e.o. / EO**
+- Creator: **e.o.**
 - Editor: *none*
 - Characters: **Kudamaki Tsukasa**
 - Source: **Touhou**
@@ -4747,7 +4747,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### seiga-miyako-hug-0000
+### seiga-yoshika-hug-0000
 
 - Creator: **haruwaka 064**
 - Editor: *none*
@@ -4839,7 +4839,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ### flandre-koishi-kiss-0006
 
-- Creator: *unknown*
+- Creator: **kirby (tiokirby)**
 - Editor: *none*
 - Characters: **Komeiji Koishi**, **Scarlet Flandre**
 - Source: **Touhou**
@@ -5584,7 +5584,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### aya-momiji-pat-0001
+### aya-momiji-pat-0002
 
 - Creator: **shimouki izui**
 - Editor: *none*
@@ -5728,7 +5728,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### chiruno-day-hug-0000
+### chiruno-dai-hug-0000
 
 - Creator: **ferdy's lab**
 - Editor: *none*
@@ -5737,7 +5737,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### chiruno-day-hug-0001
+### chiruno-dai-hug-0001
 
 - Creator: **ferdy's lab**
 - Editor: *none*
@@ -6633,6 +6633,177 @@ Some creators may be unknown. If you know them please create a PR with it.
 - Creator: **roke (taikodon)**
 - Editor: *none*
 - Characters: **Chiruno**, **Shameimaru Aya**
+- Source: **Touhou**
+
+---
+
+### ran-kon-0035
+
+- Creator: **sarasadou dan / 更紗灯弾**
+- Editor: *none*
+- Characters: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### ran-kon-0036
+
+- Creator: **sarasadou dan / 更紗灯弾**
+- Editor: *none*
+- Characters: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### hijiri-miko-poke-0000
+
+- Creator: **makuwauri**
+- Editor: *none*
+- Characters: **Hijiri Byakuren**, **Toyosatomimi no Miko**
+- Source: **Touhou**
+
+---
+
+### hijiri-miko-kiss-0000
+
+- Creator: **makuwauri**
+- Editor: **HuyaneMatsu**
+- Characters: **Hijiri Byakuren**, **Toyosatomimi no Miko**
+- Source: **Touhou**
+
+---
+
+### hecatia-junko-handhold-0000
+
+- Creator: **makuwauri**
+- Editor: *none*
+- Characters: **Hecatia Lapislazuli**, **Junko**
+- Source: **Touhou**
+
+---
+
+### seiga-yoshika-pat-0001
+
+- Creator: **makuwauri**
+- Editor: *none*
+- Characters: **Kaku Seiga**, **Miyako Yoshika**
+- Source: **Touhou**
+
+---
+
+### flandre-yuuma-hug-0000
+
+- Creator: **chokomaron**
+- Editor: *none*
+- Characters: **Scarlet Flandre**, **Toutetsu Yuuma**
+- Source: **Touhou**
+
+---
+
+### aya-momiji-lick-0001
+
+- Creator: **e.o.**
+- Editor: *none*
+- Characters: **Inubashiri Momiji**, **Shameimaru Aya**
+- Source: **Touhou**
+
+---
+
+### ran-kon-0039
+
+- Creator: **e.o.**
+- Editor: *none*
+- Characters: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### ran-kon-0038
+
+- Creator: **e.o.**
+- Editor: *none*
+- Characters: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### ran-kon-0037
+
+- Creator: **e.o.**
+- Editor: *none*
+- Characters: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### marisa-reimu-poke-0000
+
+- Creator: **e.o.**
+- Editor: *none*
+- Characters: **Hakurei Reimu**, **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-tickle-0000
+
+- Creator: **e.o.**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-hug-0010
+
+- Creator: **e.o.**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### maribel-renko-hug-0009
+
+- Creator: **e.o.**
+- Editor: *none*
+- Characters: **Hearn Maribel**, **Usami Renko**
+- Source: **Touhou**
+
+---
+
+### aunn-marisa-reimu-kiss-0000
+
+- Creator: **Rina / 里奈**
+- Editor: *none*
+- Characters: **Hakurei Reimu**, **Kirisame Marisa**, **Komano Aunn**
+- Source: **Touhou**
+
+---
+
+### marisa-reimu-kiss-0011
+
+- Creator: **Rina / 里奈**
+- Editor: *none*
+- Characters: **Hakurei Reimu**, **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### marisa-reimu-kiss-0013
+
+- Creator: **Rina / 里奈**
+- Editor: *none*
+- Characters: **Hakurei Reimu**, **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### marisa-reimu-kiss-0012
+
+- Creator: **Rina / 里奈**
+- Editor: *none*
+- Characters: **Hakurei Reimu**, **Kirisame Marisa**
 - Source: **Touhou**
 
 ---

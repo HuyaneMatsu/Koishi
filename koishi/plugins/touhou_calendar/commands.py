@@ -11,7 +11,10 @@ from .constants import CUSTOM_ID_BACK_DISABLED, CUSTOM_ID_CLOSE, CUSTOM_ID_NEXT_
 from .response_building import get_response_for_year
 
 
-@FEATURE_CLIENTS.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+)
 async def touhou_calendar():
     """
     Returns the touhou calendar for the current year.
