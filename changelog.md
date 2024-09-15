@@ -8,7 +8,6 @@
 - Rebrand `CursedSakuya` to `ToyKoishi`.
 - `/format-time absolute` now has new `time-zone` and `daylight-saving-time` parameters.
 - Fix `ZeroDivisionError` in event payload analyzer. (This is a new discord feature testing tool actually.)
-- Rebrand Cursed Sakuya to Toy Koishi.
 - Fix `/heart-shop roles` used the user's global avatar instead of the local one.
 - Fix action commands (such as `/hug`) used black color if a user had no color (instead of no color).
 - Add `/mod edit-ban-reason` command.
