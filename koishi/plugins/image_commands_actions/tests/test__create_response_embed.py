@@ -1,7 +1,9 @@
 import vampytest
-from hata import Guild, User, Role, Color, GuildProfile, Embed
-from ..action import create_response_embed
+from hata import Color, Embed, Guild, GuildProfile, Role, User
+
 from ...image_handling_core import ImageDetailStatic, ImageHandlerStatic
+
+from ..action import create_response_embed
 
 
 def _iter_options():
@@ -38,7 +40,7 @@ def _iter_options():
         False,
         None,
         [role],
-        Embed(color = Color(0), description = '*Could not get any images, please try again later.*'),
+        Embed(color = None, description = '*Could not get any images, please try again later.*'),
     )
     
     yield (
@@ -60,7 +62,7 @@ def _iter_options():
         False,
         image_detail,
         [role],
-        Embed(color = Color(0)).add_image(url).add_footer('By miau.'),
+        Embed(color = None).add_image(url).add_footer('By miau.'),
     )
 
 

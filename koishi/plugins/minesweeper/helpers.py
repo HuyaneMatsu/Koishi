@@ -3,7 +3,9 @@ __all__ = ()
 from math import floor
 from random import random
 
-from .constants import SIZE_TOTAL, SIZE_X, TILE_VALUE_BOMB, TILE_VALUE_EMPTY, TILE_VALUE_FLAG
+from config import ORIN_ID
+
+from .constants import SIZE_TOTAL, SIZE_X, TILE_MAP, TILE_MAP_ORIN, TILE_VALUE_BOMB, TILE_VALUE_EMPTY, TILE_VALUE_FLAG
 
 
 def to_index(position_x, position_y):
@@ -234,3 +236,22 @@ def flip_tile(tiles, flipped_tiles, index):
     
     if is_all_non_bomb_flipped(tiles, flipped_tiles):
         flag_and_flip_bomb_tiles(tiles, flipped_tiles)
+
+
+def get_tile_map(client_id):
+    """
+    Gets tile map for the given identifier.
+    
+    Parameters
+    ----------
+    client_id : `bool`
+        The client's identifier to get tile map for.
+    
+    Returns
+    -------
+    tile_map : `list<Emoji>`
+    """
+    if client_id == ORIN_ID:
+        return TILE_MAP_ORIN
+    
+    return TILE_MAP

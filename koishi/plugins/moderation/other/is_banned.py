@@ -39,7 +39,7 @@ def build_is_banned_embed(user, ban_entry):
 async def is_banned_command(
     client,
     event,
-    user: (User, 'Who should I check?')
+    user: (User, 'Who should I check?'),
 ):
     """Checks whether the user is banned."""
     guild = event.guild

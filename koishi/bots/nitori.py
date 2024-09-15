@@ -68,11 +68,12 @@ CAKES = [
 ]
 
 @Nitori.interactions(guild = TEST_GUILD)
-async def cake(event,
+async def cake(
+    event,
     user: P('user', 'To who?'),
 ):
     """Gifts a cake!"""
-    return Embed(description = f'{event.user:f} just gifted a cookie to {user:f} !').add_image(choice(CAKES))
+    return Embed(description = f'{event.user:f} just gifted a cake to {user:f} !').add_image(choice(CAKES))
 
 # command end
 # command start slash cola
@@ -359,7 +360,9 @@ async def why(client):
 # command start slash is-banned
 
 @Nitori.interactions(guild = TEST_GUILD)
-async def is_banned(client, event,
+async def is_banned(
+    client,
+    event,
     user: ('user', 'Who should I check?')
 ):
     """Checks whether the user is banned."""

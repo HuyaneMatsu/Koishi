@@ -185,13 +185,13 @@ BIT_MASK_CHAR_W      = 0b0000011100000000
 # BIT_MASK_CS_HOLE_P   = 0b0000011000000100
 # BIT_MASK_CW_HOLE_P   = 0b0000011100000100
 
-BIT_MASK_WALL        = 0b1111100000000000
-
 BIT_MASK_NOTHING     = 0b0000100000000000
 BIT_MASK_WALL_N      = 0b0001000000000000
 BIT_MASK_WALL_E      = 0b0010000000000000
 BIT_MASK_WALL_S      = 0b0100000000000000
 BIT_MASK_WALL_W      = 0b1000000000000000
+
+BIT_MASK_WALL = BIT_MASK_NOTHING | BIT_MASK_WALL_N | BIT_MASK_WALL_E | BIT_MASK_WALL_S | BIT_MASK_WALL_W
 # BIT_MASK_WALL_A      = 0b1111000000000000
 # BIT_MASK_WALL_SE     = 0b0110000000000000
 # BIT_MASK_WALL_SW     = 0b1100000000000000
@@ -1141,7 +1141,7 @@ def REIMU_SKILL_CAN_ACTIVATE(game_state):
     position = game_state.position
     map_ = game_state.map
     
-    for step in ( -x_size, 1, x_size, -1):
+    for step in (-x_size, 1, x_size, -1):
         target_tile = map_[position + step]
         
         if not target_tile & (BIT_MASK_PUSHABLE | BIT_MASK_SPECIAL):
@@ -1256,7 +1256,7 @@ def FLAN_SKILL_CAN_ACTIVATE(game_state):
     position = game_state.position
     map_ = game_state.map
     
-    for step in ( -x_size, 1, x_size, -1):
+    for step in (-x_size, 1, x_size, -1):
         target_tile = map_[position + step]
         
         if target_tile == BIT_MASK_OBJECT_U:
@@ -1352,14 +1352,9 @@ def YUKARI_SKILL_CAN_ACTIVATE(game_state):
 
     position = game_state.position
     y_position, x_position = divmod(position, x_size)
-
-    # x_min = x_size*y_position
-    # x_max = x_size*(y_position + 1)-1
-    # y_min = x_position
-    # y_max = x_position + (x_size*(y_size-1))
     
     for step, limit in (
-        (-x_size , -x_size                             ,),
+        (-x_size , -x_size + x_position                ,),
         (1       , x_size * (y_position + 1) - 1       ,),
         (x_size  , x_position + (x_size * (y_size - 1)),),
         ( -1     , x_size * y_position                 ,),
@@ -1368,7 +1363,7 @@ def YUKARI_SKILL_CAN_ACTIVATE(game_state):
         if target_position == limit:
             continue
         
-        if not map_[target_position]&BIT_MASK_BLOCKS_LOS:
+        if not map_[target_position] & BIT_MASK_BLOCKS_LOS:
             continue
         
         while True:
@@ -1410,15 +1405,10 @@ def YUKARI_SKILL_GET_DIRECTIONS(game_state):
     
     position = game_state.position
     y_position, x_position = divmod(position, x_size)
-
-    # x_min = x_size*y_position
-    # x_max = x_size*(y_position + 1)-1
-    # y_min = x_position
-    # y_max = x_position + (x_size*(y_size-1))
     
     for (step, limit), setter in zip(
         (
-            ( -x_size , -x_size                             ,),
+            ( -x_size , -x_size + x_position                ,),
             (1        , x_size * (y_position + 1) - 1       ,),
             (x_size   , x_position + (x_size * (y_size - 1)),),
             ( -1      , x_size * y_position                 ,),
@@ -1429,26 +1419,27 @@ def YUKARI_SKILL_GET_DIRECTIONS(game_state):
         target_position = position + step
         if target_position == limit:
             can_go_to_directory = False
+        
+        elif not map_[target_position] & BIT_MASK_BLOCKS_LOS:
+            can_go_to_directory = False
+        
         else:
-            if map_[target_position]&BIT_MASK_BLOCKS_LOS:
-                while True:
-                    target_position = target_position + step
-                    if target_position == limit:
-                        can_go_to_directory = False
-                        break
-                    
-                    target_tile = map_[target_position]
-                    if target_tile & BIT_MASK_BLOCKS_LOS:
-                        continue
-                    
-                    if target_tile & BIT_MASK_PASSABLE:
-                        can_go_to_directory = True
-                        break
-                    
+            while True:
+                target_position = target_position + step
+                if target_position == limit:
                     can_go_to_directory = False
                     break
-            else:
+                
+                target_tile = map_[target_position]
+                if target_tile & BIT_MASK_BLOCKS_LOS:
+                    continue
+                
+                if target_tile & BIT_MASK_PASSABLE:
+                    can_go_to_directory = True
+                    break
+                
                 can_go_to_directory = False
+                break
         
         setter(move_directions, can_go_to_directory)
     
@@ -1490,14 +1481,14 @@ def YUKARI_SKILL_USE(game_state, step, align):
         if step == -1:
             limit = x_size * y_position
         else:
-            limit = -x_size
+            limit = -x_size + x_position
 
     target_position = position + step
     
     if target_position == limit:
         return False
     
-    if not map_[target_position]&BIT_MASK_BLOCKS_LOS:
+    if not map_[target_position] & BIT_MASK_BLOCKS_LOS:
         return False
     
     while True:

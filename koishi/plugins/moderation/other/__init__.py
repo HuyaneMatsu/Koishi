@@ -3,6 +3,7 @@ from .top_list import *
 
 from .ban import *
 from .constants import *
+from .edit_ban_reason import *
 from .helpers import *
 from .is_banned import *
 from .kick import *
@@ -20,6 +21,7 @@ __all__ = (
     
     *ban.__all__,
     *constants.__all__,
+    *edit_ban_reason.__all__,
     *helpers.__all__,
     *is_banned.__all__,
     *kick.__all__,
@@ -36,6 +38,7 @@ __all__ = (
 from ....bots import FEATURE_CLIENTS
 
 from .ban import ban_command
+from .edit_ban_reason import edit_ban_reason_command
 from .is_banned import is_banned_command
 from .kick import kick_command
 from .mute import mute_command
@@ -59,6 +62,7 @@ MAIN_COMMAND = FEATURE_CLIENTS.interactions(
 )
 
 MAIN_COMMAND.interactions(ban_command, name = 'ban')
+MAIN_COMMAND.interactions(edit_ban_reason_command, name = 'edit-ban-reason')
 MAIN_COMMAND.interactions(is_banned_command, name = 'is-banned')
 MAIN_COMMAND.interactions(kick_command, name = 'kick')
 MAIN_COMMAND.interactions(mute_command, name = 'mute')

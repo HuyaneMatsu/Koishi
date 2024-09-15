@@ -28,10 +28,11 @@ TILE_NEAR_7 = BUILTIN_EMOJIS['seven']
 TILE_NEAR_8 = BUILTIN_EMOJIS['eight']
 
 TILE_BOMB = BUILTIN_EMOJIS['bomb']
+TILE_SKULL = BUILTIN_EMOJIS['skull']
 TILE_FLAG = BUILTIN_EMOJIS['triangular_flag_on_post']
 
 
-TILES = [
+TILE_MAP = [
     TILE_UNKNOWN,
     TILE_EMPTY,
     TILE_NEAR_1,
@@ -43,6 +44,22 @@ TILES = [
     TILE_NEAR_7,
     TILE_NEAR_8,
     TILE_BOMB,
+    TILE_FLAG,
+]
+
+
+TILE_MAP_ORIN = [
+    TILE_UNKNOWN,
+    TILE_EMPTY,
+    TILE_NEAR_1,
+    TILE_NEAR_2,
+    TILE_NEAR_3,
+    TILE_NEAR_4,
+    TILE_NEAR_5,
+    TILE_NEAR_6,
+    TILE_NEAR_7,
+    TILE_NEAR_8,
+    TILE_SKULL,
     TILE_FLAG,
 ]
 

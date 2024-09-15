@@ -1,3 +1,38 @@
+### 2024-09-15
+
+- Fix `Teireida Mai`'s nick shadowing `Mai` in `/touhou-character`.
+- Fix `Game21PlayerRunner` tried to add interaction waiter after failed to create the message.
+- Fix `/lucky-spin` infinite heart glitch, teehee.
+- Fix `format-time` applying `timezone-offset` the wrong way around.
+- Fix `/21` multi player timeout not editing the message.
+- Rebrand `CursedSakuya` to `ToyKoishi`.
+- `/format-time absolute` now has new `time-zone` and `daylight-saving-time` parameters.
+- Fix `ZeroDivisionError` in event payload analyzer. (This is a new discord feature testing tool actually.)
+- Rebrand Cursed Sakuya to Toy Koishi.
+- Fix `/heart-shop roles` used the user's global avatar instead of the local one.
+- Fix action commands (such as `/hug`) used black color if a user had no color (instead of no color).
+- Add `/mod edit-ban-reason` command.
+- `/daily` now shows the waifus on cooldown too. Also shows their cooldown too.
+- Fix `/daily` telling someone is not a waifu if they are on cooldown.
+- Ignore a random permission error caused when responding to an action command like `/hug`.
+    When this happen the client will try to default back to sending a normal message.
+    Tho that would fail on permission check probably.
+- `anilist` commands are now available when user installed.
+    This includes: `/show-anime`, `/find-anime`, `/show-character`, `/find-character`, `/show-manga`, `/find-manga`.
+- Fix `/trivia` removed embed author on chained interactions when completed. (Caused by a Discord change)
+- Fix `escape` now escaping grave character. (Forgot to add it back after fixing `escape` previously.)
+- `/minesweeper` now uses `:skull:` emoji when used through orin.
+- Fix `/ds` underflow in yukari skill calculation. 
+- Fix `/emoji` commands not showing up (support guild only).
+- Fix koishi news are not auto crossposted.
+- `/plugins list-all` and `/plugins list-per-client` merged into one `/plugins list` command. (Owner only)
+- `/plugins list` is now paged. 
+- Add new `/stare` command with **70** image.
+- Add **3** image to `/pat`.
+- Add **13** image to `/hug`.
+- Add **5** image to `/fluff`.
+- Add **1** image to `/kon`.
+
 ### 2024-08-20
 
 - `/gift` is now available when user installed.

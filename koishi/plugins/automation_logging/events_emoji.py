@@ -136,7 +136,7 @@ async def initial_request_emmojis(client):
         ]:
             guild = GUILDS.get(automation_configuration.guild_id, None)
             if (guild is not None) and (client is get_first_client_in_guild_from(guild, FEATURE_CLIENTS)):
-                await client.emoji_guild_get_all(guild)
+                await client.emoji_get_all_guild(guild)
     except ConnectionError:
         # No internet connection
         return

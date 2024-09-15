@@ -80,6 +80,7 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
                         await client.events.error(client, f'{cls.__name__}.__new__', exception)
                     
                     message = None
+                    game_ended = True
             
             if waiter.set_result_if_pending(True):
                 player.state = PLAYER_STATE_FINISH
@@ -104,7 +105,10 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
                 
                 if waiter.set_result_if_pending(False):
                     player.state = PLAYER_STATE_INITIALIZATION_ERROR
+                
                 message = None
+                game_ended = True
+        
         
         self = object.__new__(cls)
         self._gui_state = GUI_STATE_SWITCHING_CONTEXT if game_ended else GUI_STATE_READY

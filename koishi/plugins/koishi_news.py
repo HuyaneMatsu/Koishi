@@ -1,11 +1,10 @@
 __all__ = ()
 
 from hata.ext.plugin_loader import require
+require(MARISA_MODE = False)
+
 
 from ..bot_utils.constants import CHANNEL__SUPPORT__KOISHI_NEWS
-
-require('Satori')
-
 from ..bots import Satori
 
 

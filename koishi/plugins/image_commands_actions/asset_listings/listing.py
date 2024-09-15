@@ -10,15 +10,16 @@ from ...touhou_core import (
     IMAIZUMI_KAGEROU, INABA_TEWI, INUBASHIRI_MOMIJI, IZAYOI_SAKUYA, JOUTOUGUU_MAYUMI, JUNKO, KAENBYOU_RIN,
     KAGIYAMA_HINA, KAKU_SEIGA, KAMISHIRASAWA_KEINE, KASODANI_KYOUKO, KAWASHIRO_NITORI, KAZAMI_YUUKA, KICCHOU_YACHIE,
     KIJIN_SEIJA, KIRISAME_MARISA, KISHIN_SAGUME, KOAKUMA, KOCHIYA_SANAE, KOMANO_AUNN, KOMEIJI_KOISHI, KOMEIJI_SATORI,
-    KONPAKU_YOUMU, KUDAMAKI_TSUKASA, KUMOI_ICHIRIN, KURODANI_YAMAME, KUROKOMA_SAKI, LETTY_WHITEROCK, LILY_BLACK,
-    LILY_WHITE, LUNA_CHILD, MARGATROID_ALICE, MATARA_OKINA, MEDICINE_MELANCHOLY, MITSUGASHIRA_ENOKO, MIYAKO_YOSHIKA,
-    MIZUHASHI_PARSEE, MONONOBE_NO_FUTO, MORICHIKA_RINNOSUKE, MORIYA_SUWAKO, MOTOORI_KOSUZU, MURASA_MINAMITSU,
-    MYSTIA_LORELEI, NAGAE_IKU, NAZRIN, NIPPAKU_ZANMU, NISHIDA_SATONO, ONOZUKA_KOMACHI, PATCHOULI_KNOWLEDGE,
-    REISEN_UDONGEIN_INABA, REIUJI_UTSUHO, RINGO, RUMIA, SAIGYOUJI_YUYUKO, SCARLET_FLANDRE, SCARLET_REMILIA, SEIRAN,
-    SEKIBANKI, SHAMEIMARU_AYA, SHIKI_EIKI_YAMAXANADU, SHINKI, SOGA_NO_TOJIKO, STAR_SAPPHIRE, SUKUNA_SHINMYOUMARU,
-    SUNNY_MILK, TATARA_KOGASA, TEIREIDA_MAI, TORAMARU_SHOU, TOUTETSU_YUUMA, TOYOSATOMIMI_NO_MIKO, TSUKUMO_BENBEN,
-    TSUKUMO_YATSUHASHI, USAMI_RENKO, USAMI_SUMIREKO, WAKASAGIHIME, WRIGGLE_NIGHTBUG, YAGOKORO_EIRIN, YAKUMO_RAN,
-    YAKUMO_YUKARI, YASAKA_KANAKO, YOMOTSU_HISAMI, YORIGAMI_JOON, YORIGAMI_SHION
+    KONPAKU_YOUMU, KOMAKUSA_SANNYO, KUDAMAKI_TSUKASA, KUMOI_ICHIRIN, KURODANI_YAMAME, KUROKOMA_SAKI, LETTY_WHITEROCK,
+    LILY_BLACK, LILY_WHITE, LUNA_CHILD, MARGATROID_ALICE, MATARA_OKINA, MEDICINE_MELANCHOLY, MITSUGASHIRA_ENOKO,
+    MIYAKO_YOSHIKA, MIZUHASHI_PARSEE, MONONOBE_NO_FUTO, MORICHIKA_RINNOSUKE, MORIYA_SUWAKO, MOTOORI_KOSUZU,
+    MURASA_MINAMITSU, MYSTIA_LORELEI, NAGAE_IKU, NAZRIN, NIPPAKU_ZANMU, NISHIDA_SATONO, ONOZUKA_KOMACHI,
+    PATCHOULI_KNOWLEDGE, REISEN_UDONGEIN_INABA, REIUJI_UTSUHO, RINGO, RUMIA, SAIGYOUJI_YUYUKO, SCARLET_FLANDRE,
+    SCARLET_REMILIA, SEIRAN, SEKIBANKI, SHAMEIMARU_AYA, SHIKI_EIKI_YAMAXANADU, SHINKI, SOGA_NO_TOJIKO, STAR_SAPPHIRE,
+    SUKUNA_SHINMYOUMARU, SUNNY_MILK, TATARA_KOGASA, TEIREIDA_MAI, TENKYUU_CHIMATA, TORAMARU_SHOU, TOUTETSU_YUUMA,
+    TOYOSATOMIMI_NO_MIKO, TSUKUMO_BENBEN, TSUKUMO_YATSUHASHI, USAMI_RENKO, USAMI_SUMIREKO, WAKASAGIHIME,
+    WRIGGLE_NIGHTBUG, YAGOKORO_EIRIN, YAKUMO_RAN, YAKUMO_YUKARI, YASAKA_KANAKO, YOMOTSU_HISAMI, YORIGAMI_JOON,
+    YORIGAMI_SHION
 )
 from ...user_settings import PREFERRED_IMAGE_SOURCE_TOUHOU
 
@@ -26,7 +27,7 @@ from .constants import (
     ACTION_TAG_BLUSH, ACTION_TAG_BULLY, ACTION_TAG_COSPLAY, ACTION_TAG_DANCE, ACTION_TAG_FEED, ACTION_TAG_FLUFF,
     ACTION_TAG_HANDHOLD, ACTION_TAG_HUG, ACTION_TAG_KISS, ACTION_TAG_KON, ACTION_TAG_LAP_SLEEP, ACTION_TAG_LICK,
     ACTION_TAG_LIKE, ACTION_TAG_NOM, ACTION_TAG_PAT, ACTION_TAG_POCKY_KISS, ACTION_TAG_POCKY_KISS_SELF, ACTION_TAG_POKE,
-    ACTION_TAG_TICKLE, ACTION_TAG_WAVE
+    ACTION_TAG_STARE, ACTION_TAG_TICKLE, ACTION_TAG_WAVE
 )
 
 
@@ -136,6 +137,12 @@ from .constants import (
 # Source 0:
 # From my pc actually.
 # :KoishiPc:
+
+# Source of stare
+#
+# Source 0:
+# https://danbooru.donmai.us/posts?tags=touhou+staring+&z=5
+# Till page 4 I think
 
 TOUHOU_ACTION_ALL = ImageHandlerStatic(PREFERRED_IMAGE_SOURCE_TOUHOU)
 
@@ -3824,7 +3831,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1191055933057532024/medicine-melancholy-pocky-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284226955335696515/medi-pocky-0000.png',
 ).with_action(
     ACTION_TAG_POCKY_KISS_SELF, MEDICINE_MELANCHOLY, MEDICINE_MELANCHOLY,
 ).with_creator(
@@ -6526,9 +6533,808 @@ TOUHOU_ACTION_ALL.add(
     'Rina / 里奈',
 )
 
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284231739002064948/reimu-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, HAKUREI_REIMU, None,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
 
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284239141520936991/reimu-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, HAKUREI_REIMU, None,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
 
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284242869711798343/reimu-stare-0002.png',
+).with_action(
+    ACTION_TAG_STARE, HAKUREI_REIMU, None,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
 
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284231742080679977/orin-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, KAENBYOU_RIN, None,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
 
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284231741556396164/chiruno-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, CHIRUNO, None,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
 
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284237039499477125/yuuka-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, KAZAMI_YUUKA, None,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
 
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284239142187962458/youmu-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, KONPAKU_YOUMU, None,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284240065312063509/sakuya-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, IZAYOI_SAKUYA, None,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284242870508978216/koakuma-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, KOAKUMA, None,
+).with_creator(
+    'mata (matasoup)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284242871200907377/reisen-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, REISEN_UDONGEIN_INABA, None,
+).with_creator(
+    'mata (matasoup)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284231742722412738/youmu-wave-0000.png',
+).with_action(
+    ACTION_TAG_WAVE, KONPAKU_YOUMU, None,
+).with_creator(
+    'mata (matasoup)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284234047320756244/medi-yuuka-pat-0000.png',
+).with_action(
+    ACTION_TAG_PAT, KAZAMI_YUUKA, MEDICINE_MELANCHOLY,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284235694662881330/wriggle-yuuka-hug-0000.png',
+).with_actions(
+    (ACTION_TAG_HUG, KAZAMI_YUUKA, WRIGGLE_NIGHTBUG),
+    (ACTION_TAG_HUG, WRIGGLE_NIGHTBUG, KAZAMI_YUUKA),
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284231799232532593/remilia-sakuya-hug-0001.png',
+).with_action(
+    ACTION_TAG_HUG, IZAYOI_SAKUYA, SCARLET_REMILIA,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284231795897929800/meiling-sakuya-hug-0007.png',
+).with_action(
+    ACTION_TAG_HUG, HONG_MEILING, IZAYOI_SAKUYA,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284231796825002025/meiling-sakuya-hug-0006.png',
+).with_action(
+    ACTION_TAG_HUG, HONG_MEILING, IZAYOI_SAKUYA,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284231797139570830/meiling-sakuya-hug-0005.png',
+).with_action(
+    ACTION_TAG_HUG, HONG_MEILING, IZAYOI_SAKUYA,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284231798049603675/meiling-sakuya-hug-0004.png',
+).with_action(
+    ACTION_TAG_HUG, IZAYOI_SAKUYA, HONG_MEILING,
+).with_creator(
+    'mata (matasoup)',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284249095657226351/megumu-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, IIZUNAMARU_MEGUMU, None,
+).with_creator(
+    'harapan-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284249096214937701/tenshi-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, HINANAWI_TENSHI, None,
+).with_creator(
+    'harapan-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284249096919715891/momiji-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, INUBASHIRI_MOMIJI, None,
+).with_creator(
+    'harapan-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284249097624092704/flandre-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, SCARLET_FLANDRE, None,
+).with_creator(
+    'harapan-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284249098278670356/alice-patchouli-stare-0000.png',
+).with_actions(
+    (ACTION_TAG_STARE, PATCHOULI_KNOWLEDGE, None),
+    (ACTION_TAG_STARE, MARGATROID_ALICE, None),
+).with_creator(
+    'harapan-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284249097624092704/flandre-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, SCARLET_FLANDRE, None,
+).with_creator(
+    'harapan-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284251464419508344/momiji-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, INUBASHIRI_MOMIJI, None,
+).with_creator(
+    'harapan-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284252688451764317/marisa-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, KIRISAME_MARISA, None,
+).with_creator(
+    'harapan-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284412294666780794/marisa-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, KIRISAME_MARISA, None,
+).with_creator(
+    'nubezon',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284412293559488593/nue-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, HOUJUU_NUE, None,
+).with_creator(
+    'nubezon',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284412292850782248/junko-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, JUNKO, None,
+).with_creator(
+    'nubezon',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284412298839986206/flandre-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, SCARLET_FLANDRE, None,
+).with_creator(
+    'nubezon',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284412297955246150/flandre-stare-0002.png',
+).with_action(
+    ACTION_TAG_STARE, SCARLET_FLANDRE, None,
+).with_creator(
+    'nubezon',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284412297225441290/flandre-stare-0003.png',
+).with_action(
+    ACTION_TAG_STARE, SCARLET_FLANDRE, None,
+).with_creator(
+    'nubezon',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284412295853637754/flandre-stare-0004.png',
+).with_action(
+    ACTION_TAG_STARE, SCARLET_FLANDRE, None,
+).with_creator(
+    'nubezon',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284412291890020372/flandre-stare-0005.png',
+).with_action(
+    ACTION_TAG_STARE, SCARLET_FLANDRE, None,
+).with_creator(
+    'nubezon',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284415752606322759/reimu-stare-0003.png',
+).with_action(
+    ACTION_TAG_STARE, HAKUREI_REIMU, None,
+).with_creator(
+    'hia (xonn)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284415754241970216/kogasa-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, TATARA_KOGASA, None,
+).with_creator(
+    'hia (xonn)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284415753487122433/kogasa-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, TATARA_KOGASA, None,
+).with_creator(
+    'hia (xonn)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284415754900471839/kogasa-stare-0002.png',
+).with_action(
+    ACTION_TAG_STARE, TATARA_KOGASA, None,
+).with_creator(
+    'hia (xonn)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423825500672000/sakuya-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, IZAYOI_SAKUYA, None,
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423826045927425/nazrin-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, NAZRIN, None,
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423826683330611/orin-stare-0002.png',
+).with_action(
+    ACTION_TAG_STARE, KAENBYOU_RIN, None,
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423827249565716/hecatia-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, HECATIA_LAPISLAZULI, None,
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423827794821140/yatsuhashi-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, TSUKUMO_YATSUHASHI, None,
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423828981940267/koishi-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, KOMEIJI_KOISHI, None,
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423842919612476/koishi-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, KOMEIJI_KOISHI, None,
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423842583941232/koishi-stare-0002.png',
+).with_action(
+    ACTION_TAG_STARE, KOMEIJI_KOISHI, None,
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423830768451595/kokoro-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, HATA_NO_KOKORO, None,
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423829963276288/hina-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, KAGIYAMA_HINA, None,
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423829380136961/tsukasa-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, KUDAMAKI_TSUKASA, None,
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423828398669885/chen-orin-hug-pat-0000.png',
+).with_actions(
+    (ACTION_TAG_HUG, CHEN, KAENBYOU_RIN),
+    (ACTION_TAG_PAT, KAENBYOU_RIN, CHEN),
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423843317944423/chiruno-flandre-cosplay-stare-0000.png',
+).with_actions(
+    (ACTION_TAG_COSPLAY, CHIRUNO, SCARLET_FLANDRE),
+    (ACTION_TAG_STARE, CHIRUNO, None),
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284423843863334963/chiruno-flandre-cosplay-stare-0001.png',
+).with_actions(
+    (ACTION_TAG_COSPLAY, SCARLET_FLANDRE, CHIRUNO),
+    (ACTION_TAG_STARE, SCARLET_FLANDRE, None),
+).with_creator(
+    'himuhino',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284427744016470057/orin-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, KAENBYOU_RIN, None,
+).with_creator(
+    'fuuzasa',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284427743462817793/orin-stare-0003.png',
+).with_action(
+    ACTION_TAG_STARE, KAENBYOU_RIN, None,
+).with_creator(
+    'fuuzasa',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284469077372309504/keine-mokou-handhold-0001.png',
+).with_actions(
+    (ACTION_TAG_HANDHOLD, KAMISHIRASAWA_KEINE, FUJIWARA_NO_MOKOU),
+    (ACTION_TAG_HANDHOLD, FUJIWARA_NO_MOKOU, KAMISHIRASAWA_KEINE),
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284469077804580967/keine-mokou-fluff-0003.png',
+).with_action(
+    ACTION_TAG_FLUFF, FUJIWARA_NO_MOKOU, KAMISHIRASAWA_KEINE,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284469078345383986/keine-mokou-handhold-0000.png',
+).with_actions(
+    (ACTION_TAG_HANDHOLD, KAMISHIRASAWA_KEINE, FUJIWARA_NO_MOKOU),
+    (ACTION_TAG_HANDHOLD, FUJIWARA_NO_MOKOU, KAMISHIRASAWA_KEINE),
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284469079083847720/keine-mokou-hug-0006.png',
+).with_action(
+    ACTION_TAG_HUG, FUJIWARA_NO_MOKOU, KAMISHIRASAWA_KEINE,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284469080509648958/keine-mokou-fluff-0002.png',
+).with_action(
+    ACTION_TAG_FLUFF, FUJIWARA_NO_MOKOU, KAMISHIRASAWA_KEINE,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284469080509648958/keine-mokou-fluff-0002.png',
+).with_action(
+    ACTION_TAG_FLUFF, FUJIWARA_NO_MOKOU, KAMISHIRASAWA_KEINE,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284469110637334528/koishi-satori-hug-0009.png',
+).with_actions(
+    (ACTION_TAG_HUG, KOMEIJI_KOISHI, KOMEIJI_SATORI),
+    (ACTION_TAG_HUG, KOMEIJI_SATORI, KOMEIJI_KOISHI),
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284469111044313140/tsukasa-kon-stare-0000.png',
+).with_actions(
+    (ACTION_TAG_KON, KUDAMAKI_TSUKASA, None),
+    (ACTION_TAG_STARE, KUDAMAKI_TSUKASA, None),
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284469111400824886/kyouko-mamizou-fluff-0001.png',
+).with_action(
+    ACTION_TAG_FLUFF, KASODANI_KYOUKO, FUTATSUIWA_MAMIZOU,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284469111686168606/seiga-yoshika-pat-0002.png',
+).with_action(
+    ACTION_TAG_PAT, KAKU_SEIGA, MIYAKO_YOSHIKA,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284470166004174912/keine-mokou-hug-0005.png',
+).with_actions(
+    (ACTION_TAG_HUG, KAMISHIRASAWA_KEINE, FUJIWARA_NO_MOKOU),
+    (ACTION_TAG_HUG, FUJIWARA_NO_MOKOU, KAMISHIRASAWA_KEINE),
+).with_creator(
+    'itomugi-kun',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284475400101298176/keine-mokou-hug-0001.png',
+).with_action(
+    ACTION_TAG_HUG, FUJIWARA_NO_MOKOU, KAMISHIRASAWA_KEINE,
+).with_creator(
+    'itomugi-kun',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284475878365204492/keine-mokou-hug-0002.png',
+).with_action(
+    ACTION_TAG_HUG, KAMISHIRASAWA_KEINE, FUJIWARA_NO_MOKOU,
+).with_creator(
+    'itomugi-kun',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284476440556994681/keine-mokou-fluff-0001.png',
+).with_action(
+    ACTION_TAG_FLUFF, FUJIWARA_NO_MOKOU, KAMISHIRASAWA_KEINE,
+).with_creator(
+    'itomugi-kun',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284474762474688554/flandre-stare-0007.png',
+).with_action(
+    ACTION_TAG_STARE, SCARLET_FLANDRE, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284474761937686601/chimata-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, TENKYUU_CHIMATA, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284474762957029407/okina-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, MATARA_OKINA, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284474793055223818/mokou-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, FUJIWARA_NO_MOKOU, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284474793843757076/yuuma-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, TOUTETSU_YUUMA, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284474794825486368/okuu-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, REIUJI_UTSUHO, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284474796230578176/sakuya-stare-0002.png',
+).with_action(
+    ACTION_TAG_STARE, IZAYOI_SAKUYA, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284474795475599380/keine-mokou-stare-0000.png',
+).with_actions(
+    (ACTION_TAG_STARE, KAMISHIRASAWA_KEINE, None),
+    (ACTION_TAG_STARE, FUJIWARA_NO_MOKOU, None),
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284474764404195370/keine-mokou-stare-0001.png',
+).with_actions(
+    (ACTION_TAG_STARE, KAMISHIRASAWA_KEINE, None),
+    (ACTION_TAG_STARE, FUJIWARA_NO_MOKOU, None),
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284474764064194641/keine-mokou-nom-0000.png',
+).with_action(
+    ACTION_TAG_NOM, FUJIWARA_NO_MOKOU, KAMISHIRASAWA_KEINE,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284474763472801803/keine-mokou-hug-0003.png',
+).with_action(
+    ACTION_TAG_HUG, KAMISHIRASAWA_KEINE, FUJIWARA_NO_MOKOU,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284521693666345112/keine-blush-stare-0000.png',
+).with_actions(
+    (ACTION_TAG_BLUSH, KAMISHIRASAWA_KEINE, None),
+    (ACTION_TAG_STARE, KAMISHIRASAWA_KEINE, None),
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926692355477637/keine-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, KAMISHIRASAWA_KEINE, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926693164847245/kaguya-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, HOURAISAN_KAGUYA, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926693852844063/mayumi-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, JOUTOUGUU_MAYUMI, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926694251171871/mokou-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, FUJIWARA_NO_MOKOU, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926694586843206/keine-mokou-stare-0003.png',
+).with_action(
+    ACTION_TAG_STARE, FUJIWARA_NO_MOKOU, None,
+).with_character(
+    KAMISHIRASAWA_KEINE,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926714216185936/keine-stare-0002.png',
+).with_action(
+    ACTION_TAG_STARE, KAMISHIRASAWA_KEINE, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926713867931822/keine-mokou-stare-0004.png',
+).with_actions(
+    (ACTION_TAG_STARE, KAMISHIRASAWA_KEINE, None),
+    (ACTION_TAG_STARE, FUJIWARA_NO_MOKOU, None),
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926714794872872/keine-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, KAMISHIRASAWA_KEINE, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926695077580942/sekibanki-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, SEKIBANKI, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926695794802729/letty-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, LETTY_WHITEROCK, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926712592728208/okina-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, MATARA_OKINA, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926713138249728/star-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, STAR_SAPPHIRE, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926713511411773/futo-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, MONONOBE_NO_FUTO, None,
+).with_creator(
+    'itomugi-kun',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1284926714522239037/tojiko-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, SOGA_NO_TOJIKO, None,
+).with_creator(
+    'itomugi-kun',
+)

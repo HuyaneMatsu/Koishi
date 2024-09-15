@@ -20,13 +20,13 @@ else:
 
 
 if LOAD_KOISHI:
-    from .cursed_sakuya import *
     from .flandre import *
     from .koishi import *
     from .nitori import *
     from .orin import *
     from .renes import *
     from .satori import *
+    from .toy_koishi import *
     from .yoshika import *
     
     
@@ -34,22 +34,22 @@ if LOAD_KOISHI:
     MAIN_CLIENT = Koishi
     
     FEATURE_CLIENTS = ClientWrapper(
-        CursedSakuya,
         Flandre,
         Koishi,
         Orin,
+        ToyKoishi,
         Yoshika,
     )
     
     __all__ = (
         *__all__,
-        *cursed_sakuya.__all__,
         *flandre.__all__,
         *koishi.__all__,
         *nitori.__all__,
         *orin.__all__,
         *renes.__all__,
         *satori.__all__,
+        *toy_koishi.__all__,
         *yoshika.__all__,
     )
 

@@ -4,7 +4,7 @@ from hata import (
     InteractionOption, InteractionType
 )
 
-from ...touhou_core import KAENBYOU_RIN, KOMEIJI_KOISHI, REIUJI_UTSUHO
+from ...touhou_core import CHEN, KAENBYOU_RIN, KOMEIJI_KOISHI, REIUJI_UTSUHO
 
 from ..action_filtering import (
     PARAMETER_NAME_ACTION_TAG, PARAMETER_NAME_SOURCE, PARAMETER_NAME_TARGET, PARAMETER_WILD_CARD, autocomplete_source
@@ -57,7 +57,7 @@ def _iter_options():
             )
         ),
         None,
-        [PARAMETER_WILD_CARD, KOMEIJI_KOISHI.name, REIUJI_UTSUHO.name],
+        [PARAMETER_WILD_CARD, CHEN.name, KOMEIJI_KOISHI.name, REIUJI_UTSUHO.name],
     )
     
     yield (

@@ -1634,12 +1634,13 @@ class GuesserState(RichAttributeErrorBaseType):
             into.append(self.name)
             into.append(': ')
         
-        if best_guesser is None:
+        received_count = self.received_count
+        if (best_guesser is None) or (not received_count):
             into.append(UNKNOWN_FIELD_TYPE_NAME)
         else:
             into.append(best_guesser.guesser.name)
             into.append(' (')
-            percentage = floor(100 * best_chance / self.received_count)
+            percentage = floor(100 * best_chance / received_count)
             into.append(str(percentage))
             into.append('%)')
         

@@ -3,7 +3,7 @@ __all__ = ()
 import re
 from random import choice, randint, shuffle
 
-from hata import BUILTIN_EMOJIS, Color, Embed, Emoji
+from hata import BUILTIN_EMOJIS, Color, Embed, Emoji, InteractionType
 from hata.ext.slash import Button, ButtonStyle, InteractionResponse, Row
 
 from ...bots import FEATURE_CLIENTS
@@ -258,6 +258,36 @@ def reparse_selected_options(event, item):
     return selected_options
 
 
+def is_interaction_chained(interaction_event):
+    """
+    Returns whether the interaction is chained.
+    
+    Parameters
+    ----------
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    Returns
+    -------
+    chained : `bool`
+    """
+    message = interaction_event.message
+    if message is None:
+        return False
+    
+    interaction = message.interaction
+    
+    # Old style -> chained through `.referenced_message`
+    if interaction is None:
+        return True
+    
+    # New style -> chained through `.interaction.type == InteractionType.message_component`
+    if interaction.type is InteractionType.message_component:
+        return True
+    
+    return False
+
+
 async def send_user_mismatch_notification(client, event):
     """
     Sends user mismatch notification.
@@ -313,6 +343,7 @@ async def trivia(
     )
 
 
+
 @FEATURE_CLIENTS.interactions(custom_id = OPTION_PATTERN)
 async def trivia_select(client, event, user_id_string, category_id_string, item_id_string, selected_option_id_string):
     """
@@ -360,7 +391,7 @@ async def trivia_select(client, event, user_id_string, category_id_string, item_
         color = COLOR_CORRECT
     
     embed = Embed(item.question, f'**{choice(description_generators)(client, event)}**', color = color)
-    if event.message.interaction is None:
+    if is_interaction_chained(event):
         user = event.user
         guild_id = event.guild_id
         

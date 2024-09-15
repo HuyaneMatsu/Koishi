@@ -17,8 +17,8 @@ FLANDRE_ID = 0                   # bot id (int), can be 0.
 YOSHIKA_TOKEN = ''               # bot token (str) for a secondary feature bot.
 YOSHIKA_ID = 0                   # bot id (int), can be 0.
 
-CURSED_SAKUYA_TOKEN = ''         # bot token (str) for a secondary feature bot.
-CURSED_SAKUYA_ID = 0             # bot id (int), can be 0.
+TOY_KOISHI_TOKEN = ''            # bot token (str) for a secondary feature bot.
+TOY_KOISHI_ID = 0                # bot id (int), can be 0.
 
 ORIN_TOKEN = ''                  # bot token (str) for a secondary feature bot.
 ORIN_ID = 0                      # bot id (int), can be 0.

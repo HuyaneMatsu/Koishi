@@ -209,7 +209,10 @@ async def send_action_response_with_interaction_event(client, event, content, em
         return False
     
     except DiscordException as err:
-        if err.code == ERROR_CODES.unknown_interaction:
+        if err.code in (
+            ERROR_CODES.unknown_interaction, # Interaction expired.
+            ERROR_CODES.missing_permissions, # Random error I got from `interaction_response_message_edit` dunno how.
+        ):
             return False
         
         raise
@@ -384,12 +387,12 @@ def create_response_embed(client, guild_id, source_user, targets, client_in_user
         embed = Embed(
             None,
             '*Could not get any images, please try again later.*',
-            color = color,
+            color = (color if color else None),
         )
     
     else:
         embed = Embed(
-            color = color,
+            color = (color if color else None),
         ).add_image(
             image_detail.url,
         )

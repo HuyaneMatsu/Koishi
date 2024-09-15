@@ -37,6 +37,9 @@ BLACKLIST = {
     
     # In touhou pool
     'https://i.waifu.pics/szHC1yJ.gif',
+    
+    # not well formed url
+    'https://i.waifu.pics/OXM9FcR. - Episode 4 - Eurynome Disgusted Look.gif',
 }
 
 

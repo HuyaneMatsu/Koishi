@@ -211,11 +211,28 @@ ROLE_CHOICES = [
 
 
 @HEART_SHOP.interactions
-async def roles(client, event,
-    role_: (ROLE_CHOICES, 'Choose a role to buy!')
+async def roles(
+    event,
+    role_choice: (ROLE_CHOICES, 'Choose a role to buy!', 'role'),
 ):
-    """Buy roles to enhance your love!"""
-    role, cost = BUYABLE_ROLES[role_]
+    """
+    Buy roles to enhance your love!
+    
+    This function is a coroutine generator.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    
+    role_choice : `str`
+        The chosen role.
+    
+    Yields
+    ------
+    acknowledge / response : `None` / `Embed`
+    """
+    role, cost = BUYABLE_ROLES[role_choice]
     
     user = event.user
     if (user.get_guild_profile_for(GUILD__SUPPORT) is None):
@@ -280,7 +297,7 @@ async def roles(client, event,
     embed = Embed(
         f'Buying {role.name} for {cost} {EMOJI__HEART_CURRENCY}'
     ).add_thumbnail(
-        user.avatar_url,
+        user.user.avatar_url_at(event.guild_id),
     )
     
     if can_buy:

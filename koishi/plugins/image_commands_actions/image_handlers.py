@@ -4,7 +4,7 @@ from ..image_handling_core import ImageHandlerGroup, ImageHandlerWaifuPics
 from .asset_listings import (
     TOUHOU_ACTION_FEED, TOUHOU_ACTION_FLUFF, TOUHOU_ACTION_HUG, TOUHOU_ACTION_KISS, TOUHOU_ACTION_KON,
     TOUHOU_ACTION_LAP_SLEEP, TOUHOU_ACTION_LICK, TOUHOU_ACTION_LIKE, TOUHOU_ACTION_PAT, TOUHOU_ACTION_POCKY_KISS,
-    TOUHOU_ACTION_POCKY_KISS_SELF
+    TOUHOU_ACTION_POCKY_KISS_SELF, TOUHOU_ACTION_STARE
 )
 
 
@@ -49,6 +49,7 @@ IMAGE_HANDLER_POKE = ImageHandlerWaifuPics('poke', False)
 IMAGE_HANDLER_SLAP = ImageHandlerWaifuPics('slap', False)
 IMAGE_HANDLER_SMILE = ImageHandlerWaifuPics('smile', False)
 IMAGE_HANDLER_SMUG = ImageHandlerWaifuPics('smug', False)
+IMAGE_HANDLER_STARE = TOUHOU_ACTION_STARE
 IMAGE_HANDLER_WAVE = ImageHandlerWaifuPics('wave', False)
 IMAGE_HANDLER_WINK = ImageHandlerWaifuPics('wink', False)
 IMAGE_HANDLER_YEET = ImageHandlerWaifuPics('yeet', False)

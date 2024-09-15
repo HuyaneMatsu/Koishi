@@ -169,7 +169,7 @@ def test__ImageDetailMatcherCustom__eq__same_type(keyword_parameters_0, keyword_
     ----------
     keyword_parameters_0 : `dict<str, object>`
         Keyword parameters to create instance with.
-    keyword_parameters_1 : `dict<object, object>`
+    keyword_parameters_1 : `dict<str, object>`
         Keyword parameters to create instance with.
     
     Returns

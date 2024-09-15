@@ -45,6 +45,8 @@ BOT_NAMES = [
     'turnitin',
     'meta-externalagent',
     'dataprovider',
+    'oai-searchbot',
+    'bravebot',
     
     # From google:
     'googlebot',

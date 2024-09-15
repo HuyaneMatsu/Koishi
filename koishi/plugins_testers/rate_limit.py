@@ -1,37 +1,40 @@
 import os, re
-from os.path import join
 from base64 import b64encode
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
+from email._parseaddr import _parsedate_tz
+from os.path import join
 from threading import current_thread
 from time import time as time_now
-from email._parseaddr import _parsedate_tz
-from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 
-from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoModerationRule, AutoModerationAction, \
-    DiscoveryCategory, Emoji, KOKORO, Webhook, eventlist, DiscordException, BUILTIN_EMOJIS, CHANNELS, \
-    ApplicationCommand, InteractionResponseType, VerificationScreen, WelcomeScreen, \
-    ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, \
-    ERROR_CODES, ComponentType, Sticker, StickerPack, Permission, EntitlementOwnerType, \
-    VoiceRegion, VerificationLevel, MessageNotificationLevel, ExplicitContentFilterLevel, DISCORD_EPOCH, User, Client, \
-    Achievement, Oauth2User, parse_oauth2_redirect_url, Channel, Role, GUILDS, CLIENTS, \
-    Team, WebhookType, Guild, ForumTag, SoundboardSound, OnboardingMode, Poll, create_partial_user_from_id
-from scarletio import sleep, Task, TaskGroup, AsyncIO, CancelledError, IgnoreCaseMultiValueDictionary, \
-    alchemy_incendiary,  EventThread, change_on_switch, to_json, from_json
-
-from scarletio.utils.trace import render_frames_into, render_exception_into
-from scarletio.utils.trace.frame_proxy import FrameProxyTraceback
-from scarletio.web_common.headers import DATE, METHOD_PATCH, METHOD_GET, METHOD_DELETE, METHOD_POST, METHOD_PUT, \
-    AUTHORIZATION, CONTENT_TYPE, METHOD_OPTIONS, ALLOW
-from scarletio.http_client import RequestContextManager
-from scarletio.web_common import quote, BasicAuth, Formdata
-from hata.discord.utils import image_to_base64
-from hata.discord.guild import create_partial_guild_from_data, GuildDiscovery
+from hata import (
+    Achievement, ApplicationCommand, ApplicationCommandPermission, ApplicationCommandPermissionOverwrite,
+    AutoModerationAction, AutoModerationRule, BUILTIN_EMOJIS, CHANNELS, CLIENTS, Channel, Client, ComponentType,
+    DISCORD_EPOCH, DiscordException, DiscoveryCategory, ERROR_CODES, Embed, Emoji, EntitlementOwnerType,
+    ExplicitContentFilterLevel, ForumTag, GUILDS, Guild, InteractionResponseType, KOKORO, MessageNotificationLevel,
+    Oauth2User, OnboardingMode, Permission, Poll, PrivacyLevel, Role, ScheduledEventEntityType, SoundboardSound,
+    Sticker, StickerPack, Team, User, VerificationLevel, VerificationScreen, VoiceRegion, Webhook, WebhookType,
+    WelcomeScreen, create_partial_user_from_id, datetime_to_timestamp, eventlist, now_as_id, parse_oauth2_redirect_url
+)
+from hata.discord.client.functionality_helpers import role_move_key
+from hata.discord.guild import GuildDiscovery, create_partial_guild_from_data
 from hata.discord.http import API_ENDPOINT, STATUS_ENDPOINT
 from hata.discord.http.headers import RATE_LIMIT_RESET, RATE_LIMIT_RESET_AFTER
-from hata.discord.client.functionality_helpers import role_move_key
-
+from hata.discord.utils import image_to_base64
 from hata.ext.command_utils import wait_for_message, wait_for_reaction
 from hata.ext.commands_v2 import Command, checks, configure_converter
 from hata.ext.slash.menus import Pagination
+from scarletio import (
+    AsyncIO, CancelledError, EventThread, IgnoreCaseMultiValueDictionary, Task, TaskGroup, alchemy_incendiary,
+    change_on_switch, from_json, sleep, to_json
+)
+from scarletio.http_client import RequestContextManager
+from scarletio.utils.trace import render_exception_into, render_frames_into
+from scarletio.utils.trace.frame_proxy import FrameProxyTraceback
+from scarletio.web_common import BasicAuth, FormData, quote
+from scarletio.web_common.headers import (
+    ALLOW, AUTHORIZATION, CONTENT_TYPE, DATE, METHOD_DELETE, METHOD_GET, METHOD_OPTIONS, METHOD_PATCH, METHOD_POST,
+    METHOD_PUT
+)
 
 MAIN_CLIENT : Client
 RATE_LIMIT_COMMANDS = eventlist(type_ = Command, category = 'RATE_LIMIT TESTS')
@@ -82,7 +85,9 @@ async def bypass_request(client, method, url, data = None, params = None, reason
             buffer.write(f'Request started : {url} {method}\n')
             
         try:
-            async with RequestContextManager(self.http._request(method, url, headers, data, params)) as response:
+            async with RequestContextManager(
+                self.http._request(method, url, headers, data = data, params = params)
+            ) as response:
                 if decode:
                     response_data = await response.text(encoding = 'utf-8')
                 else:
@@ -3000,11 +3005,11 @@ async def sticker_get_guild(client, guild, sticker_id):
 
 
 async def sticker_create(client, guild, name, description, file, tags):
-    form = Formdata()
+    form = FormData()
     form.add_field('name', name)
     form.add_field('description', description)
     form.add_field('tags', ', '.join(tags))
-    form.add_field('file', file, filename = 'file.png', content_type = 'image/png')
+    form.add_field('file', file, file_name = 'file.png', content_type = 'image/png')
     
     guild_id = guild.id
     
@@ -3484,6 +3489,16 @@ async def application_role_connection_metadata_delete_all(client):
         METHOD_DELETE,
         f'{API_ENDPOINT}/applications/{client.application.id}/role-connections/metadata',
     )
+
+
+async def embedded_activity_get(client):
+    embedded_activity_id = now_as_id()
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/applications/{client.application.id}/activity-instances/{embedded_activity_id}',
+    )
+
 
 
 async def entitlement_create(client):
@@ -8667,3 +8682,13 @@ async def rate_limit_test_0227(client, message):
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0227') as RLT:
         await Task(KOKORO, application_role_connection_metadata_delete_all(client)).wait_for_completion()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0228(client, message):
+    """
+    Requests an embedded activity.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0228') as RLT:
+        await Task(KOKORO, embedded_activity_get(client)).wait_for_completion()

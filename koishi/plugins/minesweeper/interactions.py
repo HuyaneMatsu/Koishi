@@ -6,7 +6,7 @@ from hata.ext.slash import InteractionResponse, abort
 from ...bots import FEATURE_CLIENTS
 
 from .constants import CUSTOM_ID_CONTINUOUS_RP, CUSTOM_ID_INITIAL_RP
-from .helpers import flip_tile, generate_flipped_tiles, generate_tiles
+from .helpers import flip_tile, generate_flipped_tiles, generate_tiles, get_tile_map
 from .parsers import parse_back_tiles
 from .renderers import render_continuous, render_initial
 
@@ -103,7 +103,8 @@ async def flip_initial(client, event, index, bomb_count):
     tiles = generate_tiles(index, bomb_count)
     flipped_tiles = generate_flipped_tiles()
     flip_tile(tiles, flipped_tiles, index)
-    return InteractionResponse(components = render_continuous(tiles, flipped_tiles))
+    tile_map = get_tile_map(client.id)
+    return InteractionResponse(components = render_continuous(tiles, flipped_tiles, tile_map))
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_CONTINUOUS_RP)
@@ -140,4 +141,5 @@ async def flip_continuous(client, event, index):
         return
     
     flip_tile(*back_parse, index)
-    return InteractionResponse(components = render_continuous(*back_parse))
+    tile_map = get_tile_map(client.id)
+    return InteractionResponse(components = render_continuous(*back_parse, tile_map))

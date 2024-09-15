@@ -521,7 +521,7 @@ async def escape(message):
     
     content = escape_markdown(content)
     if len(content) > 2000:
-        content = content[:1997]+'...'
+        content = content[:1997] + '...'
     
     return InteractionResponse(content, allowed_mentions = None)
 

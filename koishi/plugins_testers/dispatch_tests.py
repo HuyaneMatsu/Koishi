@@ -971,17 +971,17 @@ class dispatch_tester:
     
     
     @classmethod
-    async def embedded_activity_create(self, client, embedded_activity_state):
-        Task(KOKORO, self.old_events['embedded_activity_create'](client, embedded_activity_state))
+    async def embedded_activity_create(self, client, embedded_activity):
+        Task(KOKORO, self.old_events['embedded_activity_create'](client, embedded_activity))
         if self.channel is None:
             return
         
         text = [
             f'Embedded activity created',
-            f'guild_id: {embedded_activity_state.guild_id!r}',
-            f'channel_id: {embedded_activity_state.guild_id!r}',
-            f'activity: {embedded_activity_state.activity!r}'
-            f'users: {", ".join(user.full_name for user in embedded_activity_state.users)}',
+            f'guild_id: {embedded_activity.guild_id!r}',
+            f'channel_id: {embedded_activity.guild_id!r}',
+            f'activity: {embedded_activity.activity!r}'
+            f'users: {", ".join(user.full_name for user in embedded_activity.users)}',
         ]
         
         pages = [Embed(description = chunk) for chunk in cchunkify(text)]
@@ -989,21 +989,21 @@ class dispatch_tester:
     
     
     @classmethod
-    async def embedded_activity_update(self, client, embedded_activity_state, old_attributes):
-        Task(KOKORO, self.old_events['embedded_activity_update'](client, embedded_activity_state, old_attributes))
+    async def embedded_activity_update(self, client, embedded_activity, old_attributes):
+        Task(KOKORO, self.old_events['embedded_activity_update'](client, embedded_activity, old_attributes))
         if self.channel is None:
             return
         
         text = [
             f'Embedded activity updated',
-            f'guild_id: {embedded_activity_state.guild_id!r}',
-            f'channel_id: {embedded_activity_state.guild_id!r}',
-            f'activity: {embedded_activity_state.activity!r}'
-            f'users: {", ".join(user.full_name for user in embedded_activity_state.users)}',
+            f'guild_id: {embedded_activity.guild_id!r}',
+            f'channel_id: {embedded_activity.guild_id!r}',
+            f'activity: {embedded_activity.activity!r}'
+            f'users: {", ".join(user.full_name for user in embedded_activity.users)}',
             'Changes',
         ]
         
-        activity = embedded_activity_state.activity
+        activity = embedded_activity.activity
         for key, value in old_attributes.items():
             text.append(f'- {key} : {value} -> {getattr(activity, key)}')
         
@@ -1012,17 +1012,17 @@ class dispatch_tester:
 
 
     @classmethod
-    async def embedded_activity_delete(self, client, embedded_activity_state):
-        Task(KOKORO, self.old_events['embedded_activity_delete'](client, embedded_activity_state))
+    async def embedded_activity_delete(self, client, embedded_activity):
+        Task(KOKORO, self.old_events['embedded_activity_delete'](client, embedded_activity))
         if self.channel is None:
             return
         
         text = [
             f'Embedded activity deleted',
-            f'guild_id: {embedded_activity_state.guild_id!r}',
-            f'channel_id: {embedded_activity_state.guild_id!r}',
-            f'activity: {embedded_activity_state.activity!r}'
-            f'users: {", ".join(user.full_name for user in embedded_activity_state.users)}',
+            f'guild_id: {embedded_activity.guild_id!r}',
+            f'channel_id: {embedded_activity.guild_id!r}',
+            f'activity: {embedded_activity.activity!r}'
+            f'users: {", ".join(user.full_name for user in embedded_activity.users)}',
         ]
         
         pages = [Embed(description = chunk) for chunk in cchunkify(text)]
@@ -1030,17 +1030,17 @@ class dispatch_tester:
     
     
     @classmethod
-    async def embedded_activity_user_add(self, client, embedded_activity_state, user_id):
-        Task(KOKORO, self.old_events['embedded_activity_user_add'](client, embedded_activity_state, user_id))
+    async def embedded_activity_user_add(self, client, embedded_activity, user_id):
+        Task(KOKORO, self.old_events['embedded_activity_user_add'](client, embedded_activity, user_id))
         if self.channel is None:
             return
         
         text = [
             f'Embedded activity user add',
-            f'guild_id: {embedded_activity_state.guild_id!r}',
-            f'channel_id: {embedded_activity_state.guild_id!r}',
-            f'activity: {embedded_activity_state.activity!r}'
-            f'users: {", ".join(user.full_name for user in embedded_activity_state.users)}',
+            f'guild_id: {embedded_activity.guild_id!r}',
+            f'channel_id: {embedded_activity.guild_id!r}',
+            f'activity: {embedded_activity.activity!r}'
+            f'users: {", ".join(user.full_name for user in embedded_activity.users)}',
             f'user id: {user_id!r}'
         ]
         
@@ -1049,17 +1049,17 @@ class dispatch_tester:
     
     
     @classmethod
-    async def embedded_activity_user_delete(self, client, embedded_activity_state, user_id):
-        Task(KOKORO, self.old_events['embedded_activity_user_delete'](client, embedded_activity_state, user_id))
+    async def embedded_activity_user_delete(self, client, embedded_activity, user_id):
+        Task(KOKORO, self.old_events['embedded_activity_user_delete'](client, embedded_activity, user_id))
         if self.channel is None:
             return
         
         text = [
             f'Embedded activity user delete',
-            f'guild_id: {embedded_activity_state.guild_id!r}',
-            f'channel_id: {embedded_activity_state.guild_id!r}',
-            f'activity: {embedded_activity_state.activity!r}'
-            f'users: {", ".join(user.full_name for user in embedded_activity_state.users)}',
+            f'guild_id: {embedded_activity.guild_id!r}',
+            f'channel_id: {embedded_activity.guild_id!r}',
+            f'activity: {embedded_activity.activity!r}'
+            f'users: {", ".join(user.full_name for user in embedded_activity.users)}',
             f'user id: {user_id!r}'
         ]
         

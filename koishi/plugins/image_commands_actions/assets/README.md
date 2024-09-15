@@ -3982,7 +3982,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### medicine-melancholy-pocky-0000
+### medi-pocky-0000
 
 - Creator: **dqn (dqnww)**
 - Editor: *none*
@@ -6804,6 +6804,852 @@ Some creators may be unknown. If you know them please create a PR with it.
 - Creator: **Rina / 里奈**
 - Editor: *none*
 - Characters: **Hakurei Reimu**, **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0000
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0001
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0002
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### orin-stare-0000
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Kaenbyou Rin**
+- Source: **Touhou**
+
+---
+
+### chiruno-stare-0000
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Chiruno**
+- Source: **Touhou**
+
+---
+
+### yuuka-stare-0000
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Kazami Yuuka**
+- Source: **Touhou**
+
+---
+
+### youmu-stare-0000
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Konpaku Youmu**
+- Source: **Touhou**
+
+---
+
+### sakuya-stare-0000
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### koakuma-stare-0000
+
+- Creator: **mata (matasoup)**
+- Editor: *none*
+- Characters: **Koakuma**
+- Source: **Touhou**
+
+---
+
+### reisen-stare-0000
+
+- Creator: **mata (matasoup)**
+- Editor: *none*
+- Characters: **Reisen Udongein Inaba**
+- Source: **Touhou**
+
+---
+
+### youmu-wave-0000
+
+- Creator: **mata (matasoup)**
+- Editor: *none*
+- Characters: **Konpaku Youmu**
+- Source: **Touhou**
+
+---
+
+### medi-yuuka-pat-0000
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Kazami Yuuka**, **Medicine Melancholy**
+- Source: **Touhou**
+
+---
+
+### wriggle-yuuka-hug-0000
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Kazami Yuuka**, **Wriggle Nightbug**
+- Source: **Touhou**
+
+---
+
+### remilia-sakuya-hug-0001
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Izayoi Sakuya**, **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### meiling-sakuya-hug-0007
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Hong Meiling**, **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### meiling-sakuya-hug-0006
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Hong Meiling**, **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### meiling-sakuya-hug-0005
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Hong Meiling**, **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### meiling-sakuya-hug-0004
+
+- Creator: **mata (matasoup)**
+- Editor: **HuyaneMatsu**
+- Characters: **Hong Meiling**, **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### megumu-stare-0000
+
+- Creator: **harapan-kun**
+- Editor: *none*
+- Characters: **Iizunamaru Megumu**
+- Source: **Touhou**
+
+---
+
+### tenshi-stare-0000
+
+- Creator: **harapan-kun**
+- Editor: *none*
+- Characters: **Hinanawi Tenshi**
+- Source: **Touhou**
+
+---
+
+### momiji-stare-0000
+
+- Creator: **harapan-kun**
+- Editor: *none*
+- Characters: **Inubashiri Momiji**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0000
+
+- Creator: **harapan-kun**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### alice-patchouli-stare-0000
+
+- Creator: **harapan-kun**
+- Editor: *none*
+- Characters: **Margatroid Alice**, **Patchouli Knowledge**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0000
+
+- Creator: **harapan-kun**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### momiji-stare-0001
+
+- Creator: **harapan-kun**
+- Editor: *none*
+- Characters: **Inubashiri Momiji**
+- Source: **Touhou**
+
+---
+
+### marisa-stare-0001
+
+- Creator: **harapan-kun**
+- Editor: *none*
+- Characters: **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### marisa-stare-0000
+
+- Creator: **nubezon**
+- Editor: *none*
+- Characters: **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0000
+
+- Creator: **nubezon**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### junko-stare-0000
+
+- Creator: **nubezon**
+- Editor: *none*
+- Characters: **Junko**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0001
+
+- Creator: **nubezon**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0002
+
+- Creator: **nubezon**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0003
+
+- Creator: **nubezon**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0004
+
+- Creator: **nubezon**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0005
+
+- Creator: **nubezon**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0003
+
+- Creator: **hia (xonn)**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0000
+
+- Creator: **hia (xonn)**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0001
+
+- Creator: **hia (xonn)**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0002
+
+- Creator: **hia (xonn)**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### sakuya-stare-0001
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### nazrin-stare-0000
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Nazrin**
+- Source: **Touhou**
+
+---
+
+### orin-stare-0002
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Kaenbyou Rin**
+- Source: **Touhou**
+
+---
+
+### hecatia-stare-0000
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Hecatia Lapislazuli**
+- Source: **Touhou**
+
+---
+
+### yatsuhashi-stare-0000
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Tsukumo Yatsuhashi**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0000
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0001
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0002
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### kokoro-stare-0000
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Hata no Kokoro**
+- Source: **Touhou**
+
+---
+
+### hina-stare-0000
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Kagiyama Hina**
+- Source: **Touhou**
+
+---
+
+### tsukasa-stare-0000
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Kudamaki Tsukasa**
+- Source: **Touhou**
+
+---
+
+### chen-orin-hug-pat-0000
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Chen**, **Kaenbyou Rin**
+- Source: **Touhou**
+
+---
+
+### chiruno-flandre-cosplay-stare-0000
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Chiruno**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### chiruno-flandre-cosplay-stare-0001
+
+- Creator: **himuhino**
+- Editor: *none*
+- Characters: **Chiruno**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### orin-stare-0001
+
+- Creator: **fuuzasa**
+- Editor: *none*
+- Characters: **Kaenbyou Rin**
+- Source: **Touhou**
+
+---
+
+### orin-stare-0003
+
+- Creator: **fuuzasa**
+- Editor: *none*
+- Characters: **Kaenbyou Rin**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-handhold-0001
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-fluff-0003
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-handhold-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-hug-0006
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-fluff-0002
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-fluff-0002
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### koishi-satori-hug-0009
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Komeiji Satori**
+- Source: **Touhou**
+
+---
+
+### tsukasa-kon-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Kudamaki Tsukasa**
+- Source: **Touhou**
+
+---
+
+### kyouko-mamizou-fluff-0001
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Futatsuiwa Mamizou**, **Kasodani Kyouko**
+- Source: **Touhou**
+
+---
+
+### seiga-yoshika-pat-0002
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Kaku Seiga**, **Miyako Yoshika**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-hug-0005
+
+- Creator: **itomugi-kun**
+- Editor: **HuyaneMatsu**
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-hug-0001
+
+- Creator: **itomugi-kun**
+- Editor: **HuyaneMatsu**
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-hug-0002
+
+- Creator: **itomugi-kun**
+- Editor: **HuyaneMatsu**
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-fluff-0001
+
+- Creator: **itomugi-kun**
+- Editor: **HuyaneMatsu**
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0007
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### chimata-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Tenkyuu Chimata**
+- Source: **Touhou**
+
+---
+
+### okina-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Matara Okina**
+- Source: **Touhou**
+
+---
+
+### mokou-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**
+- Source: **Touhou**
+
+---
+
+### yuuma-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Toutetsu Yuuma**
+- Source: **Touhou**
+
+---
+
+### okuu-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Reiuji Utsuho**
+- Source: **Touhou**
+
+---
+
+### sakuya-stare-0002
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-stare-0001
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-nom-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-hug-0003
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-blush-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### kaguya-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Houraisan Kaguya**
+- Source: **Touhou**
+
+---
+
+### mayumi-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Joutouguu Mayumi**
+- Source: **Touhou**
+
+---
+
+### mokou-stare-0001
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-stare-0003
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-stare-0002
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-stare-0004
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### keine-stare-0001
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### sekibanki-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Sekibanki**
+- Source: **Touhou**
+
+---
+
+### letty-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Letty Whiterock**
+- Source: **Touhou**
+
+---
+
+### okina-stare-0001
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Matara Okina**
+- Source: **Touhou**
+
+---
+
+### star-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Star Sapphire**
+- Source: **Touhou**
+
+---
+
+### futo-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Mononobe no Futo**
+- Source: **Touhou**
+
+---
+
+### tojiko-stare-0000
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Soga no Tojiko**
 - Source: **Touhou**
 
 ---

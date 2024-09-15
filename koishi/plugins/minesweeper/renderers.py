@@ -3,7 +3,7 @@ __all__ = ()
 from hata.ext.slash import Button, ButtonStyle, Row
 
 from .constants import (
-    CUSTOM_ID_CONTINUOUS, CUSTOM_ID_INITIAL, SIZE_TOTAL, SIZE_X, STYLE_DEFAULT, STYLE_MAP, TILES, TILE_UNKNOWN
+    CUSTOM_ID_CONTINUOUS, CUSTOM_ID_INITIAL, SIZE_TOTAL, SIZE_X, STYLE_DEFAULT, STYLE_MAP, TILE_UNKNOWN
 )
 
 
@@ -27,18 +27,23 @@ def render_initial(bomb_count):
     ]
 
 
-def create_continuous_button(tiles, flipped_tiles, index):
+def create_continuous_button(tiles, flipped_tiles, index, tile_map):
     """
     Creates a continuous button that holds information about the game's current state.
     
     Parameters
     ----------
-    tiles : `list` of `int`
+    tiles : `list<int>`
         The tiles of the game.
-    flipped_tiles : `list` of `bool`
+    
+    flipped_tiles : `list<bool>`
         Whether a tile is flipped or nah.
+    
     index : `int`
         The button's total position.
+    
+    tile_map : `list<Emoji>`
+        Tile map to use.
     
     Returns
     -------
@@ -48,7 +53,7 @@ def create_continuous_button(tiles, flipped_tiles, index):
     value = tiles[index]
     
     if flipped:
-        emoji = TILES[value]
+        emoji = tile_map[value]
         style = STYLE_MAP.get(value, STYLE_DEFAULT)
     else:
         emoji = TILE_UNKNOWN
@@ -62,16 +67,20 @@ def create_continuous_button(tiles, flipped_tiles, index):
     )
 
 
-def render_continuous(tiles, flipped_tiles):
+def render_continuous(tiles, flipped_tiles, tile_map):
     """
     Renders a step of the game.
     
     Parameters
     ----------
-    tiles : `list` of `int`
+    tiles : `list<int>`
         The tiles of the game.
-    flipped_tiles : `list` of `bool`
+    
+    flipped_tiles : `list<bool>`
         Whether a tile is flipped or nah.
+    
+    tile_map : `list<Emoji>`
+        Tile map to use.
     
     Returns
     -------
@@ -79,7 +88,7 @@ def render_continuous(tiles, flipped_tiles):
     """
     return [
         Row(*(
-            create_continuous_button(tiles, flipped_tiles, tile_index)
+            create_continuous_button(tiles, flipped_tiles, tile_index, tile_map)
             for tile_index in range(line_start_index, line_start_index + SIZE_X)
         )) for line_start_index in range(0, SIZE_TOTAL, SIZE_X)
     ]

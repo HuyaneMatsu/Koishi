@@ -1340,7 +1340,6 @@ TEIREIDA_MAI = TouhouCharacter(
     (
         '丁礼田 舞',
         'Mai Teireida',
-        'Mai',
     ),
 )
 

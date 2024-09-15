@@ -57,12 +57,15 @@ def _iter_options():
             'yomotsu hisami',
             'yorigami joon',
             'yorigami shion',
-        ]
+            'yuugen magan',
+            'yuki',
+        ],
     )
     
     yield (
         'aya',
         [
+            'ayana',
             'aya',
             'sakuya',
             'kaguya',

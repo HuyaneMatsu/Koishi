@@ -41,16 +41,16 @@ HEADER_YOSHIKA = (
     '```'
 )
 
-HEADER_CURSED_SAKUYA = (
+HEADER_TOY_KOISHI = (
     '```\n'
-    ' _____ _____       _                      \n'
-    '/  __ /  ___|     | |                     \n'
-    '| /  \\\\ `--.  __ _| | ___   _ _   _  __ _ \n'
-    '| |    `--. \\/ _` | |/ | | | | | | |/ _` |\n'
-    '| \\__//\\__/ | (_| |   <| |_| | |_| | (_| |\n'
-    ' \\____\\____/ \\__,_|_|\\_\\\\__,_|\\__, |\\__,_|\n'
-    '                               __/ |      \n'
-    '                              |___/       \n'
+    ' _____           _   __      _     _     _ \n'
+    '|_   _|         | | / /     (_)   | |   (_)\n'
+    '  | | ___  _   _| |/ /  ___  _ ___| |__  _ \n'
+    '  | |/ _ \\| | | |    \\ / _ \\| / __| \'_ \\| |\n'
+    '  | | (_) | |_| | |\\  \\ (_) | \\__ \\ | | | |\n'
+    '  \\_/\\___/ \\__, \\_| \\_/\\___/|_|___/_| |_|_|\n'
+    '            __/ |                          \n'
+    '           |___/                           \n'
     '```'
 )
 
@@ -89,16 +89,14 @@ HEADER_FLANDRE_EASTER_EGG = (
     '```'
 )
 
-HEADER_CURSED_SAKUYA_EASTER_EGG = (
+HEADER_TOY_KOISHI_EASTER_EGG = (
     '```\n'
-    ' _____ _____                   \n'
-    '/  __ /  ___|                  \n'
-    '| /  \\\\ `--. _   _ _   _ _   _ \n'
-    '| |    `--. | | | | | | | | | |\n'
-    '| \\__//\\__/ | |_| | |_| | |_| |\n'
-    ' \\____\\____/ \\__,_|\\__, |\\__,_|\n'
-    '                    __/ |      \n'
-    '                   |___/\n'
+    ' _____ _   __ ___                      _ _   \n'
+    '|_   _| | / // _ \\                    | | |  \n'
+    '  | | | |/ // /_\\ \\___ ___  __ _ _   _| | |_ \n'
+    '  | | |    \\|  _  / __/ __|/ _` | | | | | __|\n'
+    '  | | | |\\  \\ | | \\__ \\__ \\ (_| | |_| | | |_ \n'
+    '  \\_/ \\_| \\_|_| |_/___/___/\\__,_|\\__,_|_|\\__|\n'
     '```'
 )
 
@@ -117,7 +115,7 @@ HEADERS = {
     config.KOISHI_ID: (HEADER_KOISHI, HEADER_KOISHI_EASTER_EGG),
     config.FLANDRE_ID: (HEADER_FLANDRE, HEADER_FLANDRE_EASTER_EGG),
     config.YOSHIKA_ID: (HEADER_YOSHIKA, HEADER_YOSHIKA),
-    config.CURSED_SAKUYA_ID: (HEADER_CURSED_SAKUYA, HEADER_CURSED_SAKUYA_EASTER_EGG),
+    config.TOY_KOISHI_ID: (HEADER_TOY_KOISHI, HEADER_TOY_KOISHI_EASTER_EGG),
     config.ORIN_ID: (HEADER_ORIN, HEADER_ORIN_EASTER_EGG),
 }
 

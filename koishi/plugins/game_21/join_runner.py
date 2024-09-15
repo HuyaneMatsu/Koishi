@@ -296,6 +296,20 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
     
     
     async def _update_message(self, interaction_event, player, force):
+        """
+        Updates the join runner's message.
+        
+        This function is a coroutine.
+        
+        Parameters
+        ----------
+        interaction_event : ``InteractionEvent``
+            The received interaction event.
+        player : ``Player``
+            The player who causes the message to be updated.
+        force : `bool`
+            Whether the message should be updated even if the interface's current state is not ready.
+        """
         client = self.client
         players = self.players
         session = self.session
@@ -412,7 +426,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
                 None,
                 self.players[0].latest_interaction_event,
                 self.message,
-                self.player,
+                self.players[0],
                 self.session,
                 self.single_player,
                 GAME_21_JOIN_ROW_DISABLED,
