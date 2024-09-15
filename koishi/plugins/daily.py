@@ -333,7 +333,7 @@ async def get_waifu_ids_and_daily_next(user_id):
         
         results = await response.fetchall()
     
-    return {waifu_id: daily_next for (waifu_id, daily_next) in results}
+    return {waifu_id: daily_next.replace(tzinfo = TimeZone.utc) for (waifu_id, daily_next) in results}
 
 
 async def get_waifu_with_name(event, name):
