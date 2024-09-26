@@ -1,5 +1,5 @@
 import vampytest
-from scarletio import skip_ready_cycle
+from scarletio import Task, get_event_loop, skip_ready_cycle
 
 from ....bot_utils.models import DB_ENGINE
 
@@ -18,10 +18,10 @@ def _assert_fields_set(automation_configuration_saver):
         The instance to check.
     """
     vampytest.assert_instance(automation_configuration_saver, AutomationConfigurationSaver)
-    vampytest.assert_instance(automation_configuration_saver.automation_configuration, AutomationConfiguration)
+    vampytest.assert_instance(automation_configuration_saver.entry_proxy, AutomationConfiguration)
     vampytest.assert_instance(automation_configuration_saver.ensured_for_deletion, bool)
     vampytest.assert_instance(automation_configuration_saver.modified_fields, dict, nullable = True)
-    vampytest.assert_instance(automation_configuration_saver.running, bool)
+    vampytest.assert_instance(automation_configuration_saver.run_task, Task, nullable = True)
 
 
 def test__AutomationConfigurationSaver__new():
@@ -36,7 +36,7 @@ def test__AutomationConfigurationSaver__new():
         automation_configuration_saver = AutomationConfigurationSaver(automation_configuration)
         _assert_fields_set(automation_configuration_saver)
         
-        vampytest.assert_is(automation_configuration_saver.automation_configuration, automation_configuration)
+        vampytest.assert_is(automation_configuration_saver.entry_proxy, automation_configuration)
 
     finally:
         try:
@@ -45,9 +45,12 @@ def test__AutomationConfigurationSaver__new():
             pass
 
 
-def test__AutomationConfigurationSaver__repr():
+@vampytest.skip_if(DB_ENGINE is not None)
+async def test__AutomationConfigurationSaver__repr():
     """
     Tests whether ``AutomationConfigurationSaver.__repr__`` works as intended.
+    
+    This function is a coroutine.
     """
     guild_id = 202405280021
     
@@ -56,22 +59,21 @@ def test__AutomationConfigurationSaver__repr():
         
         ensured_for_deletion = True
         modified_fields = {'satori_log_enabled': True}
-        running = True
         
         automation_configuration_saver = AutomationConfigurationSaver(automation_configuration)
         automation_configuration_saver.ensured_for_deletion = ensured_for_deletion
         automation_configuration_saver.modified_fields = modified_fields
-        automation_configuration_saver.running = running
+        automation_configuration_saver.run_task = Task(get_event_loop(), automation_configuration_saver.run())
         
         output = repr(automation_configuration_saver)
         
         vampytest.assert_instance(output, str)
         
         vampytest.assert_in(AutomationConfigurationSaver.__name__, output)
-        vampytest.assert_in(f'automation_configuration = {automation_configuration!r}', output)
+        vampytest.assert_in(f'entry_proxy = {automation_configuration!r}', output)
         vampytest.assert_in(f'ensured_for_deletion = {ensured_for_deletion!r}', output)
         vampytest.assert_in(f'modified_fields = {modified_fields!r}', output)
-        vampytest.assert_in(f'running = {running!r}', output)
+        vampytest.assert_in(f'running = {True!r}', output)
     
     finally:
         try:
@@ -235,9 +237,10 @@ async def test__AutomationConfigurationSaver__begin():
         automation_configuration_saver = AutomationConfigurationSaver(automation_configuration)
         automation_configuration.saver = automation_configuration_saver
         
-        automation_configuration_saver.begin()
+        output = automation_configuration_saver.begin()
         
-        vampytest.assert_eq(automation_configuration_saver.running, True)
+        vampytest.assert_instance(output, Task)
+        vampytest.assert_is(automation_configuration_saver.run_task, output)
         vampytest.assert_is(automation_configuration.saver, automation_configuration_saver)
         
         # do save
@@ -245,9 +248,38 @@ async def test__AutomationConfigurationSaver__begin():
         await skip_ready_cycle()
         
         # after save nothing should be set.
-        vampytest.assert_eq(automation_configuration_saver.running, False)
+        vampytest.assert_is(automation_configuration_saver.run_task, None)
         vampytest.assert_is(automation_configuration.saver, None)
     
+    finally:
+        try:
+            del AUTOMATION_CONFIGURATIONS[guild_id]
+        except KeyError:
+            pass
+
+
+
+@vampytest.skip_if(DB_ENGINE is not None)
+async def AutomationConfigurationSaver__running():
+    """
+    Tests whether ``AutomationConfigurationSaver.running`` works as intended.
+    """
+    guild_id = 202409190000
+    
+    try:
+        automation_configuration = AutomationConfiguration(guild_id)
+        
+        automation_configuration_saver = AutomationConfigurationSaver(automation_configuration)
+        automation_configuration.saver = automation_configuration_saver
+        
+        output = automation_configuration_saver.running
+        vampytest.assert_eq(output, False)
+        
+        automation_configuration_saver.begin()
+        
+        output = automation_configuration_saver.running
+        vampytest.assert_eq(output, True)
+        
     finally:
         try:
             del AUTOMATION_CONFIGURATIONS[guild_id]

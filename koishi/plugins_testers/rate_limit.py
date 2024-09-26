@@ -3645,6 +3645,23 @@ async def voice_state_get(client, guild, user):
     )
 
 
+async def subscription_get_sku(client, sku_id, subscription_id):
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/skus/{sku_id}/subscriptions/{subscription_id}',
+    )
+
+
+async def subscription_get_chunk_sku_user(client, sku_id, user_id):
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/skus/{sku_id}/subscriptions',
+        None,
+        {'user_id': user_id},
+    )
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0000(client, message):
@@ -8692,3 +8709,49 @@ async def rate_limit_test_0228(client, message):
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0228') as RLT:
         await Task(KOKORO, embedded_activity_get(client)).wait_for_completion()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0229(client, message):
+    """
+    Requests a subscription.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0229') as RLT:
+        await Task(KOKORO, subscription_get_sku(client, 202409240000, 202409240001)).wait_for_completion()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0230(client, message):
+    """
+    Requests subscriptions.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0230') as RLT:
+        await Task(KOKORO, subscription_get_chunk_sku_user(client, 202409240002, 202409240003)).wait_for_completion()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0231(client, message):
+    """
+    Requests a subscription 2x (different ones).
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0231') as RLT:
+        task_group = TaskGroup(KOKORO)
+        task_group.create_task(subscription_get_sku(client, 202409240004, 202409240005))
+        task_group.create_task(subscription_get_sku(client, 202409240006, 202409240007))
+        await task_group.wait_all()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0232(client, message):
+    """
+    Requests subscriptions 2x (different one).
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0232') as RLT:
+        task_group = TaskGroup(KOKORO)
+        task_group.create_task(subscription_get_chunk_sku_user(client, 202409240008, 202409240009))
+        task_group.create_task(subscription_get_chunk_sku_user(client, 2024092400010, 2024092400011))
+        await task_group.wait_all()

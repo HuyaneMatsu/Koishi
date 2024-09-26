@@ -4,11 +4,13 @@ from re import compile as re_compile, escape as re_escape, I as re_ignore_case, 
 from scarletio import LOOP_TIME, Task
 from hata import KOKORO, DiscordException, ERROR_CODES, InviteTargetType, Embed, ICON_TYPE_NONE, elapsed_time, \
     Permission, Emoji
+from hata.ext.plugin_loader import require
 from hata.ext.slash import abort
 
 from ..bot_utils.constants import GUILD__SUPPORT
 from ..bots import MAIN_CLIENT
 
+require('hey_mister')
 
 CACHING_INTERVAL = 8 * 60.0 * 60.0 # 8 hour
 GUILD_PER_PAGE = 5

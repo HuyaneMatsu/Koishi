@@ -1,6 +1,8 @@
 __all__ = ('AutomationConfiguration',)
 
-from scarletio import RichAttributeErrorBaseType
+from scarletio import copy_docs
+
+from ...bot_utils.entry_proxy import EntryProxy
 
 from .automation_configuration_saver import AutomationConfigurationSaver
 from .constants import (
@@ -9,7 +11,7 @@ from .constants import (
 )
 
 
-class AutomationConfiguration(RichAttributeErrorBaseType):
+class AutomationConfiguration(EntryProxy):
     """
     Automation configuration.
     
@@ -94,6 +96,9 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
     reaction_copy_role_id : `bool`
         Additional role assigned to the `reaction-copy` feature.
     
+    saver : `None | AutomationConfigurationSaver`
+        Saver responsible to save synchronization.
+    
     touhou_feed_enabled : `bool`
         Whether touhou-feed is enabled in the guild.
     
@@ -114,13 +119,16 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         'community_message_moderation_availability_duration', 'community_message_moderation_down_vote_emoji_id',
         'community_message_moderation_enabled', 'community_message_moderation_log_enabled',
         'community_message_moderation_log_channel_id', 'community_message_moderation_up_vote_emoji_id', 
-        'community_message_moderation_vote_threshold', 'entry_id', 'farewell_channel_id', 'farewell_enabled',
+        'community_message_moderation_vote_threshold', 'farewell_channel_id', 'farewell_enabled',
         'farewell_style_name', 'guild_id', 'log_emoji_channel_id', 'log_emoji_enabled', 'log_mention_channel_id',
         'log_mention_enabled', 'log_satori_auto_start', 'log_satori_channel_id', 'log_satori_enabled',
         'log_sticker_channel_id', 'log_sticker_enabled', 'log_user_channel_id', 'log_user_enabled',
-        'reaction_copy_enabled', 'reaction_copy_flags', 'reaction_copy_role_id', 'saver', 'touhou_feed_enabled',
+        'reaction_copy_enabled', 'reaction_copy_flags', 'reaction_copy_role_id', 'touhou_feed_enabled',
         'welcome_channel_id', 'welcome_enabled', 'welcome_reply_buttons_enabled', 'welcome_style_name',
     )
+    
+    saver_type = AutomationConfigurationSaver
+    
     
     def __new__(cls, guild_id):
         """
@@ -167,15 +175,9 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         return self
     
     
-    def __repr__(self):
-        """Returns the automation configuration's representation."""
-        repr_parts = ['<', type(self).__name__]
-        
-        # entry_id
-        entry_id = self.entry_id
-        if entry_id != -1:
-            repr_parts.append(' entry_id = ')
-            repr_parts.append(repr(entry_id))
+    @copy_docs(EntryProxy._put_repr_parts)
+    def _put_repr_parts(self, repr_parts, field_added):
+        if field_added:
             repr_parts.append(',')
         
         # guild_id
@@ -363,14 +365,10 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
             if (farewell_style_name is not None):
                 repr_parts.append(', farewell_style_name = ')
                 repr_parts.append(repr(farewell_style_name))
-        
-        
-        repr_parts.append('>')
-        return ''.join(repr_parts)
     
     
+    @copy_docs(EntryProxy.__bool__)
     def __bool__(self):
-        """Returns whether any automation configuration is set."""
         community_message_moderation_availability_duration = self.community_message_moderation_availability_duration
         if (
             community_message_moderation_availability_duration != 0 and
@@ -473,57 +471,13 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         return False
     
     
-    def get_saver(self):
-        """
-        Gets or creates a new saver for the configuration.
-        """
-        saver = self.saver
-        if (saver is None):
-            saver = AutomationConfigurationSaver(self)
-            self.saver = saver
-        
-        return saver
-    
-        
-    def set(self, field_name, field_value):
-        """
-        Sets a value of the auto moderation configuration.
-        
-        Parameters
-        ----------
-        field_name : `str`
-            The field's name.
-        field_value : `object`
-            The new value of the field.
-        """
-        AUTOMATION_CONFIGURATION_FIELD_SETTERS[field_name](self, field_value)
-        
-        saver = self.get_saver()
-        
-        if self:
-            AUTOMATION_CONFIGURATIONS[self.guild_id] = self
-            
-            saver.add_modification(field_name, field_value)
-        
-        else:
-            saver.ensure_deletion()
-            
-            try:
-                del AUTOMATION_CONFIGURATIONS[self.guild_id]
-            except KeyError:
-                pass
-        
-        saver.begin()
+    @copy_docs(EntryProxy._store_in_cache)
+    def _store_in_cache(self):
+        AUTOMATION_CONFIGURATIONS[self.guild_id] = self
     
     
-    def delete(self):
-        """
-        Deletes the entry.
-        """
-        saver = self.get_saver()
-        saver.ensure_deletion()
-        saver.begin()
-        
+    @copy_docs(EntryProxy._pop_from_cache)
+    def _pop_from_cache(self):
         try:
             del AUTOMATION_CONFIGURATIONS[self.guild_id]
         except KeyError:
@@ -531,19 +485,8 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
     
     
     @classmethod
+    @copy_docs(EntryProxy.from_entry)
     def from_entry(cls, entry):
-        """
-        Creates an automation configuration from the given entry.
-        
-        Parameters
-        ----------
-        entry : `sqlalchemy.engine.result.RowProxy`
-            The entry to create the instance based on.
-        
-        Returns
-        -------
-        self : `instance<cls>`
-        """
         guild_id = entry['guild_id']
         
         try:
@@ -586,54 +529,3 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.welcome_style_name = entry['welcome_style_name']
         
         return self
-
-
-AUTOMATION_CONFIGURATION_FIELD_SETTERS = {
-    'community_message_moderation_availability_duration': (
-        AutomationConfiguration.community_message_moderation_availability_duration.__set__
-    ),
-    'community_message_moderation_down_vote_emoji_id': (
-        AutomationConfiguration.community_message_moderation_down_vote_emoji_id.__set__
-    ),
-    'community_message_moderation_enabled': AutomationConfiguration.community_message_moderation_enabled.__set__,
-    'community_message_moderation_log_enabled': (
-        AutomationConfiguration.community_message_moderation_log_enabled.__set__
-    ),
-    'community_message_moderation_log_channel_id': (
-        AutomationConfiguration.community_message_moderation_log_channel_id.__set__
-    ),
-    'community_message_moderation_up_vote_emoji_id': (
-        AutomationConfiguration.community_message_moderation_up_vote_emoji_id.__set__
-    ),
-    'community_message_moderation_vote_threshold': (
-        AutomationConfiguration.community_message_moderation_vote_threshold.__set__
-    ),
-    
-    'farewell_channel_id': AutomationConfiguration.farewell_channel_id.__set__,
-    'farewell_enabled': AutomationConfiguration.farewell_enabled.__set__,
-    'farewell_style_name': AutomationConfiguration.farewell_style_name.__set__,
-    
-    'log_emoji_channel_id': AutomationConfiguration.log_emoji_channel_id.__set__,
-    'log_emoji_enabled': AutomationConfiguration.log_emoji_enabled.__set__,
-    'log_mention_channel_id': AutomationConfiguration.log_mention_channel_id.__set__,
-    'log_mention_enabled': AutomationConfiguration.log_mention_enabled.__set__,
-    'log_sticker_channel_id': AutomationConfiguration.log_sticker_channel_id.__set__,
-    'log_sticker_enabled': AutomationConfiguration.log_sticker_enabled.__set__,
-    'log_user_channel_id': AutomationConfiguration.log_user_channel_id.__set__,
-    'log_user_enabled': AutomationConfiguration.log_user_enabled.__set__,
-    
-    'log_satori_channel_id': AutomationConfiguration.log_satori_channel_id.__set__,
-    'log_satori_auto_start': AutomationConfiguration.log_satori_auto_start.__set__,
-    'log_satori_enabled': AutomationConfiguration.log_satori_enabled.__set__,
-    
-    'reaction_copy_enabled': AutomationConfiguration.reaction_copy_enabled.__set__,
-    'reaction_copy_flags': AutomationConfiguration.reaction_copy_flags.__set__,
-    'reaction_copy_role_id': AutomationConfiguration.reaction_copy_role_id.__set__,
-    
-    'touhou_feed_enabled': AutomationConfiguration.touhou_feed_enabled.__set__,
-    
-    'welcome_channel_id': AutomationConfiguration.welcome_channel_id.__set__,
-    'welcome_enabled': AutomationConfiguration.welcome_enabled.__set__,
-    'welcome_reply_buttons_enabled': AutomationConfiguration.welcome_reply_buttons_enabled.__set__,
-    'welcome_style_name': AutomationConfiguration.welcome_style_name.__set__,
-}

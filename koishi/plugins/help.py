@@ -228,8 +228,8 @@ CATEGORIES = (
         EMOJI_MASKS,
         (
             'bite', 'blush', 'bully', 'cringe', 'cry', 'dance', 'feed', 'fluff', 'glomp', 'handhold', 'happy',
-            'highfive', 'hug', 'kick', 'kill', 'kiss', 'kon', 'lap-sleep', 'lick', 'like', 'nom', 'pat', 'pocky-kiss',
-            'poke', 'slap', 'smile', 'smug', 'stare', 'wave', 'wink', 'yeet',
+            'highfive', 'hug', 'kick', 'kill', 'kiss', 'kon', 'lap-sleep', 'lick', 'like', 'nom', 'pat', 'peg',
+            'pocky-kiss', 'poke', 'slap', 'smile', 'smug', 'stare', 'wave', 'wink', 'yeet',
         ),
         (),
     ), (
@@ -253,7 +253,7 @@ CATEGORIES = (
     ), (
         'Help',
         EMOJI_SPEECH_BUBBLE,
-        ('about', 'help',),
+        ('about', 'ask', 'help',),
         (),
     ), (
         'Marriage',
@@ -278,9 +278,6 @@ CATEGORIES = (
         (),
     ),
 )
-
-
-NOT_LISTED_COMMANDS = ('koi-guilds', 'koi-guilds-how-to')
 
 """
 def build_category_into(extend, category_name, emoji, command_names):
@@ -611,24 +608,6 @@ async def docs_search(client, event,
         embeds.append(embed)
     
     await Pagination(client, event, embeds, check = partial_func(docs_search_pagination_check, event.user))
-
-
-@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT)
-async def ask():
-    """How to ask!"""
-    return Embed(
-        'How to ask?',
-        (
-            'Don\'t ask to ask just ask.\n'
-            '\n'
-            ' • You will have much higher chances of getting an answer\n'
-            ' • It saves time both for us and you as we can skip the whole process of actually getting the question '
-            'out of you\n'
-            '\n'
-            'For more info visit [dontasktoask.com](https://dontasktoask.com/)'
-        ),
-        color = COLOR__KOISHI_HELP,
-    )
 
 
 @FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT)

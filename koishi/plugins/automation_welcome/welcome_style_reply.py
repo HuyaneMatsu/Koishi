@@ -11,8 +11,10 @@ class WelcomeStyleReply(RichAttributeErrorBaseType):
     ----------
     button_content : `str`
         Content appearing on the reply button.
+    
     button_emoji : ``Emoji``
         Emoji appearing on the reply button.
+    
     reply_content_builder : `FunctionType`
         Content builder for the reply messages.
     """
@@ -27,8 +29,10 @@ class WelcomeStyleReply(RichAttributeErrorBaseType):
         ----------
         button_content : `str`
             Content appearing on the reply button.
+        
         button_emoji : ``Emoji``
             Emoji appearing on the reply button.
+        
         reply_content_builder : `FunctionType`
             Content builder for the reply messages.
         """

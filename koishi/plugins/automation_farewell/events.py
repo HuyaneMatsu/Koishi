@@ -35,7 +35,8 @@ async def farewell_user(client, guild, user, farewell_style, farewell_channel):
     items = farewell_style.items
     item = items[seed % len(items)]
     
-    message_content = item.message_content_builder(user.full_name)
+    
+    message_content = item.get_message_content_builder_localized(guild.locate)(user.full_name)
     
     color = (now_as_id() >> 22) & 0xffffff
     

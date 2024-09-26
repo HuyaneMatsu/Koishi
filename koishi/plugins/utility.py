@@ -513,7 +513,11 @@ async def all_users(client, event):
     await Pagination(client, event, embeds)
 
 
-@FEATURE_CLIENTS.interactions(is_global = True, target = 'message')
+@FEATURE_CLIENTS.interactions(
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+    target = 'message',
+)
 async def escape(message):
     content = message.content
     if content is None:
@@ -526,7 +530,10 @@ async def escape(message):
     return InteractionResponse(content, allowed_mentions = None)
 
 
-@FEATURE_CLIENTS.interactions(integration_types = ['guild_install', 'user_install'], is_global = True)
+@FEATURE_CLIENTS.interactions(
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+)
 async def calc(
     expression: ('expression', 'Mathematical expression to evaluate')
 ):

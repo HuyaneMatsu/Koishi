@@ -297,7 +297,7 @@ async def roles(
     embed = Embed(
         f'Buying {role.name} for {cost} {EMOJI__HEART_CURRENCY}'
     ).add_thumbnail(
-        user.user.avatar_url_at(event.guild_id),
+        user.avatar_url_at(event.guild_id),
     )
     
     if can_buy:

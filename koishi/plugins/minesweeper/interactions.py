@@ -48,7 +48,7 @@ async def check_invoking_user(client, event):
 async def minesweeper(
     client,
     event,
-    bomb_count: (range(4, 9), 'how much bombs should there be') = 4,
+    bomb_count: (range(4, 16), 'how much bombs should there be') = 4,
 ):
     """
     Initialises a minesweeper game.

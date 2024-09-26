@@ -522,7 +522,7 @@ def test__AutomationConfiguration__get_saver():
         
         output = automation_configuration.get_saver()
         vampytest.assert_instance(output, AutomationConfigurationSaver)
-        vampytest.assert_is(output.automation_configuration, automation_configuration)
+        vampytest.assert_is(output.entry_proxy, automation_configuration)
         vampytest.assert_is(automation_configuration.saver, output)
     
     finally:

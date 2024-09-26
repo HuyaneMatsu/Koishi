@@ -68,7 +68,7 @@ def get_allowed_users(client, event, input_targets):
     return targets, client_in_users, user_in_users, allowed_mentions
 
 
-def build_response(client, verb, source_user, targets, client_in_targets):
+def build_response(client, starter_text, verb, source_user, targets, client_in_targets):
     """
     Builds action response text and allowed mentions.
     
@@ -76,12 +76,19 @@ def build_response(client, verb, source_user, targets, client_in_targets):
     ----------
     client : ``Client``
         The client who received the event.
+    
+    starter_text : `None | str`
+        Text to start the response with.
+    
     verb : `str`
         The verb to use in the response.
+    
     source_user : ``ClientUserBase``
         The user source user who invoked the event.
+    
     targets : `set<Role | ClientUserBase>`
         The mentioned users and roles by the event.
+    
     client_in_targets : `bool`
         Whether the client is in the mentioned targets.
     
@@ -92,6 +99,10 @@ def build_response(client, verb, source_user, targets, client_in_targets):
     targets = [*targets]
     
     response_parts = ['> ']
+    
+    if (starter_text is not None):
+        response_parts.append(starter_text)
+        response_parts.append('; ')
     
     user_count = len(targets)
     if (user_count == 0) and (not client_in_targets):
@@ -136,14 +147,18 @@ def build_response(client, verb, source_user, targets, client_in_targets):
     return ''.join(response_parts)
 
 
-def build_response_self(verb, source_user):
+def build_response_self(starter_text, verb, source_user):
     """
     Builds action response text and allowed mentions.
     
     Parameters
     ----------
+    starter_text : `None | str`
+        Starter text to start teh response with.
+    
     verb : `str`
         The verb to use in the response.
+    
     source_user : ``ClientUserBase``
         The user source user who invoked the event.
     
@@ -151,10 +166,23 @@ def build_response_self(verb, source_user):
     -------
     response : `str`
     """
+    response_parts = ['> ']
+    
+    if (starter_text is not None):
+        response_parts.append(starter_text)
+        response_parts.append('; ')
+    
+    response_parts.append(source_user.mention)
+    response_parts.append(' ')
+    response_parts.append(verb)
+    response_parts.append(' ')
+    
     if random() < 0.2:
         target_word = 'herself'
     else:
         target_word = 'themselves'
+    response_parts.append(target_word)
+    response_parts.append(' ')
     
     sign_chance = random()
     if sign_chance < 0.1:
@@ -163,8 +191,8 @@ def build_response_self(verb, source_user):
         end_sign = '!?'
     else:
         end_sign = '?!'
-    
-    return ''.join(['> ', source_user.mention, ' ', verb, ' ', target_word, ' ', end_sign])
+    response_parts.append(end_sign)
+    return ''.join(response_parts)
 
 
 async def send_action_response_with_interaction_event(client, event, content, embed, allowed_mentions):
@@ -410,20 +438,28 @@ class Action(RichAttributeErrorBaseType):
     ----------
     aliases : `None | tuple<str>`
         Name aliases.
+    
     name : `str`
         The name of the action.
+    
     description : `str`
         Description for the action.
+    
     handler : ``ImageHandlerBase``
         Image handler to use when invoking self-action.
+    
     handler : ``ImageHandlerBase``
         Image handler to use.
+    
+    starter_text : `None | str`
+        Text to start with.
+    
     verb : `str`
         Verb used in the action.
     """
-    __slots__ = ('aliases', 'description', 'handler', 'handler_self', 'name',  'verb')
+    __slots__ = ('aliases', 'description', 'handler', 'handler_self', 'name', 'starter_text', 'verb')
     
-    def __new__(cls, name, description, handler, verb, *, aliases = None, handler_self = None):
+    def __new__(cls, name, description, handler, verb, *, aliases = None, handler_self = None, starter_text = None):
         """
         Creates a new action.
         
@@ -431,16 +467,24 @@ class Action(RichAttributeErrorBaseType):
         ----------
         name : `str`
             The name of the action.
+        
         description : `str`
             Description for the action.
+        
         handler : ``ImageHandlerBase``
             Image handler to use.
+        
         verb : `str`
             Verb used in the action.
+        
         aliases : `None | tuple<str>` = `None`, Optional (Keyword only)
             Name aliases
+        
         handler_self : `None`, ``ImageHandlerBase`` = `None`, Optional (Keyword only)
             Image handler to use when invoking self-action.
+    
+        starter_text : `None | str` = `None`, Optional (Keyword only)
+            Text to start with.
         """
         self = object.__new__(cls)
         self.aliases = aliases
@@ -448,6 +492,7 @@ class Action(RichAttributeErrorBaseType):
         self.handler = handler
         self.handler_self = handler_self
         self.name = name
+        self.starter_text = starter_text
         self.verb = verb
         return self
     
@@ -641,11 +686,11 @@ async def create_response_content_and_embed(
         (action.handler_self is not None)
         and ((random() < 0.5) if client_in_users else True)
     ):
-        content = build_response_self(action.verb, source_user)
+        content = build_response_self(action.starter_text, action.verb, source_user)
         handler = action.handler_self
         
     else:
-        content = build_response(client, action.verb, source_user, targets, client_in_users)
+        content = build_response(client, action.starter_text, action.verb, source_user, targets, client_in_users)
         handler = action.handler
     
     target_users = [target for target in targets if isinstance(target, ClientUserBase)]

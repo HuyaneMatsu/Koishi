@@ -5485,15 +5485,6 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### kogasa-nue-hug-0000
-
-- Creator: **misha (hoongju)**
-- Editor: *none*
-- Characters: **Houjuu Nue**, **Tatara Kogasa**
-- Source: **Touhou**
-
----
-
 ### chiruno-wakasagihime-kiss-0000
 
 - Creator: **misha (hoongju)**
@@ -7650,6 +7641,15 @@ Some creators may be unknown. If you know them please create a PR with it.
 - Creator: **itomugi-kun**
 - Editor: *none*
 - Characters: **Soga no Tojiko**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-peg-0000
+
+- Creator: **shirosato**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
 - Source: **Touhou**
 
 ---

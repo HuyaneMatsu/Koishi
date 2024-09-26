@@ -44,14 +44,14 @@ class ImageDetailMatcherContextSensitive(ImageDetailMatcherBase):
             repr_parts.append(' sources = ')
             repr_parts.append(repr(sources))
             
-            fields_added = True
+            field_added = True
         else:
-            fields_added = False
+            field_added = False
         
         # targets
         targets = self.targets
         if (targets is not None):
-            if fields_added:
+            if field_added:
                 repr_parts.append(',')
             
             repr_parts.append(' targets = ')

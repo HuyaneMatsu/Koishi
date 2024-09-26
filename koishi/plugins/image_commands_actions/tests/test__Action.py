@@ -21,6 +21,7 @@ def _assert_fields_set(action):
     vampytest.assert_instance(action.handler, ImageHandlerBase)
     vampytest.assert_instance(action.handler_self, ImageHandlerBase, nullable = True)
     vampytest.assert_instance(action.name, str)
+    vampytest.assert_instance(action.starter_text, str, nullable = True)
     vampytest.assert_instance(action.verb, str)
 
 
@@ -63,6 +64,7 @@ def test__Action__new__max():
     verb = 'hugs'
     aliases = ('kiss', 'smooch')
     handler_self = IMAGE_HANDLER_POCKY_KISS_SELF
+    starter_text = 'so true bestie'
     
     action = Action(
         name,
@@ -71,6 +73,7 @@ def test__Action__new__max():
         verb,
         aliases = aliases,
         handler_self = handler_self,
+        starter_text = starter_text,
     )
     _assert_fields_set(action)
     
@@ -79,6 +82,7 @@ def test__Action__new__max():
     vampytest.assert_is(action.handler, handler)
     vampytest.assert_is(action.handler_self, handler_self)
     vampytest.assert_eq(action.name, name)
+    vampytest.assert_eq(action.starter_text, starter_text)
     vampytest.assert_eq(action.verb, verb)
 
 
@@ -92,6 +96,7 @@ def test__Action__repr():
     verb = 'hugs'
     aliases = ('kiss', 'smooch')
     handler_self = IMAGE_HANDLER_POCKY_KISS_SELF
+    starter_text = 'so true bestie'
     
     action = Action(
         name,
@@ -100,6 +105,7 @@ def test__Action__repr():
         verb,
         aliases = aliases,
         handler_self = handler_self,
+        starter_text = starter_text,
     )
     
     output = repr(action)

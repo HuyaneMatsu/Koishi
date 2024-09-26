@@ -52,7 +52,12 @@ STYLE_CODES = {
 }
 
 
-@FEATURE_CLIENTS.interactions(is_global = True, target = 'message', allowed_mentions = None)
+@FEATURE_CLIENTS.interactions(
+    allowed_mentions = None,
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+    target = 'message',
+)
 async def style_text(target):
     content = target.content
     if content is None:
@@ -100,6 +105,7 @@ STYLE_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
     name = 'style-text',
     description = 'Styling text',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 

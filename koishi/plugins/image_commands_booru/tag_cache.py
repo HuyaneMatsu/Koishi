@@ -102,6 +102,8 @@ async def request_tag_auto_completion(client, query, safe):
         if response.status != 200:
             return
         
-        tag_datas = await response.json()
+        # Pass `content_type` as empty string to disable its check.
+        # safebooru returns `text/html; charset=UTF-8` header value which fails content type check.
+        tag_datas = await response.json(content_type = '')
     
     return [tag_builder(tag_data) for tag_data in tag_datas if tag_data['value'] not in tags_banned]

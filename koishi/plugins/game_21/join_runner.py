@@ -428,7 +428,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
                 self.message,
                 self.players[0],
                 self.session,
-                self.single_player,
+                False,
                 GAME_21_JOIN_ROW_DISABLED,
                 build_join_embed_timed_out(
                     [player.user for player in self.players], self.session.guild, self.session.amount,

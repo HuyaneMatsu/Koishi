@@ -53,17 +53,17 @@ class ImageDetailMatcherCustom(ImageDetailMatcherBase):
             repr_parts.append(' action_tag = ')
             repr_parts.append(repr(action_tag))
             
-            fields_added = True
+            field_added = True
         else:
-            fields_added = False
+            field_added = False
         
         # source
         source = self.source
         if (source is not None):
-            if fields_added:
+            if field_added:
                 repr_parts.append(',')
             else:
-                fields_added = True
+                field_added = True
             
             repr_parts.append(' source = ')
             repr_parts.append(repr(source))
@@ -71,10 +71,10 @@ class ImageDetailMatcherCustom(ImageDetailMatcherBase):
         # target
         target = self.target
         if (target is not None):
-            if fields_added:
+            if field_added:
                 repr_parts.append(',')
             else:
-                fields_added = True
+                field_added = True
             
             repr_parts.append(' target = ')
             repr_parts.append(repr(target))
@@ -82,7 +82,7 @@ class ImageDetailMatcherCustom(ImageDetailMatcherBase):
         # name
         name = self.name
         if (name is not None):
-            if fields_added:
+            if field_added:
                 repr_parts.append(',')
             
             repr_parts.append(' name = ')
