@@ -1,3 +1,16 @@
+### 2024-09-26
+
+- `/todo list` now allows filtering.
+- `/todo list` now allows switching between pages.
+- Fix `/safebooru` returning incorrect content type headers when auto completing. (So just a workaround.)
+- Fix `Game21JoinRunner` not updating the message on timeout.
+- `/ask` is now a global command & available when user installed.
+- `/oj` command's dataset updated.
+- `/oj` is available when user installed.
+- `style-text` and `/style-text` commands are available when user installed.
+- `escape` now available when user installed.
+- Add `/peg` command.
+
 ### 2024-09-15
 
 - Fix `Teireida Mai`'s nick shadowing `Mai` in `/touhou-character`.

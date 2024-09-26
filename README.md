@@ -62,7 +62,7 @@ And much more!
 - Actions
     
     `bite` • `blush` • `bully` • `cringe` • `cry` • `dance` • `feed` • `fluff` • `glomp` • `handhold` • `happy` •
-    `highfive` • `hug` • `kick` • `kill` • `kiss` • `kon` • `lap-sleep` • `like` • `lick` • `nom` • `pat` •
+    `highfive` • `hug` • `kick` • `kill` • `kiss` • `kon` • `lap-sleep` • `like` • `lick` • `nom` • `pat` • `peg` •
     `pocky-kiss` • `poke` • `slap` • `smile` • `smug` • `stare` • `wave` • `wink` • `yeet`
 
 - Economy
@@ -80,7 +80,7 @@ And much more!
 
 -  Help
     
-    `about` • `help`
+    `about` • `ask` • `help`
 
 -  Marriage
     
