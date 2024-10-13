@@ -3,7 +3,7 @@ import vampytest
 from ...image_handling_core import ImageHandlerBase
 
 from ..action import Action
-from ..asset_listings.constants import ACTION_TAG_POCKY_KISS, ACTION_TAG_POCKY_KISS_SELF
+from ..asset_listings.constants import ACTION_TAG_POCKY, ACTION_TAG_POCKY_SELF
 from ..image_handlers import IMAGE_HANDLER_POCKY_KISS, IMAGE_HANDLER_POCKY_KISS_SELF 
 
 
@@ -169,7 +169,7 @@ def test__Action__get_action_tag():
     
     output = action.get_action_tag()
     vampytest.assert_instance(output, str, nullable = True)
-    vampytest.assert_eq(output, ACTION_TAG_POCKY_KISS)
+    vampytest.assert_eq(output, ACTION_TAG_POCKY)
 
 
 def test__Action__get_action_tag_self():
@@ -192,4 +192,4 @@ def test__Action__get_action_tag_self():
     
     output = action.get_action_tag_self()
     vampytest.assert_instance(output, str, nullable = True)
-    vampytest.assert_eq(output, ACTION_TAG_POCKY_KISS_SELF)
+    vampytest.assert_eq(output, ACTION_TAG_POCKY_SELF)

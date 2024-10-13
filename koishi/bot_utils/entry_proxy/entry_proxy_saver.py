@@ -133,11 +133,14 @@ class EntryProxySaver(RichAttributeErrorBaseType):
         entry_proxy = self.entry_proxy
         try:
             async with DB_ENGINE.connect() as connector:
-                
                 entry_id = entry_proxy.entry_id
-                    
+                # Entry new that is all
+                if (entry_id == -1) and entry_proxy:
+                    self.modified_fields = None
+                    entry_id = await self._insert_entry(connector, entry_proxy)
+                    entry_proxy.entry_id = entry_id
+                
                 while self.is_modified():
-                    
                     if self.ensured_for_deletion:
                         if entry_id != -1:
                             await self._delete_entry(connector, entry_id)
@@ -145,7 +148,6 @@ class EntryProxySaver(RichAttributeErrorBaseType):
                         
                         # We done!
                         return
-                    
                     
                     modified_fields = self.modified_fields
                     if (modified_fields is not None):

@@ -1,3 +1,44 @@
+### 2024-10-13
+
+- Add `Vivit` touhou character.
+- Add `Prismriver Layla` touhou character.
+- Add `Mishaguji` touhou character.
+- Add `Okazaki Yumemi` touhou character.
+- Add `Miyadeguchi Mizuchi` touhou character.
+- Add `Genjii` touhou character.
+- Add `Hourai` touhou character.
+- Add `Shanghai` touhou character.
+- Add `Yumeko` touhou character.
+- Add `Konpaku Youki` touhou character.
+- Add `Tokiko` touhou character.
+- Add `Label` touhou character.
+- Add `Jacket` touhou character.
+- Add `Goliath` touhou character.
+- Add `Haruru` touhou character.
+- Add `Tsubame` touhou character.
+- Add `Akiyo` touhou character.
+- Add `Satowa` touhou character.
+- Add `Yorumi` touhou character.
+- Add `Tomomi` touhou character.
+- Add `Unnamed Exotic Girl - 20000-hit Girl` touhou character (really could not find how it is called).
+- Add `Unnamed Exotic Girl - Cleaning Maid` touhou character (really could not find how it is called).
+- Remove `embed.author` in `/ds`. The existence of `message.interaction` field makes it duplicate.
+- Add `convert_action_asset_formats` cli command to help with registering new images.
+- Add many touhou character nicks for better matching.
+- `/pocky (self)` images now have their own `pocky_self` tag in the names.
+- `/like` images now use a shared `like` tag in their names.
+- Add **14** images to `/meme`.
+- Add **20** images to `/hug`.
+- Add **10** images to `/kiss`.
+- Add **5** images to `/pat`.
+- Add **2** images to `/fluff`.
+- Add **377** images to `/stare` (74 is so nue).
+- Add **1** images to `/pocky-kiss`.
+- Add **2** images to `/lick`.
+- `/sex` now silences when discord is derping. Also tries to respond with a normal message if Discord is slow.
+- `/sex` now has rate limit per `user_id` as well (teehee).
+- Fix `/sex` rate limit was not updated on repeated uses.
+
 ### 2024-09-26
 
 - `/todo list` now allows filtering.

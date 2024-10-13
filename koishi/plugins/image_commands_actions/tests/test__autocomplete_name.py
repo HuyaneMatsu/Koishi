@@ -32,8 +32,8 @@ def _iter_options():
             PARAMETER_WILD_CARD,
             'akyuu-kosuzu-lap-sleep-0000',
             'akyuu-kosuzu-pocky-0000',
+            'akyuu-stare-0000',
             'alice-aya-hug-0000',
-            'alice-marisa-feed-0000',
         ],
     )
     
@@ -93,7 +93,7 @@ def _iter_options():
             )
         ),
         'ran',
-        ['ran-fluffy-tail-0000', 'ran-kon-0000', 'ran-kon-0001', 'ran-kon-0002', 'ran-kon-0003'],
+        ['ran-kon-0000', 'ran-kon-0001', 'ran-kon-0002', 'ran-kon-0003', 'ran-kon-0004'],
     )
     
     yield (

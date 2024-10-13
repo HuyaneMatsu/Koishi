@@ -2,6 +2,8 @@ __all__ = ()
 
 SEX_RESET_AFTER = 600
 
+SEX_SPAM_LOCKS = {}
+
 SEX_IMAGES = [
     'https://cdn.discordapp.com/attachments/568837922288173058/1160496032094896170/chiruno-no-sex.gif',
     'https://cdn.discordapp.com/attachments/568837922288173058/1160496031746760714/chiruno-maybe-sex.gif',

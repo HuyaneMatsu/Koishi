@@ -4559,7 +4559,6 @@ class DungeonSweeperRunner:
                     runner_state = RUNNER_STATE_PLAYING
             
             user = event.user
-            embed.add_author(user.full_name, user.avatar_url_as('png', 32))
             
             message = await client.interaction_followup_message_create(event, embed = embed, components = components)
         except:
@@ -4715,7 +4714,6 @@ class DungeonSweeperRunner:
             return
         
         user = self.user
-        embed.add_author(user.full_name, user.avatar_url_as('png', 32))
         
         self._gui_state = GUI_STATE_EDITING
         try:
@@ -4878,9 +4876,6 @@ class DungeonSweeperRunner:
                     '\n'
                     'I am sorry for the inconvenience. See ya later qtie!'
                 ),
-            ).add_author(
-                user.full_name,
-                user.avatar_url_as('png', 32),
             ).add_thumbnail(
                 EMOJI_KOISHI_WAVE.url,
             )

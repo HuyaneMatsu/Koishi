@@ -1,12 +1,23 @@
 import vampytest
 
-from ..characters import AYANA, HOURAISAN_KAGUYA, IZAYOI_SAKUYA, KOMEIJI_KOISHI, REIUJI_UTSUHO, SHAMEIMARU_AYA
+from ..characters import (
+    AYANA, HOURAISAN_KAGUYA, IZAYOI_SAKUYA, KOMEIJI_KOISHI, PRISMRIVER_LAYLA, REIUJI_UTSUHO, SHAMEIMARU_AYA
+)
 from ..utils import get_familiar_touhou_matches
 
 
 def _iter_options():
     yield 'Komeiji Koishi', [(KOMEIJI_KOISHI, 'komeiji koishi')]
-    yield 'aya', [(SHAMEIMARU_AYA, 'aya'), (AYANA, 'ayana'), (IZAYOI_SAKUYA, 'sakuya'), (HOURAISAN_KAGUYA, 'kaguya')]
+    yield (
+        'aya',
+        [
+            (SHAMEIMARU_AYA, 'aya'),
+            (PRISMRIVER_LAYLA, 'layla'),
+            (AYANA, 'ayana'),
+            (IZAYOI_SAKUYA, 'sakuya'),
+            (HOURAISAN_KAGUYA, 'kaguya'),
+        ],
+    )
     yield 'oguu', [(REIUJI_UTSUHO, 'okuu')]
     yield 'Gilgamesh', []
 

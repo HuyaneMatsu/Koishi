@@ -616,7 +616,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### mai-ran-satono-fluff-0000
+### ran-satono-tmai-fluff-0000
 
 - Creator: **itatatata**
 - Editor: **HuyaneMatsu**
@@ -2524,7 +2524,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### eiki-judged-0000
+### eiki-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2533,7 +2533,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### eirin-older-0000
+### eirin-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2542,7 +2542,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### eirin-older-0001
+### eirin-like-0001
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2551,7 +2551,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### futatsuiwa-older-0000
+### futatsuiwa-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2560,7 +2560,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### hisami-grape-0000
+### hisami-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2569,7 +2569,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### hisami-older-0000
+### hisami-like-0001
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2578,7 +2578,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### iku-older-0000
+### iku-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2587,7 +2587,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### junko-older-0000
+### junko-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2596,7 +2596,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### junko-older-0001
+### junko-like-0001
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2605,7 +2605,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### junko-older-0002
+### junko-like-0002
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2614,7 +2614,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### junko-racist-0000
+### junko-like-0003
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2623,7 +2623,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### kasen-oder-0000
+### kasen-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2632,7 +2632,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### kogasa-umbrella-0000
+### kogasa-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2641,7 +2641,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### koishi-happy-0000
+### koishi-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2650,7 +2650,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### miko-older-0000
+### miko-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2659,7 +2659,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### nitori-smart-0000
+### nitori-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2668,7 +2668,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### nue-huge-surprises-0000
+### nue-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2677,7 +2677,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### rinnosuke-plain-0000
+### rinnosuke-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2686,7 +2686,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### okina-older-0000
+### okina-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2695,7 +2695,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### okuu-nuclear-0000
+### okuu-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2704,7 +2704,16 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### ran-fluffy-tail-0000
+### ran-like-0000
+
+- Creator: **terrajin**
+- Editor: *none*
+- Characters: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### ran-like-0001
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2713,16 +2722,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### ran-older-0000
-
-- Creator: *unknown*
-- Editor: *none*
-- Characters: **Yakumo Ran**
-- Source: **Touhou**
-
----
-
-### rumia-older-0000
+### rumia-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2731,7 +2731,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### seiga-evil-0000
+### seiga-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2740,7 +2740,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### seiga-older-0000
+### seiga-like-0001
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2749,7 +2749,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### tewi-older-0000
+### tewi-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2758,7 +2758,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yukari-japanese-goblin-0000
+### yukari-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2767,7 +2767,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yukari-older-0000
+### yukari-like-0001
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2776,7 +2776,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yukari-older-0001
+### yukari-like-0002
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2785,7 +2785,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yukari-older-0002
+### yukari-like-0003
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2794,7 +2794,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yukari-older-0003
+### yukari-like-0004
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2803,7 +2803,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yukari-older-0004
+### yukari-like-0005
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2812,7 +2812,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yukari-older-0005
+### yukari-like-0006
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2821,7 +2821,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yukari-older-0006
+### yukari-like-0007
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2830,7 +2830,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yukari-yuyuko-older-0000
+### yukari-yuyuko-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2839,7 +2839,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yuuka-cbt-0000
+### yuuka-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2848,7 +2848,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yuuka-older-0000
+### yuuka-like-0001
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2857,7 +2857,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yuyuko-older-0000
+### yuyuko-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2866,7 +2866,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yuyuko-older-0001
+### yuyuko-like-0001
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2875,7 +2875,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yuyuko-older-0002
+### yuyuko-like-0002
 
 - Creator: *unknown*
 - Editor: *none*
@@ -2884,7 +2884,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yuyuko-older-0003
+### yuyuko-like-0003
 
 - Creator: *unknown*
 - Editor: *none*
@@ -3487,7 +3487,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### lily-rumia-pocky-0000
+### lily_white-rumia-pocky-0000
 
 - Creator: **mitsubasa miu / 魅翼**
 - Editor: *none*
@@ -3721,7 +3721,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### aya-pocky-0000
+### aya-pocky_self-0000
 
 - Creator: **futatsuki eru**
 - Editor: *none*
@@ -3730,7 +3730,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### byakuren-pocky-0000
+### byakuren-pocky_self-0000
 
 - Creator: **cpu (hexivision)**
 - Editor: *none*
@@ -3739,7 +3739,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### byakuren-pocky-0001
+### byakuren-pocky_self-0001
 
 - Creator: **han (jackpot)**
 - Editor: *none*
@@ -3748,7 +3748,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### chiruno-pocky-0000
+### chiruno-pocky_self-0000
 
 - Creator: **shokuyou pants**
 - Editor: *none*
@@ -3757,7 +3757,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### eiki-pocky-0000
+### eiki-pocky_self-0000
 
 - Creator: **guard vent jun**
 - Editor: *none*
@@ -3766,7 +3766,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### flandre-pocky-0000
+### flandre-pocky_self-0000
 
 - Creator: **mamemochi**
 - Editor: **HuyaneMatsu**
@@ -3775,7 +3775,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### flandre-pocky-0001
+### flandre-pocky_self-0001
 
 - Creator: **zerocat**
 - Editor: *none*
@@ -3784,7 +3784,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### flandre-pocky-0002
+### flandre-pocky_self-0002
 
 - Creator: **puuakachan**
 - Editor: **HuyaneMatsu**
@@ -3793,7 +3793,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### flandre-pocky-0003
+### flandre-pocky_self-0003
 
 - Creator: **sasurai no kuchibuefuki**
 - Editor: *none*
@@ -3802,7 +3802,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### flandre-pocky-0004
+### flandre-pocky_self-0004
 
 - Creator: **takamoto akisa**
 - Editor: *none*
@@ -3811,7 +3811,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### flandre-pocky-0005
+### flandre-pocky_self-0005
 
 - Creator: **tosura-ayato**
 - Editor: *none*
@@ -3820,7 +3820,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### flandre-pocky-0006
+### flandre-pocky_self-0006
 
 - Creator: **misa (kaeruhitode)**
 - Editor: *none*
@@ -3829,7 +3829,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### futo-pocky-0000
+### futo-pocky_self-0000
 
 - Creator: **kuzumomo**
 - Editor: **HuyaneMatsu**
@@ -3838,7 +3838,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### hatate-pocky-0000
+### hatate-pocky_self-0000
 
 - Creator: **shiranui (wasuresateraito)**
 - Editor: **HuyaneMatsu**
@@ -3847,7 +3847,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### hatate-pocky-0001
+### hatate-pocky_pocky-0001
 
 - Creator: ***gomi (gomitin)**
 - Editor: *none*
@@ -3856,7 +3856,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### iku-pocky-0000
+### iku-pocky_self-0000
 
 - Creator: **etosen**
 - Editor: **HuyaneMatsu**
@@ -3865,7 +3865,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### kagerou-pocky-0000
+### kagerou-pocky_self-0000
 
 - Creator: **rokugou daisuke**
 - Editor: *none*
@@ -3874,7 +3874,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### kagerou-pocky-0001
+### kagerou-pocky_self-0001
 
 - Creator: **tetsuhige / 鉄髭**
 - Editor: *none*
@@ -3883,7 +3883,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### keine-pocky-0000
+### keine-pocky_self-0000
 
 - Creator: **rebecca (keinelove)**
 - Editor: *none*
@@ -3892,7 +3892,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### kogasa-pocky-0000
+### kogasa-pocky_self-0000
 
 - Creator: **muginon**
 - Editor: **HuyaneMatsu**
@@ -3901,7 +3901,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### koishi-pocky-0000
+### koishi-pocky_self-0000
 
 - Creator: **oshiaki**
 - Editor: *none*
@@ -3910,7 +3910,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### koishi-pocky-0001
+### koishi-pocky_self-0001
 
 - Creator: **sukima (crie)**
 - Editor: **HuyaneMatsu**
@@ -3919,7 +3919,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### koishi-pocky-0002
+### koishi-pocky_self-0002
 
 - Creator: **ocha (ochappie)**
 - Editor: **HuyaneMatsu**
@@ -3928,7 +3928,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### kokoro-pocky-0000
+### kokoro-pocky_self-0000
 
 - Creator: **hammer (sunset beach)**
 - Editor: *none*
@@ -3937,7 +3937,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### komachi-pocky-0000
+### komachi-pocky_self-0000
 
 - Creator: **harakune (mugennero)**
 - Editor: *none*
@@ -3946,7 +3946,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### lily-black-pocky-0000
+### lily_black-pocky_self-0000
 
 - Creator: **earlgrey**
 - Editor: *none*
@@ -3955,7 +3955,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### lily-white-pocky-0000
+### lily_white-pocky_self-0000
 
 - Creator: **nonotan**
 - Editor: **HuyaneMatsu**
@@ -3964,7 +3964,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### marisa-pocky-0000
+### marisa-pocky_self-0000
 
 - Creator: **e.o.**
 - Editor: *none*
@@ -3973,7 +3973,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### marisa-pocky-0001
+### marisa-pocky_self-0001
 
 - Creator: **sanpa**
 - Editor: **HuyaneMatsu**
@@ -3982,7 +3982,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### medi-pocky-0000
+### medi-pocky_self-0000
 
 - Creator: **dqn (dqnww)**
 - Editor: *none*
@@ -3991,7 +3991,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### miko-pocky-0000
+### miko-pocky_self-0000
 
 - Creator: **makuwauri**
 - Editor: *none*
@@ -4000,7 +4000,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### mokou-pocky-0000
+### mokou-pocky_self-0000
 
 - Creator: **hijikawa arashi**
 - Editor: *none*
@@ -4009,7 +4009,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### mokou-pocky-0001
+### mokou-pocky_self-0001
 
 - Creator: **hiyori-o**
 - Editor: *none*
@@ -4018,7 +4018,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### momiji-pocky-0000
+### momiji-pocky_self-0000
 
 - Creator: **elu butyo**
 - Editor: *none*
@@ -4027,7 +4027,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### momiji-pocky-0001
+### momiji-pocky_self-0001
 
 - Creator: **katsumi5o**
 - Editor: **HuyaneMatsu**
@@ -4036,7 +4036,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### momiji-pocky-0002
+### momiji-pocky_self-0002
 
 - Creator: **ginzake (mizuumi)**, **shake (sakana)**
 - Editor: **HuyaneMatsu**
@@ -4045,7 +4045,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### mystia-pocky-0000
+### mystia-pocky_self-0000
 
 - Creator: **phantom2071**
 - Editor: **HuyaneMatsu**
@@ -4054,7 +4054,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### nazrin-pocky-0000
+### nazrin-pocky_self-0000
 
 - Creator: **kibayashi kimori**
 - Editor: *none*
@@ -4063,7 +4063,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### nue-pocky-0000
+### nue-pocky_self-0000
 
 - Creator: **makita (vector1525)**
 - Editor: **HuyaneMatsu**
@@ -4072,7 +4072,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### nue-pocky-0001
+### nue-pocky_self-0001
 
 - Creator: **igakusei**
 - Editor: **HuyaneMatsu**
@@ -4081,7 +4081,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### okuu-pocky-0000
+### okuu-pocky_self-0000
 
 - Creator: **sinzan**
 - Editor: *none*
@@ -4090,7 +4090,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### orin-pocky-0000
+### orin-pocky_self-0000
 
 - Creator: **kuromari (runia)**
 - Editor: *none*
@@ -4099,7 +4099,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### orin-pocky-0001
+### orin-pocky_self-0001
 
 - Creator: **takasu**, **tks (chikuwa)**
 - Editor: *none*
@@ -4108,7 +4108,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### patchouli-pocky-0000
+### patchouli-pocky_self-0000
 
 - Creator: **namiki (remiter00)**
 - Editor: *none*
@@ -4117,7 +4117,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### patchouli-pocky-0001
+### patchouli-pocky_self-0001
 
 - Creator: **natsuki (silent selena)**
 - Editor: *none*
@@ -4126,7 +4126,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### patchouli-pocky-0002
+### patchouli-pocky_self-0002
 
 - Creator: **porurin (do-desho)**
 - Editor: *none*
@@ -4135,7 +4135,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### ran-pocky-0000
+### ran-pocky_self-0000
 
 - Creator: **dearmybrothers**
 - Editor: *none*
@@ -4144,7 +4144,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### ran-pocky-0001
+### ran-pocky_self-0001
 
 - Creator: **dearmybrothers**
 - Editor: *none*
@@ -4153,7 +4153,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### reimu-pocky-0000
+### reimu-pocky_self-0000
 
 - Creator: **h sakray**, **sakurai haruto**
 - Editor: *none*
@@ -4162,7 +4162,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### reimu-pocky-0001
+### reimu-pocky_self-0001
 
 - Creator: **aosi (wasabiranzy)**
 - Editor: *none*
@@ -4171,7 +4171,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### reimu-pocky-0002
+### reimu-pocky_self-0002
 
 - Creator: **pasutel**
 - Editor: **HuyaneMatsu**
@@ -4180,7 +4180,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### remilia-pocky-0000
+### remilia-pocky_self-0000
 
 - Creator: **beni kurage**
 - Editor: *none*
@@ -4189,7 +4189,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### remilia-pocky-0001
+### remilia-pocky_self-0001
 
 - Creator: **yamasuta**
 - Editor: **HuyaneMatsu**
@@ -4198,7 +4198,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### remilia-pocky-0002
+### remilia-pocky_self-0002
 
 - Creator: **misa (kaeruhitode)**
 - Editor: **HuyaneMatsu**
@@ -4207,7 +4207,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### rumia-pocky-0000
+### rumia-pocky_self-0000
 
 - Creator: **natoubee**
 - Editor: *none*
@@ -4216,7 +4216,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### sakuya-pocky-0000
+### sakuya-pocky_self-0000
 
 - Creator: **caramell0501**
 - Editor: *none*
@@ -4225,7 +4225,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### sanae-pocky-0000
+### sanae-pocky_self-0000
 
 - Creator: **fueiku**
 - Editor: *none*
@@ -4234,7 +4234,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### sanae-pocky-0001
+### sanae-pocky_self-0001
 
 - Creator: **osashin (osada)**
 - Editor: *none*
@@ -4243,7 +4243,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### satori-pocky-0000
+### satori-pocky_self-0000
 
 - Creator: **noumin joemanyodw**
 - Editor: **HuyaneMatsu**
@@ -4252,7 +4252,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### satori-pocky-0001
+### satori-pocky_self-0001
 
 - Creator: **toritori (yakitoriya)**
 - Editor: **HuyaneMatsu**
@@ -4261,7 +4261,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### suwako-pocky-0000
+### suwako-pocky_self-0000
 
 - Creator: **gamuo**
 - Editor: **HuyaneMatsu**
@@ -4270,7 +4270,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### tenshi-pocky-0000
+### tenshi-pocky_self-0000
 
 - Creator: **ruu (tksymkw)**
 - Editor: *none*
@@ -4279,7 +4279,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### wriggle-pocky-0000
+### wriggle-pocky_self-0000
 
 - Creator: **kajiyama**
 - Editor: **HuyaneMatsu**
@@ -4288,7 +4288,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### wriggle-pocky-0001
+### wriggle-pocky_self-0001
 
 - Creator: **cato (monocatienus)**
 - Editor: *none*
@@ -4297,7 +4297,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### youmu-pocky-0000
+### youmu-pocky_self-0000
 
 - Creator: **shironeko yuuki**
 - Editor: *none*
@@ -4306,7 +4306,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### youmu-pocky-0001
+### youmu-pocky_self-0001
 
 - Creator: **kame (kamepan44231)**
 - Editor: *none*
@@ -4315,7 +4315,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### youmu-pocky-0002
+### youmu-pocky_self-0002
 
 - Creator: **moni monico**
 - Editor: **HuyaneMatsu**
@@ -4324,7 +4324,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### youmu-pocky-0003
+### youmu-pocky_self-0003
 
 - Creator: **katanakko daisuki**
 - Editor: **HuyaneMatsu**
@@ -4333,7 +4333,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### youmu-pocky-0004
+### youmu-pocky_self-0004
 
 - Creator: **enelis**
 - Editor: *none*
@@ -4342,7 +4342,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yukari-pocky-0000
+### yukari-pocky_self-0000
 
 - Creator: **yoshihiro-m**
 - Editor: *none*
@@ -4351,7 +4351,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yuuka-pocky-0000
+### yuuka-pocky_self-0000
 
 - Creator: **kanta (pixiv9296614)**
 - Editor: **HuyaneMatsu**
@@ -4360,7 +4360,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yuuka-pocky-0001
+### yuuka-pocky_self-0001
 
 - Creator: **mokku**
 - Editor: **HuyaneMatsu**
@@ -4369,7 +4369,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yuuka-pocky-0002
+### yuuka-pocky_self-0002
 
 - Creator: **roki (hirokix)**
 - Editor: **HuyaneMatsu**
@@ -4378,7 +4378,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yuyuko-pocky-0000
+### yuyuko-pocky_self-0000
 
 - Creator: **shiranui (wasuresateraito)**
 - Editor: *none*
@@ -4585,7 +4585,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yuyuko-older-0004
+### yuyuko-like-0004
 
 - Creator: *unknown*
 - Editor: *none*
@@ -4594,7 +4594,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### flandre-okina-help-0000
+### flandre-okina-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -4720,7 +4720,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### aya-chiruno-kiss
+### aya-chiruno-kiss-0000
 
 - Creator: **kototoki**
 - Editor: *none*
@@ -6214,7 +6214,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### alice-pocky-0000
+### alice-pocky_self-0000
 
 - Creator: **arnest**
 - Editor: **HuyaneMatsu**
@@ -6313,7 +6313,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### yuuka-older-0001
+### yuuka-like-0002
 
 - Creator: *unknown*
 - Editor: *none*
@@ -6322,7 +6322,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### junko-older-0003
+### junko-like-0004
 
 - Creator: *unknown*
 - Editor: *none*
@@ -6331,7 +6331,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### kanako-older-0000
+### kanako-like-0000
 
 - Creator: *unknown*
 - Editor: *none*
@@ -6340,7 +6340,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### junko-older-0004
+### junko-like-0005
 
 - Creator: *unknown*
 - Editor: *none*
@@ -6349,7 +6349,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### junko-older-0005
+### junko-like-0006
 
 - Creator: *unknown*
 - Editor: *none*
@@ -6358,7 +6358,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### junko-older-0006
+### junko-like-0007
 
 - Creator: *unknown*
 - Editor: *none*
@@ -6367,7 +6367,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### okina-older-0001
+### okina-like-0001
 
 - Creator: *unknown*
 - Editor: *none*
@@ -7650,6 +7650,3948 @@ Some creators may be unknown. If you know them please create a PR with it.
 - Creator: **shirosato**
 - Editor: *none*
 - Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-hug-0004
+
+- Creator: **ranka224**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-remilia-hug-0004
+
+- Creator: **kutabireta inu**
+- Editor: **HuyaneMatsu**
+- Characters: **Scarlet Flandre**, **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### aya-momiji-fluff-0000
+
+- Creator: **kutabireta inu**
+- Editor: **HuyaneMatsu**
+- Characters: **Inubashiri Momiji**, **Shameimaru Aya**
+- Source: **Touhou**
+
+---
+
+### patchouli-remilia-hug-0001
+
+- Creator: **kutabireta inu**
+- Editor: *none*
+- Characters: **Patchouli Knowledge**, **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### flandre-remilia-kiss-0000
+
+- Creator: **kutabireta inu**
+- Editor: *none*
+- Characters: **Scarlet Flandre**, **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### flandre-remilia-hug-0005
+
+- Creator: **kutabireta inu**
+- Editor: *none*
+- Characters: **Scarlet Flandre**, **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-handhold-0002
+
+- Creator: **kutabireta inu**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-hug-0005
+
+- Creator: *unknown*
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-marisa-hug-0003
+
+- Creator: **mata (matasoup)**
+- Editor: *none*
+- Characters: **Kirisame Marisa**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-hug-0004
+
+- Creator: **terrajin**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### meiling-wave-0000
+
+- Creator: **terrajin**
+- Editor: *none*
+- Characters: **Hong Meiling**
+- Source: **Touhou**
+
+---
+
+### mystia-yuyuko-hug-nom-0000
+
+- Creator: **terrajin**
+- Editor: **HuyaneMatsu**
+- Characters: **Mystia Lorelei**, **Saigyouji Yuyuko**
+- Source: **Touhou**
+
+---
+
+### flandre-meiling-kiss-0000
+
+- Creator: **terrajin**
+- Editor: **HuyaneMatsu**
+- Characters: **Hong Meiling**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-meiling-hug-0000
+
+- Creator: **terrajin**
+- Editor: *none*
+- Characters: **Hong Meiling**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### hijiri-nue-hug-0001
+
+- Creator: **terrajin**
+- Editor: *none*
+- Characters: **Hijiri Byakuren**, **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### shou-stare-0000
+
+- Creator: **terrajin**
+- Editor: *none*
+- Characters: **Toramaru Shou**
+- Source: **Touhou**
+
+---
+
+### doremy-stare-0000
+
+- Creator: **terrajin**
+- Editor: *none*
+- Characters: **Doremy Sweet**
+- Source: **Touhou**
+
+---
+
+### hina-stare-0001
+
+- Creator: **terrajin**
+- Editor: *none*
+- Characters: **Kagiyama Hina**
+- Source: **Touhou**
+
+---
+
+### kanako-stare-0000
+
+- Creator: **terrajin**
+- Editor: *none*
+- Characters: **Yasaka Kanako**
+- Source: **Touhou**
+
+---
+
+### yuuka-stare-0001
+
+- Creator: **terrajin**
+- Editor: *none*
+- Characters: **Kazami Yuuka**
+- Source: **Touhou**
+
+---
+
+### kagerou-stare-0000
+
+- Creator: **terrajin**
+- Editor: **HuyaneMatsu**
+- Characters: **Imaizumi Kagerou**
+- Source: **Touhou**
+
+---
+
+### kagerou-stare-0001
+
+- Creator: **terrajin**
+- Editor: **HuyaneMatsu**
+- Characters: **Imaizumi Kagerou**
+- Source: **Touhou**
+
+---
+
+### flandre-okina-pat-0000
+
+- Creator: *unknown*
+- Editor: *none*
+- Characters: **Matara Okina**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-kiss-0010
+
+- Creator: **Amaoto**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-kiss-0011
+
+- Creator: **Hanuu**
+- Editor: **HuyaneMatsu**
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-kiss-0012
+
+- Creator: **Hanuu**
+- Editor: **HuyaneMatsu**
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### koishi-wave-0000
+
+- Creator: **Hanuu**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### keine-fluff_self-0000
+
+- Creator: **Hanuu**
+- Editor: *none*
+- Characters: **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-kiss-0013
+
+- Creator: **Sekichun**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-hug-0008
+
+- Creator: **Nasukon**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-kiss-0014
+
+- Creator: **Nasukon**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-hug-0006
+
+- Creator: **Nasukon**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-pocky-0000
+
+- Creator: **Nasukon**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-handhold-0003
+
+- Creator: **Nasukon**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-handhold-0000
+
+- Creator: **Nasukon**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-koishi-kiss-0015
+
+- Creator: **Mio/Mia**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### murasa-nue-handhold-0001
+
+- Creator: **k0269323474256**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Murasa Minamitsu**
+- Source: **Touhou**
+
+---
+
+### murasa-nue-kiss-0001
+
+- Creator: **k0269323474256**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Murasa Minamitsu**
+- Source: **Touhou**
+
+---
+
+### reisen-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Reisen Udongein Inaba**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0055
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0018
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### doremy-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Doremy Sweet**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0048
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### merlin-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Prismriver Merlin**
+- Source: **Touhou**
+
+---
+
+### junko-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Junko**
+- Source: **Touhou**
+
+---
+
+### shou-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Toramaru Shou**
+- Source: **Touhou**
+
+---
+
+### aya-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Shameimaru Aya**
+- Source: **Touhou**
+
+---
+
+### akyuu-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hieda no Akyuu**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0018
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### joon-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Yorigami Joon**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0008
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### miko-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Toyosatomimi no Miko**
+- Source: **Touhou**
+
+---
+
+### sakuya-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### futo-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mononobe no Futo**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0011
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### youmu-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Konpaku Youmu**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### kutaka-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Niwatari Kutaka**
+- Source: **Touhou**
+
+---
+
+### chimata-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tenkyuu Chimata**
+- Source: **Touhou**
+
+---
+
+### sagume-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kishin Sagume**
+- Source: **Touhou**
+
+---
+
+### sakuya-stare-0006
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### satori-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Satori**
+- Source: **Touhou**
+
+---
+
+### hecatia-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hecatia Lapislazuli**
+- Source: **Touhou**
+
+---
+
+### mokou-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0033
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0015
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### tenshi-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hinanawi Tenshi**
+- Source: **Touhou**
+
+---
+
+### shinmyoumaru-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Sukuna Shinmyoumaru**
+- Source: **Touhou**
+
+---
+
+### kanako-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Yasaka Kanako**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0043
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0032
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### alice-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Margatroid Alice**
+- Source: **Touhou**
+
+---
+
+### chiruno-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Chiruno**
+- Source: **Touhou**
+
+---
+
+### letty-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Letty Whiterock**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0006
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### mystia-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mystia Lorelei**
+- Source: **Touhou**
+
+---
+
+### rumia-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Rumia**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0017
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### keine-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### suwako-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Moriya Suwako**
+- Source: **Touhou**
+
+---
+
+### sekibanki-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Sekibanki**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0008
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0010
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### eiki-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Shiki Eiki Yamaxanadu**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0021
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### ichirin-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kumoi Ichirin**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0049
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0026
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### okuu-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Reiuji Utsuho**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0016
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### saki-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kurokoma Saki**
+- Source: **Touhou**
+
+---
+
+### tokiko-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tokiko**
+- Source: **Touhou**
+
+---
+
+### nue-murder-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0013
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### satono-tmai-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Nishida Satono**, **Teireida Mai**
+- Source: **Touhou**
+
+---
+
+### komachi-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Onozuka Komachi**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0034
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### suwako-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Moriya Suwako**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0008
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0006
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### ichirin-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kumoi Ichirin**
+- Source: **Touhou**
+
+---
+
+### parsee-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mizuhashi Parsee**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0011
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### parsee-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mizuhashi Parsee**
+- Source: **Touhou**
+
+---
+
+### yachie-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kicchou Yachie**
+- Source: **Touhou**
+
+---
+
+### satori-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Satori**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0031
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0007
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0012
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### suwako-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Moriya Suwako**
+- Source: **Touhou**
+
+---
+
+### rumia-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Rumia**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0014
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### hijiri-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hijiri Byakuren**
+- Source: **Touhou**
+
+---
+
+### yuugi-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hoshiguma Yuugi**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0054
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### wakasagihime-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Wakasagihime**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0027
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0007
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### zanmu-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Nippaku Zanmu**
+- Source: **Touhou**
+
+---
+
+### yuuma-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Toutetsu Yuuma**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0009
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0020
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### chimata-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tenkyuu Chimata**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0016
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### sagume-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kishin Sagume**
+- Source: **Touhou**
+
+---
+
+### tenshi-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hinanawi Tenshi**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0041
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0051
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### mystia-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mystia Lorelei**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0009
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0018
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### koishi-satori-hug-0010
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Komeiji Satori**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### kagerou-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Imaizumi Kagerou**
+- Source: **Touhou**
+
+---
+
+### kogasa-nue-hug-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### shou-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Toramaru Shou**
+- Source: **Touhou**
+
+---
+
+### kogasa-nue-handhold-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### sagume-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kishin Sagume**
+- Source: **Touhou**
+
+---
+
+### rumia-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Rumia**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0040
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0010
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0013
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### aya-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Shameimaru Aya**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0037
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0015
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0019
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### ringo-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Ringo**
+- Source: **Touhou**
+
+---
+
+### remilia-stare-0006
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0011
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0007
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### murasa-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Murasa Minamitsu**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0015
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0053
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0009
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0020
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### eiki-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Shiki Eiki Yamaxanadu**
+- Source: **Touhou**
+
+---
+
+### kagerou-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Imaizumi Kagerou**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### rumia-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Rumia**
+- Source: **Touhou**
+
+---
+
+### doremy-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Doremy Sweet**
+- Source: **Touhou**
+
+---
+
+### doremy-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Doremy Sweet**
+- Source: **Touhou**
+
+---
+
+### clownpiece-hecatia-junko-pat-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Clownpiece**, **Hecatia Lapislazuli**, **Junko**
+- Source: **Touhou**
+
+---
+
+### hina-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kagiyama Hina**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0010
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### orin-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kaenbyou Rin**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0014
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### kogasa-nue-handhold-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### kanako-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Yasaka Kanako**
+- Source: **Touhou**
+
+---
+
+### clownpiece-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Clownpiece**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0023
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### yamame-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kurodani Yamame**
+- Source: **Touhou**
+
+---
+
+### takane-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Yamashiro Takane**
+- Source: **Touhou**
+
+---
+
+### satono-tmai-hug-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Nishida Satono**, **Teireida Mai**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0006
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### urumi-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Ushizaki Urumi**
+- Source: **Touhou**
+
+---
+
+### parsee-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mizuhashi Parsee**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0014
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-seija-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0038
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0015
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### junko-stare-0006
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Junko**
+- Source: **Touhou**
+
+---
+
+### doremy-stare-0006
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Doremy Sweet**
+- Source: **Touhou**
+
+---
+
+### seiga-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kaku Seiga**
+- Source: **Touhou**
+
+---
+
+### miko-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Toyosatomimi no Miko**
+- Source: **Touhou**
+
+---
+
+### wakasagihime-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Wakasagihime**
+- Source: **Touhou**
+
+---
+
+### kokoro-mamizou-fluff-0003
+
+- Creator: **makuwauri**
+- Editor: *none*
+- Characters: **Futatsuiwa Mamizou**, **Hata no Kokoro**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0025
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### satori-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Satori**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-kiss-0001
+
+- Creator: **imonatsuki**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0056
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### raiko-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Horikawa Raiko**
+- Source: **Touhou**
+
+---
+
+### yukari-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Yakumo Yukari**
+- Source: **Touhou**
+
+---
+
+### sekibanki-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Sekibanki**
+- Source: **Touhou**
+
+---
+
+### yuyuko-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Saigyouji Yuyuko**
+- Source: **Touhou**
+
+---
+
+### remilia-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0008
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### ichirin-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kumoi Ichirin**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0024
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### tsukasa-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kudamaki Tsukasa**
+- Source: **Touhou**
+
+---
+
+### shion-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Yorigami Shion**
+- Source: **Touhou**
+
+---
+
+### mystia-stare-0006
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mystia Lorelei**
+- Source: **Touhou**
+
+---
+
+### megumu-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Iizunamaru Megumu**
+- Source: **Touhou**
+
+---
+
+### youmu-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Konpaku Youmu**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### junko-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Junko**
+- Source: **Touhou**
+
+---
+
+### tokiko-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tokiko**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0011
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### kutaka-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Niwatari Kutaka**
+- Source: **Touhou**
+
+---
+
+### marisa-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### nazrin-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Nazrin**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0019
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### hatate-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Himekaidou Hatate**
+- Source: **Touhou**
+
+---
+
+### shion-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Yorigami Shion**
+- Source: **Touhou**
+
+---
+
+### junko-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Junko**
+- Source: **Touhou**
+
+---
+
+### rumia-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Rumia**
+- Source: **Touhou**
+
+---
+
+### kutaka-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Niwatari Kutaka**
+- Source: **Touhou**
+
+---
+
+### mokou-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0013
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### lily_white-wave-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Lily White**
+- Source: **Touhou**
+
+---
+
+### junko-stare-0007
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Junko**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0006
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0021
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### satori-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Satori**
+- Source: **Touhou**
+
+---
+
+### murasa-nue-handhold-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Murasa Minamitsu**
+- Source: **Touhou**
+
+---
+
+### kogasa-nue-lick-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### komachi-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Onozuka Komachi**
+- Source: **Touhou**
+
+---
+
+### remilia-stare-0007
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### parsee-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mizuhashi Parsee**
+- Source: **Touhou**
+
+---
+
+### keine-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### hecatia-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hecatia Lapislazuli**
+- Source: **Touhou**
+
+---
+
+### hecatia-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hecatia Lapislazuli**
+- Source: **Touhou**
+
+---
+
+### urumi-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Ushizaki Urumi**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0022
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### mayumi-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Joutouguu Mayumi**
+- Source: **Touhou**
+
+---
+
+### eiki-stare-0006
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Shiki Eiki Yamaxanadu**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0016
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### remilia-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0017
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0035
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0030
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### chen-ran-hug-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Chen**, **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0010
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0036
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### yachie-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kicchou Yachie**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0009
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### komachi-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Onozuka Komachi**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0009
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0006
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### tokiko-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tokiko**
+- Source: **Touhou**
+
+---
+
+### mokou-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**
+- Source: **Touhou**
+
+---
+
+### remilia-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0008
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### junko-stare-0008
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Junko**
+- Source: **Touhou**
+
+---
+
+### eiki-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Shiki Eiki Yamaxanadu**
+- Source: **Touhou**
+
+---
+
+### clownpiece-hecatia-pat-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Clownpiece**, **Hecatia Lapislazuli**
+- Source: **Touhou**
+
+---
+
+### aya-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Shameimaru Aya**
+- Source: **Touhou**
+
+---
+
+### mystia-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mystia Lorelei**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0014
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0047
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### tenshi-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hinanawi Tenshi**
+- Source: **Touhou**
+
+---
+
+### joon-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Yorigami Joon**
+- Source: **Touhou**
+
+---
+
+### kogasa-nue-handhold-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### sanae-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kochiya Sanae**
+- Source: **Touhou**
+
+---
+
+### nue-seija-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0009
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### aya-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Shameimaru Aya**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### nazrin-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Nazrin**
+- Source: **Touhou**
+
+---
+
+### letty-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Letty Whiterock**
+- Source: **Touhou**
+
+---
+
+### wakasagihime-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Wakasagihime**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0010
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### parsee-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mizuhashi Parsee**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0011
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0050
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0017
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### sagume-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kishin Sagume**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### mystia-stare-0007
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mystia Lorelei**
+- Source: **Touhou**
+
+---
+
+### doremy-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Doremy Sweet**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0017
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0012
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### hina-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kagiyama Hina**
+- Source: **Touhou**
+
+---
+
+### futo-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mononobe no Futo**
+- Source: **Touhou**
+
+---
+
+### hecatia-junko-hug-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hecatia Lapislazuli**, **Junko**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0015
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0012
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### yuuka-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kazami Yuuka**
+- Source: **Touhou**
+
+---
+
+### hina-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kagiyama Hina**
+- Source: **Touhou**
+
+---
+
+### eiki-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Shiki Eiki Yamaxanadu**
+- Source: **Touhou**
+
+---
+
+### larva-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Eternity Larva**
+- Source: **Touhou**
+
+---
+
+### satori-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Satori**
+- Source: **Touhou**
+
+---
+
+### ran-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### letty-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Letty Whiterock**
+- Source: **Touhou**
+
+---
+
+### yuuka-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kazami Yuuka**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0012
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0013
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### kutaka-urumi-pat-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Niwatari Kutaka**, **Ushizaki Urumi**
+- Source: **Touhou**
+
+---
+
+### yukari-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Yakumo Yukari**
+- Source: **Touhou**
+
+---
+
+### yachie-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kicchou Yachie**
+- Source: **Touhou**
+
+---
+
+### clownpiece-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Clownpiece**
+- Source: **Touhou**
+
+---
+
+### nazrin-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Nazrin**
+- Source: **Touhou**
+
+---
+
+### hecatia-junko-hug-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hecatia Lapislazuli**, **Junko**
+- Source: **Touhou**
+
+---
+
+### mystia-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mystia Lorelei**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0046
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### reisen-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Reisen Udongein Inaba**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0052
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### eiki-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Shiki Eiki Yamaxanadu**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0029
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0023
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0044
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### mokou-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**
+- Source: **Touhou**
+
+---
+
+### eiki-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Shiki Eiki Yamaxanadu**
+- Source: **Touhou**
+
+---
+
+### yuyuko-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Saigyouji Yuyuko**
+- Source: **Touhou**
+
+---
+
+### yachie-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kicchou Yachie**
+- Source: **Touhou**
+
+---
+
+### hecatia-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hecatia Lapislazuli**
+- Source: **Touhou**
+
+---
+
+### seiran-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Seiran**
+- Source: **Touhou**
+
+---
+
+### sanae-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kochiya Sanae**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### aya-chiruno-lick-0000
+
+- Creator: **roke (taikodon)**
+- Editor: *none*
+- Characters: **Chiruno**, **Shameimaru Aya**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0008
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### remilia-stare-0003
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### minoriko-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Aki Minoriko**
+- Source: **Touhou**
+
+---
+
+### kutaka-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Niwatari Kutaka**
+- Source: **Touhou**
+
+---
+
+### reimu-stare-0012
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hakurei Reimu**
+- Source: **Touhou**
+
+---
+
+### yuuka-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kazami Yuuka**
+- Source: **Touhou**
+
+---
+
+### mystia-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mystia Lorelei**
+- Source: **Touhou**
+
+---
+
+### tokiko-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tokiko**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0016
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### remilia-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### okuu-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Reiuji Utsuho**
+- Source: **Touhou**
+
+---
+
+### kogasa-nue-pat-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0045
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### yachie-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kicchou Yachie**
+- Source: **Touhou**
+
+---
+
+### aya-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Shameimaru Aya**
+- Source: **Touhou**
+
+---
+
+### rumia-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Rumia**
+- Source: **Touhou**
+
+---
+
+### shizuha-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Aki Shizuha**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0007
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### shizuha-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Aki Shizuha**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0010
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### yuuka-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kazami Yuuka**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0012
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### remilia-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### sanae-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kochiya Sanae**
+- Source: **Touhou**
+
+---
+
+### mayumi-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Joutouguu Mayumi**
+- Source: **Touhou**
+
+---
+
+### keine-mokou-stare-0002
+
+- Creator: **itomugi-kun**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Kamishirasawa Keine**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0028
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0022
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### doremy-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Doremy Sweet**
+- Source: **Touhou**
+
+---
+
+### patchouli-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Patchouli Knowledge**
+- Source: **Touhou**
+
+---
+
+### chiruno-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Chiruno**
+- Source: **Touhou**
+
+---
+
+### mokou-stare-0006
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0011
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### sakuya-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### mystia-stare-0005
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mystia Lorelei**
+- Source: **Touhou**
+
+---
+
+### sakuya-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### kokoro-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hata no Kokoro**
+- Source: **Touhou**
+
+---
+
+### koishi-satori-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**, **Komeiji Satori**
+- Source: **Touhou**
+
+---
+
+### okina-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Matara Okina**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0039
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0007
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0013
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0018
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### junko-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Junko**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0006
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### mishagujo-suwako-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Mishaguji**, **Moriya Suwako**
+- Source: **Touhou**
+
+---
+
+### patchouli-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Patchouli Knowledge**
+- Source: **Touhou**
+
+---
+
+### lyrica-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Prismriver Lyrica**
+- Source: **Touhou**
+
+---
+
+### yuuma-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Toutetsu Yuuma**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0016
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0042
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### junko-stare-0004
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Junko**
+- Source: **Touhou**
+
+---
+
+### murasa-stare-0000
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Murasa Minamitsu**
+- Source: **Touhou**
+
+---
+
+### hecatia-stare-0002
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Hecatia Lapislazuli**
+- Source: **Touhou**
+
+---
+
+### sagume-stare-0001
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Kishin Sagume**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0014
+
+- Creator: **ichirugi**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### sakuya-stare-0007
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### koishi-happy-0000
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0070
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0062
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0071
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### kyouko-happy-0000
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Kasodani Kyouko**
+- Source: **Touhou**
+
+---
+
+### kogasa-nue-hug-0002
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### kosuzu-stare-0000
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Motoori Kosuzu**
+- Source: **Touhou**
+
+---
+
+### youmu-stare-0003
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Konpaku Youmu**
+- Source: **Touhou**
+
+---
+
+### satori-stare-0005
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Komeiji Satori**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0025
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0072
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-feed_self-stare-0000
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0021
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0059
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-cry-0000
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### kutaka-stare-0004
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Niwatari Kutaka**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0068
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### suika-feed_self-stare-0000
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Ibuki Suika**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0024
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### sanae-stare-0003
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Kochiya Sanae**
+- Source: **Touhou**
+
+---
+
+### nue-wink-0000
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### alice-stare-0001
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Margatroid Alice**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0061
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0057
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0073
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### kogasa-wave-0000
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### nue-happy-0001
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-happy-0000
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### seija-stare-0026
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Kijin Seija**
+- Source: **Touhou**
+
+---
+
+### marisa-stare-0003
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0064
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0067
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0019
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0063
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0020
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### tmiko-stare-0000
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Toyosatomimi no Miko**
+- Source: **Touhou**
+
+---
+
+### sanae-stare-0004
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Kochiya Sanae**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0019
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### koishi-stare-0020
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Komeiji Koishi**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0069
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### iku-stare-0000
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Nagae Iku**
+- Source: **Touhou**
+
+---
+
+### kogasa-stare-0013
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0060
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### flandre-stare-0021
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Scarlet Flandre**
+- Source: **Touhou**
+
+---
+
+### sekibanki-stare-0003
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Sekibanki**
+- Source: **Touhou**
+
+---
+
+### kogasa-nue-hug-0003
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**, **Tatara Kogasa**
+- Source: **Touhou**
+
+---
+
+### marisa-stare-0004
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### remilia-stare-0008
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### chiruno-stare-0005
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Chiruno**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0065
+
+- Creator: **kisamu (ksmz)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
 - Source: **Touhou**
 
 ---
