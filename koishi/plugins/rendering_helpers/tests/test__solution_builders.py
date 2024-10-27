@@ -327,8 +327,8 @@ def _iter_options__build_activity_description():
         ),
         current_date,
         (
-            f'Name: with Kokoro\n'
             f'Type: spotify ~ 2\n'
+            f'Name: with Kokoro\n'
             f'Timestamp start: 2016-10-14 21:13:16\n'
             f'Timestamp end: 2016-10-14 21:13:46\n'
             f'Details: Satori\n'
@@ -349,8 +349,8 @@ def _iter_options__build_activity_description():
             f'Session id: Orin\n'
             f'Flags: play, embedded\n'
             f'Application id: 202308080001\n'
-            f'Created at: 2016-10-14 21:13:26 [*10 seconds ago*]\n'
-            f'Id: 202308080000'
+            f'Id: 202308080000\n'
+            f'Created at: 2016-10-14 21:13:26 [*10 seconds ago*]'
         ),
     )
 

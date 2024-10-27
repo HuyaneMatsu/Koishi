@@ -5,10 +5,10 @@ from datetime import datetime as DateTime, timezone as TimeZone
 from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import DATETIME_FORMAT_CODE, elapsed_time
 
-from .constants import DATE_TIME_CONDITION_ALL, DATE_TIME_CONDITION_PAST, DATE_TIME_CONDITION_FUTURE
+from .constants import DATE_TIME_CONDITION_ALL, DATE_TIME_CONDITION_FUTURE, DATE_TIME_CONDITION_PAST
 from .value_renderers import (
-    render_channel_into, render_role_mentions_into, render_date_time_with_relative_into, render_flags_into,
-    render_user_into
+    render_channel_into, render_date_time_with_relative_into, render_flags_into, render_nullable_emoji_into,
+    render_nullable_string_tuple_into, render_role_mentions_into, render_user_into
 )
 
 
@@ -241,7 +241,7 @@ def render_string_field_into(into, field_added, string, *, optional = True, titl
         The string to render.
     optional : `bool` = `True`, Optional (Keyword only)
         Whether should not render if `flags` is empty.
-    title : `str` = `'Flags'`, Optional (Keyword only)
+    title : `str` = `'Value'`, Optional (Keyword only)
         The title of the line.
     
     Returns
@@ -392,7 +392,7 @@ def render_attachments_field_into(into, field_added, attachments, *, optional = 
         The container to render into.
     field_added : `bool`
         Whether any fields were added already.
-    attachments : `None | set<Attachment>`
+    attachments : `None | tuple<Attachment>`
         The attachments to render.
     optional : `bool` = `True`, Optional (Keyword only)
         Whether should not render if `attachments` is `None`.
@@ -428,5 +428,83 @@ def render_attachments_field_into(into, field_added, attachments, *, optional = 
                 into.append('](')
                 into.append(url)
                 into.append(')')
+    
+    return into, field_added
+
+
+def render_emoji_field_into(into, field_added, emoji, *, optional = True, title = 'Emoji'):
+    """
+    Renders an emoji field into the given container.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        The container to render into.
+    
+    field_added : `bool`
+        Whether any fields were added already.
+    
+    emoji : `None | Emoji`
+        The emoji to render.
+    
+    optional : `bool` = `True`, Optional (Keyword only)
+        Whether should not render if `flags` is empty.
+    
+    title : `str` = `'Emoji'`, Optional (Keyword only)
+        The title of the line.
+    
+    Returns
+    -------
+    into : `list<str>`
+    field_added : `bool`
+    """
+    if (not optional) or (emoji is not None):
+        if field_added:
+            into.append('\n')
+        else:
+            field_added = True
+        
+        into.append(title)
+        into.append(': ')
+        into = render_nullable_emoji_into(into, emoji)
+    
+    return into, field_added
+
+
+def render_string_tuple_field_into(into, field_added, string_tuple, *, optional = True, title = 'Values'):
+    """
+    Renders a string tuple field into the given container.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        The container to render into.
+    
+    field_added : `bool`
+        Whether any fields were added already.
+    
+    string_tuple : `None | tuple<str>`
+        The string tuple to render.
+    
+    optional : `bool` = `True`, Optional (Keyword only)
+        Whether should not render if `flags` is empty.
+    
+    title : `str` = `'Values'`, Optional (Keyword only)
+        The title of the line.
+    
+    Returns
+    -------
+    into : `list<str>`
+    field_added : `bool`
+    """
+    if (not optional) or (string_tuple is not None):
+        if field_added:
+            into.append('\n')
+        else:
+            field_added = True
+        
+        into.append(title)
+        into.append(': ')
+        into = render_nullable_string_tuple_into(into, string_tuple)
     
     return into, field_added

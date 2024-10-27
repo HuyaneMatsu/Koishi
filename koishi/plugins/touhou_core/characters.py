@@ -1118,6 +1118,7 @@ OKUNODA_MIYOI = TouhouCharacter(
     'Okunoda Miyoi',
     (
         '奥野田 美宵',
+        'Miyoi',
         'Miyoi Okunoda',
     ),
 )

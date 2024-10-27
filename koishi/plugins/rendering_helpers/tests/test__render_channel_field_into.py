@@ -48,10 +48,10 @@ def test__render_channel_field_into(field_added, channel, optional, title):
     ----------
     field_added : `bool`
         Whether a field was already added.
+    
     channel : `None | Channel`
         The channel to render.
-    guild : `None | Guild`
-        The guild to pull name for.
+    
     title : `str`
         The title to use.
     

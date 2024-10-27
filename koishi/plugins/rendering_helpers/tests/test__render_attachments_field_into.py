@@ -35,12 +35,12 @@ def _iter_options():
     )
     
     yield (
-        False, [attachment_0], False, 'Attachments',
+        False, (attachment_0,), False, 'Attachments',
         (f'Attachments:\n- [{name_0!s}]({url_0!s})', True),
     )
     
     yield (
-        True, [attachment_0], False, 'Attachments',
+        True, (attachment_0,), False, 'Attachments',
         (f'\nAttachments:\n- [{name_0!s}]({url_0!s})', True),
     )
 
@@ -55,18 +55,18 @@ def _iter_options():
     )
     
     yield (
-        False, [attachment_0], True, 'Attachments',
+        False, (attachment_0,), True, 'Attachments',
         (f'Attachments:\n- [{name_0!s}]({url_0!s})', True),
     )
     
     yield (
-        True, [attachment_0], True, 'Attachments',
+        True, (attachment_0,), True, 'Attachments',
         (f'\nAttachments:\n- [{name_0!s}]({url_0!s})', True),
     )
     
     # Multiple attachments
     yield (
-        False, [attachment_0, attachment_1], True, 'Attachments',
+        False, (attachment_0, attachment_1), True, 'Attachments',
         (f'Attachments:\n- [{name_0!s}]({url_0!s})\n- [{name_1!s}]({url_0!s})', True),
     )
     
@@ -86,7 +86,7 @@ def test__render_attachments_field_into(field_added, attachments, optional, titl
     ----------
     field_added : `bool`
         Whether any fields were added already.
-    attachments : `None | set<Attachment>`
+    attachments : `None | tuple<Attachment>`
         The attachments to render.
     optional : `bool` = `True`
         Whether should not render if `attachments` is `None`.

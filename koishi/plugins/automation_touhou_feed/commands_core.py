@@ -174,39 +174,94 @@ def get_channel_like(client, guild, channel_name):
         return priority_queue[0][1]
 
 
-def join_handler_keys(handler_keys):
+def render_handler_keys_into(into, handler_keys, truncate_after):
     """
     Joins the given handler keys together into one string.
     
     Parameters
     ----------
-    handler_keys : `tuple` of ``TouhouHandlerKey``
-        The handler keys to join.
+    into : `list<str>`
+        Container to render into.
+    
+    handler_keys : `tuple<TouhouHandlerKey>`
+        The handler keys to render.
+    
+    truncate_after : `int`
+        The amount of characters to truncate after.
     
     Returns
     -------
-    joined : `str`
+    into : `list<str>`
     """
-    join_parts = []
+    truncate_after -= len(STYLE_GREEN)
+    into.append(STYLE_GREEN)
     handler_key_index = 0
     handler_key_count = len(handler_keys)
     
     while True:
         handler_key = handler_keys[handler_key_index]
         
-        join_parts.append(join_names_of_touhou_characters(handler_key.characters, ' + '))
+        joined_character_names = join_names_of_touhou_characters(handler_key.characters, ' + ')
         
+        # Get line length # always add line break at the end.
+        line_length = len(joined_character_names) + 1
         if handler_key.solo:
-            join_parts.append(' (solo)')
+            line_length += 7
+        
+        truncate_after -= line_length
+        if truncate_after < 0:
+            into.append(STYLE_BLUE)
+            into.append('... + ')
+            into.append(str(handler_key_count - handler_key_index))
+            break
+        
+        # add line
+        into.append(joined_character_names)
+        if handler_key.solo:
+            into.append(' (solo)')
         
         handler_key_index += 1
         if handler_key_index >= handler_key_count:
             break
         
-        join_parts.append('\n')
+        into.append('\n')
         continue
     
-    return ''.join(join_parts)
+    return into
+
+
+def build_characters_section_description(handler_keys):
+    """
+    Renders `characters` section description.
+    
+    Parameters
+    ----------
+    handler_keys : `None | tuple<TouhouHandlerKey>`
+        The handler keys to render.
+    
+    Returns
+    -------
+    section_description : `str`
+    """
+    into = ['```ansi\n', STYLE_RESET]
+    while True:
+        if handler_keys is None:
+            into.append(STYLE_RED)
+            into.append('unknown')
+            break
+        
+        if handler_keys[0].characters is None:
+            into.append(STYLE_BLUE)
+            into.append('*all*')
+            if handler_keys[0].solo:
+                into.append(' (solo)')
+            break
+        
+        into = render_handler_keys_into(into, handler_keys, 990)
+        break
+    
+    into.append('\n```')
+    return ''.join(into)
 
 
 def build_touhou_feed_listing_response(client, guild, page, enabled):
@@ -274,20 +329,6 @@ def build_touhou_feed_listing_response(client, guild, page, enabled):
             else:
                 handler_keys, interval = handler_keys_and_interval
         
-        if handler_keys is None:
-            style = STYLE_RED
-            character_name = 'unknown'
-        else:
-            if handler_keys[0].characters is not None:
-                character_name = join_handler_keys(handler_keys)
-                style = STYLE_GREEN
-            else:
-                character_name = '*all*'
-                if handler_keys[0].solo:
-                    character_name += ' (solo)'
-                
-                style = STYLE_BLUE
-        
         delta = elapsed_time(RelativeDelta(seconds = interval))
         
         embed.add_field(
@@ -295,11 +336,7 @@ def build_touhou_feed_listing_response(client, guild, page, enabled):
             f'{channel.mention}'
         ).add_field(
             'Character',
-            (
-                f'```ansi\n'
-                f'{STYLE_RESET}{style}{character_name}\n'
-                f'```'
-            ),
+            build_characters_section_description(handler_keys),
         ).add_field(
             'Interval',
             (

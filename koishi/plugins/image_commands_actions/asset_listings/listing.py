@@ -13,7 +13,7 @@ from ...touhou_core import (
     KONPAKU_YOUMU, KUDAMAKI_TSUKASA, KUMOI_ICHIRIN, KURODANI_YAMAME, KUROKOMA_SAKI, LETTY_WHITEROCK, LILY_BLACK,
     LILY_WHITE, LUNA_CHILD, MARGATROID_ALICE, MATARA_OKINA, MEDICINE_MELANCHOLY, MISHAGUJI, MITSUGASHIRA_ENOKO,
     MIYAKO_YOSHIKA, MIZUHASHI_PARSEE, MONONOBE_NO_FUTO, MORICHIKA_RINNOSUKE, MORIYA_SUWAKO, MOTOORI_KOSUZU,
-    MURASA_MINAMITSU, MYSTIA_LORELEI, NAGAE_IKU, NAZRIN, NIPPAKU_ZANMU, NISHIDA_SATONO, NIWATARI_KUTAKA,
+    MURASA_MINAMITSU, MYSTIA_LORELEI, NAGAE_IKU, NAZRIN, NIPPAKU_ZANMU, NISHIDA_SATONO, NIWATARI_KUTAKA, OKUNODA_MIYOI,
     ONOZUKA_KOMACHI, PATCHOULI_KNOWLEDGE, PRISMRIVER_LYRICA, PRISMRIVER_MERLIN, REISEN_UDONGEIN_INABA, REIUJI_UTSUHO,
     RINGO, RUMIA, SAIGYOUJI_YUYUKO, SCARLET_FLANDRE, SCARLET_REMILIA, SEIRAN, SEKIBANKI, SHAMEIMARU_AYA,
     SHIKI_EIKI_YAMAXANADU, SHINKI, SOGA_NO_TOJIKO, STAR_SAPPHIRE, SUKUNA_SHINMYOUMARU, SUNNY_MILK, TATARA_KOGASA,
@@ -10886,4 +10886,250 @@ TOUHOU_ACTION_ALL.add(
     ACTION_TAG_STARE, HOUJUU_NUE, None,
 ).with_creator(
     'kisamu (ksmz)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300132474818662450/chen-ran-hug-0003.png',
+).with_action(
+    ACTION_TAG_HUG, YAKUMO_RAN, CHEN,
+).with_creator(
+    'mizuga',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300133856183193741/mokou-mystia-hug-0000.png',
+).with_actions(
+    (ACTION_TAG_HUG, FUJIWARA_NO_MOKOU, MYSTIA_LORELEI),
+    (ACTION_TAG_HUG, MYSTIA_LORELEI, FUJIWARA_NO_MOKOU),
+).with_creator(
+    'makoto jon',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300133857932345405/alice-mokou-hug-0000.png',
+).with_actions(
+    (ACTION_TAG_HUG, FUJIWARA_NO_MOKOU, MARGATROID_ALICE),
+    (ACTION_TAG_HUG, MARGATROID_ALICE, FUJIWARA_NO_MOKOU),
+).with_creator(
+    'makoto jon',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188758439624839/koakuma-stare-0002.png',
+).with_action(
+    ACTION_TAG_STARE, KOAKUMA, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188764492140564/sakuya-stare-0008.png',
+).with_action(
+    ACTION_TAG_STARE, IZAYOI_SAKUYA, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188770330480711/kokoro-stare-0002.png',
+).with_action(
+    ACTION_TAG_STARE, HATA_NO_KOKORO, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188773908349028/alice-stare-0002.png',
+).with_action(
+    ACTION_TAG_STARE, MARGATROID_ALICE, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188775619493999/sekibanki-stare-0004.png',
+).with_action(
+    ACTION_TAG_STARE, SEKIBANKI, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188785950199879/meiling-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, HONG_MEILING, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188791071440896/meiling-stare-0002.png',
+).with_action(
+    ACTION_TAG_STARE, HONG_MEILING, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188797136535552/meiling-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, HONG_MEILING, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188805210574889/meiling-sakuya-hug-0002.png',
+).with_actions(
+    (ACTION_TAG_HUG, HONG_MEILING, IZAYOI_SAKUYA),
+    (ACTION_TAG_HUG, IZAYOI_SAKUYA, HONG_MEILING),
+).with_creator(
+    'risui (suzu rks)',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188810428158032/tmiko-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, TOYOSATOMIMI_NO_MIKO, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188814777778316/nue-stare-0058.png',
+).with_action(
+    ACTION_TAG_STARE, HOUJUU_NUE, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188818263117865/marisa-stare-0005.png',
+).with_action(
+    ACTION_TAG_STARE, KIRISAME_MARISA, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188820393824397/nitori-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, KAWASHIRO_NITORI, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188833056292864/hina-stare-0005.png',
+).with_action(
+    ACTION_TAG_STARE, KAGIYAMA_HINA, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188836638490756/miyoi-stare-0000.png',
+).with_action(
+    ACTION_TAG_STARE, OKUNODA_MIYOI, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188841902211102/koakuma-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, KOAKUMA, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188852576583742/hina-stare-0006.png',
+).with_action(
+    ACTION_TAG_STARE, KAGIYAMA_HINA, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188860176666824/alice-stare-0003.png',
+).with_action(
+    ACTION_TAG_STARE, MARGATROID_ALICE, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188864647921734/meiling-stare-0003.png',
+).with_action(
+    ACTION_TAG_STARE, HONG_MEILING, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188868410216549/meiling-sakuya-hug-0003.png',
+).with_action(
+    ACTION_TAG_HUG, HONG_MEILING, IZAYOI_SAKUYA,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188872843591751/marisa-stare-0006.png',
+).with_action(
+    ACTION_TAG_STARE, KIRISAME_MARISA, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188879827243048/flandre-remilia-hug-0006.png',
+).with_actions(
+    (ACTION_TAG_HUG, SCARLET_FLANDRE, SCARLET_REMILIA),
+    (ACTION_TAG_HUG, SCARLET_REMILIA, SCARLET_FLANDRE),
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188886659629178/komachi-eiki-hug-0000.png',
+).with_action(
+    ACTION_TAG_HUG, ONOZUKA_KOMACHI, SHIKI_EIKI_YAMAXANADU,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188891508375693/sanae-happy-0000.png',
+).with_action(
+    ACTION_TAG_HAPPY, KOCHIYA_SANAE, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188906221736017/kagerou-stare-0004.png',
+).with_action(
+    ACTION_TAG_STARE, IMAIZUMI_KAGEROU, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188910286147668/youmu-stare-0004.png',
+).with_action(
+    ACTION_TAG_STARE, KONPAKU_YOUMU, None,
+).with_creator(
+    'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1300188916376277096/saki-stare-0001.png',
+).with_action(
+    ACTION_TAG_STARE, KUROKOMA_SAKI, None,
+).with_creator(
+    'risui (suzu rks)',
 )

@@ -143,28 +143,3 @@ def with_image(embed, entity):
             embeds.append(Embed(color = (entity.id >> 22) & 0xffffff).add_image(entity_url))
     
     return embeds
-
-
-def copy_extra_fields(embed, event):
-    """
-    Copies the extra fields (author and footer) of the event's embed to the given one.
-    
-    Parameters
-    ----------
-    embed : ``Embed``
-        The embed to extend.
-    event : ``InteractionEvent``
-        The received interaction event.
-    
-    Returns
-    -------
-    copied : `bool`
-    """
-    if event.type is InteractionType.message_component:
-        source_embed = event.message.embed
-        if (source_embed is not None):
-            embed.author = source_embed.author
-            embed.footer = source_embed.footer
-            return True
-    
-    return False

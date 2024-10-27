@@ -1564,7 +1564,7 @@ CARD_PIGGY_BANK = OJCard(82,
 
 CARD_PIYOPIYO_PROCESSION = OJCard(83,
     'Piyopiyo Procession',
-    2, CARD_COST_0, 3, CARD_TYPE_TRAP, CARD_PACK_MIXED_BOOSTER_PACK, CARD_RARITY_RARE,
+    2, CARD_COST_0, 1, CARD_TYPE_TRAP, CARD_PACK_MIXED_BOOSTER_PACK, CARD_RARITY_RARE,
     'Player suffers 3 random encounters (the player attacks first).',
     '"Piyopiyopiyopiyopiyopiyopiyopiyopiyooo!" —Colored Piyo Army',
     None,

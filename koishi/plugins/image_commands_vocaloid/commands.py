@@ -14,13 +14,16 @@ from .vocaloid import NewVocaloid, VOCALOID_CHARACTERS, make_custom_id_of_vocalo
 HANDLERS = {character: ImageHandlerMeekMoe(character) for character in VOCALOID_CHARACTERS.values()}
 
 
-@FEATURE_CLIENTS.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+)
 async def vocaloid(
     client,
     event,
     character : (VOCALOID_CHARACTERS, 'Select a character!') = 'miku',
 ):
-    """Ayaya."""
+    """Baka Baka Baka"""
     handler = HANDLERS[character]
     image_detail = await handler.get_image(client, event)
     

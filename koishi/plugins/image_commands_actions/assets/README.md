@@ -11596,6 +11596,276 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
+### chen-ran-hug-0003
+
+- Creator: **mizuga**
+- Editor: *none*
+- Characters: **Chen**, **Yakumo Ran**
+- Source: **Touhou**
+
+---
+
+### mokou-mystia-hug-0000
+
+- Creator: **makoto jon**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Mystia Lorelei**
+- Source: **Touhou**
+
+---
+
+### alice-mokou-hug-0000
+
+- Creator: **makoto jon**
+- Editor: *none*
+- Characters: **Fujiwara no Mokou**, **Margatroid Alice**
+- Source: **Touhou**
+
+---
+
+### koakuma-stare-0002
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Koakuma**
+- Source: **Touhou**
+
+---
+
+### sakuya-stare-0008
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### kokoro-stare-0002
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Hata no Kokoro**
+- Source: **Touhou**
+
+---
+
+### alice-stare-0002
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Margatroid Alice**
+- Source: **Touhou**
+
+---
+
+### sekibanki-stare-0004
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Sekibanki**
+- Source: **Touhou**
+
+---
+
+### meiling-stare-0000
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Hong Meiling**
+- Source: **Touhou**
+
+---
+
+### meiling-stare-0002
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Hong Meiling**
+- Source: **Touhou**
+
+---
+
+### meiling-stare-0001
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Hong Meiling**
+- Source: **Touhou**
+
+---
+
+### meiling-sakuya-hug-0002
+
+- Creator: **risui (suzu rks)**
+- Editor: **HuyaneMatsu**
+- Characters: **Hong Meiling**, **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### tmiko-stare-0001
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Toyosatomimi no Miko**
+- Source: **Touhou**
+
+---
+
+### nue-stare-0058
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Houjuu Nue**
+- Source: **Touhou**
+
+---
+
+### marisa-stare-0005
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### nitori-stare-0000
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Kawashiro Nitori**
+- Source: **Touhou**
+
+---
+
+### hina-stare-0005
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Kagiyama Hina**
+- Source: **Touhou**
+
+---
+
+### miyoi-stare-0000
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Okunoda Miyoi**
+- Source: **Touhou**
+
+---
+
+### koakuma-stare-0001
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Koakuma**
+- Source: **Touhou**
+
+---
+
+### hina-stare-0006
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Kagiyama Hina**
+- Source: **Touhou**
+
+---
+
+### alice-stare-0003
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Margatroid Alice**
+- Source: **Touhou**
+
+---
+
+### meiling-stare-0003
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Hong Meiling**
+- Source: **Touhou**
+
+---
+
+### meiling-sakuya-hug-0003
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Hong Meiling**, **Izayoi Sakuya**
+- Source: **Touhou**
+
+---
+
+### marisa-stare-0006
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Kirisame Marisa**
+- Source: **Touhou**
+
+---
+
+### flandre-remilia-hug-0006
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Scarlet Flandre**, **Scarlet Remilia**
+- Source: **Touhou**
+
+---
+
+### komachi-eiki-hug-0000
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Onozuka Komachi**, **Shiki Eiki Yamaxanadu**
+- Source: **Touhou**
+
+---
+
+### sanae-happy-0000
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Kochiya Sanae**
+- Source: **Touhou**
+
+---
+
+### kagerou-stare-0004
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Imaizumi Kagerou**
+- Source: **Touhou**
+
+---
+
+### youmu-stare-0004
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Konpaku Youmu**
+- Source: **Touhou**
+
+---
+
+### saki-stare-0001
+
+- Creator: **risui (suzu rks)**
+- Editor: *none*
+- Characters: **Kurokoma Saki**
+- Source: **Touhou**
+
+---
+
 I don't own the image files. The credits goes their respective owners.
 This feature is purely fan-made, and will not be used for profit or illegal sharing!
 Please contact me if you're the owner of an image and want to remove it from this repository!

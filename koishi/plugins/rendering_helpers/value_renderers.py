@@ -1,4 +1,7 @@
-__all__ = ()
+__all__ = (
+    'render_date_time_with_relative_into', 'render_flags_into', 'render_nullable_emoji_into',
+    'render_nullable_string_tuple_into'
+)
 
 from hata import DATETIME_FORMAT_CODE, elapsed_time
 
@@ -73,24 +76,29 @@ def render_flags_into(into, flags):
     
     Parameters
     ----------
-    into : `list` of `str`
+    into : `list<str>`
         List to extend.
+    
     flags : ``FlagBase``
         The flags to render.
     
     Returns
     -------
-    into : `list` of `str`
+    into : `list<str>`
     """
-    field_added = False
+    if not flags:
+        into.append('*none*')
     
-    for flag_name in flags:
-        if field_added:
-            into.append(', ')
-        else:
-            field_added = True
+    else:
+        field_added = False
         
-        into.append(flag_name.replace('_', ' '))
+        for flag_name in flags:
+            if field_added:
+                into.append(', ')
+            else:
+                field_added = True
+            
+            into.append(flag_name.replace('_', ' '))
     
     return into
 
@@ -271,5 +279,67 @@ def render_voters_into(into, voters, guild):
     """
     for user in iter_render_listing_into(into, sorted(voters), VOTERS_MAX):
         into = render_user_into(into, user, guild)
+    
+    return into
+
+
+def render_nullable_emoji_into(into, emoji):
+    """
+    Renders the emoji into the given container.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        The container to render into.
+    
+    emoji : `None | Emoji`
+        The emoji to render.
+    
+    Returns
+    -------
+    into : `list<str>`
+    """
+    if emoji is None:
+        into.append('null')
+    else:
+        into.append(emoji.name)
+        into.append(' (')
+        into.append(str(emoji.id))
+        into.append(')')
+    
+    return into
+
+
+def render_nullable_string_tuple_into(into, value):
+    """
+    Renders a nullable string tuple.
+    
+    Parameters
+    ----------
+    into : `list<str>`
+        The container to render into.
+    
+    Parameters
+    ----------
+    value : `None | tuple<str>`
+        Value to render.
+    
+    Returns
+    -------
+    into : `list<str>`
+    """
+    if value is None:
+        into.append('*none*')
+    
+    else:
+        field_added = False
+        
+        for element in value:
+            if field_added:
+                into.append(', ')
+            else:
+                field_added = True
+            
+            into.append(repr(element))
     
     return into

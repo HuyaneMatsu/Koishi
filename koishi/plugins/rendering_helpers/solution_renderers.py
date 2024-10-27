@@ -2,13 +2,14 @@ __all__ = ('render_activity_description_into',)
 
 from datetime import datetime as DateTime, timezone as TimeZone
 
-from hata import ActivityType, Status
+from hata import Status, ActivityMetadataCustom, ActivityMetadataHanging, ActivityMetadataRich
 
 from .constants import DATE_TIME_CONDITION_FUTURE, GUILD_PROFILE_RENDER_MODE_JOIN, MESSAGE_RENDER_MODE_CREATE
 from .field_renderers import (
     render_attachments_field_into, render_channel_field_into, render_date_time_field_into,
-    render_date_time_with_relative_field_into, render_flags_field_into, render_preinstanced_field_into,
-    render_role_mentions_field_into, render_string_field_into, render_user_field_into
+    render_date_time_with_relative_field_into, render_emoji_field_into, render_flags_field_into,
+    render_preinstanced_field_into, render_role_mentions_field_into, render_string_field_into,
+    render_string_tuple_field_into, render_user_field_into
 )
 
 
@@ -175,8 +176,10 @@ def render_activity_description_into(into, field_added, activity):
     ----------
     into : `list<str>`
         The container to render into.
+    
     field_added : `bool`
         Whether any fields were added already.
+    
     activity : ``Activity``
         The activity to render.
     
@@ -185,11 +188,12 @@ def render_activity_description_into(into, field_added, activity):
     into : `list<str>`
     field_added : `bool`
     """
-    into, field_added = render_string_field_into(into, field_added, activity.name, optional = False, title = 'Name')
     activity_type = activity.type
     into, field_added = render_preinstanced_field_into(into, field_added, activity_type, optional = False)
+    metadata_type = activity_type.metadata_type
     
-    if activity_type is not ActivityType.custom:
+    if metadata_type is ActivityMetadataRich:
+        into, field_added = render_string_field_into(into, field_added, activity.name, optional = False, title = 'Name')
         timestamps = activity.timestamps
         if (timestamps is not None):
             into, field_added = render_date_time_field_into(
@@ -244,6 +248,7 @@ def render_activity_description_into(into, field_added, activity):
         )
         
         into, field_added = render_string_field_into(into, field_added, activity.url, title = 'Url')
+        into, field_added = render_string_tuple_field_into(into, field_added, activity.buttons, title = 'Buttons')
         into, field_added = render_string_field_into(into, field_added, activity.sync_id, title = 'Sync id')
         into, field_added = render_string_field_into(into, field_added, activity.session_id, title = 'Session id')
         into, field_added = render_flags_field_into(into, field_added, activity.flags)
@@ -254,14 +259,27 @@ def render_activity_description_into(into, field_added, activity):
                 into, field_added, repr(application_id), title = 'Application id'
             )
     
+        # This is always false for custom ones, so we can leave it here.
+        activity_id = activity.id
+        if activity_id:
+            into, field_added = render_string_field_into(into, field_added, repr(activity_id), title = 'Id')
+    
+    elif metadata_type is ActivityMetadataCustom:
+        into, field_added = render_emoji_field_into(into, field_added, activity.emoji)
+        into, field_added = render_string_field_into(into, field_added, activity.state, title = 'State')
+    
+    elif metadata_type is ActivityMetadataHanging:
+        into, field_added = render_preinstanced_field_into(
+            into, field_added, activity.hang_type, optional = False, title = 'Hang type'
+        )
+        into, field_added = render_emoji_field_into(into, field_added, activity.emoji)
+        into, field_added = render_string_field_into(into, field_added, activity.details, title = 'Details')
+    
+    
     into, field_added = render_date_time_with_relative_field_into(
         into, field_added, activity.created_at, add_ago = True, title = 'Created at'
     )
     
-    # This is always false for custom ones, so we can leave it here.
-    activity_id = activity.id
-    if activity_id:
-        into, field_added = render_string_field_into(into, field_added, repr(activity_id), title = 'Id')
 
     return into, field_added
 

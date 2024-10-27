@@ -3,7 +3,7 @@ from datetime import datetime as DateTime, timezone as TimeZone
 import vampytest
 from hata import (
     Activity, ActivityAssets, ActivityFlag, ActivityParty, ActivitySecrets, ActivityTimestamps, ActivityType,
-    BUILTIN_EMOJIS, GuildProfile, GuildProfileFlag, Role, Status, User, UserFlag
+    BUILTIN_EMOJIS, HangType, GuildProfile, GuildProfileFlag, Role, Status, User, UserFlag
 )
 
 from ..constants import GUILD_PROFILE_RENDER_MODE_GENERAL, GUILD_PROFILE_RENDER_MODE_JOIN, GUILD_PROFILE_RENDER_MODE_LEAVE
@@ -467,6 +467,7 @@ def test__render_nullable_guild_profile_description_into(field_added, guild_prof
 
 def _iter_options__render_activity_description_into():
     current_date = DateTime(2016, 10, 14, 21, 13, 36, tzinfo = TimeZone.utc)
+    emoji = BUILTIN_EMOJIS['heart']
     
     # Minimal
     yield (
@@ -475,8 +476,8 @@ def _iter_options__render_activity_description_into():
         current_date,
         (
             (
-                f'Name: with Kokoro\n'
-                f'Type: playing ~ 0'
+                f'Type: playing ~ 0\n'
+                f'Name: with Kokoro'
             ),
             True,
         )
@@ -490,8 +491,8 @@ def _iter_options__render_activity_description_into():
         (
             (
                 f'\n'
-                f'Name: with Kokoro\n'
-                f'Type: playing ~ 0'
+                f'Type: playing ~ 0\n'
+                f'Name: with Kokoro'
             ),
             True,
         )
@@ -511,6 +512,7 @@ def _iter_options__render_activity_description_into():
                 text_large = 'Yuyuko',
                 text_small = 'Youmu',
             ),
+            buttons = ['Rumia', 'Letty'],
             created_at = DateTime(2016, 10, 14, 21, 13, 26, tzinfo = TimeZone.utc),
             details = 'Satori',
             flags = ActivityFlag().update_by_keys(play = True, embedded = True),
@@ -536,8 +538,8 @@ def _iter_options__render_activity_description_into():
         current_date,
         (
             (
-                f'Name: with Kokoro\n'
                 f'Type: spotify ~ 2\n'
+                f'Name: with Kokoro\n'
                 f'Timestamp start: 2016-10-14 21:13:16\n'
                 f'Timestamp end: 2016-10-14 21:13:46\n'
                 f'Details: Satori\n'
@@ -554,31 +556,56 @@ def _iter_options__render_activity_description_into():
                 f'Secrets spectate: Chiruno\n'
                 f'Spotify album cover url: https://i.scdn.co/image/Yuuka\n'
                 f'Url: https://orindance.party/\n'
+                f'Buttons: \'Rumia\', \'Letty\'\n'
                 f'Sync id: Mr. spider\n'
                 f'Session id: Orin\n'
                 f'Flags: play, embedded\n'
                 f'Application id: 202308080001\n'
-                f'Created at: 2016-10-14 21:13:26 [*10 seconds ago*]\n'
-                f'Id: 202308080000'
+                f'Id: 202308080000\n'
+                f'Created at: 2016-10-14 21:13:26 [*10 seconds ago*]'
             ),
             True,
         )
     )
-
+    
     # Custom
     yield (
         False,
         Activity(
             activity_type = ActivityType.custom,
             created_at = DateTime(2016, 10, 14, 21, 13, 26, tzinfo = TimeZone.utc),
-            emoji = BUILTIN_EMOJIS['heart'],
+            emoji = emoji,
             state = 'Koishi Love!'
         ),
         current_date,
         (
             (
-                f'Name: {BUILTIN_EMOJIS["heart"].unicode} Koishi Love!\n'
                 f'Type: custom ~ 4\n'
+                f'Emoji: {emoji.name} ({emoji.id!s})\n'
+                f'State: Koishi Love!\n'
+                f'Created at: 2016-10-14 21:13:26 [*10 seconds ago*]'
+            ),
+            True,
+        )
+    )
+    
+    # Hanging
+    yield (
+        False,
+        Activity(
+            activity_type = ActivityType.hanging,
+            hang_type = HangType.focusing,
+            created_at = DateTime(2016, 10, 14, 21, 13, 26, tzinfo = TimeZone.utc),
+            emoji = emoji,
+            details = 'Koishi Love!'
+        ),
+        current_date,
+        (
+            (
+                f'Type: hanging ~ 6\n'
+                f'Hang type: focusing ~ focusing\n'
+                f'Emoji: {emoji.name} ({emoji.id!s})\n'
+                f'Details: Koishi Love!\n'
                 f'Created at: 2016-10-14 21:13:26 [*10 seconds ago*]'
             ),
             True,

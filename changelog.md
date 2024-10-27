@@ -1,3 +1,17 @@
+### 2024-10-27
+
+- Fix `/automation log-satori` activity timestamp difference rendered incorrectly.
+- Fix `/automation log-satori` emoji difference rendered incorrectly.
+- Fix `/automation log-satori` not separating added activities enough from entries under them.
+- `/automation log-satori` now correctly shows custom & hanging activities.
+- Fix `/snipe` did not update `embed.footer` correctly when switching between detailed entity views.
+- Fix `automation touhou-feed list-channels` failed if the channel had too much (around 40+) characters tagged.
+- `/vocaloid` is now available when user installed.
+- Add more touhou character nicks for better matching.
+- Add **6** images to `/hug`.
+- Add **22** images to `/stare`.
+- Fix `/automation farewell` was not working since localization support was added.
+
 ### 2024-10-13
 
 - Add `Vivit` touhou character.
@@ -24,8 +38,9 @@
 - Add `Unnamed Exotic Girl - Cleaning Maid` touhou character (really could not find how it is called).
 - Remove `embed.author` in `/ds`. The existence of `message.interaction` field makes it duplicate.
 - Add `convert_action_asset_formats` cli command to help with registering new images.
+- Add `upload-action-assets` cli command to help with uploading new images.
 - Add many touhou character nicks for better matching.
-- `/pocky (self)` images now have their own `pocky_self` tag in the names.
+- `/pocky (self)` images now have their own `pocky_self` tag.
 - `/like` images now use a shared `like` tag in their names.
 - Add **14** images to `/meme`.
 - Add **20** images to `/hug`.

@@ -217,7 +217,7 @@ def join_names_of_touhou_characters(characters, join_with):
     
     Returns
     -------
-    joined_names : `None`, `str`
+    joined_names : `None | str`
     """
     if characters is None:
         character_count = 0

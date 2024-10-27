@@ -1,10 +1,13 @@
 from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
-from hata import Role, UserFlag
+from hata import Channel, ChannelType, Emoji, Role, UserFlag
 
 from ..constants import ROLE_MENTIONS_MAX
-from ..value_renderers import render_date_time_with_relative_into, render_flags_into, render_role_mentions_into
+from ..value_renderers import (
+    render_channel_into, render_date_time_with_relative_into, render_flags_into, render_nullable_emoji_into,
+    render_nullable_string_tuple_into, render_role_mentions_into
+)
 
 from .mocks import DateTimeMock, is_instance_mock
 
@@ -83,6 +86,7 @@ def test__render_date_time_with_relative_into(input_date_time, current_date_time
 
 
 def _iter_options__render_flags_into():
+    yield UserFlag(), '*none*'
     yield UserFlag().update_by_keys(staff = True), 'staff'
     yield UserFlag().update_by_keys(staff = True, team_user = True), 'staff, team user'
 
@@ -102,4 +106,107 @@ def test__render_flags_into(input_flags):
     output : `str`
     """
     into = render_flags_into([], input_flags)
+    return ''.join(into)
+
+
+def _iter_options__render_nullable_emoji_into():
+    emoji = Emoji.precreate(202410150010, name = 'keine')
+    
+    yield (
+        None,
+        'null',
+    )
+    
+    yield (
+        emoji,
+        f'{emoji.name} ({emoji.id!s})',
+    )
+
+
+@vampytest._(vampytest.call_from(_iter_options__render_nullable_emoji_into()).returning_last())
+def test__render_nullable_emoji_into(input_value):
+    """
+    Tests whether ``render_nullable_emoji_into`` works as intended.
+    
+    Parameters
+    ----------
+    input_value : `None | Emoji`
+        The value to render.
+    
+    Returns
+    -------
+    output : `str`
+    """
+    into = render_nullable_emoji_into([], input_value)
+    vampytest.assert_instance(into, list)
+    for element in into:
+        vampytest.assert_instance(element, str)
+    return ''.join(into)
+
+
+def _iter_options__render_channel_into():
+    channel = Channel.precreate(202410150019, channel_type = ChannelType.guild_text, name = 'keine')
+    
+    yield (
+        channel,
+        f'{channel.name} [*{channel.type.name!s} ~ {channel.type.value!s}*] ({channel.id!s})',
+    )
+
+
+@vampytest._(vampytest.call_from(_iter_options__render_channel_into()).returning_last())
+def test__render_channel_into(input_value):
+    """
+    Tests whether ``render_channel_into`` works as intended.
+    
+    Parameters
+    ----------
+    input_value : ``Channel``
+        The value to render.
+    
+    Returns
+    -------
+    output : `str`
+    """
+    into = render_channel_into([], input_value)
+    vampytest.assert_instance(into, list)
+    for element in into:
+        vampytest.assert_instance(element, str)
+    return ''.join(into)
+
+
+def _iter_options__render_nullable_string_tuple_into():
+    yield (
+        None,
+        '*none*',
+    )
+    
+    yield (
+        ('hey',),
+        f'\'hey\'',
+    )
+    
+    yield (
+        ('hey', 'mister'),
+        f'\'hey\', \'mister\'',
+    )
+
+
+@vampytest._(vampytest.call_from(_iter_options__render_nullable_string_tuple_into()).returning_last())
+def test__render_nullable_string_tuple_into(input_value):
+    """
+    Tests whether ``render_nullable_string_tuple_into`` works as intended.
+    
+    Parameters
+    ----------
+    input_value : `None | tuple<str>`
+        The value to render.
+    
+    Returns
+    -------
+    output : `str`
+    """
+    into = render_nullable_string_tuple_into([], input_value)
+    vampytest.assert_instance(into, list)
+    for element in into:
+        vampytest.assert_instance(element, str)
     return ''.join(into)
