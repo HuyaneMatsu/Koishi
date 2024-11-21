@@ -116,7 +116,7 @@ async def delete_from(
     event,
     target,
 ):
-    if not event.user_permissions.can_manage_messages:
+    if not event.user_permissions.manage_messages:
         abort('You need manage messages permission to execute this command.')
     
     if (event.user.id, target.channel_id) in DELETE_RANGE_CONTEXTS:
@@ -144,7 +144,7 @@ async def delete_till(
     event,
     target,
 ):
-    if not event.user_permissions.can_manage_messages:
+    if not event.user_permissions.manage_messages:
         abort('You need manage messages permission to execute this command.')
     
     try:

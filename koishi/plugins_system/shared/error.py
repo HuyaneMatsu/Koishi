@@ -13,7 +13,7 @@ ALL_CLIENT = ClientWrapper()
 
 @ALL_CLIENT.events(name = 'error', overwrite = True)
 async def error__notify(client, name, err):
-    if not CHANNEL__SUPPORT__LOG_ERROR.cached_permissions_for(client).can_send_messages:
+    if not CHANNEL__SUPPORT__LOG_ERROR.cached_permissions_for(client).send_messages:
         return await default_error_event_handler(client, name, err)
     
     extracted = [client.full_name, ' ignores occurred exception at ', name, '\n',]

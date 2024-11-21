@@ -144,7 +144,7 @@ def check_reactor(author, event):
     if author is user:
         return True
     
-    if event.message.channel.permissions_for(event.user).can_manage_messages:
+    if event.message.channel.permissions_for(event.user).manage_messages:
         return True
     
     return False

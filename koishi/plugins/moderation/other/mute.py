@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import Embed, User
+from hata import DiscordException, Embed, ERROR_CODES, User
 
 from ..shared_constants import PERMISSIONS__MUTE, WORD_CONFIG__MUTE
 from ..shared_helpers import (
@@ -10,7 +10,10 @@ from ..shared_helpers_mute import (
     PARAMETER_DAYS, PARAMETER_HOURS, PARAMETER_MINUTES, PARAMETER_SECONDS, build_duration_string, get_duration
 )
 from .easter_eggs import apply_mode_nazrin, should_show_nazrin
-from .helpers import build_action_completed_embed, check_required_permissions, confirm_action, notify_user_action
+from .helpers import (
+    build_action_completed_embed, build_action_failed_embed, check_required_permissions, confirm_action,
+    notify_user_action
+)
 
 
 def build_mute_embed(user, title, description, reason, notify_user, duration_string, nazrin_mode):
@@ -102,25 +105,37 @@ async def mute_command(
     if (component_interaction is None):
         return
     
-    await client.user_guild_profile_edit(
-        guild,
-        user,
-        timeout_duration = duration,
-        reason = create_auto_reason(event, reason),
-    )
-    
-    if notify_user:
-        notify_note = await notify_user_action(
-            client, guild, user, build_mute_notification_embed, reason, duration_string
+    try:
+        await client.user_guild_profile_edit(
+            guild,
+            user,
+            timeout_duration = duration,
+            reason = create_auto_reason(event, reason),
+        )
+    except DiscordException as exception:
+        if exception.code == ERROR_CODES.unknown_member:
+            note = 'The user left while performing the action'
+        else:
+            raise
+        
+        embed = build_action_failed_embed(
+            user, build_mute_embed, WORD_CONFIG__MUTE, note, reason, notify_user, duration_string, False
         )
     else:
-        notify_note = None
-    
+        if notify_user:
+            note = await notify_user_action(
+                client, guild, user, build_mute_notification_embed, reason, duration_string
+            )
+        else:
+            note = None
+        
+        embed = build_action_completed_embed(
+            user, build_mute_embed, WORD_CONFIG__MUTE, note, reason, notify_user, duration_string, nazrin_mode
+        )
+        
     await client.interaction_response_message_edit(
         component_interaction,
         allowed_mentions = None,
         components = None,
-        embed = build_action_completed_embed(
-            user, build_mute_embed, WORD_CONFIG__MUTE, notify_note, reason, notify_user, duration_string, nazrin_mode
-        )
+        embed = embed,
     )

@@ -1350,7 +1350,7 @@ CARD_BLOODLUST = OJCard(61,
     1, CARD_COST_0, 1, CARD_TYPE_GIFT, CARD_PACK_COMMUNITY_PACK_2, CARD_RARITY_RARE,
     'Lose 1 HP at the start of your turn. Heal 1 HP for every damage you deal. Cannot Norma while holding this card. '
     'This card is discarded upon KO or use.',
-    '"The true power of my beast... I wonder if it\'s like this." —Krila',
+    '"The true power of my beast... I wonder if it\'s like this." —Krilalaris',
     None,
     'Bloodlust',
 )
@@ -2644,7 +2644,7 @@ CARD_RED_AND_BLUE = OJCard(176,
     'When holding this card, gain +1 ATK, DEF and EVD in battle. On Discard or KO, this card is removed from the game.',
     '"We can\'t do this anymore!" ―Red & Blue',
     None,
-    'Red_ & _Blue',
+    'Red_&_Blue',
 )
 
 CARD_MUSHROOM_BOOST = OJCard(177,
@@ -3543,13 +3543,13 @@ CHARACTER_KYOUSUKE = OJCharacter(18,
     'Kyousuke_(unit)',
 )
 
-CHARACTER_KRILA = OJCharacter(19,
-    'Krila',
+CHARACTER_KRILALARIS = OJCharacter(19,
+    'Krilalaris',
     6, 0, 0, -1, 5,
     ORIGIN_QP_SHOOTING_DANGEROUS,
     None,
     (CARD_PLUSHIE_MASTER, CARD_DANCE_LONG_EARED_BEASTS),
-    'Krila_(unit)',
+    'Krilalaris_(unit)',
 )
 
 CHARACTER_KAE = OJCharacter(20,
@@ -3638,7 +3638,7 @@ CHARACTER_MIMYUU = OJCharacter(
         'Revive as Tomato. When you do, you may challenge any enemies on the same panel. '
         'Lose 1/4 stars and give 1 Win when KO\'d in battle.'
     ),
-    (CARD_EVIL_SPY_WORK_EXECUTION,),
+    (CARD_EVIL_SPY_WORK_PREPARATION, CARD_EVIL_SPY_WORK_EXECUTION,),
     'Mimyuu_(unit)',
 )
 
@@ -4313,11 +4313,11 @@ CHARACTER_MIMYUU_JAILBIRD = OJCharacter(
     4,
     ORIGIN_QP_SHOOTING,
     'When KO\'d in battle, move to your Home panel.',
-    (CARD_MAKE_BELIEVE_PRISON_BREAK),
+    (CARD_MAKE_BELIEVE_PRISON_BREAK,),
     'Mimyuu_(Jailbird)_(unit)',
 )
 
-CHARACTER_KRILALARIS_PAJAMAS = OJCharacter(
+CHARACTER_KRILALARISLARIS_PAJAMAS = OJCharacter(
     88,
     'Krilalaris (Pajamas)',
     4,
@@ -4506,7 +4506,6 @@ RELATIONS = {
     'Nanako_(unit)': 'https://cdn.discordapp.com/attachments/568837922288173058/901029214034210826/Nanako_unit.png',
     'Saki_(unit)': 'https://cdn.discordapp.com/attachments/568837922288173058/901029220606677042/Saki_unit.png',
     'Kyousuke_(unit)': 'https://cdn.discordapp.com/attachments/568837922288173058/901029224167653376/Kyousuke_unit.png',
-    'Krila_(unit)': 'https://cdn.discordapp.com/attachments/568837922288173058/901029227745398814/Krila_unit.png',
     'Kae_(unit)': 'https://cdn.discordapp.com/attachments/568837922288173058/901029231285383168/Kae_unit.png',
     'Alte_(unit)': 'https://cdn.discordapp.com/attachments/568837922288173058/901029235215466546/Alte_unit.png',
     'Kyoko_(unit)': 'https://cdn.discordapp.com/attachments/568837922288173058/901029245969629194/Kyoko_unit.png',
@@ -4622,7 +4621,6 @@ RELATIONS = {
     'Super_All-Out_Mode': 'https://cdn.discordapp.com/attachments/568837922288173058/901030210542116894/Super_All-Out_Mode.png',
     'Unpaid_Work': 'https://cdn.discordapp.com/attachments/568837922288173058/901030213872410624/Unpaid_Work.png',
     'We_Are_Waruda': 'https://cdn.discordapp.com/attachments/568837922288173058/901030217102020618/We_Are_Waruda.png',
-    'Bloodlust': 'https://cdn.discordapp.com/attachments/568837922288173058/901030221153701888/Bloodlust.png',
     'Lost_Child': 'https://cdn.discordapp.com/attachments/568837922288173058/901030224689500160/Lost_Child.png',
     'Lucky_Charm': 'https://cdn.discordapp.com/attachments/568837922288173058/901030233195565067/Lucky_Charm.png',
     'Metallic_Monocoque': 'https://cdn.discordapp.com/attachments/568837922288173058/901030238107074570/Metallic_Monocoque.png',
@@ -4797,12 +4795,14 @@ RELATIONS = {
     'Warp_Control': 'https://cdn.discordapp.com/attachments/568837922288173058/1288594457574379521/Warp_Control.png',
     'Heart_of_Resistance': 'https://cdn.discordapp.com/attachments/568837922288173058/1288608776219525214/Heart_of_Resistance.png',
     'Bourbon_(unit)': 'https://cdn.discordapp.com/attachments/568837922288173058/1288608776521388053/Bourbon_unit.png',
+    'Krilalaris_(unit)': 'https://cdn.discordapp.com/attachments/568837922288173058/1308346754554400808/Krilalaris_unit.png',
+    'Bloodlust': 'https://cdn.discordapp.com/attachments/568837922288173058/1308347588126183515/Bloodlust.png',
 }
-
 
 
 def autocomplete_key(entity_factor_pair):
     return entity_factor_pair[1]
+
 
 def get_auto_complete_results(value, container):
     if value is None:

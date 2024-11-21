@@ -39,9 +39,9 @@ async def message_create(client, message):
     channel = message.channel
     permissions = channel.cached_permissions_for(client)
     if channel.is_in_group_thread():
-        can_send_message = permissions.can_send_messages_in_threads
+        can_send_message = permissions.send_messages_in_threads
     else:
-        can_send_message = permissions.can_send_messages
+        can_send_message = permissions.send_messages
     if not can_send_message:
         return
     

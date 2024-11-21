@@ -18,7 +18,7 @@ async def unknown_dispatch_event__structurize(client, event_name, payload):
 @ALL_CLIENT.events(name = 'unknown_dispatch_event')
 @to_coroutine
 def unknown_dispatch_event__notify(client, event_name, payload):
-    if CHANNEL__SUPPORT__LOG_DISPATCH.cached_permissions_for(client).can_send_messages:
+    if CHANNEL__SUPPORT__LOG_DISPATCH.cached_permissions_for(client).send_messages:
         yield from client.message_create(
             CHANNEL__SUPPORT__LOG_DISPATCH,
             content = f'# {event_name}',

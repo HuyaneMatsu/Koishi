@@ -117,7 +117,7 @@ async def color_(
 )
 async def raw(client, event):
     """Shows up the message's payload."""
-    if not event.user_permissions.can_manage_messages:
+    if not event.user_permissions.manage_messages:
         abort('You must have manage messages permission to invoke this command.')
     
     data = await client.api.message_get(event.channel_id, event.interaction.target_id)
@@ -210,7 +210,7 @@ def shared_guilds_pagination_check(user, event):
     if user is event.user:
         return True
     
-    if event.channel.permissions_for(event_user).can_manage_messages:
+    if event.channel.permissions_for(event_user).manage_messages:
         return True
     
     return False
@@ -348,7 +348,7 @@ def in_role_pagination_check(user, event):
     if user is event.user:
         return True
     
-    if event.message.channel.permissions_for(event_user).can_manage_messages:
+    if event.message.channel.permissions_for(event_user).manage_messages:
         return True
     
     return False
@@ -455,7 +455,7 @@ def add_user_field(embed, index, joined_at, user):
 )
 async def latest_users(client, event):
     """Shows the new users of the guild."""
-    if not event.user_permissions.can_kick_users:
+    if not event.user_permissions.kick_users:
         abort('You must have kick users to invoke this command.')
     
     date_limit = DateTime.now(TimeZone.utc) - TimeDelta(days = 7)
@@ -488,7 +488,7 @@ async def latest_users(client, event):
 )
 async def all_users(client, event):
     """Shows the new users of the guild."""
-    if not event.user_permissions.can_kick_users:
+    if not event.user_permissions.kick_users:
         abort('You must have kick users to invoke this command.')
     
     users = []

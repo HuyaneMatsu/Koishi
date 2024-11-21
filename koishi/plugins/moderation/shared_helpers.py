@@ -115,5 +115,5 @@ def check_user_cannot_be_admin(guild, user, word_config):
     word_config : ``WordConfig``
         Words to use for filling up the error messages about the action to be executed.
     """
-    if guild.permissions_for(user).can_administrator:
+    if guild.permissions_for(user).administrator:
         abort(f'Cannot {word_config.name} admins.')

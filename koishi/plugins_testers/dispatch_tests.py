@@ -736,7 +736,7 @@ class dispatch_tester:
             if key == 'permissions':
                 result.append('permissions :')
                 other = role.permissions
-                for name,index in Permission.__keys__.items():
+                for name, index in Permission.__shifts_ordered__:
                     old_value = (value >> index) & 1
                     new_value = (other >> index) & 1
                     if old_value != new_value:

@@ -24,7 +24,7 @@ PROPOSAL_CANCEL_REASON_OVER_LIMIT = 2
 
 
 def assert_required_permission(event):
-    if not event.user_permissions.can_administrator:
+    if not event.user_permissions.administrator:
         abort('You must have administrator permission to invoke this command.')
 
 

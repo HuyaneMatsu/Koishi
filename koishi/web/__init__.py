@@ -47,6 +47,7 @@ BOT_NAMES = [
     'dataprovider',
     'oai-searchbot',
     'bravebot',
+    'chatgpt-user',
     
     # From google:
     'googlebot',

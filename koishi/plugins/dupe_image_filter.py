@@ -541,7 +541,7 @@ class DupeImageFilter:
 
 
 def has_manage_messages_permission(event):
-    return bool(event.user_permissions.can_manage_messages)
+    return bool(event.user_permissions.manage_messages)
 
 
 
@@ -563,10 +563,10 @@ async def dupe_image_filter(
     if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to do this.')
     
-    if not event.user_permissions.can_manage_messages:
+    if not event.user_permissions.manage_messages:
         abort('You must have manage messages permission to use this command.')
     
-    if not guild.cached_permissions_for(client).can_manage_messages:
+    if not guild.cached_permissions_for(client).manage_messages:
         abort(f'{client.name_at(guild)} must have manage messages permission to execute this command.')
     
     if event.channel_id in FILTERERS:
@@ -580,7 +580,7 @@ async def dupe_image_filter(
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_CLOSE)
 async def close_dupe_image_filter(client, event):
-    if event.user_permissions.can_manage_messages:
+    if event.user_permissions.manage_messages:
         await client.interaction_component_acknowledge(event)
         await client.interaction_response_message_delete(event)
 

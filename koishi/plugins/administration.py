@@ -47,11 +47,11 @@ async def clear(client, event,
     if limit < 1:
         abort('`limit` cannot be non-positive.')
     
-    if not event.user_permissions.can_administrator:
+    if not event.user_permissions.administrator:
         abort('You must have administrator permission to use this command.')
     
     client_permissions = channel.cached_permissions_for(client)
-    if (not client_permissions.can_manage_messages) or (not client_permissions.can_read_message_history):
+    if (not client_permissions.manage_messages) or (not client_permissions.read_message_history):
         abort('I must have manage messages and read message history in the channel to do it.')
     
     if (before is None) or (not before):
@@ -111,10 +111,10 @@ async def invite_create(client, event,
     if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute the command.')
     
-    if not event.user_permissions.can_create_instant_invite:
+    if not event.user_permissions.create_instant_invite:
         abort('You must have `create instant invite` permission to invoke this command.')
     
-    if not guild.cached_permissions_for(client).can_create_instant_invite:
+    if not guild.cached_permissions_for(client).create_instant_invite:
         abort('I must have `create instant invite` permission invite to execute this command.')
     
     yield
@@ -146,7 +146,7 @@ def bans_pagination_check(event):
     if guild is None:
         return False
     
-    if guild.permissions_for(event.user).can_ban_users:
+    if guild.permissions_for(event.user).ban_users:
         return True
     
     return False
@@ -168,10 +168,10 @@ async def bans(client, event):
     if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute the command.')
     
-    if not event.user_permissions.can_ban_users:
+    if not event.user_permissions.ban_users:
         abort('You must have `ban users` permission to invoke this command.')
     
-    if not guild.cached_permissions_for(client).can_ban_users:
+    if not guild.cached_permissions_for(client).ban_users:
         abort('I must have `ban users` permission invite to execute this command.')
     
     yield
@@ -231,10 +231,10 @@ async def bans(client, event):
 
 def check_channel_invites_pagination_permissions(event):
     permissions = event.message.channel.permissions_for(event.user)
-    if not permissions.can_manage_channels:
+    if not permissions.manage_channels:
         return False
     
-    if not permissions.can_create_instant_invite:
+    if not permissions.create_instant_invite:
         return False
     
     return True
@@ -245,10 +245,10 @@ def check_guild_invites_pagination_permissions(event):
         return False
     
     permissions = guild.permissions_for(event.user)
-    if not permissions.can_manage_guild:
+    if not permissions.manage_guild:
         return False
     
-    if not permissions.can_create_instant_invite:
+    if not permissions.create_instant_invite:
         return False
     
     return True
@@ -283,20 +283,20 @@ async def invites_(client, event,
     
     if channel is None:
         permissions = event.user_permissions
-        if (not permissions.can_create_instant_invite) or (not permissions.can_manage_guild):
+        if (not permissions.create_instant_invite) or (not permissions.manage_guild):
             abort('You must have `create instant invite` and `manage guild` permission to invoke this command.')
         
         permissions = guild.cached_permissions_for(client)
-        if (not permissions.can_create_instant_invite) or (not permissions.can_manage_guild):
+        if (not permissions.create_instant_invite) or (not permissions.manage_guild):
             abort('I must have `create instant invite` and `manage guild` to invite to execute this command.')
     
     else:
         permissions = event.user_permissions
-        if (not permissions.can_create_instant_invite) or (not permissions.can_manage_channels):
+        if (not permissions.create_instant_invite) or (not permissions.manage_channels):
             abort('You must have `create instant invite` and `manage channel` permission to invoke this command.')
         
         permissions = channel.cached_permissions_for(client)
-        if (not permissions.can_create_instant_invite) or (not permissions.can_manage_channels):
+        if (not permissions.create_instant_invite) or (not permissions.manage_channels):
             abort('I must have `create instant invite` and `manage channel` to invite to execute this command.')
     
     yield

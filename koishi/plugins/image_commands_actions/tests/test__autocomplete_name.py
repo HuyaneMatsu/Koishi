@@ -30,7 +30,7 @@ def _iter_options():
         None,
         [
             PARAMETER_WILD_CARD,
-            'akyuu-kosuzu-lap-sleep-0000',
+            'akyuu-kosuzu-lap_sleep-0000',
             'akyuu-kosuzu-pocky-0000',
             'akyuu-stare-0000',
             'alice-aya-hug-0000',

@@ -262,15 +262,19 @@ async def user_presence_update(client, user, old_attributes):
         except ConnectionError:
             break
         
-        except BaseException as err:
-            if isinstance(err, DiscordException) and err.code in (
-                ERROR_CODES.unknown_channel, # channel deleted
-                ERROR_CODES.missing_access, # client removed
-                ERROR_CODES.missing_permissions, # permissions changed
-            ):
-                continue
+        except BaseException as exception:
+            if isinstance(exception, DiscordException):
+                if exception.status >= 500:
+                    break
+                
+                if exception.code in (
+                    ERROR_CODES.unknown_channel, # channel deleted
+                    ERROR_CODES.missing_access, # client removed
+                    ERROR_CODES.missing_permissions, # permissions changed
+                ):
+                    continue
             
-            await client.events.error(client, 'log.satori.user_presence_update', err)
+            await client.events.error(client, 'log.satori.user_presence_update', exception)
             continue
 
 

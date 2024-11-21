@@ -13,10 +13,10 @@ async def move_(client, event,
     """Moves me to the selected voice channel | You must have move users permission."""
     player = get_player_or_abort(client, event)
     
-    if not event.user_permissions.can_move_users:
+    if not event.user_permissions.move_users:
         abort('You must have move move users permission to invoke this command.')
     
-    if not channel.cached_permissions_for(client).can_connect:
+    if not channel.cached_permissions_for(client).connect:
         abort(f'I have no permissions to connect to {channel.mention}.')
     
     

@@ -12,7 +12,7 @@ def check_user_permissions(event):
     event : ``InteractionEvent``
         The received interaction event.
     """
-    if not event.user_permissions.can_administrator:
+    if not event.user_permissions.administrator:
         abort('You must have administrator permission to use this command.')
 
 
@@ -53,5 +53,5 @@ def check_channel_and_client_permissions(client, channel):
     if not channel.is_in_group_guild_system():
         abort('Please select a guild system channel.')
     
-    if not channel.cached_permissions_for(client).can_send_messages:
+    if not channel.cached_permissions_for(client).send_messages:
         abort('I cannot send messages into the selected channel.')

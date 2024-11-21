@@ -159,7 +159,7 @@ async def try_play_paranoia(client, event, user_is_satori):
     if (voice_channel is None):
         return
     
-    if not voice_channel.cached_permissions_for(client).can_connect:
+    if not voice_channel.cached_permissions_for(client).connect:
         return
     
     voice_client = await client.join_voice(voice_channel)

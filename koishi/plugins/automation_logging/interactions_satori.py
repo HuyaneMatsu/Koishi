@@ -130,7 +130,7 @@ async def channel_delete(client, event):
         The received interaction event.
     """
     channel = event.channel
-    if not channel.cached_permissions_for(client).can_manage_channels:
+    if not channel.cached_permissions_for(client).manage_channels:
         abort('Cannot delete channel: missing permissions')
         return
     

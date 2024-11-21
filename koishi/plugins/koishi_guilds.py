@@ -212,7 +212,7 @@ async def try_get_invite_url_of(guild):
     if (invite_url is not None):
         return invite_url
     
-    if not guild.cached_permissions_for(MAIN_CLIENT).can_create_instant_invite:
+    if not guild.cached_permissions_for(MAIN_CLIENT).create_instant_invite:
         return None
     
     

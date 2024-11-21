@@ -89,7 +89,7 @@ async def _image_refresh(client, message, interaction_event, retry):
     """
     if (interaction_event is not None):
         # if the interaction client is not in the guild we are not receiving
-        if not interaction_event.application_permissions.can_view_channel:
+        if not interaction_event.application_permissions.view_channel:
             try:
                 await client.interaction_followup_message_get(interaction_event, message)
             except GeneratorExit:
@@ -143,7 +143,7 @@ async def _image_refresh(client, message, interaction_event, retry):
             _invoke_image_refresh(client, message, interaction_event, retry)
             return
     
-    if not message.channel.cached_permissions_for(client).can_view_channel:
+    if not message.channel.cached_permissions_for(client).view_channel:
         return
     
     try:

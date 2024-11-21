@@ -35,7 +35,7 @@ async def play_(client, event,
             abort(f'Please join a voice channel first, so I will know where to play.')
         
         channel = state.channel
-        if not channel.cached_permissions_for(client).can_connect:
+        if not channel.cached_permissions_for(client).connect:
             abort(f'I have no permissions to connect to your channel: {channel.mention}.')
     
     yield

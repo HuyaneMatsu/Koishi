@@ -29,7 +29,7 @@ async def page_refresh(event):
         return
     
     enabled, role, flags = get_reaction_copy_fields_forced(guild.id)
-    if event.user_permissions.can_administrator or ((role is not None) and event.user.has_role(role)):
+    if event.user_permissions.administrator or ((role is not None) and event.user.has_role(role)):
         return build_reaction_copy_list_channels_response(guild, enabled, flags)
 
 
@@ -47,6 +47,6 @@ async def close_message(client, event):
     event : ``InteractionEvent``
         The received event.
     """
-    if event.user_permissions.can_manage_messages:
+    if event.user_permissions.manage_messages:
         await client.interaction_component_acknowledge(event)
         await client.interaction_response_message_delete(event)

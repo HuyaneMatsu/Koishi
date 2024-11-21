@@ -172,7 +172,7 @@ async def auto_pyramid(client, message, emoji:Emoji, size:int):
         if not client_.can_use_emoji(emoji):
             continue
         
-        if should_check_external and (not permissions.can_use_external_emojis):
+        if should_check_external and (not permissions.use_external_emojis):
             continue
         
         available_clients.append(client_)
@@ -221,7 +221,7 @@ async def auto_pyramid_u(client, message, emoji:Emoji, size:int):
         return
     
     channel = message.channel
-    if not channel.cached_permissions_for(client).can_manage_webhooks:
+    if not channel.cached_permissions_for(client).manage_webhooks:
         await client.message_create(channel, 'I need manage webhooks permission to execute this command.')
         return
     

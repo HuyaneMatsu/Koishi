@@ -280,9 +280,9 @@ def can_send_response_to_channel(client, channel):
     
     # send messages depends on channel type.
     if channel.is_in_group_thread():
-        can_send_message = permissions.can_send_messages_in_threads
+        can_send_message = permissions.send_messages_in_threads
     else:
-        can_send_message = permissions.can_send_messages
+        can_send_message = permissions.send_messages
     if not can_send_message:
         return False
     

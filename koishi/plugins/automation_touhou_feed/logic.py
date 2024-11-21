@@ -282,7 +282,7 @@ def should_touhou_feed_in_channel(client, channel):
         
         permissions = channel.cached_permissions_for(client)
         if (
-            not permissions.can_send_messages or
+            not permissions.send_messages or
             permissions & PERMISSION_MASK_EMBED_LINKS != PERMISSION_MASK_EMBED_LINKS
         ):
             return False
@@ -302,7 +302,7 @@ def should_touhou_feed_in_channel(client, channel):
         
         permissions = parent.cached_permissions_for(client)
         if (
-            not permissions.can_send_messages_in_threads or
+            not permissions.send_messages_in_threads or
             permissions & PERMISSION_MASK_EMBED_LINKS != PERMISSION_MASK_EMBED_LINKS
         ):
             return False

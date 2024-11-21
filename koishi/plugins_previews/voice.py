@@ -196,7 +196,7 @@ async def join(client, user, guild, volume):
         return
     
     channel = state.channel
-    if not channel.cached_permissions_for(client).can_connect:
+    if not channel.cached_permissions_for(client).connect:
         yield 'I have no permissions to connect to that channel'
         return
     
@@ -511,7 +511,7 @@ async def move(client, event_or_message, user, voice_channel):
         
         voice_channel = state.channel
     
-    if not voice_channel.cached_permissions_for(client).can_connect:
+    if not voice_channel.cached_permissions_for(client).connect:
         yield 'I have no permissions to connect to that channel.'
         return
     
@@ -534,7 +534,7 @@ async def party_is_over(client, event_or_message):
         return
     
     channel = voice_client.channel
-    if not channel.cached_permissions_for(client).can_move_users:
+    if not channel.cached_permissions_for(client).move_users:
         yield 'I must have move users permission in the respective channel to invoke this command.'
         return
     
@@ -920,7 +920,7 @@ if FEATURE_CLIENTS is not None:
     @VOICE_COMMANDS.interactions(name = 'party-is-over')
     async def slash_party_is_over(client, interaction_event):
         """I mark the talking party as done?"""
-        if not interaction_event.user_permissions.can_administrator:
+        if not interaction_event.user_permissions.administrator:
             return 'You must have administrator permission to invoke this command.'
         
         return party_is_over(client, interaction_event)

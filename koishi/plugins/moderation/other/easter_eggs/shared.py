@@ -60,7 +60,7 @@ async def count_entries(client, guild, user, audit_log_interval, entry_types):
     -------
     count : `int`
     """
-    if not guild.cached_permissions_for(client).can_view_audit_logs:
+    if not guild.cached_permissions_for(client).view_audit_logs:
         return 0
     
     after = DateTime.now(TimeZone.utc) - audit_log_interval

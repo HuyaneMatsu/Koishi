@@ -177,7 +177,7 @@ async def check_has_create_guild_expressions_permission(client, event):
     -------
     has_permissions : `bool`
     """
-    if not event.user_permissions.can_create_guild_expressions:
+    if not event.user_permissions.create_guild_expressions:
         await propagate_check_error_message(
             client,
             event,
@@ -186,7 +186,7 @@ async def check_has_create_guild_expressions_permission(client, event):
         return False
     
     guild = event.guild
-    if (guild is None) or (not guild.cached_permissions_for(client).can_create_guild_expressions):
+    if (guild is None) or (not guild.cached_permissions_for(client).create_guild_expressions):
         await propagate_check_error_message(
             client,
             event,
@@ -214,7 +214,7 @@ async def check_has_manage_guild_expressions_permission(client, event):
     -------
     has_permissions : `bool`
     """
-    if not event.user_permissions.can_manage_guild_expressions:
+    if not event.user_permissions.manage_guild_expressions:
         await propagate_check_error_message(
             client,
             event,
@@ -223,7 +223,7 @@ async def check_has_manage_guild_expressions_permission(client, event):
         return False
     
     guild = event.guild
-    if (guild is None) or (not guild.cached_permissions_for(client).can_manage_guild_expressions):
+    if (guild is None) or (not guild.cached_permissions_for(client).manage_guild_expressions):
         await propagate_check_error_message(
             client,
             event,

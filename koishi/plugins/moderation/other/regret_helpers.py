@@ -21,10 +21,10 @@ def check_regret_permissions(client, guild):
         The guild where the action would be executed.
     """
     permissions = guild.cached_permissions_for(client)
-    if not permissions.can_create_instant_invite:
+    if not permissions.create_instant_invite:
         abort(f'{client.name_at(guild)} requires create instant invites permission for this action.')
     
-    if not permissions.can_view_audit_logs:
+    if not permissions.view_audit_logs:
         abort(f'{client.name_at(guild)} requires view audit logs permission for this action.')
 
 

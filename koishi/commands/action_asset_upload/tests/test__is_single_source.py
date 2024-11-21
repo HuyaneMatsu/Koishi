@@ -34,12 +34,20 @@ def _iter_options():
         False,
     )
     
-    for allowed in ('kon', 'stare'):
+    for tag in ('kon', 'stare'):
         yield (
             {CHEN},
-            {allowed},
+            {tag},
             None,
             True,
+        )
+    
+    for tag in ('feed_self', 'pocky_self'):
+        yield (
+            {CHEN},
+            {tag},
+            None,
+            False,
         )
 
 

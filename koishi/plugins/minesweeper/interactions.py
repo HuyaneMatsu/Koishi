@@ -68,7 +68,7 @@ async def minesweeper(
     -------
     response : ``InteractionResponse``
     """
-    if event.channel.slowmode and (not event.channel.cached_permissions_for(client).can_manage_messages):
+    if event.channel.slowmode and (not event.channel.cached_permissions_for(client).manage_messages):
         return abort('Please use the command in a channel without slowmode.')
     
     return InteractionResponse(components = render_initial(bomb_count))

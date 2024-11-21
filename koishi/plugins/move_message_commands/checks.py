@@ -42,15 +42,15 @@ def check_move_permissions_custom(client, source_channel, target_channel, user_p
         Whether we should require admin permission and not manage messages.
     """
     if require_admin_permissions:
-        if (not user_permissions.can_administrator):
+        if (not user_permissions.administrator):
             return abort('You need to have administrator permission to invoke this command.')
     
     else:
-        if (not user_permissions.can_manage_messages):
+        if (not user_permissions.manage_messages):
             return abort('You need to have manage messages permission to invoke this command.')
         
-        if (source_channel is None) or (not source_channel.cached_permissions_for(client).can_manage_messages):
+        if (source_channel is None) or (not source_channel.cached_permissions_for(client).manage_messages):
             return abort('I require manage messages permission in this channel to execute the command.')
         
-    if (not target_channel.cached_permissions_for(client).can_manage_webhooks):
+    if (not target_channel.cached_permissions_for(client).manage_webhooks):
         return abort('I need manage webhook permission in the target channel to execute this this command.')

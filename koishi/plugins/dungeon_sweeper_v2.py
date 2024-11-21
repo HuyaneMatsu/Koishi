@@ -4495,7 +4495,7 @@ class DungeonSweeperRunner:
         event : ``InteractionEvent``
             The received client.
         """
-        if not event.channel.cached_permissions_for(client).can_use_external_emojis:
+        if not event.channel.cached_permissions_for(client).use_external_emojis:
             await client.interaction_response_message_create(
                 event,
                 'I need use external emojis permission to execute this command.',
@@ -4946,7 +4946,7 @@ DUNGEON_SWEEPER = FEATURE_CLIENTS.interactions(
 @DUNGEON_SWEEPER.interactions
 async def rules(client, event):
     """Shows the rules of DS!"""
-    if not event.channel.cached_permissions_for(client).can_use_external_emojis:
+    if not event.channel.cached_permissions_for(client).use_external_emojis:
         abort('I have no permissions at this channel to render this message.')
     
     return RULES_HELP

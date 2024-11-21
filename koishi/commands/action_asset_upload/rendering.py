@@ -232,7 +232,37 @@ def renderer_single_source(characters, action_tags, unidentified, creator, url):
     """
     into = []
     into = _render_url_into(into, url)
-    into = _render_single_action_into(into, next(iter(action_tags)), next(iter(characters)), unidentified)
+    character = next(iter(characters))
+    into = _render_single_action_into(into, next(iter(action_tags)), character, character)
+    into = _render_creator_into(into, creator)
+    into.append('\n\n')
+    return ''.join(into)
+
+
+def renderer_self_target(characters, action_tags, unidentified, creator, url):
+    """
+    Renderer to render a self targeting action.
+    
+    Parameters
+    ----------
+    characters : `None | set<TouhouCharacter>`
+        Touhou characters.
+    
+    action_tags : `None | set<str>`
+        Action tags.
+    
+    unidentified : `None | set<str>`
+        Unidentified name parts.
+    
+    creator : `None | str`
+        The image's creator.
+    
+    url : `str`
+        Url to the image.
+    """
+    into = []
+    into = _render_url_into(into, url)
+    into = _render_single_action_into(into, next(iter(action_tags)), next(iter(characters)), None)
     into = _render_creator_into(into, creator)
     into.append('\n\n')
     return ''.join(into)
@@ -272,7 +302,7 @@ def renderer_default(characters, action_tags, unidentified, creator, url):
 
 def is_single_source(characters, action_tags, unidentified):
     """
-    Returns whether the given field combination can be used with single source renderer.
+    Returns whether the given field combination can be used with self targeting renderer.
     
     Parameters
     ----------
@@ -288,6 +318,37 @@ def is_single_source(characters, action_tags, unidentified):
     Returns
     -------
     is_single_source : `bool`
+    """
+    if (characters is None) or (action_tags is None) or (unidentified is not None):
+        return False
+    
+    if len(characters) != 1 or len(action_tags) != 1:
+        return False
+    
+    if next(iter(action_tags)) not in ('pocky_self', 'feed_self'):
+        return False
+    
+    return True
+
+
+def is_self_target(characters, action_tags, unidentified):
+    """
+    Returns whether the given field combination can be used with single source renderer.
+    
+    Parameters
+    ----------
+    characters : `None | set<TouhouCharacter>`
+        Touhou characters.
+    
+    action_tags : `None | set<str>`
+        Action tags.
+    
+    unidentified : `None | set<str>`
+        Unidentified name parts.
+    
+    Returns
+    -------
+    is_self_target : `bool`
     """
     if (characters is None) or (action_tags is None) or (unidentified is not None):
         return False
@@ -322,5 +383,8 @@ def get_renderer_for(characters, action_tags, unidentified):
     """
     if is_single_source(characters, action_tags, unidentified):
         return renderer_single_source
+    
+    if is_self_target(characters, action_tags, unidentified):
+        return renderer_self_target
     
     return renderer_default

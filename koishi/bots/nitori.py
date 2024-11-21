@@ -366,10 +366,10 @@ async def is_banned(
     user: ('user', 'Who should I check?')
 ):
     """Checks whether the user is banned."""
-    if not event.user_permissions.can_ban_users:
+    if not event.user_permissions.ban_users:
         abort('You need to have `ban users` permissions to do this.')
     
-    if not event.channel.cached_permissions_for(client).can_ban_users:
+    if not event.channel.cached_permissions_for(client).ban_users:
         abort('I need to have `ban users` permissions to do this.')
     
     yield # Acknowledge the event.
@@ -438,7 +438,7 @@ async def enable_ping(
     if guild is None:
         abort('Guild only command.')
     
-    if not event.user_permissions.can_administrator:
+    if not event.user_permissions.administrator:
         abort('You must have administrator permission to invoke this command.')
     
     application_commands = await client.application_command_guild_get_all(guild)
@@ -1029,7 +1029,7 @@ async def role_claimer(event):
     """Role claimer message. (Owner only)"""
     
     # Double check.
-    if not event.user_permissions.can_administrator:
+    if not event.user_permissions.administrator:
         abort('Admin only')
     
     return InteractionResponse('Claim role by clicking on it', components = ROLE_CLAIMER_COMPONENTS)
@@ -1584,10 +1584,10 @@ async def add_role(
 ):
     """Add role to a user."""
     # Check for permissions
-    if not event.user_permissions.can_manage_roles:
+    if not event.user_permissions.manage_roles:
         abort('You need `manage roles` permission to invoke this command.')
     
-    if not event.guild.cached_permissions_for(client).can_manage_roles:
+    if not event.guild.cached_permissions_for(client).manage_roles:
         abort('I need `manage roles` permission to execute this command.')
     
     if not event.user.has_higher_role_than(role):

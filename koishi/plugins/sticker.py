@@ -208,7 +208,7 @@ async def sticker_top(
 
 
 def assert_user_permissions(event):
-    if not event.user_permissions.can_manage_guild_expressions:
+    if not event.user_permissions.manage_guild_expressions:
         abort(f'You must have manage emojis & stickers permissions to invoke this command.')
 
 

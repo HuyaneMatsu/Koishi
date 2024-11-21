@@ -11,13 +11,13 @@ def _iter_options__render_flags_difference_into():
             activity_type = ActivityType.playing,
             flags = ActivityFlag().update_by_keys(join = True, spectate = True),
         ),
-        'Flags: sync, play -> join, spectate\n',
+        'Flags: play, sync -> join, spectate\n',
     )
     
     yield (
         ActivityFlag().update_by_keys(sync = True, play = True),
         Activity(activity_type = ActivityType.playing),
-        'Flags: sync, play -> *none*\n',
+        'Flags: play, sync -> *none*\n',
     )
     yield (
         ActivityFlag(),

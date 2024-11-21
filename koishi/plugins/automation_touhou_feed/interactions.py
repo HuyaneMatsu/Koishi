@@ -115,7 +115,7 @@ async def page_move(client, event, page):
     response : `None`, ``InteractionResponse``
     """
     guild = event.guild
-    if (guild is not None) and event.user_permissions.can_administrator:
+    if (guild is not None) and event.user_permissions.administrator:
         return build_touhou_feed_listing_response(client, guild, int(page), get_touhou_feed_enabled(guild.id))
 
 
@@ -140,7 +140,7 @@ async def page_refresh(client, event, page):
     response : `None`, ``InteractionResponse``
     """
     guild = event.guild
-    if (guild is not None) and event.user_permissions.can_administrator:
+    if (guild is not None) and event.user_permissions.administrator:
         return build_touhou_feed_listing_response(client, guild, int(page), get_touhou_feed_enabled(guild.id))
 
 
@@ -158,6 +158,6 @@ async def close_message(client, event):
     event : ``InteractionEvent``
         The received event.
     """
-    if event.user_permissions.can_manage_messages:
+    if event.user_permissions.manage_messages:
         await client.interaction_component_acknowledge(event)
         await client.interaction_response_message_delete(event)

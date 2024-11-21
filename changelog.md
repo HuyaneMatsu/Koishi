@@ -1,3 +1,22 @@
+### 2024-11-??
+
+- Fix `/oj card` `Red & Blue` had its asset incorrectly assigned.
+- Fix `/oj character` `Mimyuu (Jailbird)` had its hyper incorrectly linked.
+- Fix `/oj character` `Mimyuu` did not have both of its hypers linked.
+- Fix `gateway timeout` were propagated while acknowledging in `/daily`.
+- Fix `internal server error` were propagated in `/automation log satori` presence logging.
+- Fix `/mod mute` now handles when the user leaves while the action is performed.
+- Fix `auotmation touhou-feed` not updating when: a role is deleted, a role is modified, a role is given / taken.
+- Add `self-target` rendering to `upload-action-assets` cli command.
+- Update `Krila` -> `Krilalaris` in `/OJ card` `Bloodlust` & `/OJ character` `Krilalaris`.
+- Add new `Claim poll role` button into `/rules` (support guild only).
+- Add `Alice` bot.
+- `/lap-sleep` command now uses `lap_sleep` tag in its images' names (from `lap-sleep`).
+- Add **1** images to `/kon`.
+- Add **9** images to `/hug`.
+- Add **2** images to `/kiss`.
+- Add **2** images to `/lap-sleep`.
+
 ### 2024-10-27
 
 - Fix `/automation log-satori` activity timestamp difference rendered incorrectly.

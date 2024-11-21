@@ -89,7 +89,7 @@ async def top_list_close(client, event):
     """
     await client.interaction_component_acknowledge(event)
     
-    if event.user_permissions.can_manage_messages or event.message.interaction.user_id == event.user_id:
+    if event.user_permissions.manage_messages or event.message.interaction.user_id == event.user_id:
         await client.interaction_response_message_delete(event)
     
     else:

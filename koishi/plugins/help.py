@@ -8,10 +8,10 @@ from hata.ext.slash import Button, InteractionResponse, Row, abort
 from hata.ext.slash.menus import Closer, Pagination
 
 from ..bot_utils.constants import (
-    COLOR__KOISHI_HELP, EMOJI__HEART_CURRENCY, GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT, URL__KOISHI_TOP_GG,
-    ROLE__SUPPORT__ANNOUNCEMENTS, ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__EVENT_MANAGER,
-    ROLE__SUPPORT__EVENT_PARTICIPANT, ROLE__SUPPORT__EVENT_WINNER, ROLE__SUPPORT__HEART_BOOST,
-    ROLE__SUPPORT__NSFW_ACCESS, ROLE__SUPPORT__VERIFIED
+    COLOR__KOISHI_HELP, EMOJI__HEART_CURRENCY, GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT, ROLE__SUPPORT__ANNOUNCEMENTS,
+    ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__EVENT_MANAGER, ROLE__SUPPORT__EVENT_PARTICIPANT,
+    ROLE__SUPPORT__EVENT_WINNER, ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__NSFW_ACCESS, ROLE__SUPPORT__POLLS,
+    ROLE__SUPPORT__VERIFIED, URL__KOISHI_TOP_GG
 )
 from ..bot_utils.headers import get_header_for
 from ..bots import FEATURE_CLIENTS
@@ -26,6 +26,10 @@ CLAIM_ROLE_VERIFIED_CUSTOM_ID = 'rules.claim_role.verified'
 CLAIM_ROLE_ANNOUNCEMENTS_EMOJI = Emoji.precreate(1175518140390707332)
 CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID = 'rules.claim_role.announcements'
 
+CLAIM_ROLE_POLLS_EMOJI = Emoji.precreate(1087715009045479465)
+CLAIM_ROLE_POLLS_CUSTOM_ID = 'rules.claim_role.polls'
+
+
 RULES_COMPONENTS = Row(
     Button(
         'Accept rules (I wont fry fumos)',
@@ -36,6 +40,11 @@ RULES_COMPONENTS = Row(
         'Claim announcements role',
         CLAIM_ROLE_ANNOUNCEMENTS_EMOJI,
         custom_id = CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID,
+    ),
+    Button(
+        'Claim polls role',
+        CLAIM_ROLE_POLLS_EMOJI,
+        custom_id = CLAIM_ROLE_POLLS_CUSTOM_ID,
     ),
 )
 
@@ -117,7 +126,7 @@ async def rules(
             color = COLOR__KOISHI_HELP,
         )
         
-        if event.user_permissions.can_administrator:
+        if event.user_permissions.administrator:
             components = RULES_COMPONENTS
         else:
             components = None
@@ -188,12 +197,38 @@ async def claim_announcements_role(client, event):
     await client.interaction_followup_message_create(event, content = response, show_for_invoking_user_only = True)
 
 
+@FEATURE_CLIENTS.interactions(custom_id = CLAIM_ROLE_POLLS_CUSTOM_ID, show_for_invoking_user_only = True)
+async def claim_polls_role(client, event):
+    """
+    Assigns or removes the polls role to / of the user.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    """
+    await client.interaction_component_acknowledge(event)
+    
+    user = event.user
+    if user.has_role(ROLE__SUPPORT__POLLS):
+        await client.user_role_delete(user, ROLE__SUPPORT__POLLS)
+        response = f'Your {ROLE__SUPPORT__POLLS.name} role was removed.'
+    else:
+        await client.user_role_add(user, ROLE__SUPPORT__POLLS)
+        response = f'You claimed {ROLE__SUPPORT__POLLS.name} role.'
+    
+    await client.interaction_followup_message_create(event, content = response, show_for_invoking_user_only = True)
+
 
 def docs_search_pagination_check(user, event):
     if user is event.user:
         return True
     
-    if event.user_permissions.can_manage_messages:
+    if event.user_permissions.manage_messages:
         return True
     
     return False
@@ -479,7 +514,7 @@ async def help_close(client, event):
     """
     await client.interaction_component_acknowledge(event)
     
-    if event.user_permissions.can_manage_messages or event.message.interaction.user_id == event.user_id:
+    if event.user_permissions.manage_messages or event.message.interaction.user_id == event.user_id:
         await client.interaction_response_message_delete(event)
     
     else:

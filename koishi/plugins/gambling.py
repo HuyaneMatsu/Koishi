@@ -80,7 +80,7 @@ async def heart_event(
 ):
     """Starts a heart event at the channel."""
     while True:
-        if not event.user_permissions.can_administrator:
+        if not event.user_permissions.administrator:
             response = f'{ROLE__SUPPORT__ADMIN.mention} only!'
             error = True
             break
@@ -861,7 +861,7 @@ async def award(
     with_: (AWARD_TYPES, 'Select award type') = 'hearts',
 ):
     """Awards the user with love."""
-    if not event.user_permissions.can_administrator:
+    if not event.user_permissions.administrator:
         abort(f'You must have administrator permission to invoke this command.')
     
     if amount <= 0:
@@ -994,7 +994,7 @@ async def take(
     amount: ('int', 'How much love do you want to take away?'),
 ):
     """Takes away hearts form the lucky user."""
-    if not event.user_permissions.can_administrator:
+    if not event.user_permissions.administrator:
         abort(f'You must have administrator permission to invoke this command.')
     
     if amount <= 0:

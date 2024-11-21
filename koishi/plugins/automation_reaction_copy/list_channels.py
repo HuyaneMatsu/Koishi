@@ -44,7 +44,7 @@ def get_first_client(channel):
     client : `None | Client`
     """
     for client in channel.clients:
-        if channel.cached_permissions_for(client).can_manage_webhooks:
+        if channel.cached_permissions_for(client).manage_webhooks:
             return client
 
 

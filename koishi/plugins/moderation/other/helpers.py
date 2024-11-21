@@ -135,12 +135,16 @@ def build_action_completed_embed(user, embed_builder, word_config, note, *positi
     ----------
     user : ``ClientUserBase``
         The user on who the action was executed.
+    
     embed_builder : `FunctionType``
         Base embed builder.
+    
     word_config : ``WordConfig``
         Words to use for filling up the error messages about the action to be executed.
-    note : `None`, `str`
+    
+    note : `None | str`
         Note to set to the message.
+    
     *position_parameters : Positional parameters
         Additional positional parameters to pass to the embed builder.
     
@@ -152,6 +156,44 @@ def build_action_completed_embed(user, embed_builder, word_config, note, *positi
         user,
         'Hecatia yeah!',
         f'**{user.full_name}** has been {word_config.to_be}.',
+        *position_parameters,
+    )
+    
+    if (note is not None):
+        embed.add_footer(note)
+    
+    return embed
+
+
+def build_action_failed_embed(user, embed_builder, word_config, note, *position_parameters):
+    """
+    Builds an action not done embed.
+    
+    Parameters
+    ----------
+    user : ``ClientUserBase``
+        The user on who the action was executed.
+    
+    embed_builder : `FunctionType``
+        Base embed builder.
+    
+    word_config : ``WordConfig``
+        Words to use for filling up the error messages about the action to be executed.
+    
+    note : `None | str`
+        Note to set to the message.
+    
+    *position_parameters : Positional parameters
+        Additional positional parameters to pass to the embed builder.
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
+    embed = embed_builder(
+        user,
+        'Oh snap..',
+        f'Failed to {word_config.name!s} **{user.full_name}**.',
         *position_parameters,
     )
     

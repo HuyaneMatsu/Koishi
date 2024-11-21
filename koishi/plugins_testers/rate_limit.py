@@ -30,7 +30,7 @@ from scarletio import (
 from scarletio.http_client import RequestContextManager
 from scarletio.utils.trace import render_exception_into, render_frames_into
 from scarletio.utils.trace.frame_proxy import FrameProxyTraceback
-from scarletio.web_common import BasicAuth, FormData, quote
+from scarletio.web_common import BasicAuthorization, FormData, quote
 from scarletio.web_common.headers import (
     ALLOW, AUTHORIZATION, CONTENT_TYPE, DATE, METHOD_DELETE, METHOD_GET, METHOD_OPTIONS, METHOD_PATCH, METHOD_POST,
     METHOD_PUT
@@ -834,7 +834,7 @@ async def oauth2_token(client):
     }
     
     headers = IgnoreCaseMultiValueDictionary()
-    headers[AUTHORIZATION] = BasicAuth(str(client.id), client.secret).encode()
+    headers[AUTHORIZATION] = BasicAuthorization(str(client.id), client.secret).encode()
     headers[CONTENT_TYPE] = 'application/x-www-form-urlencoded'
                 
     return await bypass_request(
@@ -1620,7 +1620,7 @@ async def role_create(
 async def role_move(client, role, new_position):
     guild = role.guild
     data= change_on_switch(guild.role_list, role, new_position, key = role_move_key)
-    guild_id = role.guild.id
+    guild_id = role.guild_id
     return await bypass_request(
         client,
         METHOD_PATCH,
@@ -1652,7 +1652,7 @@ async def role_edit(
         'mentionable' : mentionable,
     }
     
-    guild_id = role.guild.id
+    guild_id = role.guild_id
     role_id = role.id
     return await bypass_request(
         client,
@@ -1663,11 +1663,21 @@ async def role_edit(
 
 
 async def role_delete(client, role):
-    guild_id = role.guild.id
+    guild_id = role.guild_id
     role_id = role.id
     return await bypass_request(
         client,
         METHOD_DELETE,
+        f'{API_ENDPOINT}/guilds/{guild_id}/roles/{role_id}',
+    )
+
+
+async def role_get(client, role):
+    guild_id = role.guild_id
+    role_id = role.id
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles/{role_id}',
     )
 
@@ -4037,7 +4047,7 @@ async def rate_limit_test_0013(client, message):
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         target_time = int((time_now() - 40 * 86400.) * 1000.-DISCORD_EPOCH) << 22
@@ -4128,7 +4138,7 @@ async def rate_limit_test_0014(client, message):
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
             
         messages = []
@@ -4149,7 +4159,7 @@ async def rate_limit_test_0015(client, message):
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         emoji = BUILTIN_EMOJIS['x']
@@ -4166,7 +4176,7 @@ async def rate_limit_test_0016(client, message):
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         emoji = BUILTIN_EMOJIS['x']
@@ -4205,7 +4215,7 @@ async def rate_limit_test_0019(client, message):
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         nsfw = channel.nsfw
@@ -4225,7 +4235,7 @@ async def rate_limit_test_0020(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         data = await channel_create(client, guild, 'channel_name')
@@ -4244,7 +4254,7 @@ async def rate_limit_test_0021(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         channel = await client.channel_create(guild, name = 'Kanako', type_ = 0)
@@ -4262,7 +4272,7 @@ async def rate_limit_test_0022(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         role = await client.role_create(guild, name = 'Sanae')
@@ -4281,7 +4291,7 @@ async def rate_limit_test_0023(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         data = await role_create(client, guild, name = 'Yukari')
@@ -4300,7 +4310,7 @@ async def rate_limit_test_0024(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
 
         top_role = client.top_role_at(guild)
@@ -4321,7 +4331,7 @@ async def rate_limit_test_0025(client, message):
         if channel_1.guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not channel_1.cached_permissions_for(client).can_administrator:
+        if not channel_1.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         parent = channel_1.parent
@@ -4363,7 +4373,7 @@ async def rate_limit_test_0026(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         role_1 = await client.role_create(guild, name = 'Sanae')
@@ -4385,7 +4395,7 @@ async def rate_limit_test_0027(client, message, guild_id : str = ''):
         if guild_1 is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not guild_1.cached_permissions_for(client).can_administrator:
+        if not guild_1.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         try:
@@ -4393,7 +4403,7 @@ async def rate_limit_test_0027(client, message, guild_id : str = ''):
         except (KeyError, ValueError):
             await RLT.send('Please pass a guild id as well, where I am as well.')
         
-        if not guild_2.cached_permissions_for(client).can_administrator:
+        if not guild_2.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission at the other guild as well')
             
         role_1 = await client.role_create(guild_1, name = 'Sanae')
@@ -4415,7 +4425,7 @@ async def rate_limit_test_0028(client, message, guild_id : str = ''):
         if guild_1 is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not guild_1.cached_permissions_for(client).can_administrator:
+        if not guild_1.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         try:
@@ -4423,7 +4433,7 @@ async def rate_limit_test_0028(client, message, guild_id : str = ''):
         except (KeyError, ValueError):
             await RLT.send('Please pass a guild id as well, where I am as well.')
         
-        if not guild_2.cached_permissions_for(client).can_administrator:
+        if not guild_2.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission at the other guild as well')
             
         role_1_data = await role_create(client, guild_1, name = 'Yuyuko')
@@ -4445,7 +4455,7 @@ async def rate_limit_test_0029(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         top_role = client.top_role_at(guild)
@@ -4468,7 +4478,7 @@ async def rate_limit_test_0030(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         if channel.type != 5:
@@ -4495,7 +4505,7 @@ async def rate_limit_test_0031(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         if channel.type != 5:
@@ -4608,7 +4618,7 @@ async def rate_limit_test_0035(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
             
         for channel_ in guild.channels.values():
@@ -4661,7 +4671,7 @@ async def rate_limit_test_0036(client, message):
             await RLT.send('Please use this command at a guild.')
         
         # I dunno what perm u need, so lets check all ^^'
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         await invite_get_channel(client, channel)
@@ -4674,7 +4684,7 @@ async def rate_limit_test_0037(client, message):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0037') as RLT:
-        if not channel.cached_permissions_for(client).can_read_message_history:
+        if not channel.cached_permissions_for(client).read_message_history:
             await RLT.send('I need permission to read message history to execute this command.')
         
         await message_get_chunk(client, channel)
@@ -4697,7 +4707,7 @@ async def rate_limit_test_0039(client, message):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0039') as RLT:
-        if not channel.cached_permissions_for(client).can_add_reactions:
+        if not channel.cached_permissions_for(client).add_reactions:
             await RLT.send('I need permission to add reactions to execute this command.')
         
         emoji = BUILTIN_EMOJIS['x']
@@ -4718,7 +4728,7 @@ async def rate_limit_test_0040(client, message):
             await RLT.send('Please use this command at a guild.')
         
         # I dunno what perm u need, so lets check all ^^'
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         roles = guild.role_list
@@ -4759,7 +4769,7 @@ async def rate_limit_test_0041(client, message):
             await RLT.send('Please use this command at a guild.')
         
         # I dunno what perm u need, so lets check all ^^'
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         roles = guild.role_list
@@ -4799,7 +4809,7 @@ async def rate_limit_test_0042(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         await webhook_get_all_channel(client, channel)
@@ -4816,7 +4826,7 @@ async def rate_limit_test_0043(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         webhook = await webhook_create(client, channel, 'cake')
@@ -4848,7 +4858,7 @@ async def rate_limit_test_0045(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
     
         afk_channel = guild.afk_channel
@@ -4883,7 +4893,7 @@ async def rate_limit_test_0046(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_view_audit_logs:
+        if not guild.cached_permissions_for(client).view_audit_logs:
             await RLT.send('I need view audit log permission to complete this command.')
         
         await audit_log_get_chunk(client, guild)
@@ -4900,7 +4910,7 @@ async def rate_limit_test_0047(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         await guild_ban_get_all(client, guild)
@@ -4923,7 +4933,7 @@ async def rate_limit_test_0048(client, message, user : 'user' = None):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         if user is None:
@@ -4962,7 +4972,7 @@ async def rate_limit_test_0050(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         target_channel = await client.channel_create(guild, name = 'tesuto_next:gen', parent = channel.parent, type_ = 0)
@@ -4987,7 +4997,7 @@ async def rate_limit_test_0051(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         created_channel = await channel_create(client, guild, name = 'tesuto_next:gen2', type_ = 0)
@@ -5040,7 +5050,7 @@ async def rate_limit_test_0054(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         await guild_prune_estimate(client, guild)
@@ -5057,7 +5067,7 @@ async def rate_limit_test_0055(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         await guild_prune(client, guild)
@@ -5074,7 +5084,7 @@ async def rate_limit_test_0056(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         await guild_voice_region_get_all(client, guild)
@@ -5091,7 +5101,7 @@ async def rate_limit_test_0057(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         await guild_role_get_all(client, guild)
@@ -5122,7 +5132,7 @@ async def rate_limit_test_0059(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         await webhook_get_all_guild(client, guild)
@@ -5139,7 +5149,7 @@ async def rate_limit_test_0060(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         invite = await client.invite_create_preferred(guild)
@@ -5299,7 +5309,7 @@ async def rate_limit_test_0070(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         webhook = await client.webhook_create(channel, name = 'Suzuya')
@@ -5318,7 +5328,7 @@ async def rate_limit_test_0071(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         webhook = await client.webhook_create(channel, name = 'Suzuya')
@@ -5337,7 +5347,7 @@ async def rate_limit_test_0072(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_manage_guild:
+        if not guild.cached_permissions_for(client).manage_guild:
             await RLT.send('I need manage guild permission to complete this command.')
         
         await guild_discovery_get(client, guild)
@@ -5354,7 +5364,7 @@ async def rate_limit_test_0073(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_manage_guild:
+        if not guild.cached_permissions_for(client).manage_guild:
             await RLT.send('I need manage guild permission to complete this command.')
         
         guild_discovery = await client.guild_discovery_get(guild)
@@ -5375,7 +5385,7 @@ async def rate_limit_test_0074(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_manage_guild:
+        if not guild.cached_permissions_for(client).manage_guild:
             await RLT.send('I need manage guild permission to complete this command.')
         
         discovery_category_get_all = await client.discovery_category_get_all()
@@ -5639,7 +5649,7 @@ async def rate_limit_test_0089(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_manage_webhooks:
+        if not guild.cached_permissions_for(client).manage_webhooks:
             await RLT.send('I need manage webhooks permission to complete this command.')
         
         channel = message.channel
@@ -5667,7 +5677,7 @@ async def rate_limit_test_0090(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_manage_webhooks:
+        if not guild.cached_permissions_for(client).manage_webhooks:
             await RLT.send('I need manage webhooks permission to complete this command.')
         
         channel = message.channel
@@ -5779,7 +5789,7 @@ async def rate_limit_test_0095(client, message):
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         for name in ('ayaya', 'nyan', 'orin'):
@@ -6411,7 +6421,7 @@ async def rate_limit_test_0118(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         for stage_channel in guild.iter_channels(Channel.is_guild_stage):
@@ -6441,13 +6451,13 @@ async def rate_limit_test_0119(client, message, guild_1 : 'guild' = None):
         if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild_0.cached_permissions_for(client).can_administrator:
+        if not guild_0.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         if guild_1 is None:
             await RLT.send('Second guild unknown.')
         
-        if not guild_0.cached_permissions_for(client).can_administrator:
+        if not guild_0.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         for stage_channel_0 in guild_0.iter_channels(Channel.is_guild_stage):
@@ -6485,13 +6495,13 @@ async def rate_limit_test_0120(client, message, guild_1 : 'guild' = None):
         if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild_0.cached_permissions_for(client).can_administrator:
+        if not guild_0.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         if guild_1 is None:
             await RLT.send('Second guild unknown.')
         
-        if not guild_0.cached_permissions_for(client).can_administrator:
+        if not guild_0.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         for stage_channel_0 in guild_0.iter_channels(Channel.is_guild_stage):
@@ -6567,7 +6577,7 @@ async def rate_limit_test_0123(client, message, stage_channel : 'channel' = None
         if not stage_channel.is_guild_stage():
             await RLT.send('Stage channel only.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         
@@ -6591,7 +6601,7 @@ async def rate_limit_test_0124(client, message, stage_channel : 'channel' = None
         if not stage_channel.is_guild_stage():
             await RLT.send('Stage channel only.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await stage_edit(client, stage_channel, 'Ayaya')
@@ -6624,7 +6634,7 @@ async def rate_limit_test_0126(client, message, stage_channel : 'channel' = None
         if not stage_channel.is_guild_stage():
             await RLT.send('Stage channel only.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await stage_delete(client, stage_channel)
@@ -6641,7 +6651,7 @@ async def rate_limit_test_0127(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_manage_webhooks:
+        if not guild.cached_permissions_for(client).manage_webhooks:
             await RLT.send('I need manage webhooks permission to complete this command.')
         
         channel = message.channel
@@ -6704,7 +6714,7 @@ async def rate_limit_test_0129(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await thread_create(client, channel, 11, 'ayaya')
@@ -6721,7 +6731,7 @@ async def rate_limit_test_0130(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await thread_join(client, channel)
@@ -6748,7 +6758,7 @@ async def rate_limit_test_0132(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await thread_leave(client, channel)
@@ -6767,7 +6777,7 @@ async def rate_limit_test_0133(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await thread_get_self(client, channel)
@@ -6786,7 +6796,7 @@ async def rate_limit_test_0134(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await thread_user_get(client, channel, message.author)
@@ -6803,7 +6813,7 @@ async def rate_limit_test_0135(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await thread_user_add(client, channel, message.author)
@@ -6820,7 +6830,7 @@ async def rate_limit_test_0136(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await thread_user_delete(client, channel, message.author)
@@ -6837,7 +6847,7 @@ async def rate_limit_test_0137(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await thread_self_settings_edit(client, channel, {'type': 11})
@@ -6854,7 +6864,7 @@ async def rate_limit_test_0138(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await channel_thread_get_chunk_archived_public(client, channel)
@@ -6871,7 +6881,7 @@ async def rate_limit_test_0139(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await channel_thread_get_chunk_self_archived(client, channel)
@@ -6904,7 +6914,7 @@ async def rate_limit_test_0141(client, message, stage_channel : 'channel' = None
         if not stage_channel.is_guild_stage():
             await RLT.send('Stage channel only.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await stage_get(client, stage_channel)
@@ -6981,7 +6991,7 @@ async def rate_limit_test_0146(client, message, emoji_1: 'emoji' = None, emoji_2
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         if emoji_1 is None:
@@ -7017,7 +7027,7 @@ async def rate_limit_test_0147(client, message, sticker_id : int = None):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         if sticker_id is None:
@@ -7033,7 +7043,7 @@ async def rate_limit_test_0148(client, message):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0148') as RLT:
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         await sticker_get(client, 819131232642007062)
@@ -7086,7 +7096,7 @@ async def rate_limit_test_0151(client, message, sticker_id : int = None, name : 
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not channel.cached_permissions_for(client).can_administrator:
+        if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         if sticker_id is None:
@@ -7237,7 +7247,7 @@ async def rate_limit_test_0160(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await thread_create_from_message(client, message, 10, 'ayaya')
@@ -7254,7 +7264,7 @@ async def rate_limit_test_0161(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await channel_thread_get_chunk_archived_private(client, channel)
@@ -7271,7 +7281,7 @@ async def rate_limit_test_0162(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await channel_thread_get_chunk_active(client, channel)
@@ -7288,7 +7298,7 @@ async def rate_limit_test_0163(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await thread_user_get_chunk(client, channel)
@@ -7305,7 +7315,7 @@ async def rate_limit_test_0164(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await guild_thread_get_all_active(client, guild)
@@ -8116,7 +8126,7 @@ async def rate_limit_test_0193(client, message, voice_channel : 'channel' = None
         else:
             status = 'koishi'
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the guild to complete this command.')
     
         await channel_edit_status(client, voice_channel, status)
@@ -8148,7 +8158,7 @@ async def rate_limit_test_0194(client, message, voice_channel_0 : 'channel' = No
         if voice_channel_0 is voice_channel_1:
             await RLT.send('Different channels only.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the guild to complete this command.')
         
         task_group = TaskGroup(KOKORO)
@@ -8186,7 +8196,7 @@ async def rate_limit_test_0195(client, message, voice_channel : 'channel' = None
         if not voice_channel.is_guild_voice():
             await RLT.send('Voice channel only.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the guild to complete this command.')
         
         task_group = TaskGroup(KOKORO)
@@ -8217,7 +8227,7 @@ async def rate_limit_test_0196(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the guild as well to complete this command.')
         
         await guild_inventory_settings_edit(client, guild.id, emoji_pack_collectible = True)
@@ -8234,13 +8244,13 @@ async def rate_limit_test_0197(client, message, guild_1: 'guild' = None):
         if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild_0.cached_permissions_for(client).can_administrator:
+        if not guild_0.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the guild to complete this command.')
         
         if guild_1 is None:
             await RLT.send('Please provide a secondary guild parameter')
         
-        if not guild_1.cached_permissions_for(client).can_administrator:
+        if not guild_1.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         if guild_0 is guild_1:
@@ -8511,7 +8521,7 @@ async def rate_limit_test_0216(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         
@@ -8629,7 +8639,7 @@ async def rate_limit_test_0224(client, message):
         if (guild is None):
             await RLT.send('Guild only.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         for voice_channel in guild.iter_channels(Channel.is_guild_voice):
@@ -8653,7 +8663,7 @@ async def rate_limit_test_0225(client, message):
         if (guild is None):
             await RLT.send('Guild only.')
         
-        if not guild.cached_permissions_for(client).can_administrator:
+        if not guild.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         user = message.author
@@ -8755,3 +8765,20 @@ async def rate_limit_test_0232(client, message):
         task_group.create_task(subscription_get_chunk_sku_user(client, 202409240008, 202409240009))
         task_group.create_task(subscription_get_chunk_sku_user(client, 2024092400010, 2024092400011))
         await task_group.wait_all()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0233(client, message, role : Role = None):
+    """
+    Gets one role.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0233') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if role is None:
+            await RLT.send('Please give a role.')
+        
+        await role_get(client, role)

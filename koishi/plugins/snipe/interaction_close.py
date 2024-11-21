@@ -30,7 +30,7 @@ async def snipe_interaction_close(client, event):
     if event.guild_id == 0:
         can_delete = True
     
-    elif event.user_permissions.can_manage_messages:
+    elif event.user_permissions.manage_messages:
         can_delete = True
     
     else:

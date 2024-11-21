@@ -5,7 +5,7 @@ from math import floor
 from re import compile as re_compile
 
 from dateutil.relativedelta import relativedelta as RelativeDelta
-from hata import Embed, elapsed_time
+from hata import DiscordException, Embed, elapsed_time
 from hata.discord.utils import DATETIME_MAX
 from hata.ext.slash import Button, abort
 from sqlalchemy import and_, or_
@@ -393,21 +393,34 @@ async def daily(
     target_user_name: ('str', 'Claiming daily for a waifu?', 'waifu') = None,
 ):
     """Claim a share of my love every day for yourself or for your waifu."""
-    if target_user_name is None:
-        yield
-        yield await claim_daily_for_yourself(client, event)
+    if (target_user_name is None):
+        target_user = None
+    else:
+        target_user = await get_waifu_with_name(event, target_user_name)
+        if (target_user is None):
+            if len(target_user_name) > 100:
+                target_user_name = target_user_name[:100] + '...'
+            
+            abort(f'Waifu not found: `{target_user_name}`')
+            return
+    
+    try:
+        await client.interaction_application_command_acknowledge(event)
+    except ConnectionError:
         return
     
-    target_user = await get_waifu_with_name(event, target_user_name)
-    if (target_user is None):
-        if len(target_user_name) > 100:
-            target_user_name = target_user_name[:100] + '...'
+    except DiscordException as exception:
+        if exception.status >= 500:
+            return
         
-        abort(f'Waifu not found: `{target_user_name}`')
-        return
+        raise
     
-    yield
-    yield await claim_daily_for_waifu(client, event, target_user)
+    if target_user is None:
+        embed = await claim_daily_for_yourself(client, event)
+    else:
+        embed = await claim_daily_for_waifu(client, event, target_user)
+    
+    yield embed
 
 
 @daily.autocomplete('target_user_name')

@@ -27,13 +27,13 @@ async def cancel_message_mover(event):
 
 @MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_CLOSE)
 async def close_message_mover(client, event):
-    if event.user_permissions.can_manage_messages:
+    if event.user_permissions.manage_messages:
         await client.interaction_component_acknowledge(event)
         await client.interaction_response_message_delete(event)
 
 
 async def maybe_call_message_mover_method(event, function):
-    if not event.user_permissions.can_manage_messages:
+    if not event.user_permissions.manage_messages:
         return
     
     try:
@@ -82,7 +82,7 @@ async def add_to_move_group(
 
 @MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID)
 async def add_message_by_id_button_click(event):
-    if event.user_permissions.can_manage_messages:
+    if event.user_permissions.manage_messages:
         return MESSAGE_MOVER_ADD_BY_ID_FORM
 
 

@@ -80,7 +80,7 @@ async def test_rate_limit(client, message):
     
     proxy = client.get_rate_limits_of(RATE_LIMIT_GROUPS.role_edit, limiter = guild)
     if (not proxy.is_alive()) or (not proxy.has_size_set()):
-        if not guild.cached_permissions_for(client).can_manage_roles:
+        if not guild.cached_permissions_for(client).manage_roles:
             await client.message_create(message.channel, 'Current state unknown -> No permissions.')
             return
         
@@ -406,7 +406,7 @@ async def test_receive_voice(client, message, target: User = None):
         return
     
     channel = state.channel
-    if not channel.cached_permissions_for(client).can_connect:
+    if not channel.cached_permissions_for(client).connect:
         await client.message_create(message.channel, 'I have no permissions to connect to that channel')
         return
     
@@ -448,7 +448,7 @@ async def test_receive_voice_decoded(client, event, target : User):
         return
     
     channel = state.channel
-    if not channel.cached_permissions_for(client).can_connect:
+    if not channel.cached_permissions_for(client).connect:
         yield 'I have no permissions to connect to that channel'
         return
     
@@ -490,7 +490,7 @@ async def test_receive_voice_repeat(client, event, target : User):
         return
     
     channel = state.channel
-    if not channel.cached_permissions_for(client).can_connect:
+    if not channel.cached_permissions_for(client).connect:
         yield 'I have no permissions to connect to that channel'
         return
     
@@ -1932,7 +1932,7 @@ if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
                     break
                 
                 self_channel = voice_state.channel
-                if not self_channel.cached_permissions_for(client).can_connect:
+                if not self_channel.cached_permissions_for(client).connect:
                     text = 'I have no permissions to connect to that channel'
                     break
                 

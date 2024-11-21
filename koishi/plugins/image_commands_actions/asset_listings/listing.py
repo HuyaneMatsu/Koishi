@@ -19,7 +19,8 @@ from ...touhou_core import (
     SHIKI_EIKI_YAMAXANADU, SHINKI, SOGA_NO_TOJIKO, STAR_SAPPHIRE, SUKUNA_SHINMYOUMARU, SUNNY_MILK, TATARA_KOGASA,
     TEIREIDA_MAI, TENKYUU_CHIMATA, TOKIKO, TORAMARU_SHOU, TOUTETSU_YUUMA, TOYOSATOMIMI_NO_MIKO, TSUKUMO_BENBEN,
     TSUKUMO_YATSUHASHI, USAMI_RENKO, USAMI_SUMIREKO, USHIZAKI_URUMI, WAKASAGIHIME, WRIGGLE_NIGHTBUG, YAGOKORO_EIRIN,
-    YAKUMO_RAN, YAKUMO_YUKARI, YAMASHIRO_TAKANE, YASAKA_KANAKO, YOMOTSU_HISAMI, YORIGAMI_JOON, YORIGAMI_SHION
+    YAKUMO_RAN, YAKUMO_YUKARI, YAMASHIRO_TAKANE, YASAKA_KANAKO, YOMOTSU_HISAMI, YORIGAMI_JOON, YORIGAMI_SHION,
+    MEIRA
 )
 from ...user_settings import PREFERRED_IMAGE_SOURCE_TOUHOU
 
@@ -130,7 +131,7 @@ from .constants import (
 # From my pc actually.
 # :KoishiPc:
 
-# Source of lap-sleep:
+# Source of lap_sleep:
 #
 # Source 0:
 # From meiko.
@@ -4246,7 +4247,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483876095688775/doremy-sagume-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308909254760988773/doremy-sagume-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, DOREMY_SWEET, KISHIN_SAGUME,
 ).with_creator(
@@ -4256,7 +4257,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239484602209533962/reisen-tewi-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308912673588514917/reisen-tewi-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, INABA_TEWI, REISEN_UDONGEIN_INABA,
 ).with_creator(
@@ -4266,7 +4267,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483876980690995/aya-reimu-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308912808414675014/aya-reimu-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, HAKUREI_REIMU, SHAMEIMARU_AYA,
 ).with_creator(
@@ -4276,7 +4277,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483877366562816/kanako-suwako-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308908922207473694/kanako-suwako-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, MORIYA_SUWAKO, YASAKA_KANAKO,
 ).with_creator(
@@ -4284,7 +4285,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239485878938894346/marisa-nazrin-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308907988391690330/marisa-nazrin-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, NAZRIN, KIRISAME_MARISA,
 ).with_creator(
@@ -4292,7 +4293,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483878054432799/kaguya-mokou-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308910047421530223/kaguya-mokou-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, FUJIWARA_NO_MOKOU, HOURAISAN_KAGUYA,
 ).with_creator(
@@ -4300,7 +4301,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483878461276221/keine-mokou-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308911077957828608/keine-mokou-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, FUJIWARA_NO_MOKOU, KAMISHIRASAWA_KEINE,
 ).with_creator(
@@ -4308,7 +4309,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483878914396200/koishi-satori-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308908539950927943/koishi-satori-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, KOMEIJI_KOISHI, KOMEIJI_SATORI,
 ).with_creator(
@@ -4316,7 +4317,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483879279169566/keiki-mayumi-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308909899631165531/keiki-mayumi-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, JOUTOUGUU_MAYUMI, HANIYASUSHIN_KEIKI,
 ).with_creator(
@@ -4324,7 +4325,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239487878883704852/futo-miko-tojiko-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308907461356421150/futo-miko-tojiko-lap_sleep-0000.png',
 ).with_actions(
     (ACTION_TAG_LAP_SLEEP, MONONOBE_NO_FUTO, SOGA_NO_TOJIKO),
     (ACTION_TAG_LAP_SLEEP, TOYOSATOMIMI_NO_MIKO, SOGA_NO_TOJIKO),
@@ -4333,7 +4334,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483916579115018/marisa-reimu-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308909757817552997/marisa-reimu-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, KIRISAME_MARISA, HAKUREI_REIMU,
 ).with_creator(
@@ -4341,7 +4342,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483916918849626/maribel-renko-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308908137599995946/maribel-renko-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, HEARN_MARIBEL, USAMI_RENKO,
 ).with_creator(
@@ -4349,7 +4350,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483917287952424/chen-ran-yukari-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308907790735118337/chen-ran-yukari-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, CHEN, YAKUMO_RAN,
 ).with_character(
@@ -4359,7 +4360,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483917715767306/chen-ran-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308912450652995634/chen-ran-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, CHEN, YAKUMO_RAN,
 ).with_creator(
@@ -4367,7 +4368,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483918089064448/kanako-suwako-lap-sleep-0001.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308908740807757885/kanako-suwako-lap_sleep-0001.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, MORIYA_SUWAKO, YASAKA_KANAKO,
 ).with_creator(
@@ -4375,7 +4376,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483918403506206/mamizou-nue-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308910941106081873/mamizou-nue-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, HOUJUU_NUE, FUTATSUIWA_MAMIZOU,
 ).with_creator(
@@ -4383,7 +4384,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483918835646464/flandre-remilia-sakuya-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308907044409180180/flandre-remilia-sakuya-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, SCARLET_REMILIA, SCARLET_FLANDRE,
 ).with_character(
@@ -4393,7 +4394,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239483919271858187/shion-tenshi-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308909441260851304/shion-tenshi-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, YORIGAMI_SHION, HINANAWI_TENSHI,
 ).with_creator(
@@ -4809,7 +4810,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1244312740592357497/akyuu-kosuzu-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308910192687190026/akyuu-kosuzu-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, MOTOORI_KOSUZU, HIEDA_NO_AKYUU,
 ).with_creator(
@@ -4825,7 +4826,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1244329883044413450/hecatia-junko-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308909097466200105/hecatia-junko-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, JUNKO, HECATIA_LAPISLAZULI,
 ).with_creator(
@@ -4896,7 +4897,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1244332524910416064/koishi-okuu-orin-satori-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308906720730419282/koishi-okuu-orin-satori-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, KOMEIJI_KOISHI, KOMEIJI_SATORI,
 ).with_characters(
@@ -5201,7 +5202,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1244686207921688687/hina-nitori-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308911875282571294/hina-nitori-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, KAWASHIRO_NITORI, KAGIYAMA_HINA,
 ).with_creator(
@@ -5257,7 +5258,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1244697425860362321/marisa-reimu-lap-sleep-0001.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308909567966445608/marisa-reimu-lap_sleep-0001.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, HAKUREI_REIMU, KIRISAME_MARISA,
 ).with_creator(
@@ -5559,7 +5560,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1259488758319943741/koishi-satori-lap-sleep-0001.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308908392185724948/koishi-satori-lap_sleep-0001.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, KOMEIJI_SATORI, KOMEIJI_KOISHI,
 ).with_creator(
@@ -6344,7 +6345,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1262054244912205844/minoriko-shizuha-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308907268267577408/minoriko-shizuha-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, AKI_MINORIKO, AKI_SHIZUHA,
 ).with_creator(
@@ -6360,7 +6361,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1262054245964972163/aya-chiruno-lap-sleep-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308912045277708308/aya-chiruno-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, CHIRUNO, SHAMEIMARU_AYA,
 ).with_creator(
@@ -11132,4 +11133,154 @@ TOUHOU_ACTION_ALL.add(
     ACTION_TAG_STARE, KUROKOMA_SAKI, None,
 ).with_creator(
     'risui (suzu rks)',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308902156396527719/tsukasa-kon-0023.png',
+).with_action(
+    ACTION_TAG_KON, KUDAMAKI_TSUKASA, None,
+).with_creator(
+    'kamenozoki momomo',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308902162184798238/meira-reimu-hug-0000.png',
+).with_action(
+    ACTION_TAG_HUG, HAKUREI_REIMU, MEIRA,
+).with_creator(
+    'kamenozoki momomo',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308903288044912750/marisa-rinnosuke-hug-0000.png',
+).with_action(
+    ACTION_TAG_HUG, KIRISAME_MARISA, MORICHIKA_RINNOSUKE,
+).with_creator(
+    'akasata',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308903292251668602/meira-reimu-hug-0001.png',
+).with_action(
+    ACTION_TAG_HUG, HAKUREI_REIMU, MEIRA,
+).with_creator(
+    'akasata',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308916621750042755/aya-reimu-cosplay-0000.png',
+).with_actions(
+    (ACTION_TAG_COSPLAY, HAKUREI_REIMU, SHAMEIMARU_AYA),
+    (ACTION_TAG_COSPLAY, HAKUREI_REIMU, SHAMEIMARU_AYA),
+).with_creator(
+    'chilwell seele',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308916626506383432/aya-reimu-hug-0002.png',
+).with_action(
+    ACTION_TAG_HUG, HAKUREI_REIMU, SHAMEIMARU_AYA,
+).with_creator(
+    'chilwell seele',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308916632827199569/aya-reimu-hug-0005.png',
+).with_action(
+    ACTION_TAG_HUG, SHAMEIMARU_AYA, HAKUREI_REIMU,
+).with_creator(
+    'chilwell seele',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308916637826547762/aya-reimu-kiss-0003.png',
+).with_action(
+    ACTION_TAG_KISS, HAKUREI_REIMU, SHAMEIMARU_AYA,
+).with_creator(
+    'chilwell seele',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308916641840762910/aya-reimu-hug-0004.png',
+).with_actions(
+    (ACTION_TAG_HUG, HAKUREI_REIMU, SHAMEIMARU_AYA),
+    (ACTION_TAG_HUG, SHAMEIMARU_AYA, HAKUREI_REIMU),
+).with_creator(
+    'chilwell seele',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308916645791666268/aya-reimu-hug-0006.png',
+).with_action(
+    ACTION_TAG_HUG, HAKUREI_REIMU, SHAMEIMARU_AYA,
+).with_creator(
+    'chilwell seele',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308916651420549120/aya-reimu-hug-0003.png',
+).with_actions(
+    (ACTION_TAG_HUG, HAKUREI_REIMU, SHAMEIMARU_AYA),
+    (ACTION_TAG_HUG, SHAMEIMARU_AYA, HAKUREI_REIMU),
+).with_creator(
+    'chilwell seele',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308916656042676316/aya-reimu-lap_sleep-0002.png',
+).with_action(
+    ACTION_TAG_LAP_SLEEP, HAKUREI_REIMU, SHAMEIMARU_AYA,
+).with_creator(
+    'chilwell seele',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308916666834485361/eiki-komachi-hug-0001.png',
+).with_action(
+    ACTION_TAG_HUG, SHIKI_EIKI_YAMAXANADU, ONOZUKA_KOMACHI,
+).with_creator(
+    'chilwell seele',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308916673096712192/aya-reimu-lap_sleep-0001.png',
+).with_action(
+    ACTION_TAG_LAP_SLEEP, HAKUREI_REIMU, SHAMEIMARU_AYA,
+).with_creator(
+    'chilwell seele',
+).with_editor(
+    'HuyaneMatsu',
+)
+
+TOUHOU_ACTION_ALL.add(
+    'https://cdn.discordapp.com/attachments/568837922288173058/1308916678469488731/aya-reimu-kiss-0002.png',
+).with_actions(
+    (ACTION_TAG_KISS, HAKUREI_REIMU, SHAMEIMARU_AYA),
+    (ACTION_TAG_KISS, SHAMEIMARU_AYA, HAKUREI_REIMU),
+).with_creator(
+    'chilwell seele',
+).with_editor(
+    'HuyaneMatsu',
 )

@@ -348,7 +348,7 @@ async def booru_close(client, event):
     """
     await client.interaction_component_acknowledge(event)
     
-    if event.user_permissions.can_manage_messages or event_user_matches(event):
+    if event.user_permissions.manage_messages or event_user_matches(event):
         await client.interaction_response_message_delete(event)
     
     else:

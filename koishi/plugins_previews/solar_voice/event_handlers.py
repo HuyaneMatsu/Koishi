@@ -14,11 +14,11 @@ def can_send_message_in_channel(client, channel):
     if (channel is not None):
         permissions = channel.cached_permissions_for(client)
         if channel.is_in_group_thread():
-            if permissions.can_send_messages_in_threads:
+            if permissions.send_messages_in_threads:
                 return True
         
         else:
-            if permissions.can_send_messages:
+            if permissions.send_messages:
                 return True
     
     return False

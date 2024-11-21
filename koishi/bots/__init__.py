@@ -20,6 +20,7 @@ else:
 
 
 if LOAD_KOISHI:
+    from .alice import *
     from .flandre import *
     from .koishi import *
     from .nitori import *
@@ -34,6 +35,7 @@ if LOAD_KOISHI:
     MAIN_CLIENT = Koishi
     
     FEATURE_CLIENTS = ClientWrapper(
+        Alice,
         Flandre,
         Koishi,
         Orin,
@@ -43,6 +45,7 @@ if LOAD_KOISHI:
     
     __all__ = (
         *__all__,
+        *alice.__all__,
         *flandre.__all__,
         *koishi.__all__,
         *nitori.__all__,

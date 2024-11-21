@@ -117,7 +117,7 @@ def _iter_options__build_guild_profile_description():
             f'Nick: koi\n'
             f'Booster since: 2016-10-14 21:13:18 [*28 seconds*]\n'
             f'Timed out until: 2016-10-14 21:14:46 [*1 minute*]\n'
-            f'Flags: rejoined, onboarding completed'
+            f'Flags: onboarding completed, rejoined'
         )
     )
 
@@ -228,7 +228,7 @@ def _iter_options__test__build_user_join_or_leave_description():
             f'Nick: koi\n'
             f'Booster since: 2016-10-14 21:13:18 [*28 seconds*]\n'
             f'Timed out until: 2016-10-14 21:14:46 [*1 minute*]\n'
-            f'Flags: rejoined, onboarding completed'
+            f'Flags: onboarding completed, rejoined'
         ),
     )
     
@@ -251,7 +251,7 @@ def _iter_options__test__build_user_join_or_leave_description():
             f'Nick: koi\n'
             f'Booster since: 2016-10-14 21:13:18 [*28 seconds*]\n'
             f'Timed out until: 2016-10-14 21:14:46 [*1 minute*]\n'
-            f'Flags: rejoined, onboarding completed\n'
+            f'Flags: onboarding completed, rejoined\n'
             f'\n'
             f'Left: 2016-10-14 21:13:46\n'
             f'Created - joined difference: 10 seconds'
@@ -347,7 +347,7 @@ def _iter_options__build_activity_description():
             f'Url: https://orindance.party/\n'
             f'Sync id: Mr. spider\n'
             f'Session id: Orin\n'
-            f'Flags: play, embedded\n'
+            f'Flags: embedded, play\n'
             f'Application id: 202308080001\n'
             f'Id: 202308080000\n'
             f'Created at: 2016-10-14 21:13:26 [*10 seconds ago*]'
@@ -477,7 +477,7 @@ def _iter_options__build_user_with_guild_profile_description():
             f'Nick: koi\n'
             f'Booster since: 2016-10-14 21:13:18 [*28 seconds*]\n'
             f'Timed out until: 2016-10-14 21:14:46 [*1 minute*]\n'
-            f'Flags: rejoined, onboarding completed'
+            f'Flags: onboarding completed, rejoined'
         ),
     )
 

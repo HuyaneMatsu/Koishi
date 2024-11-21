@@ -177,7 +177,7 @@ def _iter_options__render_guild_profile_description_into():
                 f'Nick: koi\n'
                 f'Booster since: 2016-10-14 21:13:18 [*28 seconds*]\n'
                 f'Timed out until: 2016-10-14 21:14:46 [*1 minute*]\n'
-                f'Flags: rejoined, onboarding completed'
+                f'Flags: onboarding completed, rejoined'
             ),
             True,
         )
@@ -559,7 +559,7 @@ def _iter_options__render_activity_description_into():
                 f'Buttons: \'Rumia\', \'Letty\'\n'
                 f'Sync id: Mr. spider\n'
                 f'Session id: Orin\n'
-                f'Flags: play, embedded\n'
+                f'Flags: embedded, play\n'
                 f'Application id: 202308080001\n'
                 f'Id: 202308080000\n'
                 f'Created at: 2016-10-14 21:13:26 [*10 seconds ago*]'

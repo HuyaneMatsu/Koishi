@@ -1754,7 +1754,7 @@ async def bozosort_(
     event,
     message,
 ):
-    if (not event.user_permissions.can_manage_messages):
+    if (not event.user_permissions.manage_messages):
         abort('You need to have manage messages to invoke this command.')
     
     content = message.content

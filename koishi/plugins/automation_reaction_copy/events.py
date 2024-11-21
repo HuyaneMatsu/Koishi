@@ -155,7 +155,7 @@ async def reaction_add(client, event):
     
     # Get the first client who satisfies the required permission requirements
     for client_to_use in guild.clients:
-        if target_channel.cached_permissions_for(client_to_use).can_manage_webhooks:
+        if target_channel.cached_permissions_for(client_to_use).manage_webhooks:
             if client_to_use is client:
                 break
     

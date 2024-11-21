@@ -86,7 +86,7 @@ async def top_list_command_component_close(client, event):
     """
     permissions = event.user_permissions
     if (
-        permissions.can_manage_messages or
+        permissions.manage_messages or
         permissions & REQUIRED_PERMISSIONS_USER_VALUE == REQUIRED_PERMISSIONS_USER_VALUE
     ):
         await client.interaction_component_acknowledge(event)

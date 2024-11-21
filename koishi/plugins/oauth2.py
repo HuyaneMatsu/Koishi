@@ -1,7 +1,7 @@
 __all__ = ()
 
 from scarletio import sleep
-from hata import Color, Embed, parse_oauth2_redirect_url, DiscordException, ERROR_CODES, Channel, Client, ChannelType
+from hata import Color, Embed, parse_oauth2_redirect_url, DiscordException, ERROR_CODES, Channel, ChannelType
 from hata.ext.commands_v2 import checks
 from hata.ext.slash.menus import Pagination
 

@@ -51,7 +51,7 @@ async def get_should_use_default_response_method(client, event):
     should_use_default_response_method : `bool`
     client : ``Client``
     """
-    if event.user_permissions.can_use_external_application_commands:
+    if event.user_permissions.use_external_application_commands:
         return True, client
     
     guild = event.guild
