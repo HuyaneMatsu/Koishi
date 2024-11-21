@@ -1,4 +1,4 @@
-### 2024-11-??
+### 2024-11-21
 
 - Fix `/oj card` `Red & Blue` had its asset incorrectly assigned.
 - Fix `/oj character` `Mimyuu (Jailbird)` had its hyper incorrectly linked.
