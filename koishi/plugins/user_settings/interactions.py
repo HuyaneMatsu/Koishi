@@ -8,9 +8,11 @@ from .constants import (
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_REMINDER_DISABLE,
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_REMINDER_ENABLE,
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_PROPOSAL_DISABLE, USER_SETTINGS_CUSTOM_ID_NOTIFICATION_PROPOSAL_ENABLE,
+    USER_SETTINGS_CUSTOM_ID_NOTIFICATION_VOTE_DISABLE, USER_SETTINGS_CUSTOM_ID_NOTIFICATION_VOTE_ENABLE,
 )
 from .options import (
-    OPTION_NOTIFICATION_DAILY_BY_WAIFU, OPTION_NOTIFICATION_DAILY_REMINDER, OPTION_NOTIFICATION_PROPOSAL
+    OPTION_NOTIFICATION_DAILY_BY_WAIFU, OPTION_NOTIFICATION_DAILY_REMINDER, OPTION_NOTIFICATION_PROPOSAL,
+    OPTION_NOTIFICATION_VOTE
 )
 from .utils import handle_user_settings_change
 
@@ -43,3 +45,13 @@ async def handle_user_settings_notification_proposal_enable(event):
 @FEATURE_CLIENTS.interactions(custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_PROPOSAL_DISABLE)
 async def handle_user_settings_notification_proposal_disable(event):
     return await handle_user_settings_change(event, OPTION_NOTIFICATION_PROPOSAL, False)
+
+
+@FEATURE_CLIENTS.interactions(custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_VOTE_ENABLE)
+async def handle_user_settings_notification_vote_enable(event):
+    return await handle_user_settings_change(event, OPTION_NOTIFICATION_VOTE, True)
+
+
+@FEATURE_CLIENTS.interactions(custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_VOTE_DISABLE)
+async def handle_user_settings_notification_vote_disable(event):
+    return await handle_user_settings_change(event, OPTION_NOTIFICATION_VOTE, False)

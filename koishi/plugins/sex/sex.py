@@ -88,7 +88,7 @@ async def sex(client, event):
         return
     
     try:
-        await client.messa_create(event.channel, embed = response_embed)
+        await client.message_create(event.channel, embed = response_embed)
     except ConnectionError:
         return
     

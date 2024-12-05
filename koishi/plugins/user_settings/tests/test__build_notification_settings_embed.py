@@ -16,6 +16,7 @@ def test__build_notification_settings_embed():
         notification_daily_by_waifu = True,
         notification_daily_reminder = False,
         notification_proposal = False,
+        notification_vote = False,
     )
     
     user = User.precreate(user_id)
@@ -45,8 +46,15 @@ def test__build_notification_settings_embed():
             'false\n'
             '```'
         ),
+    ).add_field(
+        'Vote',
+        (
+            '```\n'
+            'false\n'
+            '```'
+        ),
     )
-        
+    
     
     output = build_notification_settings_embed(user, user_settings)
     vampytest.assert_instance(output, Embed)

@@ -1,3 +1,16 @@
+### 2024-12-04
+
+- Fix commands using `booru` were not working (since last update).
+- Fix a few new edge cases popping up in `auotmation touhou-feed` due to recent changes.
+- Add new `/accessibility notification-settings change notification_type: vote` option.
+- Voting on Koishi on `top.gg` now triggers a notification.
+- `top.gg` vote rewards now scale with roles.
+- `/daily` now gives higher reward if a user is a booster.
+- Update `/daily` message to include how much streak the user lost.
+- Rewards are now dynamic.
+- `/hearts` rewritten to support dynamic reward rendering.
+- Add `extrenal_events` plugin.
+
 ### 2024-11-21
 
 - Fix `/oj card` `Red & Blue` had its asset incorrectly assigned.

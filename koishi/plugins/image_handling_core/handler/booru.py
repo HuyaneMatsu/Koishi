@@ -4,7 +4,7 @@ from random import random, shuffle
 from math import ceil, floor
 
 from scarletio import copy_docs
-from scarletio.web_common import quote
+from scarletio.web_common import URL, quote
 
 from ....bot_utils.tools import BeautifulSoup
 
@@ -231,7 +231,7 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
         
         while True:
             try:
-                async with client.http.get(f'{self._url}&pid={self._page}') as response:
+                async with client.http.get(URL(f'{self._url}&pid={self._page}', True)) as response:
                     if response.status == 200:
                         data = await response.read()
                     else:

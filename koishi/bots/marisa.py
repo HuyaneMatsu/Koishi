@@ -92,7 +92,7 @@ async def track_stuck(client, event):
     print(repr(event))
 
 @Marisa.events
-async def player_websocket_closed(client, event):
+async def player_web_socket_closed(client, event):
     print(repr(event))
 """
 

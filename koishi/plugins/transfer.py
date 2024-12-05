@@ -12,7 +12,7 @@ from ..bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, 
     emoji_counter_model, EMOJI_COUNTER_TABLE, sticker_counter_model, STICKER_COUNTER_TABLE, ds_v2_model, DS_V2_TABLE, \
     ds_v2_result_model, DS_V2_RESULT_TABLE
 from ..bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, IN_GAME_IDS,  COLOR__GAMBLING
-from ..bot_utils.daily import calculate_daily_new_only
+from ..bot_utils.daily import refresh_daily_streak
 from ..bots import MAIN_CLIENT
 
 WAIFU_STATE_NONE = 0
@@ -174,7 +174,7 @@ async def do_transfer(client, event, source_user, target_user, message):
                 = source_user_result
             
             if source_user_daily_next > now:
-                source_user_daily_streak = calculate_daily_new_only(
+                source_user_daily_streak = refresh_daily_streak(
                 source_user_daily_streak,
                 source_user_daily_next,
                 now,
@@ -221,7 +221,7 @@ async def do_transfer(client, event, source_user, target_user, message):
             
             now = DateTime.now(TimeZone.utc)
             if target_user_daily_next > now:
-                target_user_daily_streak = calculate_daily_new_only(
+                target_user_daily_streak = refresh_daily_streak(
                 target_user_daily_streak,
                 target_user_daily_next,
                 now,

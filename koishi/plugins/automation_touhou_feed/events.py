@@ -78,6 +78,7 @@ async def channel_update(client, channel, old_attributes):
         The affected old attributes of the channel.
     """
     if not (
+        (old_attributes is None) or
         ('applied_tag_ids' in old_attributes) or
         ('available_tags' in old_attributes) or
         ('name' in old_attributes) or
@@ -191,6 +192,7 @@ async def role_update(client, role, old_attributes):
         The affected old attributes of the role.
     """
     if not (
+        (old_attributes is None) or
         ('permissions' in old_attributes) or
         ('position' in old_attributes)
     ):
@@ -234,6 +236,7 @@ async def guild_user_update(client, guild, user, old_attributes):
         return
     
     if not (
+        (old_attributes is None) or
         ('role_ids' in old_attributes)
     ):
         return

@@ -50,6 +50,9 @@ USER_SETTINGS_TABLE = None
 blacklist_model = None
 BLACKLIST_TABLE = None
 
+external_events_model = None
+EXTERNAL_EVENTS_TABLE = None
+
 
 if (DATABASE_NAME is not None):
     from sqlalchemy.ext.declarative import declarative_base
@@ -65,8 +68,8 @@ if (DATABASE_NAME is not None):
             RuntimeWarning,
         )
         DB_ENGINE = None
-        
-    
+
+
 if (DB_ENGINE is not None):
     BASE = declarative_base()
     
@@ -287,8 +290,9 @@ if (DB_ENGINE is not None):
         id = Column(Int64, nullable = False, primary_key = True)
         user_id = Column(Int64, nullable = False)
         notification_daily_by_waifu = Column(Boolean, default = True, nullable = False)
+        notification_daily_reminder = Column(Boolean, default = False, nullable = False)
         notification_proposal = Column(Boolean, default = True, nullable = False)
-        notification_daily_reminder = Column(Boolean, default = True, nullable = False)
+        notification_vote = Column(Boolean, default = True, nullable = False)
         preferred_client_id = Column(Int64, default = 0, nullable = False)
         preferred_image_source = Column(Int16, default = 0, nullable = False)
     
@@ -303,6 +307,20 @@ if (DB_ENGINE is not None):
         user_id         = Column(Int64, nullable = False)
     
     BLACKLIST_TABLE = blacklist_model.__table__
+    
+    
+    class external_events_model(BASE):
+        __tablename__ = 'EXTERNAL_EVENTS'
+        id = Column(Int64, nullable = False, primary_key = True)
+        client_id = Column(Int64, nullable = False)
+        user_id = Column(Int64, nullable = False)
+        event_type = Column(Int32, default = 0, nullable = False)
+        event_data = Column(Binary(), nullable = True)
+        guild_id = Column(Int64, nullable = False)
+        trigger_after = Column(DateTime, nullable = True)
+    
+    
+    EXTERNAL_EVENTS_TABLE = external_events_model.__table__
     
     
     DB_ENGINE.dispose()

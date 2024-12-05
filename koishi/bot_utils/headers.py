@@ -65,6 +65,17 @@ HEADER_ORIN = (
     '```'
 )
 
+HEADER_ALICE = (
+    '```\n'
+    '  ___  _ _          \n'
+    ' / _ \\| (_)         \n'
+    '/ /_\\ \\ |_  ___ ___ \n'
+    '|  _  | | |/ __/ _ \\\n'
+    '| | | | | | (_|  __/\n'
+    '\\_| |_/_|_|\\___\\___|\n'
+    '```'
+)
+
 HEADER_KOISHI_EASTER_EGG = (
     '```\n'
     ' _____ __    ___ \n'
@@ -111,12 +122,24 @@ HEADER_ORIN_EASTER_EGG = (
     '```'
 )
 
+HEADER_ALICE_EASTER_EGG = (
+    '```\n'
+    '  ___       _           \n'
+    ' / _ \\     (_)          \n'
+    '/ /_\\ \\_ __ _ ___ _   _ \n'
+    '|  _  | \'__| / __| | | |\n'
+    '| | | | |  | \\__ \\ |_| |\n'
+    '\\_| |_/_|  |_|___/\\__,_|\n'
+    '```'
+)
+
 HEADERS = {
     config.KOISHI_ID: (HEADER_KOISHI, HEADER_KOISHI_EASTER_EGG),
     config.FLANDRE_ID: (HEADER_FLANDRE, HEADER_FLANDRE_EASTER_EGG),
     config.YOSHIKA_ID: (HEADER_YOSHIKA, HEADER_YOSHIKA),
     config.TOY_KOISHI_ID: (HEADER_TOY_KOISHI, HEADER_TOY_KOISHI_EASTER_EGG),
     config.ORIN_ID: (HEADER_ORIN, HEADER_ORIN_EASTER_EGG),
+    config.ALICE_ID: (HEADER_ALICE, HEADER_ALICE_EASTER_EGG)
 }
 
 HEADER_DEFAULT = HEADER_KOISHI

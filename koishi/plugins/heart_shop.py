@@ -12,10 +12,14 @@ from ..bot_utils.constants import (
     EMOJI__HEART_CURRENCY, GUILD__SUPPORT, ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__HEART_BOOST,
     ROLE__SUPPORT__NSFW_ACCESS
 )
-from ..bot_utils.daily import ELEVATED_COST, HEART_BOOST_COST, NSFW_ACCESS_COST, calculate_daily_new
+from ..bot_utils.daily import calculate_daily_new
 from ..bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, user_common_model
 from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
+
+NSFW_ACCESS_COST = 8000
+ELEVATED_COST = 12000
+HEART_BOOST_COST = 100000
 
 
 HEART_SHOP = FEATURE_CLIENTS.interactions(

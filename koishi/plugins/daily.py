@@ -14,7 +14,7 @@ from sqlalchemy.sql import select
 from ..bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY, URL__KOISHI_TOP_GG, WAIFU_COST_DEFAULT
 from ..bot_utils.daily import (
     DAILY_INTERVAL, DAILY_STREAK_BREAK, TOP_GG_VOTE_DELAY_MAX, TOP_GG_VOTE_DELAY_MIN, calculate_daily_for,
-    calculate_daily_new_only
+    refresh_daily_streak
 )
 from ..bot_utils.models import (
     DB_ENGINE, USER_COMMON_TABLE, get_create_common_user_expression, user_common_model, waifu_list_model
@@ -30,6 +30,7 @@ from .user_settings import (
 )
 
 WAIFU_WITH_COMMENT_RP = re_compile('(.*?)(?:\\s*\\(.*\\)\\s*)?')
+
 
 
 async def claim_daily_for_yourself(client, event):
@@ -53,9 +54,9 @@ async def claim_daily_for_yourself(client, event):
         
         now = DateTime.now(TimeZone.utc)
         
-        results = await response.fetchall()
-        if results:
-            entry_id, total_love, daily_streak, daily_next, count_top_gg_vote, top_gg_last_vote = results[0]
+        result = await response.fetchone()
+        if (result is not None):
+            entry_id, total_love, daily_streak, daily_next, count_top_gg_vote, top_gg_last_vote = result
             daily_next = daily_next.replace(tzinfo = TimeZone.utc)
             top_gg_last_vote = top_gg_last_vote.replace(tzinfo = TimeZone.utc)
             
@@ -66,17 +67,20 @@ async def claim_daily_for_yourself(client, event):
                     color = COLOR__GAMBLING,
                 )
             
-            daily_streak = calculate_daily_new_only(daily_streak, daily_next, now)
-            
-            if daily_next + DAILY_STREAK_BREAK < now:
-                streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
-            else:
-                streak_text = f'You are in a {daily_streak + 1} day streak! Keep up the good work!'
-            
-            received = calculate_daily_for(user, daily_streak)
+            new_daily_streak = refresh_daily_streak(daily_streak, daily_next, now)
+            received = calculate_daily_for(user, new_daily_streak)
+            new_daily_streak += 1
             total_love = total_love + received
             
-            daily_streak += 1
+            if new_daily_streak > daily_streak:
+                streak_text = f'You are on a {new_daily_streak} day streak! Keep up the good work!'
+            elif new_daily_streak < daily_streak:
+                streak_text = (
+                    f'You did not claim daily for more than 1 day, you lost {daily_streak - new_daily_streak}, '
+                    f'and now you are at {new_daily_streak}.'
+                )
+            else:
+                streak_text = f'You did not claim daily for 1 day, your daily stands at {daily_streak!s}.'
             
             await connector.execute(
                 USER_COMMON_TABLE.update(
@@ -84,7 +88,7 @@ async def claim_daily_for_yourself(client, event):
                 ).values(
                     total_love = total_love,
                     daily_next = now + DAILY_INTERVAL,
-                    daily_streak = daily_streak,
+                    daily_streak = new_daily_streak,
                     count_daily_self = user_common_model.count_daily_self + 1,
                     daily_reminded = False,
                 )
@@ -207,7 +211,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                 )
             
             target_daily_streak = target_entry[3]
-            target_daily_streak = calculate_daily_new_only(target_daily_streak, target_daily_next, now)
+            target_daily_streak = refresh_daily_streak(target_daily_streak, target_daily_next, now)
             
             if target_daily_next + DAILY_STREAK_BREAK < now:
                 streak_text = f'They did not claim daily for more than 1 day, they got down to {target_daily_streak}.'
