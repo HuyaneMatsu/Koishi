@@ -29,9 +29,9 @@ async def respond_daily_short(interaction_event, target_user):
     -------
     response : ``InteractionResponse``
     """
-    total, streak, ready_to_claim = await get_generic_heart_fields(target_user.id)
+    balance, streak, ready_to_claim = await get_generic_heart_fields(target_user.id)
     return InteractionResponse(
-        embed = build_daily_embed_short(interaction_event, target_user, total, streak, ready_to_claim),
+        embed = build_daily_embed_short(interaction_event, target_user, balance, streak, ready_to_claim),
         allowed_mentions = None,
     )
     
@@ -55,9 +55,9 @@ async def respond_daily_extended(interaction_event, target_user):
     -------
     response : ``InteractionResponse``
     """
-    total, streak, ready_to_claim = await get_generic_heart_fields(target_user.id)
+    balance, streak, ready_to_claim = await get_generic_heart_fields(target_user.id)
     return InteractionResponse(
-        embed = build_daily_embed_extended(interaction_event, target_user, total, streak, ready_to_claim),
+        embed = build_daily_embed_extended(interaction_event, target_user, balance, streak, ready_to_claim),
         allowed_mentions = None,
     )
 
@@ -80,9 +80,9 @@ async def respond_vote_extended(interaction_event, target_user):
     -------
     response : ``InteractionResponse``
     """
-    total, streak, ready_to_vote = await get_generic_vote_fields(target_user.id)
+    balance, streak, ready_to_vote = await get_generic_vote_fields(target_user.id)
     return InteractionResponse(
-        embed = build_vote_embed_extended(interaction_event, target_user, total, streak, ready_to_vote),
+        embed = build_vote_embed_extended(interaction_event, target_user, balance, streak, ready_to_vote),
         allowed_mentions = None,
     )
 
@@ -106,7 +106,7 @@ async def respond_heart_stats(interaction_event, target_user):
     response : ``InteractionResponse``
     """
     (
-        total,
+        balance,
         streak,
         count_daily_self,
         count_daily_by_waifu,
@@ -118,7 +118,7 @@ async def respond_heart_stats(interaction_event, target_user):
         embed = build_stats_embed(
             interaction_event,
             target_user,
-            total,
+            balance,
             streak,
             count_daily_self,
             count_daily_by_waifu,

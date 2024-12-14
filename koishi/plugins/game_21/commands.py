@@ -6,6 +6,8 @@ from hata.ext.slash import Button
 from ...bot_utils.constants import IN_GAME_IDS
 from ...bots import FEATURE_CLIENTS
 
+from ..user_balance import get_user_balance
+
 from .checks import check_bet_too_low, check_has_enough_love, check_in_game
 from .constants import GAME_21_JOIN_ROW_DISABLED, GAME_21_ROW_DISABLED, PLAYER_STATE_FINISH
 from .helpers import (
@@ -15,10 +17,7 @@ from .helpers import (
 from .join_runner import Game21JoinRunner
 from .player import Player
 from .player_runner import Game21PlayerRunner
-from .queries import (
-    DB_ENGINE, allocate_love_with_connector_with_connector, batch_modify_user_hearts,
-    query_user_entry_id_and_available_love_with_connector
-)
+from .queries import batch_modify_user_hearts
 from .rendering import build_end_embed_multi_player, build_end_embed_single_player
 from .session import Session
 
@@ -31,32 +30,57 @@ EVENT_LOOP = get_event_loop()
     integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
-async def game_21(client, event,
+async def game_21(
+    client,
+    interaction_event,
     amount : ('int', 'The amount of hearts to bet'),
     mode : ([('single-player', 'single'), ('multi-player', 'multi')], 'Game mode, yayyy') = 'single',
 ):
-    """Starts a card game where you can bet your hearts."""
-    check_in_game(event)
+    """
+    Starts a card game where you can bet your hearts.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received this event.
+    
+    interaction_event : ``InteractionEvent``
+        The received event.
+    
+    amount : `str`
+        Bet amount.
+    
+    mode : `str` = `single`, Optional
+        Game mode.
+    """
+    check_in_game(interaction_event)
     check_bet_too_low(amount)
     
-    async with DB_ENGINE.connect() as connector:
-        entry_id, available_love = await query_user_entry_id_and_available_love_with_connector(event.user_id, connector)
-        check_has_enough_love(amount, available_love)
-        await allocate_love_with_connector_with_connector(entry_id, amount, connector)
+    user_balance = await get_user_balance(interaction_event.user_id)
+    check_has_enough_love(amount, user_balance.balance - user_balance.allocated, False)
+    user_balance.set('allocated', user_balance.allocated + amount)
+    await user_balance.save()
     
-    is_single_player = (mode == 'single')
+    single_player_mode = (mode == 'single')
+    if single_player_mode:
+        user_balance = await get_user_balance(client.id)
+        check_has_enough_love(amount, user_balance.balance - user_balance.allocated, True)
+        user_balance.set('allocated', user_balance.allocated + amount)
+        await user_balance.save()
     
-    await client.interaction_application_command_acknowledge(event)
+    await client.interaction_application_command_acknowledge(interaction_event)
     
-    if is_single_player:
+    if single_player_mode:
         coroutine_function = game_21_single_player
     else:
         coroutine_function = game_21_multi_player
     
-    await coroutine_function(client, event, entry_id, amount)
+    await coroutine_function(client, interaction_event, amount)
 
 
-async def game_21_single_player(client, event, entry_id, amount):
+async def game_21_single_player(client, event, amount):
     """
     Runs a single player game.
     
@@ -64,19 +88,19 @@ async def game_21_single_player(client, event, entry_id, amount):
     ----------
     client : ``Client``
         The client who received the event.
+    
     event : ``InteractionEvent``
         The received interaction event.
-    entry_id : `int`
-        The user's database entry's identifier.
+    
     amount : `int`
         Bet amount.
     """
     session = Session(event.guild, amount, event)
     
-    player_user = Player(event.user, entry_id, event)
+    player_user = Player(event.user, event)
     player_user.hand.auto_pull_starting_cards(session.deck)
     
-    player_bot = Player(client, -1, None)
+    player_bot = Player(client, None)
     player_bot.hand.auto_finish(session.deck)
     player_bot.state = PLAYER_STATE_FINISH
     
@@ -90,14 +114,14 @@ async def game_21_single_player(client, event, entry_id, amount):
         raise
     
     except:
-        await batch_modify_user_hearts(get_refund_distribution([player_user], amount))
+        await batch_modify_user_hearts(get_refund_distribution([player_user, player_bot], amount))
         raise
     
     finally:
         IN_GAME_IDS.discard(event.user_id)
     
     if not success:
-        await batch_modify_user_hearts(get_refund_distribution([player_user], amount))
+        await batch_modify_user_hearts(get_refund_distribution([player_user, player_bot], amount))
         return
     
     
@@ -124,7 +148,7 @@ async def game_21_single_player(client, event, entry_id, amount):
     )
 
 
-async def game_21_multi_player(client, event, entry_id, amount):
+async def game_21_multi_player(client, event, amount):
     """
     Runs a multi player game.
     
@@ -132,16 +156,16 @@ async def game_21_multi_player(client, event, entry_id, amount):
     ----------
     client : ``Client``
         The client who received the event.
+    
     event : ``InteractionEvent``
         The received interaction event.
-    entry_id : `int`
-        The user's database entry's identifier.
+    
     amount : `int`
         Bet amount.
     """
     session = Session(event.guild, amount, event)
     
-    players = [Player(event.user, entry_id, event)]
+    players = [Player(event.user, event)]
     
     waiter = Future(EVENT_LOOP)
     

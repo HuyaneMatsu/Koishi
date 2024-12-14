@@ -7,11 +7,10 @@ from math import floor
 from hata import Embed
 from hata.ext.slash import abort
 
-from sqlalchemy.sql import select
-
-from ..bot_utils.constants import IN_GAME_IDS, EMOJI__HEART_CURRENCY
-from ..bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE
+from ..bot_utils.constants import EMOJI__HEART_CURRENCY
 from ..bots import FEATURE_CLIENTS
+
+from .user_balance import get_user_balance
 
 
 MULTIPLIERS = (*(Decimal(value) / 100 for value in (170, 240, 120, 50, 30, 10, 20, 150,)),)
@@ -41,49 +40,19 @@ async def lucky_spin(client, event,
         description = ARROW_BLOCKS[index]
     else:
         if (bet < 10):
-            abort(f'You must bet at least 10 {EMOJI__HEART_CURRENCY}.')
+            return abort(f'You must bet at least 10 {EMOJI__HEART_CURRENCY}.')
         
-        async with DB_ENGINE.connect() as connector:
-            response = await connector.execute(
-                select(
-                    [
-                        user_common_model.id,
-                        user_common_model.total_love,
-                        user_common_model.total_allocated,
-                    ]
-                ).where(
-                    user_common_model.user_id == event.user.id,
-                )
-            )
-            
-            result = await response.fetchone()
-            if result is None:
-                enough_hearts = False
-                available_love = 0
-            else:
-                entry_id, total_love, total_allocated = result
-                if (event.user.id in IN_GAME_IDS) and total_allocated:
-                    available_love = total_love - total_allocated
-                else:
-                    available_love = total_love
-                
-                if bet > available_love:
-                    enough_hearts = False
-                else:
-                    enough_hearts = True
-            
-            if not enough_hearts:
-                abort(f'You have only {available_love} {EMOJI__HEART_CURRENCY} available hearts.')
-            
-            change = floor((MULTIPLIERS[index] - Decimal(1)) * bet)
-            
-            await connector.execute(
-                USER_COMMON_TABLE.update(
-                    user_common_model.id == entry_id,
-                ).values(
-                    total_love = user_common_model.total_love + change,
-                )
-            )
+        user_balance = await get_user_balance(event.user_id)
+        balance = user_balance.balance
+        available = balance - user_balance.allocated
+        
+        if (bet > available):
+            return abort(f'You have only {available} {EMOJI__HEART_CURRENCY} available hearts.')
+        
+        change = floor((MULTIPLIERS[index] - Decimal(1)) * bet)
+        
+        user_balance.set('balance', balance + change)
+        await user_balance.save()
         
         description = f'{ARROW_BLOCKS[index]}\n\nYou won {bet + change} {EMOJI__HEART_CURRENCY} !'
     

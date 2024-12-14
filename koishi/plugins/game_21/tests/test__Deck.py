@@ -24,7 +24,6 @@ def test__Deck__new():
     _assert_fields_set(deck)
 
 
-
 def test__Deck__pull_card():
     """
     Tests whether ``Deck.pull_card`` works as intended.

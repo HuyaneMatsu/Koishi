@@ -5,6 +5,8 @@ from scarletio import Lock, RichAttributeErrorBaseType, Task, get_event_loop
 
 from ...bot_utils.constants import IN_GAME_IDS
 
+from ..user_balance import get_user_balance
+
 from .checks import check_has_enough_love, check_in_game, check_max_players
 from .constants import (
     GAME_21_CUSTOM_ID_CANCEL, GAME_21_CUSTOM_ID_ENTER, GAME_21_CUSTOM_ID_START, GAME_21_JOINER_TIMEOUT,
@@ -13,10 +15,7 @@ from .constants import (
 )
 from .helpers import should_render_exception, try_acknowledge, try_edit_response
 from .player import Player
-from .queries import (
-   DB_ENGINE,  allocate_love_with_connector_with_connector, modify_user_hearts,
-   query_user_entry_id_and_available_love_with_connector
-)
+from .queries import modify_user_hearts
 from .rendering import (
     build_join_embed, build_join_embed_cancelled, build_join_embed_game_started, build_join_embed_timed_out,
     build_join_failed_embed_not_enough_users_to_start, build_leave_succeeded_embed
@@ -170,7 +169,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
             players.remove(player)
             IN_GAME_IDS.discard(interaction_event.user_id)
             await try_acknowledge(client, interaction_event, player, session, True)
-            await modify_user_hearts(player.entry_id, session.amount, 0.0, True)
+            await modify_user_hearts(player.user.id, session.amount, 0.0, True)
             
             try:
                 await client.interaction_followup_message_create(
@@ -194,12 +193,10 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
             check_max_players(players)
             check_in_game(interaction_event)
             
-            async with DB_ENGINE.connect() as connector:
-                entry_id, available_love = await query_user_entry_id_and_available_love_with_connector(
-                    interaction_event.user_id, connector
-                )
-                check_has_enough_love(session.amount, available_love)
-                await allocate_love_with_connector_with_connector(entry_id, session.amount, connector)
+            user_balance = await get_user_balance(interaction_event.user_id)
+            check_has_enough_love(session.amount, user_balance.balance - user_balance.allocated, False)
+            user_balance.set('allocated', user_balance.allocated + session.amount)
+            await user_balance.save()
         except InteractionAbortedError as exception:
             await try_acknowledge(client, interaction_event, player, session, True)
             
@@ -217,7 +214,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
             
             return
         
-        player = Player(interaction_event.user, entry_id, interaction_event)
+        player = Player(interaction_event.user, interaction_event)
         players.append(player)
         IN_GAME_IDS.add(interaction_event.user_id)
         

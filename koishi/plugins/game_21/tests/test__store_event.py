@@ -11,7 +11,7 @@ def _iter_options():
     interaction_event_0 = InteractionEvent.precreate(202408040002)
     interaction_event_1 = InteractionEvent.precreate(202408040003)
     interaction_event_2 = InteractionEvent.precreate(202408040004)
-    player = Player(User.precreate(202408040005), -1, interaction_event_0)
+    player = Player(User.precreate(202408040005), interaction_event_0)
     session = Session(None, 1000, interaction_event_1)
     
     yield (
@@ -21,12 +21,12 @@ def _iter_options():
         interaction_event_2,
         (interaction_event_2, interaction_event_2),
     )
-
-
+    
+    
     interaction_event_0 = InteractionEvent.precreate(202408040006)
     interaction_event_1 = InteractionEvent.precreate(202408040007)
     interaction_event_2 = InteractionEvent.precreate(202408040008)
-    player = Player(User.precreate(202408040009), -1, interaction_event_0)
+    player = Player(User.precreate(202408040009), interaction_event_0)
     session = Session(None, 1000, interaction_event_1)
     
     yield (
@@ -36,12 +36,12 @@ def _iter_options():
         interaction_event_2,
         (interaction_event_2, interaction_event_1),
     )
-
-
+    
+    
     interaction_event_0 = InteractionEvent.precreate(202408040010)
     interaction_event_1 = InteractionEvent.precreate(202408040011)
     interaction_event_2 = InteractionEvent.precreate(202408040012)
-    player = Player(User.precreate(202408040013), -1, interaction_event_1)
+    player = Player(User.precreate(202408040013), interaction_event_1)
     session = Session(None, 1000, interaction_event_2)
     
     yield (
@@ -51,8 +51,8 @@ def _iter_options():
         interaction_event_0,
         (interaction_event_1, interaction_event_2),
     )
-
-
+    
+    
     interaction_event_0 = InteractionEvent.precreate(202408040062)
     interaction_event_1 = InteractionEvent.precreate(202408040063)
     player = None

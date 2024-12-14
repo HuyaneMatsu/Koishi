@@ -8,16 +8,20 @@ from hata import (
     BUILTIN_EMOJIS, DiscordException, ERROR_CODES, Embed, InteractionType, KOKORO, Permission, parse_tdelta
 )
 from hata.ext.slash import Button, Row, abort, wait_for_component_interaction
-from scarletio import Future, Task
-from sqlalchemy.sql import select
+from scarletio import CancelledError, Future, Task
 
 from ..bot_utils.constants import (
     COLOR__GAMBLING, EMOJI__HEART_CURRENCY, GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, ROLE__SUPPORT__BOOSTER,
     ROLE__SUPPORT__ELEVATED
 )
 from ..bot_utils.daily import calculate_daily_new
-from ..bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, get_create_common_user_expression, user_common_model
+from ..bot_utils.utils import send_embed_to
 from ..bots import FEATURE_CLIENTS
+
+from .user_balance import get_user_balance
+from .user_settings import (
+    USER_SETTINGS_CUSTOM_ID_NOTIFICATION_GIFT_DISABLE, get_one_user_settings, get_preferred_client_for_user
+)
 
 
 EVENT_MAX_DURATION = TimeDelta(hours = 24)
@@ -201,11 +205,10 @@ class HeartEventGUI:
     _update_time = 60.0
     _update_delta = TimeDelta(seconds = _update_time)
     
-    __slots__ = ('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
+    __slots__ = ('amount', 'client', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
     
     async def __new__(cls, client, event, duration, amount, user_limit):
         self = object.__new__(cls)
-        self.connector = None
         self.user_ids = set()
         self.user_limit = user_limit
         self.client = client
@@ -220,13 +223,9 @@ class HeartEventGUI:
             await client.interaction_response_message_edit(
                 event, content = '', embed = self.generate_embed(), components = EVENT_CURRENCY_BUTTON
             )
-        except BaseException as err:
-            if isinstance(err, ConnectionError):
-                return
-            
-            raise
+        except ConnectionError:
+            return
         
-        self.connector = await DB_ENGINE.connect()
         client.slasher.add_component_interaction_waiter(message, self)
         Task(KOKORO, self.countdown(client, message))
         return
@@ -259,37 +258,13 @@ class HeartEventGUI:
             self.duration = TimeDelta()
             self.waiter.set_result(None)
         
-        connector = self.connector
-        
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                ]
-            ).where(
-                user_common_model.user_id == user.id,
-            )
-        )
-        
-        results = await response.fetchall()
-        if results:
-            entry_id = results[0][0]
-            to_execute = USER_COMMON_TABLE.update(
-                user_common_model.id == entry_id,
-            ).values(
-                total_love = user_common_model.total_love + self.amount,
-            )
-        
-        else:
-            to_execute = get_create_common_user_expression(
-                user_id,
-                total_love = self.amount,
-            )
-        
-        await connector.execute(to_execute)
+        user_balance = await get_user_balance(user.id)
+        user_balance.set('balance', user_balance.balance + self.amount)
+        await user_balance.save()
         
         await self.client.interaction_component_acknowledge(event)
-        
+    
+    
     async def countdown(self, client, message):
         update_delta = self._update_delta
         waiter = self.waiter
@@ -297,13 +272,13 @@ class HeartEventGUI:
         sleep_time = (self.duration % update_delta).seconds
         if sleep_time:
             self.duration -= TimeDelta(seconds = sleep_time)
-            KOKORO.call_after(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
+            KOKORO.call_after(sleep_time, type(waiter).set_result_if_pending, waiter, None)
             await waiter
             self.waiter = waiter = Future(KOKORO)
         
         sleep_time = self._update_time
         while True:
-            KOKORO.call_after(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
+            KOKORO.call_after(sleep_time, type(waiter).set_result_if_pending, waiter, None)
             await waiter
             self.waiter = waiter = Future(KOKORO)
             self.duration -= update_delta
@@ -311,10 +286,16 @@ class HeartEventGUI:
                 break
             try:
                 await client.message_edit(message, embed = self.generate_embed())
+            except GeneratorExit:
+                raise
+            
+            except CancelledError:
+                raise
+            
+            except ConnectionError:
+                break
+            
             except BaseException as err:
-                if isinstance(err, ConnectionError):
-                    break
-                
                 if isinstance(err, DiscordException):
                     if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
@@ -331,11 +312,16 @@ class HeartEventGUI:
         client.slasher.remove_component_interaction_waiter(message, self)
         try:
             await client.message_delete(message)
+        except GeneratorExit:
+            raise
+        
+        except CancelledError:
+            raise
+        
+        except ConnectionError:
+            return
+        
         except BaseException as err:
-            if isinstance(err, ConnectionError):
-                # no internet
-                return
-            
             if isinstance(err, DiscordException):
                 if err.code in (
                     ERROR_CODES.unknown_channel, # message's channel deleted
@@ -346,20 +332,6 @@ class HeartEventGUI:
             
             await client.events.error(client, f'{self!r}.countdown', err)
             return
-        
-        finally:
-            connector = self.connector
-            if (connector is not None):
-                self.connector = None
-                await connector.close()
-    
-    def __del__(self):
-        connector = self.connector
-        if connector is None:
-            return
-        
-        self.connector = None
-        Task(KOKORO, connector.close())
 
 
 @FEATURE_CLIENTS.interactions(
@@ -496,11 +468,10 @@ class DailyEventGUI:
     _update_time = 60.0
     _update_delta = TimeDelta(seconds = _update_time)
     
-    __slots__ = ('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
+    __slots__ = ('amount', 'client', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
     
     async def __new__(cls, client, event, duration, amount, user_limit):
         self = object.__new__(cls)
-        self.connector = None
         self.user_ids = set()
         self.user_limit = user_limit
         self.client = client
@@ -515,21 +486,15 @@ class DailyEventGUI:
             await client.interaction_response_message_edit(
                 event, content = '', embed = self.generate_embed(), components = EVENT_CURRENCY_BUTTON
             )
-        except BaseException as err:
-            if isinstance(err, ConnectionError):
-                return
-            
-            raise
+        except ConnectionError:
+            return
         
-        self.connector = await DB_ENGINE.connect()
-        
-        self.connector = await DB_ENGINE.connect()
         client.slasher.add_component_interaction_waiter(message, self)
         Task(KOKORO, self.countdown(client, message))
         return
     
     def generate_embed(self):
-        title = f'React with {EMOJI__HEART_CURRENCY} to increase your daily streak by {self.amount}'
+        title = f'React with {EMOJI__HEART_CURRENCY} to increase your streak by {self.amount}'
         if self.user_limit:
             description = f'{convert_tdelta(self.duration)} left or {self.user_limit - len(self.user_ids)} users'
         else:
@@ -556,44 +521,17 @@ class DailyEventGUI:
             self.duration = TimeDelta()
             self.waiter.set_result(None)
         
-        connector = self.connector
         
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.daily_streak,
-                    user_common_model.daily_next,
-                ]
-            ).where(
-                user_common_model.user_id == user_id,
-            )
+        user_balance = await get_user_balance(user.id)
+        streak, daily_can_claim_at = calculate_daily_new(
+            user_balance.streak, user_balance.daily_can_claim_at.replace, DateTime.now(TimeZone.utc)
         )
+        user_balance.set('streak', streak + self.amount)
+        user_balance.set('daily_can_claim_at', daily_can_claim_at)
+        await user_balance.save()
         
-        results = await response.fetchall()
-        if results:
-            entry_id, daily_streak, daily_next = results[0]
-            now = DateTime.now(TimeZone.utc)
-            
-            daily_streak, daily_next = calculate_daily_new(daily_streak, daily_next, now)
-            daily_streak = daily_streak + self.amount
-            
-            to_execute = USER_COMMON_TABLE.update(
-                user_common_model.id == entry_id,
-            ).values(
-                daily_streak = daily_streak,
-                daily_next = daily_next,
-            )
-        
-        else:
-            to_execute = get_create_common_user_expression(
-                user_id,
-                daily_streak = self.amount,
-            )
-        
-        await connector.execute(to_execute)
-    
         await self.client.interaction_component_acknowledge(event)
+    
     
     async def countdown(self, client, message):
         update_delta = self._update_delta
@@ -602,24 +540,28 @@ class DailyEventGUI:
         sleep_time = (self.duration % update_delta).seconds
         if sleep_time:
             self.duration -= TimeDelta(seconds = sleep_time)
-            KOKORO.call_after(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
+            KOKORO.call_after(sleep_time, type(waiter).set_result_if_pending, waiter, None)
             await waiter
             self.waiter = waiter = Future(KOKORO)
         
         sleep_time = self._update_time
         while True:
-            KOKORO.call_after(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
+            KOKORO.call_after(sleep_time, type(waiter).set_result_if_pending, waiter, None)
             await waiter
             self.waiter = waiter = Future(KOKORO)
             self.duration -= update_delta
             if self.duration < update_delta:
                 break
+            
             try:
                 await client.message_edit(message, embed = self.generate_embed())
+            except GeneratorExit:
+                raise
+            
+            except CancelledError:
+                raise
+            
             except BaseException as err:
-                if isinstance(err,ConnectionError):
-                    break
-                
                 if isinstance(err,DiscordException):
                     if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
@@ -636,11 +578,16 @@ class DailyEventGUI:
         client.slasher.remove_component_interaction_waiter(message, self)
         try:
             await client.message_delete(message)
+        except GeneratorExit:
+            raise
+        
+        except CancelledError:
+            raise
+        
+        except ConnectionError:
+            return
+        
         except BaseException as err:
-            if isinstance(err, ConnectionError):
-                # no internet
-                return
-            
             if isinstance(err, DiscordException):
                 if err.code in (
                     ERROR_CODES.unknown_channel, # message's channel deleted
@@ -651,20 +598,6 @@ class DailyEventGUI:
             
             await client.events.error(client, f'{self!r}.countdown', err)
             return
-        
-        finally:
-            connector = self.connector
-            if (connector is not None):
-                self.connector = None
-                await connector.close()
-    
-    def __del__(self):
-        connector = self.connector
-        if connector is None:
-            return
-        
-        self.connector = None
-        Task(KOKORO, connector.close())
 
 
 
@@ -718,96 +651,44 @@ async def gift(
     if (message is not None) and len(message) > 1000:
         message = message[:1000] + '...'
     
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.total_love,
-                    user_common_model.total_allocated
-                ]
-            ).where(
-                user_common_model.user_id == source_user.id,
-            )
-        )
-        
-        results = await response.fetchall()
-        if results:
-            source_user_entry_id, source_user_total_love, source_user_total_allocated = results[0]
-        else:
-            source_user_entry_id = -1
-            source_user_total_love = 0
-            source_user_total_allocated = 0
-        
-        if source_user_total_love == 0:
-            yield Embed('So lonely...', 'You do not have any hearts to gift.', color = COLOR__GAMBLING)
-            return
-        
-        if source_user_total_love == source_user_total_allocated:
-            yield Embed('Like a flower', 'Whithering to the dust.', color = COLOR__GAMBLING)
-            return
-        
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.total_love,
-                ]
-            ).where(
-                user_common_model.user_id == target_user.id,
-            )
-        )
-        
-        results = await response.fetchall()
-        if results:
-            target_user_entry_id, target_user_total_love = results[0]
-        else:
-            target_user_entry_id = -1
-            target_user_total_love = 0
-        
-        source_user_total_love -= source_user_total_allocated
-        
-        if amount > source_user_total_love:
-            amount = source_user_total_love - source_user_total_allocated
-            source_user_new_love = source_user_total_allocated
-        else:
-            source_user_new_love = source_user_total_love - amount
-        
-        target_user_new_total_love = target_user_total_love + amount
-        
-        await connector.execute(
-            USER_COMMON_TABLE.update(
-                user_common_model.id == source_user_entry_id
-            ).values(
-                total_love = user_common_model.total_love - amount,
-            )
-        )
-        
-        if target_user_entry_id != -1:
-            to_execute = USER_COMMON_TABLE.update(
-                user_common_model.id == target_user_entry_id
-            ).values(
-                total_love = user_common_model.total_love + amount,
-            )
-        
-        else:
-            to_execute = get_create_common_user_expression(
-                target_user.id,
-                total_love = target_user_new_total_love,
-            )
-        
-        await connector.execute(to_execute)
-        
+    source_user_balance = await get_user_balance(source_user.id)
+    
+    source_balance =  source_user_balance.balance
+    source_allocated = source_user_balance.allocated
+    
+    if source_balance == 0:
+        yield Embed('So lonely...', 'You do not have any hearts to gift.', color = COLOR__GAMBLING)
+        return
+    
+    if source_balance == source_allocated:
+        yield Embed('Like a flower', 'Whithering to the dust.', color = COLOR__GAMBLING)
+        return
+    
+    target_user_balance = await get_user_balance(source_user.id)
+    target_balance = target_user_balance.balance
+
+    source_balance -= source_allocated
+    
+    amount = min(source_balance - source_allocated, amount)
+    source_new_balance = source_balance - amount
+    target_new_balance = target_balance + amount
+    
+    source_user_balance.set('balance', source_new_balance)
+    await source_user_balance.save()
+    
+    target_user_balance.set('balance', target_new_balance)
+    await target_user_balance.save()
+    
     embed = Embed(
         'Aww, so lovely',
         f'You gifted {amount} {EMOJI__HEART_CURRENCY} to {target_user.full_name}',
         color = COLOR__GAMBLING,
     ).add_field(
         f'Your {EMOJI__HEART_CURRENCY}',
-        f'{source_user_total_love} -> {source_user_new_love}',
+        f'{source_balance} -> {source_new_balance}',
     ).add_field(
         f'Their {EMOJI__HEART_CURRENCY}',
-        f'{target_user_total_love} -> {target_user_new_total_love}',
+        f'{target_balance} -> {target_new_balance}',
     )
     
     if (message is not None):
@@ -815,39 +696,34 @@ async def gift(
     
     yield embed
     
-    if target_user.bot:
-        return
-    
-    try:
-        target_user_channel = await client.channel_private_create(target_user)
-    except ConnectionError:
-        return
-    
-    embed = Embed('Aww, love is in the air',
-        f'You have been gifted {amount} {EMOJI__HEART_CURRENCY} by {source_user.full_name}',
-        color = COLOR__GAMBLING,
-    ).add_field(
-        f'Your {EMOJI__HEART_CURRENCY}',
-        f'{target_user_total_love} -> {target_user_new_total_love}',
-    )
-    
-    if (message is not None):
-        embed.add_field('Message:', message)
-    
-    try:
-        await client.message_create(target_user_channel, embed = embed)
-    except ConnectionError:
-        return
-    except DiscordException as err:
-        if err.code == ERROR_CODES.cannot_message_user:
-            return
-        
-        raise
+    if (not target_user.bot):
+        target_user_settings = await get_one_user_settings(target_user.id)
+        if target_user_settings.notification_gift:
+            embed = Embed('Aww, love is in the air',
+                f'You have been gifted {amount} {EMOJI__HEART_CURRENCY} by {source_user.full_name}',
+                color = COLOR__GAMBLING,
+            ).add_field(
+                f'Your {EMOJI__HEART_CURRENCY}',
+                f'{target_balance} -> {target_new_balance}',
+            )
+            
+            if (message is not None):
+                embed.add_field('Message:', message)
+            
+            await send_embed_to(
+                get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
+                target_user.id,
+                embed,
+                Button(
+                    'I don\'t want notifs, nya!!',
+                    custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_GIFT_DISABLE,
+                ),
+            )
 
 
 AWARD_TYPES = [
     ('hearts', 'hearts'),
-    ('daily-streak', 'daily-streak')
+    ('streak', 'streak')
 ]
 
 
@@ -873,79 +749,43 @@ async def award(
         return
     
     if (message is not None) and len(message) > 1000:
-        message = message[:1000] + '...'
+        message = message[ : 1000] + '...'
     
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.total_love,
-                    user_common_model.daily_streak,
-                    user_common_model.daily_next,
-                ]
-            ).where(
-                user_common_model.user_id == target_user.id
-            )
+    target_user_balance = await get_user_balance(target_user.id)
+    target_balance = target_user_balance.balance
+    target_streak = target_user_balance.streak
+    target_daily_can_claim_at = target_user_balance.daily_can_claim_at
+    
+    if with_ == 'hearts':
+        target_new_balance = target_balance + amount
+        target_new_streak = target_streak
+    else:
+        now = DateTime.now(TimeZone.utc)
+        target_new_balance = target_user_balance.balance
+        target_new_streak, target_daily_can_claim_at = calculate_daily_new(
+            target_streak, 
+            target_daily_can_claim_at,
+            now,
         )
         
-        results = await response.fetchall()
-        if results:
-            target_user_entry_id, target_user_total_love, target_user_daily_streak, target_user_daily_next = results[0]
-            target_user_daily_next = target_user_daily_next.replace(tzinfo = TimeZone.utc)
-        else:
-            target_user_entry_id = -1
-            target_user_total_love = 0
-            target_user_daily_streak = 0
-            target_user_daily_next = DateTime.now(TimeZone.utc)
-        
-        
-        if with_ == 'hearts':
-            target_user_new_total_love = target_user_total_love + amount
-            target_user_new_daily_streak = target_user_daily_streak
-        else:
-            now = DateTime.now(TimeZone.utc)
-            target_user_new_total_love = target_user_total_love
-            if target_user_daily_next < now:
-                target_user_daily_streak, target_user_daily_next = calculate_daily_new(
-                    target_user_daily_streak, 
-                    target_user_daily_next,
-                    now,
-                )
-            
-            target_user_new_daily_streak = target_user_daily_streak + amount
-        
-        target_user_new_daily_next = target_user_daily_next
-            
-        if (target_user_entry_id != -1):
-            to_execute = USER_COMMON_TABLE.update(
-                user_common_model.id == target_user_entry_id,
-            ).values(
-                total_love  = target_user_new_total_love,
-                daily_streak = target_user_new_daily_streak,
-                daily_next = target_user_new_daily_next,
-            )
-        else:
-            to_execute = get_create_common_user_expression(
-                target_user.id,
-                total_love = target_user_new_total_love,
-                daily_next = target_user_new_daily_next,
-                daily_streak = target_user_new_daily_streak,
-            )
-        
-        await connector.execute(to_execute)
+        target_new_streak = target_streak + amount
+    
+    target_user_balance.set('balance', target_new_balance)
+    target_user_balance.set('streak', target_new_streak)
+    target_user_balance.set('daily_can_claim_at', target_daily_can_claim_at)
+    await target_user_balance.save()
     
     if with_ == 'hearts':
         awarded_with = EMOJI__HEART_CURRENCY.as_emoji
-        up_from = target_user_total_love
-        up_to = target_user_new_total_love
+        up_from = target_balance
+        up_to = target_new_balance
     else:
-        awarded_with = 'daily streak(s)'
-        up_from = target_user_daily_streak
-        up_to = target_user_new_daily_streak
+        awarded_with = 'streak(s)'
+        up_from = target_streak
+        up_to = target_new_streak
     
     embed = Embed(
-        f'You awarded {target_user.full_name} with {amount} {awarded_with}',
+        f'You awarded {target_user.name_at(event.guild_id)} with {amount} {awarded_with}',
         f'Now they are up from {up_from} to {up_to} {awarded_with}',
         color = COLOR__GAMBLING,
     )
@@ -957,15 +797,10 @@ async def award(
     
     if target_user.bot:
         return
-
-    try:
-        target_user_channel = await client.channel_private_create(target_user)
-    except ConnectionError:
-        return
     
     embed = Embed(
         'Aww, love is in the air',
-        f'You have been awarded {amount} {awarded_with} by {event.user.full_name}',
+        f'You have been awarded {amount} {awarded_with} by {event.user.name_at(event.guild_id)}',
         color = COLOR__GAMBLING,
     ).add_field(
         f'Your {awarded_with}',
@@ -975,15 +810,14 @@ async def award(
     if (message is not None):
         embed.add_field('Message:', message)
     
-    try:
-        await client.message_create(target_user_channel, embed = embed)
-    except ConnectionError:
-        return
-    except DiscordException as err:
-        if err.code == ERROR_CODES.cannot_message_user:
-            return
-        
-        raise
+    target_user_settings = await get_one_user_settings(target_user.id)
+    
+    await send_embed_to(
+        get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
+        target_user.id,
+        embed,
+        None,
+    )
 
 
 @FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
@@ -1000,49 +834,20 @@ async def take(
     if amount <= 0:
         abort('You cannot award non-positive amount of hearts..')
     
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.total_love,
-                    user_common_model.total_allocated,
-                ]
-            ).where(
-                user_common_model.user_id == target_user.id
-            )
-        )
-        results = await response.fetchall()
-        if results:
-            target_user_entry_id, target_user_total_love, target_user_total_allocated = results[0]
-            target_user_heart_reducible = target_user_total_love - target_user_total_allocated
-            if target_user_heart_reducible <= 0:
-                target_user_new_total_love = 0
-            else:
-                target_user_new_total_love = target_user_heart_reducible - amount
-                if target_user_new_total_love < 0:
-                    target_user_new_total_love = 0
-                
-                target_user_new_total_love += target_user_total_allocated
-                
-                await connector.execute(
-                    USER_COMMON_TABLE.update(
-                        user_common_model.id == target_user_entry_id,
-                    ).values(
-                        total_love = target_user_new_total_love,
-                    )
-                )
-        else:
-            target_user_total_love = 0
-            target_user_new_total_love = 0
+    user_balance = await get_user_balance(target_user.id)
+    
+    balance = target_user.balance
+    can_take = min(balance - user_balance.allocated, amount)
+    
+    if can_take:
+        user_balance.set('balance', balance - can_take)
+        await user_balance.save()
     
     yield Embed(
         f'You took {amount} {EMOJI__HEART_CURRENCY} away from {target_user.full_name}',
-        f'They got down from {target_user_total_love} to {target_user_new_total_love} {EMOJI__HEART_CURRENCY}',
+        f'They got down from {balance} to {balance - can_take} {EMOJI__HEART_CURRENCY}',
         color = COLOR__GAMBLING,
     )
-    
-    return
 
 
 HEART_GENERATOR_COOLDOWNS = set()
@@ -1052,36 +857,6 @@ HEART_GENERATION_AMOUNT = 10
 INTERACTION_TYPE_APPLICATION_COMMAND = InteractionType.application_command
 INTERACTION_TYPE_MESSAGE_COMPONENT = InteractionType.message_component
 INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE = InteractionType.application_command_autocomplete
-
-async def increase_user_total_love(user_id, increase):
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                ]
-            ).where(
-                user_common_model.user_id == user_id,
-            )
-        )
-        results = await response.fetchall()
-        if not results:
-            # avoid race condition, do not add hearts if the user is not yet stored.
-            #
-            # to_execute = get_create_common_user_expression(
-            #     user_id,
-            #     total_love = increase,
-            # )
-            return
-            
-        entry_id = results[0][0]
-        to_execute = USER_COMMON_TABLE.update(
-            user_common_model.id == entry_id
-        ).values(
-            total_love = user_common_model.total_love + increase,
-        )
-        
-        await connector.execute(to_execute)
 
 
 # yup, we are generating hearts
@@ -1103,4 +878,6 @@ async def heart_generator(client, event):
     
     if random() < chance:
         KOKORO.call_after(HEART_GENERATOR_COOLDOWN, set.discard, HEART_GENERATOR_COOLDOWNS, user_id)
-        await increase_user_total_love(user_id, HEART_GENERATION_AMOUNT)
+        user_balance = await get_user_balance(user_id)
+        user_balance.set('balance', user_balance.balance + HEART_GENERATION_AMOUNT)
+        await user_balance.save()

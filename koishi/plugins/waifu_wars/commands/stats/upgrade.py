@@ -2,8 +2,6 @@ __all__ = ('command_upgrade',)
 
 from hata import Embed
 from hata.ext.slash import P, abort
-from scarletio import copy_docs
-from sqlalchemy.sql import select
 
 from ...core.constants import (
     STAT_NAME_FULL_BEDROOM, STAT_NAME_FULL_CHARM, STAT_NAME_FULL_CUTENESS, STAT_NAME_FULL_HOUSEWIFE,
@@ -14,7 +12,9 @@ from ...core.helpers import calculate_stat_upgrade_cost, get_user_chart_color
 
 from .....bot_utils.bind_types import WaifuStats
 from .....bot_utils.constants import EMOJI__HEART_CURRENCY, WAIFU_COST_DEFAULT
-from .....bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, user_common_model
+
+from ....user_balance import get_user_balance
+
 
 STAT_NAMES_AND_SLOTS = (
     (STAT_NAME_FULL_HOUSEWIFE, WaifuStats.stat_housewife),
@@ -88,6 +88,7 @@ async def try_upgrade_stat(waifu_stats, slot):
     ----------
     waifu_stats : ``WaifuStats``
         The user's waifu stats.
+    
     slot : ``FieldDescriptor``
         The stat slot to upgrade.
     
@@ -102,86 +103,35 @@ async def try_upgrade_stat(waifu_stats, slot):
     next_point : `int`
         The new amount the stat has been upgraded to.
     """
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.total_love,
-                    user_common_model.total_allocated,
-                    user_common_model.waifu_cost,
-                ]
-            ).where(
-                user_common_model.user_id == waifu_stats.user_id,
-            )
-        )
-        result = await response.fetchone()
-        
-        if result is None:
-            total_love = 0
-            available_love = 0
-            waifu_cost = WAIFU_COST_DEFAULT
-        else:
-            total_love, total_allocated, waifu_cost = result
-            available_love = total_love - total_allocated
-            if not waifu_cost:
-                waifu_cost = WAIFU_COST_DEFAULT
-        
-        total_points = (
-            waifu_stats.stat_housewife +
-            waifu_stats.stat_cuteness +
-            waifu_stats.stat_bedroom +
-            waifu_stats.stat_charm +
-            waifu_stats.stat_loyalty
-        )
-        next_point = slot.__get__(waifu_stats, WaifuStats) + 1
-        
-        cost = calculate_stat_upgrade_cost(total_points, next_point)
-        
-        if available_love > cost:
-            success = True
-        else:
-            success = False
-        
-        if success:
-            await connector.execute(
-                USER_COMMON_TABLE.update(
-                    user_common_model.user_id == waifu_stats.user_id,
-                ).values(
-                    total_love = user_common_model.total_love - cost,
-                    waifu_cost = waifu_cost + cost // 100,
-                )
-            )
-            
-            slot.__set__(waifu_stats, next_point)
-            waifu_stats.save()
+    user_balance = await get_user_balance(waifu_stats.user_id)
+    balance = user_balance.balance
+
+    total_points = (
+        waifu_stats.stat_housewife +
+        waifu_stats.stat_cuteness +
+        waifu_stats.stat_bedroom +
+        waifu_stats.stat_charm +
+        waifu_stats.stat_loyalty
+    )
+    next_point = slot.__get__(waifu_stats, WaifuStats) + 1
     
+    cost = calculate_stat_upgrade_cost(total_points, next_point)
     
-    return success, total_love, cost, next_point
+    if (balance - user_balance.avaiilable) < cost:
+        success = False
+    
+    else:
+        success = True
+        
+        user_balance.set('balance', balance - cost)
+        user_balance.set('waifu_cost', (user_balance.waifu_cost or WAIFU_COST_DEFAULT) + cost // 100)
+        await user_balance.save()
+        
+        slot.__set__(waifu_stats, next_point)
+        waifu_stats.save()
 
 
-# Locally we have no db, so we replace the function
-if DB_ENGINE is None:
-    @copy_docs(try_upgrade_stat)
-    async def try_upgrade_stat(waifu_stats, slot):
-        available_love = total_love = 50000
-        
-        total_points = (
-            waifu_stats.stat_housewife +
-            waifu_stats.stat_cuteness +
-            waifu_stats.stat_bedroom +
-            waifu_stats.stat_charm +
-            waifu_stats.stat_loyalty
-        )
-        next_point = slot.__get__(waifu_stats, WaifuStats) + 1
-        cost = calculate_stat_upgrade_cost(total_points, next_point)
-        
-        if available_love > cost:
-            success = True
-            slot.__set__(waifu_stats, next_point)
-        else:
-            success = False
-        
-        return success, total_love, cost, next_point
+    return success, balance, cost, next_point
 
 
 async def autocomplete_upgrade_stat(event, value):
@@ -253,7 +203,7 @@ async def command_upgrade(event, stat: P(str, 'Select a stat', autocomplete = au
     stat_name, slot = identified_stat
     waifu_stats = await event.user.waifu_stats
     
-    success, total_love, cost, next_point = await try_upgrade_stat(waifu_stats, slot)
+    success, balance, cost, next_point = await try_upgrade_stat(waifu_stats, slot)
     
     embed = Embed(
         f'Upgrading {stat_name} -> {next_point} for {cost} {EMOJI__HEART_CURRENCY}',
@@ -275,7 +225,7 @@ async def command_upgrade(event, stat: P(str, 'Select a stat', autocomplete = au
             f'Your {EMOJI__HEART_CURRENCY}',
             (
                 f'```\n'
-                f'{total_love} -> {total_love - cost}\n'
+                f'{balance} -> {balance - cost}\n'
                 f'```'
             )
         )
@@ -285,7 +235,7 @@ async def command_upgrade(event, stat: P(str, 'Select a stat', autocomplete = au
             f'Your {EMOJI__HEART_CURRENCY}',
             (
                 f'```\n'
-                f'{total_love}\n'
+                f'{balance}\n'
                 f'```'
             ),
         )

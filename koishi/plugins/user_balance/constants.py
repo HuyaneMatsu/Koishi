@@ -1,0 +1,10 @@
+__all__ = ()
+
+from collections import OrderedDict
+
+
+USER_BALANCE_CACHE = OrderedDict()
+USER_BALANCE_QUERY_TASKS = {}
+USER_BALANCE_CACHE_SIZE = 200
+
+USER_WAIFU_SLOTS_DEFAULT = 1

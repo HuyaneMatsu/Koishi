@@ -7,9 +7,10 @@ from hata.ext.slash import InteractionResponse
 from sqlalchemy import or_
 from sqlalchemy.sql import select
 
-from ....bot_utils.models import DB_ENGINE, user_common_model, waifu_list_model
+from ....bot_utils.models import DB_ENGINE, waifu_list_model
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY, WAIFU_COST_DEFAULT
 from ....bot_utils.user_getter import get_user
+from ....plugins.user_balance import get_user_balance
 
 from ..constants.waifu_type import get_relation_name
 from ..helpers import get_multiplier
@@ -31,71 +32,50 @@ async def info(event,
     user_id = user.id
     
     async with DB_ENGINE.connect() as connector:
+        user_balance = await get_user_balance(user_id)
+        waifu_cost = user_balance.waifu_cost or WAIFU_COST_DEFAULT
+        waifu_divorces = user_balance.waifu_divorces
+        waifu_slots = user_balance.waifu_slots
+        
+        relationship_members_by_category = None
+        
         response = await connector.execute(
             select(
                 [
-                    user_common_model.waifu_cost,
-                    user_common_model.waifu_divorces,
-                    user_common_model.waifu_slots,
+                    waifu_list_model.user_id,
+                    waifu_list_model.waifu_id,
+                    waifu_list_model.waifu_type,
                 ]
             ).where(
-                user_common_model.user_id == user_id,
+                or_(
+                    waifu_list_model.user_id == user_id,
+                    waifu_list_model.waifu_id == user_id,
+                )
             )
         )
         
         results = await response.fetchall()
-        if results:
-            waifu_cost, waifu_divorces, waifu_slots = results[0]
+        for relation_source_user_id, relation_target_user_id, relation_type in results:
             
-            entry_found = True
-        else:
-            waifu_cost = WAIFU_COST_DEFAULT
-            waifu_divorces = 0
-            waifu_slots = 1
+            if relation_source_user_id == user_id:
+                reverted = False
+            else:
+                reverted = True
             
-            entry_found = False
-        
-        
-        relationship_members_by_category = None
-        
-        if entry_found:
-            response = await connector.execute(
-                select(
-                    [
-                        waifu_list_model.user_id,
-                        waifu_list_model.waifu_id,
-                        waifu_list_model.waifu_type,
-                    ]
-                ).where(
-                    or_(
-                        waifu_list_model.user_id == user_id,
-                        waifu_list_model.waifu_id == user_id,
-                    )
-                )
-            )
+            relation_name = get_relation_name(relation_type, reverted, True)
+            if relationship_members_by_category is None:
+                relationship_members_by_category = {}
             
-            results = await response.fetchall()
-            for relation_source_user_id, relation_target_user_id, relation_type in results:
-                
-                if relation_source_user_id == user_id:
-                    reverted = False
-                else:
-                    reverted = True
-                
-                relation_name = get_relation_name(relation_type, reverted, True)
-                if relationship_members_by_category is None:
-                    relationship_members_by_category = {}
-                
-                try:
-                    relation_member_ids = relationship_members_by_category[relation_name]
-                except KeyError:
-                    relation_member_ids = set()
-                    relationship_members_by_category[relation_name] = relation_member_ids
-                
-                if relation_source_user_id == user_id:
-                    relation_member_ids.add(relation_target_user_id)
-                else:
-                    relation_member_ids.add(relation_source_user_id)
+            try:
+                relation_member_ids = relationship_members_by_category[relation_name]
+            except KeyError:
+                relation_member_ids = set()
+                relationship_members_by_category[relation_name] = relation_member_ids
+            
+            if relation_source_user_id == user_id:
+                relation_member_ids.add(relation_target_user_id)
+            else:
+                relation_member_ids.add(relation_source_user_id)
     
     
     embed = Embed(

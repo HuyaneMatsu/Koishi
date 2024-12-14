@@ -216,7 +216,7 @@ def render_reward_into(into, interaction_event, reward):
     return into
 
 
-def render_hearts_short_title(interaction_event, target_user, total):
+def render_hearts_short_title(interaction_event, target_user, balance):
     """
     Renders a shot hearts title.
     
@@ -228,8 +228,8 @@ def render_hearts_short_title(interaction_event, target_user, total):
     target_user : ``ClientUserBase``
         The targeted user.
     
-    total : `int`
-        The user's total hearts.
+    balance : `int`
+        The user's balance.
     
     Returns
     -------
@@ -244,7 +244,7 @@ def render_hearts_short_title(interaction_event, target_user, total):
         into.append(' has')
     
     into.append(' ')
-    into.append(str(total))
+    into.append(str(balance))
     into.append(' ')
     into.append(EMOJI__HEART_CURRENCY.as_emoji)
     
@@ -252,7 +252,7 @@ def render_hearts_short_title(interaction_event, target_user, total):
 
 
 def render_hearts_short_description(
-    interaction_event, target_user, total, streak, ready_to_claim, ready_to_claim_string
+    interaction_event, target_user, balance, streak, ready_to_claim, ready_to_claim_string
 ):
     """
     Renders a short hearts description.
@@ -265,8 +265,8 @@ def render_hearts_short_description(
     target_user : ``ClientUserBase``
         The targeted user.
     
-    total : `int`
-        The user's total hearts.
+    balance : `int`
+        The user's balance.
     
     streak : `int`
         The user's streak
@@ -281,13 +281,13 @@ def render_hearts_short_description(
     -------
     description : `None | str`
     """
-    if (not streak) and total:
+    if (not streak) and balance:
         return
     
     own = target_user is interaction_event.user
     into = []
     
-    if streak or total:
+    if streak or balance:
         into.append('You' if own else 'They')
         into.append(' are on a ')
         into.append(str(streak))

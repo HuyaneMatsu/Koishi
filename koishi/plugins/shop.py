@@ -4,17 +4,16 @@ from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import DiscordException, ERROR_CODES, Embed, Sticker
 from hata.ext.slash import Button, InteractionResponse, Row, abort
-from sqlalchemy.sql import select
-
-from .marriage_slot import EMOJI_NO, EMOJI_YES, buy_waifu_slot_invoke
 
 from ..bot_utils.constants import (
     EMOJI__HEART_CURRENCY, GUILD__SUPPORT, ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__HEART_BOOST,
     ROLE__SUPPORT__NSFW_ACCESS
 )
 from ..bot_utils.daily import calculate_daily_new
-from ..bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, user_common_model
 from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
+
+from .marriage_slot import EMOJI_NO, EMOJI_YES, buy_waifu_slot_invoke
+from .user_balance import get_user_balance
 
 
 NSFW_ACCESS_COST = 8000
@@ -22,15 +21,15 @@ ELEVATED_COST = 12000
 HEART_BOOST_COST = 100000
 
 
-HEART_SHOP = FEATURE_CLIENTS.interactions(
+SHOP = FEATURE_CLIENTS.interactions(
     None,
-    name = 'heart-shop',
+    name = 'shop',
     description = 'Trade your love!',
     is_global = True,
 )
 
 
-@HEART_SHOP.interactions
+@SHOP.interactions
 async def buy_waifu_slot(event):
     return await buy_waifu_slot_invoke(event)
 
@@ -38,8 +37,8 @@ def get_divorce_reduction_cost(user_id, divorce_count):
     return user_id % (10000 * divorce_count)
 
 
-CUSTOM_ID_REDUCE_DIVORCE_PAPER_YES = 'heart_shop.reduce_divorce.1'
-CUSTOM_ID_REDUCE_DIVORCE_PAPER_NO = 'heart_shop.reduce_divorce.0'
+CUSTOM_ID_REDUCE_DIVORCE_PAPER_YES = 'shop.reduce_divorce.1'
+CUSTOM_ID_REDUCE_DIVORCE_PAPER_NO = 'shop.reduce_divorce.0'
 
 BUTTON_REDUCE_DIVORCE_YES = Button(
     'Take My money!',
@@ -61,35 +60,17 @@ COMPONENTS_REDUCE_DIVORCE = Row(
 STICKER_REDUCE_DIVORCE_SUCCESS = Sticker.precreate(947189211671429220)
 
 
-@HEART_SHOP.interactions
+@SHOP.interactions
 async def burn_divorce_papers(client, event):
     user_id = event.user.id
     
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.total_love,
-                    user_common_model.total_allocated,
-                    user_common_model.waifu_divorces,
-                ]
-            ).where(
-                user_common_model.user_id == user_id
-            )
-        )
-        
-        result = await response.fetchone()
-        if result is None:
-            total_love = 0
-            total_allocated = 0
-            waifu_divorces = 0
-        else:
-            total_love, total_allocated, waifu_divorces = result
+    user_balance = await get_user_balance(user_id)
+    waifu_divorces = user_balance.waifu_divorces
     
     if waifu_divorces <= 0:
         return Embed(None, 'You do not have divorces')
     
-    available_love = total_love-total_allocated
+    available_love = user_balance.balance - user_balance.allocated
     cost = get_divorce_reduction_cost(user_id, waifu_divorces)
     
     if available_love < cost:
@@ -117,68 +98,43 @@ async def reduce_divorce_yes(event):
     if event.message.interaction.user_id != user.id:
         return
     
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.total_love,
-                    user_common_model.total_allocated,
-                    user_common_model.waifu_divorces,
-                ]
-            ).where(
-                user_common_model.user_id == user.id
-            )
-        )
-        
-        result = await response.fetchone()
-        if result is None:
-            entry_id = 0
-            total_love = 0
-            total_allocated = 0
-            waifu_divorces = 0
-        else:
-            entry_id, total_love, total_allocated, waifu_divorces = result
-        
-        while True:
-            if waifu_divorces <= 0:
-                text = (
-                    'Task failed successfully\n'
-                    '\n'
-                    'Sufficient amount of divorces.'
-                )
-                thumbnail_image_url = None
-                break
-            
-            available_love = total_love-total_allocated
-            cost = get_divorce_reduction_cost(user.id, waifu_divorces)
-            
-            if available_love < cost:
-                text = (
-                    f'Heart amount changed - sufficient amount of hearts\n'
-                    f'\n'
-                    f'Required: {cost} {EMOJI__HEART_CURRENCY}\n'
-                    f'Available {available_love} {EMOJI__HEART_CURRENCY} .'
-                )
-                thumbnail_image_url = None
-                break
-            
-            await connector.execute(
-                USER_COMMON_TABLE.update(
-                    user_common_model.id == entry_id,
-                ).values(
-                    total_love = user_common_model.total_love - cost,
-                    waifu_divorces = user_common_model.waifu_divorces - 1,
-                )
-            )
-            
+    user_balance = await get_user_balance(user.id)
+    waifu_divorces = user_balance.waifu_divorces
+
+    while True:
+        if waifu_divorces <= 0:
             text = (
-                'Divorce papers located and burned successfully!\n'
+                'Task failed successfully\n'
                 '\n'
-                '*they will never find the bodies*'
+                'Sufficient amount of divorces.'
             )
-            thumbnail_image_url = STICKER_REDUCE_DIVORCE_SUCCESS.url
+            thumbnail_image_url = None
             break
+        
+        available_love = user_balance.balance - user_balance.alocated
+        cost = get_divorce_reduction_cost(user.id, waifu_divorces)
+        
+        if available_love < cost:
+            text = (
+                f'Heart amount changed - sufficient amount of hearts\n'
+                f'\n'
+                f'Required: {cost} {EMOJI__HEART_CURRENCY}\n'
+                f'Available {available_love} {EMOJI__HEART_CURRENCY} .'
+            )
+            thumbnail_image_url = None
+            break
+        
+        user_balance.set('balance', user_balance.balance - cost)
+        user_balance.set('waifu_divorces', waifu_divorces - 1)
+        await user_balance.save()
+        
+        text = (
+            'Divorce papers located and burned successfully!\n'
+            '\n'
+            '*they will never find the bodies*'
+        )
+        thumbnail_image_url = STICKER_REDUCE_DIVORCE_SUCCESS.url
+        break
     
     embed = Embed(None, text)
     
@@ -214,7 +170,7 @@ ROLE_CHOICES = [
 ]
 
 
-@HEART_SHOP.interactions
+@SHOP.interactions
 async def roles(
     event,
     role_choice: (ROLE_CHOICES, 'Choose a role to buy!', 'role'),
@@ -246,58 +202,35 @@ async def roles(
         abort(f'You already have {role.name} role.')
     
     user_id = user.id
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.total_love,
-                    user_common_model.total_allocated,
-                ]
-            ).where(
-                user_common_model.user_id == user_id,
-            )
-        )
-        results = await response.fetchall()
+    
+    user_balance = await get_user_balance(user_id)
+    balance = user_balance.balance
+    can_buy = (balance - user_balance.allocated) >= cost
+    
+    if not can_buy:
+        buying_success = False
+    
+    else:
+        yield
         
-        if results:
-            total_love, total_allocated = results[0]
-            available_love = total_love - total_allocated
-        else:
-            total_love = 0
-            available_love = 0
-        
-        if available_love >= cost:
-            can_buy = True
-        else:
-            can_buy = False
-        
-        
-        if can_buy:
-            yield
-            
-            try:
-                await MAIN_CLIENT.user_role_add(user, role)
-            except DiscordException as err:
-                if err.code in (
-                    ERROR_CODES.unknown_user,
-                    ERROR_CODES.unknown_member,
-                ):
-                    buying_success = False
-                
-                else:
-                    raise
+        try:
+            await MAIN_CLIENT.user_role_add(user, role)
+        except DiscordException as err:
+            if err.code in (
+                ERROR_CODES.unknown_user,
+                ERROR_CODES.unknown_member,
+            ):
+                buying_success = False
             
             else:
-                buying_success = True
-            
-            await connector.execute(
-                USER_COMMON_TABLE.update(
-                    user_common_model.user_id == user_id,
-                ).values(
-                    total_love = user_common_model.total_love - cost,
-                )
-            )
-    
+                raise
+        
+        else:
+            buying_success = True
+        
+        user_balance.set('balance', balance - cost)
+        await user_balance.save()
+
     embed = Embed(
         f'Buying {role.name} for {cost} {EMOJI__HEART_CURRENCY}'
     ).add_thumbnail(
@@ -311,7 +244,7 @@ async def roles(
                 f'Your {EMOJI__HEART_CURRENCY}',
                 (
                     f'```\n'
-                    f'{total_love} -> {total_love - cost}\n'
+                    f'{balance} -> {balance - cost}\n'
                     f'```'
                 )
             )
@@ -323,13 +256,12 @@ async def roles(
             f'Your {EMOJI__HEART_CURRENCY}',
             (
                 f'```\n'
-                f'{total_love}\n'
+                f'{balance}\n'
                 f'```'
             ),
         )
     
     yield embed
-
 
 
 # ((d + 1) * d) >> 1 - (((d - a) + 1) * (d - a)) >> 1
@@ -374,8 +306,10 @@ def calculate_sell_price(daily_count, daily_refund):
 
 
 
-@HEART_SHOP.interactions
-async def sell_daily(client, event,
+@SHOP.interactions
+async def sell_daily(
+    client,
+    event,
     amount: ('number', 'How much?'),
 ):
     """Sell excess daily streak for extra hearts."""
@@ -383,51 +317,25 @@ async def sell_daily(client, event,
         abort('`amount` must be non-negative!')
     
     user_id = event.user.id
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.total_love,
-                    user_common_model.daily_streak,
-                    user_common_model.daily_next,
-                ]
-            ).where(
-                user_common_model.user_id == user_id,
-            )
-        )
+    user_balance = await get_user_balance(user_id)
+    balance = user_balance.balance
+    streak = user_balance.streak
+    daily_can_claim_at = user_balance.daily_can_claim_at
+    now = DateTime.now(TimeZone.utc)
+    streak, daily_can_claim_at = calculate_daily_new(streak, daily_can_claim_at, now)
+    
+    if amount > streak:
+        sold = False
+    
+    else:
+        sell_price = calculate_sell_price(streak, amount)
         
-        results = await response.fetchall()
-        if results:
-            entry_id, total_love, daily_streak, daily_next = results[0]
-            daily_next = daily_next.replace(tzinfo = TimeZone.utc)
-            
-            now = DateTime.now(TimeZone.utc)
-            if daily_next < now:
-                daily_streak, daily_next = calculate_daily_new(daily_streak, daily_next, now)
-                daily_next = daily_next.replace(tzinfo = TimeZone.utc)
+        user_balance.set('balance', balance + sell_price)
+        user_balance.set('daily_can_claim_at', daily_can_claim_at)
+        user_balance.set('streak', streak - amount)
+        await user_balance.save()
         
-        else:
-            entry_id = -1
-            total_love = 0
-            daily_streak = 0
-        
-        if amount <= daily_streak:
-            sell_price = calculate_sell_price(daily_streak, amount)
-            
-            await connector.execute(
-                USER_COMMON_TABLE.update(
-                    user_common_model.id == entry_id
-                ).values(
-                    total_love = user_common_model.total_love + sell_price,
-                    daily_next = daily_next,
-                    daily_streak = daily_streak - amount,
-                )
-            )
-            
-            sold = True
-        else:
-            sold = False
+        sold = True
     
     embed = Embed(
         f'Selling {amount} daily for {EMOJI__HEART_CURRENCY}'
@@ -441,7 +349,7 @@ async def sell_daily(client, event,
             f'Your daily streak',
             (
                 f'```\n'
-                f'{daily_streak} -> {daily_streak - amount}\n'
+                f'{streak} -> {streak - amount}\n'
                 f'```'
             ),
         )
@@ -449,7 +357,7 @@ async def sell_daily(client, event,
             f'Your {EMOJI__HEART_CURRENCY}',
             (
                 f'```\n'
-                f'{total_love} -> {total_love + sell_price}\n'
+                f'{balance} -> {balance + sell_price}\n'
                 f'```'
             ),
         )
@@ -459,7 +367,7 @@ async def sell_daily(client, event,
             f'Daily streak',
             (
                 f'```\n'
-                f'{daily_streak}\n'
+                f'{streak}\n'
                 f'```'
             ),
         )

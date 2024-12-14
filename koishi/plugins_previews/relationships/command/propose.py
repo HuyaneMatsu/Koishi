@@ -7,7 +7,7 @@ from hata.ext.slash import InteractionResponse
 from sqlalchemy import or_
 from sqlalchemy.sql import select
 
-from ....bot_utils.models import DB_ENGINE, user_common_model, waifu_list_model
+from ....bot_utils.models import DB_ENGINE, waifu_list_model
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY, WAIFU_COST_DEFAULT
 from ....bot_utils.user_getter import get_user
 

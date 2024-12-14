@@ -4,7 +4,7 @@ from hata import DiscordException, ERROR_CODES, ZEROUSER
 from scarletio import copy_docs
 from sqlalchemy.sql import desc, select
 
-from ...bot_utils.models import DB_ENGINE, user_common_model
+from ...bot_utils.models import DB_ENGINE, user_balance_model
 from ...bot_utils.user_getter import get_user
 
 from .constants import PAGE_SIZE
@@ -29,13 +29,13 @@ async def request_top_list_entries(page_index):
         response = await connector.execute(
             select(
                 [
-                    user_common_model.user_id,
-                    user_common_model.total_love,
+                    user_balance_model.user_id,
+                    user_balance_model.balance,
                 ]
             ).where(
-                user_common_model.total_love != 0,
+                user_balance_model.balance != 0,
             ).order_by(
-                desc(user_common_model.total_love),
+                desc(user_balance_model.balance),
             ).limit(
                 PAGE_SIZE,
             ).offset(

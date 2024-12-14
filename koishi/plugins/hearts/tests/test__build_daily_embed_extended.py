@@ -42,7 +42,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_daily_embed_extended(interaction_event, target_user, total, streak, ready_to_claim):
+def test__build_daily_embed_extended(interaction_event, target_user, balance, streak, ready_to_claim):
     """
     Tests whether ``build_daily_embed_extended`` works as intended.
     
@@ -54,8 +54,8 @@ def test__build_daily_embed_extended(interaction_event, target_user, total, stre
     target_user : ``ClientUserBase``
         The targeted user.
     
-    total : `int`
-        The user's total hearts.
+    balance : `int`
+        The user's balance.
     
     streak : `int`
         The user's streak.
@@ -67,6 +67,6 @@ def test__build_daily_embed_extended(interaction_event, target_user, total, stre
     -------
     output : ``Embed``
     """
-    output = build_daily_embed_extended(interaction_event, target_user, total, streak, ready_to_claim)
+    output = build_daily_embed_extended(interaction_event, target_user, balance, streak, ready_to_claim)
     vampytest.assert_instance(output, Embed)
     return output

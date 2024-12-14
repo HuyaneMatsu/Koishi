@@ -3,7 +3,7 @@ from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as T
 import vampytest
 
 from ..constants import DAILY_STREAK_BREAK, DAILY_STREAK_LOSE
-from ..utils import refresh_daily_streak
+from ..utils import refresh_streak
 
 
 def _iter_options():
@@ -37,16 +37,16 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__refresh_daily_streak(daily_streak, daily_next, now):
+def test__refresh_streak(streak, daily_can_claim_at, now):
     """
-    Tests whether ``refresh_daily_streak`` works as intended.
+    Tests whether ``refresh_streak`` works as intended.
     
     Parameters
     ----------
-    daily_streak : `int`
+    streak : `int`
         The user's actual daily streak.
     
-    daily_next : `DateTime`
+    daily_can_claim_at : `DateTime`
         The time when the user can claim it's next daily reward.
     
     now : `DateTime`
@@ -56,6 +56,6 @@ def test__refresh_daily_streak(daily_streak, daily_next, now):
     -------
     output : `int`
     """
-    output = refresh_daily_streak(daily_streak, daily_next, now)
+    output = refresh_streak(streak, daily_can_claim_at, now)
     vampytest.assert_instance(output, int)
     return output

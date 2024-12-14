@@ -2,12 +2,10 @@ __all__ = ()
 
 from datetime import datetime as DateTime, timezone as TimeZone
 
-from scarletio import copy_docs
-from sqlalchemy.sql import select
-
 from ...bot_utils.constants import IN_GAME_IDS
-from ...bot_utils.daily import TOP_GG_VOTE_INTERVAL, refresh_daily_streak
-from ...bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, user_common_model
+from ...bot_utils.daily import TOP_GG_VOTE_INTERVAL, refresh_streak, calculate_daily_new
+
+from ..user_balance import get_user_balance
 
 
 async def get_generic_heart_fields(target_user_id):
@@ -23,60 +21,21 @@ async def get_generic_heart_fields(target_user_id):
     
     Returns
     -------
-    total : `int`
+    balance : `int`
     streak : `int`
     ready_to_claim : `bool`
     """
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.total_love,
-                    user_common_model.daily_streak,
-                    user_common_model.daily_next,
-                    user_common_model.total_allocated,
-                ]
-            ).where(
-                user_common_model.user_id == target_user_id,
-            )
-        )
-        
-        result = await response.fetchone()
-        
-        if result is None:
-            total = 0
-            streak = 0
-            ready_to_claim = True
-        
-        else:
-            entry_id, total, streak, daily_next, total_allocated = result
-            daily_next = daily_next.replace(tzinfo = TimeZone.utc)
-            
-            now = DateTime.now(TimeZone.utc)
-            if daily_next < now:
-                ready_to_claim = True
-                streak = refresh_daily_streak(streak, daily_next, now)
-            
-            else:
-                ready_to_claim = False
-        
-            if total_allocated and (target_user_id not in IN_GAME_IDS):
-                await connector.execute(
-                    USER_COMMON_TABLE.update(
-                        user_common_model.id == entry_id,
-                    ).values(
-                        total_allocated = 0,
-                    )
-                )
+    user_balance = await get_user_balance(target_user_id)
     
-    return total, streak, ready_to_claim
+    if user_balance.allocated and (target_user_id not in IN_GAME_IDS):
+        user_balance.set('allocated', 0)
+        await user_balance.save()
     
-
-if DB_ENGINE is None:
-    @copy_docs(get_generic_heart_fields)
-    async def get_generic_heart_fields(target_user_id):
-        return 0, 0, False
+    now = DateTime.now(TimeZone.utc)
+    streak, daily_can_claim_at = calculate_daily_new(user_balance.streak, user_balance.daily_can_claim_at, now)
+    ready_to_claim = daily_can_claim_at <= DateTime.now(TimeZone.utc)
+    
+    return user_balance.balance, streak, ready_to_claim
 
 
 async def get_generic_vote_fields(target_user_id):
@@ -92,61 +51,20 @@ async def get_generic_vote_fields(target_user_id):
     
     Returns
     -------
-    total : `int`
+    balance : `int`
     streak : `int`
     ready_to_vote : `bool`
     """
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.total_love,
-                    user_common_model.daily_streak,
-                    user_common_model.daily_next,
-                    user_common_model.total_allocated,
-                    user_common_model.top_gg_last_vote,
-                ]
-            ).where(
-                user_common_model.user_id == target_user_id,
-            )
-        )
-        
-        result = await response.fetchone()
-        
-        if result is None:
-            streak = 0
-            total = 0
-            ready_to_vote = False
-        
-        else:
-            entry_id, total, streak, daily_next, total_allocated, top_gg_last_vote = result
-            daily_next = daily_next.replace(tzinfo = TimeZone.utc)
-            top_gg_last_vote = top_gg_last_vote.replace(tzinfo = TimeZone.utc)
-            
-            now = DateTime.now(TimeZone.utc)
-            if daily_next < now:
-                streak = refresh_daily_streak(streak, daily_next, now)
-            
-            ready_to_vote = top_gg_last_vote + TOP_GG_VOTE_INTERVAL >= now
-            
-            if total_allocated and (target_user_id not in IN_GAME_IDS):
-                await connector.execute(
-                    USER_COMMON_TABLE.update(
-                        user_common_model.id == entry_id,
-                    ).values(
-                        total_allocated = 0,
-                    )
-                )
-        
-        return total, streak, ready_to_vote
-
-
-if DB_ENGINE is None:
-    @copy_docs(get_generic_vote_fields)
-    async def get_generic_vote_fields(target_user_id):
-        return 0, 0, False
-
+    user_balance = await get_user_balance(target_user_id)
+    
+    if user_balance.allocated and (target_user_id not in IN_GAME_IDS):
+        user_balance.set('allocated', 0)
+        await user_balance.save()
+    
+    now = DateTime.now(TimeZone.utc)
+    streak = refresh_streak(user_balance.streak, user_balance.daily_can_claim_at, now)
+    ready_to_vote = user_balance.top_gg_voted_at + TOP_GG_VOTE_INTERVAL <= now
+    return user_balance.balance, streak, ready_to_vote
 
 
 async def get_stat_fields(target_user_id):
@@ -162,77 +80,27 @@ async def get_stat_fields(target_user_id):
     
     Returns
     -------
-    total : `int`
+    balance : `int`
     streak : `int`
     count_daily_self : `int`
     count_daily_by_waifu : `int`
     count_daily_for_waifu : `int`
     count_top_gg_vote : `int`
     """
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.total_love,
-                    user_common_model.daily_streak,
-                    user_common_model.daily_next,
-                    user_common_model.total_allocated,
-                    
-                    # Counts
-                    user_common_model.count_daily_self,
-                    user_common_model.count_daily_by_waifu,
-                    user_common_model.count_daily_for_waifu,
-                    user_common_model.count_top_gg_vote,
-                ]
-            ).where(
-                user_common_model.user_id == target_user_id,
-            )
-        )
-        
-        result = await response.fetchone()
-        
-        if (result is None):
-            total = 0
-            streak = 0
-            
-            count_daily_self = 0
-            count_daily_by_waifu = 0
-            count_daily_for_waifu = 0
-            count_top_gg_vote = 0
-        
-        else:
-            (
-                entry_id,
-                total,
-                streak,
-                daily_next,
-                total_allocated,
-                count_daily_self,
-                count_daily_by_waifu,
-                count_daily_for_waifu,
-                count_top_gg_vote
-            ) = result
-            
-            daily_next = daily_next.replace(tzinfo = TimeZone.utc)
-            
-            now = DateTime.now(TimeZone.utc)
-            if daily_next > now:
-                streak = refresh_daily_streak(streak, daily_next, now)
-            
-            if total_allocated and (target_user_id not in IN_GAME_IDS):
-                await connector.execute(
-                    USER_COMMON_TABLE.update(
-                        user_common_model.id == entry_id,
-                    ).values(
-                        total_allocated = 0,
-                    )
-                )
+    user_balance = await get_user_balance(target_user_id)
     
-    return total, streak, count_daily_self, count_daily_by_waifu, count_daily_for_waifu, count_top_gg_vote 
-
-
-if DB_ENGINE is None:
-    @copy_docs(get_stat_fields)
-    async def get_stat_fields(target_user_id):
-        return 0, 0, 0, 0, 0, 0
+    if user_balance.allocated and (target_user_id not in IN_GAME_IDS):
+        user_balance.set('allocated', 0)
+        await user_balance.save()
+    
+    now = DateTime.now(TimeZone.utc)
+    streak = refresh_streak(user_balance.streak, user_balance.daily_can_claim_at, now)
+    
+    return (
+        user_balance.balance,
+        streak,
+        user_balance.count_daily_self,
+        user_balance.count_daily_by_waifu,
+        user_balance.count_daily_for_waifu,
+        user_balance.count_top_gg_vote,
+    )

@@ -6,7 +6,7 @@ from sqlalchemy import and_, not_
 from sqlalchemy.sql import select
 
 from ...bot_utils.daily import DAILY_REMINDER_AFTER
-from ...bot_utils.models import USER_COMMON_TABLE, user_common_model, user_settings_model
+from ...bot_utils.models import USER_BALANCE_TABLE, user_balance_model, user_settings_model
 
 
 async def get_entries_to_notify_with_connector(connector):
@@ -27,16 +27,16 @@ async def get_entries_to_notify_with_connector(connector):
     response = await connector.execute(
         select(
             [
-                user_common_model.id,
-                user_common_model.user_id,
+                user_balance_model.id,
+                user_balance_model.user_id,
                 user_settings_model.preferred_client_id,
             ]
         ).where(
             and_(
-                user_common_model.user_id == user_settings_model.user_id,
-                user_common_model.daily_next <= DateTime.now(TimeZone.utc) - DAILY_REMINDER_AFTER,
+                user_balance_model.user_id == user_settings_model.user_id,
+                user_balance_model.daily_can_claim_at <= DateTime.now(TimeZone.utc) - DAILY_REMINDER_AFTER,
                 user_settings_model.notification_daily_reminder,
-                not_(user_common_model.daily_reminded),
+                not_(user_balance_model.daily_reminded),
             )
         )
     )
@@ -58,8 +58,8 @@ async def set_entry_as_notified_with_connector(connector, entry_id):
         The entry's id to interact with.
     """
     await connector.execute(
-        USER_COMMON_TABLE.update(
-            user_common_model.id == entry_id,
+        USER_BALANCE_TABLE.update(
+            user_balance_model.id == entry_id,
         ).values(
             daily_reminded = True,
         )

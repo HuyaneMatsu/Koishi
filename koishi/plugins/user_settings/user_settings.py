@@ -25,6 +25,9 @@ class UserSettings(RichAttributeErrorBaseType):
     notification_daily_reminder : `bool`
         Whether the user should get reminder about that they forgot to claim their daily reward.
     
+    notification_gift : `bool`
+        Whether the user should get gift notifications.
+    
     notification_proposal : `bool`
         Whether proposal notification should be delivered.
     
@@ -38,8 +41,8 @@ class UserSettings(RichAttributeErrorBaseType):
         The image source the user prefers if multiple choices are available.
     """
     __slots__ = (
-        'entry_id', 'user_id', 'notification_daily_by_waifu', 'notification_daily_reminder', 'notification_proposal',
-        'notification_vote', 'preferred_client_id', 'preferred_image_source'
+        'entry_id', 'user_id', 'notification_daily_by_waifu', 'notification_daily_reminder', 'notification_gift',
+        'notification_proposal', 'notification_vote', 'preferred_client_id', 'preferred_image_source'
     )
     
     def __new__(
@@ -48,6 +51,7 @@ class UserSettings(RichAttributeErrorBaseType):
         *,
         notification_daily_by_waifu = True,
         notification_daily_reminder = False,
+        notification_gift = True,
         notification_proposal = True,
         notification_vote = True,
         preferred_client_id = 0,
@@ -67,6 +71,9 @@ class UserSettings(RichAttributeErrorBaseType):
         notification_daily_reminder : `bool` = `False`, Optional (Keyword only)
             Whether the user should get reminder about that they forgot to claim their daily reward.
         
+        notification_gift : `bool` = `True`, Optional (Keyword only)
+            Whether the user should get gift notifications.
+        
         notification_proposal : `bool` = `True`, Optional (Keyword only)
             Whether notification_proposal notification should be delivered.
         
@@ -84,6 +91,7 @@ class UserSettings(RichAttributeErrorBaseType):
         self.user_id = user_id
         self.notification_daily_by_waifu = notification_daily_by_waifu
         self.notification_daily_reminder = notification_daily_reminder
+        self.notification_gift = notification_gift
         self.notification_proposal = notification_proposal
         self.notification_vote = notification_vote
         self.preferred_client_id = preferred_client_id
@@ -110,6 +118,7 @@ class UserSettings(RichAttributeErrorBaseType):
         self.user_id = entry['user_id']
         self.notification_daily_by_waifu = entry['notification_daily_by_waifu']
         self.notification_daily_reminder = entry['notification_daily_reminder']
+        self.notification_gift = entry['notification_gift']
         self.notification_proposal = entry['notification_proposal']
         self.notification_vote = entry['notification_vote']
         self.preferred_client_id = entry['preferred_client_id']
@@ -135,6 +144,10 @@ class UserSettings(RichAttributeErrorBaseType):
         
         repr_parts.append(', notification_daily_reminder = ')
         repr_parts.append(repr(self.notification_daily_reminder))
+        
+        # notification_gift
+        repr_parts.append(', notification_gift = ')
+        repr_parts.append(repr(self.notification_gift))
         
         repr_parts.append(', notification_proposal = ')
         repr_parts.append(repr(self.notification_proposal))
@@ -166,6 +179,10 @@ class UserSettings(RichAttributeErrorBaseType):
         if self.notification_daily_reminder != other.notification_daily_reminder:
             return False
         
+        # notification_gift
+        if self.notification_gift != other.notification_gift:
+            return False
+        
         if self.notification_proposal != other.notification_proposal:
             return False
         
@@ -187,6 +204,10 @@ class UserSettings(RichAttributeErrorBaseType):
             return True
         
         if self.notification_daily_reminder != False:
+            return True
+        
+        # notification_gift
+        if self.notification_gift != True:
             return True
         
         if self.notification_proposal != True:
@@ -217,6 +238,7 @@ class UserSettings(RichAttributeErrorBaseType):
         new.user_id = self.user_id
         new.notification_daily_by_waifu = self.notification_daily_by_waifu
         new.notification_daily_reminder = self.notification_daily_reminder
+        new.notification_gift = self.notification_gift
         new.notification_proposal = self.notification_proposal
         new.notification_vote = self.notification_vote
         new.preferred_client_id = self.preferred_client_id

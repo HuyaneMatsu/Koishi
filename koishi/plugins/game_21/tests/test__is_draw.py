@@ -6,8 +6,8 @@ from ..player import Player
 
 
 def _iter_options():
-    player_0 = Player(User.precreate(202408040030), -1, InteractionEvent.precreate(202408040031))
-    player_1 = Player(User.precreate(202408040032), -1, InteractionEvent.precreate(202408040033))
+    player_0 = Player(User.precreate(202408040030), InteractionEvent.precreate(202408040031))
+    player_1 = Player(User.precreate(202408040032), InteractionEvent.precreate(202408040033))
     
     yield (None, None, True)
     yield (None, [player_1], True)

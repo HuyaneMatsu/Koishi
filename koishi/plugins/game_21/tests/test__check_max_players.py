@@ -9,7 +9,7 @@ from ..player import Player
 
 
 def _iter_options():
-    player = Player(User.precreate(202408040060), -1, InteractionEvent.precreate(202408040061))
+    player = Player(User.precreate(202408040060), InteractionEvent.precreate(202408040061))
     
     yield (
         [player for index in range(PLAYERS_MAX - 1)],

@@ -35,7 +35,6 @@ async def test__set_user_settings_option__no_change():
     vampytest.assert_eq(output, False)
 
 
-
 async def test__set_user_settings_option__with_change():
     """
     Tests whether ``set_user_settings_option`` works as intended.

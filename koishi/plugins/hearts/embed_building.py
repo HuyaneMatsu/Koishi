@@ -14,7 +14,7 @@ from .rendering import (
 )
 
 
-def build_daily_embed_short(interaction_event, target_user, total, streak, ready_to_claim):
+def build_daily_embed_short(interaction_event, target_user, balance, streak, ready_to_claim):
     """
     Builds a daily embed (short).
     
@@ -23,8 +23,8 @@ def build_daily_embed_short(interaction_event, target_user, total, streak, ready
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    total : `int`
-        The user's total love.
+    balance : `int`
+        The user's balance.
     
     streak : `int`
         The user's streak.
@@ -37,15 +37,15 @@ def build_daily_embed_short(interaction_event, target_user, total, streak, ready
     embed : ``Embed``
     """
     return Embed(
-        render_hearts_short_title(interaction_event, target_user, total),
+        render_hearts_short_title(interaction_event, target_user, balance),
         render_hearts_short_description(
-            interaction_event, target_user, total, streak, ready_to_claim, 'claim your daily'
+            interaction_event, target_user, balance, streak, ready_to_claim, 'claim your daily'
         ),
         color = COLOR__GAMBLING,
     )
 
 
-def build_daily_embed_extended(interaction_event, target_user, total, streak, ready_to_claim):
+def build_daily_embed_extended(interaction_event, target_user, balance, streak, ready_to_claim):
     """
     Builds a daily embed (extended).
     
@@ -54,8 +54,8 @@ def build_daily_embed_extended(interaction_event, target_user, total, streak, re
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    total : `int`
-        The user's total love.
+    balance : `int`
+        The user's balance.
     
     streak : `int`
         The user's streak.
@@ -67,7 +67,7 @@ def build_daily_embed_extended(interaction_event, target_user, total, streak, re
     -------
     embed : ``Embed``
     """
-    embed = build_daily_embed_short(interaction_event, target_user, total, streak, ready_to_claim)
+    embed = build_daily_embed_short(interaction_event, target_user, balance, streak, ready_to_claim)
     embed.add_field(
         'Daily reward calculation:',
         render_hearts_extended_description(interaction_event, target_user, REWARDS_DAILY, streak),
@@ -75,7 +75,7 @@ def build_daily_embed_extended(interaction_event, target_user, total, streak, re
     return embed
 
 
-def build_vote_embed_short(interaction_event, target_user, total, streak, ready_to_vote):
+def build_vote_embed_short(interaction_event, target_user, balance, streak, ready_to_vote):
     """
     Builds a vote embed (short).
     
@@ -84,8 +84,8 @@ def build_vote_embed_short(interaction_event, target_user, total, streak, ready_
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    total : `int`
-        The user's total love.
+    balance : `int`
+        The user's balance.
     
     streak : `int`
         The user's streak.
@@ -98,15 +98,15 @@ def build_vote_embed_short(interaction_event, target_user, total, streak, ready_
     embed : ``Embed``
     """
     return Embed(
-        render_hearts_short_title(interaction_event, target_user, total),
+        render_hearts_short_title(interaction_event, target_user, balance),
         render_hearts_short_description(
-            interaction_event, target_user, total, streak, ready_to_vote, 'vote'
+            interaction_event, target_user, balance, streak, ready_to_vote, 'vote'
         ),
         color = COLOR__GAMBLING,
     )
 
 
-def build_vote_embed_extended(interaction_event, target_user, total, streak, ready_to_vote):
+def build_vote_embed_extended(interaction_event, target_user, balance, streak, ready_to_vote):
     """
     Builds a vote embed (extended).
     
@@ -115,8 +115,8 @@ def build_vote_embed_extended(interaction_event, target_user, total, streak, rea
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    total : `int`
-        The user's total love.
+    balance : `int`
+        The user's balance.
     
     streak : `int`
         The user's streak.
@@ -128,7 +128,7 @@ def build_vote_embed_extended(interaction_event, target_user, total, streak, rea
     -------
     embed : ``Embed``
     """
-    embed = build_vote_embed_short(interaction_event, target_user, total, streak, ready_to_vote)
+    embed = build_vote_embed_short(interaction_event, target_user, balance, streak, ready_to_vote)
     embed.add_field(
         'Vote reward calculation:',
         render_hearts_extended_description(interaction_event, target_user, REWARDS_VOTE, streak),
@@ -139,7 +139,7 @@ def build_vote_embed_extended(interaction_event, target_user, total, streak, rea
 def build_stats_embed(
     interaction_event,
     target_user,
-    total,
+    balance,
     streak,
     count_daily_self,
     count_daily_by_waifu,
@@ -154,8 +154,8 @@ def build_stats_embed(
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    total : `int`
-        The user's total love.
+    balance : `int`
+        The user's balance.
     
     streak : `int`
         The user's streak.
@@ -183,7 +183,7 @@ def build_stats_embed(
         target_user.avatar_url_at(interaction_event.guild),
     ).add_field(
         f'{EMOJI__HEART_CURRENCY} Hearts',
-        render_int_block(total),
+        render_int_block(balance),
         inline = True,
     ).add_field(
         f'{EMOJI_DAILY_STREAK} Streak',

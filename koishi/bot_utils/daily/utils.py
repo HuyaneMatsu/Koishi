@@ -1,4 +1,4 @@
-__all__ = ('calculate_daily_for', 'calculate_daily_new', 'calculate_vote_for', 'refresh_daily_streak')
+__all__ = ('calculate_daily_for', 'calculate_daily_new', 'calculate_vote_for', 'refresh_streak')
 
 from .constants import DAILY_STREAK_BREAK, DAILY_STREAK_LOSE
 from .reward_accumulator import RewardAccumulator
@@ -47,16 +47,16 @@ def calculate_vote_for(user, streak):
     return accumulator.sum_rewards(streak)
 
 
-def refresh_daily_streak(daily_streak, daily_next, now):
+def refresh_streak(streak, daily_can_claim_at, now):
     """
     Calculates daily streak loss.
     
     Parameters
     ----------
-    daily_streak : `int`
+    streak : `int`
         The user's actual daily streak.
     
-    daily_next : `DateTime`
+    daily_can_claim_at : `DateTime`
         The time when the user can claim it's next daily reward.
     
     now : `DateTime`
@@ -64,32 +64,32 @@ def refresh_daily_streak(daily_streak, daily_next, now):
     
     Returns
     -------
-    daily_streak_new : `int`
+    streak_new : `int`
         The new daily streak value of the user.
     """
-    daily_next_with_break = daily_next + DAILY_STREAK_BREAK
-    if daily_next_with_break < now:
-        daily_streak_new = daily_streak - ((now - daily_next_with_break) // DAILY_STREAK_LOSE) - 1
+    daily_can_claim_at_with_break = daily_can_claim_at + DAILY_STREAK_BREAK
+    if daily_can_claim_at_with_break < now:
+        streak_new = streak - ((now - daily_can_claim_at_with_break) // DAILY_STREAK_LOSE) - 1
         
-        if daily_streak_new < 0:
-            daily_streak_new = 0
+        if streak_new < 0:
+            streak_new = 0
     
     else:
-        daily_streak_new = daily_streak
+        streak_new = streak
     
-    return daily_streak_new
+    return streak_new
 
 
-def calculate_daily_new(daily_streak, daily_next, now):
+def calculate_daily_new(streak, daily_can_claim_at, now):
     """
     Calculates daily streak loss and the new next claim time.
     
     Parameters
     ----------
-    daily_streak : `int`
+    streak : `int`
         The user's actual daily streak.
     
-    daily_next : `DateTime`
+    daily_can_claim_at : `DateTime`
         The time when the user can claim it's next daily reward.
     
     now : `DateTime`
@@ -97,24 +97,24 @@ def calculate_daily_new(daily_streak, daily_next, now):
     
     Returns
     -------
-    daily_streak_new : `int`
+    streak_new : `int`
         The new daily streak value of the user.
     
-    daily_next_new : `DateTime`
+    daily_can_claim_at_new : `DateTime`
         The new daily next value of the user.
     """
-    daily_next_with_break = daily_next + DAILY_STREAK_BREAK
-    if daily_next_with_break >= now:
-        daily_streak_new = daily_streak
-        daily_next_new = daily_next
+    daily_can_claim_at_with_break = daily_can_claim_at + DAILY_STREAK_BREAK
+    if daily_can_claim_at_with_break >= now:
+        streak_new = streak
+        daily_can_claim_at_new = daily_can_claim_at
     
     else:
-        daily_streak_new = daily_streak - ((now - daily_next_with_break) // DAILY_STREAK_LOSE) - 1
-        if daily_streak_new <= 0:
-            daily_streak_new = 0
-            daily_next_new = now
+        streak_new = streak - ((now - daily_can_claim_at_with_break) // DAILY_STREAK_LOSE) - 1
+        if streak_new <= 0:
+            streak_new = 0
+            daily_can_claim_at_new = now
         
         else:
-            daily_next_new = daily_next + (DAILY_STREAK_LOSE * (daily_streak - daily_streak_new))
+            daily_can_claim_at_new = daily_can_claim_at + (DAILY_STREAK_LOSE * (streak - streak_new))
     
-    return daily_streak_new, daily_next_new
+    return streak_new, daily_can_claim_at_new

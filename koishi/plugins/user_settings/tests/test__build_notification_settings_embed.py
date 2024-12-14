@@ -15,6 +15,7 @@ def test__build_notification_settings_embed():
         user_id,
         notification_daily_by_waifu = True,
         notification_daily_reminder = False,
+        notification_gift = False,
         notification_proposal = False,
         notification_vote = False,
     )
@@ -34,6 +35,13 @@ def test__build_notification_settings_embed():
         ),
     ).add_field(
         'Daily-reminder',
+        (
+            '```\n'
+            'false\n'
+            '```'
+        ),
+    ).add_field(
+        'Gift',
         (
             '```\n'
             'false\n'

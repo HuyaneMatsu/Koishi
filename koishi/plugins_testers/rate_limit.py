@@ -3536,6 +3536,16 @@ async def entitlement_delete(client):
     )
 
 
+async def entitlement_get(client):
+    entitlement_id = 1122121212121
+    
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/applications/{client.application.id}/entitlements/{entitlement_id}',
+    )
+
+
 async def entitlement_consume(client):
     entitlement_id = 1122121212121
     
@@ -8782,3 +8792,13 @@ async def rate_limit_test_0233(client, message, role : Role = None):
             await RLT.send('Please give a role.')
         
         await role_get(client, role)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0234(client, message):
+    """
+    Gets an entitlement.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0234') as RLT:
+        await Task(KOKORO, entitlement_get(client)).wait_for_completion()

@@ -67,7 +67,7 @@ def _iter_options():
 def test__build_stats_embed(
     interaction_event,
     target_user,
-    total,
+    balance,
     streak,
     count_daily_self,
     count_daily_by_waifu,
@@ -82,8 +82,8 @@ def test__build_stats_embed(
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    total : `int`
-        The user's total love.
+    balance : `int`
+        The user's balance.
     
     streak : `int`
         The user's streak.
@@ -107,7 +107,7 @@ def test__build_stats_embed(
     output = build_stats_embed(
         interaction_event,
         target_user,
-        total,
+        balance,
         streak,
         count_daily_self,
         count_daily_by_waifu,

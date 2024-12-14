@@ -19,6 +19,7 @@ def _assert_fields_set(user_settings):
     vampytest.assert_instance(user_settings.entry_id, int)
     vampytest.assert_instance(user_settings.user_id, int)
     vampytest.assert_instance(user_settings.notification_daily_by_waifu, bool)
+    vampytest.assert_instance(user_settings.notification_gift, bool)
     vampytest.assert_instance(user_settings.notification_proposal, bool)
     vampytest.assert_instance(user_settings.notification_vote, bool)
     vampytest.assert_instance(user_settings.notification_daily_reminder, bool)
@@ -33,6 +34,7 @@ def test__UserSettings__new():
     user_id = 202309240000
     notification_daily_by_waifu = False
     notification_daily_reminder = True
+    notification_gift = False
     notification_proposal = False
     notification_vote = False
     preferred_client_id = 202402250005
@@ -42,6 +44,7 @@ def test__UserSettings__new():
         user_id,
         notification_daily_by_waifu = notification_daily_by_waifu,
         notification_daily_reminder = notification_daily_reminder,
+        notification_gift = notification_gift,
         notification_proposal = notification_proposal,
         notification_vote = notification_vote,
         preferred_client_id = preferred_client_id,
@@ -53,6 +56,7 @@ def test__UserSettings__new():
     vampytest.assert_eq(user_settings.user_id, user_id)
     vampytest.assert_eq(user_settings.notification_daily_by_waifu, notification_daily_by_waifu)
     vampytest.assert_eq(user_settings.notification_daily_reminder, notification_daily_reminder)
+    vampytest.assert_eq(user_settings.notification_gift, notification_gift)
     vampytest.assert_eq(user_settings.notification_proposal, notification_proposal)
     vampytest.assert_eq(user_settings.notification_vote, notification_vote)
     vampytest.assert_eq(user_settings.preferred_client_id, preferred_client_id)
@@ -67,6 +71,7 @@ def test__UserSettings__from_entry():
     user_id = 202309240001
     notification_daily_by_waifu = False
     notification_daily_reminder = True
+    notification_gift = False
     notification_proposal = False
     notification_vote = False
     preferred_client_id = 202402250006
@@ -77,6 +82,7 @@ def test__UserSettings__from_entry():
         'user_id': user_id,
         'notification_daily_by_waifu': notification_daily_by_waifu,
         'notification_daily_reminder': notification_daily_reminder,
+        'notification_gift': notification_gift,
         'notification_proposal': notification_proposal,
         'notification_vote': notification_vote,
         'preferred_client_id': preferred_client_id,
@@ -90,6 +96,7 @@ def test__UserSettings__from_entry():
     vampytest.assert_eq(user_settings.user_id, user_id)
     vampytest.assert_eq(user_settings.notification_daily_by_waifu, notification_daily_by_waifu)
     vampytest.assert_eq(user_settings.notification_daily_reminder, notification_daily_reminder)
+    vampytest.assert_eq(user_settings.notification_gift, notification_gift)
     vampytest.assert_eq(user_settings.notification_proposal, notification_proposal)
     vampytest.assert_eq(user_settings.notification_vote, notification_vote)
     vampytest.assert_eq(user_settings.preferred_client_id, preferred_client_id)
@@ -104,6 +111,7 @@ def test__UserSettings__repr():
     user_id = 202309240002
     notification_daily_by_waifu = False
     notification_daily_reminder = True
+    notification_gift = False
     notification_proposal = False
     notification_vote = False
     preferred_client_id = 202402250007
@@ -114,6 +122,7 @@ def test__UserSettings__repr():
         'user_id': user_id,
         'notification_daily_by_waifu': notification_daily_by_waifu,
         'notification_daily_reminder': notification_daily_reminder,
+        'notification_gift': notification_gift,
         'notification_proposal': notification_proposal,
         'notification_vote': notification_vote,
         'preferred_client_id': preferred_client_id,
@@ -131,6 +140,7 @@ def test__UserSettings__eq():
     user_id = 202309170036
     notification_daily_by_waifu = False
     notification_daily_reminder = True
+    notification_gift = False
     notification_proposal = False
     notification_vote = False
     preferred_client_id = 202402250007
@@ -140,6 +150,7 @@ def test__UserSettings__eq():
         user_id,
         notification_daily_by_waifu = notification_daily_by_waifu,
         notification_daily_reminder = notification_daily_reminder,
+        notification_gift = notification_gift,
         notification_proposal = notification_proposal,
         notification_vote = notification_vote,
         preferred_client_id = preferred_client_id,
@@ -157,6 +168,7 @@ def _iter_options__bool():
     yield UserSettings(202309170050), False
     yield UserSettings(202309170038, notification_daily_by_waifu = False), True
     yield UserSettings(202402250008, notification_daily_reminder = True), True
+    yield UserSettings(202309170039, notification_gift = False), True
     yield UserSettings(202309170039, notification_proposal = False), True
     yield UserSettings(202411250000, notification_vote = False), True
     yield UserSettings(202402250009, preferred_client_id = 202402250010), True
@@ -189,6 +201,7 @@ def test__UserSettings__copy():
     user_id = 20230926004
     notification_daily_by_waifu = False
     notification_daily_reminder = True
+    notification_gift = False
     notification_proposal = False
     notification_vote = False
     preferred_client_id = 202402250011
@@ -198,6 +211,7 @@ def test__UserSettings__copy():
         user_id,
         notification_daily_by_waifu = notification_daily_by_waifu,
         notification_daily_reminder = notification_daily_reminder,
+        notification_gift = notification_gift,
         notification_proposal = notification_proposal,
         notification_vote = notification_vote,
         preferred_client_id = preferred_client_id,

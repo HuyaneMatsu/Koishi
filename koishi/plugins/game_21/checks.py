@@ -57,7 +57,7 @@ def check_bet_too_low(amount):
         abort(build_join_failed_embed_bet_too_low())
 
 
-def check_has_enough_love(expected_love, available_love):
+def check_has_enough_love(expected_love, available_love, me):
     """
     Checks whether the user has enough love to bet.
     
@@ -65,12 +65,16 @@ def check_has_enough_love(expected_love, available_love):
     ----------
     expected_love : `int`
         The expected hearts to have.
+    
     available_love : `int`
         The available hearts of a user.
+    
+    me : `bool`
+        Whether the client is checking itself.
     
     Raises
     ------
     InteractionAbortedError
     """
     if expected_love > available_love:
-        abort(build_join_failed_embed_not_enough_hearts(expected_love, available_love))
+        abort(build_join_failed_embed_not_enough_hearts(expected_love, available_love, me))

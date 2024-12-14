@@ -1,21 +1,24 @@
 __all__ = ()
 
-import re
 from math import floor
+from re import compile as re_compile
 
 from hata import Embed
-from hata.ext.slash import InteractionResponse, abort, Button, Row
-from sqlalchemy import func as alchemy_function, and_, or_
+from hata.ext.slash import Button, InteractionResponse, Row, abort
+from scarletio import copy_docs
+from sqlalchemy import and_, func as alchemy_function, or_
 from sqlalchemy.sql import select
 
-from ..bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression, \
-    waifu_list_model, WAIFU_LIST_TABLE, waifu_proposal_model, WAIFU_PROPOSAL_TABLE
 from ..bot_utils.constants import EMOJI__HEART_CURRENCY, WAIFU_COST_DEFAULT
-from ..bot_utils.utils import send_embed_to
+from ..bot_utils.models import (
+    DB_ENGINE, WAIFU_LIST_TABLE, WAIFU_PROPOSAL_TABLE, waifu_list_model, waifu_proposal_model
+)
 from ..bot_utils.user_getter import get_user, get_users_unordered
+from ..bot_utils.utils import send_embed_to
 from ..bots import FEATURE_CLIENTS
 
-from .marriage_slot import BUY_WAIFU_SLOT_INVOKE_COMPONENT, EMOJI_YES, EMOJI_NO
+from .marriage_slot import BUY_WAIFU_SLOT_INVOKE_COMPONENT, EMOJI_NO, EMOJI_YES
+from .user_balance import get_user_balance, get_user_balances
 from .user_settings import (
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_PROPOSAL_DISABLE, get_one_user_settings_with_connector,
     get_preferred_client_for_user
@@ -45,45 +48,11 @@ async def waifu_info(event,
     
     user_id = user.id
     
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.waifu_owner_id,
-                    user_common_model.waifu_cost,
-                    user_common_model.waifu_divorces,
-                    user_common_model.waifu_slots,
-                ]
-            ).where(
-                user_common_model.user_id == user_id,
-            )
-        )
-        
-        results = await response.fetchall()
-        if results:
-            waifu_owner_id, waifu_cost, waifu_divorces, waifu_slots = results[0]
-            
-            response = await connector.execute(
-                select(
-                    [
-                        waifu_list_model.waifu_id,
-                    ]
-                ).where(
-                    waifu_list_model.user_id == user_id,
-                )
-            )
-            
-            results = await response.fetchall()
-            if results:
-                waifu_ids = sorted(result[0] for result in results)
-            else:
-                waifu_ids = None
-        else:
-            waifu_owner_id = 0
-            waifu_cost = WAIFU_COST_DEFAULT
-            waifu_divorces = 0
-            waifu_slots = 1
-            waifu_ids = None
+    user_balance = await get_user_balance(user_id)
+    waifu_owner_id = user_balance.waifu_owner_id
+    
+    waifu_ids = await get_related_ids(user_id)
+    waifu_ids.discard(waifu_owner_id)
     
     embed = Embed(
         f'{user:f}\'s waifu info',
@@ -104,8 +73,7 @@ async def waifu_info(event,
         inline = True,
     )
     
-    if not waifu_cost:
-        waifu_cost = WAIFU_COST_DEFAULT
+    waifu_cost = user_balance.waifu_cost or WAIFU_COST_DEFAULT
     
     embed.add_field(
         f'Minimal cost:',
@@ -115,17 +83,17 @@ async def waifu_info(event,
     
     embed.add_field(
         'Divorces',
-        str(waifu_divorces),
+        str(user_balance.waifu_divorces),
         inline = True,
     )
     
-    if waifu_ids is None:
+    if not waifu_ids:
         field_value = '*none*'
         waifu_count_value = '0'
     else:
         waifu_names = []
         
-        for waifu_id in waifu_ids:
+        for waifu_id in sorted(waifu_ids):
             waifu = await get_user(waifu_id)
             waifu_names.append(waifu.full_name)
         
@@ -133,7 +101,7 @@ async def waifu_info(event,
         waifu_count_value = repr(len(waifu_ids))
     
     embed.add_field(
-        f'Waifus ({waifu_count_value} / {waifu_slots})',
+        f'Waifus ({waifu_count_value} / {user_balance.waifu_slots})',
         field_value,
         inline = True,
     )
@@ -164,104 +132,48 @@ async def propose(
         abort('You cannot propose to yourself.')
     
     async with DB_ENGINE.connect() as connector:
+        user_balances = await get_user_balances((source_user_id, target_user_id),)
+        source_user_balance = user_balances[source_user_id]
+        target_user_balance = user_balances[target_user_id]
+        
+        source_waifu_slots = source_user_balance.waifu_slots
+        source_balance = source_user_balance.balance
+        source_allocated = source_user_balance.allocated
+        
         response = await connector.execute(
             select(
                 [
-                    user_common_model.id,
-                    user_common_model.user_id,
-                    user_common_model.waifu_slots,
-                    user_common_model.total_love,
-                    user_common_model.total_allocated,
-                    user_common_model.waifu_cost,
-                    user_common_model.waifu_owner_id,
+                     alchemy_function.count(waifu_list_model.waifu_id),
                 ]
             ).where(
-                user_common_model.user_id.in_(
-                    [
-                        source_user_id,
-                        target_user_id,
-                    ]
-                )
+                waifu_list_model.user_id == source_user_id,
+            )
+        )
+        
+        source_waifu_count = (await response.fetchone())[0]
+        
+        response = await connector.execute(
+            select(
+                [
+                    waifu_proposal_model.id,
+                    waifu_proposal_model.target_id,
+                    waifu_proposal_model.investment,
+                ]
+            ).where(
+                waifu_proposal_model.source_id == source_user_id
             )
         )
         
         results = await response.fetchall()
-        
-        result_count = len(results)
-        if result_count == 0:
-            source_entry = None
-            target_entry = None
+        if results:
+            proposed_user_ids = {result[1] : (result[0], result[2]) for result in results}
         else:
-            source_entry = results[0]
-            
-            if result_count == 2:
-                target_entry = results[1]
-            else:
-                target_entry = None
-            
-            if (source_entry[1] != source_user_id):
-                source_entry, target_entry = target_entry, source_entry
-        
-        if source_entry is None:
-            source_entry_id = -1
-            source_waifu_slots = 1
-            source_total_love = 0
-            source_total_allocated = 0
-            
-            source_waifu_count = 0
             proposed_user_ids = None
-        else:
-            source_entry_id = source_entry[0]
-            source_waifu_slots = source_entry[2]
-            source_total_love = source_entry[3]
-            source_total_allocated = source_entry[4]
-            
-            response = await connector.execute(
-                select(
-                    [
-                         alchemy_function.count(waifu_list_model.waifu_id),
-                    ]
-                ).where(
-                    waifu_list_model.user_id == source_user_id,
-                )
-            )
-            
-            source_waifu_count = (await response.fetchone())[0]
-            
-            response = await connector.execute(
-                select(
-                    [
-                        waifu_proposal_model.id,
-                        waifu_proposal_model.target_id,
-                        waifu_proposal_model.investment,
-                    ]
-                ).where(
-                    waifu_proposal_model.source_id == source_user_id
-                )
-            )
-            
-            results = await response.fetchall()
-            if results:
-                proposed_user_ids = {result[1]:(result[0], result[2]) for result in results}
-            else:
-                proposed_user_ids = None
         
+        target_waifu_owner_id = target_user_balance.owner_id
+        target_waifu_cost = target_user_balance.waifu_cost or WAIFU_COST_DEFAULT
         
-        if target_entry is None:
-            target_entry_id = -1
-            target_waifu_cost = WAIFU_COST_DEFAULT
-            target_waifu_owner_id = 0
-        else:
-            target_entry_id = target_entry[0]
-            target_waifu_owner_id = target_entry[6]
-            
-            target_waifu_cost = target_entry[5]
-            if not target_waifu_cost:
-                target_waifu_cost = WAIFU_COST_DEFAULT
-        
-        target_user_user_settings = await get_one_user_settings_with_connector(
-            target_user_id, connector
-        )
+        target_user_user_settings = await get_one_user_settings_with_connector(target_user_id, connector)
         
         required_love = floor(target_waifu_cost * get_multiplier(source_user_id, target_user_id))
         
@@ -290,10 +202,10 @@ async def propose(
                     )
                     return
                 
-                available_love = source_total_love - source_total_allocated + investment
+                available = source_balance - source_allocated + investment
                 
                 # Case 3: The user has not enough love even with proposal
-                if available_love < amount:
+                if available < amount:
                     embed_description_parts = []
                     
                     embed_description_parts.append('You do not have ')
@@ -307,13 +219,13 @@ async def propose(
                         '\n'
                         'You have '
                     )
-                    embed_description_parts.append(repr(available_love))
+                    embed_description_parts.append(repr(available))
                     embed_description_parts.append(' ')
                     embed_description_parts.append(EMOJI__HEART_CURRENCY)
                     
-                    if source_total_allocated:
+                    if source_allocated:
                         embed_description_parts.append('(')
-                        embed_description_parts.append(repr(source_total_allocated))
+                        embed_description_parts.append(repr(source_allocated))
                         embed_description_parts.append(' in use).')
                     
                     embed_description_parts.append(
@@ -340,13 +252,8 @@ async def propose(
                     )
                 )
                 
-                await connector.execute(
-                    USER_COMMON_TABLE.update(
-                        user_common_model.id == source_entry_id,
-                    ).values(
-                        total_love = user_common_model.total_love - (amount - investment),
-                    )
-                )
+                source_user_balance.set('balance', source_user_balance.balance - (amount - investment))
+                await source_user_balance.save()
                 
                 yield Embed(
                     None,
@@ -383,15 +290,15 @@ async def propose(
                         f'Propositions: {proposed_user_count}'
                     ),
                 ).add_footer(
-                    'To buy more waifu slot, use: /heart-shop waifu-slot'
+                    'To buy more waifu slot, use: /shop waifu-slot'
                 ),
                 components = BUY_WAIFU_SLOT_INVOKE_COMPONENT,
             )
             return
         
         # case 6: The proposal amount is under required amount.
-        available_love = source_total_love - source_total_allocated
-        if amount > available_love:
+        available = source_balance - source_allocated
+        if amount > available:
             embed_description_parts = []
             
             embed_description_parts.append('You do not have ')
@@ -405,13 +312,13 @@ async def propose(
                 '\n'
                 'You have '
             )
-            embed_description_parts.append(repr(available_love))
+            embed_description_parts.append(repr(available))
             embed_description_parts.append(' ')
             embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
             
-            if source_total_allocated:
+            if source_allocated:
                 embed_description_parts.append('(')
-                embed_description_parts.append(repr(source_total_allocated))
+                embed_description_parts.append(repr(source_allocated))
                 embed_description_parts.append(' in use).')
             
             yield Embed(
@@ -423,27 +330,13 @@ async def propose(
         # case 7: Proposing to a bot
         if target_user.bot:
             love_increase = (amount >> 1)
-            if target_entry_id == -1:
-                to_execute = get_create_common_user_expression(
-                    target_user_id,
-                    total_love = love_increase,
-                    waifu_owner_id = source_user_id,
-                )
-            else:
-                to_execute = USER_COMMON_TABLE.update(
-                    user_common_model.id == target_entry_id,
-                ).values(
-                    total_love = user_common_model.total_love + love_increase,
-                    waifu_owner_id = source_user_id,
-                    waifu_cost = amount,
-                )
-                
-                if target_waifu_owner_id:
-                    to_execute = to_execute.values(
-                        waifu_divorces = user_common_model.waifu_divorces + 1,
-                    )
             
-            await connector.execute(to_execute)
+            target_user_balance.set('balance', target_user_balance.balance + love_increase)
+            target_user_balance.set('waifu_owner_id', source_user_id)
+            target_user_balance.set('waifu_cost', amount)
+            if target_waifu_owner_id:
+                target_user_balance.set('waifu_divorces', target_user_balance.waifu_divorces + 1)
+            await target_user_balance.save()
             
             if target_waifu_owner_id:
                 to_execute = WAIFU_LIST_TABLE.update(
@@ -468,9 +361,7 @@ async def propose(
             if target_waifu_owner_id:
                 owner = await client.user_get(target_waifu_owner_id)
                 if not owner.bot:
-                    owner_user_settings = await get_one_user_settings_with_connector(
-                        target_waifu_owner_id, connector
-                    )
+                    owner_user_settings = await get_one_user_settings_with_connector(target_waifu_owner_id, connector)
                     await send_embed_to(
                         get_preferred_client_for_user(owner, owner_user_settings.preferred_client_id, client),
                         target_waifu_owner_id,
@@ -489,16 +380,11 @@ async def propose(
                 target_id = target_user_id,
                 investment = amount,
             )
-        
         )
         
-        await connector.execute(
-            USER_COMMON_TABLE.update(
-                user_common_model.id == source_entry_id,
-            ).values(
-                total_love = user_common_model.total_love - amount,
-            )
-        )
+        source_user_balance.set('balance', source_user_balance.balance - amount)
+        await source_user_balance.save()
+        
         
         yield Embed(
             None,
@@ -697,57 +583,25 @@ async def accept(
             )
         )
         
-        results = await response.fetchall()
-        if not results:
+        result = await response.fetchone()
+        if (result is None):
             yield Embed(
                 None,
                 f'{target_user:f} is not proposing to you.'
             )
             return
         
-        investment = results[0][0]
+        investment = result[0]
         
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.waifu_owner_id,
-                ]
-            ).where(
-                user_common_model.user_id == source_user_id,
-            )
-        )
-        
-        results = await response.fetchall()
-        if results:
-            entry_id, waifu_owner_id = results[0]
-        else:
-            entry_id = -1
-            waifu_owner_id = 0
-        
+        user_balance = await get_user_balance(source_user_id)
+        waifu_owner_id = user_balance.waifu_owner_id
         love_increase = (investment >> 1)
-        if entry_id == -1:
-            to_execute = get_create_common_user_expression(
-                source_user_id,
-                total_love = love_increase,
-                waifu_owner_id = target_user_id,
-                waifu_cost = investment,
-            )
-        else:
-            to_execute = USER_COMMON_TABLE.update(
-                user_common_model.id == entry_id,
-            ).values(
-                total_love = user_common_model.total_love + love_increase,
-                waifu_owner_id = target_user_id,
-                waifu_cost = investment,
-            )
-            
-            if waifu_owner_id:
-                to_execute = to_execute.values(
-                    waifu_divorces = user_common_model.waifu_divorces + 1,
-                )
-        
-        await connector.execute(to_execute)
+        user_balance.set('balance', user_balance.balance + love_increase)
+        user_balance.set('waifu_cost', investment)
+        user_balance.set('waifu_owner_id', waifu_owner_id)
+        if waifu_owner_id:
+            user_balance.set('waifu_divorces', user_balance.waifu_divorces + 1)
+        await user_balance.save()
         
         if waifu_owner_id:
             to_execute = WAIFU_LIST_TABLE.update(
@@ -832,23 +686,20 @@ async def reject(
             )
         )
         
-        results = await response.fetchall()
-        if not results:
+        result = await response.fetchone()
+        
+        if (result is None):
             yield Embed(
                 None,
                 f'{target_user:f} is not proposing to you.'
             )
             return
         
-        investment = results[0][0]
+        investment = result[0]
         
-        await connector.execute(
-            USER_COMMON_TABLE.update(
-                user_common_model.user_id == target_user_id,
-            ).values(
-                total_love = user_common_model.total_love + investment,
-            )
-        )
+        user_balance = await get_user_balance(target_user_id)
+        user_balance.set('balance', user_balance.balance + investment)
+        await user_balance.save()
         
         target_user_user_settings = await get_one_user_settings_with_connector(
             target_user_id, connector
@@ -922,13 +773,9 @@ async def cancel(
         
         investment = results[0][0]
         
-        await connector.execute(
-            USER_COMMON_TABLE.update(
-                user_common_model.user_id == source_user_id,
-            ).values(
-                total_love = user_common_model.total_love + investment,
-            )
-        )
+        user_balance = await get_user_balance(source_user_id)
+        user_balance.set('balance', user_balance.balance + investment)
+        await user_balance.save()
         
         target_user_user_settings = await get_one_user_settings_with_connector(
             target_user_id, connector
@@ -959,41 +806,100 @@ async def autocomplete_reject_user_name(event, value):
     return sorted(waifu.full_name for waifu in waifus)
 
 
-async def get_waifu_ids(user_id):
+async def are_related(source_user_id, target_user_id):
+    """
+    Returns whether the two users are related.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    source_user_id : `int`
+        Source user's identifier.
+    
+    target_user : `int`
+        Target user's identifier.
+    
+    Returns
+    -------
+    related : `bool`
+    """
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
             select(
                 [
-                    user_common_model.user_id,
+                    waifu_list_model.id,
                 ]
             ).where(
-                user_common_model.user_id.in_(
-                    select(
-                        [
-                            waifu_list_model.user_id,
-                        ]
-                    ).where(
-                        waifu_list_model.waifu_id == user_id,
-                    ).union(
-                        select(
-                            [
-                                waifu_list_model.waifu_id,
-                            ]
-                        ).where(
-                            waifu_list_model.user_id == user_id,
-                        )
-                    )
+                or_(
+                    and_(
+                        waifu_list_model.user_id == source_user_id,
+                        waifu_list_model.waifu_id == target_user_id,
+                    ),
+                    and_(
+                        waifu_list_model.user_id == target_user_id,
+                        waifu_list_model.waifu_id == source_user_id,
+                    ),
                 )
             )
         )
         
-        results = await response.fetchall()
-        return [waifu_id for (waifu_id,) in results]
+        return response.rowcount > 0
+
+
+if (DB_ENGINE is None):
+    @copy_docs(are_related)
+    async def are_related(user_id):
+        return False
+
+
+async def get_related_ids(user_id):
+    """
+    Gets the users identifiers who are related to the given user.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    user_id : `int`
+        The user identifier to request their relateds of.
+    
+    Returns
+    -------
+    related_ids : `set<int>`
+    """
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(
+            select(
+                [
+                    waifu_list_model.user_id,
+                ]
+            ).where(
+                waifu_list_model.waifu_id == user_id,
+            ).union(
+                select(
+                    [
+                        waifu_list_model.waifu_id,
+                    ]
+                ).where(
+                    waifu_list_model.user_id == user_id,
+                )
+            )
+        )
+
+        entries = await response.fetchall()
+        return {entry[0] for entry in entries}
+
+
+if (DB_ENGINE is None):
+    @copy_docs(get_related_ids)
+    async def get_related_ids(user_id):
+        return [859886212251779083]
 
 
 async def get_one_divorce_with_name(event, name):
     user_id = event.user.id
-    waifu_ids = await get_waifu_ids(user_id)
+    waifu_ids = await get_related_ids(user_id)
     waifus = await get_users_unordered(waifu_ids)
     
     for waifu in waifus:
@@ -1003,7 +909,7 @@ async def get_one_divorce_with_name(event, name):
 
 async def get_all_divorce_with_name(event, value):
     user_id = event.user.id
-    waifu_ids = await get_waifu_ids(user_id)
+    waifu_ids = await get_related_ids(user_id)
     waifus = await get_users_unordered(waifu_ids)
     
     if value is not None:
@@ -1047,127 +953,98 @@ async def divorce(
             )
         )
         
-        if response.rowcount:
-            is_outgoing = True
-        else:
-            is_outgoing = False
+        is_outgoing = True if response.rowcount else False
+    
+    
+    user_balance = await get_user_balance(source_user_id)
+    is_incoming = user_balance.waifu_owner_id == target_user_id
+    
+    
+    if is_incoming:
+        allocated = user_balance.allocated
+        waifu_cost = user_balance.waifu_cost or WAIFU_COST_DEFAULT
+        available = user_balance.balance - allocated
         
-        
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.total_love,
-                    user_common_model.total_allocated,
-                    user_common_model.waifu_owner_id,
-                    user_common_model.waifu_cost,
-                    user_common_model.id,
-                ]
-            ).where(
-                user_common_model.user_id == source_user_id,
+        if available < waifu_cost:
+            embed_description_parts = []
+            embed_description_parts.append('You don\'t have enough ')
+            embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
+            embed_description_parts.append(f' to divorce ')
+            embed_description_parts.append(target_user.full_name)
+            embed_description_parts.append(
+                '.\n'
+                '\n'
+                'You need '
             )
-        )
-        
-        results = await response.fetchall()
-        if results:
-            result = results[0]
-            waifu_owner_id = result[2]
-            if waifu_owner_id == target_user_id:
-                total_love = result[0]
-                total_allocated = result[1]
-                waifu_cost = result[3]
-                
-                is_incoming = True
-            else:
-                is_incoming = False
-        
-        else:
-            is_incoming = False
-        
-        
-        
-        if is_incoming:
-            available_love = total_love - total_allocated
+            embed_description_parts.append(repr(waifu_cost))
+            embed_description_parts.append(' ')
+            embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
+            embed_description_parts.append(', but you only have ')
+            embed_description_parts.append(repr(available))
+            embed_description_parts.append(' ')
+            embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
             
-            if available_love < waifu_cost:
-                embed_description_parts = []
-                embed_description_parts.append('You don\'t have enough ')
-                embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
-                embed_description_parts.append(f' to divorce ')
-                embed_description_parts.append(target_user.full_name)
-                embed_description_parts.append(
-                    '.\n'
-                    '\n'
-                    'You need '
-                )
-                embed_description_parts.append(repr(waifu_cost))
-                embed_description_parts.append(' ')
-                embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
-                embed_description_parts.append(', but you only have ')
-                embed_description_parts.append(repr(available_love))
-                embed_description_parts.append(' ')
-                embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
-                
-                if total_allocated:
-                    embed_description_parts.append('(')
-                    embed_description_parts.append(repr(total_allocated))
-                    embed_description_parts.append(' in use).')
-                
-                return Embed(
-                    None,
-                    ''.join(embed_description_parts)
-                )
+            if allocated:
+                embed_description_parts.append('(')
+                embed_description_parts.append(repr(allocated))
+                embed_description_parts.append(' in use).')
             
-            if is_outgoing:
-                mode = 'c'
-            else:
-                mode = 'i'
-            
-            return InteractionResponse(
-                embed = Embed(
-                    None,
-                    f'Are you sure you want to divorce {target_user:f}?\n'
-                    f'\n'
-                    f'This action requires {waifu_cost} {EMOJI__HEART_CURRENCY}'
-                ),
-                components = Row(
-                    Button(
-                        'Yes',
-                        EMOJI_YES,
-                        custom_id = (
-                            f'marriage.divorce.{mode}-{source_user_id:x}-{target_user_id:x}'
-                        ),
-                    ),
-                    BUTTON_DIVORCE_CANCEL,
-                ),
+            return Embed(
+                None,
+                ''.join(embed_description_parts)
             )
-        
         
         if is_outgoing:
-            return InteractionResponse(
-                embed = Embed(
-                    None,
-                    f'Are you sure to divorce {target_user:f}?'
-                ),
-                components = Row(
-                    Button(
-                        'Yes',
-                        EMOJI_YES,
-                        custom_id = (
-                            f'marriage.divorce.o-{source_user_id:x}-{target_user_id:x}'
-                        ),
-                    ),
-                    Button(
-                        'No',
-                        EMOJI_NO,
-                        custom_id = CUSTOM_ID_DIVORCE_CANCEL,
-                    ),
-                ),
-            )
+            mode = 'c'
+        else:
+            mode = 'i'
         
-        return Embed(
-            None,
-            f'You are not married to {target_user:f}.'
+        return InteractionResponse(
+            embed = Embed(
+                None,
+                f'Are you sure you want to divorce {target_user:f}?\n'
+                f'\n'
+                f'This action requires {waifu_cost} {EMOJI__HEART_CURRENCY}'
+            ),
+            components = Row(
+                Button(
+                    'Yes',
+                    EMOJI_YES,
+                    custom_id = (
+                        f'marriage.divorce.{mode}-{source_user_id:x}-{target_user_id:x}'
+                    ),
+                ),
+                BUTTON_DIVORCE_CANCEL,
+            ),
         )
+    
+    
+    if is_outgoing:
+        return InteractionResponse(
+            embed = Embed(
+                None,
+                f'Are you sure to divorce {target_user:f}?'
+            ),
+            components = Row(
+                Button(
+                    'Yes',
+                    EMOJI_YES,
+                    custom_id = (
+                        f'marriage.divorce.o-{source_user_id:x}-{target_user_id:x}'
+                    ),
+                ),
+                Button(
+                    'No',
+                    EMOJI_NO,
+                    custom_id = CUSTOM_ID_DIVORCE_CANCEL,
+                ),
+            ),
+        )
+    
+    return Embed(
+        None,
+        f'You are not married to {target_user:f}.'
+    )
 
 
 @divorce.autocomplete('target_user_name')
@@ -1191,7 +1068,7 @@ async def divorce_cancelled(event):
 
 
 @FEATURE_CLIENTS.interactions(
-    custom_id = re.compile('marriage\\.divorce\\.([cio])\\-([0-9a-f]{6,16})\\-([0-9a-f]{6,16})')
+    custom_id = re_compile('marriage\\.divorce\\.([cio])\\-([0-9a-f]{6,16})\\-([0-9a-f]{6,16})')
 )
 async def divorce_execute(client, event, mode, source_user_id, target_user_id):
     if event.user is not event.message.interaction.user:
@@ -1214,27 +1091,9 @@ async def divorce_execute(client, event, mode, source_user_id, target_user_id):
 
 async def divorce_incoming(client, event, source_user_id, target_user):
     async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.total_love,
-                    user_common_model.total_allocated,
-                    user_common_model.waifu_owner_id,
-                    user_common_model.waifu_cost,
-                    user_common_model.id,
-                ]
-            ).where(
-                user_common_model.user_id == source_user_id,
-            )
-        )
+        user_balance = await get_user_balance(source_user_id)
         
-        results = await response.fetchall()
-        if not results:
-            return
-        
-        result = results[0]
-        waifu_owner_id = result[2]
-        
+        waifu_owner_id = user_balance.waifu_owner_id
         if waifu_owner_id != target_user.id:
             yield InteractionResponse(
                 embed = Embed(
@@ -1247,14 +1106,10 @@ async def divorce_incoming(client, event, source_user_id, target_user):
                 components = None,
             )
             return
+         
+        waifu_cost = user_balance.waifu_cost or WAIFU_COST_DEFAULT
         
-        total_love = result[0]
-        total_allocated = result[1]
-        waifu_cost = result[3]
-        
-        available_love = total_love - total_allocated
-        
-        if available_love < waifu_cost:
+        if (user_balance.balance - user_balance.allocated) < waifu_cost:
             yield InteractionResponse(
                 embed = Embed(
                     None,
@@ -1268,27 +1123,17 @@ async def divorce_incoming(client, event, source_user_id, target_user):
             )
             return
         
-        entry_id = result[4]
         refund = (waifu_cost >> 1)
         
-        await connector.execute(
-            USER_COMMON_TABLE.update(
-                user_common_model.id == entry_id,
-            ).values(
-                total_love = user_common_model.total_love - waifu_cost,
-                waifu_cost = user_common_model.waifu_cost - refund,
-                waifu_divorces = user_common_model.waifu_divorces + 1,
-                waifu_owner_id = 0,
-            )
-        )
+        user_balance.set('balance', user_balance.balance - waifu_cost)
+        user_balance.set('waifu_cost', (user_balance.waifu_cost or WAIFU_COST_DEFAULT) - refund)
+        user_balance.set('waifu_divorces', user_balance.waifu_divorces + 1)
+        user_balance.set('waifu_owner_id', 0)
+        await user_balance.save()
         
-        await connector.execute(
-            USER_COMMON_TABLE.update(
-                user_common_model.user_id == target_user.id,
-            ).values(
-                total_love = user_common_model.total_love + waifu_cost,
-            )
-        )
+        user_balance = await get_user_balance(target_user.id)
+        user_balance.set('balance', user_balance.balance + waifu_cost)
+        await user_balance.save()
         
         await connector.execute(
             WAIFU_LIST_TABLE.delete().where(
@@ -1352,21 +1197,14 @@ async def divorce_outgoing(client, event, source_user_id, target_user):
             )
             return
         
-        await connector.execute(
-            USER_COMMON_TABLE.update(
-                user_common_model.user_id == source_user_id,
-            ).values(
-                waifu_divorces = user_common_model.waifu_divorces + 1,
-            )
-        )
+        user_balance = await get_user_balance(source_user_id.id)
+        user_balance.set('waifu_divorces', user_balance.waifu_divorces + 1)
+        await user_balance.save()
         
-        await connector.execute(
-            USER_COMMON_TABLE.update(
-                user_common_model.user_id == target_user.id,
-            ).values(
-                waifu_owner_id = 0,
-            )
-        )
+        
+        user_balance = await get_user_balance(target_user.id)
+        user_balance.set('waifu_owner_id', 0)
+        await user_balance.save()
         
         target_user_user_settings = await get_one_user_settings_with_connector(
             target_user.id, connector
@@ -1432,33 +1270,14 @@ async def divorce_circular(client, event, source_user_id, target_user):
         
         entry_ids = [result[0] for result in results]
         
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.total_love,
-                    user_common_model.total_allocated,
-                    user_common_model.waifu_cost,
-                    user_common_model.id,
-                ]
-            ).where(
-                user_common_model.user_id == source_user_id,
-            )
-        )
+        user_balance = await get_user_balance(source_user_id)
+        balance = user_balance.balance
+        allocated = user_balance.allocated
+        waifu_cost = user_balance.waifu_cost or WAIFU_COST_DEFAULT
         
-        results = await response.fetchall()
-        if not results:
-            # Should not happen
-            return
+        available = balance - allocated
         
-        result = results[0]
-        
-        total_love = result[0]
-        total_allocated = result[1]
-        waifu_cost = result[2]
-        
-        available_love = total_love - total_allocated
-        
-        if available_love < waifu_cost:
+        if available < waifu_cost:
             yield InteractionResponse(
                 embed = Embed(
                     None,
@@ -1472,28 +1291,20 @@ async def divorce_circular(client, event, source_user_id, target_user):
             )
             return
         
-        entry_id = result[3]
         refund = (waifu_cost >> 1)
         
-        await connector.execute(
-            USER_COMMON_TABLE.update(
-                user_common_model.id == entry_id,
-            ).values(
-                total_love = user_common_model.total_love - waifu_cost,
-                waifu_cost = user_common_model.waifu_cost - refund,
-                waifu_divorces = user_common_model.waifu_divorces + 1,
-                waifu_owner_id = 0,
-            )
-        )
+        user_balance.set('balance', balance - waifu_cost)
+        user_balance.set('waifu_cost', waifu_cost - refund)
+        user_balance.set('waifu_divorces', user_balance.waifu_divorces + 1)
+        user_balance.set('waifu_owner_id', 0)
+        await user_balance.save()
         
-        await connector.execute(
-            USER_COMMON_TABLE.update(
-                user_common_model.user_id == target_user.id,
-            ).values(
-                total_love = user_common_model.total_love + waifu_cost,
-                waifu_owner_id = 0,
-            )
-        )
+        
+        user_balance = await get_user_balance(target_user.id)
+        user_balance.set('balance', target_user.balance + waifu_cost)
+        user_balance.set('waifu_owner_id', 0)
+        await user_balance.save()
+        
         
         await connector.execute(
             WAIFU_LIST_TABLE.delete().where(

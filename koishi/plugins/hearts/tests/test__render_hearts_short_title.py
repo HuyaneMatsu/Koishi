@@ -36,7 +36,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__render_hearts_short_title(interaction_event, target_user, total):
+def test__render_hearts_short_title(interaction_event, target_user, balance):
     """
     Tests whether ``render_hearts_short_title`` works as intended.
     
@@ -48,13 +48,13 @@ def test__render_hearts_short_title(interaction_event, target_user, total):
     target_user : ``ClientUserBase``
         The targeted user.
     
-    total : `int`
-        The user's total hearts.
+    balance : `int`
+        The user's balance.
     
     Returns
     -------
     output : `str`
     """
-    output = render_hearts_short_title(interaction_event, target_user, total)
+    output = render_hearts_short_title(interaction_event, target_user, balance)
     vampytest.assert_instance(output, str)
     return output

@@ -4,7 +4,8 @@ from hata.ext.slash import abort
 
 from sqlalchemy.sql import select
 
-from ....bot_utils.models import DB_ENGINE, user_common_model
+from ....bot_utils.models import DB_ENGINE
+from ....plugins.user_balance import get_user_balances
 
 
 class RequestDetail:
@@ -28,47 +29,6 @@ async def request(client, event, target_user, request_detail):
     
     
     async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.user_id,
-                    user_common_model.id,
-                    user_common_model.waifu_slots,
-                    user_common_model.total_love,
-                    user_common_model.total_allocated,
-                    user_common_model.waifu_cost,
-                ]
-            ).where(
-                user_common_model.user_id.in_(
-                    [
-                        source_user_id,
-                        target_user_id,
-                    ]
-                )
-            )
-        )
-        
-        results = await response.fetchall()
-        
-        result_count = len(results)
-        if result_count == 0:
-            source_entry = None
-            target_entry = None
-        else:
-            source_entry = results[0]
-            
-            if result_count == 2:
-                target_entry = results[1]
-            else:
-                target_entry = None
-            
-            if (source_entry[0] != source_user_id):
-                source_entry, target_entry = target_entry, source_entry
-        
-        
-        if source_entry is None:
-            source_entry_id = -1
-            source_waifu_slots = 1
-            source_total_love = 0
-            source_total_allocated = 0
-
+        user_balances = await get_user_balances((source_user_id, target_user_id),)
+        source_user_balance = user_balances[source_user_id]
+        target_user_balance = user_balances[target_user_id]

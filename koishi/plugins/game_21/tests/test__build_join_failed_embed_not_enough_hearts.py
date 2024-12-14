@@ -11,11 +11,26 @@ def _iter_options():
     yield (
         2000,
         1000,
+        False,
         Embed(
             'Ohoho',
             (
-                f'You must have at least {2000!s} {EMOJI__HEART_CURRENCY} to join.\n'
+                f'You must have at least {2000!s} available {EMOJI__HEART_CURRENCY} to join.\n'
                 f'You have {1000!s} {EMOJI__HEART_CURRENCY}.'
+            ),
+            color = COLOR__GAMBLING,
+        ),
+    )
+    
+    yield (
+        2000,
+        1000,
+        True,
+        Embed(
+            'Oh snap!',
+            (
+                f'I must have at least {2000!s} available {EMOJI__HEART_CURRENCY} to join.\n'
+                f'I have {1000!s} {EMOJI__HEART_CURRENCY}.'
             ),
             color = COLOR__GAMBLING,
         ),
@@ -23,7 +38,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_join_failed_embed_not_enough_hearts(expected_love, available_love):
+def test__build_join_failed_embed_not_enough_hearts(expected_love, available_love, me):
     """
     Tests whether ``build_join_failed_embed_not_enough_hearts`` works as intended.
     
@@ -31,13 +46,17 @@ def test__build_join_failed_embed_not_enough_hearts(expected_love, available_lov
     ----------
     expected_love : `int`
         The expected hearts to have.
+    
     available_love : `int`
         The available hearts of a user.
+    
+    me : `bool`
+        Whether the client is checking itself.
     
     Returns
     -------
     output : ``Embed``
     """
-    output = build_join_failed_embed_not_enough_hearts(expected_love, available_love)
+    output = build_join_failed_embed_not_enough_hearts(expected_love, available_love, me)
     vampytest.assert_instance(output, Embed)
     return output

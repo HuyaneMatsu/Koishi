@@ -18,6 +18,12 @@ OPTION_NOTIFICATION_DAILY_REMINDER = UserSettingsOption(
     'daily-reminder',
 )
 
+OPTION_NOTIFICATION_GIFT = UserSettingsOption(
+    UserSettings.notification_gift,
+    'notification_gift',
+    'gift',
+)
+
 OPTION_NOTIFICATION_PROPOSAL = UserSettingsOption(
     UserSettings.notification_proposal,
     'notification_proposal',
@@ -34,6 +40,7 @@ OPTION_NOTIFICATION_VOTE = UserSettingsOption(
 NOTIFICATION_SETTING_RESOLUTION = {
     OPTION_NOTIFICATION_DAILY_BY_WAIFU.system_name: OPTION_NOTIFICATION_DAILY_BY_WAIFU,
     OPTION_NOTIFICATION_DAILY_REMINDER.system_name: OPTION_NOTIFICATION_DAILY_REMINDER,
+    OPTION_NOTIFICATION_GIFT.system_name: OPTION_NOTIFICATION_GIFT,
     OPTION_NOTIFICATION_PROPOSAL.system_name: OPTION_NOTIFICATION_PROPOSAL,
     OPTION_NOTIFICATION_VOTE.system_name: OPTION_NOTIFICATION_VOTE,
 }

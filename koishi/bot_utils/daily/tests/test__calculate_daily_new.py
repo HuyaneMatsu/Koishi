@@ -49,16 +49,16 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__calculate_daily_new(daily_streak, daily_next, now):
+def test__calculate_daily_new(streak, daily_can_claim_at, now):
     """
     Tests whether ``calculate_daily_new`` works as intended.
     
     Parameters
     ----------
-    daily_streak : `int`
+    streak : `int`
         The user's actual daily streak.
     
-    daily_next : `DateTime`
+    daily_can_claim_at : `DateTime`
         The time when the user can claim it's next daily reward.
     
     now : `DateTime`
@@ -68,7 +68,7 @@ def test__calculate_daily_new(daily_streak, daily_next, now):
     -------
     output : `(int, DateTime)`
     """
-    output = calculate_daily_new(daily_streak, daily_next, now)
+    output = calculate_daily_new(streak, daily_can_claim_at, now)
     vampytest.assert_instance(output, tuple)
     vampytest.assert_instance(output[0], int)
     vampytest.assert_instance(output[1], DateTime)

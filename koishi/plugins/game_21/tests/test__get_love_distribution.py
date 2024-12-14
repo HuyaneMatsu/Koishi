@@ -6,10 +6,15 @@ from ..player import Player
 
 
 def _iter_options():
-    player_0 = Player(User.precreate(202408040034), -1, InteractionEvent.precreate(202408040035))
-    player_1 = Player(User.precreate(202408040036), 1, InteractionEvent.precreate(202408040037))
-    player_2 = Player(User.precreate(202408040034), 2, InteractionEvent.precreate(202408040035))
-    player_3 = Player(User.precreate(202408040036), 3, InteractionEvent.precreate(202408040037))
+    user_id_0 = 202412080000
+    user_id_1 = 202412080001
+    user_id_2 = 202412080002
+    user_id_3 = 202412080003
+    
+    player_0 = Player(User.precreate(user_id_0), InteractionEvent.precreate(202412080004))
+    player_1 = Player(User.precreate(user_id_1), InteractionEvent.precreate(202412080005))
+    player_2 = Player(User.precreate(user_id_2), InteractionEvent.precreate(202412080006))
+    player_3 = Player(User.precreate(user_id_3), InteractionEvent.precreate(202412080007))
     
     
     yield (
@@ -17,20 +22,10 @@ def _iter_options():
         [player_0, player_1, player_2, player_3],
         1000,
         [
-            (1, 1000, 0.0, True), 
-            (2, 1000, 0.0, True),
-            (3, 1000, 0.0, True),
-        ],
-    )
-    
-    yield (
-        None,
-        [player_0, player_1, player_2, player_3],
-        1000,
-        [
-            (1, 1000, 0.0, True), 
-            (2, 1000, 0.0, True),
-            (3, 1000, 0.0, True),
+            (user_id_0, 1000, 0.0, True), 
+            (user_id_1, 1000, 0.0, True), 
+            (user_id_2, 1000, 0.0, True),
+            (user_id_3, 1000, 0.0, True),
         ],
     )
 
@@ -39,9 +34,10 @@ def _iter_options():
         [player_2, player_3],
         1000,
         [
-            (1, 1000,  1.0, True), 
-            (2, 1000, -1.0, True),
-            (3, 1000, -1.0, True),
+            (user_id_0, 1000,  1.0, True), 
+            (user_id_1, 1000,  1.0, True), 
+            (user_id_2, 1000, -1.0, True),
+            (user_id_3, 1000, -1.0, True),
         ],
     )
 
@@ -50,9 +46,10 @@ def _iter_options():
         [player_0, player_2, player_3],
         1000,
         [
-            (1, 1000,  3.0, True), 
-            (2, 1000, -1.0, True),
-            (3, 1000, -1.0, True),
+            (user_id_1, 1000,  3.0, True), 
+            (user_id_0, 1000, -1.0, True), 
+            (user_id_2, 1000, -1.0, True),
+            (user_id_3, 1000, -1.0, True),
         ],
     )
 

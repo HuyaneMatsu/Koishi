@@ -2,6 +2,7 @@ import vampytest
 from hata import Embed, Guild, GuildProfile, InteractionEvent, User
 
 from ....bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY
+from ....bot_utils.daily import ConditionWeekend
 
 from ..embed_building import build_vote_embed_extended
 
@@ -42,7 +43,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_vote_embed_extended(interaction_event, target_user, total, streak, ready_to_vote):
+def test__build_vote_embed_extended(interaction_event, target_user, balance, streak, ready_to_vote):
     """
     Tests whether ``build_vote_embed_extended`` works as intended.
     
@@ -54,8 +55,8 @@ def test__build_vote_embed_extended(interaction_event, target_user, total, strea
     target_user : ``ClientUserBase``
         The targeted user.
     
-    total : `int`
-        The user's total hearts.
+    balance : `int`
+        The user's balance.
     
     streak : `int`
         The user's streak.
@@ -67,6 +68,16 @@ def test__build_vote_embed_extended(interaction_event, target_user, total, strea
     -------
     output : ``Embed``
     """
-    output = build_vote_embed_extended(interaction_event, target_user, total, streak, ready_to_vote)
+    original_call_code = ConditionWeekend.__call__.__code__
+    
+    def __call__(self, user):
+        return False
+    
+    try:
+        ConditionWeekend.__call__.__code__ = __call__.__code__
+        output = build_vote_embed_extended(interaction_event, target_user, balance, streak, ready_to_vote)
+    finally:
+        ConditionWeekend.__call__.__code__ = original_call_code
+        
     vampytest.assert_instance(output, Embed)
     return output

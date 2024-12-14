@@ -76,7 +76,7 @@ def _iter_options():
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__render_hearts_short_description(
-    interaction_event, target_user, total, streak, ready_to_claim, ready_to_claim_string
+    interaction_event, target_user, balance, streak, ready_to_claim, ready_to_claim_string
 ):
     """
     Tests whether ``render_hearts_short_description`` works as intended.
@@ -89,8 +89,8 @@ def test__render_hearts_short_description(
     target_user : ``ClientUserBase``
         The targeted user.
     
-    total : `int`
-        The user's total hearts.
+    balance : `int`
+        The user's balance.
     
     streak : `int`
         The user's streak
@@ -106,7 +106,7 @@ def test__render_hearts_short_description(
     output : `None | str`
     """
     output = render_hearts_short_description(
-        interaction_event, target_user, total, streak, ready_to_claim, ready_to_claim_string
+        interaction_event, target_user, balance, streak, ready_to_claim, ready_to_claim_string
     )
     vampytest.assert_instance(output, str, nullable = True)
     return output

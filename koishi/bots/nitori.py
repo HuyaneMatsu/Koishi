@@ -504,7 +504,7 @@ async def get_image_embed(client, tags, name, color):
 
 SCARLET = Nitori.interactions(None, name = 'scarlet', description = 'Scarlet?', guild = TEST_GUILD)
 
-@SCARLET.interactions(is_default = True)
+@SCARLET.interactions(default = True)
 async def devil(client, event):
     """Flandre & Remilia!"""
     yield

@@ -16,9 +16,9 @@ def _iter_options():
     guild_profile_1 = GuildProfile(nick = 'Suyu')
     user_1.guild_profiles[guild.id] = guild_profile_1
     
-    player_0 = Player(user_0, -1, InteractionEvent.precreate(202408060006))
+    player_0 = Player(user_0, InteractionEvent.precreate(202408060006))
     player_0.hand.add_card(8)
-    player_1 = Player(user_1, -1, InteractionEvent.precreate(202408060007))
+    player_1 = Player(user_1, InteractionEvent.precreate(202408060007))
     player_1.hand.add_card(6)
     
     session = Session(guild, 1000, InteractionEvent.precreate(202408060008))

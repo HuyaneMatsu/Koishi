@@ -230,11 +230,8 @@ def get_refund_distribution(players, amount):
     -------
     distribution : `list<(int, int, int, bool)>`
     """
-    return [
-        (player.entry_id, amount, 0.0, True)
-        for player in players if player.entry_id != -1
-    ]
-    
+    return [(player.user.id, amount, 0.0, True) for player in players]
+
 
 def get_love_distribution(winners, losers, amount):
     """
@@ -260,14 +257,10 @@ def get_love_distribution(winners, losers, amount):
     multiplier = (len(winners) + len(losers)) / len(winners) - 1.0
     
     for player in winners:
-        entry_id = player.entry_id
-        if entry_id != -1:
-            distribution.append((entry_id, amount, multiplier, True))
+        distribution.append((player.user.id, amount, multiplier, True))
     
     for player in losers:
-        entry_id = player.entry_id
-        if entry_id != -1:
-            distribution.append((entry_id, amount, -1.0, True))
+        distribution.append((player.user.id, amount, -1.0, True))
     
     return distribution
 

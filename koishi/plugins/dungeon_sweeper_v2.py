@@ -1,21 +1,19 @@
 __all__ = ()
 
-import os
 from json import dumps as to_json, load as from_json_file, loads as from_json
 from math import ceil, floor
+from os.path import join as join_paths
 from zlib import compress, decompress
 
 from hata import BUILTIN_EMOJIS, Color, DiscordException, ERROR_CODES, Embed, Emoji, KOKORO
 from hata.ext.slash import Button, ButtonStyle, Row, Timeouter, abort
 from scarletio import AsyncIO, CancelledError, Lock, Task, TaskGroup, copy_docs
-from sqlalchemy.sql import select
 
 from ..bot_utils.constants import PATH__KOISHI
-from ..bot_utils.models import (
-    DB_ENGINE, DS_V2_RESULT_TABLE, DS_V2_TABLE, USER_COMMON_TABLE, ds_v2_model, ds_v2_result_model,
-    get_create_common_user_expression, user_common_model
-)
+from ..bot_utils.models import DB_ENGINE, DS_V2_RESULT_TABLE, DS_V2_TABLE, ds_v2_model, ds_v2_result_model
 from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
+
+from .user_balance import get_user_balance
 
 
 DUNGEON_SWEEPER_COLOR = Color(0xa000c4)
@@ -63,7 +61,7 @@ RUNNER_STATE_VALUE_TO_NAME = {
 
 FILE_LOCK                = Lock(KOKORO)
 FILE_NAME                = 'ds_v2.json'
-FILE_PATH                = os.path.join(PATH__KOISHI, 'koishi', 'library', FILE_NAME)
+FILE_PATH                = join_paths(PATH__KOISHI, 'koishi', 'library', FILE_NAME)
 
 EMOJI_WEST               = BUILTIN_EMOJIS['arrow_left']
 EMOJI_NORTH              = BUILTIN_EMOJIS['arrow_up']
@@ -2599,32 +2597,9 @@ async def save_stage_result_and_reward(user_id, stage_id, steps, self_best, stag
             reward = get_reward_difference(stage_id, self_best, steps)
         
         if reward:
-            response = await connector.execute(
-                select(
-                    [
-                        user_common_model.id,
-                    ]
-                ).where(
-                    user_common_model.user_id == user_id,
-                )
-            )
-            
-            results = await response.fetchall()
-            if results:
-                entry_id = results[0][0]
-                
-                to_execute = USER_COMMON_TABLE.update(
-                    user_common_model.id == entry_id
-                ).values(
-                    total_love = user_common_model.total_love + reward
-                )
-            else:
-                to_execute = get_create_common_user_expression(
-                    user_id,
-                    total_love = reward,
-                )
-            
-            await connector.execute(to_execute)
+            user_balance = await get_user_balance(user_id)
+            user_balance.set('balance', user_balance.balance + reward)
+            await user_balance.save()
     
     return stage_result_entry_id
 
@@ -4909,7 +4884,7 @@ class DungeonSweeperRunner:
     def __repr__(self):
         """Returns the dungeon sweep runner's representation."""
         repr_parts = [
-            '<', self.__class__.__name__,
+            '<', type(self).__name__,
             ' client = ', repr(self.client),
             ', channel = ', repr(self.message.channel),
             ', gui_state = '
@@ -4952,7 +4927,7 @@ async def rules(client, event):
     return RULES_HELP
 
 
-@DUNGEON_SWEEPER.interactions(is_default = True)
+@DUNGEON_SWEEPER.interactions(default = True)
 async def play(client, event):
     """Starts the game"""
     game = DUNGEON_SWEEPER_GAMES.get(event.user.id, None)

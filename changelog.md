@@ -1,3 +1,19 @@
+### 2024-12-14
+
+- How balance is handled is completely rewritten; hoping no new bugs were made.
+- `/gift` is now affected by `accessibility`.
+- `/award` is now affected by `accessibility`.
+- `/gift` now picks up nick names.
+- `/award` now picks up nick names.
+- Add new `/accessibility notification-settings change notification_type: gift` option.
+- `/daily` now respects the user's nick name.
+- When playing `/21` in single player player mode now you are playing actually against the bot.
+    The bot is required to have enough hearts & its balance also changes depending on the outcome.
+- `/daily` does not mix `love` and `hearts` to have it consistent. Perhaps related to a future update?
+- Users without a balance entry in the database can also be retrieve random hearts randomly by using a command.
+- `/daily` is now available when user installed.
+- Rename `/heart-shop` to `/shop`.
+
 ### 2024-12-04
 
 - Fix commands using `booru` were not working (since last update).

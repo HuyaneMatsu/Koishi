@@ -9,11 +9,12 @@ from hata import BUILTIN_EMOJIS, KOKORO, Embed, Permission
 from scarletio import to_json, Lock, alchemy_incendiary
 from hata.ext.slash import abort, wait_for_component_interaction, Row, Button, InteractionResponse
 
-from sqlalchemy.sql import select, update
+from sqlalchemy.sql import select
 
 from ..bot_utils.constants import GUILD__SUPPORT, PATH__KOISHI, EMOJI__HEART_CURRENCY
-from ..bot_utils.models import DB_ENGINE, user_common_model, item_model, ITEM_TABLE
+from ..bot_utils.models import DB_ENGINE, item_model, ITEM_TABLE
 from ..bots import FEATURE_CLIENTS
+from ..plugins.user_balance import get_user_balance
 
 
 ITEMS = {}
@@ -639,22 +640,9 @@ async def buy(client, event,
     yield
     
     user = event.user
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.total_love,
-                ],
-            ).where(
-                user_common_model.user_id == user.id,
-            )
-        )
-        
-        results = await response.fetchall()
-        if results:
-            total_love = results[0]
-        else:
-            total_love = 0
+    
+    user_balance = await get_user_balance(user.id)
+    balance = user_balance.balance
     
     embed = Embed(
         'Confirm buying',
@@ -663,7 +651,7 @@ async def buy(client, event,
             f'Amount: **{amount}**\n'
             f'\n'
             f'Price: {calculate_buy_cost(item.market_cost, amount)} {EMOJI__HEART_CURRENCY}\n'
-            f'Budget: {total_love} {EMOJI__HEART_CURRENCY}'
+            f'Budget: {balance} {EMOJI__HEART_CURRENCY}'
         ),
     )
     
@@ -698,41 +686,23 @@ async def buy(client, event,
     else:
         user = event.user
         async with DB_ENGINE.connect() as connector:
-            response = await connector.execute(
-                select(
-                    [
-                        user_common_model.total_love,
-                        user_common_model.total_allocated
-                    ]
-                ).where(
-                    user_common_model.user_id == user.id,
-                )
-            )
+            user_balance = await get_user_balance(user.id)
+            balance = user_balance.balance
+            allocated = user_balance.allocated
             
-            results = await response.fetchall()
-            if results:
-                total_love, total_allocated = results[0]
-            else:
-                total_love = total_allocated = 0
-            
-            if total_love == 0:
+            if balance == 0:
                 amount = cost = 0
             else:
-                amount, cost = calculate_buyable_and_cost(item.market_cost, amount, total_love - total_allocated)
+                amount, cost = calculate_buyable_and_cost(item.market_cost, amount, balance - allocated)
                 
                 item.market_cost += amount
             
             if cost == 0:
-                new_love = total_love
+                new_balance = balance
             else:
-                new_love = total_love - cost
-                await connector.execute(
-                    update(
-                        user_common_model.user_id == user.id,
-                    ).values(
-                        total_love = new_love,
-                    )
-                )
+                new_balance = balance - cost
+                user_balance.set('balance', new_balance)
+                await user_balance.save()
                 
                 response = await connector.execute(
                     select(
@@ -770,11 +740,7 @@ async def buy(client, event,
             f'Selected item: {item.emoji} **{item.name}**\n'
             f'Bought mount: **{amount}**\n'
             f'\n'
-            f'Hearts: {total_love} {EMOJI__HEART_CURRENCY} -> {new_love} {EMOJI__HEART_CURRENCY}'
+            f'Hearts: {balance} {EMOJI__HEART_CURRENCY} -> {new_balance} {EMOJI__HEART_CURRENCY}'
         )
     
     yield InteractionResponse(embed = embed, components = None, message = message, event = component_interaction)
-
-
-
-

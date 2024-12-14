@@ -270,7 +270,7 @@ CATEGORIES = (
     ), (
         'Economy',
         EMOJI__HEART_CURRENCY,
-        ('daily', 'gift', 'heart-shop', 'hearts', 'top-list',),
+        ('daily', 'gift', 'shop', 'hearts', 'top-list',),
         (),
     ), (
         'Fun',
@@ -408,7 +408,7 @@ HEARD_GUIDE_EMBED = Embed(
         f'**•** `/daily` - Claim you daily reward.\n'
         f'**•** `/ds` - Complete dungeon sweeper stages.\n'
         f'**•** `/proposal accept` - Accept marriage proposals.\n'
-        f'**•** `/heart-shop sell-daily` - Sell your daily streak.\n'
+        f'**•** `/shop sell-daily` - Sell your daily streak.\n'
         f'**•** [Vote]({URL__KOISHI_TOP_GG}) on me on top.gg\n'
         f'**•** Use any command to get hearts randomly.'
     ),
@@ -417,8 +417,8 @@ HEARD_GUIDE_EMBED = Embed(
     (
         '**•** `/propose` - Propose to your heart\'s chosen one.\n'
         '**•** `/divorce` - Less waifus.\n'
-        '**•** `/heart-shop roles` - Buy roles inside of my support server.\n'
-        '**•** `/heart-shop waifu-slot` - More waifus.\n'
+        '**•** `/shop roles` - Buy roles inside of my support server.\n'
+        '**•** `/shop waifu-slot` - More waifus.\n'
         '**•** `/stats upgrade` - Upgrade your waifus stats.'
     ),
 ).add_field(
@@ -682,7 +682,7 @@ async def collectible():
     """A list of collectible roles in KW."""
     embed = Embed(
         'Collectible roles:',
-        f'Collect roles by buying them for heart {EMOJI__HEART_CURRENCY} using the `heart-shop roles` command.',
+        f'Collect roles by buying them for heart {EMOJI__HEART_CURRENCY} using the `shop roles` command.',
         color = COLOR__KOISHI_HELP,
     ).add_field(
         ROLE__SUPPORT__NSFW_ACCESS.name,

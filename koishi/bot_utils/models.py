@@ -1,8 +1,8 @@
 from config import DATABASE_NAME
 from warnings import warn
 
-user_common_model = None
-USER_COMMON_TABLE = None
+user_balance_model = None
+USER_BALANCE_TABLE = None
 
 waifu_list_model = None
 WAIFU_LIST_TABLE = None
@@ -26,8 +26,6 @@ sticker_counter_model = None
 STICKER_COUNTER_TABLE = None
 
 DB_ENGINE = None
-
-get_create_common_user_expression = None
 
 waifu_stats_model = None
 WAIFU_STATS_TABLE = None
@@ -73,20 +71,21 @@ if (DATABASE_NAME is not None):
 if (DB_ENGINE is not None):
     BASE = declarative_base()
     
-    class user_common_model(BASE):
+    class user_balance_model(BASE):
         __tablename__   = 'CURRENCY'
         # Generic
         id              = Column(Int64, primary_key = True, nullable = False)
         user_id         = Column(Int64, unique = True, nullable = False)
         
-        # Love
-        total_love      = Column(Int64, default = 0, nullable = False)
-        total_allocated = Column(Int64, default = 0, nullable = False)
+        # Balance
+        balance      = Column(Int64, default = 0, nullable = False)
+        allocated    = Column(Int64, default = 0, nullable = False)
         
-        # Daily
-        daily_next      = Column(DateTime, default = func.utc_timestamp(), nullable = False)
-        daily_streak    = Column(Int32, default = 0, nullable = False)
+        # Streak
+        streak          = Column(Int32, default = 0, nullable = False)
+        daily_can_claim_at = Column(DateTime, default = func.utc_timestamp(), nullable = False)
         daily_reminded  = Column(Boolean, default = False, nullable = False)
+        top_gg_voted_at = Column(DateTime, default = func.utc_timestamp(), nullable = False)
         
         # Counters
         count_daily_self = Column(Int32, default = 0, nullable = False)
@@ -99,13 +98,9 @@ if (DB_ENGINE is not None):
         waifu_divorces  = Column(Int32, default = 0, nullable = False)
         waifu_slots     = Column(Int32, default = 1, nullable = False)
         waifu_owner_id  = Column(Int64, default = 0, nullable = False)
-        
-        # Notify voters that they can vote on top.gg if they can. We base this on a top.gg vote timer and whether they
-        # voted before
-        top_gg_last_vote = Column(DateTime, default = func.utc_timestamp(), nullable = False)
     
     
-    USER_COMMON_TABLE = user_common_model.__table__
+    USER_BALANCE_TABLE = user_balance_model.__table__
     
     class waifu_list_model(BASE):
         __tablename__   = 'WAIFU_LIST'
@@ -291,6 +286,7 @@ if (DB_ENGINE is not None):
         user_id = Column(Int64, nullable = False)
         notification_daily_by_waifu = Column(Boolean, default = True, nullable = False)
         notification_daily_reminder = Column(Boolean, default = False, nullable = False)
+        notification_gift = Column(Boolean, default = True, nullable = False)
         notification_proposal = Column(Boolean, default = True, nullable = False)
         notification_vote = Column(Boolean, default = True, nullable = False)
         preferred_client_id = Column(Int64, default = 0, nullable = False)
@@ -324,54 +320,3 @@ if (DB_ENGINE is not None):
     
     
     DB_ENGINE.dispose()
-    # BASE.metadata.create_all(DB_ENGINE)
-    from datetime import datetime as DateTime, timezone as TimeZone
-    
-    def get_create_common_user_expression(
-        user_id,
-        total_love = 0,
-        daily_next = None,
-        daily_streak = 0,
-        daily_reminded = False,
-        total_allocated = 0,
-        waifu_cost = 0,
-        waifu_divorces = 0,
-        waifu_slots = 1,
-        count_daily_self = 0,
-        count_daily_by_waifu = 0,
-        count_daily_for_waifu = 0,
-        count_top_gg_vote = 0,
-        top_gg_last_vote = None,
-        waifu_owner_id = 0,
-    ):
-        now = None
-        
-        if daily_next is None:
-            if now is None:
-                now = DateTime.now(TimeZone.utc)
-
-            daily_next = now
-        
-        if top_gg_last_vote is None:
-            if now is None:
-                now = DateTime.now(TimeZone.utc)
-            
-            top_gg_last_vote = now
-        
-        return USER_COMMON_TABLE.insert().values(
-            user_id         = user_id,
-            total_love      = total_love,
-            daily_next      = daily_next,
-            daily_streak    = daily_streak,
-            daily_reminded  = daily_reminded,
-            total_allocated = total_allocated,
-            waifu_cost      = waifu_cost,
-            waifu_divorces  = waifu_divorces,
-            waifu_slots     = waifu_slots,
-            count_daily_self = count_daily_self,
-            count_daily_by_waifu = count_daily_by_waifu,
-            count_daily_for_waifu = count_daily_for_waifu,
-            count_top_gg_vote = count_top_gg_vote,
-            top_gg_last_vote = top_gg_last_vote,
-            waifu_owner_id = waifu_owner_id,
-        )

@@ -143,7 +143,7 @@ async def to_do_del_approve(
     try:
         to_do = TO_DOS[entry_id]
     except KeyError:
-        abort('The to-do was deleted meanwhile.')
+        return abort('The to-do was deleted meanwhile.')
     
     if state:
         to_do.delete()

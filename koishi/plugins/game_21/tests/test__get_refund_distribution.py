@@ -6,17 +6,22 @@ from ..player import Player
 
 
 def _iter_options():
-    player_0 = Player(User.precreate(202408040038), -1, InteractionEvent.precreate(202408040039))
-    player_1 = Player(User.precreate(202408040040), 1, InteractionEvent.precreate(202408040041))
-    player_2 = Player(User.precreate(202408040041), 2, InteractionEvent.precreate(202408040042))
+    user_id_0 = 202408040038
+    user_id_1 = 202408040040
+    user_id_2 = 202408040091
+    
+    player_0 = Player(User.precreate(user_id_0), InteractionEvent.precreate(202408040039))
+    player_1 = Player(User.precreate(user_id_1), InteractionEvent.precreate(202408040041))
+    player_2 = Player(User.precreate(user_id_2), InteractionEvent.precreate(202408040042))
     
     
     yield (
         [player_0, player_1, player_2],
         1000,
         [
-            (1, 1000, 0.0, True),
-            (2, 1000, 0.0, True),
+            (user_id_0, 1000, 0.0, True),
+            (user_id_1, 1000, 0.0, True),
+            (user_id_2, 1000, 0.0, True),
         ],
     )
 
