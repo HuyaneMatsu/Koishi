@@ -233,7 +233,7 @@ def get_refund_distribution(players, amount):
     return [(player.user.id, amount, 0.0, True) for player in players]
 
 
-def get_love_distribution(winners, losers, amount):
+def get_balance_distribution(winners, losers, amount):
     """
     Gets love distribution for the given players.
     

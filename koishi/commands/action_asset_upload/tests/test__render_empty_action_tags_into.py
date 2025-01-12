@@ -6,7 +6,6 @@ from ..rendering import _render_empty_action_tags_into
 def _iter_options():
     yield (
         {'kiss'},
-        None,
         (
             '.with_action(\n'
             '    ACTION_TAG_KISS, None, None,\n'
@@ -33,7 +32,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def _render_empty_action_tags_into(action_tags):
+def test__render_empty_action_tags_into(action_tags):
     """
     Tests whether ``_render_empty_action_tags_into`` works as intended.
     

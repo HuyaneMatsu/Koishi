@@ -1,6 +1,10 @@
 __all__ = ()
 
 
+ACTION_TAGS_SINGLE_SOURCE = ('cry', 'happy', 'kon', 'stare', 'wave', 'wink')
+ACTION_TAGS_SELF_TARGET = ('pocky_self', 'feed_self')
+
+
 def _render_url_into(into, url):
     """
     Renders an url section.
@@ -200,7 +204,7 @@ def _render_to_do_into(into, unidentified):
     into.append('# TODO')
     
     if (unidentified is not None):
-        for value in unidentified:
+        for value in sorted(unidentified):
             into.append(' ')
             into.append(value)
     
@@ -233,7 +237,7 @@ def renderer_single_source(characters, action_tags, unidentified, creator, url):
     into = []
     into = _render_url_into(into, url)
     character = next(iter(characters))
-    into = _render_single_action_into(into, next(iter(action_tags)), character, character)
+    into = _render_single_action_into(into, next(iter(action_tags)), character, None)
     into = _render_creator_into(into, creator)
     into.append('\n\n')
     return ''.join(into)
@@ -262,7 +266,8 @@ def renderer_self_target(characters, action_tags, unidentified, creator, url):
     """
     into = []
     into = _render_url_into(into, url)
-    into = _render_single_action_into(into, next(iter(action_tags)), next(iter(characters)), None)
+    character = next(iter(characters))
+    into = _render_single_action_into(into, next(iter(action_tags)), character, character)
     into = _render_creator_into(into, creator)
     into.append('\n\n')
     return ''.join(into)
@@ -302,7 +307,7 @@ def renderer_default(characters, action_tags, unidentified, creator, url):
 
 def is_single_source(characters, action_tags, unidentified):
     """
-    Returns whether the given field combination can be used with self targeting renderer.
+    Returns whether the given field combination can be used with a single source no target renderer.
     
     Parameters
     ----------
@@ -325,7 +330,7 @@ def is_single_source(characters, action_tags, unidentified):
     if len(characters) != 1 or len(action_tags) != 1:
         return False
     
-    if next(iter(action_tags)) not in ('pocky_self', 'feed_self'):
+    if next(iter(action_tags)) not in ACTION_TAGS_SINGLE_SOURCE:
         return False
     
     return True
@@ -333,7 +338,7 @@ def is_single_source(characters, action_tags, unidentified):
 
 def is_self_target(characters, action_tags, unidentified):
     """
-    Returns whether the given field combination can be used with single source renderer.
+    Returns whether the given field combination can be used with self targeting renderer.
     
     Parameters
     ----------
@@ -356,9 +361,9 @@ def is_self_target(characters, action_tags, unidentified):
     if len(characters) != 1 or len(action_tags) != 1:
         return False
     
-    if next(iter(action_tags)) not in ('cry', 'happy', 'kon', 'stare', 'wave', 'wink'):
+    if next(iter(action_tags)) not in ACTION_TAGS_SELF_TARGET:
         return False
-    
+        
     return True
 
 

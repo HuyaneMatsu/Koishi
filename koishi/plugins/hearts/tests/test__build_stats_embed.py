@@ -48,11 +48,11 @@ def _iter_options():
             '```\n1\n```',
             inline = True,
         ).add_field(
-            f'{EMOJI_COUNT_DAILY_FOR_WAIFU} Claimed for waifus',
+            f'{EMOJI_COUNT_DAILY_FOR_WAIFU} Claimed for related',
             '```\n3\n```',
             inline = True,
         ).add_field(
-            f'{EMOJI_COUNT_DAILY_BY_WAIFU} Claimed by waifu',
+            f'{EMOJI_COUNT_DAILY_BY_WAIFU} Claimed by related',
             '```\n2\n```',
             inline = True,
         ).add_field(
@@ -70,8 +70,8 @@ def test__build_stats_embed(
     balance,
     streak,
     count_daily_self,
-    count_daily_by_waifu,
-    count_daily_for_waifu,
+    count_daily_by_related,
+    count_daily_for_related,
     count_top_gg_vote,
 ):
     """
@@ -91,10 +91,10 @@ def test__build_stats_embed(
     count_daily_self : `int`
         The amount the user claimed their own daily.
     
-    count_daily_by_waifu : `int`
+    count_daily_by_related : `int`
         The amount the user's daily has been claimed.
     
-    count_daily_for_waifu : `int`
+    count_daily_for_related : `int`
         The amount the user claimed other's daily.
     
     count_top_gg_vote : `int`
@@ -110,8 +110,8 @@ def test__build_stats_embed(
         balance,
         streak,
         count_daily_self,
-        count_daily_by_waifu,
-        count_daily_for_waifu,
+        count_daily_by_related,
+        count_daily_for_related,
         count_top_gg_vote,
     )
     vampytest.assert_instance(output, Embed)

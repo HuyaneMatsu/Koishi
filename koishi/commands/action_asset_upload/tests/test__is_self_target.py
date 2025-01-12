@@ -52,7 +52,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def is_self_target(characters, action_tags, unidentified):
+def test__is_self_target(characters, action_tags, unidentified):
     """
     Tests whether ``is_self_target`` works as intended.
     

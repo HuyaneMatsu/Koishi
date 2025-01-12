@@ -22,10 +22,10 @@ class UserBalance(EntryProxy):
     balance : `int`
         The total love of the user.
     
-    count_daily_by_waifu : `int`
+    count_daily_by_related : `int`
         How much daily times the user got claimed by someone else.
     
-    count_daily_for_waifu : `int`
+    count_daily_for_related : `int`
         How much times the user claimed daily of someone else.
     
     count_daily_self : `int`
@@ -53,22 +53,19 @@ class UserBalance(EntryProxy):
     user_id : `int`
         The parent user's identifier.
     
-    waifu_cost : `int`
+    relationship_value : `int`
         The user's waifu cost.
     
-    waifu_divorces : `int`
+    relationship_divorces : `int`
         How much times the user divorced.
     
-    waifu_owner_id : `bool`
-        Who owns the user.
-    
-    waifu_slots : `int`
+    relationship_slots : `int`
         The maximal amount of waifus the user can have.
     """
     __slots__ = (
-        'balance', 'allocated', 'count_daily_by_waifu', 'count_daily_for_waifu', 'count_daily_self',
+        'balance', 'allocated', 'count_daily_by_related', 'count_daily_for_related', 'count_daily_self',
         'count_top_gg_vote', 'daily_can_claim_at', 'daily_reminded', 'streak', 'top_gg_voted_at', 'user_id',
-        'waifu_cost', 'waifu_divorces', 'waifu_owner_id', 'waifu_slots',
+        'relationship_value', 'relationship_divorces', 'relationship_slots',
     )
     
     saver_type = UserBalanceSaver
@@ -88,8 +85,8 @@ class UserBalance(EntryProxy):
         self = object.__new__(cls)
         self.allocated = 0
         self.balance = 0
-        self.count_daily_by_waifu = 0
-        self.count_daily_for_waifu = 0
+        self.count_daily_by_related = 0
+        self.count_daily_for_related = 0
         self.count_daily_self = 0
         self.count_top_gg_vote = 0
         self.daily_can_claim_at = now
@@ -99,10 +96,9 @@ class UserBalance(EntryProxy):
         self.saver = None
         self.top_gg_voted_at = now
         self.user_id = user_id
-        self.waifu_cost = 0
-        self.waifu_divorces = 0
-        self.waifu_owner_id = 0
-        self.waifu_slots = USER_WAIFU_SLOTS_DEFAULT
+        self.relationship_value = 0
+        self.relationship_divorces = 0
+        self.relationship_slots = USER_WAIFU_SLOTS_DEFAULT
         return self
     
     
@@ -133,17 +129,17 @@ class UserBalance(EntryProxy):
             repr_parts.append(', count_daily_self = ')
             repr_parts.append(repr(count_daily_self))
         
-        # count_daily_by_waifu
-        count_daily_by_waifu = self.count_daily_by_waifu
-        if count_daily_by_waifu:
-            repr_parts.append(', count_daily_by_waifu = ')
-            repr_parts.append(repr(count_daily_by_waifu))
+        # count_daily_by_related
+        count_daily_by_related = self.count_daily_by_related
+        if count_daily_by_related:
+            repr_parts.append(', count_daily_by_related = ')
+            repr_parts.append(repr(count_daily_by_related))
         
-        # count_daily_for_waifu
-        count_daily_for_waifu = self.count_daily_for_waifu
-        if count_daily_for_waifu:
-            repr_parts.append(', count_daily_for_waifu = ')
-            repr_parts.append(repr(count_daily_for_waifu))
+        # count_daily_for_related
+        count_daily_for_related = self.count_daily_for_related
+        if count_daily_for_related:
+            repr_parts.append(', count_daily_for_related = ')
+            repr_parts.append(repr(count_daily_for_related))
         
         # count_top_gg_vote
         count_top_gg_vote = self.count_top_gg_vote
@@ -172,29 +168,23 @@ class UserBalance(EntryProxy):
         repr_parts.append(', top_gg_voted_at = ')
         repr_parts.append(format(top_gg_voted_at, DATETIME_FORMAT_CODE))
         
-        # waifu_cost
-        waifu_cost = self.waifu_cost
-        if waifu_cost:
-            repr_parts.append(', waifu_cost = ')
-            repr_parts.append(repr(waifu_cost))
+        # relationship_value
+        relationship_value = self.relationship_value
+        if relationship_value:
+            repr_parts.append(', relationship_value = ')
+            repr_parts.append(repr(relationship_value))
         
-        # waifu_divorces
-        waifu_divorces = self.waifu_divorces
-        if waifu_divorces:
-            repr_parts.append(', waifu_divorces = ')
-            repr_parts.append(repr(waifu_divorces))
+        # relationship_divorces
+        relationship_divorces = self.relationship_divorces
+        if relationship_divorces:
+            repr_parts.append(', relationship_divorces = ')
+            repr_parts.append(repr(relationship_divorces))
         
-        # waifu_slots
-        waifu_slots = self.waifu_slots
-        if waifu_slots != USER_WAIFU_SLOTS_DEFAULT:
-            repr_parts.append(', waifu_slots = ')
-            repr_parts.append(repr(waifu_slots))
-        
-        # waifu_owner_id
-        waifu_owner_id = self.waifu_owner_id
-        if waifu_owner_id:
-            repr_parts.append(', waifu_owner_id = ')
-            repr_parts.append(repr(waifu_owner_id))
+        # relationship_slots
+        relationship_slots = self.relationship_slots
+        if relationship_slots != USER_WAIFU_SLOTS_DEFAULT:
+            repr_parts.append(', relationship_slots = ')
+            repr_parts.append(repr(relationship_slots))
     
     
     async def save(self):
@@ -244,17 +234,16 @@ class UserBalance(EntryProxy):
         self.entry_id = entry['id']
         self.allocated = entry['allocated']
         self.balance = entry['balance']
-        self.count_daily_by_waifu = entry['count_daily_by_waifu']
-        self.count_daily_for_waifu = entry['count_daily_for_waifu']
+        self.count_daily_by_related = entry['count_daily_by_related']
+        self.count_daily_for_related = entry['count_daily_for_related']
         self.count_daily_self = entry['count_daily_self']
         self.count_top_gg_vote = entry['count_top_gg_vote']
         self.daily_can_claim_at = entry['daily_can_claim_at'].replace(tzinfo = TimeZone.utc)
         self.daily_reminded = entry['daily_reminded']
         self.streak = entry['streak']
         self.top_gg_voted_at = entry['top_gg_voted_at'].replace(tzinfo = TimeZone.utc)
-        self.waifu_cost = entry['waifu_cost']
-        self.waifu_divorces = entry['waifu_divorces']
-        self.waifu_owner_id = entry['waifu_owner_id']
-        self.waifu_slots = entry['waifu_slots']
+        self.relationship_value = entry['relationship_value']
+        self.relationship_divorces = entry['relationship_divorces']
+        self.relationship_slots = entry['relationship_slots']
         
         return self

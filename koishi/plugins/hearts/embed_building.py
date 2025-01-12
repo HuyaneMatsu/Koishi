@@ -142,8 +142,8 @@ def build_stats_embed(
     balance,
     streak,
     count_daily_self,
-    count_daily_by_waifu,
-    count_daily_for_waifu,
+    count_daily_by_related,
+    count_daily_for_related,
     count_top_gg_vote,
 ):
     """
@@ -163,10 +163,10 @@ def build_stats_embed(
     count_daily_self : `int`
         The amount the user claimed their own daily.
     
-    count_daily_by_waifu : `int`
+    count_daily_by_related : `int`
         The amount the user's daily has been claimed.
     
-    count_daily_for_waifu : `int`
+    count_daily_for_related : `int`
         The amount the user claimed other's daily.
     
     count_top_gg_vote : `int`
@@ -194,12 +194,12 @@ def build_stats_embed(
         render_int_block(count_daily_self),
         inline = True,
     ).add_field(
-        f'{EMOJI_COUNT_DAILY_FOR_WAIFU} Claimed for waifus',
-        render_int_block(count_daily_for_waifu),
+        f'{EMOJI_COUNT_DAILY_FOR_WAIFU} Claimed for related',
+        render_int_block(count_daily_for_related),
         inline = True,
     ).add_field(
-        f'{EMOJI_COUNT_DAILY_BY_WAIFU} Claimed by waifu',
-        render_int_block(count_daily_by_waifu),
+        f'{EMOJI_COUNT_DAILY_BY_WAIFU} Claimed by related',
+        render_int_block(count_daily_by_related),
         inline = True,
     ).add_field(
         f'{EMOJI_COUNT_TOP_GG_VOTE} Top.gg votes',

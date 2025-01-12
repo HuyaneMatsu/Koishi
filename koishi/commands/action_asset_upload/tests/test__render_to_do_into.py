@@ -5,7 +5,6 @@ from ..rendering import _render_to_do_into
 
 def _iter_options():
     yield (
-        'sister',
         None,
         (
             '# TODO\n'
@@ -21,7 +20,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def _render_to_do_into(unidentified):
+def test__render_to_do_into(unidentified):
     """
     Tests whether ``_render_to_do_into`` works as intended.
     

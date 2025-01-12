@@ -46,7 +46,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def renderer_default(characters, action_tags, unidentified, creator, url):
+def test__renderer_default(characters, action_tags, unidentified, creator, url):
     """
     Tests whether ``renderer_default`` works as intended.
     

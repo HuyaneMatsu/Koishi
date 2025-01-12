@@ -57,14 +57,14 @@ def _iter_options():
     yield (
         InteractionEvent(
             user = None,
-            message = Message(interaction = MessageInteraction(user_id = user_id)),
+            message = Message(interaction = MessageInteraction(user = user)),
         ),
         False,
     )
     yield (
         InteractionEvent(
             user = user,
-            message = Message(interaction = MessageInteraction(user_id = user_id)),
+            message = Message(interaction = MessageInteraction(user = user)),
         ),
         True,
     )

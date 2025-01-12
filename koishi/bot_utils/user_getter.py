@@ -20,6 +20,7 @@ _CLIENT_ITERATOR = iter(_client_repeater())
 USER_CACHE_SIZE = 1000
 USER_CACHE = deque(maxlen = USER_CACHE_SIZE)
 
+
 def _get_client():
     return next(_CLIENT_ITERATOR)
 

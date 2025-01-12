@@ -12,7 +12,7 @@ from ..bot_utils.constants import (
 from ..bot_utils.daily import calculate_daily_new
 from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
-from .marriage_slot import EMOJI_NO, EMOJI_YES, buy_waifu_slot_invoke
+from .relationship_slot import EMOJI_NO, EMOJI_YES, buy_relationship_slot_invoke
 from .user_balance import get_user_balance
 
 
@@ -24,14 +24,14 @@ HEART_BOOST_COST = 100000
 SHOP = FEATURE_CLIENTS.interactions(
     None,
     name = 'shop',
-    description = 'Trade your love!',
+    description = 'Trade your hearts!',
     is_global = True,
 )
 
 
 @SHOP.interactions
-async def buy_waifu_slot(event):
-    return await buy_waifu_slot_invoke(event)
+async def buy_relationship_slot(event):
+    return await buy_relationship_slot_invoke(event)
 
 def get_divorce_reduction_cost(user_id, divorce_count):
     return user_id % (10000 * divorce_count)
@@ -65,21 +65,21 @@ async def burn_divorce_papers(client, event):
     user_id = event.user.id
     
     user_balance = await get_user_balance(user_id)
-    waifu_divorces = user_balance.waifu_divorces
+    relationship_divorces = user_balance.relationship_divorces
     
-    if waifu_divorces <= 0:
+    if relationship_divorces <= 0:
         return Embed(None, 'You do not have divorces')
     
-    available_love = user_balance.balance - user_balance.allocated
-    cost = get_divorce_reduction_cost(user_id, waifu_divorces)
+    available_balance = user_balance.balance - user_balance.allocated
+    cost = get_divorce_reduction_cost(user_id, relationship_divorces)
     
-    if available_love < cost:
+    if available_balance < cost:
         return Embed(
             None,
             (
                 f'To locate and burn one of your divorce papers is worth {cost} {EMOJI__HEART_CURRENCY}\n'
                 f'\n'
-                f'You have only {available_love} {EMOJI__HEART_CURRENCY} available.'
+                f'You have only {available_balance} {EMOJI__HEART_CURRENCY} available.'
             ),
         )
     
@@ -99,10 +99,10 @@ async def reduce_divorce_yes(event):
         return
     
     user_balance = await get_user_balance(user.id)
-    waifu_divorces = user_balance.waifu_divorces
+    relationship_divorces = user_balance.relationship_divorces
 
     while True:
-        if waifu_divorces <= 0:
+        if relationship_divorces <= 0:
             text = (
                 'Task failed successfully\n'
                 '\n'
@@ -111,21 +111,21 @@ async def reduce_divorce_yes(event):
             thumbnail_image_url = None
             break
         
-        available_love = user_balance.balance - user_balance.alocated
-        cost = get_divorce_reduction_cost(user.id, waifu_divorces)
+        available_balance = user_balance.balance - user_balance.allocated
+        cost = get_divorce_reduction_cost(user.id, relationship_divorces)
         
-        if available_love < cost:
+        if available_balance < cost:
             text = (
                 f'Heart amount changed - sufficient amount of hearts\n'
                 f'\n'
                 f'Required: {cost} {EMOJI__HEART_CURRENCY}\n'
-                f'Available {available_love} {EMOJI__HEART_CURRENCY} .'
+                f'Available {available_balance} {EMOJI__HEART_CURRENCY} .'
             )
             thumbnail_image_url = None
             break
         
         user_balance.set('balance', user_balance.balance - cost)
-        user_balance.set('waifu_divorces', waifu_divorces - 1)
+        user_balance.set('relationship_divorces', relationship_divorces - 1)
         await user_balance.save()
         
         text = (
@@ -145,7 +145,7 @@ async def reduce_divorce_yes(event):
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_REDUCE_DIVORCE_PAPER_NO)
-async def reduce_divorce_yes(event):
+async def reduce_divorce_no(event):
     user = event.user
     if event.message.interaction.user_id != user.id:
         return

@@ -10,4 +10,5 @@ Sakuya = Client(
     client_id = config.SAKUYA_ID,
     application_id = config.SAKUYA_ID,
     intents = IntentFlag().update_by_keys(message_content = False),
+    extensions = ('slash',),
 )

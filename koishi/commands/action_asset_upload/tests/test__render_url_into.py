@@ -15,7 +15,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def _render_url_into(url):
+def test__render_url_into(url):
     """
     Tests whether ``_render_url_into`` works as intended.
     

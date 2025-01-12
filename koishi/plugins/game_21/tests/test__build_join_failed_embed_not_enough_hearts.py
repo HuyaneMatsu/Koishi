@@ -38,16 +38,16 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_join_failed_embed_not_enough_hearts(expected_love, available_love, me):
+def test__build_join_failed_embed_not_enough_hearts(expected, available, me):
     """
     Tests whether ``build_join_failed_embed_not_enough_hearts`` works as intended.
     
     Parameters
     ----------
-    expected_love : `int`
+    expected : `int`
         The expected hearts to have.
     
-    available_love : `int`
+    available : `int`
         The available hearts of a user.
     
     me : `bool`
@@ -57,6 +57,6 @@ def test__build_join_failed_embed_not_enough_hearts(expected_love, available_lov
     -------
     output : ``Embed``
     """
-    output = build_join_failed_embed_not_enough_hearts(expected_love, available_love, me)
+    output = build_join_failed_embed_not_enough_hearts(expected, available, me)
     vampytest.assert_instance(output, Embed)
     return output

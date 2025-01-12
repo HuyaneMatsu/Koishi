@@ -8,6 +8,8 @@ from hata.ext.slash import abort
 from ..bot_utils.constants import GUILD__SUPPORT
 from ..bots import FEATURE_CLIENTS
 
+from .relationships import get_affinity_percent
+
 
 @FEATURE_CLIENTS.interactions(show_for_invoking_user_only = True, is_global = True)
 async def message_me(client, event):
@@ -273,7 +275,7 @@ async def love(client, event,
     if source_user is target_user:
         abort('huh?')
     
-    percent = ((source_user.id & 0x1111111111111111111111) + (target_user.id & 0x1111111111111111111111)) % 101
+    percent = get_affinity_percent(source_user.id, target_user.id & 0x1111111111111111111111)
     element = LOVE_VALUES[percent]
     
     return Embed(
@@ -283,35 +285,4 @@ async def love(client, event,
     ).add_field(
         'My advice:',
         element['text'],
-    )
-
-
-EMOJI_1 = Emoji.precreate(814618830106132511, name = 'T90Salute')
-EMOJI_2 = Emoji.precreate(588052578214871053, name = 'tatohaHola')
-
-
-@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT, show_for_invoking_user_only = True)
-async def crywolf_(client, event):
-    """Crywolf is a bot"""
-    yield 'crywolf is a sus'
-    channel = event.channel
-    webhook = await client.webhook_get_own_channel(channel)
-    if (webhook is None):
-        webhook = await client.webhook_create(channel, 'crywolf-bot')
-    
-    crywolf = await client.user_get(151446521311789057)
-    await client.webhook_message_create(
-        webhook,
-        'Good morning, how are yous?',
-        name = crywolf.name,
-        avatar_url = crywolf.avatar_url,
-        wait = True,
-    )
-    
-    await client.webhook_message_create(
-        webhook,
-        f'{EMOJI_1} {EMOJI_2}',
-        name = crywolf.name,
-        avatar_url = crywolf.avatar_url,
-        wait = True,
     )

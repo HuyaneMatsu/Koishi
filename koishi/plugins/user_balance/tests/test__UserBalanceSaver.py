@@ -10,7 +10,7 @@ from ..constants import USER_BALANCE_CACHE
 
 def _assert_fields_set(user_balance_saver):
     """
-    Tests whether every fields are set of the given automation configuration saver.
+    Tests whether every fields are set of the given user balance saver.
     
     Parameters
     ----------
@@ -53,7 +53,7 @@ async def test__UserBalanceSaver__repr():
     
     old_streak = 56
     
-    new_streak = 'nyan'
+    new_streak = 57
     
     try:
         user_balance = UserBalance(user_id)
@@ -88,15 +88,15 @@ def test__UserBalanceSaver__add_modification():
     user_id = 202412070017
     
     old_streak = 56
-    old_waifu_cost = 20
+    old_relationship_value = 20
     
-    new_streak = 'nyan'
-    new_waifu_cost = 'hey mister'
+    new_streak = 57
+    new_relationship_value = 20002
     
     try:
         user_balance = UserBalance(user_id)
         user_balance.streak = old_streak
-        user_balance.waifu_cost = old_waifu_cost
+        user_balance.relationship_value = old_relationship_value
         
         user_balance_saver = UserBalanceSaver(user_balance)
         
@@ -114,13 +114,13 @@ def test__UserBalanceSaver__add_modification():
             }
         )
         
-        user_balance_saver.add_modification('waifu_cost', new_waifu_cost)
+        user_balance_saver.add_modification('relationship_value', new_relationship_value)
         
         vampytest.assert_eq(
             user_balance_saver.modified_fields,
             {
                 'streak': new_streak,
-                'waifu_cost': new_waifu_cost,
+                'relationship_value': new_relationship_value,
             }
         )
     

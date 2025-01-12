@@ -2,7 +2,7 @@ import vampytest
 
 from ....plugins.touhou_core import CHEN
 
-from ..rendering import renderer_single_source
+from ..rendering import renderer_self_target
 
 
 def _iter_options():
@@ -25,9 +25,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def renderer_single_source(source_character, action_tag, creator, url):
+def test__renderer_self_target(source_character, action_tag, creator, url):
     """
-    Tests whether ``renderer_single_source`` works as intended.
+    Tests whether ``renderer_self_target`` works as intended.
     
     Parameters
     ----------
@@ -44,6 +44,6 @@ def renderer_single_source(source_character, action_tag, creator, url):
     -------
     output : `str`
     """
-    output = renderer_single_source({source_character}, {action_tag}, None, creator, url)
+    output = renderer_self_target({source_character}, {action_tag}, None, creator, url)
     vampytest.assert_instance(output, str)
     return output

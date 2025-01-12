@@ -643,7 +643,7 @@ async def gift(
         )
     
     if source_user is target_user:
-        abort('You cannot give love to yourself..')
+        abort('You cannot give hearts to yourself..')
     
     if amount <= 0:
         abort('You cannot gift non-positive amount of hearts..')
@@ -656,11 +656,11 @@ async def gift(
     source_balance =  source_user_balance.balance
     source_allocated = source_user_balance.allocated
     
-    if source_balance == 0:
+    if source_balance <= 0:
         yield Embed('So lonely...', 'You do not have any hearts to gift.', color = COLOR__GAMBLING)
         return
     
-    if source_balance == source_allocated:
+    if source_allocated >= source_balance:
         yield Embed('Like a flower', 'Whithering to the dust.', color = COLOR__GAMBLING)
         return
     
@@ -670,6 +670,7 @@ async def gift(
     source_balance -= source_allocated
     
     amount = min(source_balance - source_allocated, amount)
+        
     source_new_balance = source_balance - amount
     target_new_balance = target_balance + amount
     
@@ -732,11 +733,11 @@ async def award(
     client,
     event,
     target_user: ('user', 'Who do you want to award?'),
-    amount: ('int', 'With how much love do you wanna award them?'),
+    amount: ('int', 'With how much hearts do you wanna award them?'),
     message : ('str', 'Optional message to send with the gift.') = None,
     with_: (AWARD_TYPES, 'Select award type') = 'hearts',
 ):
-    """Awards the user with love."""
+    """Awards the user with balance or streak."""
     if not event.user_permissions.administrator:
         abort(f'You must have administrator permission to invoke this command.')
     
@@ -824,8 +825,8 @@ async def award(
 async def take(
     client,
     event,
-    target_user: ('user', 'From who do you want to take love away?'),
-    amount: ('int', 'How much love do you want to take away?'),
+    target_user: ('user', 'From who do you want to take hearts away?'),
+    amount: ('int', 'How much hearts do you want to take away?'),
 ):
     """Takes away hearts form the lucky user."""
     if not event.user_permissions.administrator:

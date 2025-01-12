@@ -4267,16 +4267,6 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1308912808414675014/aya-reimu-lap_sleep-0000.png',
-).with_action(
-    ACTION_TAG_LAP_SLEEP, HAKUREI_REIMU, SHAMEIMARU_AYA,
-).with_creator(
-    'chilwell seele',
-).with_editor(
-    'HuyaneMatsu',
-)
-
-TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1308908922207473694/kanako-suwako-lap_sleep-0000.png',
 ).with_action(
     ACTION_TAG_LAP_SLEEP, MORIYA_SUWAKO, YASAKA_KANAKO,

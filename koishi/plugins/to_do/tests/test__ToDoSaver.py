@@ -12,7 +12,7 @@ from ..constants import TO_DOS
 
 def _assert_fields_set(to_do_saver):
     """
-    Tests whether every fields are set of the given automation configuration saver.
+    Tests whether every fields are set of the given to-do saver.
     
     Parameters
     ----------

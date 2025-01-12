@@ -366,16 +366,16 @@ def build_join_failed_embed_max_players():
     )
 
 
-def build_join_failed_embed_not_enough_hearts(expected_love, available_love, me):
+def build_join_failed_embed_not_enough_hearts(expected, available, me):
     """
     Builds a failed to join game embed for the case when the user does not have enough hearts.
     
     Parameters
     ----------
-    expected_love : `int`
+    expected : `int`
         The expected hearts to have.
     
-    available_love : `int`
+    available : `int`
         The available hearts of a user.
     
     me : `bool`
@@ -388,8 +388,8 @@ def build_join_failed_embed_not_enough_hearts(expected_love, available_love, me)
     return Embed(
         ('Oh snap!' if me else 'Ohoho'),
         (
-            f'{"I" if me else "You"} must have at least {expected_love!s} available {EMOJI__HEART_CURRENCY} to join.\n'
-            f'{"I" if me else "You"} have {available_love!s} {EMOJI__HEART_CURRENCY}.'
+            f'{"I" if me else "You"} must have at least {expected!s} available {EMOJI__HEART_CURRENCY} to join.\n'
+            f'{"I" if me else "You"} have {available!s} {EMOJI__HEART_CURRENCY}.'
         ),
         color = COLOR__GAMBLING,
     )

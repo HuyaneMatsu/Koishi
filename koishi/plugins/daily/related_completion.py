@@ -8,44 +8,31 @@ from hata import elapsed_time
 
 from ...bot_utils.user_getter import get_users_unordered
 
-from ..marriage import get_related_ids
+from ..relationships import get_relationship_listing_and_extend, iter_relationship_and_extend_user_ids_to_request
 from ..user_balance import get_user_balances
 
 
-WAIFU_WITH_COMMENT_RP = re_compile('(.*?)(?:\\s*\\(.*\\)\\s*)?')
+USER_NAME_WITH_COMMENT_RP = re_compile('(.*?)(?:\\s*\\(.*\\)\\s*)?')
 
 
-async def get_related_with_name(user_id, guild_id, name):
+def remove_comment(target_user_name):
     """
-    Gets the related user with the given name.
-    
-    This function is a coroutine.
+    Removes the comment from after the name.
     
     Parameters
     ----------
-    user_id : `int`
-        Use id to query for.
-    
-    guild_id : `int`
-        Respective guild's identifier to extend matching for.
-    
-    name : `str`
-        Name to filter for.
+    target_user_name : `str`
+        The target user's name.
     
     Returns
     -------
-    related_user : `None | ClientUserBase`
+    target_user_name : `str`
     """
-    match = WAIFU_WITH_COMMENT_RP.fullmatch(name)
+    match = USER_NAME_WITH_COMMENT_RP.fullmatch(target_user_name)
     if (match is not None):
-        name = match.group(1)
+        target_user_name = match.group(1)
     
-    related_user_ids = await get_related_ids(user_id)
-    related_users = await get_users_unordered(related_user_ids)
-    
-    for user in related_users:
-        if user.has_name_like_at(name, guild_id):
-            return user
+    return target_user_name
 
 
 async def get_related_users_with_name_and_next_daily(user_id, guild_id, value):
@@ -70,19 +57,22 @@ async def get_related_users_with_name_and_next_daily(user_id, guild_id, value):
     related_users : `dict<ClientUserBase, DateTime>`
     """
     if (value is not None):
-        match = WAIFU_WITH_COMMENT_RP.fullmatch(value)
-        if (match is not None):
-            value = match.group(1)
+        value = remove_comment(value)
     
-    related_user_ids = await get_related_ids(user_id)
-    related_users = await get_users_unordered(related_user_ids)
+    relationship_listing, relationship_listing_extend = await get_relationship_listing_and_extend(user_id)
+    if relationship_listing is None:
+        return {}
+    
+    users = await get_users_unordered(
+        iter_relationship_and_extend_user_ids_to_request(user_id, relationship_listing, relationship_listing_extend)
+    )
     
     if (value is not None):
-        related_users = [user for user in related_users if user.has_name_like_at(value, guild_id)]
+        users = [user for user in users if user.has_name_like_at(value, guild_id)]
     
-    user_balances = await get_user_balances(user.id for user in related_users)
+    user_balances = await get_user_balances(user.id for user in users)
     
-    return {user: user_balances[user.id].daily_can_claim_at for user in related_users}
+    return {user: user_balances[user.id].daily_can_claim_at for user in users}
 
 
 def get_related_sort_key_and_suggestion(related_user, guild_id, now, daily_can_claim_at):

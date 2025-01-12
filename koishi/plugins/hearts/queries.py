@@ -83,8 +83,8 @@ async def get_stat_fields(target_user_id):
     balance : `int`
     streak : `int`
     count_daily_self : `int`
-    count_daily_by_waifu : `int`
-    count_daily_for_waifu : `int`
+    count_daily_by_related : `int`
+    count_daily_for_related : `int`
     count_top_gg_vote : `int`
     """
     user_balance = await get_user_balance(target_user_id)
@@ -100,7 +100,7 @@ async def get_stat_fields(target_user_id):
         user_balance.balance,
         streak,
         user_balance.count_daily_self,
-        user_balance.count_daily_by_waifu,
-        user_balance.count_daily_for_waifu,
+        user_balance.count_daily_by_related,
+        user_balance.count_daily_for_related,
         user_balance.count_top_gg_vote,
     )

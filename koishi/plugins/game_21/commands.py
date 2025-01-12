@@ -8,10 +8,10 @@ from ...bots import FEATURE_CLIENTS
 
 from ..user_balance import get_user_balance
 
-from .checks import check_bet_too_low, check_has_enough_love, check_in_game
+from .checks import check_bet_too_low, check_has_enough_balance, check_in_game
 from .constants import GAME_21_JOIN_ROW_DISABLED, GAME_21_ROW_DISABLED, PLAYER_STATE_FINISH
 from .helpers import (
-    decide_winners, get_love_distribution, get_refund_distribution, is_draw, try_deliver_end_notification,
+    decide_winners, get_balance_distribution, get_refund_distribution, is_draw, try_deliver_end_notification,
     try_edit_response
 )
 from .join_runner import Game21JoinRunner
@@ -59,14 +59,14 @@ async def game_21(
     check_bet_too_low(amount)
     
     user_balance = await get_user_balance(interaction_event.user_id)
-    check_has_enough_love(amount, user_balance.balance - user_balance.allocated, False)
+    check_has_enough_balance(amount, user_balance.balance - user_balance.allocated, False)
     user_balance.set('allocated', user_balance.allocated + amount)
     await user_balance.save()
     
     single_player_mode = (mode == 'single')
     if single_player_mode:
         user_balance = await get_user_balance(client.id)
-        check_has_enough_love(amount, user_balance.balance - user_balance.allocated, True)
+        check_has_enough_balance(amount, user_balance.balance - user_balance.allocated, True)
         user_balance.set('allocated', user_balance.allocated + amount)
         await user_balance.save()
     
@@ -126,7 +126,7 @@ async def game_21_single_player(client, event, amount):
     
     
     winners, losers = decide_winners([player_user, player_bot])
-    await batch_modify_user_hearts(get_love_distribution(winners, losers, amount))
+    await batch_modify_user_hearts(get_balance_distribution(winners, losers, amount))
     
     if is_draw(winners, losers):
         player_win = 0
@@ -237,7 +237,7 @@ async def game_21_multi_player(client, event, amount):
     '''
     
     winners, losers = decide_winners(players)
-    await batch_modify_user_hearts(get_love_distribution(winners, losers, amount))
+    await batch_modify_user_hearts(get_balance_distribution(winners, losers, amount))
     
     await try_edit_response(
         client,

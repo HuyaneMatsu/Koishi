@@ -1,16 +1,52 @@
+### 2025+01-12
+
+- Fix `/gift` did not handle the case when `allocated > balance`.
+- Fix `/gift` did not handle the case when `balance < 0`.
+- Fix `/mod regret-un-ban` failed on checking whether the user can be regret-un-banned (again).
+- Fix `/daily` did not show top.gg reminder as intended.
+- Fix `/show burn-discovery-papers` could not be confirmed (since previous update).
+- Rename `/shop buy-waifu-slot` to `/shop buy-relationship-slot`.
+- Rename `/propose` to `/proposal create`.
+- Add new `kind` parameter to `/proposal create` to define what type of relationship you want to create.
+- Relationships now can be the following type: `waifu - waifu`, `big sister - lil-sister`, `master - maid`,
+   `mama - daughter`. When using `/proposal create` or `/relationships update-unset` you can only select the left side.
+- A single user can be "claimed" multiple times (depends on the relationship's type). A user can have only one
+    waifu, mama and master, but many daughters, maids and sisters.
+- "Claiming" a user now uses up a relationship slot from them as well.
+- Add support for extended relationships. Most relationships are shared through a waifu. Except master.
+- Rename `/waifu-info` to `/relationships info`.
+- `/relationships info` now also shows relationships by type & the "extended" relationships too.
+- Rename `/divorce` to `/relationships divorce`.
+- `/relationships divorce` now does not require the target user to pay back half of the hearts.
+- `/relationships divorce` now pays back and decreases the relationship value of the user based on how much they put
+    into the relationship. More put in = bigger payback & less decrease.
+- Bots do not auto divorce on receiving a new proposal.
+    This is not fully implemented yet, but they will divorce users based on when they were last interacted with.
+- `/daily`'s `related` parameter now allows picking users from the "extended" relationships.
+    When picking a user who is related through someone else, the relationship value with the middle person is increased.
+- Relationship value calculation changed (its lower in general).
+- Now each relationship stores how much its users contributed to it.
+     The user who proposed the relationship will start with `1000` as "put in value" while the other one
+     with `0`.
+- Add `/relationships update-unset` command to update the the type of the old relationships.
+    There is a criteria that only the user who put enough "love" into the relationship can update them.
+    It is usually the "source" user. At the case of old "bi-directional" relationships both user can update them.
+- User affinity calculation changed. This affects `/love`, `/proposal create` and `/relationships info` commands.
+- `/propose` and `/relationships` commands are now available when user installed.
+- All existing proposals have been refunded.
+
 ### 2024-12-14
 
-- How balance is handled is completely rewritten; hoping no new bugs were made.
-- `/gift` is now affected by `accessibility`.
-- `/award` is now affected by `accessibility`.
-- `/gift` now picks up nick names.
-- `/award` now picks up nick names.
+- How balance is handled is completely rewritten; hoping not much new bugs were made.
+- `/gift` is now affected by `accessibility` & picks up nick names.
+- `/award` is now affected by `accessibility` & picks up nick names.
 - Add new `/accessibility notification-settings change notification_type: gift` option.
 - `/daily` now respects the user's nick name.
 - When playing `/21` in single player player mode now you are playing actually against the bot.
     The bot is required to have enough hearts & its balance also changes depending on the outcome.
-- `/daily` does not mix `love` and `hearts` to have it consistent. Perhaps related to a future update?
-- Users without a balance entry in the database can also be retrieve random hearts randomly by using a command.
+- `/daily` does not mix `love` and `hearts`  words, now it uses only `hearts` to have it consistent.
+    Perhaps related to a future update?
+- Users without a balance entry in the database can also retrieve hearts randomly just by using commands.
 - `/daily` is now available when user installed.
 - Rename `/heart-shop` to `/shop`.
 

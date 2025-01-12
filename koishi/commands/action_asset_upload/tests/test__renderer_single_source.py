@@ -25,7 +25,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def renderer_single_source(source_character, action_tag, creator, url):
+def test__renderer_single_source(source_character, action_tag, creator, url):
     """
     Tests whether ``renderer_single_source`` works as intended.
     

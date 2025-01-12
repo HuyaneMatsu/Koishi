@@ -13,12 +13,12 @@ from ..to_do_saver import ToDoSaver
 
 def _assert_fields_set(to_do):
     """
-    Asserts whether every fields are set of the automation configuration.
+    Asserts whether every fields are set of the to-do.
     
     Parameters
     ----------
     to_do : ``ToDo``
-        Automation configuration to test.
+        To-do entry to test.
     """
     vampytest.assert_instance(to_do, ToDo)
     vampytest.assert_instance(to_do.creator_id, int)

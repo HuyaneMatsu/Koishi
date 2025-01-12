@@ -8,7 +8,6 @@ from ..rendering import _render_characters_into
 def _iter_options():
     yield (
         {CHEN},
-        None,
         (
             '.with_character(\n'
             '    CHEN,\n'
@@ -35,7 +34,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def _render_characters_into(characters):
+def test__render_characters_into(characters):
     """
     Tests whether ``_render_characters_into`` works as intended.
     

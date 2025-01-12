@@ -1,9 +1,9 @@
 __all__ = ()
 
 import os, sys
-IS_PYPY = (sys.implementation.name == 'pypy')
+PYPY = (sys.implementation.name == 'pypy')
 
-if IS_PYPY:
+if PYPY:
     from gc import get_stats as get_gc_stats
 
 from datetime import datetime as DateTime, timezone as TimeZone
@@ -170,7 +170,7 @@ async def threads(client, message):
     await client.message_create(message.channel, embed = embed)
 
 
-if IS_PYPY:
+if PYPY:
     async def gc_stats_description(command_context):
         return Embed(
             'gc-stats',

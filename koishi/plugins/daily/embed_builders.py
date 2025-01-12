@@ -121,29 +121,6 @@ def build_embed_daily_claimed_self(received, balance_new, streak_old, streak_new
     )
 
 
-def build_embed_not_related(target_user, guild_id):
-    """
-    Builds not related embed.
-    
-    Parameters
-    ----------
-    target_user : ``ClientUserBase``
-        The targeted user.
-    
-    guild_id : `int`
-        Respective guild's identifier.
-    
-    Returns
-    -------
-    embed : ``Embed``
-    """
-    return Embed(
-        'Savage',
-        f'{target_user.name_at(guild_id)} is not related to you.',
-        color = COLOR__GAMBLING,
-    )
-
-
 def build_embed_daily_claimed_other(received, balance_new, streak_old, streak_new, target_user, guild_id):
     """
     Builds a daily-other claim embed.

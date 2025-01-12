@@ -4,14 +4,13 @@ from datetime import datetime as DateTime, timezone as TimeZone
 from math import floor
 
 from hata import DiscordException
-from hata.ext.slash import Button, P, abort
+from hata.ext.slash import Button, P
 
-from ...bot_utils.constants import WAIFU_COST_DEFAULT
 from ...bot_utils.daily import DAILY_INTERVAL, calculate_daily_for, refresh_streak
 from ...bot_utils.utils import send_embed_to
 from ...bots import FEATURE_CLIENTS
 
-from ..marriage import are_related
+from ..relationships import get_extender_relationship_and_relationship_and_user_like_at
 from ..user_balance import get_user_balance, get_user_balances
 from ..user_settings import (
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_BY_WAIFU_DISABLE, get_one_user_settings, get_preferred_client_for_user
@@ -19,10 +18,10 @@ from ..user_settings import (
 
 from .embed_builders import (
     build_embed_already_claimed_other, build_embed_already_claimed_self, build_embed_daily_claimed_other,
-    build_embed_daily_claimed_other_notification, build_embed_daily_claimed_self, build_embed_not_related
+    build_embed_daily_claimed_other_notification, build_embed_daily_claimed_self
 )
 from .helpers import should_top_gg_notify
-from .related_completion import autocomplete_related_name, get_related_with_name
+from .related_completion import autocomplete_related_name, remove_comment
 
 
 async def claim_daily_for_yourself(client, interaction_event):
@@ -72,7 +71,7 @@ async def claim_daily_for_yourself(client, interaction_event):
     return
 
 
-async def claim_daily_for_other(client, interaction_event, target_user):
+async def claim_daily_for_other(client, interaction_event, extender_relationship, relationship, target_user):
     """
     Claims daily for someone else.
     
@@ -86,7 +85,14 @@ async def claim_daily_for_other(client, interaction_event, target_user):
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    target_user : `ClientUserBase``
+    extender_relationship : `None | Relationship`
+        The relationship through what is the target user is related to the source user if its through some-one else.
+        Given as `None` if its a direct relationship.
+    
+    relationship : ``Relationship``
+        The targeted user's relationship.
+    
+    target_user : ``ClientUserBase``
         The targeted user.
     
     Yields
@@ -94,10 +100,6 @@ async def claim_daily_for_other(client, interaction_event, target_user):
     embed : ``Embed``
     """
     source_user = interaction_event.user
-    
-    if not (await are_related(source_user.id, target_user.id)):
-        yield build_embed_not_related(target_user, interaction_event.guild_id)
-        return
     
     user_balances = await get_user_balances((source_user.id, target_user.id),)
     source_user_balance = user_balances[source_user.id]
@@ -118,19 +120,30 @@ async def claim_daily_for_other(client, interaction_event, target_user):
     balance_new = target_user_balance.balance + received
     
     streak_new += 1
-    waifu_cost_increase = 1 + floor(received * 0.01)
+    relationship_value_increase = 1 + floor(received * 0.01)
     
-    new_waifu_cost = (source_user_balance.waifu_cost or WAIFU_COST_DEFAULT) + waifu_cost_increase
-    source_user_balance.set('waifu_cost', new_waifu_cost)
-    source_user_balance.set('count_daily_for_waifu', source_user_balance.count_daily_for_waifu + 1)
+    source_user_balance.set('count_daily_for_related', source_user_balance.count_daily_for_related + 1)
     await source_user_balance.save()
     
-    new_waifu_cost = (target_user_balance.waifu_cost or WAIFU_COST_DEFAULT) + waifu_cost_increase
+    if (extender_relationship is None):
+        invested_relationship = relationship
+    else:
+        invested_relationship = extender_relationship
+    
+    if invested_relationship.source_user_id == source_user.id:
+        invested_relationship.set(
+            'source_investment', invested_relationship.source_investment + relationship_value_increase
+        )
+    else:
+        invested_relationship.set(
+            'target_investment', invested_relationship.target_investment + relationship_value_increase
+        )
+    await invested_relationship.save()
+    
     target_user_balance.set('balance', balance_new)
     target_user_balance.set('daily_can_claim_at', now + DAILY_INTERVAL)
     target_user_balance.set('streak', streak_new)
-    target_user_balance.set('waifu_cost', new_waifu_cost)
-    target_user_balance.set('count_daily_by_waifu', target_user_balance.count_daily_by_waifu + 1)
+    target_user_balance.set('count_daily_by_related', target_user_balance.count_daily_by_related + 1)
     target_user_balance.set('daily_reminded', False)
     await target_user_balance.save()
     
@@ -163,11 +176,11 @@ async def daily(
     client,
     interaction_event,
     target_user_name: P(
-        'str', 'Claiming daily for someone related?', 'related', autocomplete = autocomplete_related_name
+        str, 'Claiming daily for someone related?', 'related', autocomplete = autocomplete_related_name
     ) = None,
 ):
     """
-    Claim a share of my love every day for yourself or for your related.
+    Claim a share of my hearts every day for yourself or for your related.
     
     This function is a coroutine generator.
     
@@ -186,19 +199,6 @@ async def daily(
     ------
     acknowledge / embed : `None | Embed`
     """
-    if (target_user_name is None):
-        target_user = None
-    else:
-        target_user = await get_related_with_name(
-            interaction_event.user_id, interaction_event.guild_id, target_user_name
-        )
-        if (target_user is None):
-            if len(target_user_name) > 100:
-                target_user_name = target_user_name[:100] + '...'
-            
-            abort(f'Waifu not found: `{target_user_name}`')
-            return
-    
     try:
         yield
     except ConnectionError:
@@ -210,10 +210,21 @@ async def daily(
         
         raise
     
-    if target_user is None:
+    if (target_user_name is None):
         coroutine_generator = claim_daily_for_yourself(client, interaction_event)
+        
     else:
-        coroutine_generator = claim_daily_for_other(client, interaction_event, target_user)
+        (
+            extender_relationship,
+            relationship,
+            target_user
+        ) = await get_extender_relationship_and_relationship_and_user_like_at(
+            interaction_event.user_id, remove_comment(target_user_name), interaction_event.guild_id
+        )
+        
+        coroutine_generator = claim_daily_for_other(
+            client, interaction_event, extender_relationship, relationship, target_user
+        )
     
     async for embed in coroutine_generator:
         yield embed

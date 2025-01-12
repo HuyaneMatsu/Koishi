@@ -11,7 +11,7 @@ from ...core.constants import (
 from ...core.helpers import calculate_stat_upgrade_cost, get_user_chart_color
 
 from .....bot_utils.bind_types import WaifuStats
-from .....bot_utils.constants import EMOJI__HEART_CURRENCY, WAIFU_COST_DEFAULT
+from .....bot_utils.constants import EMOJI__HEART_CURRENCY, RELATIONSHIP_VALUE_DEFAULT
 
 from ....user_balance import get_user_balance
 
@@ -117,14 +117,14 @@ async def try_upgrade_stat(waifu_stats, slot):
     
     cost = calculate_stat_upgrade_cost(total_points, next_point)
     
-    if (balance - user_balance.avaiilable) < cost:
+    if (balance - user_balance.allocated) < cost:
         success = False
     
     else:
         success = True
         
         user_balance.set('balance', balance - cost)
-        user_balance.set('waifu_cost', (user_balance.waifu_cost or WAIFU_COST_DEFAULT) + cost // 100)
+        user_balance.set('relationship_value', (user_balance.relationship_value or RELATIONSHIP_VALUE_DEFAULT) + cost // 100)
         await user_balance.save()
         
         slot.__set__(waifu_stats, next_point)

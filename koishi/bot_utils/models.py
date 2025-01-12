@@ -4,12 +4,6 @@ from warnings import warn
 user_balance_model = None
 USER_BALANCE_TABLE = None
 
-waifu_list_model = None
-WAIFU_LIST_TABLE = None
-
-waifu_proposal_model = None
-WAIFU_PROPOSAL_TABLE = None
-
 auto_react_role_model = None
 AUTO_REACT_ROLE_TABLE = None
 
@@ -51,6 +45,12 @@ BLACKLIST_TABLE = None
 external_events_model = None
 EXTERNAL_EVENTS_TABLE = None
 
+relationship_request_model = None
+RELATIONSHIP_REQUEST_TABLE = None
+
+relationship_model = None
+RELATIONSHIP_TABLE = None
+
 
 if (DATABASE_NAME is not None):
     from sqlalchemy.ext.declarative import declarative_base
@@ -74,51 +74,32 @@ if (DB_ENGINE is not None):
     class user_balance_model(BASE):
         __tablename__   = 'CURRENCY'
         # Generic
-        id              = Column(Int64, primary_key = True, nullable = False)
-        user_id         = Column(Int64, unique = True, nullable = False)
+        id = Column(Int64, primary_key = True, nullable = False)
+        user_id = Column(Int64, unique = True, nullable = False)
         
         # Balance
-        balance      = Column(Int64, default = 0, nullable = False)
-        allocated    = Column(Int64, default = 0, nullable = False)
+        balance = Column(Int64, default = 0, nullable = False)
+        allocated = Column(Int64, default = 0, nullable = False)
         
         # Streak
-        streak          = Column(Int32, default = 0, nullable = False)
+        streak = Column(Int32, default = 0, nullable = False)
         daily_can_claim_at = Column(DateTime, default = func.utc_timestamp(), nullable = False)
         daily_reminded  = Column(Boolean, default = False, nullable = False)
         top_gg_voted_at = Column(DateTime, default = func.utc_timestamp(), nullable = False)
         
         # Counters
         count_daily_self = Column(Int32, default = 0, nullable = False)
-        count_daily_by_waifu = Column(Int32, default = 0, nullable = False)
-        count_daily_for_waifu = Column(Int32, default = 0, nullable = False)
+        count_daily_by_related = Column(Int32, default = 0, nullable = False)
+        count_daily_for_related = Column(Int32, default = 0, nullable = False)
         count_top_gg_vote = Column(Int32, default = 0, nullable = False)
         
-        # Waifu
-        waifu_cost      = Column(Int64, default = 0, nullable = False)
-        waifu_divorces  = Column(Int32, default = 0, nullable = False)
-        waifu_slots     = Column(Int32, default = 1, nullable = False)
-        waifu_owner_id  = Column(Int64, default = 0, nullable = False)
+        # Relationships
+        relationship_value = Column(Int64, default = 0, nullable = False)
+        relationship_divorces = Column(Int32, default = 0, nullable = False)
+        relationship_slots = Column(Int32, default = 1, nullable = False)
     
     
     USER_BALANCE_TABLE = user_balance_model.__table__
-    
-    class waifu_list_model(BASE):
-        __tablename__   = 'WAIFU_LIST'
-        id              = Column(Int64, primary_key = True)
-        user_id         = Column(Int64)
-        waifu_id        = Column(Int64)
-    
-    WAIFU_LIST_TABLE = waifu_list_model.__table__
-    
-    
-    class waifu_proposal_model(BASE):
-        __tablename__   = 'WAIFU_PROPOSAL'
-        id              = Column(Int64, primary_key = True)
-        source_id       = Column(Int64)
-        target_id       = Column(Int64)
-        investment      = Column(Int64)
-    
-    WAIFU_PROPOSAL_TABLE = waifu_proposal_model.__table__
     
     
     class auto_react_role_model(BASE):
@@ -299,8 +280,8 @@ if (DB_ENGINE is not None):
     class blacklist_model(BASE):
         __tablename__   = 'BLACKLIST'
         
-        id              = Column(Int64, nullable = False, primary_key = True)
-        user_id         = Column(Int64, nullable = False)
+        id = Column(Int64, nullable = False, primary_key = True)
+        user_id = Column(Int64, nullable = False)
     
     BLACKLIST_TABLE = blacklist_model.__table__
     
@@ -319,4 +300,34 @@ if (DB_ENGINE is not None):
     EXTERNAL_EVENTS_TABLE = external_events_model.__table__
     
     
+    class relationship_request_model(BASE):
+        __tablename__   = 'RELATIONSHIP_REQUESTS'
+        
+        id = Column(Int64, primary_key = True, nullable = False)
+        source_user_id = Column(Int64, unique = False, nullable = False)
+        target_user_id = Column(Int64, unique = False, nullable = False)
+        investment = Column(Int64, default = 0, nullable = False)
+        relationship_type = Column(Int16, unique = False, nullable = False)
+    
+    
+    RELATIONSHIP_REQUEST_TABLE = relationship_request_model.__table__
+    
+    
+    class relationship_model(BASE):
+        __tablename__   = 'RELATIONSHIPS'
+        
+        id = Column(Int64, primary_key = True, nullable = False)
+        source_user_id = Column(Int64, unique = False, nullable = False)
+        target_user_id = Column(Int64, unique = False, nullable = False)
+        source_investment = Column(Int64, default = 0, nullable = False)
+        target_investment = Column(Int64, default = 0, nullable = False)
+        source_can_boost_at = Column(DateTime, nullable = False)
+        target_can_boost_at = Column(DateTime, nullable = False)
+        relationship_type = Column(Int16, unique = False, nullable = False)
+    
+    
+    RELATIONSHIP_TABLE = relationship_model.__table__
+    
+    
     DB_ENGINE.dispose()
+    # BASE.metadata.create_all(DB_ENGINE)

@@ -44,7 +44,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def _render_action_internal_into(action_tag, source_character, target_character):
+def test__render_action_internal_into(action_tag, source_character, target_character):
     """
     Tests whether ``_render_action_internal_into`` works as intended.
     

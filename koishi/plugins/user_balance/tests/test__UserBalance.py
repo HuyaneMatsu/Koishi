@@ -13,17 +13,17 @@ from ..user_balance_saver import UserBalanceSaver
 
 def _assert_fields_set(user_balance):
     """
-    Asserts whether every fields are set of the automation configuration.
+    Asserts whether every fields are set of the user balance.
     
     Parameters
     ----------
     user_balance : ``UserBalance``
-        Automation configuration to test.
+        The user balance to test.
     """
     vampytest.assert_instance(user_balance, UserBalance)
     vampytest.assert_instance(user_balance.allocated, int)
-    vampytest.assert_instance(user_balance.count_daily_by_waifu, int)
-    vampytest.assert_instance(user_balance.count_daily_for_waifu, int)
+    vampytest.assert_instance(user_balance.count_daily_by_related, int)
+    vampytest.assert_instance(user_balance.count_daily_for_related, int)
     vampytest.assert_instance(user_balance.count_daily_self, int)
     vampytest.assert_instance(user_balance.count_top_gg_vote, int)
     vampytest.assert_instance(user_balance.daily_can_claim_at, DateTime)
@@ -31,10 +31,9 @@ def _assert_fields_set(user_balance):
     vampytest.assert_instance(user_balance.streak, int)
     vampytest.assert_instance(user_balance.entry_id, int)
     vampytest.assert_instance(user_balance.top_gg_voted_at, DateTime)
-    vampytest.assert_instance(user_balance.waifu_cost, int)
-    vampytest.assert_instance(user_balance.waifu_divorces, int)
-    vampytest.assert_instance(user_balance.waifu_owner_id, int)
-    vampytest.assert_instance(user_balance.waifu_slots, int)
+    vampytest.assert_instance(user_balance.relationship_value, int)
+    vampytest.assert_instance(user_balance.relationship_divorces, int)
+    vampytest.assert_instance(user_balance.relationship_slots, int)
 
 
 def test__UserBalance__new():
@@ -62,8 +61,8 @@ def test__UserBalance__repr():
     """
     allocated = 7
     balance = 8
-    count_daily_by_waifu = 9
-    count_daily_for_waifu = 10
+    count_daily_by_related = 9
+    count_daily_for_related = 10
     count_daily_self = 11
     count_top_gg_vote = 12
     daily_can_claim_at = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
@@ -72,18 +71,17 @@ def test__UserBalance__repr():
     streak = 13
     top_gg_voted_at = DateTime(2016, 5, 15, tzinfo = TimeZone.utc)
     user_id = 202412070001
-    waifu_cost = 14
-    waifu_divorces = 15
-    waifu_owner_id = 202412070002
-    waifu_slots = 16
+    relationship_value = 14
+    relationship_divorces = 15
+    relationship_slots = 16
     
     try:
         
         user_balance = UserBalance(user_id)
         user_balance.allocated = allocated
         user_balance.balance = balance
-        user_balance.count_daily_by_waifu = count_daily_by_waifu
-        user_balance.count_daily_for_waifu = count_daily_for_waifu
+        user_balance.count_daily_by_related = count_daily_by_related
+        user_balance.count_daily_for_related = count_daily_for_related
         user_balance.count_daily_self = count_daily_self
         user_balance.count_top_gg_vote = count_top_gg_vote
         user_balance.daily_can_claim_at = daily_can_claim_at
@@ -91,10 +89,9 @@ def test__UserBalance__repr():
         user_balance.streak = streak
         user_balance.entry_id = entry_id
         user_balance.top_gg_voted_at = top_gg_voted_at
-        user_balance.waifu_cost = waifu_cost
-        user_balance.waifu_divorces = waifu_divorces
-        user_balance.waifu_owner_id = waifu_owner_id
-        user_balance.waifu_slots = waifu_slots
+        user_balance.relationship_value = relationship_value
+        user_balance.relationship_divorces = relationship_divorces
+        user_balance.relationship_slots = relationship_slots
         
         user_balance.entry_id = entry_id
         
@@ -105,8 +102,8 @@ def test__UserBalance__repr():
         vampytest.assert_in(UserBalance.__name__, output)
         vampytest.assert_in(f'allocated = {allocated!r}', output)
         vampytest.assert_in(f'balance = {balance!r}', output)
-        vampytest.assert_in(f'count_daily_by_waifu = {count_daily_by_waifu!r}', output)
-        vampytest.assert_in(f'count_daily_for_waifu = {count_daily_for_waifu!r}', output)
+        vampytest.assert_in(f'count_daily_by_related = {count_daily_by_related!r}', output)
+        vampytest.assert_in(f'count_daily_for_related = {count_daily_for_related!r}', output)
         vampytest.assert_in(f'count_daily_self = {count_daily_self!r}', output)
         vampytest.assert_in(f'count_top_gg_vote = {count_top_gg_vote!r}', output)
         vampytest.assert_in(f'daily_can_claim_at = {daily_can_claim_at:{DATETIME_FORMAT_CODE}}', output)
@@ -115,10 +112,9 @@ def test__UserBalance__repr():
         vampytest.assert_in(f'entry_id = {entry_id!r}', output)
         vampytest.assert_in(f'user_id = {user_id!r}', output)
         vampytest.assert_in(f'top_gg_voted_at = {top_gg_voted_at:{DATETIME_FORMAT_CODE}}', output)
-        vampytest.assert_in(f'waifu_cost = {waifu_cost!r}', output)
-        vampytest.assert_in(f'waifu_divorces = {waifu_divorces!r}', output)
-        vampytest.assert_in(f'waifu_owner_id = {waifu_owner_id!r}', output)
-        vampytest.assert_in(f'waifu_slots = {waifu_slots!r}', output)
+        vampytest.assert_in(f'relationship_value = {relationship_value!r}', output)
+        vampytest.assert_in(f'relationship_divorces = {relationship_divorces!r}', output)
+        vampytest.assert_in(f'relationship_slots = {relationship_slots!r}', output)
         
     finally:
         USER_BALANCE_CACHE.clear()
@@ -188,8 +184,8 @@ def test__UserBalance__from_entry():
     """
     allocated = 20
     balance = 21
-    count_daily_by_waifu = 22
-    count_daily_for_waifu = 23
+    count_daily_by_related = 22
+    count_daily_for_related = 23
     count_daily_self = 24
     count_top_gg_vote = 25
     daily_can_claim_at = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
@@ -198,17 +194,16 @@ def test__UserBalance__from_entry():
     streak = 27
     top_gg_voted_at = DateTime(2016, 5, 15, tzinfo = TimeZone.utc)
     user_id = 202412070007
-    waifu_cost = 28
-    waifu_divorces = 29
-    waifu_owner_id = 202412070008
-    waifu_slots = 30
+    relationship_value = 28
+    relationship_divorces = 29
+    relationship_slots = 30
     
     try:
         entry = {
             'allocated': allocated,
             'balance': balance,
-            'count_daily_by_waifu': count_daily_by_waifu,
-            'count_daily_for_waifu': count_daily_for_waifu,
+            'count_daily_by_related': count_daily_by_related,
+            'count_daily_for_related': count_daily_for_related,
             'count_daily_self': count_daily_self,
             'count_top_gg_vote': count_top_gg_vote,
             'daily_can_claim_at': daily_can_claim_at.replace(tzinfo = None),
@@ -217,10 +212,9 @@ def test__UserBalance__from_entry():
             'streak': streak,
             'top_gg_voted_at': top_gg_voted_at.replace(tzinfo = None),
             'user_id': user_id,
-            'waifu_cost': waifu_cost,
-            'waifu_divorces': waifu_divorces,
-            'waifu_owner_id': waifu_owner_id,
-            'waifu_slots': waifu_slots,
+            'relationship_value': relationship_value,
+            'relationship_divorces': relationship_divorces,
+            'relationship_slots': relationship_slots,
         }
         
         user_balance = UserBalance.from_entry(entry)
@@ -231,8 +225,8 @@ def test__UserBalance__from_entry():
         
         vampytest.assert_eq(user_balance.allocated, allocated)
         vampytest.assert_eq(user_balance.balance, balance)
-        vampytest.assert_eq(user_balance.count_daily_by_waifu, count_daily_by_waifu)
-        vampytest.assert_eq(user_balance.count_daily_for_waifu, count_daily_for_waifu)
+        vampytest.assert_eq(user_balance.count_daily_by_related, count_daily_by_related)
+        vampytest.assert_eq(user_balance.count_daily_for_related, count_daily_for_related)
         vampytest.assert_eq(user_balance.count_daily_self, count_daily_self)
         vampytest.assert_eq(user_balance.count_top_gg_vote, count_top_gg_vote)
         vampytest.assert_eq(user_balance.daily_can_claim_at, daily_can_claim_at)
@@ -241,10 +235,9 @@ def test__UserBalance__from_entry():
         vampytest.assert_eq(user_balance.streak, streak)
         vampytest.assert_eq(user_balance.top_gg_voted_at, top_gg_voted_at)
         vampytest.assert_eq(user_balance.user_id, user_id)
-        vampytest.assert_eq(user_balance.waifu_cost, waifu_cost)
-        vampytest.assert_eq(user_balance.waifu_divorces, waifu_divorces)
-        vampytest.assert_eq(user_balance.waifu_owner_id, waifu_owner_id)
-        vampytest.assert_eq(user_balance.waifu_slots, waifu_slots)
+        vampytest.assert_eq(user_balance.relationship_value, relationship_value)
+        vampytest.assert_eq(user_balance.relationship_divorces, relationship_divorces)
+        vampytest.assert_eq(user_balance.relationship_slots, relationship_slots)
     
     finally:
         USER_BALANCE_CACHE.clear()
@@ -258,8 +251,8 @@ def test__UserBalance__from_entry__cache():
     """
     allocated = 40
     balance = 41
-    count_daily_by_waifu = 42
-    count_daily_for_waifu = 43
+    count_daily_by_related = 42
+    count_daily_for_related = 43
     count_daily_self = 44
     count_top_gg_vote = 45
     daily_can_claim_at = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
@@ -268,10 +261,9 @@ def test__UserBalance__from_entry__cache():
     streak = 46
     top_gg_voted_at = DateTime(2016, 5, 15, tzinfo = TimeZone.utc)
     user_id = 202412070009
-    waifu_cost = 47
-    waifu_divorces = 48
-    waifu_owner_id = 202412070010
-    waifu_slots = 49
+    relationship_value = 47
+    relationship_divorces = 48
+    relationship_slots = 49
     
     try:
         user_balance = UserBalance(user_id)
@@ -281,8 +273,8 @@ def test__UserBalance__from_entry__cache():
         entry = {
             'allocated': allocated,
             'balance': balance,
-            'count_daily_by_waifu': count_daily_by_waifu,
-            'count_daily_for_waifu': count_daily_for_waifu,
+            'count_daily_by_related': count_daily_by_related,
+            'count_daily_for_related': count_daily_for_related,
             'count_daily_self': count_daily_self,
             'count_top_gg_vote': count_top_gg_vote,
             'daily_can_claim_at': daily_can_claim_at.replace(tzinfo = None),
@@ -291,10 +283,9 @@ def test__UserBalance__from_entry__cache():
             'streak': streak,
             'top_gg_voted_at': top_gg_voted_at.replace(tzinfo = None),
             'user_id': user_id,
-            'waifu_cost': waifu_cost,
-            'waifu_divorces': waifu_divorces,
-            'waifu_owner_id': waifu_owner_id,
-            'waifu_slots': waifu_slots,
+            'relationship_value': relationship_value,
+            'relationship_divorces': relationship_divorces,
+            'relationship_slots': relationship_slots,
         }
         
         output = UserBalance.from_entry(entry)
@@ -302,8 +293,8 @@ def test__UserBalance__from_entry__cache():
         
         vampytest.assert_eq(user_balance.allocated, allocated)
         vampytest.assert_eq(user_balance.balance, balance)
-        vampytest.assert_eq(user_balance.count_daily_by_waifu, count_daily_by_waifu)
-        vampytest.assert_eq(user_balance.count_daily_for_waifu, count_daily_for_waifu)
+        vampytest.assert_eq(user_balance.count_daily_by_related, count_daily_by_related)
+        vampytest.assert_eq(user_balance.count_daily_for_related, count_daily_for_related)
         vampytest.assert_eq(user_balance.count_daily_self, count_daily_self)
         vampytest.assert_eq(user_balance.count_top_gg_vote, count_top_gg_vote)
         vampytest.assert_eq(user_balance.daily_can_claim_at, daily_can_claim_at)
@@ -312,10 +303,9 @@ def test__UserBalance__from_entry__cache():
         vampytest.assert_eq(user_balance.streak, streak)
         vampytest.assert_eq(user_balance.top_gg_voted_at, top_gg_voted_at)
         vampytest.assert_eq(user_balance.user_id, user_id)
-        vampytest.assert_eq(user_balance.waifu_cost, waifu_cost)
-        vampytest.assert_eq(user_balance.waifu_divorces, waifu_divorces)
-        vampytest.assert_eq(user_balance.waifu_owner_id, waifu_owner_id)
-        vampytest.assert_eq(user_balance.waifu_slots, waifu_slots)
+        vampytest.assert_eq(user_balance.relationship_value, relationship_value)
+        vampytest.assert_eq(user_balance.relationship_divorces, relationship_divorces)
+        vampytest.assert_eq(user_balance.relationship_slots, relationship_slots)
     
     finally:
         USER_BALANCE_CACHE.clear()
@@ -364,29 +354,29 @@ async def test__UserBalance__set__add_field():
     Case: Add field.
     """
     user_id = 202412070013
-    old_waifu_cost = 50
+    old_relationship_value = 50
     
-    new_waifu_cost = 20
+    new_relationship_value = 20
     
     try:
         user_balance = UserBalance(user_id)
-        user_balance.waifu_cost = old_waifu_cost
+        user_balance.relationship_value = old_relationship_value
         
         vampytest.assert_is(user_balance.saver, None)
         vampytest.assert_is(USER_BALANCE_CACHE.get(user_id, None), None)
-        vampytest.assert_eq(user_balance.waifu_cost, old_waifu_cost)
+        vampytest.assert_eq(user_balance.relationship_value, old_relationship_value)
         
-        user_balance.set('waifu_cost', new_waifu_cost)
+        user_balance.set('relationship_value', new_relationship_value)
         
-        vampytest.assert_eq(user_balance.waifu_cost, new_waifu_cost)
+        vampytest.assert_eq(user_balance.relationship_value, new_relationship_value)
         vampytest.assert_is_not(user_balance.saver, None)
-        vampytest.assert_eq(user_balance.saver.modified_fields, {'waifu_cost': new_waifu_cost})
+        vampytest.assert_eq(user_balance.saver.modified_fields, {'relationship_value': new_relationship_value})
         vampytest.assert_is(USER_BALANCE_CACHE.get(user_id, None), user_balance)
         
         await skip_ready_cycle()
         await skip_ready_cycle()
         
-        vampytest.assert_eq(user_balance.waifu_cost, new_waifu_cost)
+        vampytest.assert_eq(user_balance.relationship_value, new_relationship_value)
         vampytest.assert_is(user_balance.saver, None)
         vampytest.assert_is(USER_BALANCE_CACHE.get(user_id, None), user_balance)
         

@@ -6,7 +6,6 @@ from ..rendering import _render_creator_into
 def _iter_options():
     yield (
         'sister',
-        None,
         (
             '.with_creator(\n'
             '    \'sister\',\n'
@@ -23,7 +22,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def _render_creator_into(creator):
+def test__render_creator_into(creator):
     """
     Tests whether ``_render_creator_into`` works as intended.
     

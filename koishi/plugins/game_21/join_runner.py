@@ -7,7 +7,7 @@ from ...bot_utils.constants import IN_GAME_IDS
 
 from ..user_balance import get_user_balance
 
-from .checks import check_has_enough_love, check_in_game, check_max_players
+from .checks import check_has_enough_balance, check_in_game, check_max_players
 from .constants import (
     GAME_21_CUSTOM_ID_CANCEL, GAME_21_CUSTOM_ID_ENTER, GAME_21_CUSTOM_ID_START, GAME_21_JOINER_TIMEOUT,
     GAME_21_JOIN_ROW_DISABLED, GAME_21_JOIN_ROW_ENABLED, GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_EDITING,
@@ -194,7 +194,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
             check_in_game(interaction_event)
             
             user_balance = await get_user_balance(interaction_event.user_id)
-            check_has_enough_love(session.amount, user_balance.balance - user_balance.allocated, False)
+            check_has_enough_balance(session.amount, user_balance.balance - user_balance.allocated, False)
             user_balance.set('allocated', user_balance.allocated + session.amount)
             await user_balance.save()
         except InteractionAbortedError as exception:

@@ -109,8 +109,8 @@ async def respond_heart_stats(interaction_event, target_user):
         balance,
         streak,
         count_daily_self,
-        count_daily_by_waifu,
-        count_daily_for_waifu,
+        count_daily_by_related,
+        count_daily_for_related,
         count_top_gg_vote,
     ) = await get_stat_fields(target_user.id)
     
@@ -121,8 +121,8 @@ async def respond_heart_stats(interaction_event, target_user):
             balance,
             streak,
             count_daily_self,
-            count_daily_by_waifu,
-            count_daily_for_waifu,
+            count_daily_by_related,
+            count_daily_for_related,
             count_top_gg_vote,
         ),
         allowed_mentions = None,
