@@ -65,7 +65,7 @@ def parse_header_rate_limit(headers):
     return (delay1 if delay1 < delay2 else delay2)
 
 
-async def bypass_request(client, method, url, data = None, params = None, reason = None, headers = None, decode = True):
+async def bypass_request(client, method, url, data = None, query = None, reason = None, headers = None, decode = True):
     self = client.api
     if headers is None:
         headers = self.headers.copy()
@@ -86,7 +86,7 @@ async def bypass_request(client, method, url, data = None, params = None, reason
             
         try:
             async with RequestContextManager(
-                self.http._request(method, url, headers, data = data, params = params)
+                self.http._request(method, url, headers, data = data, query = query)
             ) as response:
                 if decode:
                     response_data = await response.text(encoding = 'utf-8')
@@ -100,7 +100,7 @@ async def bypass_request(client, method, url, data = None, params = None, reason
         
         with RLTPrinterBuffer() as buffer:
             response_headers = response.headers
-            print(response_headers)
+            
             status = response.status
             if response_headers['content-type'].startswith('application/json'):
                 response_data = from_json(response_data)
@@ -474,7 +474,7 @@ async def reaction_user_get_chunk(client, message, emoji):
         client,
         METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions/{reaction}',
-        params = {'limit': 100},
+        query = {'limit': 100},
     )
 
 
@@ -575,7 +575,7 @@ async def message_get_chunk(client, channel):
         client,
         METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/messages',
-        params = {'limit': 1},)
+        query = {'limit': 1},)
 
 
 async def message_get(client, channel, message_id):
@@ -980,7 +980,7 @@ async def audit_log_get_chunk(client, guild):
         client,
         METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/audit-logs',
-        params = data,
+        query = data,
     )
 
 
@@ -1000,7 +1000,7 @@ async def guild_ban_add(client, guild, user_id):
         client,
         METHOD_PUT,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',
-        params = data,
+        query = data,
     )
 
 
@@ -1578,7 +1578,7 @@ async def guild_prune(client, guild):
         client,
         METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/prune',
-        params = {'days': 30},
+        query = {'days': 30},
     )
 
 
@@ -1588,7 +1588,7 @@ async def guild_prune_estimate(client, guild):
         client,
         METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/prune',
-        params = {'days':30},
+        query = {'days':30},
     )
 
 
@@ -1697,7 +1697,7 @@ async def guild_widget_image(client, guild):
         client,
         METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/widget.png',
-        params = {'style': 'shield'},
+        query = {'style': 'shield'},
         decode = False,
         headers = {},
     )
@@ -1784,7 +1784,7 @@ async def guild_get_chunk(client):
         client,
         METHOD_GET,
         f'{API_ENDPOINT}/users/@me/guilds',
-        params = {'after': 0},
+        query = {'after': 0},
     )
 
 
@@ -1954,7 +1954,7 @@ async def guild_user_search(client, guild, query, limit = 1):
         client,
         METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/search',
-        params = data,
+        query = data,
     )
 
 
@@ -2226,7 +2226,7 @@ async def discovery_validate_term(client, term):
         client,
         METHOD_GET,
         f'{API_ENDPOINT}/discovery/valid-term',
-        params = {'term': term})
+        query = {'term': term})
     
     return data['valid']
 

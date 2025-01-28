@@ -98,7 +98,7 @@ async def request_tag_auto_completion(client, query, safe):
     
     query_parameters[query_key] = query
     
-    async with client.http.get(endpoint, params = query_parameters) as response:
+    async with client.http.get(endpoint, query = query_parameters) as response:
         if response.status != 200:
             return
         

@@ -2,19 +2,26 @@ __all__ = ()
 
 from datetime import datetime as DateTime, timezone as TimeZone
 
-from hata import DiscordException, ERROR_CODES, Embed, Sticker
-from hata.ext.slash import Button, InteractionResponse, Row, abort
+from hata import ClientUserBase, DiscordException, ERROR_CODES, Embed, Emoji, Sticker
+from hata.ext.slash import Button, InteractionResponse, P, Row, abort
 
 from ..bot_utils.constants import (
-    EMOJI__HEART_CURRENCY, GUILD__SUPPORT, ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__HEART_BOOST,
-    ROLE__SUPPORT__NSFW_ACCESS
+    EMOJI__HEART_CURRENCY, ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__NSFW_ACCESS
 )
 from ..bot_utils.daily import calculate_daily_new
 from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
-from .relationship_slot import EMOJI_NO, EMOJI_YES, buy_relationship_slot_invoke
+from .relationship_slots_interactions import (
+    relationship_slot_increment_invoke_other_question, relationship_slot_increment_invoke_self_question
+)
+from .relationships_core import (
+    autocomplete_relationship_extended_user_name, get_extender_relationship_and_relationship_and_user_like_at
+)
 from .user_balance import get_user_balance
 
+
+EMOJI_YES = Emoji.precreate(990558169963049041)
+EMOJI_NO = Emoji.precreate(994540311990784041)
 
 NSFW_ACCESS_COST = 8000
 ELEVATED_COST = 12000
@@ -30,8 +37,34 @@ SHOP = FEATURE_CLIENTS.interactions(
 
 
 @SHOP.interactions
-async def buy_relationship_slot(event):
-    return await buy_relationship_slot_invoke(event)
+async def buy_relationship_slot(
+    event,
+    target_related_name : P(
+        str,
+        'Buy relationship slot for someone related',
+        'related',
+        autocomplete = autocomplete_relationship_extended_user_name,
+    ) = None,
+    target_user : (
+        ClientUserBase,
+        'Buy waifu slot for someone else?',
+        'someone-else',
+    ) = None,
+):
+    if (target_user is None) and (target_related_name is not None):
+        extender_relationship, relationship, target_user = (
+            await get_extender_relationship_and_relationship_and_user_like_at(
+                event.user_id, target_related_name, event.guild_id
+            )
+        )
+    
+    if target_user is None:
+        coroutine = relationship_slot_increment_invoke_self_question(event)
+    else:
+        coroutine = relationship_slot_increment_invoke_other_question(event, target_user)
+    
+    return await coroutine
+
 
 def get_divorce_reduction_cost(user_id, divorce_count):
     return user_id % (10000 * divorce_count)
@@ -195,8 +228,9 @@ async def roles(
     role, cost = BUYABLE_ROLES[role_choice]
     
     user = event.user
-    if (user.get_guild_profile_for(GUILD__SUPPORT) is None):
-        abort(f'You must be in {GUILD__SUPPORT.name} to buy any role.')
+    role_guild = role.guild
+    if (user.get_guild_profile_for(role_guild) is None):
+        abort(f'You must be in {role_guild.name} to buy this role.')
     
     if user.has_role(role):
         abort(f'You already have {role.name} role.')

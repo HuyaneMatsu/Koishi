@@ -664,9 +664,9 @@ async def gift(
         yield Embed('Like a flower', 'Whithering to the dust.', color = COLOR__GAMBLING)
         return
     
-    target_user_balance = await get_user_balance(source_user.id)
+    target_user_balance = await get_user_balance(target_user.id)
     target_balance = target_user_balance.balance
-
+    
     source_balance -= source_allocated
     
     amount = min(source_balance - source_allocated, amount)
@@ -682,7 +682,7 @@ async def gift(
     
     embed = Embed(
         'Aww, so lovely',
-        f'You gifted {amount} {EMOJI__HEART_CURRENCY} to {target_user.full_name}',
+        f'You gifted {amount} {EMOJI__HEART_CURRENCY} to {target_user.name_at(event.guild_id)}',
         color = COLOR__GAMBLING,
     ).add_field(
         f'Your {EMOJI__HEART_CURRENCY}',
@@ -701,7 +701,7 @@ async def gift(
         target_user_settings = await get_one_user_settings(target_user.id)
         if target_user_settings.notification_gift:
             embed = Embed('Aww, love is in the air',
-                f'You have been gifted {amount} {EMOJI__HEART_CURRENCY} by {source_user.full_name}',
+                f'You have been gifted {amount} {EMOJI__HEART_CURRENCY} by {source_user.name_at(event.guild_id)}',
                 color = COLOR__GAMBLING,
             ).add_field(
                 f'Your {EMOJI__HEART_CURRENCY}',

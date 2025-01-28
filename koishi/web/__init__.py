@@ -48,6 +48,15 @@ BOT_NAMES = [
     'oai-searchbot',
     'bravebot',
     'chatgpt-user',
+    'censysinspect',
+    (
+        'mozilla/5.0 (iphone; cpu iphone os 13_2_3 like mac os x) applewebkit/605.1.15 (khtml, like gecko) '
+        'version/13.0.3 mobile/15e148 safari/604.1'
+    ),
+    (
+        'mozilla/5.0 (linux; android 11; m2004j15sc) applewebkit/537.36 (khtml, like gecko) '
+        'chrome/103.0.5060.114 mobile safari/537.36',
+    ),
     
     # From google:
     'googlebot',

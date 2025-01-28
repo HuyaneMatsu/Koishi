@@ -58,17 +58,23 @@ async def game_21(
     check_in_game(interaction_event)
     check_bet_too_low(amount)
     
-    user_balance = await get_user_balance(interaction_event.user_id)
-    check_has_enough_balance(amount, user_balance.balance - user_balance.allocated, False)
-    user_balance.set('allocated', user_balance.allocated + amount)
-    await user_balance.save()
+    source_user_balance = await get_user_balance(interaction_event.user_id)
+    check_has_enough_balance(amount, source_user_balance.balance - source_user_balance.allocated, False)
     
     single_player_mode = (mode == 'single')
+    
     if single_player_mode:
-        user_balance = await get_user_balance(client.id)
-        check_has_enough_balance(amount, user_balance.balance - user_balance.allocated, True)
-        user_balance.set('allocated', user_balance.allocated + amount)
-        await user_balance.save()
+        target_user_balance = await get_user_balance(client.id)
+        check_has_enough_balance(amount, target_user_balance.balance - target_user_balance.allocated, True)
+    
+    
+    source_user_balance.set('allocated', source_user_balance.allocated + amount)
+    await source_user_balance.save()
+    
+    if single_player_mode:
+        target_user_balance.set('allocated', target_user_balance.allocated + amount)
+        await target_user_balance.save()
+    
     
     await client.interaction_application_command_acknowledge(interaction_event)
     

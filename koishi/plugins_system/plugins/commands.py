@@ -11,7 +11,7 @@ from ...bots import MAIN_CLIENT
 
 from .helpers import (
     check_permission, create_plugins_page_components, get_plugin_by_name, get_plugins_sequence,
-    render_plugin_coroutine_result, render_plugins_page, run_plugin_coroutine
+    build_plugin_coroutine_result_response, render_plugins_page, run_plugin_coroutine
 )
 
 
@@ -44,7 +44,7 @@ async def load(
     
     Yields
     ------
-    acknowledge / response : `None` / ``Embed``
+    acknowledge / response : `None` / ``InteractionResponse``
     """
     check_permission(event)
     plugin = get_plugin_by_name(name)
@@ -52,7 +52,7 @@ async def load(
     
     yield
     plugins_and_exception = await run_plugin_coroutine(load_plugin(name, deep = deep))
-    yield render_plugin_coroutine_result(name, 'load', *plugins_and_exception)
+    yield await build_plugin_coroutine_result_response(name, 'load', *plugins_and_exception)
 
 
 @PLUGIN_COMMANDS.interactions
@@ -77,7 +77,7 @@ async def reload(
     
     Yields
     ------
-    acknowledge / response : `None` / ``Embed``
+    acknowledge / response : `None` / ``InteractionResponse``
     """
     check_permission(event)
     
@@ -86,7 +86,7 @@ async def reload(
     
     yield
     plugins_and_exception = await run_plugin_coroutine(reload_plugin(name, deep = deep))
-    yield render_plugin_coroutine_result(name, 'reload', *plugins_and_exception)
+    yield await build_plugin_coroutine_result_response(name, 'reload', *plugins_and_exception)
 
 
 @PLUGIN_COMMANDS.interactions
@@ -111,7 +111,7 @@ async def unload(
     
     Yields
     ------
-    acknowledge / response : `None` / ``Embed``
+    acknowledge / response : `None` / ``InteractionResponse``
     
     """
     check_permission(event)
@@ -121,7 +121,7 @@ async def unload(
     
     yield
     plugins_and_exception = await run_plugin_coroutine(unload_plugin(name, deep = deep))
-    yield render_plugin_coroutine_result(name, 'unload', *plugins_and_exception)
+    yield await build_plugin_coroutine_result_response(name, 'unload', *plugins_and_exception)
 
 
 @PLUGIN_COMMANDS.interactions

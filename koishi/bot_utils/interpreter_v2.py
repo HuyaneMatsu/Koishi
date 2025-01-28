@@ -134,14 +134,14 @@ class Interpreter:
     
     def __new__(cls, locals_):
         
-        for variable_name in {
+        for variable_name in (
             '__name__',
             '__package__',
             '__loader__',
             '__spec__',
             '__builtins__',
-            '__file__'
-        }:
+            '__file__',
+        ):
             locals_[variable_name] = getattr(hata, variable_name)
         
         for variable_name in hata.__all__:
@@ -201,7 +201,7 @@ class Interpreter:
                         fixup_syntax_error_line_from_buffer(syntax_error, source.splitlines())
                         
                         _render_exception_representation_syntax_error_into(
-                            ExceptionRepresentationSyntaxError(syntax_error, None), into, None
+                            ExceptionRepresentationSyntaxError(syntax_error, None), None, into
                         )
                     else:
                         render_exception_into(syntax_error, into, filter = _ignore_console_frames)

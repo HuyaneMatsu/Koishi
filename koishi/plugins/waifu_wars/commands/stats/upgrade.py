@@ -124,7 +124,7 @@ async def try_upgrade_stat(waifu_stats, slot):
         success = True
         
         user_balance.set('balance', balance - cost)
-        user_balance.set('relationship_value', (user_balance.relationship_value or RELATIONSHIP_VALUE_DEFAULT) + cost // 100)
+        user_balance.set('relationship_value', (max(user_balance.relationship_value, RELATIONSHIP_VALUE_DEFAULT)) + cost // 100)
         await user_balance.save()
         
         slot.__set__(waifu_stats, next_point)

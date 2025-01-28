@@ -154,7 +154,7 @@ def build_response_self(starter_text, verb, source_user):
     Parameters
     ----------
     starter_text : `None | str`
-        Starter text to start teh response with.
+        Starter text to start the response with.
     
     verb : `str`
         The verb to use in the response.

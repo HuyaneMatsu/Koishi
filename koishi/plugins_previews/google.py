@@ -62,7 +62,7 @@ async def search(query, safe_search = True, image_search = False):
                 if image_search:
                     query['searchType'] = 'image'
                 
-                async with HTTP_CLIENT.get(API_URL, params = query) as response:
+                async with HTTP_CLIENT.get(API_URL, query = query) as response:
                     response_data = await response.json()
                 
                 api_error = response_data.get('error', None)

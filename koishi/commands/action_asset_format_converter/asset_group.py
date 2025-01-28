@@ -29,7 +29,7 @@ class AssetGroup(RichAttributeErrorBaseType):
         Parameters
         ----------
         prefix : `str`
-            The prefix to represent with teh group.
+            The prefix to represent with the group.
         """
         self = object.__new__(cls)
         self.assets = None

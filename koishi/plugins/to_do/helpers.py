@@ -264,7 +264,7 @@ TO_DOS_REQUESTED = False
 
 async def request_to_dos():
     """
-    Requests the to-dos from teh database.
+    Requests the to-dos from the database.
     
     If the to-dos are already requested does nothing.
     

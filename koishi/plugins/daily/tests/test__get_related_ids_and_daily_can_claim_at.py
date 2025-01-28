@@ -3,8 +3,7 @@ from datetime import datetime as DateTime, timezone as TimeZone
 import vampytest
 from hata import User
 
-from ...relationships import Relationship
-from ...relationships.relationship_types import RELATIONSHIP_TYPE_SISTER_LIL
+from ...relationships_core import RELATIONSHIP_TYPE_SISTER_LIL, Relationship
 from ...user_balance import UserBalance
 
 from ..related_completion import get_related_users_with_name_and_next_daily

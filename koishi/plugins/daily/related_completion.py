@@ -8,7 +8,7 @@ from hata import elapsed_time
 
 from ...bot_utils.user_getter import get_users_unordered
 
-from ..relationships import get_relationship_listing_and_extend, iter_relationship_and_extend_user_ids_to_request
+from ..relationships_core import get_relationship_listing_and_extend, iter_relationship_and_extend_user_ids_to_request
 from ..user_balance import get_user_balances
 
 

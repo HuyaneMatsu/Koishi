@@ -5,10 +5,9 @@ from random import random, randint, choice
 from hata import Client, Embed, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, Emoji
 from hata.ext.slash import abort
 
-from ..bot_utils.constants import GUILD__SUPPORT
 from ..bots import FEATURE_CLIENTS
 
-from .relationships import get_affinity_percent
+from .relationships_core import get_affinity_percent
 
 
 @FEATURE_CLIENTS.interactions(show_for_invoking_user_only = True, is_global = True)

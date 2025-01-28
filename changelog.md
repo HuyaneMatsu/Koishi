@@ -1,3 +1,23 @@
+### 2025+01-28
+
+- Fix `/21 mode:single` allocated the user's balance before checking the bot's. (getj1nxed1)
+- Fix `/gift` (from last december update). (fariz_12134)
+- Fix `/plugin` commands did not forward exception traces to the response. (For like 9 months, owner only)
+- Fix `/relationship info` did not check relationship targeting correctly at the case of extended relationships.
+    (fariz_12134)
+- Fix `/relationship info` included your `waifu`'s `unset` relationships while they should not.
+- Fix `target already has mistress` & `target already has mama` checks were reversed in `/proposal create`.
+     The selection logic was wrong and somehow escaped.
+- Add new relationship sharing rules to share your related's waifus.
+    This is basically the reverse of the sharing rule added previously.
+    With this all from waifu and to waifu sharing rules are done. More sharing rules are planned in the future.
+- `/proposal create` and `/proposal accept` now prompts you to buy a new relationship if you have sufficient.
+- Fix `/automation welcome` style: flandre not working since like jan 25. (remiscarletworld)
+    (Updated the emoji, but forgot its used in the code ofc)
+- `/shop buy-relationship-slot ` now has a `related` and `someone-else` parameters allowing you to buy relationships
+    for your beloved. if the user is related it also "deepens" your relationship as well.
+- `/proposal create` now prompts to you to buy a new relationship when proposing to a bot with `n / n` relationships.
+
 ### 2025+01-12
 
 - Fix `/gift` did not handle the case when `allocated > balance`.

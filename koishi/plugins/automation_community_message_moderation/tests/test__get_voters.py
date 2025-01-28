@@ -10,7 +10,7 @@ from ..helpers import PERMISSION_MASK_MESSAGING_DEFAULT, get_voters
 class TestDiscordApiClient(DiscordApiClient):
     __slots__ = ()
     
-    async def request(self, handler, method, url, data = None, params = None, headers = None, reason = None):
+    async def request(self, handler, method, url, data = None, query = None, headers = None, reason = None):
         raise RuntimeError('Should not make any requests')
 
 

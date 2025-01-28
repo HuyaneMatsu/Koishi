@@ -13,7 +13,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test___merge_values_with_values(old_values, values):
+def test__merge_values_with_values(old_values, values):
     """
     Tests whether ``old_values`` works as intended.
     

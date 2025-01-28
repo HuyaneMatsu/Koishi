@@ -3,9 +3,10 @@ __all__ = ()
 from itertools import islice
 from re import compile as re_compile
 
-from hata import BUILTIN_EMOJIS, CLIENTS
-from hata.ext.plugin_loader import PLUGINS, PluginError, get_plugin_like
-from hata.ext.slash import Button, Option, Row, Select, abort
+from hata import BUILTIN_EMOJIS, CLIENTS, KOKORO
+from hata.ext.plugin_loader import PLUGINS, PluginError, frame_filter, get_plugin_like
+from hata.ext.slash import Button, InteractionResponse, Option, Row, Select, abort
+from scarletio import render_exception_into_async
 
 from ...bot_utils.constants import ROLE__SUPPORT__ADMIN
 
@@ -444,9 +445,11 @@ async def run_plugin_coroutine(coroutine):
         return plugins, None
 
 
-def render_plugin_coroutine_result(plugin_name, action_name, plugins, exception):
+async def build_plugin_coroutine_result_response(plugin_name, action_name, plugins, exception):
     """
     Renders a plugin coroutine's result.
+    
+    This function is a coroutine.
     
     Parameters
     ----------
@@ -464,17 +467,36 @@ def render_plugin_coroutine_result(plugin_name, action_name, plugins, exception)
     
     Returns
     -------
-    result : `str`
+    response : ``InteractionResponse``
     """
-    into = [action_name.title(), 'ing ']
+    description_parts = ['> ', action_name.title(), 'ing ']
     
-    if (exception is not None):
-        into.append(plugin_name)
-        into.append(' failed.')
-        into.append(exception.message[:1980])
+    if (exception is None):
+        description_parts.append('was successful!')
+        if (plugins is not None):
+            description_parts.append('\n')
+            description_parts = render_plugin_listing_with_truncation_into(plugins, 1980, description_parts)
     
     else:
-        into.append('was successful!')
-        into = render_plugin_listing_with_truncation_into(plugins, 1980, into)
+        description_parts.append(plugin_name)
+        description_parts.append(' failed. ')
+        description_parts.append(exception.message[:1980])
     
-    return ''.join(into)
+    
+    content = ''.join(description_parts)
+    
+    
+    if (exception is None):
+        attachments = None
+    else:
+        attachments = [
+            (
+                'traceback.py',
+                ''.join(await render_exception_into_async(exception, [], filter = frame_filter, loop = KOKORO)),
+            ),
+        ]
+    
+    return InteractionResponse(
+        attachments = attachments,
+        content = content,
+    )

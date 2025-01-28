@@ -291,9 +291,9 @@ CATEGORIES = (
         ('about', 'ask', 'help',),
         (),
     ), (
-        'Marriage',
+        'Relationships',
         EMOJI_RING,
-        ('divorce', 'love', 'propose', 'proposals', 'waifu-info',),
+        ('love', 'proposal', 'relationships',),
         (),
     ), (
         'Utility',

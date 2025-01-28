@@ -10,7 +10,7 @@ from ...bot_utils.daily import DAILY_INTERVAL, calculate_daily_for, refresh_stre
 from ...bot_utils.utils import send_embed_to
 from ...bots import FEATURE_CLIENTS
 
-from ..relationships import get_extender_relationship_and_relationship_and_user_like_at
+from ..relationships_core import get_extender_relationship_and_relationship_and_user_like_at
 from ..user_balance import get_user_balance, get_user_balances
 from ..user_settings import (
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_BY_WAIFU_DISABLE, get_one_user_settings, get_preferred_client_for_user

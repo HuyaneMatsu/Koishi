@@ -16,6 +16,7 @@ def setup(lib):
 def teardown(lib):
     MAIN_CLIENT.commands.unextend(DISPATCH_TESTS)
 
+
 class dispatch_tester:
     channel = None
     old_events = {}
