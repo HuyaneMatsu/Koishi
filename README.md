@@ -38,7 +38,7 @@ Koishi excels in a variety of areas, just to mention a few featured commands:
 - `/hug` - Hug your best homies.
 - `/meme` - Shows up a good anime meme.
 - `/ds` - A box pushing cute puzzle game.
-- `/propose` - Propose to your best homies to become a family them.
+- `/propose` - Propose to your best homies to become a family with them.
 - `/guild` - Get generic information of the guild.
 - `/user` - Checkout anyone.
 - `/waifu` - Get one from our curated list of waifus.

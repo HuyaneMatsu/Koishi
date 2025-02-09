@@ -1,5 +1,6 @@
 __all__ = ()
 
+import config
 from hata import Locale
 
 from ..farewell_style import FarewellStyle
@@ -57,5 +58,6 @@ ITEMS = (
 
 FAREWELL_STYLE = FarewellStyle(
     NAME,
+    config.FLANDRE_ID,
     ITEMS,
 )

@@ -35,7 +35,7 @@ def build_user_icon_embed(user, guild_id, icon_kind, icon_source):
     color = user.color_at(guild_id)
     
     embed = Embed(
-        f'{user:f}\'s {icon_source_name!s} {icon_kind_name!s}',
+        f'{user.name_at(guild_id)}\'s {icon_source_name!s} {icon_kind_name!s}',
         color = (color if color else None),
         url = icon_url,
     )

@@ -22,7 +22,7 @@ def _iter_options():
         Embed(
             'Insufficient balance',
             (
-                'You do not have enough available heart to buy more relationship slots for Keine.\n'
+                'You do not have enough available hearts to buy more relationship slots for Keine.\n'
                 f'You need 2000 {EMOJI__HEART_CURRENCY} to buy the 3rd slot.'
             ),
         ),
@@ -36,7 +36,7 @@ def _iter_options():
         Embed(
             'Insufficient balance',
             (
-                'You do not have enough available heart to buy more relationship slots for Caver.\n'
+                'You do not have enough available hearts to buy more relationship slots for Caver.\n'
                 f'You need 2000 {EMOJI__HEART_CURRENCY} to buy the 3rd slot.'
             ),
         ),

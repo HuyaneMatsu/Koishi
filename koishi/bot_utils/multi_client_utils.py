@@ -12,6 +12,35 @@ PERMISSION_MASK_MESSAGING__THREAD = Permission().update_by_keys(
 )
 
 
+def has_client_message_create_permissions(channel, client, extra = 0):
+    """
+    Returns whether the given client has message create permissions in the given channel.
+    
+    Parameters
+    ----------
+    chanel : ``Channel``
+        Channel to check.
+    
+    client : ``Client``
+        The client to check.
+    
+    extra : `int` = `0`, Optional
+        Additional permissions to check for.
+    
+    Returns
+    -------
+    has_permissions : `bool`
+    """
+    if channel.is_in_group_thread():
+        mask = PERMISSION_MASK_MESSAGING__THREAD
+    else:
+        mask = PERMISSION_MASK_MESSAGING__DEFAULT
+    
+    mask |= extra
+    
+    return channel.cached_permissions_for(client) & mask == mask
+
+
 def get_first_client_with_message_create_permissions_from(channel, client_wrapper, extra = 0):
     """
     Returns the first client who has message create permissions into the given channel.

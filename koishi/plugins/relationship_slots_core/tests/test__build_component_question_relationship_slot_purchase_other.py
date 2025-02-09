@@ -3,7 +3,7 @@ import vampytest
 from hata import Component
 from hata.ext.slash import Button, Row
 
-from ..component_builders import build_component_question_relationship_purchase_other
+from ..component_builders import build_component_question_relationship_slot_purchase_other
 from ..constants import EMOJI_NO, EMOJI_YES
 
 
@@ -28,9 +28,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_component_question_relationship_purchase_other(user_id):
+def test__build_component_question_relationship_slot_purchase_other(user_id):
     """
-    tests whether ``build_component_question_relationship_purchase_other`` works as intended.
+    tests whether ``build_component_question_relationship_slot_purchase_other`` works as intended.
     
     Parameters
     ----------
@@ -41,6 +41,6 @@ def test__build_component_question_relationship_purchase_other(user_id):
     -------
     output : ``Component``
     """
-    output = build_component_question_relationship_purchase_other(user_id)
+    output = build_component_question_relationship_slot_purchase_other(user_id)
     vampytest.assert_instance(output, Component)
     return output

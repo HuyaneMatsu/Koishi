@@ -30,9 +30,6 @@ def test__build_end_embed_single_player_title(player_win, amount):
     """
     Tests whether ``build_end_embed_single_player_title`` works as intended.
     
-    Parameters
-    ----------
-    Parameters
     ----------
     player_win : `int`
         Whether the player won.

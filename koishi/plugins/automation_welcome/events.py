@@ -1,9 +1,11 @@
 __all__ = ()
 
-from hata import Embed, now_as_id
+from hata import CLIENTS, Embed, now_as_id
 from hata.ext.slash import Button, ButtonStyle, Row
 
-from ...bot_utils.multi_client_utils import get_first_client_with_message_create_permissions_from
+from ...bot_utils.multi_client_utils import (
+    has_client_message_create_permissions, get_first_client_with_message_create_permissions_from
+)
 from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_welcome_fields
@@ -25,17 +27,30 @@ async def welcome_user(client, guild, user, welcome_style, welcome_channel, welc
     ----------
     client : ``Client``
         The client who received the event.
+    
     guild : ``Guild``
         The guild the welcome the user at.
+    
     user : ``ClientUserBase``
         The user to welcome.
+    
     welcome_style : ``WelcomeStyle``
         The welcome style to use.
+    
     welcome_channel : ``Channel``
         The channel to welcome the user at.
+    
     welcome_reply_buttons_enabled : `bool`
         Whether welcome reply button should be added under the message.
     """
+    # select client if different
+    client_id = welcome_style.client_id
+    if client_id and client_id != client.id:
+        preferred_client = CLIENTS.get(client_id, None)
+        if (preferred_client is not None) and has_client_message_create_permissions(welcome_channel, client):
+            client = preferred_client
+    
+    # build content @ embed & components
     seed = guild.id ^ user.id
     
     message_content_builders = welcome_style.message_content_builders
@@ -87,8 +102,10 @@ async def guild_user_add(client, guild, user):
     ----------
     client : ``Client``
         The client who received the event.
+    
     guild : ``Guild``
         The guild the user has been added to.
+    
     user : ``ClientUserBase``
         The added user.
     """
@@ -128,10 +145,13 @@ async def guild_user_update(client, guild, user, old_attributes):
     ----------
     client : ``Client``
         The client who received the event.
+    
     guild : ``Guild``
         The guild where the user's profile was updated at.
+    
     user : ``ClientUserBase``
         The user who was updated.
+    
     old_attributes : `None | dict<str, object>`
         The updated attributes.
     """

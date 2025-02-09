@@ -58,3 +58,24 @@ class Deck(RichAttributeErrorBaseType):
         all_pulled.sort()
         
         return card
+    
+    
+    def push_card(self, card):
+        """
+        Pushes a card into the deck.
+        
+        Parameters
+        ----------
+        card : `int`
+            The card to push.
+        
+        Returns
+        -------
+        success : `bool`
+        """
+        try:
+            self.all_pulled.remove(card)
+        except ValueError:
+            return False
+        
+        return True

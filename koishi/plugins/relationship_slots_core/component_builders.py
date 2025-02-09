@@ -1,6 +1,6 @@
 __all__ = (
     'build_component_invoke_relationship_slot_purchase_other', 'build_component_invoke_relationship_slot_purchase_self',
-    'build_component_question_relationship_purchase_other', 'build_component_question_relationship_purchase_self'
+    'build_component_question_relationship_slot_purchase_other', 'build_component_question_relationship_slot_purchase_self'
 )
 
 from hata.ext.slash import Button, Row
@@ -29,7 +29,7 @@ def build_component_invoke_relationship_slot_purchase_self():
 
 def build_component_invoke_relationship_slot_purchase_other(user_id):
     """
-    Builds a (row) component to invoke relationship purchase for someone else.
+    Builds a component to invoke relationship purchase for someone else.
     
     Parameters
     ----------
@@ -46,9 +46,9 @@ def build_component_invoke_relationship_slot_purchase_other(user_id):
     )
 
 
-def build_component_question_relationship_purchase_self():
+def build_component_question_relationship_slot_purchase_self():
     """
-    Builds a component to invoke relationship purchase for yourself.
+    Builds a (row) component to invoke relationship purchase for yourself.
     
     Returns
     -------
@@ -68,7 +68,7 @@ def build_component_question_relationship_purchase_self():
     )
 
 
-def build_component_question_relationship_purchase_other(user_id):
+def build_component_question_relationship_slot_purchase_other(user_id):
     """
     Builds a (row) component to invoke relationship purchase for someone else.
     

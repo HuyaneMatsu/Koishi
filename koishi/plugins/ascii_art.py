@@ -239,14 +239,19 @@ async def avatar(
     ----------
     client : ``Client``
         The client who received the event.
+    
     event : ``InteractionEvent``
         The received interaction event.
+    
     user : `None`, ``ClientUserBase`` = `None`, Optional
         The defined user to get the avatar of.
+    
     style_name : `str` = `default`, Optional
         The monochrome to character mapping style's name.
+    
     size : `int` = `default`, Optional
         The size of the image to process.
+    
     colored : `bool` = `False`, Optional
         Whether the output should use color ansi color codes.
     
@@ -285,12 +290,16 @@ async def guild_icon(
     ----------
     client : ``Client``
         The client who received the event.
+    
     event : ``InteractionEvent``
         The received interaction event.
+    
     style_name : `str` = `default`, Optional
         The monochrome to character mapping style's name.
+    
     size : `int` = `default`, Optional
         The size of the image to process.
+    
     colored : `bool` = `False`, Optional
         Whether the output should use color ansi color codes.
     

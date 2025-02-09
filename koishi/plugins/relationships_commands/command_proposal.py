@@ -3,17 +3,19 @@ __all__ = ()
 from datetime import datetime as DateTime, timezone as TimeZone
 from math import floor
 
-from hata import ClientUserBase, Embed
-from hata.ext.slash import Button, P, abort
+from hata import ClientUserBase, Embed, InteractionType
+from hata.ext.slash import Button, InteractionAbortedError, P, abort
 
-from ...bot_utils.user_getter import get_users_unordered
+from ...bot_utils.user_getter import get_user, get_users_unordered
 from ...bot_utils.utils import send_embed_to
 from ...bots import FEATURE_CLIENTS
 
 from ..relationships_core import (
-    Relationship, RelationshipRequest, autocomplete_relationship_request_source_user_name,
-    autocomplete_relationship_request_target_user_name, calculate_relationship_value, get_affinity_multiplier,
-    get_relationship_listing, get_relationship_request_and_user_like_at, get_relationship_request_listing
+    CUSTOM_ID_RELATIONSHIP_PROPOSAL_ACCEPT_PATTERN, CUSTOM_ID_RELATIONSHIP_PROPOSAL_REJECT_PATTERN, Relationship,
+    RelationshipRequest, autocomplete_relationship_request_source_user_name,
+    autocomplete_relationship_request_target_user_name, build_component_relationship_proposal_actions,
+    calculate_relationship_value, get_affinity_multiplier, get_relationship_listing,
+    get_relationship_request_and_user_like_at, get_relationship_request, get_relationship_request_listing,
 )
 from ..user_balance import get_user_balance, get_user_balances
 from ..user_settings import (
@@ -33,6 +35,7 @@ from .embed_builders import (
     build_relationship_request_listing_embed, build_success_embed_request_accepted,
     build_success_embed_request_cancelled, build_success_embed_request_created, build_success_embed_request_rejected
 )
+from .helpers import is_private_channel_of_two
 
 
 PROPOSAL_COMMANDS = FEATURE_CLIENTS.interactions(
@@ -165,26 +168,43 @@ async def create(
         embed = build_success_embed_request_created(relationship_type, investment, target_user, event.guild_id),
     )
     
+    # Send out notifications
     if not target_user.bot:
-        target_user_settings = await get_one_user_settings(target_user.id)
-        if target_user_settings.notification_proposal:
-            await send_embed_to(
-                get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
-                target_user,
-                build_notification_embed_request_created(relationship_type, investment, source_user, event.guild_id),
-                Button(
-                    'I don\'t want notifs, nya!!',
-                    custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_PROPOSAL_DISABLE,
+        if is_private_channel_of_two(event.channel, source_user, target_user):
+            await client.interaction_followup_message_create(
+                event,
+                content = target_user.mention,
+                embed = build_notification_embed_request_created(
+                    relationship_type, investment, source_user, event.guild_id
                 ),
+                components = build_component_relationship_proposal_actions(source_user.id, target_user.id),
             )
-    
-    if not source_user.bot and target_user.bot:
-        source_user_settings = await get_one_user_settings(source_user.id)
         
-        await send_embed_to(
-            get_preferred_client_for_user(source_user, source_user_settings.preferred_client_id, client),
-            source_user,
-            build_notification_embed_request_accepted(relationship_type, investment, target_user, event.guild_id),
+        else:
+            target_user_settings = await get_one_user_settings(target_user.id)
+            if target_user_settings.notification_proposal:
+                await send_embed_to(
+                    get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
+                    target_user,
+                    build_notification_embed_request_created(
+                        relationship_type, investment, source_user, event.guild_id
+                    ),
+                    [
+                        build_component_relationship_proposal_actions(source_user.id, target_user.id),
+                        Button(
+                            'I don\'t want notifs, nya!!',
+                            custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_PROPOSAL_DISABLE,
+                        ),
+                    ],
+                )
+    
+    if (not source_user.bot) and target_user.bot:
+        await client.interaction_followup_message_create(
+            event,
+            embed = build_notification_embed_request_accepted(
+                relationship_type, investment, target_user, event.guild_id
+            ),
+            show_for_invoking_user_only = True,
         )
 
 
@@ -323,18 +343,31 @@ async def cancel(
         embed = build_success_embed_request_cancelled(relationship_type, investment, target_user, event.guild_id),
     )
     
+    # Send out notifications.
     if not target_user.bot:
-        target_user_settings = await get_one_user_settings(target_user.id)
-        if target_user_settings.notification_proposal:
-            await send_embed_to(
-                get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
-                target_user,
-                build_notification_embed_request_cancelled(relationship_type, investment, source_user, event.guild_id),
-                Button(
-                    'I don\'t want notifs, nya!!',
-                    custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_PROPOSAL_DISABLE,
+        if is_private_channel_of_two(event.channel, source_user, target_user):
+            await client.interaction_followup_message_create(
+                event,
+                content = target_user.mention,
+                embed = build_notification_embed_request_cancelled(
+                    relationship_type, investment, source_user, event.guild_id
                 ),
             )
+        
+        else:
+            target_user_settings = await get_one_user_settings(target_user.id)
+            if target_user_settings.notification_proposal:
+                await send_embed_to(
+                    get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
+                    target_user,
+                    build_notification_embed_request_cancelled(
+                        relationship_type, investment, source_user, event.guild_id
+                    ),
+                    Button(
+                        'I don\'t want notifs, nya!!',
+                        custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_PROPOSAL_DISABLE,
+                    ),
+                )
 
 
 @PROPOSAL_COMMANDS.interactions
@@ -360,10 +393,6 @@ async def reject(
     
     source_user_name : `str`
         The source user's name.
-    
-    Returns
-    -------
-    embed : ``Embed``
     """
     await client.interaction_application_command_acknowledge(event, False, show_for_invoking_user_only = True)
     
@@ -372,6 +401,72 @@ async def reject(
     relationship_request, source_user = await get_relationship_request_and_user_like_at(
         target_user.id, False, source_user_name, event.guild_id
     )
+    await _handle_relationship_proposal_reject(client, event, source_user, target_user, relationship_request)
+
+
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_PROPOSAL_REJECT_PATTERN)
+async def handle_component_interaction_reject(client, event, source_user_id, target_user_id):
+    """
+    Rejects an incoming request. Handles a component interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    
+    event : ``InteractionEvent``
+        The received interaction event.
+    
+    source_user_id : `str`
+        The source user's identifier as hexadecimal integer.
+    
+    target_user_id : `str`
+        The source user's identifier as hexadecimal integer.
+    """
+    await client.interaction_component_acknowledge(event)
+    
+    source_user_id = int(source_user_id, base = 16)
+    target_user_id = int(target_user_id, base = 16)
+    target_user = event.user
+    
+    if target_user.id != target_user_id:
+        return
+    
+    try:
+        relationship_request = await get_relationship_request(source_user_id, target_user.id)
+    except InteractionAbortedError as exception:
+        exception.response.abort = False
+        raise
+    
+    source_user = await get_user(source_user_id)
+    await _handle_relationship_proposal_reject(client, event, source_user, target_user, relationship_request)
+
+
+async def _handle_relationship_proposal_reject(client, event, source_user, target_user, relationship_request):
+    """
+    Handles an interaction proposal rejection.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    
+    event : ``InteractionEvent``
+        The received interaction event.
+    
+    source_user : ``ClientUserBase``
+        The source user.
+    
+    target_user_id : ``ClientUserBase``
+        The target user.
+    
+    relationship_request : ``RelationshipRequest``
+        The relationship request to reject.
+    """
     source_user_balance = await get_user_balance(source_user.id)
     
     relationship_type = relationship_request.relationship_type
@@ -382,21 +477,30 @@ async def reject(
     source_user_balance.set('balance', source_user_balance.balance + investment)
     await source_user_balance.save()
     
-    
     await client.interaction_response_message_edit(
         event,
+        components = None,
         embed = build_success_embed_request_rejected(relationship_type, investment, source_user, event.guild_id),
     )
     
-    
+    # Send out the notifications.
     if not source_user.bot:
-        source_user_settings = await get_one_user_settings(source_user.id)
+        if is_private_channel_of_two(event.channel, source_user, target_user):
+            await client.interaction_followup_message_create(
+                event,
+                content = source_user.mention,
+                embed = build_notification_embed_request_rejected(
+                    relationship_type, investment, target_user, event.guild_id
+                ),
+            )
         
-        await send_embed_to(
-            get_preferred_client_for_user(source_user, source_user_settings.preferred_client_id, client),
-            source_user,
-            build_notification_embed_request_rejected(relationship_type, investment, target_user, event.guild_id),
-        )
+        else:
+            source_user_settings = await get_one_user_settings(source_user.id)
+            await send_embed_to(
+                get_preferred_client_for_user(source_user, source_user_settings.preferred_client_id, client),
+                source_user,
+                build_notification_embed_request_rejected(relationship_type, investment, target_user, event.guild_id),
+            )
 
 
 @PROPOSAL_COMMANDS.interactions
@@ -435,6 +539,72 @@ async def accept(
         target_user.id, False, source_user_name, event.guild_id
     )
     
+    await _handle_relationship_proposal_accept(client, event, source_user, target_user, relationship_request)
+
+
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_PROPOSAL_ACCEPT_PATTERN)
+async def handle_component_interaction_accept(client, event, source_user_id, target_user_id):
+    """
+    Accepts an incoming request. Handles a component interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    
+    event : ``InteractionEvent``
+        The received interaction event.
+    
+    source_user_id : `str`
+        The source user's identifier as hexadecimal integer.
+    
+    target_user_id : `str`
+        The source user's identifier as hexadecimal integer.
+    """
+    await client.interaction_component_acknowledge(event)
+    
+    source_user_id = int(source_user_id, base = 16)
+    target_user_id = int(target_user_id, base = 16)
+    target_user = event.user
+    
+    if target_user.id != target_user_id:
+        return
+    
+    try:
+        relationship_request = await get_relationship_request(source_user_id, target_user.id)
+    except InteractionAbortedError as exception:
+        exception.response.abort = False
+        raise
+    
+    source_user = await get_user(source_user_id)
+    await _handle_relationship_proposal_accept(client, event, source_user, target_user, relationship_request)
+
+
+async def _handle_relationship_proposal_accept(client, event, source_user, target_user, relationship_request):
+    """
+    Handles an interaction proposal acceptage.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    
+    event : ``InteractionEvent``
+        The received interaction event.
+    
+    source_user : ``ClientUserBase``
+        The source user.
+    
+    target_user_id : ``ClientUserBase``
+        The target user.
+    
+    relationship_request : ``RelationshipRequest``
+        The relationship request to accept.
+    """
     relationship_type = relationship_request.relationship_type
     investment = relationship_request.investment
     
@@ -446,28 +616,33 @@ async def accept(
     
     target_relationship_request_listing = await get_relationship_request_listing(target_user.id, True)
     
-    check_already_related(source_relationship_listing, False, source_user, target_user, event.guild_id)
-    
-    # Slot check
-    check_insufficient_relationship_slots(
-        (0 if target_relationship_listing is None else len(target_relationship_listing)),
-        (0 if target_relationship_request_listing is None else len(target_relationship_request_listing)),
-        (target_user_balance.relationship_slots),
-    )
-    
-    # Edge cases
-    await async_check_source_already_has_waifu(
-        relationship_type, source_relationship_listing, False, source_user, target_user, event.guild_id
-    )
-    await async_check_target_already_has_waifu(
-        relationship_type, target_relationship_listing, False, source_user, target_user, event.guild_id
-    )
-    await async_check_target_already_has_mama(
-        relationship_type, target_relationship_listing, False, source_user, target_user, event.guild_id
-    )
-    await async_check_target_already_has_mistress(
-        relationship_type, target_relationship_listing, False, source_user, target_user, event.guild_id
-    )
+    try:
+        check_already_related(source_relationship_listing, False, source_user, target_user, event.guild_id)
+        
+        # Slot check
+        check_insufficient_relationship_slots(
+            (0 if target_relationship_listing is None else len(target_relationship_listing)),
+            (0 if target_relationship_request_listing is None else len(target_relationship_request_listing)),
+            (target_user_balance.relationship_slots),
+        )
+        
+        # Edge cases
+        await async_check_source_already_has_waifu(
+            relationship_type, source_relationship_listing, False, source_user, target_user, event.guild_id
+        )
+        await async_check_target_already_has_waifu(
+            relationship_type, target_relationship_listing, False, source_user, target_user, event.guild_id
+        )
+        await async_check_target_already_has_mama(
+            relationship_type, target_relationship_listing, False, source_user, target_user, event.guild_id
+        )
+        await async_check_target_already_has_mistress(
+            relationship_type, target_relationship_listing, False, source_user, target_user, event.guild_id
+        )
+    except InteractionAbortedError as exception:
+        if event.type is InteractionType.message_component:
+            exception.response.abort = False
+        raise
     
     # Everything is good
     relationship_request.delete()
@@ -482,14 +657,25 @@ async def accept(
     
     await client.interaction_response_message_edit(
         event,
+        components = None,
         embed = build_success_embed_request_accepted(relationship_type, investment, source_user, event.guild_id),
     )
     
     if not source_user.bot:
-        source_user_settings = await get_one_user_settings(source_user.id)
+        if is_private_channel_of_two(event.channel, source_user, target_user):
+            await client.interaction_followup_message_create(
+                event,
+                content = source_user.mention,
+                embed = build_notification_embed_request_accepted(
+                    relationship_type, investment, target_user, event.guild_id
+                ),
+            )
         
-        await send_embed_to(
-            get_preferred_client_for_user(source_user, source_user_settings.preferred_client_id, client),
-            source_user,
-            build_notification_embed_request_accepted(relationship_type, investment, target_user, event.guild_id),
-        )
+        else:
+            source_user_settings = await get_one_user_settings(source_user.id)
+            
+            await send_embed_to(
+                get_preferred_client_for_user(source_user, source_user_settings.preferred_client_id, client),
+                source_user,
+                build_notification_embed_request_accepted(relationship_type, investment, target_user, event.guild_id),
+            )

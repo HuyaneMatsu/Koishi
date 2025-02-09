@@ -14,6 +14,9 @@ def _iter_options():
     user_name_0 = 'Marisa'
     user_name_1 = 'Youmu'
     
+    user_nick_0 = 'Spark'
+    user_nick_1 = 'Sword'
+    
     guild_id_0 = 202408190032
     guild_id_1 = 202408190033
     
@@ -24,10 +27,14 @@ def _iter_options():
     role_color_1 = Color(456)
     
     user_0 = User.precreate(user_id_0, avatar = Icon(ICON_TYPE_STATIC, 2), name = user_name_0)
-    user_0.guild_profiles[guild_id_0] = GuildProfile(avatar = Icon(ICON_TYPE_ANIMATED, 3), role_ids = [role_id_0])
+    user_0.guild_profiles[guild_id_0] = GuildProfile(
+        avatar = Icon(ICON_TYPE_ANIMATED, 3), nick = user_nick_0, role_ids = [role_id_0]
+    )
     
     user_1 = User.precreate(user_id_1, banner = Icon(ICON_TYPE_STATIC, 2), name = user_name_1)
-    user_1.guild_profiles[guild_id_1] = GuildProfile(banner = Icon(ICON_TYPE_ANIMATED, 3), role_ids = [role_id_1])
+    user_1.guild_profiles[guild_id_1] = GuildProfile(
+        banner = Icon(ICON_TYPE_ANIMATED, 3), nick = user_nick_1, role_ids = [role_id_1]
+    )
     
     role_0 = Role.precreate(role_id_0, color = role_color_0)
     role_1 = Role.precreate(role_id_1, color = role_color_1)
@@ -56,7 +63,7 @@ def _iter_options():
         ICON_SOURCE_LOCAL,
         [role_0, role_1],
         Embed(
-            f'{user_name_0}\'s local avatar',
+            f'{user_nick_0}\'s local avatar',
             color = role_color_0,
             url = f'https://cdn.discordapp.com/guilds/{guild_id_0}/users/{user_id_0}/avatars/a_00000000000000000000000000000003.gif?size=4096'
         ).add_image(
@@ -78,7 +85,6 @@ def _iter_options():
             f'https://cdn.discordapp.com/avatars/{user_id_0}/00000000000000000000000000000002.png?size=4096',
         ),
     )
-
     
     yield (
         user_1,
@@ -117,7 +123,7 @@ def _iter_options():
         ICON_SOURCE_LOCAL,
         [role_0, role_1],
         Embed(
-            f'{user_name_1}\'s local banner',
+            f'{user_nick_1}\'s local banner',
             color = role_color_1,
             url = f'https://cdn.discordapp.com/guilds/{guild_id_1}/users/{user_id_1}/banners/a_00000000000000000000000000000003.gif?size=4096',
         ).add_image(

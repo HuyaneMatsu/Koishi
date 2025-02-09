@@ -9,6 +9,7 @@ from ...bot_utils.user_getter import get_user, get_users_unordered
 from ...bot_utils.utils import send_embed_to
 from ...bots import FEATURE_CLIENTS
 
+from ..relationship_divorces_core import build_component_invoke_relationship_divorces_decrement_purchase_self
 from ..relationships_core import (
     RELATIONSHIP_TYPE_NONE, RELATIONSHIP_TYPE_RELATIONSHIPS, autocomplete_relationship_unset_outgoing_user_name,
     autocomplete_relationship_user_name, get_relationship_and_user_like_at, get_relationship_listing,
@@ -322,14 +323,14 @@ async def divorce_confirm(
     # The users receive some to their relationship value.
     # Lets use the values from above.
     # Here the water level is lower than before: 1000 ((3000 + 1000) >> 2).
-    # Everything above water level is added to the user's value.
-    #    user 0 receives: 2000
+    # Everything above water level // 3 is added to the user's value.
+    #    user 0 receives: 666
     #    user 1 receives: 0
     # Note: can be negative
     
     value_water_level = investment_water_level >> 1
-    source_value = source_investment - value_water_level
-    target_value = target_investment - value_water_level
+    source_value = (source_investment - value_water_level) // 3
+    target_value = (target_investment - value_water_level) // 3
     
     user_balances = await get_user_balances((source_user_id, target_user_id))
     source_user_balance = user_balances[source_user_id]
@@ -355,7 +356,7 @@ async def divorce_confirm(
     await client.interaction_response_message_edit(
         event,
         embed = build_success_embed_divorce_confirmed(target_user, source_receives, target_receives, event.guild_id),
-        components = None,
+        components = build_component_invoke_relationship_divorces_decrement_purchase_self(),
     )
     
     # Notify

@@ -9,10 +9,10 @@ from ...bots import FEATURE_CLIENTS
 from ..user_balance import get_user_balance
 
 from .checks import check_bet_too_low, check_has_enough_balance, check_in_game
-from .constants import GAME_21_JOIN_ROW_DISABLED, GAME_21_ROW_DISABLED, PLAYER_STATE_FINISH
+from .constants import GAME_21_JOIN_ROW_DISABLED, GAME_21_ROW_DISABLED
 from .helpers import (
-    decide_winners, get_balance_distribution, get_refund_distribution, is_draw, try_deliver_end_notification,
-    try_edit_response
+    create_player_bot, decide_winners, get_balance_distribution, get_refund_distribution, is_draw,
+    try_deliver_end_notification, try_edit_response
 )
 from .join_runner import Game21JoinRunner
 from .player import Player
@@ -106,9 +106,7 @@ async def game_21_single_player(client, event, amount):
     player_user = Player(event.user, event)
     player_user.hand.auto_pull_starting_cards(session.deck)
     
-    player_bot = Player(client, None)
-    player_bot.hand.auto_finish(session.deck)
-    player_bot.state = PLAYER_STATE_FINISH
+    player_bot = create_player_bot(client, session.deck, 0.25)
     
     waiter = Future(EVENT_LOOP)
     

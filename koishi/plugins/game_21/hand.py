@@ -149,3 +149,15 @@ class Hand(RichAttributeErrorBaseType):
             
         self.total = total
         self.ace = ace
+    
+    
+    def restore(self, deck):
+        """
+        Restores the hand's cards to the deck.
+        """
+        self.ace = 0
+        self.total = 0
+        
+        cards = self.cards
+        while cards:
+            deck.push_card(cards.pop())

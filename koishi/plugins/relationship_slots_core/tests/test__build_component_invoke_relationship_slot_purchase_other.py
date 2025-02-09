@@ -25,8 +25,6 @@ def test__build_component_invoke_relationship_slot_purchase_other(user_id):
     
     Parameters
     ----------
-    Parameters
-    ----------
     user_id : `int`
         The user's identifier.
     

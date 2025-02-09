@@ -14,6 +14,7 @@ from ..embed_builders import build_relationship_listing_embed
 
 
 def _iter_options():
+    user_id_N0 = 202501040039
     user_id_00 = 202501040040
     user_id_01 = 202501040041
     user_id_02 = 202501040042
@@ -33,6 +34,9 @@ def _iter_options():
     guild_id = 202501040100
     
     now = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    
+    user_N0 = User.precreate(user_id_N0, name = 'Mayumi', avatar = Icon(ICON_TYPE_STATIC, 98))
+    user_N0.guild_profiles[guild_id] = GuildProfile(nick = 'Haniwa', avatar = Icon(ICON_TYPE_STATIC, 99))
     
     user_00 = User.precreate(user_id_00, name = 'Satori', avatar = Icon(ICON_TYPE_STATIC, 100))
     user_00.guild_profiles[guild_id] = GuildProfile(nick = 'Sato', avatar = Icon(ICON_TYPE_STATIC, 101))
@@ -454,6 +458,9 @@ def _iter_options():
     
     relationship_00 = Relationship(user_id_01, user_id_00, RELATIONSHIP_TYPE_SISTER_BIG, 2000, now)
     relationship_01 = Relationship(user_id_02, user_id_01, RELATIONSHIP_TYPE_WAIFU, 1200, now)
+    relationship_02 = Relationship(user_id_03, user_id_01, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
+    relationship_03 = Relationship(user_id_01, user_id_04, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
+    relationship_04 = Relationship(user_id_01, user_id_N0, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
     
     yield (
         user_00,
@@ -470,13 +477,22 @@ def _iter_options():
                 (
                     # waifu is your big sister (in law)
                     relationship_01,
+                    # big sister is your big sister (half)
+                    relationship_02,
+                    # lil sister is your relative (lil) sister (half)
+                    relationship_03,
+                    # lil sister is your relative (big) sister (half)
+                    relationship_04,
                 ),
             ),
         ],
         None,
         [
+            user_N0,
             user_01,
             user_02,
+            user_03,
+            user_04,
         ],
         0,
         Embed(
@@ -511,8 +527,13 @@ def _iter_options():
             'Big sisters',
             (
                 'Koishi\n'
+                'Mayumi (half)\n'
+                'Utsuho (half)\n'
                 'Rin (in law)'
             ),
+        ).add_field(
+            'Lil sister',
+            'Alice (half)'
         ),
     )
     
@@ -523,6 +544,9 @@ def _iter_options():
     
     relationship_00 = Relationship(user_id_00, user_id_01, RELATIONSHIP_TYPE_SISTER_BIG, 2000, now)
     relationship_01 = Relationship(user_id_02, user_id_01, RELATIONSHIP_TYPE_WAIFU, 1200, now)
+    relationship_02 = Relationship(user_id_01, user_id_03, RELATIONSHIP_TYPE_SISTER_BIG, 2000, now)
+    relationship_03 = Relationship(user_id_04, user_id_01, RELATIONSHIP_TYPE_SISTER_BIG, 2000, now)
+    relationship_04 = Relationship(user_id_N0, user_id_01, RELATIONSHIP_TYPE_SISTER_BIG, 2000, now)
     
     yield (
         user_00,
@@ -539,13 +563,23 @@ def _iter_options():
                 (
                     # waifu is your lil sister (in law)
                     relationship_01,
+                    # lil sister is your lil sister (half)
+                    relationship_02,
+                    # big sister is your relative (lil) sister (half)
+                    relationship_03,
+                    # big sister is your relative (big) sister (half)
+                    relationship_04,
+                    
                 ),
             ),
         ],
         None,
         [
+            user_N0,
             user_01,
             user_02,
+            user_03,
+            user_04,
         ],
         0,
         Embed(
@@ -577,9 +611,14 @@ def _iter_options():
             ),
             inline = True,
         ).add_field(
+            'Big sister',
+            'Mayumi (half)',
+        ).add_field(
             'Lil sisters',
             (
                 'Koishi\n'
+                'Alice (half)\n'
+                'Utsuho (half)\n'
                 'Rin (in law)'
             ),
         ),
@@ -592,6 +631,8 @@ def _iter_options():
     
     relationship_00 = Relationship(user_id_01, user_id_00, RELATIONSHIP_TYPE_MAMA, 2000, now)
     relationship_01 = Relationship(user_id_02, user_id_01, RELATIONSHIP_TYPE_WAIFU, 1200, now)
+    relationship_02 = Relationship(user_id_01, user_id_03, RELATIONSHIP_TYPE_MAMA, 1200, now)
+    relationship_03 = Relationship(user_id_01, user_id_N0, RELATIONSHIP_TYPE_MAMA, 1200, now)
     
     yield (
         user_00,
@@ -608,13 +649,19 @@ def _iter_options():
                 (
                     # waifu is your mama (in law)
                     relationship_01,
+                    # daughter is your relative (lil) sister (half)
+                    relationship_02,
+                    # daughter is your relative (big) sister (half)
+                    relationship_03,
                 ),
             ),
         ],
         None,
         [
+            user_N0,
             user_01,
             user_02,
+            user_03,
         ],
         0,
         Embed(
@@ -646,6 +693,12 @@ def _iter_options():
             ),
             inline = True,
         ).add_field(
+            'Big sister',
+            'Mayumi (half)',
+        ).add_field(
+            'Lil sister',
+            'Utsuho (half)',
+        ).add_field(
             'Mamas',
             (
                 'Koishi\n'
@@ -661,6 +714,8 @@ def _iter_options():
     
     relationship_00 = Relationship(user_id_00, user_id_01, RELATIONSHIP_TYPE_MAMA, 2000, now)
     relationship_01 = Relationship(user_id_02, user_id_01, RELATIONSHIP_TYPE_WAIFU, 1200, now)
+    relationship_02 = Relationship(user_id_03, user_id_01, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
+    relationship_03 = Relationship(user_id_01, user_id_04, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
     
     yield (
         user_00,
@@ -677,6 +732,10 @@ def _iter_options():
                 (
                     # waifu is your daughter (in law)
                     relationship_01,
+                    # big sister is your daughter (half)
+                    relationship_02,
+                    # lil sister is your daughter (half)
+                    relationship_03,
                 ),
             ),
         ],
@@ -684,6 +743,8 @@ def _iter_options():
         [
             user_01,
             user_02,
+            user_03,
+            user_04,
         ],
         0,
         Embed(
@@ -718,6 +779,8 @@ def _iter_options():
             'Daughters',
             (
                 'Koishi\n'
+                'Alice (half)\n'
+                'Utsuho (half)\n'
                 'Rin (in law)'
             ),
         ),
@@ -740,7 +803,7 @@ def _iter_options():
             relationship_00,
         ],
         [
-            # mistress''s
+            # mistress's
             (
                 relationship_00,
                 (

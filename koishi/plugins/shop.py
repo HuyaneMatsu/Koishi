@@ -2,8 +2,8 @@ __all__ = ()
 
 from datetime import datetime as DateTime, timezone as TimeZone
 
-from hata import ClientUserBase, DiscordException, ERROR_CODES, Embed, Emoji, Sticker
-from hata.ext.slash import Button, InteractionResponse, P, Row, abort
+from hata import ClientUserBase, DiscordException, ERROR_CODES, Embed
+from hata.ext.slash import P, abort
 
 from ..bot_utils.constants import (
     EMOJI__HEART_CURRENCY, ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__NSFW_ACCESS
@@ -11,6 +11,9 @@ from ..bot_utils.constants import (
 from ..bot_utils.daily import calculate_daily_new
 from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
+from .relationship_divorces_interactions import (
+    relationship_divorces_decrement_invoke_other_question, relationship_divorces_decrement_invoke_self_question
+)
 from .relationship_slots_interactions import (
     relationship_slot_increment_invoke_other_question, relationship_slot_increment_invoke_self_question
 )
@@ -18,14 +21,6 @@ from .relationships_core import (
     autocomplete_relationship_extended_user_name, get_extender_relationship_and_relationship_and_user_like_at
 )
 from .user_balance import get_user_balance
-
-
-EMOJI_YES = Emoji.precreate(990558169963049041)
-EMOJI_NO = Emoji.precreate(994540311990784041)
-
-NSFW_ACCESS_COST = 8000
-ELEVATED_COST = 12000
-HEART_BOOST_COST = 100000
 
 
 SHOP = FEATURE_CLIENTS.interactions(
@@ -66,124 +61,39 @@ async def buy_relationship_slot(
     return await coroutine
 
 
-def get_divorce_reduction_cost(user_id, divorce_count):
-    return user_id % (10000 * divorce_count)
-
-
-CUSTOM_ID_REDUCE_DIVORCE_PAPER_YES = 'shop.reduce_divorce.1'
-CUSTOM_ID_REDUCE_DIVORCE_PAPER_NO = 'shop.reduce_divorce.0'
-
-BUTTON_REDUCE_DIVORCE_YES = Button(
-    'Take My money!',
-    EMOJI_YES,
-    custom_id = CUSTOM_ID_REDUCE_DIVORCE_PAPER_YES,
-)
-
-BUTTON_REDUCE_DIVORCE_NO = Button(
-    'Never mind...',
-    EMOJI_NO,
-    custom_id = CUSTOM_ID_REDUCE_DIVORCE_PAPER_NO,
-)
-
-COMPONENTS_REDUCE_DIVORCE = Row(
-    BUTTON_REDUCE_DIVORCE_YES,
-    BUTTON_REDUCE_DIVORCE_NO,
-)
-
-STICKER_REDUCE_DIVORCE_SUCCESS = Sticker.precreate(947189211671429220)
-
-
 @SHOP.interactions
-async def burn_divorce_papers(client, event):
-    user_id = event.user.id
-    
-    user_balance = await get_user_balance(user_id)
-    relationship_divorces = user_balance.relationship_divorces
-    
-    if relationship_divorces <= 0:
-        return Embed(None, 'You do not have divorces')
-    
-    available_balance = user_balance.balance - user_balance.allocated
-    cost = get_divorce_reduction_cost(user_id, relationship_divorces)
-    
-    if available_balance < cost:
-        return Embed(
-            None,
-            (
-                f'To locate and burn one of your divorce papers is worth {cost} {EMOJI__HEART_CURRENCY}\n'
-                f'\n'
-                f'You have only {available_balance} {EMOJI__HEART_CURRENCY} available.'
-            ),
+async def burn_divorce_papers(
+    event,
+    target_related_name : P(
+        str,
+        'Hire ninjas to burn and locate divorce papers for someone related',
+        'related',
+        autocomplete = autocomplete_relationship_extended_user_name,
+    ) = None,
+    target_user : (
+        ClientUserBase,
+        'Hire ninjas to burn an locate divorce papers for someone else?',
+        'someone-else',
+    ) = None,
+):
+    if (target_user is None) and (target_related_name is not None):
+        extender_relationship, relationship, target_user = (
+            await get_extender_relationship_and_relationship_and_user_like_at(
+                event.user_id, target_related_name, event.guild_id
+            )
         )
     
-    return InteractionResponse(
-        embed = Embed(
-            None,
-            f'To locate and burn one of your divorce papers is worth {cost} {EMOJI__HEART_CURRENCY}',
-        ),
-        components = COMPONENTS_REDUCE_DIVORCE,
-    )
+    if target_user is None:
+        coroutine = relationship_divorces_decrement_invoke_self_question(event)
+    else:
+        coroutine = relationship_divorces_decrement_invoke_other_question(event, target_user)
+    
+    return await coroutine
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_REDUCE_DIVORCE_PAPER_YES)
-async def reduce_divorce_yes(event):
-    user = event.user
-    if event.message.interaction.user_id != user.id:
-        return
-    
-    user_balance = await get_user_balance(user.id)
-    relationship_divorces = user_balance.relationship_divorces
-
-    while True:
-        if relationship_divorces <= 0:
-            text = (
-                'Task failed successfully\n'
-                '\n'
-                'Sufficient amount of divorces.'
-            )
-            thumbnail_image_url = None
-            break
-        
-        available_balance = user_balance.balance - user_balance.allocated
-        cost = get_divorce_reduction_cost(user.id, relationship_divorces)
-        
-        if available_balance < cost:
-            text = (
-                f'Heart amount changed - sufficient amount of hearts\n'
-                f'\n'
-                f'Required: {cost} {EMOJI__HEART_CURRENCY}\n'
-                f'Available {available_balance} {EMOJI__HEART_CURRENCY} .'
-            )
-            thumbnail_image_url = None
-            break
-        
-        user_balance.set('balance', user_balance.balance - cost)
-        user_balance.set('relationship_divorces', relationship_divorces - 1)
-        await user_balance.save()
-        
-        text = (
-            'Divorce papers located and burned successfully!\n'
-            '\n'
-            '*they will never find the bodies*'
-        )
-        thumbnail_image_url = STICKER_REDUCE_DIVORCE_SUCCESS.url
-        break
-    
-    embed = Embed(None, text)
-    
-    if (thumbnail_image_url is not None):
-        embed.add_thumbnail(thumbnail_image_url)
-    
-    return InteractionResponse(embed = embed, components = None)
-
-
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_REDUCE_DIVORCE_PAPER_NO)
-async def reduce_divorce_no(event):
-    user = event.user
-    if event.message.interaction.user_id != user.id:
-        return
-    
-    return InteractionResponse(embed = Embed(None, 'Divorce paper exploration cancelled'), components = None)
+NSFW_ACCESS_COST = 8000
+ELEVATED_COST = 12000
+HEART_BOOST_COST = 100000
 
 
 NSFW_ACCESS_IDENTIFIER = '0'

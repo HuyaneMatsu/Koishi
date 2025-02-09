@@ -121,7 +121,7 @@ async def test__create_webhook_message__stuffed():
         vampytest.assert_eq(webhook_id, input_webhook_id)
         vampytest.assert_eq(webhook_token, input_webhook_token)
         vampytest.assert_eq(expected_message_data, input_message_data)
-        vampytest.assert_eq({'thread_id': str(thread_id)}, input_query_parameters)
+        vampytest.assert_eq({'thread_id': str(thread_id), 'with_components': True}, input_query_parameters)
         return return_message_data
     
     api.webhook_message_create = mock_api_webhook_message_create

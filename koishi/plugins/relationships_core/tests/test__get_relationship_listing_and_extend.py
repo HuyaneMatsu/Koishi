@@ -149,11 +149,12 @@ def _iter_options():
                     relationship_0,
                     [
                         relationship_1,
+                        relationship_2,
+                        relationship_3,
                         # TBD,
                         # TBD,
                         # TBD,
-                        # TBD
-                        # TBD
+                        # TBD,
                         
                         # extras:
                         # do not add unset
@@ -211,11 +212,12 @@ def _iter_options():
                     relationship_0,
                     [
                         relationship_1,
+                        relationship_2,
+                        relationship_3,
                         # TBD,
                         # TBD,
                         # TBD,
-                        # TBD
-                        # TBD
+                        # TBD,
                         
                         # extras:
                         # do not add unset
@@ -276,8 +278,9 @@ def _iter_options():
                         # TBD,
                         # TBD,
                         # TBD,
-                        # TBD
-                        # TBD
+                        relationship_5,
+                        # TBD,
+                        # TBD,
                         
                         # extras:
                         # do not add unset
@@ -336,11 +339,12 @@ def _iter_options():
                     relationship_0,
                     [
                         relationship_1,
+                        relationship_2,
+                        relationship_3,
                         # TBD,
                         # TBD,
                         # TBD,
-                        # TBD
-                        # TBD
+                        # TBD,
                         
                         # extras:
                         # do not add unset
@@ -401,8 +405,9 @@ def _iter_options():
                         # TBD,
                         # TBD,
                         # TBD,
-                        # TBD
-                        # TBD
+                        # TBD,
+                        # TBD,
+                        # TBD,
                         
                         # extras:
                         # do not add unset

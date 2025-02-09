@@ -1,7 +1,33 @@
-### 2025+01-28
+### 2025-02-08
+
+- `/user avatar` & `/user banner` used the user's full name instead of the local display one.
+- `/to-do` now removes the components from under the message on deletion confirmation if the entry was deleted already.
+- Fix voting on koishi was not working since last update. (Messed up bot check in the web-server.) (fariz_12134)
+- In `/21` it turned out the bot player is too weak, so now has 25% to play with increased difficulty.
+- `/automation welcome style` now affects which client welcomes if there are multiple options. (opecuted)
+- `/automation farewell style` now affects which client farewells if there are multiple options.
+- Add new relationship sharing rules to share sisters. From previously 13 / 49 rules, now 21 / 49 are implemented.
+    More sharing rules are planned in the future. Note that it may look like as less than half is done currently,
+    but at the end many will be just marked as `N / A`.
+- Now `/proposal create`'s notification prompts the user to either accept or reject the relationship request.
+- Now `/relationship divorce` prompts the user to burn their divorce papers.
+- Fix `/shop buy-relationship-slot` when buying for someone related could set investment as `float` causing
+    `/relationship divorce` to fail.
+- `/shop burn-divorce-paers` now has a `related` and `someone-else` parameters allowing you to burn divorce papers
+    for your beloved. If the user is related it also "deepens" your relationship as well.
+- The following feature is added, but not working due to Discord not telling the bot who are in the channel:
+   If `/proposal create`, `/proposal cancel`, `/proposal reject` or `/proposal accept` is used in a private channel
+   of the source & target users, then the notification is delivered into that channel regardless of notification
+   settings. With the accept & reject components also added onto `/proposal create`'s notification this should make
+   creating relationships in private channels shrimple.
+- When using `/proposal create` against a bot, now it delivers teh accept notification into the same channel.
+- Decrease global relationship value increase on divorce to limit abuse.
+- Change how much burning a divorce paper costs. Fix amount added & random amount is lower.
+
+### 2025-01-28
 
 - Fix `/21 mode:single` allocated the user's balance before checking the bot's. (getj1nxed1)
-- Fix `/gift` (from last december update). (fariz_12134)
+- Fix `/gift` gifting the hearts back to the gifter. (from last december update). (fariz_12134)
 - Fix `/plugin` commands did not forward exception traces to the response. (For like 9 months, owner only)
 - Fix `/relationship info` did not check relationship targeting correctly at the case of extended relationships.
     (fariz_12134)
@@ -14,11 +40,11 @@
 - `/proposal create` and `/proposal accept` now prompts you to buy a new relationship if you have sufficient.
 - Fix `/automation welcome` style: flandre not working since like jan 25. (remiscarletworld)
     (Updated the emoji, but forgot its used in the code ofc)
-- `/shop buy-relationship-slot ` now has a `related` and `someone-else` parameters allowing you to buy relationships
-    for your beloved. if the user is related it also "deepens" your relationship as well.
+- `/shop buy-relationship-slot` now has a `related` and `someone-else` parameters allowing you to buy relationships
+    for your beloved. If the user is related it also "deepens" your relationship as well.
 - `/proposal create` now prompts to you to buy a new relationship when proposing to a bot with `n / n` relationships.
 
-### 2025+01-12
+### 2025-01-12
 
 - Fix `/gift` did not handle the case when `allocated > balance`.
 - Fix `/gift` did not handle the case when `balance < 0`.

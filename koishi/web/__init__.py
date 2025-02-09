@@ -55,7 +55,11 @@ BOT_NAMES = [
     ),
     (
         'mozilla/5.0 (linux; android 11; m2004j15sc) applewebkit/537.36 (khtml, like gecko) '
-        'chrome/103.0.5060.114 mobile safari/537.36',
+        'chrome/103.0.5060.114 mobile safari/537.36'
+    ),
+    (
+        'mozilla/5.0 (windows nt 10.0; win64; x64) applewebkit/537.36 (khtml, like gecko) '
+        'chrome/131.0.0.0 safari/537.36 edg/131.0.0.0'
     ),
     
     # From google:
@@ -121,6 +125,7 @@ BLOCKED_IPS = {
     
     # Tries to request env variable file
     '78.153.140.223',
+    '78.153.140.222',
 }
 
 

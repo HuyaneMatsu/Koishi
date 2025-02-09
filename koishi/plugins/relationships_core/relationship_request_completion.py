@@ -1,6 +1,6 @@
 __all__ = (
     'autocomplete_relationship_request_source_user_name', 'autocomplete_relationship_request_target_user_name',
-    'get_relationship_request_and_user_like_at'
+    'get_relationship_request', 'get_relationship_request_and_user_like_at'
 )
 
 from hata.ext.slash import abort
@@ -167,3 +167,31 @@ async def autocomplete_relationship_request_target_user_name(event, value):
     suggestions : `None | list<str>`
     """
     return await get_relationship_request_user_names_like_at(event.user_id, True, value, event.guild_id)
+
+
+async def get_relationship_request(source_user_id, target_user_id):
+    """
+    gets a relationship request for the given user identifier combination.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    source_user_id : `int`
+        Source user identifier to get relationships for.
+    
+    target_user_id : `int`
+        The target user's identifier.
+    
+    Raises
+    ------
+    InteractionAbortedError
+    """
+    relationship_proposal_listing = await get_relationship_request_listing(source_user_id, True)
+    
+    if relationship_proposal_listing is not None:
+        for relationship_proposal in relationship_proposal_listing:
+            if relationship_proposal.target_user_id == target_user_id:
+                return relationship_proposal
+    
+    abort('Could not match anyone.')

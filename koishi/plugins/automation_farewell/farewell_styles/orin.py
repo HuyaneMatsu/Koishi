@@ -1,5 +1,7 @@
 __all__ = ()
 
+import config
+
 from ..farewell_style import FarewellStyle
 from ..farewell_style_item import FarewellStyleItem
 
@@ -40,5 +42,6 @@ ITEMS = (
 
 FAREWELL_STYLE = FarewellStyle(
     NAME,
+    config.ORIN_ID,
     ITEMS,
 )

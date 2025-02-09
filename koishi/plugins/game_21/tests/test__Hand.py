@@ -321,3 +321,26 @@ def test__Hand__add_card(cards):
         hand.add_card(card)
     
     return hand.ace, hand.total
+
+
+def test__Hand__restore():
+    """
+    Tests whether ``Hand.restore`` works as intended.
+    
+    Case: Not finished.
+    """
+    hand_0 = Hand()
+    hand_1 = Hand()
+    deck = Deck()
+    
+    hand_0.pull_card(deck)
+    hand_0.pull_card(deck)
+    hand_1.pull_card(deck)
+    hand_1.pull_card(deck)
+    
+    hand_0.restore(deck)
+    vampytest.assert_eq(hand_0.ace, 0)
+    vampytest.assert_eq(len(hand_0.cards), 0)
+    vampytest.assert_eq(hand_0.total, 0)
+    
+    vampytest.assert_eq(deck.all_pulled, sorted(hand_1.cards))

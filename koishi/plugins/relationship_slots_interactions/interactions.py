@@ -2,6 +2,8 @@ __all__ = (
     'relationship_slot_increment_invoke_other_question', 'relationship_slot_increment_invoke_self_question',
 )
 
+from math import floor
+
 from hata.ext.slash import InteractionAbortedError, InteractionResponse
 
 from ...bot_utils.constants import WAIFU_SLOT_COSTS, WAIFU_SLOT_COST_DEFAULT
@@ -12,7 +14,7 @@ from ..relationship_slots_core import (
     CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CANCEL_OTHER_PATTERN, CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CANCEL_SELF,
     CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CONFIRM_OTHER_PATTERN, CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CONFIRM_SELF,
     CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_INVOKE_OTHER_PATTERN, CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_INVOKE_SELF,
-    build_component_question_relationship_purchase_other, build_component_question_relationship_purchase_self
+    build_component_question_relationship_slot_purchase_other, build_component_question_relationship_slot_purchase_self
 )
 from ..relationships_core import (
     get_relationship_listing_and_extend, select_extender_relationship_and_relationship_for_user_id
@@ -33,7 +35,7 @@ from .embed_builders import (
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_INVOKE_SELF)
 async def relationship_slot_increment_invoke_self(event):
     """
-    Inline caller for buying a relationship for yourself.
+    Inline caller for buying a relationship slot for yourself.
     
     This function is a coroutine generator.
     
@@ -56,7 +58,7 @@ async def relationship_slot_increment_invoke_self(event):
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_INVOKE_OTHER_PATTERN)
 async def relationship_slot_increment_invoke_other(event, target_user_id):
     """
-    Inline caller for buying a relationship for someone else.
+    Inline caller for buying a relationship slot for someone else.
     
     This function is a coroutine generator.
     
@@ -87,7 +89,7 @@ async def relationship_slot_increment_invoke_other(event, target_user_id):
 
 async def relationship_slot_increment_invoke_self_question(event):
     """
-    Questions whether the user really wanna buy increment their relationship slot count.
+    Questions whether the user really wanna increment their relationship slot count.
     
     This function is a coroutine.
     
@@ -115,13 +117,13 @@ async def relationship_slot_increment_invoke_self_question(event):
     
     return InteractionResponse(
         embed = build_question_embed_purchase_confirmation_self(required_balance, new_relationship_slot_count),
-        components = build_component_question_relationship_purchase_self(),
+        components = build_component_question_relationship_slot_purchase_self(),
     )
 
 
 async def relationship_slot_increment_invoke_other_question(event, target_user):
     """
-    Questions whether the user really wanna buy increment someone else's relationship slot count.
+    Questions whether the user really wanna increment someone else's relationship slot count.
     
     This function is a coroutine.
     
@@ -157,7 +159,7 @@ async def relationship_slot_increment_invoke_other_question(event, target_user):
         embed = build_question_embed_purchase_confirmation_other(
             required_balance, new_relationship_slot_count, target_user, event.guild_id,
         ),
-        components = build_component_question_relationship_purchase_other(target_user.id),
+        components = build_component_question_relationship_slot_purchase_other(target_user.id),
     )
 
 
@@ -194,7 +196,7 @@ async def relationship_slot_increment_cancel(event):
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CONFIRM_SELF)
 async def relationship_slot_increment_confirm_self(event):
     """
-    Confirms a relationship confirmation for yourself.
+    Confirms a relationship slot increment purchase for yourself.
     
     This function is a coroutine generator.
     
@@ -246,7 +248,7 @@ async def relationship_slot_increment_confirm_self(event):
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CONFIRM_OTHER_PATTERN)
 async def relationship_slot_increment_confirm_other(event, target_user_id):
     """
-    Confirms a relationship confirmation for someone else.
+    Confirms a relationship slot increment purchase for someone else.
     
     This function is a coroutine generator.
     
@@ -327,7 +329,7 @@ async def relationship_slot_increment_confirm_other(event, target_user_id):
     
     
     if (relationship is not None):
-        relationship_investment_increase = required_balance * 0.01
+        relationship_investment_increase = floor(required_balance * 0.01)
         if relationship.source_user_id == source_user_id:
             relationship.set('source_investment', relationship.source_investment + relationship_investment_increase)
         else:

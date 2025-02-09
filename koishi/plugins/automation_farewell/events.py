@@ -1,8 +1,10 @@
 __all__ = ()
 
-from hata import Embed, now_as_id
+from hata import CLIENTS, Embed, now_as_id
 
-from ...bot_utils.multi_client_utils import get_first_client_with_message_create_permissions_from
+from ...bot_utils.multi_client_utils import (
+    has_client_message_create_permissions, get_first_client_with_message_create_permissions_from
+)
 from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_farewell_fields
@@ -21,15 +23,27 @@ async def farewell_user(client, guild, user, farewell_style, farewell_channel):
     ----------
     client : ``Client``
         The client who received the event.
+    
     guild : ``Guild``
         The guild the farewell the user at.
+    
     user : ``ClientUserBase``
         The user to farewell.
+    
     farewell_style : ``FarewellStyle``
         The farewell style to use.
+    
     farewell_channel : ``Channel``
         The channel to farewell the user at.
     """
+    # select client if different
+    client_id = farewell_style.client_id
+    if client_id and client_id != client.id:
+        preferred_client = CLIENTS.get(client_id, None)
+        if (preferred_client is not None) and has_client_message_create_permissions(farewell_channel, client):
+            client = preferred_client
+    
+    # build content & embed
     seed = guild.id ^ user.id
     
     items = farewell_style.items

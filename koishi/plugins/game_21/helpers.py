@@ -1,8 +1,11 @@
 __all__ = ()
 
+from random import random
+
 from hata import DiscordException, ERROR_CODES
 
 from .constants import PLAYER_STATE_FINISH
+from .player import Player
 
 
 def should_render_exception(exception):
@@ -419,3 +422,49 @@ async def try_deliver_end_notification(
         return False
     
     return True
+
+
+def create_player_bot(client, deck, difficulty):
+    """
+    Creates a bot player with the given difficulty.
+    
+    Difficulty represents the chance [0.0 : 1.0] how likely should it be for the bot to cheat.
+    
+    Parameters
+    ----------
+    client : ``ClientUserBase``
+        The client to we create player for.
+    
+    deck : ``Deck``
+        Deck to pull from.
+    
+    difficulty : `float`
+        The likeliness to cheat.
+    
+    Returns
+    -------
+    player_bot : ``Player``
+    """
+    player_bot_0 = Player(client, None)
+    player_bot_0.hand.auto_finish(deck)
+    player_bot_0.state = PLAYER_STATE_FINISH
+    
+    if (difficulty <= 0.0) or (player_bot_0.hand.total == 21) or (random() > difficulty):
+        return player_bot_0
+    
+    player_bot_1 = Player(client, None)
+    player_bot_1.hand.auto_finish(deck)
+    player_bot_1.state = PLAYER_STATE_FINISH
+    
+    player_bot_0_total = player_bot_0.hand.total
+    player_bot_1_total = player_bot_1.hand.total
+    
+    if (
+        (player_bot_1_total == 21) or
+        (player_bot_1_total < 21) and (player_bot_0_total < 21) and (player_bot_0_total < player_bot_1_total)
+    ):
+        player_bot_0.hand.restore(deck)
+        return player_bot_1
+    
+    player_bot_1.hand.restore(deck)
+    return player_bot_0

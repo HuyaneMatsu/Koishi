@@ -98,7 +98,7 @@ async def to_do_edit_form_submit(
     try:
         to_do = TO_DOS[entry_id]
     except KeyError:
-        abort('The to-do was deleted meanwhile.')
+        return abort('The to-do was deleted meanwhile.')
     
     to_do.set('name', name)
     to_do.set('description', description)
@@ -112,6 +112,7 @@ async def to_do_edit_form_submit(
 
 @MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_TO_DO_DELETE_RP)
 async def to_do_del_approve(
+    client,
     event,
     entry_id,
     state,
@@ -121,6 +122,9 @@ async def to_do_del_approve(
     
     Parameters
     ----------
+    client : ``Client``
+        The client who received the interaction.
+    
     event : ``InteractionEvent``
         The received event.
     
@@ -143,6 +147,7 @@ async def to_do_del_approve(
     try:
         to_do = TO_DOS[entry_id]
     except KeyError:
+        await client.interaction_component_message_edit(event, components = None)
         return abort('The to-do was deleted meanwhile.')
     
     if state:

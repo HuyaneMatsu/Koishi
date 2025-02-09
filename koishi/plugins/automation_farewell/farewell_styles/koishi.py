@@ -1,5 +1,7 @@
 __all__ = ()
 
+import config
+
 from ..farewell_style_item import FarewellStyleItem
 from ..farewell_style import FarewellStyle
 
@@ -40,5 +42,6 @@ ITEMS = (
 
 FAREWELL_STYLE = FarewellStyle(
     NAME,
+    config.KOISHI_ID,
     ITEMS,
 )

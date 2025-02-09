@@ -78,7 +78,7 @@ async def threads(client, message):
             
             for thread in list_threads():
                 if type(thread) is EventThread:
-                    event_loop_executor_count += thread.used_executor_count + thread.free_executor_count
+                    event_loop_executor_count += thread.get_used_executor_count() + thread.get_free_executor_count()
         
         description.append(
             f'--------------------\n'

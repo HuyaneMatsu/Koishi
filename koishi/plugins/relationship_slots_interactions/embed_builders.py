@@ -62,12 +62,11 @@ def build_failure_embed_insufficient_balance_self(required_balance, new_relation
     return Embed(
         'Insufficient balance',
         (
-            f'You do not have enough available heart to buy more relationship slots.\n'
+            f'You do not have enough available hearts to buy more relationship slots.\n'
             f'You need {required_balance} {EMOJI__HEART_CURRENCY} to buy the {new_relationship_slot_count}'
             f'{NUMBER_TH_ENDINGS.get(new_relationship_slot_count, NUMBER_TH_ENDING_DEFAULT)} slot.'
         ),
     )
-
 
 
 def build_failure_embed_insufficient_balance_other(required_balance, new_relationship_slot_count, user, guild_id):
@@ -95,7 +94,7 @@ def build_failure_embed_insufficient_balance_other(required_balance, new_relatio
     return Embed(
         'Insufficient balance',
         (
-            f'You do not have enough available heart to buy more relationship slots for {user.name_at(guild_id)}.\n'
+            f'You do not have enough available hearts to buy more relationship slots for {user.name_at(guild_id)}.\n'
             f'You need {required_balance} {EMOJI__HEART_CURRENCY} to buy the {new_relationship_slot_count}'
             f'{NUMBER_TH_ENDINGS.get(new_relationship_slot_count, NUMBER_TH_ENDING_DEFAULT)} slot.'
         ),

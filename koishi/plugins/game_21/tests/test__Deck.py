@@ -30,11 +30,6 @@ def test__Deck__pull_card():
     """
     deck = Deck()
     
-    mocked = vampytest.mock_globals(
-        Deck.pull_card,
-        random = lambda : 0.0,
-    )
-    
     # pull 1 card
     card_0 = deck.pull_card()
     
@@ -62,3 +57,39 @@ def test__Deck__repr():
     
     output = repr(deck)
     vampytest.assert_instance(output, str)
+
+
+def test__Deck__push_card__pulled():
+    """
+    Tests whether ``Deck.push_card`` works as intended.
+    
+    Case: card pulled.
+    """
+    deck = Deck()
+    
+    card_0 = deck.pull_card()
+    card_1 = deck.pull_card()
+    
+    output = deck.push_card(card_0)
+    vampytest.assert_instance(output, bool)
+    vampytest.assert_eq(output, True)
+    
+    vampytest.assert_eq(deck.all_pulled, [card_1])
+
+
+def test__Deck__push_card__invalid():
+    """
+    Tests whether ``Deck.push_card`` works as intended.
+    
+    Case: invalid card.
+    """
+    deck = Deck()
+    
+    card_0 = -2
+    card_1 = deck.pull_card()
+    
+    output = deck.push_card(card_0)
+    vampytest.assert_instance(output, bool)
+    vampytest.assert_eq(output, False)
+    
+    vampytest.assert_eq(deck.all_pulled, [card_1])

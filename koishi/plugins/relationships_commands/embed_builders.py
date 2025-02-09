@@ -10,8 +10,8 @@ from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 from ..relationships_core import (
     RELATIONSHIP_TYPE_DAUGHTER, RELATIONSHIP_TYPE_MAID, RELATIONSHIP_TYPE_MAMA, RELATIONSHIP_TYPE_MISTRESS,
     RELATIONSHIP_TYPE_NONE, RELATIONSHIP_TYPE_RELATIONSHIPS, RELATIONSHIP_TYPE_SISTER_BIG, RELATIONSHIP_TYPE_SISTER_LIL,
-    RELATIONSHIP_TYPE_UNSET, RELATIONSHIP_TYPE_WAIFU, calculate_relationship_value, get_affinity_multiplier,
-    get_relationship_type_name
+    RELATIONSHIP_TYPE_SISTER_RELATIVE, RELATIONSHIP_TYPE_UNSET, RELATIONSHIP_TYPE_WAIFU, calculate_relationship_value,
+    determine_relative_sister, get_affinity_multiplier, get_relationship_type_name
 )
 
 from .constants import ACTION_NAME_UNKNOWN
@@ -1018,6 +1018,10 @@ def build_relationship_listing_embed(
                     ]
                 except KeyError:
                     relationship_connection_type = RELATIONSHIP_CONNECTION_TYPE_NONE
+                
+                else:
+                    if relationship_type == RELATIONSHIP_TYPE_SISTER_RELATIVE:
+                        relationship_type = determine_relative_sister(target_user.id, user_id)
                 
                 try:
                     group = grouped_relationships[relationship_type]

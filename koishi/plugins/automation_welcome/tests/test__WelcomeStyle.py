@@ -15,6 +15,7 @@ def _assert_fields_set(welcome_style):
         The welcome style to check.
     """
     vampytest.assert_instance(welcome_style, WelcomeStyle)
+    vampytest.assert_instance(welcome_style.client_id, int)
     vampytest.assert_instance(welcome_style.images, tuple)
     vampytest.assert_instance(welcome_style.image_creator, str)
     vampytest.assert_instance(welcome_style.message_content_builders, tuple)
@@ -27,6 +28,7 @@ def test__WelcomeStyle__new():
     Tests whether ``WelcomeStyle.__new__`` works as intended.
     """
     name = 'koishi'
+    client_id = 202502080005
     message_content_builders = (
         (lambda target: 'content'),
     )
@@ -35,11 +37,16 @@ def test__WelcomeStyle__new():
     )
     image_creator = 'remilia'
     reply_styles = (
-        WelcomeStyleReply('Stare at them', BUILTIN_EMOJIS['heart'], lambda source, target: f'{source} stares at {target}'),
+        WelcomeStyleReply(
+            'Stare at them',
+            BUILTIN_EMOJIS['heart'],
+            (lambda source, target: f'{source} stares at {target}'),
+        ),
     )
     
     welcome_style = WelcomeStyle(
         name,
+        client_id,
         message_content_builders,
         images,
         image_creator,
@@ -47,6 +54,7 @@ def test__WelcomeStyle__new():
     )
     _assert_fields_set(welcome_style)
     
+    vampytest.assert_eq(welcome_style.client_id, client_id)
     vampytest.assert_eq(welcome_style.images, images)
     vampytest.assert_eq(welcome_style.image_creator, image_creator)
     vampytest.assert_eq(welcome_style.message_content_builders, message_content_builders)
@@ -59,6 +67,7 @@ def test__WelcomeStyle__repr():
     Tests whether ``WelcomeStyle.__repr__`` works as intended.
     """
     name = 'koishi'
+    client_id = 202502080006
     message_content_builders = (
         (lambda target: 'content'),
     )
@@ -67,11 +76,16 @@ def test__WelcomeStyle__repr():
     )
     image_creator = 'remilia'
     reply_styles = (
-        WelcomeStyleReply('Stare at them', BUILTIN_EMOJIS['heart'], lambda source, target: f'{source} stares at {target}'),
+        WelcomeStyleReply(
+            'Stare at them',
+            BUILTIN_EMOJIS['heart'],
+            (lambda source, target: f'{source} stares at {target}'),
+        ),
     )
     
     welcome_style = WelcomeStyle(
         name,
+        client_id,
         message_content_builders,
         images,
         image_creator,
