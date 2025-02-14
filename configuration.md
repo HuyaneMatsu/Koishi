@@ -29,7 +29,7 @@ SATORI_ID = 0                    # bot id (int). can be 0.
 SATORI_SECRET = None             # client secret (str) for oauth2, can be None.
 SATORI_PREFIX = '&'              # default prefix (str)
 
-MARISA_TOKEN = ''                # bot token (str) for the tetsing bot.
+MARISA_TOKEN = ''                # bot token (str) for the testing bot.
 MARISA_ID = 0                    # bot id (int), can be 0.
 MARISA_SECRET = None             # client secret (str) for oauth2, can be None.
 MARISA_PREFIX  = '$'             # default prefix (str)
