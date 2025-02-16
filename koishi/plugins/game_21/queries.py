@@ -31,7 +31,7 @@ async def modify_user_hearts(user_id, amount, multiplier, unallocate):
         user_balance.set('balance', user_balance.balance + floor(amount * multiplier))
     
     if unallocate:
-        user_balance.set('allocated', user_balance.allocated - amount)
+        user_balance.set('allocated', max(user_balance.allocated - amount, 0))
     
     await user_balance.save()
 

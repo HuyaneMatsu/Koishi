@@ -1,7 +1,8 @@
-__all__ = ('get_files', 'get_message_and_files', 'get_webhook',)
+__all__ = ('get_files', 'get_message', 'get_webhook',)
 
-from hata import ERROR_CODES, DiscordException, KOKORO
-from scarletio import Task, TaskGroup
+from hata import ERROR_CODES, DiscordException
+
+from .attachment_stream import AttachmentStream
 
 
 async def get_attachment(client, attachment):
@@ -28,41 +29,6 @@ async def get_attachment(client, attachment):
     return attachment, file
 
 
-async def get_attachments(client, attachments):
-    """
-    Requests the given attachments.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The respective client.
-    attachments : `tuple` of ``Attachment``
-        The attachments to request.
-    
-    Returns
-    -------
-    attachments : `list` of `tuple` (`str`, `bytes`, (`None`, `str`))
-    """
-    task_group = TaskGroup(KOKORO, (Task(KOKORO, get_attachment(client, attachment)) for attachment in attachments))
-    failed_task = await task_group.wait_exception()
-    if (failed_task is not None):
-        # Cancel all and propagate the first failing one
-        task_group.cancel_all()
-        failed_task.get_result()
-        return
-    
-    attachment_map = {}
-    for task in task_group.done:
-        # This line might raise
-        attachment, file = task.get_result()
-        
-        attachment_map[attachment] = file
-    
-    return [(attachment.name, attachment_map[attachment], attachment.description) for attachment in attachments]
-
-
 async def get_webhook(client, channel_id):
     """
     Gets the optimal webhook to use for the given channel by it's identifier.
@@ -85,29 +51,31 @@ async def get_webhook(client, channel_id):
     return executor_webhook
 
 
-async def get_files(client, message):
+def get_files(client, message):
     """
     Requests the files of the given messages.
-    
-    This function is a coroutine.
     
     Parameters
     ----------
     client : ``Client``
         The respective client.
+    
     message : ``Message``
         The message to the files of.
     
     Returns
     -------
-    files : `None`, `list` of `tuple` (`str`, `bytes`, (`None`, `str`))
+    files : `None | list<(str, AttachmentStream, None | str)>
         Files of the message.
     """
     attachments = message.attachments
     if (attachments is None):
         files = None
     else:
-        files = await get_attachments(client, attachments)
+        files = [
+            (attachment.name, AttachmentStream(attachment.url, client.http), attachment.description)
+            for attachment in attachments
+        ]
     
     return files
 
@@ -148,39 +116,3 @@ async def get_message(client, channel, message_id):
             raise
     
     return message
-
-
-async def get_message_and_files(client, channel, message_id):
-    """
-    Gets the given message by their identifier and requests it's attachments too.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The respective client.
-    channel : ``Channel``
-        The channel where the message is.
-    message_id : `int`
-        The message's id to request.
-    
-    Returns
-    -------
-    message : `None`, ``Message``
-    files : `None`, `list` of `tuple` (`str`, `bytes`, (`None`, `str`))
-    
-    Raises
-    ------
-    ConnectionError
-        No internet connection
-    DiscordException
-        Client removed.
-    """
-    message = await get_message(client, channel, message_id)
-    if message is None:
-        files = None
-    else:
-        files = await get_files(client, message)
-    
-    return message, files

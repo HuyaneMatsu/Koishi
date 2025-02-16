@@ -8,6 +8,7 @@ from hata.ext.slash import InteractionAbortedError, InteractionResponse
 
 from ...bot_utils.constants import WAIFU_SLOT_COSTS, WAIFU_SLOT_COST_DEFAULT
 from ...bot_utils.user_getter import get_user
+from ...bot_utils.utils import send_embed_to
 from ...bots import FEATURE_CLIENTS
 
 from ..relationship_slots_core import (
@@ -16,19 +17,18 @@ from ..relationship_slots_core import (
     CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_INVOKE_OTHER_PATTERN, CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_INVOKE_SELF,
     build_component_question_relationship_slot_purchase_other, build_component_question_relationship_slot_purchase_self
 )
-from ..relationships_core import (
-    get_relationship_listing_and_extend, select_extender_relationship_and_relationship_for_user_id
-)
+from ..relationships_core import get_relationship_to_deepen
 from ..user_balance import get_user_balance, get_user_balances
+from ..user_settings import get_one_user_settings, get_preferred_client_for_user
 
 from .checks import (
     check_max_relationship_slots_other, check_max_relationship_slots_self, check_sufficient_balance_other,
     check_sufficient_balance_self
 )
 from .embed_builders import (
-    build_question_embed_purchase_confirmation_other, build_question_embed_purchase_confirmation_self,
-    build_success_embed_purchase_cancelled, build_success_embed_purchase_completed_other,
-    build_success_embed_purchase_completed_self
+    build_notification_embed_other, build_question_embed_purchase_confirmation_other,
+    build_question_embed_purchase_confirmation_self, build_success_embed_purchase_cancelled,
+    build_success_embed_purchase_completed_other, build_success_embed_purchase_completed_self
 )
 
 
@@ -246,7 +246,7 @@ async def relationship_slot_increment_confirm_self(event):
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CONFIRM_OTHER_PATTERN)
-async def relationship_slot_increment_confirm_other(event, target_user_id):
+async def relationship_slot_increment_confirm_other(client, event, target_user_id):
     """
     Confirms a relationship slot increment purchase for someone else.
     
@@ -254,6 +254,9 @@ async def relationship_slot_increment_confirm_other(event, target_user_id):
     
     Parameters
     ----------
+    client : ``Client``
+        The client who received the event.
+    
     event : ``InteractionEvent``
         The received interaction event.
     
@@ -278,25 +281,7 @@ async def relationship_slot_increment_confirm_other(event, target_user_id):
     target_user = await get_user(target_user_id)
     
     # Get relationship to increment its value if any.
-    while True:
-        relationship_listing, relationship_listing_extend = await get_relationship_listing_and_extend(source_user_id)
-        if relationship_listing is None:
-            relationship = None
-            break
-        
-        extender_relationship_and_relationship = select_extender_relationship_and_relationship_for_user_id(
-            relationship_listing, relationship_listing_extend, target_user_id
-        )
-        if extender_relationship_and_relationship is None:
-            relationship = None
-            break
-        
-        relationship = extender_relationship_and_relationship[0]
-        if relationship is not None:
-            break
-        
-        relationship = extender_relationship_and_relationship[1]
-        break
+    relationship = await get_relationship_to_deepen(source_user_id, target_user_id)
     
     user_balances = await get_user_balances((source_user_id, target_user_id))
     source_user_balance = user_balances[source_user_id]
@@ -342,3 +327,12 @@ async def relationship_slot_increment_confirm_other(event, target_user_id):
         ),
         components = None,
     )
+    
+    if not target_user.bot:
+        target_user_settings = await get_one_user_settings(target_user.id)
+        if target_user_settings.notification_gift:
+            await send_embed_to(
+                get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
+                target_user,
+                build_notification_embed_other(new_relationship_slot_count, event.user, event.guild_id),
+            )

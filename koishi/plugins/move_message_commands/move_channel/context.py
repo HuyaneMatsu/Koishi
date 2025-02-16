@@ -201,7 +201,7 @@ class ChannelMoverContext:
         else:
             thread_id = 0
         
-        files = await get_files(self.client, message)
+        files = get_files(self.client, message)
         try:
             await create_webhook_message(self.client, self.webhook, message, thread_id, files)
         except:

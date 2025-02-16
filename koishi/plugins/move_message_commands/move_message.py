@@ -7,7 +7,7 @@ from scarletio import Task, TaskGroup
 from ...bots import MAIN_CLIENT
 
 from ..move_message_core.create import create_webhook_message
-from ..move_message_core.get import get_message_and_files, get_webhook
+from ..move_message_core.get import get_files, get_message, get_webhook
 
 from .checks import check_move_permissions
 from .constants import ALLOWED_GUILDS
@@ -35,13 +35,13 @@ async def move_message(
         channel_id = channel.id
         thread_id = 0
     
-    get_message_and_files_task = Task(KOKORO, get_message_and_files(client, event.channel, message_id))
+    get_message_task = Task(KOKORO, get_message(client, channel, message_id))
     get_webhook_task = Task(KOKORO, get_webhook(client, channel_id))
     
     task_group = TaskGroup(
         KOKORO,
         [
-            get_message_and_files_task,
+            get_message_task,
             get_webhook_task,
             Task(KOKORO, client.interaction_application_command_acknowledge(event, show_for_invoking_user_only = True))
         ],
@@ -58,8 +58,8 @@ async def move_message(
     for task in task_group.done:
         result = task.get_result()
         
-        if task is get_message_and_files_task:
-            message, files = result
+        if task is get_message_task:
+            message = result
             continue
         
         if task is get_webhook_task:
@@ -68,6 +68,8 @@ async def move_message(
     
     if message is None:
         return abort('Unknown message.')
+    
+    files = get_files(client, message)
     
     try:
         await create_webhook_message(client, webhook, message, thread_id, files)

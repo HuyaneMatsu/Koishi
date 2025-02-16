@@ -28,4 +28,3 @@ def _get_user_name(message):
         name = name[: NAME_LENGTH_MAX - len(' ...')] + ' ...'
     
     return f'{name}{DATE_CONNECTOR}{message.created_at:{DATETIME_FORMAT_CODE}}'
-

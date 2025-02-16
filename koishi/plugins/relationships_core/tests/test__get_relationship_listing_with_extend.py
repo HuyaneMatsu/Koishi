@@ -4,7 +4,7 @@ import vampytest
 
 from ..constants import RELATIONSHIP_CACHE_LISTING
 from ..relationship import Relationship
-from ..relationship_queries import get_relationship_listing_and_extend
+from ..relationship_queries import get_relationship_listing_with_extend
 from ..relationship_types import (
     RELATIONSHIP_TYPE_MAMA, RELATIONSHIP_TYPE_MISTRESS, RELATIONSHIP_TYPE_SISTER_BIG, RELATIONSHIP_TYPE_UNSET,
     RELATIONSHIP_TYPE_WAIFU
@@ -34,10 +34,7 @@ def _iter_options():
             ),
         ),
         user_id_00,
-        (
-            None,
-            None,
-        )
+        None,
     )
     
     # Sharing through waifu
@@ -78,28 +75,23 @@ def _iter_options():
             )
         ),
         user_id_00,
-        (
-            [
-                relationship_0
-            ],
-            [
-                (
-                    relationship_0,
-                    [
-                        relationship_1,
-                        relationship_2,
-                        relationship_3,
-                        relationship_4,
-                        # do not add mistress
-                        relationship_6,
-                        
-                        # extras:
-                        # do not add unset
-                        # do not add waifu
-                    ],
-                )
-            ],
-        )
+        [
+            (
+                relationship_0,
+                [
+                    relationship_1,
+                    relationship_2,
+                    relationship_3,
+                    relationship_4,
+                    # do not add mistress
+                    relationship_6,
+                    
+                    # extras:
+                    # do not add unset
+                    # do not add waifu
+                ],
+            )
+        ],
     )
     
     # Sharing through big sister
@@ -140,28 +132,23 @@ def _iter_options():
             )
         ),
         user_id_00,
-        (
-            [
-                relationship_0
-            ],
-            [
-                (
-                    relationship_0,
-                    [
-                        relationship_1,
-                        relationship_2,
-                        relationship_3,
-                        # TBD,
-                        # TBD,
-                        # TBD,
-                        # TBD,
-                        
-                        # extras:
-                        # do not add unset
-                    ],
-                )
-            ],
-        )
+        [
+            (
+                relationship_0,
+                [
+                    relationship_1,
+                    relationship_2,
+                    relationship_3,
+                    # TBD,
+                    relationship_5,
+                    # TBD,
+                    # TBD,
+                    
+                    # extras:
+                    # do not add unset
+                ],
+            )
+        ],
     )
     
     
@@ -203,28 +190,23 @@ def _iter_options():
             )
         ),
         user_id_00,
-        (
-            [
-                relationship_0
-            ],
-            [
-                (
-                    relationship_0,
-                    [
-                        relationship_1,
-                        relationship_2,
-                        relationship_3,
-                        # TBD,
-                        # TBD,
-                        # TBD,
-                        # TBD,
-                        
-                        # extras:
-                        # do not add unset
-                    ],
-                )
-            ],
-        )
+        [
+            (
+                relationship_0,
+                [
+                    relationship_1,
+                    relationship_2,
+                    relationship_3,
+                    # TBD,
+                    relationship_5,
+                    # TBD,
+                    # TBD,
+                    
+                    # extras:
+                    # do not add unset
+                ],
+            )
+        ],
     )
     
     
@@ -266,30 +248,25 @@ def _iter_options():
             )
         ),
         user_id_00,
-        (
-            [
-                relationship_0
-            ],
-            [
-                (
-                    relationship_0,
-                    [
-                        relationship_1,
-                        # TBD,
-                        # TBD,
-                        # TBD,
-                        relationship_5,
-                        # TBD,
-                        # TBD,
-                        
-                        # extras:
-                        # do not add unset
-                    ],
-                )
-            ],
-        )
+        [
+            (
+                relationship_0,
+                [
+                    relationship_1,
+                    relationship_2,
+                    relationship_3,
+                    # TBD,
+                    relationship_5,
+                    # TBD,
+                    # TBD,
+                    
+                    # extras:
+                    # do not add unset
+                ],
+            )
+        ],
     )
-
+    
     
     
     # Sharing through daughter
@@ -330,28 +307,23 @@ def _iter_options():
             )
         ),
         user_id_00,
-        (
-            [
-                relationship_0
-            ],
-            [
-                (
-                    relationship_0,
-                    [
-                        relationship_1,
-                        relationship_2,
-                        relationship_3,
-                        # TBD,
-                        # TBD,
-                        # TBD,
-                        # TBD,
-                        
-                        # extras:
-                        # do not add unset
-                    ],
-                )
-            ],
-        )
+        [
+            (
+                relationship_0,
+                [
+                    relationship_1,
+                    relationship_2,
+                    relationship_3,
+                    # TBD,
+                    # TBD,
+                    # TBD,
+                    # TBD,
+                    
+                    # extras:
+                    # do not add unset
+                ],
+            )
+        ],
     )
     
     
@@ -393,28 +365,23 @@ def _iter_options():
             )
         ),
         user_id_00,
-        (
-            [
-                relationship_0
-            ],
-            [
-                (
-                    relationship_0,
-                    [
-                        relationship_1,
-                        # TBD,
-                        # TBD,
-                        # TBD,
-                        # TBD,
-                        # TBD,
-                        # TBD,
-                        
-                        # extras:
-                        # do not add unset
-                    ],
-                )
-            ],
-        )
+        [
+            (
+                relationship_0,
+                [
+                    relationship_1,
+                    # TBD,
+                    # TBD,
+                    # TBD,
+                    # TBD,
+                    # TBD,
+                    relationship_7,
+                    
+                    # extras:
+                    # do not add unset
+                ],
+            )
+        ],
     )
 
     
@@ -443,13 +410,13 @@ def _iter_options():
             # All is N / A or TBD
         ),
         user_id_00,
-        (
-            [
-                relationship_0
-            ],
-            # all is N / A or TBD
-            None,
-        ),
+        [
+            (
+                relationship_0,
+                # all is N / A or TBD
+                None,
+            )
+        ],
     )
 
     
@@ -467,19 +434,19 @@ def _iter_options():
             ),
         ),
         user_id_00,
-        (
-            [
-                relationship_0
-            ],
-            None,
-        ),
+        [
+            (
+                relationship_0,
+                None,
+            )
+        ],
     )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-async def test__get_relationship_listing_and_extend__in_cache(cache, user_id):
+async def test__get_relationship_listing_with_extend__in_cache(cache, user_id):
     """
-    Tests whether ``get_relationship_listing_and_extend`` works as intended.
+    Tests whether ``get_relationship_listing_with_extend`` works as intended.
     
     Case: in cache.
     
@@ -495,14 +462,14 @@ async def test__get_relationship_listing_and_extend__in_cache(cache, user_id):
     
     Returns
     -------
-    output : `(None | list<Relationship>, None | list<(Relationship, list<Relationship>)>)`
+    output : `None | list<(Relationship, None | list<Relationship>)>)`
     """
     async def mock_query_relationship_listing(input_user_id, input_outgoing):
         raise RuntimeError
     
     
     mocked = vampytest.mock_globals(
-        get_relationship_listing_and_extend,
+        get_relationship_listing_with_extend,
         query_relationship_listing = mock_query_relationship_listing,
     )
     
@@ -515,10 +482,5 @@ async def test__get_relationship_listing_and_extend__in_cache(cache, user_id):
     finally:
         RELATIONSHIP_CACHE_LISTING.clear()
         
-    vampytest.assert_instance(output, tuple)
-    vampytest.assert_eq(len(output), 2)
-    relationship_listing, relationship_listing_extend = output
-    vampytest.assert_instance(relationship_listing, list, nullable = True)
-    vampytest.assert_instance(relationship_listing_extend, list, nullable = True)
-    
+    vampytest.assert_instance(output, list, nullable = True)
     return output

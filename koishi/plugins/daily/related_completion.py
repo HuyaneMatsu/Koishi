@@ -8,7 +8,7 @@ from hata import elapsed_time
 
 from ...bot_utils.user_getter import get_users_unordered
 
-from ..relationships_core import get_relationship_listing_and_extend, iter_relationship_and_extend_user_ids_to_request
+from ..relationships_core import get_relationship_listing_with_extend, iter_relationship_and_extend_user_ids_to_request
 from ..user_balance import get_user_balances
 
 
@@ -59,12 +59,12 @@ async def get_related_users_with_name_and_next_daily(user_id, guild_id, value):
     if (value is not None):
         value = remove_comment(value)
     
-    relationship_listing, relationship_listing_extend = await get_relationship_listing_and_extend(user_id)
-    if relationship_listing is None:
+    relationship_listing_with_extend = await get_relationship_listing_with_extend(user_id)
+    if relationship_listing_with_extend is None:
         return {}
     
     users = await get_users_unordered(
-        iter_relationship_and_extend_user_ids_to_request(user_id, relationship_listing, relationship_listing_extend)
+        iter_relationship_and_extend_user_ids_to_request(user_id, relationship_listing_with_extend)
     )
     
     if (value is not None):

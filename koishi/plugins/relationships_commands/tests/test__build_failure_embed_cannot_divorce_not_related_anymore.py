@@ -14,7 +14,7 @@ def _iter_options():
         target_user,
         0,
         Embed(
-            'Divorcing cannot be confirmed',
+            'Breaking up cannot be confirmed',
             'You are not related to Satori anymore.'
         )
     )
@@ -23,7 +23,7 @@ def _iter_options():
         target_user,
         guild_id,
         Embed(
-            'Divorcing cannot be confirmed',
+            'Breaking up cannot be confirmed',
             'You are not related to Sato anymore.'
         )
     )

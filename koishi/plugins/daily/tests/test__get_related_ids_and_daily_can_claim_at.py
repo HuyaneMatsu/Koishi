@@ -30,13 +30,13 @@ async def test__get_related_users_with_name_and_next_daily():
     relationship_0 = Relationship(user_id, related_id_0, RELATIONSHIP_TYPE_SISTER_LIL, 2000, now)
     relationship_1 = Relationship(user_id, related_id_1, RELATIONSHIP_TYPE_SISTER_LIL, 2000, now)
     
-    async def mock_get_relationship_listing_and_extend(input_user_id):
+    async def mock_get_relationship_listing_with_extend(input_user_id):
         nonlocal user_id
         nonlocal relationship_0
         nonlocal relationship_1
         
         vampytest.assert_eq(user_id, input_user_id)
-        return [relationship_0, relationship_1], None
+        return [(relationship_0, None), (relationship_1, None)]
     
     async def mock_get_user_balances(input_user_ids):
         nonlocal related_id_1
@@ -67,7 +67,7 @@ async def test__get_related_users_with_name_and_next_daily():
     
     mocked = vampytest.mock_globals(
         get_related_users_with_name_and_next_daily,
-        get_relationship_listing_and_extend = mock_get_relationship_listing_and_extend,
+        get_relationship_listing_with_extend = mock_get_relationship_listing_with_extend,
         get_user_balances = mock_get_user_balances,
         get_users_unordered = mock_get_users_unordered,
     )

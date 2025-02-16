@@ -68,11 +68,11 @@ async def game_21(
         check_has_enough_balance(amount, target_user_balance.balance - target_user_balance.allocated, True)
     
     
-    source_user_balance.set('allocated', source_user_balance.allocated + amount)
+    source_user_balance.set('allocated', max(source_user_balance.allocated + amount, 0))
     await source_user_balance.save()
     
     if single_player_mode:
-        target_user_balance.set('allocated', target_user_balance.allocated + amount)
+        target_user_balance.set('allocated', max(target_user_balance.allocated + amount, 0))
         await target_user_balance.save()
     
     

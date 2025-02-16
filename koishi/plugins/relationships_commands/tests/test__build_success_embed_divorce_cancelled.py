@@ -14,8 +14,8 @@ def _iter_options():
         target_user,
         0,
         Embed(
-            'Divorcing cancelled',
-            'You cancelled divorcing Satori.',
+            'Break up cancelled',
+            'You cancelled breaking up with Satori.',
         )
     )
     
@@ -23,8 +23,8 @@ def _iter_options():
         target_user,
         guild_id,
         Embed(
-            'Divorcing cancelled',
-            'You cancelled divorcing Sato.',
+            'Break up cancelled',
+            'You cancelled breaking up with Sato.',
         )
     )
 

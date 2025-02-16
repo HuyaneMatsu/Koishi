@@ -17,9 +17,9 @@ def _iter_options():
         0,
         0,
         Embed(
-            'You have been divorced',
+            'You have been broke up with',
             (
-                'Satori divorced you.'
+                'Satori broke up with you.'
             ),
         )
     )
@@ -29,9 +29,9 @@ def _iter_options():
         0,
         guild_id,
         Embed(
-            'You have been divorced',
+            'You have been broke up with',
             (
-                'Sato divorced you.'
+                'Sato broke up with you.'
             ),
         )
     )
@@ -41,9 +41,9 @@ def _iter_options():
         1000,
         0,
         Embed(
-            'You have been divorced',
+            'You have been broke up with',
             (
-                f'Satori divorced you.\n'
+                f'Satori broke up with you.\n'
                 f'\n'
                 f'You received 1000 {EMOJI__HEART_CURRENCY} after investing much into the relationship.'
             ),

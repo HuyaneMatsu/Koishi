@@ -14,8 +14,8 @@ def _iter_options():
         target_user,
         0,
         Embed(
-            'Divorcing',
-            f'Are you sure to divorce Satori?',
+            'Break up',
+            f'Are you sure to break up with Satori?',
         )
     )
     
@@ -23,8 +23,8 @@ def _iter_options():
         target_user,
         guild_id,
         Embed(
-            'Divorcing',
-            f'Are you sure to divorce Sato?',
+            'Break up',
+            f'Are you sure to break up with Sato?',
         )
     )
 

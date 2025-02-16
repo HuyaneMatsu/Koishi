@@ -1,3 +1,26 @@
+### 2025-02-16
+
+- Add spam protection for `top-gg` voting to fix a top.gg webhook + nginx bug.
+    (Seems like many people did not like to get 4 rewards at once.)
+- The default notification delivering client for `top-gg` votes should be `Koishi`. (ongmylinh9)
+- `/shop sell-daily` removed.
+- Add more safety code to make sure users dont go negative. Especially for getting `/gift` to send negative amount.
+    (.theclosedeyesoflove.)
+- `/automation reaction-copy`, `/move-channel`, `/move-message`, `/move-messages` commands now uses streaming for 
+  attachments.
+- `/accessibility` now available when user installed.
+- `/rules` updated (support guild only). Now it includes a "bot access select" that will assign a role to you to give
+    access to the selected bot & prefer it.
+- `/shop roles` now has a `related` and `someone-else` parameters allowing you to purchase If the user is related it
+    also "deepens" your relationship as well.
+- Buying a relation shop for someone else using `/shop buy-relation-slot` or by any other means now delivers a
+    notification.
+- Burning divorce papers of someone else using `/shop burn-divorce-papers` or by any other means now delivers a
+    notification.
+- Add 6 new relationship extend rules.
+- `/relationship divorce` has been rebranded to `relationship break-up` for better clarity.
+    `divorce` at other places is not changed yet. (aspecialguest)
+
 ### 2025-02-08
 
 - `/user avatar` & `/user banner` used the user's full name instead of the local display one.
@@ -13,14 +36,14 @@
 - Now `/relationship divorce` prompts the user to burn their divorce papers.
 - Fix `/shop buy-relationship-slot` when buying for someone related could set investment as `float` causing
     `/relationship divorce` to fail.
-- `/shop burn-divorce-paers` now has a `related` and `someone-else` parameters allowing you to burn divorce papers
+- `/shop burn-divorce-papers` now has a `related` and `someone-else` parameters allowing you to burn divorce papers
     for your beloved. If the user is related it also "deepens" your relationship as well.
 - The following feature is added, but not working due to Discord not telling the bot who are in the channel:
    If `/proposal create`, `/proposal cancel`, `/proposal reject` or `/proposal accept` is used in a private channel
    of the source & target users, then the notification is delivered into that channel regardless of notification
    settings. With the accept & reject components also added onto `/proposal create`'s notification this should make
    creating relationships in private channels shrimple.
-- When using `/proposal create` against a bot, now it delivers teh accept notification into the same channel.
+- When using `/proposal create` against a bot, now it delivers the accept notification into the same channel.
 - Decrease global relationship value increase on divorce to limit abuse.
 - Change how much burning a divorce paper costs. Fix amount added & random amount is lower.
 

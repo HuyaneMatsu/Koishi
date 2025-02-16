@@ -1,6 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime, timezone as TimeZone
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 
 from hata import Embed
 from hata.ext.slash import Button
@@ -9,11 +9,14 @@ from ...bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY
 from ...bot_utils.daily import calculate_daily_new, calculate_vote_for
 from ...bot_utils.user_getter import get_user
 from ...bot_utils.utils import send_embed_to
+from ...bots import MAIN_CLIENT
 
 from ..user_balance import get_user_balance
 from ..user_settings import (
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_VOTE_DISABLE, get_one_user_settings, get_preferred_client_for_user
 )
+
+DELTA_BETWEEN_VOTES_MIN = TimeDelta(minutes = 1)
 
 
 async def handle_top_gg_vote(external_event):
@@ -30,8 +33,11 @@ async def handle_top_gg_vote(external_event):
     user = await get_user(external_event.user_id)
     
     user_balance = await get_user_balance(external_event.user_id)
-    
     now = DateTime.now(TimeZone.utc)
+    
+    if now - user_balance.top_gg_voted_at < DELTA_BETWEEN_VOTES_MIN:
+        return
+    
     streak_new, daily_can_claim_at = calculate_daily_new(user_balance.streak, user_balance.daily_can_claim_at, now)
     received = calculate_vote_for(user, streak_new)
     streak_new += 1
@@ -48,7 +54,7 @@ async def handle_top_gg_vote(external_event):
     target_user_settings = await get_one_user_settings(external_event.user_id)
     if target_user_settings.notification_vote:
         await send_embed_to(
-            get_preferred_client_for_user(user, target_user_settings.preferred_client_id, None),
+            get_preferred_client_for_user(user, target_user_settings.preferred_client_id, MAIN_CLIENT),
             user.id,
             Embed(
                 f'You voted for me, Its so embarrassing. *blushes*',

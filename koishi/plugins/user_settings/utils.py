@@ -3,6 +3,7 @@ __all__ = (
     'handle_user_settings_set_preferred_client', 'handle_user_settings_set_preferred_image_source',
     'get_preferred_client_for_user', 'get_preferred_client_in_channel',
     'get_preferred_image_source_weight_map', 'is_preferred_image_source_weight_map_valuable',
+    'set_user_settings_option',
 )
 
 from hata import CLIENTS, Permission

@@ -1,9 +1,7 @@
 __all__ = ()
 
-from re import compile as re_compile
-
 from hata import ClientUserBase
-from hata.ext.slash import Button, P, Row, abort
+from hata.ext.slash import P, abort
 
 from ...bot_utils.user_getter import get_user, get_users_unordered
 from ...bot_utils.utils import send_embed_to
@@ -11,10 +9,11 @@ from ...bots import FEATURE_CLIENTS
 
 from ..relationship_divorces_core import build_component_invoke_relationship_divorces_decrement_purchase_self
 from ..relationships_core import (
+    CUSTOM_ID_RELATIONSHIP_DIVORCE_CANCEL_PATTERN, CUSTOM_ID_RELATIONSHIP_DIVORCE_CONFIRM_PATTERN,
     RELATIONSHIP_TYPE_NONE, RELATIONSHIP_TYPE_RELATIONSHIPS, autocomplete_relationship_unset_outgoing_user_name,
-    autocomplete_relationship_user_name, get_relationship_and_user_like_at, get_relationship_listing,
-    get_relationship_listing_and_extend, get_relationship_request_listing,
-    get_relationship_unset_outgoing_and_user_like_at, get_root, get_square
+    autocomplete_relationship_user_name, build_component_relationship_divorce_question,
+    get_relationship_and_user_like_at, get_relationship_listing, get_relationship_listing_with_extend,
+    get_relationship_request_listing, get_relationship_unset_outgoing_and_user_like_at, get_root, get_square
 )
 from ..user_balance import get_user_balance, get_user_balances
 from ..user_settings import get_one_user_settings, get_preferred_client_for_user
@@ -23,13 +22,14 @@ from .checks import (
     async_check_source_already_has_waifu, async_check_target_already_has_mama, async_check_target_already_has_mistress,
     async_check_target_already_has_waifu
 )
-from .constants import EMOJI_NO, EMOJI_YES, RELATIONSHIP_REQUEST_CREATABLE
+from .constants import RELATIONSHIP_REQUEST_CREATABLE
 from .embed_builders import (
     build_failure_embed_cannot_divorce_not_related_anymore, build_failure_embed_you_cannot_cancel_this_divorce,
     build_failure_embed_you_cannot_confirm_this_divorce, build_notification_embed_divorced,
     build_question_embed_divorce, build_relationship_listing_embed, build_success_embed_divorce_cancelled,
     build_success_embed_divorce_confirmed, build_success_embed_relationship_updated
 )
+
 
 RELATIONSHIPS_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
@@ -70,22 +70,21 @@ async def info(
     
     # Query
     target_user_balance = await get_user_balance(target_user.id)
-    target_relationship_listing, target_relationship_listing_extend = await get_relationship_listing_and_extend(
-        target_user.id
-    )
+    target_relationship_listing_with_extend = await get_relationship_listing_with_extend(target_user.id)
     target_relationship_request_listing = await get_relationship_request_listing(target_user.id, True)
     
     # Request users
     user_ids = set()
     
-    if (target_relationship_listing is not None):
-        for relationship in target_relationship_listing:
+    if (target_relationship_listing_with_extend is not None):
+        for relationship, relationship_listing in target_relationship_listing_with_extend:
             user_ids.add(relationship.source_user_id)
             user_ids.add(relationship.target_user_id)
         
-        if (target_relationship_listing_extend is not None):
-            for extender_relationship, relationship_listing in target_relationship_listing_extend:
-                for relationship in relationship_listing:
+            if (relationship_listing is None):
+                continue
+            
+            for relationship in relationship_listing:
                     user_ids.add(relationship.source_user_id)
                     user_ids.add(relationship.target_user_id)
     
@@ -103,8 +102,7 @@ async def info(
             source_user,
             target_user,
             target_user_balance,
-            target_relationship_listing,
-            target_relationship_listing_extend,
+            target_relationship_listing_with_extend,
             target_relationship_request_listing,
             users,
             event.guild_id,
@@ -113,15 +111,15 @@ async def info(
 
 
 @RELATIONSHIPS_COMMANDS.interactions
-async def divorce(
+async def break_up(
     client,
     event,
     target_user_name: P(
-        str, 'The user to get', 'user', autocomplete = autocomplete_relationship_user_name
+        str, 'The user to break up with.', 'user', autocomplete = autocomplete_relationship_user_name
     ),
 ):
     """
-    Divorces the given user.
+    Breaks up with the given user.
     
     This function is a coroutine.
     
@@ -145,24 +143,11 @@ async def divorce(
     await client.interaction_response_message_edit(
         event,
         embed = build_question_embed_divorce(target_user, event.guild_id),
-        components = Row(
-            Button(
-                'Yes',
-                EMOJI_YES,
-                custom_id = f'relationships.divorce.confirm.{source_user.id:x}-{target_user.id:x}'
-            ),
-            Button(
-                'No',
-                EMOJI_NO,
-                custom_id = f'relationships.divorce.cancel.{source_user.id:x}-{target_user.id:x}'
-            ),
-        ),
+        components = build_component_relationship_divorce_question(source_user.id, target_user.id),
     )
 
 
-@FEATURE_CLIENTS.interactions(
-    custom_id = re_compile('relationships\\.divorce\\.cancel\\.([0-9a-f]+)\\-([0-9a-f]+)')
-)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_DIVORCE_CANCEL_PATTERN)
 async def divorce_cancel(
     client,
     event,
@@ -221,9 +206,7 @@ async def divorce_cancel(
     )
 
 
-@FEATURE_CLIENTS.interactions(
-    custom_id = re_compile('relationships\\.divorce\\.confirm\\.([0-9a-f]+)\\-([0-9a-f]+)')
-)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_DIVORCE_CONFIRM_PATTERN)
 async def divorce_confirm(
     client,
     event,

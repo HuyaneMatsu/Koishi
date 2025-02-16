@@ -254,7 +254,7 @@ class MessageMoverContext:
     
     async def move_message(self, message):
         webhook = await self.get_webhook_waiter()
-        files = await get_files(self.client, message)
+        files = get_files(self.client, message)
         
         try:
             await create_webhook_message(self.client, webhook, message, self.target_thread_id, files)

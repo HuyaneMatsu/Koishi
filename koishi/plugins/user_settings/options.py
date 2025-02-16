@@ -1,4 +1,4 @@
-__all__ = ('NOTIFICATION_SETTINGS_CHOICES', 'NOTIFICATION_SETTING_RESOLUTION')
+__all__ = ('NOTIFICATION_SETTINGS_CHOICES', 'NOTIFICATION_SETTING_RESOLUTION', 'OPTION_PREFERRED_CLIENT_ID')
 
 from .user_settings import UserSettings
 from .option import UserSettingsOption

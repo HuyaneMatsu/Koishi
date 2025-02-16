@@ -195,7 +195,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
             
             user_balance = await get_user_balance(interaction_event.user_id)
             check_has_enough_balance(session.amount, user_balance.balance - user_balance.allocated, False)
-            user_balance.set('allocated', user_balance.allocated + session.amount)
+            user_balance.set('allocated', max(user_balance.allocated + session.amount, 0))
             await user_balance.save()
         except InteractionAbortedError as exception:
             await try_acknowledge(client, interaction_event, player, session, True)

@@ -266,17 +266,14 @@ def select_relationship_for_user_id(relationship_listing, user_id):
 
 
 def select_extender_relationship_and_relationship_for_user_id(
-    relationship_listing, relationship_listing_extend, user_id
+    relationship_listing_with_extend, user_id
 ):
     """
     Selects the extender relationship and the relationship of the given user identifier.
     
     Parameters
     ----------
-    relationship_listing : `list<Relationship>`
-        The relationships to get the user identifiers from.
-    
-    relationship_listing_extend : `None | list<(Relationship, list<Relationship>)>`
+    relationship_listing_with_extend : `None | list<(Relationship, None | list<Relationship>)>`
         The relationship extends to get the user identifiers from.
     
     user_id : `int`
@@ -286,20 +283,16 @@ def select_extender_relationship_and_relationship_for_user_id(
     -------
     extender_relationship_and_relationship : `None | (None | Relationship, Relationship)`
     """
-    relationship = select_relationship_for_user_id(relationship_listing, user_id)
-    if relationship is not None:
-        extender_relationship = None
+    if relationship_listing_with_extend is None:
+        return None
     
-    else:
+    for extender_relationship, relationship_listing_extend in relationship_listing_with_extend:
+        if (extender_relationship.source_user_id == user_id) or (extender_relationship.target_user_id == user_id):
+            return None, extender_relationship
+        
         if (relationship_listing_extend is None):
-            return None
+            continue
         
-        for extender_relationship, relationship_listing_extend in relationship_listing_extend:
-            relationship = select_relationship_for_user_id(relationship_listing_extend, user_id)
-            if (relationship is not None):
-                break
-        
-        else:
-            return None
-    
-    return extender_relationship, relationship
+        relationship = select_relationship_for_user_id(relationship_listing_extend, user_id)
+        if (relationship is not None):
+            return extender_relationship, relationship

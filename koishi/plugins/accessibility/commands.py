@@ -23,6 +23,7 @@ ACCESSIBILITY_INTERACTIONS = FEATURE_CLIENTS.interactions(
     None,
     name = 'accessibility',
     description = 'Customize your Koishi experience. (Actually just a few things.)',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 

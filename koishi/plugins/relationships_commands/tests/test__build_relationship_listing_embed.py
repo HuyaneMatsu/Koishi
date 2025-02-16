@@ -96,7 +96,6 @@ def _iter_options():
         None,
         None,
         None,
-        None,
         0,
         Embed(
             'Satori\'s relationship info',
@@ -150,12 +149,9 @@ def _iter_options():
         user_01,
         user_balance_01,
         [
-            relationship_00,
-            relationship_01,
-            relationship_02,
-        ],
-        [
             (relationship_00, [relationship_03]),
+            (relationship_01, None),
+            (relationship_02, None),
         ],
         [
             relationship_request_00,
@@ -228,12 +224,11 @@ def _iter_options():
         user_00,
         user_balance_00,
         [
-            relationship_00,
-            relationship_01,
-            relationship_02,
-            relationship_03,
+            (relationship_00, None),
+            (relationship_01, None),
+            (relationship_02, None),
+            (relationship_03, None),
         ],
-        None,
         None,
         [
             user_01,
@@ -301,9 +296,6 @@ def _iter_options():
         user_01,
         user_balance_01,
         [
-            relationship_00,
-        ],
-        [
             (relationship_00, [relationship_01, relationship_02]),
         ],
         None,
@@ -370,10 +362,6 @@ def _iter_options():
         user_00,
         user_00,
         user_balance_00,
-        [
-            # waifu
-            relationship_00,
-        ],
         [
             # waifus'
             (
@@ -461,15 +449,12 @@ def _iter_options():
     relationship_02 = Relationship(user_id_03, user_id_01, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
     relationship_03 = Relationship(user_id_01, user_id_04, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
     relationship_04 = Relationship(user_id_01, user_id_N0, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
+    relationship_05 = Relationship(user_id_01, user_id_05, RELATIONSHIP_TYPE_MAMA, 1200, now)
     
     yield (
         user_00,
         user_00,
         user_balance_00,
-        [
-            # big sister
-            relationship_00,
-        ],
         [
             # big sister''s
             (
@@ -483,6 +468,8 @@ def _iter_options():
                     relationship_03,
                     # lil sister is your relative (big) sister (half)
                     relationship_04,
+                    # daughter is your niece
+                    relationship_05,
                 ),
             ),
         ],
@@ -493,6 +480,7 @@ def _iter_options():
             user_02,
             user_03,
             user_04,
+            user_05,
         ],
         0,
         Embed(
@@ -534,6 +522,9 @@ def _iter_options():
         ).add_field(
             'Lil sister',
             'Alice (half)'
+        ).add_field(
+            'Niece',
+            'Flandre',
         ),
     )
     
@@ -547,15 +538,12 @@ def _iter_options():
     relationship_02 = Relationship(user_id_01, user_id_03, RELATIONSHIP_TYPE_SISTER_BIG, 2000, now)
     relationship_03 = Relationship(user_id_04, user_id_01, RELATIONSHIP_TYPE_SISTER_BIG, 2000, now)
     relationship_04 = Relationship(user_id_N0, user_id_01, RELATIONSHIP_TYPE_SISTER_BIG, 2000, now)
+    relationship_05 = Relationship(user_id_01, user_id_05, RELATIONSHIP_TYPE_MAMA, 1200, now)
     
     yield (
         user_00,
         user_00,
         user_balance_00,
-        [
-            # lil sister
-            relationship_00,
-        ],
         [
             # lil sister''s
             (
@@ -569,6 +557,8 @@ def _iter_options():
                     relationship_03,
                     # big sister is your relative (big) sister (half)
                     relationship_04,
+                    # daughter is your niece
+                    relationship_05,
                     
                 ),
             ),
@@ -580,6 +570,7 @@ def _iter_options():
             user_02,
             user_03,
             user_04,
+            user_05,
         ],
         0,
         Embed(
@@ -621,6 +612,9 @@ def _iter_options():
                 'Utsuho (half)\n'
                 'Rin (in law)'
             ),
+        ).add_field(
+            'Niece',
+            'Flandre',
         ),
     )
     
@@ -633,15 +627,13 @@ def _iter_options():
     relationship_01 = Relationship(user_id_02, user_id_01, RELATIONSHIP_TYPE_WAIFU, 1200, now)
     relationship_02 = Relationship(user_id_01, user_id_03, RELATIONSHIP_TYPE_MAMA, 1200, now)
     relationship_03 = Relationship(user_id_01, user_id_N0, RELATIONSHIP_TYPE_MAMA, 1200, now)
+    relationship_04 = Relationship(user_id_04, user_id_01, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
+    relationship_05 = Relationship(user_id_01, user_id_05, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
     
     yield (
         user_00,
         user_00,
         user_balance_00,
-        [
-            # mama
-            relationship_00,
-        ],
         [
             # mama''s
             (
@@ -653,6 +645,10 @@ def _iter_options():
                     relationship_02,
                     # daughter is your relative (big) sister (half)
                     relationship_03,
+                    # big sister is your auntie
+                    relationship_04,
+                    # lil sister is your auntie
+                    relationship_05,
                 ),
             ),
         ],
@@ -662,6 +658,8 @@ def _iter_options():
             user_01,
             user_02,
             user_03,
+            user_04,
+            user_05,
         ],
         0,
         Embed(
@@ -704,6 +702,12 @@ def _iter_options():
                 'Koishi\n'
                 'Rin (in law)'
             ),
+        ).add_field(
+            'Aunties',
+            (
+                'Alice\n'
+                'Flandre'
+            ),
         ),
     )
     
@@ -721,10 +725,6 @@ def _iter_options():
         user_00,
         user_00,
         user_balance_00,
-        [
-            # daughter
-            relationship_00,
-        ],
         [
             # daughter''s
             (
@@ -793,15 +793,12 @@ def _iter_options():
     
     relationship_00 = Relationship(user_id_01, user_id_00, RELATIONSHIP_TYPE_MISTRESS, 2000, now)
     relationship_01 = Relationship(user_id_02, user_id_01, RELATIONSHIP_TYPE_WAIFU, 1200, now)
+    relationship_02 = Relationship(user_id_01, user_id_03, RELATIONSHIP_TYPE_MISTRESS, 1200, now)
     
     yield (
         user_00,
         user_00,
         user_balance_00,
-        [
-            # mistress
-            relationship_00,
-        ],
         [
             # mistress's
             (
@@ -809,6 +806,8 @@ def _iter_options():
                 (
                     # waifu is your mistress (in law)
                     relationship_01,
+                    # maid your co-worker
+                    relationship_02,
                 ),
             ),
         ],
@@ -816,6 +815,7 @@ def _iter_options():
         [
             user_01,
             user_02,
+            user_03,
         ],
         0,
         Embed(
@@ -852,6 +852,9 @@ def _iter_options():
                 'Koishi\n'
                 'Rin (in law)'
             ),
+        ).add_field(
+            'Co-worker',
+            'Utsuho',
         ),
     )
     
@@ -868,9 +871,12 @@ def _iter_options():
         user_balance_00,
         [
             # maid
-            relationship_00,
+            (
+                relationship_00,
+                # No sharing currently yet
+                None,
+            )
         ],
-        None, # no sharing currently
         None,
         [
             user_01,
@@ -916,8 +922,7 @@ def test__build_relationship_listing_embed(
     source_user,
     target_user,
     target_user_balance,
-    target_relationship_listing,
-    target_relationship_listing_extend,
+    target_relationship_listing_with_extend,
     target_relationship_request_listing,
     users,
     guild_id,
@@ -936,10 +941,7 @@ def test__build_relationship_listing_embed(
     target_user_balance : ``UserBalance``
         The targeted user's user balance.
     
-    target_relationship_listing : `None | list<Relationship>`
-        The targeted user's relationships.
-    
-    target_relationship_listing_extend : `None | list<(Relationship, list<Relationship>)>`
+    target_relationship_listing_with_extend : `None | list<(Relationship, None | list<Relationship>)>`
         Indirect relationships of the targeted user.
     
     target_relationship_request_listing : `None | list<RelationshipProposal>`
@@ -959,8 +961,7 @@ def test__build_relationship_listing_embed(
         source_user,
         target_user,
         target_user_balance,
-        target_relationship_listing,
-        target_relationship_listing_extend,
+        target_relationship_listing_with_extend,
         target_relationship_request_listing,
         users,
         guild_id,

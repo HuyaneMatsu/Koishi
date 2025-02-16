@@ -28,15 +28,20 @@ def _iter_options():
     
     yield (
         user_id_0,
-        [relationship_0, relationship_1, relationship_2],
-        None,
+        [
+            (relationship_0, None),
+            (relationship_1, None),
+            (relationship_2, None),
+        ],
         [user_id_1, user_id_2, user_id_3],
     )
     
     yield (
         user_id_0,
-        [relationship_0, relationship_1, relationship_2, relationship_3],
         [
+            (relationship_0, None),
+            (relationship_1, None),
+            (relationship_2, None),
             (relationship_3, [relationship_5, relationship_6]),
         ],
         [user_id_1, user_id_2, user_id_3, user_id_4, user_id_5, user_id_6],
@@ -44,8 +49,10 @@ def _iter_options():
     
     yield (
         user_id_0,
-        [relationship_0, relationship_1, relationship_2, relationship_4],
         [
+            (relationship_0, None),
+            (relationship_1, None),
+            (relationship_2, None),
             (relationship_4, [relationship_5, relationship_6]),
         ],
         [user_id_1, user_id_2, user_id_3, user_id_4, user_id_5, user_id_6],
@@ -54,7 +61,7 @@ def _iter_options():
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__iter_relationship_and_extend_user_ids_to_request(
-    excluded_user_id, relationship_listing, relationship_listing_extend
+    excluded_user_id, relationship_listing_with_extend
 ):
     """
     Tests whether ``iter_relationship_and_extend_user_ids_to_request`` works as intended.
@@ -64,18 +71,15 @@ def test__iter_relationship_and_extend_user_ids_to_request(
     excluded_user_id : `int`
         The user identifier to exclude.
     
-    relationships : `list<Relationship>`
-        The relationships to get the user identifiers from.
-    
-    relationship_listing_extend : `None | list<(Relationship, list<Relationship>)>`
-        The indirect relationships to get the user identifiers from.
+    relationship_listing_with_extend : `None | list<(Relationship, None | list<Relationship>)>`
+        The relationship listing with their extend to get the user identifiers from.
     
     Returns
     -------
     output : `list<int>`
     """
     output = sorted(iter_relationship_and_extend_user_ids_to_request(
-        excluded_user_id, relationship_listing, relationship_listing_extend
+        excluded_user_id, relationship_listing_with_extend,
     ))
     
     for element in output:

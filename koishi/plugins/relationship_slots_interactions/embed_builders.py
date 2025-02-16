@@ -229,3 +229,32 @@ def build_success_embed_purchase_completed_other(required_balance, new_relations
             f'{required_balance} {EMOJI__HEART_CURRENCY}.'
         ),
     )
+
+
+def build_notification_embed_other(new_relationship_slot_count, source_user, guild_id):
+    """
+    Builds a notification when a relation shop was purchased for someone else.
+    
+    Parameters
+    ----------
+    required_balance : `int`
+        The required balance to buy the relationship slot.
+    
+    source_user : `ClientUserBase``
+        The user who bought the role.
+    
+    guild_id : `int`
+        The respective guild's identifier.
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
+    return Embed(
+        'Love is in the air',
+        (
+            f'You have been gifted your {new_relationship_slot_count}'
+            f'{NUMBER_TH_ENDINGS.get(new_relationship_slot_count, NUMBER_TH_ENDING_DEFAULT)} relationship slot by '
+            f'{source_user.name_at(guild_id)}.'
+        ),
+    )

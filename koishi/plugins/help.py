@@ -3,15 +3,14 @@ __all__ = ()
 from functools import partial as partial_func
 from time import perf_counter
 
-from hata import BUILTIN_EMOJIS, Embed, Emoji
+from hata import BUILTIN_EMOJIS, Embed
 from hata.ext.slash import Button, InteractionResponse, Row, abort
 from hata.ext.slash.menus import Closer, Pagination
 
 from ..bot_utils.constants import (
-    COLOR__KOISHI_HELP, EMOJI__HEART_CURRENCY, GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT, ROLE__SUPPORT__ANNOUNCEMENTS,
-    ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__EVENT_MANAGER, ROLE__SUPPORT__EVENT_PARTICIPANT,
-    ROLE__SUPPORT__EVENT_WINNER, ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__NSFW_ACCESS, ROLE__SUPPORT__POLLS,
-    ROLE__SUPPORT__VERIFIED, URL__KOISHI_TOP_GG
+    COLOR__KOISHI_HELP, EMOJI__HEART_CURRENCY, GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT, ROLE__SUPPORT__ELEVATED,
+    ROLE__SUPPORT__EVENT_MANAGER, ROLE__SUPPORT__EVENT_PARTICIPANT, ROLE__SUPPORT__EVENT_WINNER,
+    ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__NSFW_ACCESS, URL__KOISHI_TOP_GG
 )
 from ..bot_utils.headers import get_header_for
 from ..bots import FEATURE_CLIENTS
@@ -19,209 +18,6 @@ from ..bots import FEATURE_CLIENTS
 
 HATA_DOCS_BASE_URL = 'https://www.astil.dev/project/hata/docs/'
 HATA_DOCS_SEARCH_API = HATA_DOCS_BASE_URL + 'api/v1/search'
-
-CLAIM_ROLE_VERIFIED_EMOJI = Emoji.precreate(931503291957919744)
-CLAIM_ROLE_VERIFIED_CUSTOM_ID = 'rules.claim_role.verified'
-
-CLAIM_ROLE_ANNOUNCEMENTS_EMOJI = Emoji.precreate(1175518140390707332)
-CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID = 'rules.claim_role.announcements'
-
-CLAIM_ROLE_POLLS_EMOJI = Emoji.precreate(1087715009045479465)
-CLAIM_ROLE_POLLS_CUSTOM_ID = 'rules.claim_role.polls'
-
-
-RULES_COMPONENTS = Row(
-    Button(
-        'Accept rules (I wont fry fumos)',
-        CLAIM_ROLE_VERIFIED_EMOJI,
-        custom_id = CLAIM_ROLE_VERIFIED_CUSTOM_ID,
-    ),
-    Button(
-        'Claim announcements role',
-        CLAIM_ROLE_ANNOUNCEMENTS_EMOJI,
-        custom_id = CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID,
-    ),
-    Button(
-        'Claim polls role',
-        CLAIM_ROLE_POLLS_EMOJI,
-        custom_id = CLAIM_ROLE_POLLS_CUSTOM_ID,
-    ),
-)
-
-
-RULES = [
-    (
-        'Behaviour',
-        lambda: 'Listen to staff and follow their instructions.',
-    ), (
-        'Language',
-        lambda: f'{GUILD__SUPPORT.name} is an english speaking server, please try to stick yourself to it.'
-    ), (
-        'Channels',
-        lambda: 'Read the channel\'s topics. Make sure to keep the conversations in their respective channels.'
-    ), (
-        'Usernames',
-        lambda: 'Invisible, offensive or noise unicode names are not allowed.',
-    ), (
-        'Spamming',
-        lambda: 'Forbidden in any form. Spamming server members in DM-s counts as well.'
-    ), (
-        'NSFW',
-        lambda: 'Keep explicit content in nsfw channels.',
-    ), (
-        'Shitposting, earrape and other cursed contents',
-        lambda: (
-            'Including tiktok cringe, ai shit, pictures taken of a screen, '
-            'and making the same joke 3 times in a row are all a big NO!!!'
-        ),
-    ), (
-        'Advertisements',
-        lambda: 'Advertising other social medias, servers, communities or services in chat or in DM-s are disallowed.',
-    ), (
-        'Political and Religious topics',
-        lambda: 'I do not say either that aliens exists, even tho they do.',
-    ), (
-        'Alternative accounts',
-        lambda: 'Unless, you have really good reason, like you were locked out from the original.',
-    ), (
-        'Deep frying fumos',
-        lambda: 'Fumo frying and other related unethical actions are bannable offenses.',
-    )
-]
-
-#     (
-#         'Chat identity',
-#         lambda: f'{GUILD__SUPPORT.name} is a Touhou themed guild so everyone is identified as a Touhou girl.',
-#     ),
-
-
-RULE_CHOICES = [(f'{index}. {title}', index) for index, (title, description_builder) in enumerate(RULES)]
-
-
-@FEATURE_CLIENTS.interactions(
-    guild = GUILD__SUPPORT,
-    description = f'{GUILD__SUPPORT.name}\'s rules!'
-)
-async def rules(
-    event,
-    rule: (RULE_CHOICES, 'Select a rule to show.') = None
-):
-    if rule is None:
-        description_parts = []
-        for index, (title, description_builder) in enumerate(RULES):
-            description_parts.append(f'**{index}\\. {title}**\n')
-            description_parts.append(description_builder())
-            description_parts.append('\n\n')
-        
-        description_parts.append(
-            'If ever in doubt about rules, follow [Discord\'s guidelines](https://discord.com/guidelines).'
-        )
-        
-        description = ''.join(description_parts)
-        description_parts = None
-        
-        embed = Embed(
-            f'Rules of {GUILD__SUPPORT.name}:',
-            description,
-            color = COLOR__KOISHI_HELP,
-        )
-        
-        if event.user_permissions.administrator:
-            components = RULES_COMPONENTS
-        else:
-            components = None
-
-    else:
-        embed = Embed(
-            f'Rules {rule} of {GUILD__SUPPORT.name}:',
-            color = COLOR__KOISHI_HELP,
-        )
-        
-        title, description_builder = RULES[rule]
-        embed.add_field(title, description_builder())
-        components = None
-    
-    return InteractionResponse(embed = embed, components = components, allowed_mentions = None)
-
-
-@FEATURE_CLIENTS.interactions(custom_id = CLAIM_ROLE_VERIFIED_CUSTOM_ID)
-async def claim_verified_role(client, event):
-    """
-    Assigns the verified role to the user.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The client who received the interaction event.
-    event : ``InteractionEvent``
-        The received interaction event.
-    """
-    await client.interaction_component_acknowledge(event)
-    
-    user = event.user
-    if user.has_role(ROLE__SUPPORT__VERIFIED):
-        response = f'You already have {ROLE__SUPPORT__VERIFIED.name} role claimed.'
-    else:
-        await client.user_role_add(user, ROLE__SUPPORT__VERIFIED)
-        response = f'You claimed {ROLE__SUPPORT__VERIFIED.name} role.'
-    
-    await client.interaction_followup_message_create(event, content = response, show_for_invoking_user_only = True)
-
-
-@FEATURE_CLIENTS.interactions(custom_id = CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID, show_for_invoking_user_only = True)
-async def claim_announcements_role(client, event):
-    """
-    Assigns or removes the announcements role to / of the user.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The client who received the interaction event.
-    event : ``InteractionEvent``
-        The received interaction event.
-    """
-    await client.interaction_component_acknowledge(event)
-    
-    user = event.user
-    if user.has_role(ROLE__SUPPORT__ANNOUNCEMENTS):
-        await client.user_role_delete(user, ROLE__SUPPORT__ANNOUNCEMENTS)
-        response = f'Your {ROLE__SUPPORT__ANNOUNCEMENTS.name} role was removed.'
-    else:
-        await client.user_role_add(user, ROLE__SUPPORT__ANNOUNCEMENTS)
-        response = f'You claimed {ROLE__SUPPORT__ANNOUNCEMENTS.name} role.'
-    
-    await client.interaction_followup_message_create(event, content = response, show_for_invoking_user_only = True)
-
-
-@FEATURE_CLIENTS.interactions(custom_id = CLAIM_ROLE_POLLS_CUSTOM_ID, show_for_invoking_user_only = True)
-async def claim_polls_role(client, event):
-    """
-    Assigns or removes the polls role to / of the user.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The client who received the interaction event.
-    event : ``InteractionEvent``
-        The received interaction event.
-    """
-    await client.interaction_component_acknowledge(event)
-    
-    user = event.user
-    if user.has_role(ROLE__SUPPORT__POLLS):
-        await client.user_role_delete(user, ROLE__SUPPORT__POLLS)
-        response = f'Your {ROLE__SUPPORT__POLLS.name} role was removed.'
-    else:
-        await client.user_role_add(user, ROLE__SUPPORT__POLLS)
-        response = f'You claimed {ROLE__SUPPORT__POLLS.name} role.'
-    
-    await client.interaction_followup_message_create(event, content = response, show_for_invoking_user_only = True)
 
 
 def docs_search_pagination_check(user, event):
@@ -408,17 +204,17 @@ HEARD_GUIDE_EMBED = Embed(
         f'**•** `/daily` - Claim you daily reward.\n'
         f'**•** `/ds` - Complete dungeon sweeper stages.\n'
         f'**•** `/proposal accept` - Accept marriage proposals.\n'
-        f'**•** `/shop sell-daily` - Sell your daily streak.\n'
         f'**•** [Vote]({URL__KOISHI_TOP_GG}) on me on top.gg\n'
         f'**•** Use any command to get hearts randomly.'
     ),
 ).add_field(
     'Spending hearts',
     (
-        '**•** `/propose` - Propose to your heart\'s chosen one.\n'
-        '**•** `/divorce` - Less waifus.\n'
+        '**•** `/proposal create` - Propose to your heart\'s chosen one.\n'
+        '**•** `/relationships divorce` - Less waifus.\n'
         '**•** `/shop roles` - Buy roles inside of my support server.\n'
-        '**•** `/shop waifu-slot` - More waifus.\n'
+        '**•** `/shop buy-relationship-slot ` - More waifus.\n'
+        '**•** `/shop burn-divorce-papers` - We all make mistakes.\n'
         '**•** `/stats upgrade` - Upgrade your waifus stats.'
     ),
 ).add_field(

@@ -654,22 +654,21 @@ async def gift(
     source_user_balance = await get_user_balance(source_user.id)
     
     source_balance =  source_user_balance.balance
-    source_allocated = source_user_balance.allocated
+    source_allocated = max(source_user_balance.allocated, 0)
     
     if source_balance <= 0:
         yield Embed('So lonely...', 'You do not have any hearts to gift.', color = COLOR__GAMBLING)
         return
     
-    if source_allocated >= source_balance:
+    available_balance = source_balance - source_allocated
+    if available_balance <= 0:
         yield Embed('Like a flower', 'Whithering to the dust.', color = COLOR__GAMBLING)
         return
     
     target_user_balance = await get_user_balance(target_user.id)
     target_balance = target_user_balance.balance
     
-    source_balance -= source_allocated
-    
-    amount = min(source_balance - source_allocated, amount)
+    amount = min(available_balance, amount)
         
     source_new_balance = source_balance - amount
     target_new_balance = target_balance + amount
@@ -700,7 +699,8 @@ async def gift(
     if (not target_user.bot):
         target_user_settings = await get_one_user_settings(target_user.id)
         if target_user_settings.notification_gift:
-            embed = Embed('Aww, love is in the air',
+            embed = Embed(
+                'Aww, love is in the air',
                 f'You have been gifted {amount} {EMOJI__HEART_CURRENCY} by {source_user.name_at(event.guild_id)}',
                 color = COLOR__GAMBLING,
             ).add_field(

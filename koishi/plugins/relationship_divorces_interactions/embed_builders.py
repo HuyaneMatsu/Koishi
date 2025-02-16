@@ -236,3 +236,33 @@ def build_success_embed_purchase_completed_other(required_balance, relationship_
             f'They completed the task splendid; the case is cool even in the summer.'
         ),
     )
+
+
+def build_notification_embed_other(relationship_divorce_count, source_user, guild_id):
+    """
+    Builds a notification when the user's divorce counter was decremented by someone else.
+    
+    Parameters
+    ----------
+    relationship_divorce_count : `int`
+        The current relationship divorce count.
+    
+    source_user : `ClientUserBase``
+        The user who bought the role.
+    
+    guild_id : `int`
+        The respective guild's identifier.
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
+    return Embed(
+        'Love is in the air',
+        (
+            f'{source_user.name_at(guild_id)} sent out their hired ninjas to locate and burn your '
+            f'{relationship_divorce_count}'
+            f'{NUMBER_TH_ENDINGS.get(relationship_divorce_count, NUMBER_TH_ENDING_DEFAULT)} divorce papers.\n'
+            f'The task was completed splendid; now you cannot hide and seek with them.'
+        ),
+    )

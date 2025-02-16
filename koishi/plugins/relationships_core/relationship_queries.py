@@ -1,4 +1,4 @@
-__all__ = ('get_relationship_listing', 'get_relationship_listing_and_extend')
+__all__ = ('get_relationship_listing', 'get_relationship_listing_with_extend')
 
 from scarletio import copy_docs
 from sqlalchemy import or_
@@ -6,7 +6,6 @@ from sqlalchemy import or_
 from ...bot_utils.models import DB_ENGINE, RELATIONSHIP_TABLE, relationship_model
 
 from .constants import RELATIONSHIP_CACHE_LISTING, RELATIONSHIP_CACHE_LISTING_SIZE_MAX
-from .helpers import iter_select_relationships
 from .relationship import Relationship
 from .relationship_types import RELATIONSHIP_TYPE_NONE, RELATIONSHIP_TYPE_RELATIONSHIPS, RELATION_TYPE_ALLOWED_EXTENDS
 
@@ -44,61 +43,28 @@ async def get_relationship_listing(user_id):
     return listing
 
 
-def _iter_user_ids_from(user_relationship_listing, user_relationship_listing_extend):
-    """
-    Iterates over all user identifiers in the given relationship listings.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    user_relationship_listing : `list<Relationship>`
-        The source user's relationships.
-    
-    user_relationship_listing_extend : `None | list<(Relationship, list<Relationship>)>`
-        The relationship extends to get the user identifiers from.
-    
-    Yields
-    ------
-    user_id : `int`
-    """
-    for relationship in user_relationship_listing:
-        yield relationship.source_user_id
-        yield relationship.target_user_id
-    
-    if (user_relationship_listing_extend is not None):
-        for extender_relationship, relationship_listing in user_relationship_listing_extend:
-            for relationship in relationship_listing:
-                yield relationship.source_user_id
-                yield relationship.target_user_id
-
-
 def _select_extended_relationships(
-    allowed_relationship_types,
-    user_relationship_listing,
-    user_relationship_listing_extend,
     connector_user_id,
+    allowed_relationship_types,
     relationship_listing,
+    mentioned_user_ids,
 ):
     """
     Selects the extended relationships.
     
     Parameters
     ----------
-    allowed_relationship_types : `tuple<int>`
-        The allowed relationship types to be connected.
-    
-    user_relationship_listing : `list<Relationship>`
-        The source user's relationships.
-    
-    user_relationship_listing_extend : `None | list<(Relationship, list<Relationship>)>`
-        The relationship extends to get the user identifiers from.
-    
     connector_user_id : `int`
         The connector user's identifier.
     
+    allowed_relationship_types : `tuple<int>`
+        The allowed relationship types to be connected.
+    
     relationship_listing : `list<Relationship>`
         The waifu user's relationships.
+    
+    mentioned_user_ids : `set<int>`
+        A set of user identifiers to avoid repeats.
     
     Returns
     -------
@@ -118,12 +84,10 @@ def _select_extended_relationships(
             continue
         
         # Exclude if the user is already related.
-        if any(
-            related_id == user_id for user_id
-            in _iter_user_ids_from(user_relationship_listing, user_relationship_listing_extend)
-        ):
+        if related_id in mentioned_user_ids:
             continue
         
+        mentioned_user_ids.add(related_id)
         if extra is None:
             extra = []
             
@@ -132,7 +96,7 @@ def _select_extended_relationships(
     return extra
 
 
-async def get_relationship_listing_and_extend(user_id):
+async def get_relationship_listing_with_extend(user_id):
     """
     Gets the user's extended relationship listing.
     The extend is separated by the relationships they are branching out form.
@@ -146,42 +110,44 @@ async def get_relationship_listing_and_extend(user_id):
     
     Returns
     -------
-    relationship_listing : `None | list<Relationship>`
-    relationship_listing_extend : `None | list<(Relationship, list<Relationship>)>`
+    relationship_listing_with_extend : `None | list<(Relationship, None | list<Relationship>)>`
     """
     user_relationship_listing = await get_relationship_listing(user_id)
     if (user_relationship_listing is None):
-        return None, None
+        return None
     
-    user_relationship_listing_extend = None
+    mentioned_user_ids = set()
+    for relationship in user_relationship_listing:
+        mentioned_user_ids.add(relationship.source_user_id)
+        mentioned_user_ids.add(relationship.target_user_id)
     
-    for extender_relationship_type, allowed_relationship_types in RELATION_TYPE_ALLOWED_EXTENDS:
-        for relationship in iter_select_relationships(user_id, extender_relationship_type, user_relationship_listing):
-            connector_user_id = relationship.source_user_id
-            if connector_user_id == user_id:
-                connector_user_id = relationship.target_user_id
-            
+    relationship_listing_with_extend = []
+    
+    for relationship in user_relationship_listing:
+        connector_user_id = relationship.source_user_id
+        relationship_type = relationship.relationship_type
+        if connector_user_id == user_id:
+            connector_user_id = relationship.target_user_id
+            relationship_type = RELATIONSHIP_TYPE_RELATIONSHIPS.get(relationship_type, RELATIONSHIP_TYPE_NONE)
+        
+        allowed_relationship_types = RELATION_TYPE_ALLOWED_EXTENDS.get(relationship_type, None)
+        if allowed_relationship_types is None:
+            extend = None
+        else:
             relationship_listing = await get_relationship_listing(connector_user_id)
             if (relationship_listing is None) or (len(relationship_listing) == 1):
-                continue
-            
-            extra = _select_extended_relationships(
-                allowed_relationship_types,
-                user_relationship_listing,
-                user_relationship_listing_extend,
-                connector_user_id,
-                relationship_listing,
-            )
-            
-            if extra is None:
-                continue
-            
-            if user_relationship_listing_extend is None:
-                user_relationship_listing_extend = []
-            
-            user_relationship_listing_extend.append((relationship, extra))
+                extend = None
+            else:
+                extend = _select_extended_relationships(
+                    connector_user_id,
+                    allowed_relationship_types,
+                    relationship_listing,
+                    mentioned_user_ids,
+                )
+        
+        relationship_listing_with_extend.append((relationship, extend))
     
-    return user_relationship_listing, user_relationship_listing_extend
+    return relationship_listing_with_extend
 
 
 async def query_relationship_listing(user_id):

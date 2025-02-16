@@ -10,7 +10,7 @@ from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_reaction_copy_fields
 from ..blacklist_core import is_user_id_in_blacklist
-from ..move_message_core import create_webhook_message, get_message_and_files, get_webhook
+from ..move_message_core import create_webhook_message, get_files, get_message, get_webhook
 
 from .constants import MASK_PARSE_ANY_CUSTOM, MAKS_PARSE_ANY_UNICODE
 from .list_channels import collect_channel_emojis
@@ -178,13 +178,13 @@ async def reaction_add(client, event):
             channel_id = target_channel.id
             thread_id = 0
         
-        get_message_and_files_task = Task(KOKORO, get_message_and_files(client, source_channel, message.id))
+        get_message_task = Task(KOKORO, get_message(client, source_channel, message.id))
         get_webhook_task = Task(KOKORO, get_webhook(client, channel_id))
         
         task_group =  TaskGroup(
             KOKORO,
             [
-                get_message_and_files_task,
+                get_message_task,
                 get_webhook_task,
             ],
         )
@@ -199,13 +199,15 @@ async def reaction_add(client, event):
         for task in task_group.done:
             result = task.get_result()
             
-            if task is get_message_and_files_task:
-                message, files = result
+            if task is get_message_task:
+                message = result
                 continue
             
             if task is get_webhook_task:
                 webhook = result
                 continue
+        
+        files = get_files(client, message)
         
         try:
             await create_webhook_message(client, webhook, message, thread_id, files)

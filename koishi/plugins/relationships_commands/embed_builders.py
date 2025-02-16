@@ -8,8 +8,9 @@ from hata import Embed
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ..relationships_core import (
-    RELATIONSHIP_TYPE_DAUGHTER, RELATIONSHIP_TYPE_MAID, RELATIONSHIP_TYPE_MAMA, RELATIONSHIP_TYPE_MISTRESS,
-    RELATIONSHIP_TYPE_NONE, RELATIONSHIP_TYPE_RELATIONSHIPS, RELATIONSHIP_TYPE_SISTER_BIG, RELATIONSHIP_TYPE_SISTER_LIL,
+    RELATIONSHIP_TYPE_AUNTIE, RELATIONSHIP_TYPE_CO_WORKER, RELATIONSHIP_TYPE_DAUGHTER, RELATIONSHIP_TYPE_MAID,
+    RELATIONSHIP_TYPE_MAMA, RELATIONSHIP_TYPE_MISTRESS, RELATIONSHIP_TYPE_NIECE, RELATIONSHIP_TYPE_NONE,
+    RELATIONSHIP_TYPE_RELATIONSHIPS, RELATIONSHIP_TYPE_SISTER_BIG, RELATIONSHIP_TYPE_SISTER_LIL,
     RELATIONSHIP_TYPE_SISTER_RELATIVE, RELATIONSHIP_TYPE_UNSET, RELATIONSHIP_TYPE_WAIFU, calculate_relationship_value,
     determine_relative_sister, get_affinity_multiplier, get_relationship_type_name
 )
@@ -873,12 +874,42 @@ def build_relationship_request_listing_embed(outgoing, relationship_request_list
     return embed
 
 
+RELATIONSHIP_ORDER = (
+    RELATIONSHIP_TYPE_WAIFU,
+    RELATIONSHIP_TYPE_SISTER_BIG,
+    RELATIONSHIP_TYPE_SISTER_LIL,
+    RELATIONSHIP_TYPE_MAMA,
+    RELATIONSHIP_TYPE_DAUGHTER,
+    RELATIONSHIP_TYPE_MISTRESS,
+    RELATIONSHIP_TYPE_MAID,
+    RELATIONSHIP_TYPE_AUNTIE,
+    RELATIONSHIP_TYPE_NIECE,
+    RELATIONSHIP_TYPE_CO_WORKER,
+    RELATIONSHIP_TYPE_UNSET,
+)
+
+RELATIONSHIP_TITLES = {
+    RELATIONSHIP_TYPE_WAIFU : ('Waifu', 'Waifus'),
+    RELATIONSHIP_TYPE_SISTER_BIG : ('Big sister', 'Big sisters'),
+    RELATIONSHIP_TYPE_SISTER_LIL : ('Lil sister', 'Lil sisters'),
+    RELATIONSHIP_TYPE_MAMA : ('Mama', 'Mamas'),
+    RELATIONSHIP_TYPE_DAUGHTER : ('Daughter', 'Daughters'),
+    RELATIONSHIP_TYPE_MISTRESS : ('Master', 'Masters'),
+    RELATIONSHIP_TYPE_MAID : ('Maid', 'Maids'),
+    RELATIONSHIP_TYPE_AUNTIE : ('Auntie', 'Aunties'),
+    RELATIONSHIP_TYPE_NIECE : ('Niece', 'Nieces'),
+    RELATIONSHIP_TYPE_CO_WORKER : ('Co-worker', 'Co-workers'),
+    RELATIONSHIP_TYPE_UNSET : ('Unset', 'Unset'),
+}
+
+RELATIONSHIP_TITLE_DEFAULT = (ACTION_NAME_UNKNOWN, ACTION_NAME_UNKNOWN)
+
+
 def build_relationship_listing_embed(
     source_user,
     target_user,
     target_user_balance,
-    target_relationship_listing,
-    target_relationship_listing_extend,
+    target_relationship_listing_with_extend,
     target_relationship_request_listing,
     users,
     guild_id,
@@ -897,11 +928,8 @@ def build_relationship_listing_embed(
     target_user_balance : ``UserBalance``
         The targeted user's user balance.
     
-    target_relationship_listing : `None | list<Relationship>`
-        The targeted user's relationships.
-    
-    target_relationship_listing_extend : `None | list<(Relationship, list<Relationship>)>`
-        Indirect relationships of the targeted user.
+    target_relationship_listing_with_extend : `None | list<(Relationship, None | list<Relationship>)>`
+        The target user's relationship with their extends.
     
     target_relationship_request_listing : `None | list<RelationshipProposal>`
         The outgoing relationship proposals of the targeted user.
@@ -922,9 +950,21 @@ def build_relationship_listing_embed(
         target_user.avatar_url_at(guild_id),
     )
     
+    if target_relationship_listing_with_extend is None:
+        direct_relationship_listing = None
+    else:
+        direct_relationship_listing = [
+            relationship_with_extend[0] for relationship_with_extend in target_relationship_listing_with_extend
+        ]
+    
     # Relationship value
     relationship_value = calculate_relationship_value(
-        target_user.id, target_user_balance.relationship_value, target_relationship_listing
+        target_user.id,
+        target_user_balance.relationship_value,
+        (
+            None if target_relationship_listing_with_extend is None else
+            [relationship_with_extend[0] for relationship_with_extend in target_relationship_listing_with_extend]
+        ),
     )
     embed.add_field(
         f'Value',
@@ -948,7 +988,7 @@ def build_relationship_listing_embed(
     )
     
     # Relationship slots
-    relationship_count = 0 if target_relationship_listing is None else len(target_relationship_listing)
+    relationship_count = (0 if direct_relationship_listing is None else len(direct_relationship_listing))
     relationship_proposal_count = (
         0 if target_relationship_request_listing is None else len(target_relationship_request_listing)
     )
@@ -980,15 +1020,19 @@ def build_relationship_listing_embed(
     
     # Relationships
     
-    if (target_relationship_listing is None):
+    if (direct_relationship_listing is None):
         embed.add_field('Relationships', '*none*')
     
     else:
         grouped_relationships = {}
         
         for relationship_source, relationships in chain(
-            ((None, target_relationship_listing),),
-            (() if target_relationship_listing_extend is None else target_relationship_listing_extend),
+            ((None, direct_relationship_listing),),
+            (
+                relationship_with_extend for relationship_with_extend
+                in target_relationship_listing_with_extend
+                if (relationship_with_extend[1] is not None)
+            ),
         ):
             if relationship_source is None:
                 connector_relationship_type = RELATIONSHIP_TYPE_NONE
@@ -1036,8 +1080,7 @@ def build_relationship_listing_embed(
                         source_user,
                         target_user,
                         target_user_balance,
-                        target_relationship_listing,
-                        target_relationship_listing_extend,
+                        target_relationship_listing_with_extend,
                         target_relationship_request_listing,
                         users,
                         guild_id,
@@ -1050,46 +1093,15 @@ def build_relationship_listing_embed(
         for group in grouped_relationships.values():
             group.sort()
         
-        for relationship_type in (
-            RELATIONSHIP_TYPE_WAIFU,
-            RELATIONSHIP_TYPE_SISTER_BIG,
-            RELATIONSHIP_TYPE_SISTER_LIL,
-            RELATIONSHIP_TYPE_MAMA,
-            RELATIONSHIP_TYPE_DAUGHTER,
-            RELATIONSHIP_TYPE_MISTRESS,
-            RELATIONSHIP_TYPE_MAID,
-            RELATIONSHIP_TYPE_UNSET,
-        ):
+        for relationship_type in RELATIONSHIP_ORDER:
             try:
                 group = grouped_relationships[relationship_type]
             except KeyError:
                 continue
             
-            if relationship_type == RELATIONSHIP_TYPE_WAIFU:
-                title = 'Waifu'
-            elif relationship_type == RELATIONSHIP_TYPE_SISTER_BIG:
-                title = 'Big sister'
-            elif relationship_type == RELATIONSHIP_TYPE_SISTER_LIL:
-                title = 'Lil sister'
-            elif relationship_type == RELATIONSHIP_TYPE_MAMA:
-                title = 'Mama'
-            elif relationship_type == RELATIONSHIP_TYPE_DAUGHTER:
-                title = 'Daughter'
-            elif relationship_type == RELATIONSHIP_TYPE_MISTRESS:
-                title = 'Master'
-            elif relationship_type == RELATIONSHIP_TYPE_MAID:
-                title = 'Maid'
-            elif relationship_type == RELATIONSHIP_TYPE_UNSET:
-                title = 'Unset'
-            else:
-                title = ACTION_NAME_UNKNOWN
-            
-            length = len(group)
-            if length > 1:
-                title += 's'
-            
             description_parts = []
             
+            length = len(group)
             index = 0
             
             while True:
@@ -1112,7 +1124,9 @@ def build_relationship_listing_embed(
             description = ''.join(description_parts)
             description_parts = None
             
+            title = RELATIONSHIP_TITLES.get(relationship_type, RELATIONSHIP_TITLE_DEFAULT)[length > 1]
             embed.add_field(title, description)
+    
     
     # Footer | could add more footers?
     if (source_user is target_user):
@@ -1121,7 +1135,7 @@ def build_relationship_listing_embed(
     
     elif (
         (
-            (target_relationship_listing is None) or
+            (direct_relationship_listing is None) or
             not any(
                 (
                     (relationship.source_user_id == source_user.id) and
@@ -1130,7 +1144,7 @@ def build_relationship_listing_embed(
                     (relationship.source_user_id == target_user.id) and
                     (relationship.target_user_id == source_user.id)
                 )
-                for relationship in target_relationship_listing
+                for relationship in direct_relationship_listing
             )
         )
     ):
@@ -1170,8 +1184,8 @@ def build_question_embed_divorce(target_user, guild_id):
     embed : ``Embed``
     """
     return Embed(
-        'Divorcing',
-        f'Are you sure to divorce {target_user.name_at(guild_id)}?',
+        'Break up',
+        f'Are you sure to break up with {target_user.name_at(guild_id)}?',
     )
 
 
@@ -1192,8 +1206,8 @@ def build_success_embed_divorce_cancelled(target_user, guild_id):
     embed : ``Embed``
     """
     return Embed(
-        'Divorcing cancelled',
-        f'You cancelled divorcing {target_user.name_at(guild_id)}.',
+        'Break up cancelled',
+        f'You cancelled breaking up with {target_user.name_at(guild_id)}.',
     )
 
 
@@ -1206,8 +1220,8 @@ def build_failure_embed_you_cannot_cancel_this_divorce():
     embed : ``Embed``
     """
     return Embed(
-        'Divorcing cannot be cancelled',
-        'You are not part of this engagement, so you cannot cancel it.',
+        'Break up cannot be cancelled',
+        'You are not part of this relationship, so you cannot cancel this action.',
     )
 
 
@@ -1235,7 +1249,7 @@ def build_success_embed_divorce_confirmed(target_user, source_received, target_r
     """
     description_parts = []
     
-    description_parts.append('You have divorced ')
+    description_parts.append('You have broke up with ')
     description_parts.append(target_user.name_at(guild_id))
     description_parts.append('.')
     
@@ -1257,7 +1271,7 @@ def build_success_embed_divorce_confirmed(target_user, source_received, target_r
             description_parts.append(' after investing much into the relationship.')
     
     return Embed(
-        'Divorcing confirmed',
+        'Break up confirmed',
         ''.join(description_parts),
     )
 
@@ -1271,8 +1285,8 @@ def build_failure_embed_you_cannot_confirm_this_divorce():
     embed : ``Embed``
     """
     return Embed(
-        'Divorcing cannot be confirmed',
-        'You are not part of this engagement, so you cannot confirm it.',
+        'Breaking up cannot be confirmed',
+        'You are not part of this relationship, so you cannot confirm this action.',
     )
 
 
@@ -1293,7 +1307,7 @@ def build_failure_embed_cannot_divorce_not_related_anymore(target_user, guild_id
     embed : ``Embed``
     """
     return Embed(
-        'Divorcing cannot be confirmed',
+        'Breaking up cannot be confirmed',
         f'You are not related to {target_user.name_at(guild_id)} anymore.'
     )
 
@@ -1319,7 +1333,7 @@ def build_notification_embed_divorced(source_user, target_received, guild_id):
     """
     description_parts = []
     description_parts.append(source_user.name_at(guild_id))
-    description_parts.append(' divorced you.')
+    description_parts.append(' broke up with you.')
     
     if target_received:
         description_parts.append('\n\nYou received ')
@@ -1329,7 +1343,7 @@ def build_notification_embed_divorced(source_user, target_received, guild_id):
         description_parts.append(' after investing much into the relationship.')
     
     return Embed(
-        'You have been divorced',
+        'You have been broke up with',
         ''.join(description_parts),
     )
 

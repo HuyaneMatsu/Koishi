@@ -7,8 +7,8 @@ from ..embed_builders import build_failure_embed_you_cannot_cancel_this_divorce
 def _iter_options():
     yield (
         Embed(
-            'Divorcing cannot be cancelled',
-            'You are not part of this engagement, so you cannot cancel it.',
+            'Break up cannot be cancelled',
+            'You are not part of this relationship, so you cannot cancel this action.',
         ),
     )
 

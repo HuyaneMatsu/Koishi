@@ -7,8 +7,8 @@ from ..embed_builders import build_failure_embed_you_cannot_confirm_this_divorce
 def _iter_options():
     yield (
         Embed(
-            'Divorcing cannot be confirmed',
-            'You are not part of this engagement, so you cannot confirm it.',
+            'Breaking up cannot be confirmed',
+            'You are not part of this relationship, so you cannot confirm this action.',
         ),
     )
 
