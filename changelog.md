@@ -11,8 +11,8 @@
 - `/accessibility` now available when user installed.
 - `/rules` updated (support guild only). Now it includes a "bot access select" that will assign a role to you to give
     access to the selected bot & prefer it.
-- `/shop roles` now has a `related` and `someone-else` parameters allowing you to purchase If the user is related it
-    also "deepens" your relationship as well.
+- `/shop roles` now has a `related` and `someone-else` parameters allowing you to purchase them for other people as
+    well. If the user is related it also "deepens" your relationship as well.
 - Buying a relation shop for someone else using `/shop buy-relation-slot` or by any other means now delivers a
     notification.
 - Burning divorce papers of someone else using `/shop burn-divorce-papers` or by any other means now delivers a

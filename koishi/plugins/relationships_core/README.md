@@ -42,7 +42,7 @@ It is possible to extend relationships through someone else.
 
 |                       | your waifu's              | your big sister's             | your lil sister's             | your mama's                   | your daughter's       | your mistress'        | your maid's   |
 |-----------------------|---------------------------|-------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------|
-| waifu is your         | N / A                     | big sister<br>(in law)        | lil sister<br>(in law)        | mama<br>(in law)              | daughter<br>(in law) | mistress<br>(in law)  | N / A         |
+| waifu is your         | N / A                     | big sister<br>(in law)        | lil sister<br>(in law)        | mama<br>(in law)              | daughter<br>(in law)  | mistress<br>(in law)  | N / A         |
 | big sister is your    | big sister<br>(in law)    | big sister<br>(half)          | big / lil sister<br>(half)    | auntie                        | daughter<br>(half)    | TBD                   | TBD           |
 | lil sister is your    | lil sister<br>(in law)    | big / lil sister<br>(half)    | lil sister<br>(half)          | auntie                        | daughter<br>(half)    | TBD                   | TBD           |
 | mama is your          | mama<br>(in law)          | TBD                           | TBD                           | TBD                           | N / A                 | TBD                   | TBD           |
