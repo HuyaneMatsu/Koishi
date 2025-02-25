@@ -5,15 +5,14 @@ from hata.ext.slash import P
 
 from ...bots import FEATURE_CLIENTS
 
+from ..gift_common import identify_targeted_user
 from ..relationship_divorces_interactions import (
     relationship_divorces_decrement_invoke_other_question, relationship_divorces_decrement_invoke_self_question
 )
 from ..relationship_slots_interactions import (
     relationship_slot_increment_invoke_other_question, relationship_slot_increment_invoke_self_question
 )
-from ..relationships_core import (
-    autocomplete_relationship_extended_user_name, get_extender_relationship_and_relationship_and_user_like_at
-)
+from ..relationships_core import autocomplete_relationship_extended_user_name
 from ..role_purchase import PURCHASABLE_ROLES, ROLE_CHOICES, purchase_role_other, purchase_role_self
 
 
@@ -27,6 +26,7 @@ SHOP = FEATURE_CLIENTS.interactions(
 
 @SHOP.interactions
 async def buy_relationship_slot(
+    client,
     event,
     target_related_name : P(
         str,
@@ -66,23 +66,23 @@ async def buy_relationship_slot(
     -------
     response : ``InteractionResponse``
     """
-    if (target_user is None) and (target_related_name is not None):
-        extender_relationship, relationship, target_user = (
-            await get_extender_relationship_and_relationship_and_user_like_at(
-                event.user_id, target_related_name, event.guild_id
-            )
+    target_user, relationship_to_deepen = await identify_targeted_user(
+        event.user, target_related_name, target_user, event.guild_id
+    )
+    
+    if (target_user is None):
+        coroutine = relationship_slot_increment_invoke_self_question(client, event)
+    else:
+        coroutine = relationship_slot_increment_invoke_other_question(
+            client, event, target_user, relationship_to_deepen
         )
     
-    if (target_user is None) or (target_user is event.user):
-        coroutine = relationship_slot_increment_invoke_self_question(event)
-    else:
-        coroutine = relationship_slot_increment_invoke_other_question(event, target_user)
-    
-    return await coroutine
+    await coroutine
 
 
 @SHOP.interactions
 async def burn_divorce_papers(
+    client,
     event,
     target_related_name : P(
         str,
@@ -117,24 +117,17 @@ async def burn_divorce_papers(
     
     target_user : `None | ClientUserBase` = `None`, Optional
         The targeted user.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
     """
-    if (target_user is None) and (target_related_name is not None):
-        extender_relationship, relationship, target_user = (
-            await get_extender_relationship_and_relationship_and_user_like_at(
-                event.user_id, target_related_name, event.guild_id
-            )
-        )
+    target_user, relationship_to_deepen = await identify_targeted_user(
+        event.user, target_related_name, target_user, event.guild_id
+    )
     
-    if (target_user is None) or (target_user is event.user):
-        coroutine = relationship_divorces_decrement_invoke_self_question(event)
+    if (target_user is None):
+        coroutine = relationship_divorces_decrement_invoke_self_question(client, event)
     else:
-        coroutine = relationship_divorces_decrement_invoke_other_question(event, target_user)
+        coroutine = relationship_divorces_decrement_invoke_other_question(client, event, target_user, relationship_to_deepen)
     
-    return await coroutine
+    await coroutine
 
 
 @SHOP.interactions
@@ -177,17 +170,13 @@ async def roles(
         The targeted user.
     """
     role, required_balance = PURCHASABLE_ROLES[role_choice]
+    target_user, relationship_to_deepen = await identify_targeted_user(
+        event.user, target_related_name, target_user, event.guild_id
+    )
     
-    if (target_user is None) and (target_related_name is not None):
-        extender_relationship, relationship, target_user = (
-            await get_extender_relationship_and_relationship_and_user_like_at(
-                event.user_id, target_related_name, event.guild_id
-            )
-        )
-    
-    if (target_user is None) or (target_user is event.user):
+    if (target_user is None):
         coroutine = purchase_role_self(client, event, role, required_balance)
     else:
-        coroutine = purchase_role_other(client, event, role, required_balance, target_user)
+        coroutine = purchase_role_other(client, event, role, required_balance, target_user, relationship_to_deepen)
     
-    return await coroutine
+    await coroutine

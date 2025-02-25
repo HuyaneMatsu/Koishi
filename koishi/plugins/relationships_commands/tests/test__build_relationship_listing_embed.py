@@ -204,7 +204,7 @@ def _iter_options():
                 'Alicia (in law)'
             ),
         ).add_footer(
-            'To propose to Koi you need at least 21717 hearts.',
+            'To propose to Koi you need at least 21821 hearts.',
             icon_url = f'https://cdn.discordapp.com/guilds/{guild_id}/users/{user_id_00}/avatars/00000000000000000000000000000065.png'
         )
     )
@@ -272,7 +272,7 @@ def _iter_options():
             'Mama',
             'Utsuho',
         ).add_field(
-            'Master',
+            'Mistress',
             'Alice',
         ).add_field(
             'Unset',
@@ -450,6 +450,7 @@ def _iter_options():
     relationship_03 = Relationship(user_id_01, user_id_04, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
     relationship_04 = Relationship(user_id_01, user_id_N0, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
     relationship_05 = Relationship(user_id_01, user_id_05, RELATIONSHIP_TYPE_MAMA, 1200, now)
+    relationship_06 = Relationship(user_id_06, user_id_01, RELATIONSHIP_TYPE_MAMA, 1200, now)
     
     yield (
         user_00,
@@ -470,6 +471,8 @@ def _iter_options():
                     relationship_04,
                     # daughter is your niece
                     relationship_05,
+                    # mama is your mama (step)
+                    relationship_06,
                 ),
             ),
         ],
@@ -481,6 +484,7 @@ def _iter_options():
             user_03,
             user_04,
             user_05,
+            user_06,
         ],
         0,
         Embed(
@@ -523,6 +527,9 @@ def _iter_options():
             'Lil sister',
             'Alice (half)'
         ).add_field(
+            'Mama',
+            'Remilia (step)',
+        ).add_field(
             'Niece',
             'Flandre',
         ),
@@ -539,6 +546,7 @@ def _iter_options():
     relationship_03 = Relationship(user_id_04, user_id_01, RELATIONSHIP_TYPE_SISTER_BIG, 2000, now)
     relationship_04 = Relationship(user_id_N0, user_id_01, RELATIONSHIP_TYPE_SISTER_BIG, 2000, now)
     relationship_05 = Relationship(user_id_01, user_id_05, RELATIONSHIP_TYPE_MAMA, 1200, now)
+    relationship_06 = Relationship(user_id_06, user_id_01, RELATIONSHIP_TYPE_MAMA, 1200, now)
     
     yield (
         user_00,
@@ -559,6 +567,8 @@ def _iter_options():
                     relationship_04,
                     # daughter is your niece
                     relationship_05,
+                    # mama is your mama (step)
+                    relationship_06,
                     
                 ),
             ),
@@ -571,6 +581,7 @@ def _iter_options():
             user_03,
             user_04,
             user_05,
+            user_06,
         ],
         0,
         Embed(
@@ -613,6 +624,9 @@ def _iter_options():
                 'Rin (in law)'
             ),
         ).add_field(
+            'Mama',
+            'Remilia (step)',
+        ).add_field(
             'Niece',
             'Flandre',
         ),
@@ -629,6 +643,8 @@ def _iter_options():
     relationship_03 = Relationship(user_id_01, user_id_N0, RELATIONSHIP_TYPE_MAMA, 1200, now)
     relationship_04 = Relationship(user_id_04, user_id_01, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
     relationship_05 = Relationship(user_id_01, user_id_05, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
+    relationship_06 = Relationship(user_id_06, user_id_01, RELATIONSHIP_TYPE_MAMA, 1200, now)
+    relationship_07 = Relationship(user_id_01, user_id_07, RELATIONSHIP_TYPE_MISTRESS, 1200, now)
     
     yield (
         user_00,
@@ -649,6 +665,10 @@ def _iter_options():
                     relationship_04,
                     # lil sister is your auntie
                     relationship_05,
+                    # mama is your granny
+                    relationship_06,
+                    # maid is your nanny
+                    relationship_07,
                 ),
             ),
         ],
@@ -660,6 +680,8 @@ def _iter_options():
             user_03,
             user_04,
             user_05,
+            user_06,
+            user_07,
         ],
         0,
         Embed(
@@ -703,11 +725,17 @@ def _iter_options():
                 'Rin (in law)'
             ),
         ).add_field(
+            'Granny',
+            'Remilia',
+        ).add_field(
             'Aunties',
             (
                 'Alice\n'
                 'Flandre'
             ),
+        ).add_field(
+            'Nanny',
+            'Suwako',
         ),
     )
     
@@ -720,6 +748,8 @@ def _iter_options():
     relationship_01 = Relationship(user_id_02, user_id_01, RELATIONSHIP_TYPE_WAIFU, 1200, now)
     relationship_02 = Relationship(user_id_03, user_id_01, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
     relationship_03 = Relationship(user_id_01, user_id_04, RELATIONSHIP_TYPE_SISTER_BIG, 1200, now)
+    relationship_04 = Relationship(user_id_01, user_id_05, RELATIONSHIP_TYPE_MAMA, 1200, now)
+    relationship_05 = Relationship(user_id_06, user_id_01, RELATIONSHIP_TYPE_MISTRESS, 1200, now)
     
     yield (
         user_00,
@@ -736,6 +766,10 @@ def _iter_options():
                     relationship_02,
                     # lil sister is your daughter (half)
                     relationship_03,
+                    # daughter is your granddaughter
+                    relationship_04,
+                    # mistress is your tea friend
+                    relationship_05,
                 ),
             ),
         ],
@@ -745,6 +779,8 @@ def _iter_options():
             user_02,
             user_03,
             user_04,
+            user_05,
+            user_06,
         ],
         0,
         Embed(
@@ -783,6 +819,12 @@ def _iter_options():
                 'Utsuho (half)\n'
                 'Rin (in law)'
             ),
+        ).add_field(
+            'Granddaughter',
+            'Flandre',
+        ).add_field(
+            'Tea friend',
+            'Remilia',
         ),
     )
     
@@ -794,6 +836,7 @@ def _iter_options():
     relationship_00 = Relationship(user_id_01, user_id_00, RELATIONSHIP_TYPE_MISTRESS, 2000, now)
     relationship_01 = Relationship(user_id_02, user_id_01, RELATIONSHIP_TYPE_WAIFU, 1200, now)
     relationship_02 = Relationship(user_id_01, user_id_03, RELATIONSHIP_TYPE_MISTRESS, 1200, now)
+    relationship_03 = Relationship(user_id_01, user_id_04, RELATIONSHIP_TYPE_MAMA, 1200, now)
     
     yield (
         user_00,
@@ -808,6 +851,8 @@ def _iter_options():
                     relationship_01,
                     # maid your co-worker
                     relationship_02,
+                    # daughter is your young mistress
+                    relationship_03,
                 ),
             ),
         ],
@@ -816,6 +861,7 @@ def _iter_options():
             user_01,
             user_02,
             user_03,
+            user_04,
         ],
         0,
         Embed(
@@ -847,15 +893,18 @@ def _iter_options():
             ),
             inline = True,
         ).add_field(
-            'Masters',
+            'Mistresses',
             (
                 'Koishi\n'
                 'Rin (in law)'
             ),
         ).add_field(
+            'Young mistress',
+            'Alice',
+        ).add_field(
             'Co-worker',
             'Utsuho',
-        ),
+        )
     )
     
     # sharing through maid
@@ -864,6 +913,7 @@ def _iter_options():
     user_balance_00.relationship_slots = 1
     
     relationship_00 = Relationship(user_id_00, user_id_01, RELATIONSHIP_TYPE_MISTRESS, 2000, now)
+    relationship_01 = Relationship(user_id_02, user_id_01, RELATIONSHIP_TYPE_MAMA, 2000, now)
     
     yield (
         user_00,
@@ -874,12 +924,16 @@ def _iter_options():
             (
                 relationship_00,
                 # No sharing currently yet
-                None,
+                (
+                     # mama is your tea friend
+                    relationship_01,
+                ),
             )
         ],
         None,
         [
             user_01,
+            user_02,
         ],
         0,
         Embed(
@@ -913,6 +967,9 @@ def _iter_options():
         ).add_field(
             'Maid',
             'Koishi',
+        ).add_field(
+            'Tea friend',
+            'Rin',
         ),
     )
 

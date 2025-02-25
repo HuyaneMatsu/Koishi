@@ -4,6 +4,7 @@ from hata.ext.slash import abort
 
 from ...bot_utils.user_getter import get_user
 
+from ..gift_common import can_gift_with_request
 from ..relationship_slots_core import (
     build_component_invoke_relationship_slot_purchase_other, build_component_invoke_relationship_slot_purchase_self
 )
@@ -243,12 +244,19 @@ def check_already_proposing(source_relationship_request_listing, target_user, gu
     )
 
 
-def check_can_propose_to_bot(target_user, target_relationship_count, target_relationship_slots, guild_id):
+async def async_check_can_propose_to_bot(
+    source_user, target_user, target_relationship_count, target_relationship_slots, guild_id
+):
     """
     Checks whether the source user is already proposing to the target one.
     
+    This function is a coroutine.
+    
     Parameters
     ----------
+    source_user : ``ClientUserBase``
+        The source user.
+    
     target_user : ``ClientUserBase``
         The target user.
     
@@ -271,9 +279,14 @@ def check_can_propose_to_bot(target_user, target_relationship_count, target_rela
     if target_relationship_count < target_relationship_slots:
         return
     
+    if (await can_gift_with_request(source_user, target_user)):
+        components = build_component_invoke_relationship_slot_purchase_other(target_user.id),
+    else:
+        components = None
+    
     abort(
         embed = build_failure_embed_target_relationship_creation_disallowed(target_user, guild_id),
-        components = build_component_invoke_relationship_slot_purchase_other(target_user.id),
+        components = components,
     )
 
 

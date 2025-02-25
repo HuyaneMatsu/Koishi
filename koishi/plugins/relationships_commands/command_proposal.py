@@ -23,10 +23,10 @@ from ..user_settings import (
 )
 
 from .checks import (
-    async_check_source_already_has_waifu, async_check_source_already_has_waifu_request,
+    async_check_can_propose_to_bot, async_check_source_already_has_waifu, async_check_source_already_has_waifu_request,
     async_check_target_already_has_mama, async_check_target_already_has_mistress, async_check_target_already_has_waifu,
-    check_already_proposing, check_already_related, check_can_propose_to_bot, check_insufficient_available_balance,
-    check_insufficient_investment, check_insufficient_relationship_slots, check_self_propose
+    check_already_proposing, check_already_related, check_insufficient_available_balance, check_insufficient_investment,
+    check_insufficient_relationship_slots, check_self_propose
 )
 from .constants import RELATIONSHIP_REQUEST_CREATABLE
 from .embed_builders import (
@@ -139,7 +139,8 @@ async def create(
     )
     
     # Bot post-check.
-    check_can_propose_to_bot(
+    await async_check_can_propose_to_bot(
+        source_user,
         target_user,
         (0 if target_relationship_listing is None else len(target_relationship_listing)),
         target_user_balance.relationship_slots,

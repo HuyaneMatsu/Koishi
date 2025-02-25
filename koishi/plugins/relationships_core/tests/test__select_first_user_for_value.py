@@ -5,11 +5,12 @@ from ..relationship_completion import select_first_user_for_value
 
 
 def _iter_options():
-    user_id_0 = 202501270020
-    user_id_1 = 202501270021
-    user_id_2 = 202501270022
+    user_id_0 = 202501270020_000000
+    user_id_1 = 202501270021_000000
+    user_id_2 = 202501270022_000000
+    user_id_3 = 202502220003_000000
     
-    guild_id = 202501270023
+    guild_id = 202501270023_000000
     
     user_0 = User.precreate(user_id_0, name = 'Satori')
     user_0.guild_profiles[guild_id] = GuildProfile(nick = 'Sato')
@@ -41,6 +42,20 @@ def _iter_options():
         guild_id,
         user_2,
     )
+    
+    yield (
+        [user_0, user_1, user_2],
+        str(user_id_1),
+        0,
+        user_1,
+    )
+    
+    yield (
+        [user_0, user_1, user_2],
+        str(user_id_3),
+        0,
+        None,
+    )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
@@ -53,7 +68,7 @@ def test__select_first_user_for_value(users, value, guild_id):
     users : `list<ClientUserBase>`
         The users to filter from.
     
-    value : `None | str`
+    value : `str`
         Value to filter for.
     
     guild_id : `int`

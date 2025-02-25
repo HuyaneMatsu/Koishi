@@ -134,7 +134,7 @@ async def break_up(
     target_user_name : `str`
         The user's name to divorce.
     """
-    await client.interaction_application_command_acknowledge(event, False)
+    await client.interaction_application_command_acknowledge(event, False, show_for_invoking_user_only = True)
     source_user = event.user
     relationship, target_user = await get_relationship_and_user_like_at(
         source_user.id, target_user_name, event.guild_id

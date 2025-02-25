@@ -8,12 +8,12 @@ from ..relationship_types import RELATIONSHIP_TYPE_MAMA
 
 
 def _iter_options():
-    guild_id = 202501020050
+    guild_id = 202501020050_000000
     
-    user_id_0 = 202501020051
-    user_id_1 = 202501020052
-    user_id_2 = 202501020053
-    user_id_3 = 202501020054
+    user_id_0 = 202501020051_000000
+    user_id_1 = 202501020052_000000
+    user_id_2 = 202501020053_000000
+    user_id_3 = 202501020054_000000
     
     user_0 = User.precreate(user_id_0, name = 'Satori')
     user_0.guild_profiles[guild_id] = GuildProfile(nick = 'Sister')
@@ -53,9 +53,9 @@ def _iter_options():
             user_3,
         ],
         [
-            'Koishi',
-            'Okuu',
-            'Orin',
+            ('Koishi', str(user_id_1)),
+            ('Okuu', str(user_id_3)),
+            ('Orin', str(user_id_2)),
         ],
     )
     
@@ -75,9 +75,9 @@ def _iter_options():
             user_3,
         ],
         [
-            'Koishi',
-            'Okuu',
-            'Orin',
+            ('Koishi', str(user_id_1)),
+            ('Okuu', str(user_id_3)),
+            ('Orin', str(user_id_2)),
         ],
     )
     
@@ -97,9 +97,9 @@ def _iter_options():
             user_3,
         ],
         [
-            'BirdBrain',
-            'Flower',
-            'Maid',
+            ('BirdBrain', str(user_id_3)),
+            ('Flower', str(user_id_1)),
+            ('Maid', str(user_id_2)),
         ],
     )
     
@@ -119,7 +119,7 @@ def _iter_options():
             user_3,
         ],
         [
-            'Koishi',
+            ('Koishi', str(user_id_1)),
         ],
     )
     
@@ -139,7 +139,7 @@ def _iter_options():
             user_3,
         ],
         [
-            'Flower',
+            ('Flower', str(user_id_1)),
         ],
     )
     
@@ -159,6 +159,26 @@ def _iter_options():
             user_3,
         ],
         None,
+    )
+    
+    yield (
+        user_id_0,
+        False,
+        str(user_id_3),
+        0,
+        [
+            RelationshipRequest(user_id_1, user_id_0, RELATIONSHIP_TYPE_MAMA, 1000),
+            RelationshipRequest(user_id_2, user_id_0, RELATIONSHIP_TYPE_MAMA, 1002),
+            RelationshipRequest(user_id_3, user_id_0, RELATIONSHIP_TYPE_MAMA, 1004),
+        ],
+        [
+            user_1,
+            user_2,
+            user_3,
+        ],
+        [
+            ('Okuu', str(user_id_3)),
+        ],
     )
 
 
@@ -193,7 +213,7 @@ async def test__get_relationship_request_user_names_like_at(
     
     Returns
     -------
-    output : `None | list<str>`
+    output : `None | list<(str, str)>`
     """
     async def mock_get_relationship_request_listing(input_user_id, input_outgoing):
         nonlocal user_id

@@ -4,7 +4,7 @@ import vampytest
 
 from ..relationship import Relationship
 from ..relationship_completion import get_relationship_to_deepen
-from ..relationship_types import RELATIONSHIP_TYPE_MAMA, RELATIONSHIP_TYPE_SISTER_BIG, RELATIONSHIP_TYPE_WAIFU
+from ..relationship_types import RELATIONSHIP_TYPE_SISTER_BIG, RELATIONSHIP_TYPE_WAIFU
 
 
 def _iter_options():

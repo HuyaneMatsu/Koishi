@@ -8,6 +8,7 @@ from ...bot_utils.constants import RELATIONSHIP_VALUE_DEFAULT
 
 from math import floor
 
+from .completion_helpers import looks_like_user_id
 from .relationship_types import RELATIONSHIP_TYPE_NONE, RELATIONSHIP_TYPE_RELATIONSHIPS
 
 
@@ -27,7 +28,7 @@ def get_affinity_percent(source_user_id, target_user_id):
     -------
     percent : `int`
     """
-    return ((source_user_id ^ target_user_id) & 0b1111111111111111111111) % 101
+    return ((source_user_id ^ target_user_id) >> 22) % 101
 
 
 def get_affinity_multiplier(source_user_id, target_user_id):
@@ -229,7 +230,7 @@ def select_first_user_for_value(users, value, guild_id):
     users : `list<ClientUserBase>`
         The users to filter from.
     
-    value : `None | str`
+    value : `str`
         Value to filter for.
     
     guild_id : `int`
@@ -239,6 +240,13 @@ def select_first_user_for_value(users, value, guild_id):
     -------
     user : `None | ClientUserBase`
     """
+    if looks_like_user_id(value):
+        passed_user_id = int(value)
+        
+        for user in users:
+            if user.id == passed_user_id:
+                return user
+    
     for user in users:
         if user.has_name_like_at(value, guild_id):
             return user

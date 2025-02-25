@@ -21,7 +21,7 @@ MESSAGE_CREATE_PERMISSIONS = Permission().update_by_keys(send_messages = True, e
 )
 async def sex(client, event):
     """
-    You horny? Try your luck!
+    You horny? Try your luck!/21
     
     This function is a coroutine.
     

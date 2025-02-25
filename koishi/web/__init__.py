@@ -132,6 +132,13 @@ BLOCKED_IPS = {
     # This its php, lol
     '78.153.140.222',
     
+    # Tries to access git
+    '196.251.83.148',
+    
+    # Random bot
+    '171.244.43.14',
+    '3.228.138.194',
+    
     # spams | https://coder.social | "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43" 
     '47.82.8.101',
     '47.82.8.112',

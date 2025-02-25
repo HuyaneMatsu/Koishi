@@ -1,3 +1,20 @@
+### 2025-02-25
+
+- `/autommation welcome` now will not welcome a user in a guild if they welcomed recently.
+- `/autommation farewell` now will not farewell a user in a guild if they farewelled recently.
+- Fix love affinity percentage had bottom heavy distribution instead of scattered. (Since first relationship update.)
+- Fill out the relationship extend rules.
+- Fix `/shop roles` did not increment relationship investment as intended.
+- `/shop roles`, `/shop divorce-papers`, `/shop buy-relationship-slot` now only allows you to gift to anyone who is
+    related, or you must have the required roles to gift to anyone to matching `/gift` behavior.
+- Fix `/shop burn-divorce-papers`, `/shop buy-relationship-slot` not saving the "deepened" relationship which could led
+    the deepening to be lost.
+- Relationship request & relation auto completion now works with duplicate (or highly familiar) user names.
+- `/gift` now has `related` and `someone-else` parameters from previously only `target`.
+- `/gift` now allows you to gift to anyone who is related to you even if you do not have any of the required roles.
+- Fix `/shop roles` did not "deepen" the relationship between the users.
+- Now you will not be promoted to gift someone something if you cannot gift them.
+
 ### 2025-02-16
 
 - Add spam protection for `top-gg` voting to fix a top.gg webhook + nginx bug.

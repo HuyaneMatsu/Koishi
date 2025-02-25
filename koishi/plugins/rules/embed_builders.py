@@ -31,7 +31,7 @@ def _build_single_rule_into(rule_index, title, description_builder, into):
     """
     into.append('**')
     into.append(str(rule_index))
-    into.append('\\.')
+    into.append('\\. ')
     into.append(title)
     into.append('**\n')
     into.append(description_builder())
@@ -78,11 +78,10 @@ def build_embed_rules_single(rule_index):
     -------
     embed : ``Embed``
     """
-    try:
-        title, description_builder = RULES[rule_index]
-    except LookupError:
+    if (rule_index < 0) or (rule_index >= len(RULES)):
         description = 'There is no such a rule.'
     else:
+        title, description_builder = RULES[rule_index]
         description = ''.join(_build_single_rule_into(rule_index, title, description_builder, []))
     
     return Embed(

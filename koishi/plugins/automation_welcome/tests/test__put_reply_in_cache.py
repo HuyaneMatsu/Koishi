@@ -1,7 +1,7 @@
 import vampytest
 
 from ..constants import REPLY_CACHE, REPLY_CACHE_MAX_SIZE
-from ..spam_protection import put_reply_in_cache
+from ..reply_spam_protection import put_reply_in_cache
 
 
 def test__put_reply_in_cache__nope():

@@ -7,7 +7,7 @@ from hata.ext.slash import abort
 
 from ...bot_utils.user_getter import get_users_unordered
 
-from .completion_helpers import _make_suggestions
+from .completion_helpers import looks_like_user_id, _make_suggestions
 from .relationship_request_queries import get_relationship_request_listing
 
 
@@ -60,7 +60,7 @@ async def get_relationship_request_user_names_like_at(user_id, outgoing, value, 
     
     Returns
     -------
-    suggestions : `None | list<str>`
+    suggestions : `None | list<(str, str)>`
     """
     relationship_requests = await get_relationship_request_listing(user_id, outgoing)
     if relationship_requests is None:
@@ -111,11 +111,24 @@ async def get_relationship_request_and_user_like_at(user_id, outgoing, value, gu
             _iter_relationship_request_user_ids_to_request(outgoing, relationship_requests)
         )
         
-        for user in users:
-            if user.has_name_like_at(value, guild_id):
-                break
+        
+        if not looks_like_user_id(value):
+            user = None
+        
         else:
-            break
+            passed_user_id = int(value)
+            for user in users:
+                if user.id == passed_user_id:
+                    break
+            else:
+                user = None
+        
+        if user is None:
+            for user in users:
+                if user.has_name_like_at(value, guild_id):
+                    break
+            else:
+                break
         
         relationship_request = next(
             relationship_request for relationship_request in relationship_requests
@@ -143,7 +156,7 @@ async def autocomplete_relationship_request_source_user_name(event, value):
     
     Returns
     -------
-    suggestions : `None | list<str>`
+    suggestions : `None | list<(str, int)>`
     """
     return await get_relationship_request_user_names_like_at(event.user_id, False, value, event.guild_id)
 
@@ -164,7 +177,7 @@ async def autocomplete_relationship_request_target_user_name(event, value):
     
     Returns
     -------
-    suggestions : `None | list<str>`
+    suggestions : `None | list<(str, int)>`
     """
     return await get_relationship_request_user_names_like_at(event.user_id, True, value, event.guild_id)
 

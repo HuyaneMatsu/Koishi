@@ -10,6 +10,7 @@ from ...bots import FEATURE_CLIENTS
 from ..automation_core import get_farewell_fields
 from ..embed_image_refresh import schedule_image_refresh
 
+from .farewell_spam_protection import put_farewell_in_cache
 from .farewell_styles import get_farewell_style
 
 
@@ -36,6 +37,10 @@ async def farewell_user(client, guild, user, farewell_style, farewell_channel):
     farewell_channel : ``Channel``
         The channel to farewell the user at.
     """
+    # If the user was recently farewelled in the guild do not farewell again.
+    if put_farewell_in_cache(guild.id, user.id):
+        return
+    
     # select client if different
     client_id = farewell_style.client_id
     if client_id and client_id != client.id:

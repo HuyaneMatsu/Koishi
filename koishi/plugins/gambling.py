@@ -10,18 +10,13 @@ from hata import (
 from hata.ext.slash import Button, Row, abort, wait_for_component_interaction
 from scarletio import CancelledError, Future, Task
 
-from ..bot_utils.constants import (
-    COLOR__GAMBLING, EMOJI__HEART_CURRENCY, GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, ROLE__SUPPORT__BOOSTER,
-    ROLE__SUPPORT__ELEVATED
-)
+from ..bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY, GUILD__SUPPORT, ROLE__SUPPORT__ADMIN
 from ..bot_utils.daily import calculate_daily_new
 from ..bot_utils.utils import send_embed_to
 from ..bots import FEATURE_CLIENTS
 
 from .user_balance import get_user_balance
-from .user_settings import (
-    USER_SETTINGS_CUSTOM_ID_NOTIFICATION_GIFT_DISABLE, get_one_user_settings, get_preferred_client_for_user
-)
+from .user_settings import get_one_user_settings, get_preferred_client_for_user
 
 
 EVENT_MAX_DURATION = TimeDelta(hours = 24)
@@ -598,128 +593,6 @@ class DailyEventGUI:
             
             await client.events.error(client, f'{self!r}.countdown', err)
             return
-
-
-
-@FEATURE_CLIENTS.interactions(
-    integration_types = ['guild_install', 'user_install'],
-    is_global = True,
-)
-async def gift(
-    client,
-    event,
-    target_user: ('user', 'Who is your heart\'s chosen one?'),
-    amount: ('expression', 'How much do u love them?'),
-    message: ('str', 'Optional message to send with the gift.') = None,
-):
-    """
-    Gifts hearts to the chosen by your heart.
-    
-    This function is a coroutine generator.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The client who received the event.
-    event : ``InteractionEvent``
-        The received event.
-    target_user : ``ClientUserBase``
-        The targeted user.
-    amount : `int`
-        The amount of hearts to gift.
-    message : `None | str` = `None`, Optional
-        Additional message to send.
-    
-    Yields
-    ------
-    response : `None | Embed`
-    """
-    source_user = event.user
-    
-    if not (source_user.has_role(ROLE__SUPPORT__ELEVATED) or source_user.has_role(ROLE__SUPPORT__BOOSTER)):
-        abort(
-            f'You must have either {ROLE__SUPPORT__ELEVATED.name} or '
-            f'{ROLE__SUPPORT__BOOSTER.name} role to invoke this command.'
-        )
-    
-    if source_user is target_user:
-        abort('You cannot give hearts to yourself..')
-    
-    if amount <= 0:
-        abort('You cannot gift non-positive amount of hearts..')
-    
-    if (message is not None) and len(message) > 1000:
-        message = message[:1000] + '...'
-    
-    source_user_balance = await get_user_balance(source_user.id)
-    
-    source_balance =  source_user_balance.balance
-    source_allocated = max(source_user_balance.allocated, 0)
-    
-    if source_balance <= 0:
-        yield Embed('So lonely...', 'You do not have any hearts to gift.', color = COLOR__GAMBLING)
-        return
-    
-    available_balance = source_balance - source_allocated
-    if available_balance <= 0:
-        yield Embed('Like a flower', 'Whithering to the dust.', color = COLOR__GAMBLING)
-        return
-    
-    target_user_balance = await get_user_balance(target_user.id)
-    target_balance = target_user_balance.balance
-    
-    amount = min(available_balance, amount)
-        
-    source_new_balance = source_balance - amount
-    target_new_balance = target_balance + amount
-    
-    source_user_balance.set('balance', source_new_balance)
-    await source_user_balance.save()
-    
-    target_user_balance.set('balance', target_new_balance)
-    await target_user_balance.save()
-    
-    embed = Embed(
-        'Aww, so lovely',
-        f'You gifted {amount} {EMOJI__HEART_CURRENCY} to {target_user.name_at(event.guild_id)}',
-        color = COLOR__GAMBLING,
-    ).add_field(
-        f'Your {EMOJI__HEART_CURRENCY}',
-        f'{source_balance} -> {source_new_balance}',
-    ).add_field(
-        f'Their {EMOJI__HEART_CURRENCY}',
-        f'{target_balance} -> {target_new_balance}',
-    )
-    
-    if (message is not None):
-        embed.add_field('Message:', message)
-    
-    yield embed
-    
-    if (not target_user.bot):
-        target_user_settings = await get_one_user_settings(target_user.id)
-        if target_user_settings.notification_gift:
-            embed = Embed(
-                'Aww, love is in the air',
-                f'You have been gifted {amount} {EMOJI__HEART_CURRENCY} by {source_user.name_at(event.guild_id)}',
-                color = COLOR__GAMBLING,
-            ).add_field(
-                f'Your {EMOJI__HEART_CURRENCY}',
-                f'{target_balance} -> {target_new_balance}',
-            )
-            
-            if (message is not None):
-                embed.add_field('Message:', message)
-            
-            await send_embed_to(
-                get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
-                target_user.id,
-                embed,
-                Button(
-                    'I don\'t want notifs, nya!!',
-                    custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_GIFT_DISABLE,
-                ),
-            )
 
 
 AWARD_TYPES = [

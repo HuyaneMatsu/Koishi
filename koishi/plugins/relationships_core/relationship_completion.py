@@ -139,7 +139,7 @@ async def get_relationship_user_names_like_at(user_id, value, guild_id):
     
     Returns
     -------
-    suggestions : `None | list<str>`
+    suggestions : `None | list<(str, str)>`
     """
     relationships = await get_relationship_listing(user_id)
     if relationships is None:
@@ -238,7 +238,7 @@ async def get_relationship_unset_outgoing_user_names_like_at(user_id, value, gui
     
     Returns
     -------
-    suggestions : `None | list<str>`
+    suggestions : `None | list<(str, str)>`
     """
     relationships = await get_relationship_listing(user_id)
     if relationships is None:
@@ -344,7 +344,7 @@ async def get_relationship_extended_user_names_like_at(user_id, value, guild_id)
     
     Returns
     -------
-    suggestions : `None | list<str>`
+    suggestions : `None | list<(str, str)>`
     """
     relationship_listing_with_extend = await get_relationship_listing_with_extend(user_id)
     if relationship_listing_with_extend is None:

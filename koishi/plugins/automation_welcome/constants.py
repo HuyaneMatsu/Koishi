@@ -18,3 +18,6 @@ REPLY_EXPIRES_AFTER = timedelta_to_id_difference(TimeDelta(days = 7))
 
 REPLY_CACHE = OrderedDict()
 REPLY_CACHE_MAX_SIZE = 100
+
+WELCOME_CACHE = OrderedDict()
+WELCOME_CACHE_MAX_SIZE = 100

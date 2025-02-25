@@ -4,8 +4,8 @@ from ..helpers import get_affinity_multiplier
 
 
 def _iter_options():
-    yield 202501050010, 202501051011, 1.8800000000000001
-    yield 202501051012, 202501053013, 1.75
+    yield 202501050010_000000, 202501051011_000000, 1.96
+    yield 202501051012_000000, 202501053013_000000, 1.42
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())

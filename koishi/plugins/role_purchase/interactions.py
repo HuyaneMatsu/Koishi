@@ -1,11 +1,14 @@
 __all__ = ('purchase_role_other', 'purchase_role_self',)
 
+from math import floor
+
 from hata import DiscordException, ERROR_CODES
 from hata.ext.slash import abort
 
 from ...bot_utils.utils import send_embed_to
 from ...bots import MAIN_CLIENT
 
+from ..gift_common import check_can_gift
 from ..user_balance import get_user_balance
 from ..user_settings import get_one_user_settings, get_preferred_client_for_user
 
@@ -106,7 +109,7 @@ async def purchase_role_self(client, event, role, required_balance):
     )
 
 
-async def purchase_role_other(client, event, role, required_balance, target_user):
+async def purchase_role_other(client, event, role, required_balance, target_user, relationship_to_deepen):
     """
     Purchases a role for an other user.
     
@@ -129,14 +132,19 @@ async def purchase_role_other(client, event, role, required_balance, target_user
     target_user : ``ClientUserBase``
         The user to buy the role for.
     
+    relationship_to_deepen : `None | Relationship`
+        The relationship to deepen by the purchase.
+    
     Raises
     ------
     InteractionAbortedError
     """
+    await client.interaction_application_command_acknowledge(event, False, show_for_invoking_user_only = True)
+    
+    source_user = event.user
+    check_can_gift(source_user, relationship_to_deepen)
     check_has_role_other(role, target_user, event.guild_id)
     check_not_in_guild_other(role, target_user, event.guild_id)
-    
-    await client.interaction_application_command_acknowledge(event, False, show_for_invoking_user_only = True)
     
     user_balance = await get_user_balance(event.user_id)
     available_balance = user_balance.balance - max(user_balance.allocated, 0)
@@ -151,6 +159,20 @@ async def purchase_role_other(client, event, role, required_balance, target_user
     balance = user_balance.balance
     user_balance.set('balance', balance - required_balance)
     await user_balance.save()
+    
+    if (relationship_to_deepen is not None):
+        relationship_investment_increase = floor(required_balance * 0.01)
+        if relationship_to_deepen.source_user_id == source_user.id:
+            relationship_to_deepen.set(
+                'source_investment',
+                relationship_to_deepen.source_investment + relationship_investment_increase
+            )
+        else:
+            relationship_to_deepen.set(
+                'target_investment',
+                relationship_to_deepen.target_investment + relationship_investment_increase
+            )
+        await relationship_to_deepen.save()
     
     await client.interaction_response_message_edit(
         event,

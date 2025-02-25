@@ -11,12 +11,12 @@ from ..relationship_types import RELATIONSHIP_TYPE_MAMA, RELATIONSHIP_TYPE_UNSET
 
 
 def _iter_options():
-    guild_id = 202501080020
+    guild_id = 202501080020_000000
     
-    user_id_0 = 202501080021
-    user_id_1 = 202501080022
-    user_id_2 = 202501080023
-    user_id_3 = 202501080024
+    user_id_0 = 202501080021_000000
+    user_id_1 = 202501080022_000000
+    user_id_2 = 202501080023_000000
+    user_id_3 = 202501080024_000000
     
     user_0 = User.precreate(user_id_0, name = 'Satori')
     user_0.guild_profiles[guild_id] = GuildProfile(nick = 'Sister')
@@ -73,15 +73,37 @@ def _iter_options():
         ],
         (relationship_1, user_2),
     )
+    
+    relationship_0 = Relationship(user_id_0, user_id_1, RELATIONSHIP_TYPE_UNSET, 1000, now)
+    relationship_1 = Relationship(user_id_0, user_id_2, RELATIONSHIP_TYPE_UNSET, 1000, now)
+    relationship_2 = Relationship(user_id_0, user_id_3, RELATIONSHIP_TYPE_MAMA, 1000, now)
+    
+    yield (
+        user_id_0,
+        str(user_id_2),
+        guild_id,
+        [
+            relationship_0,
+            relationship_1,
+            relationship_2,
+        ],
+        [
+            user_1,
+            user_2,
+            user_3,
+        ],
+        (relationship_1, user_2),
+    )
 
 
 def _iter_options__aborted():
-    guild_id = 202501080030
+    guild_id = 202501080030_000000
     
-    user_id_0 = 202501080031
-    user_id_1 = 202501080032
-    user_id_2 = 202501080033
-    user_id_3 = 202501080034
+    user_id_0 = 202501080031_000000
+    user_id_1 = 202501080032_000000
+    user_id_2 = 202501080033_000000
+    user_id_3 = 202501080034_000000
+    user_id_4 = 202502220002_000000
     
     user_0 = User.precreate(user_id_0, name = 'Satori')
     user_0.guild_profiles[guild_id] = GuildProfile(nick = 'Sister')
@@ -174,6 +196,26 @@ def _iter_options__aborted():
     yield (
         user_id_0,
         'unyu',
+        guild_id,
+        [
+            relationship_0,
+            relationship_1,
+            relationship_2,
+        ],
+        [
+            user_1,
+            user_2,
+            user_3,
+        ],
+    )
+    
+    relationship_0 = Relationship(user_id_1, user_id_0, RELATIONSHIP_TYPE_UNSET, 1000, now)
+    relationship_1 = Relationship(user_id_2, user_id_0, RELATIONSHIP_TYPE_UNSET, 1002, now)
+    relationship_2 = Relationship(user_id_0, user_id_3, RELATIONSHIP_TYPE_MAMA, 1004, now)
+    
+    yield (
+        user_id_0,
+        str(user_id_4),
         guild_id,
         [
             relationship_0,

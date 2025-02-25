@@ -10,7 +10,7 @@ from ..automation_core import get_welcome_style_name
 from ..embed_image_refresh import schedule_image_refresh
 
 from .constants import CUSTOM_ID_WELCOME_REPLY, CUSTOM_ID_WELCOME_REPLY_CUSTOM, REPLY_EXPIRES_AFTER
-from .spam_protection import is_reply_in_cache, put_reply_in_cache
+from .reply_spam_protection import is_reply_in_cache, put_reply_in_cache
 from .welcome_styles import get_welcome_style
 
 

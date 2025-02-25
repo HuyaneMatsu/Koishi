@@ -4,8 +4,8 @@ from ..helpers import get_affinity_percent
 
 
 def _iter_options():
-    yield 202501050010, 202501051011, 22
-    yield 202501051012, 202501053013, 35
+    yield 202501050010_000000, 202501051011_000000, 14
+    yield 202501051012_000000, 202501053013_000000, 68
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())

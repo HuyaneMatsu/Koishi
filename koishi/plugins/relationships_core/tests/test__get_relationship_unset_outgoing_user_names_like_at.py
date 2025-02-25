@@ -10,12 +10,12 @@ from ..relationship_types import RELATIONSHIP_TYPE_SISTER_BIG, RELATIONSHIP_TYPE
 
 
 def _iter_options():
-    guild_id = 202501080010
+    guild_id = 202501080010_000000
     
-    user_id_0 = 202501080011
-    user_id_1 = 202501080012
-    user_id_2 = 202501080013
-    user_id_3 = 202501080014
+    user_id_0 = 202501080011_000000
+    user_id_1 = 202501080012_000000
+    user_id_2 = 202501080013_000000
+    user_id_3 = 202501080014_000000
     
     user_0 = User.precreate(user_id_0, name = 'Satori')
     user_0.guild_profiles[guild_id] = GuildProfile(nick = 'Sister')
@@ -54,8 +54,8 @@ def _iter_options():
             user_2,
         ],
         [
-            'Koishi',
-            'Orin',
+            ('Koishi', str(user_id_1)),
+            ('Orin', str(user_id_2)),
         ],
     )
     
@@ -73,8 +73,8 @@ def _iter_options():
             user_2,
         ],
         [
-            'Flower',
-            'Maid',
+            ('Flower', str(user_id_1)),
+            ('Maid', str(user_id_2)),
         ],
     )
     
@@ -92,7 +92,7 @@ def _iter_options():
             user_2,
         ],
         [
-            'Koishi',
+            ('Koishi', str(user_id_1)),
         ],
     )
     
@@ -110,13 +110,47 @@ def _iter_options():
             user_2,
         ],
         [
-            'Flower',
+            ('Flower', str(user_id_1)),
         ],
     )
     
     yield (
         user_id_0,
         'satori',
+        0,
+        [
+            Relationship(user_id_0, user_id_1, RELATIONSHIP_TYPE_UNSET, 1000, now),
+            Relationship(user_id_0, user_id_2, RELATIONSHIP_TYPE_UNSET, 1002, now),
+            Relationship(user_id_3, user_id_0, RELATIONSHIP_TYPE_SISTER_BIG, 1004, now),
+        ],
+        [
+            user_1,
+            user_2,
+        ],
+        None,
+    )
+    
+    yield (
+        user_id_0,
+        str(user_id_1),
+        0,
+        [
+            Relationship(user_id_0, user_id_1, RELATIONSHIP_TYPE_UNSET, 1000, now),
+            Relationship(user_id_0, user_id_2, RELATIONSHIP_TYPE_UNSET, 1002, now),
+            Relationship(user_id_3, user_id_0, RELATIONSHIP_TYPE_SISTER_BIG, 1004, now),
+        ],
+        [
+            user_1,
+            user_2,
+        ],
+        [
+            ('Koishi', str(user_id_1)),
+        ],
+    )
+    
+    yield (
+        user_id_0,
+        str(user_id_3),
         0,
         [
             Relationship(user_id_0, user_id_1, RELATIONSHIP_TYPE_UNSET, 1000, now),
@@ -157,7 +191,7 @@ async def test__get_relationship_unset_outgoing_user_names_like_at(user_id, valu
     
     Returns
     -------
-    output : `None | list<str>`
+    output : `None | list<(str, str)>`
     """
     async def mock_get_relationship_listing(input_user_id):
         nonlocal user_id

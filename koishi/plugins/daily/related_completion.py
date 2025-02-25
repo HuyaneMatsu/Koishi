@@ -8,7 +8,9 @@ from hata import elapsed_time
 
 from ...bot_utils.user_getter import get_users_unordered
 
-from ..relationships_core import get_relationship_listing_with_extend, iter_relationship_and_extend_user_ids_to_request
+from ..relationships_core import (
+    get_relationship_listing_with_extend, iter_relationship_and_extend_user_ids_to_request, looks_like_user_id
+)
 from ..user_balance import get_user_balances
 
 
@@ -67,8 +69,25 @@ async def get_related_users_with_name_and_next_daily(user_id, guild_id, value):
         iter_relationship_and_extend_user_ids_to_request(user_id, relationship_listing_with_extend)
     )
     
-    if (value is not None):
+    while True:
+        if (value is None):
+            break
+        
+        if looks_like_user_id(value):
+            passed_user_id = int(value)
+            
+            for user in users:
+                if user.id == passed_user_id:
+                    break
+            else:
+                user = None
+            
+            if (user is not None):
+                users = [user]
+            break
+        
         users = [user for user in users if user.has_name_like_at(value, guild_id)]
+        break
     
     user_balances = await get_user_balances(user.id for user in users)
     
@@ -96,7 +115,7 @@ def get_related_sort_key_and_suggestion(related_user, guild_id, now, daily_can_c
     Returns
     -------
     sort_key : `DateTime`
-    suggestion : `str`
+    suggestion : `(str, str)`
     """
     if daily_can_claim_at <= now:
         comment = None
@@ -110,7 +129,7 @@ def get_related_sort_key_and_suggestion(related_user, guild_id, now, daily_can_c
     if (comment is not None):
         suggestion = f'{suggestion} ({comment})'
     
-    return sort_key, suggestion
+    return sort_key, (suggestion, str(related_user.id))
 
 
 async def autocomplete_related_name(interaction_event, value):
@@ -127,7 +146,7 @@ async def autocomplete_related_name(interaction_event, value):
     
     Returns
     -------
-    suggestions : `list<str>`
+    suggestions : `list<(str, str)>`
     """
     related_users_and_next_daily = await get_related_users_with_name_and_next_daily(
         interaction_event.user_id, interaction_event.guild_id, value

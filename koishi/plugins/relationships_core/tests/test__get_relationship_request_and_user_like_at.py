@@ -9,12 +9,12 @@ from ..relationship_types import RELATIONSHIP_TYPE_MAMA
 
 
 def _iter_options():
-    guild_id = 202501020060
+    guild_id = 202501020060_000000
     
-    user_id_0 = 202501020061
-    user_id_1 = 202501020062
-    user_id_2 = 202501020063
-    user_id_3 = 202501020064
+    user_id_0 = 202501020061_000000
+    user_id_1 = 202501020062_000000
+    user_id_2 = 202501020063_000000
+    user_id_3 = 202501020064_000000
     
     user_0 = User.precreate(user_id_0, name = 'Satori')
     user_0.guild_profiles[guild_id] = GuildProfile(nick = 'Sister')
@@ -93,15 +93,38 @@ def _iter_options():
         ],
         (relationship_request_2, user_3),
     )
+    
+    relationship_request_0 = RelationshipRequest(user_id_0, user_id_1, RELATIONSHIP_TYPE_MAMA, 1000)
+    relationship_request_1 = RelationshipRequest(user_id_0, user_id_2, RELATIONSHIP_TYPE_MAMA, 1000)
+    relationship_request_2 = RelationshipRequest(user_id_0, user_id_3, RELATIONSHIP_TYPE_MAMA, 1000)
+    
+    yield (
+        user_id_0,
+        True,
+        str(user_id_3),
+        guild_id,
+        [
+            relationship_request_0,
+            relationship_request_1,
+            relationship_request_2,
+        ],
+        [
+            user_1,
+            user_2,
+            user_3,
+        ],
+        (relationship_request_2, user_3),
+    )
 
 
 def _iter_options__aborted():
-    guild_id = 202501020070
+    guild_id = 202501020070_000000
     
-    user_id_0 = 202501020071
-    user_id_1 = 202501020072
-    user_id_2 = 202501020073
-    user_id_3 = 202501020074
+    user_id_0 = 202501020071_000000
+    user_id_1 = 202501020072_000000
+    user_id_2 = 202501020073_000000
+    user_id_3 = 202501020074_000000
+    user_id_4 = 202502220000_000000
     
     user_0 = User.precreate(user_id_0, name = 'Satori')
     user_0.guild_profiles[guild_id] = GuildProfile(nick = 'Sister')
@@ -123,7 +146,7 @@ def _iter_options__aborted():
         None,
         None,
     )
-
+    
     
     relationship_request_0 = RelationshipRequest(user_id_0, user_id_1, RELATIONSHIP_TYPE_MAMA, 1000)
     relationship_request_1 = RelationshipRequest(user_id_0, user_id_2, RELATIONSHIP_TYPE_MAMA, 1000)
@@ -145,7 +168,7 @@ def _iter_options__aborted():
             user_3,
         ],
     )
-
+    
     
     relationship_request_0 = RelationshipRequest(user_id_0, user_id_1, RELATIONSHIP_TYPE_MAMA, 1000)
     relationship_request_1 = RelationshipRequest(user_id_0, user_id_2, RELATIONSHIP_TYPE_MAMA, 1000)
@@ -155,6 +178,28 @@ def _iter_options__aborted():
         user_id_0,
         True,
         'satori',
+        guild_id,
+        [
+            relationship_request_0,
+            relationship_request_1,
+            relationship_request_2,
+        ],
+        [
+            user_1,
+            user_2,
+            user_3,
+        ],
+    )
+    
+    
+    relationship_request_0 = RelationshipRequest(user_id_0, user_id_1, RELATIONSHIP_TYPE_MAMA, 1000)
+    relationship_request_1 = RelationshipRequest(user_id_0, user_id_2, RELATIONSHIP_TYPE_MAMA, 1000)
+    relationship_request_2 = RelationshipRequest(user_id_0, user_id_3, RELATIONSHIP_TYPE_MAMA, 1000)
+    
+    yield (
+        user_id_0,
+        True,
+        str(user_id_4),
         guild_id,
         [
             relationship_request_0,

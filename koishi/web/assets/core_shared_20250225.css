@@ -626,6 +626,7 @@ p[align="left"] a::before {
 }
 
 .header_menu .header_right details-menu, .header_menu .header_right details {
+    display: block;
     background-color: var(--color-header-button-right);
 }
 
@@ -654,6 +655,8 @@ p[align="left"] a::before {
 }
 
 .header_theme_picker {
+    flex-direction: column;
+    display: block;
     float: right;
     width: calc(var(--size-header-theme-picker-width) - var(--size-header-button-inner-border) * 2);
 }

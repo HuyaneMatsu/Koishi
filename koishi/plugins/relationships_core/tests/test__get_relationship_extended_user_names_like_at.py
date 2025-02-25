@@ -10,12 +10,12 @@ from ..relationship_types import RELATIONSHIP_TYPE_MAMA, RELATIONSHIP_TYPE_SISTE
 
 
 def _iter_options():
-    guild_id = 202501110010
+    guild_id = 202501110010_000000
     
-    user_id_0 = 202501110011
-    user_id_1 = 202501110012
-    user_id_2 = 202501110013
-    user_id_3 = 202501110014
+    user_id_0 = 202501110011_000000
+    user_id_1 = 202501110012_000000
+    user_id_2 = 202501110013_000000
+    user_id_3 = 202501110014_000000
     
     user_0 = User.precreate(user_id_0, name = 'Satori')
     user_0.guild_profiles[guild_id] = GuildProfile(nick = 'Sister')
@@ -50,7 +50,7 @@ def _iter_options():
             user_3,
         ],
         [
-            'Okuu',
+            ('Okuu', str(user_id_3)),
         ],
     )
     
@@ -73,7 +73,7 @@ def _iter_options():
             user_3,
         ],
         [
-            'BirdBrain',
+            ('BirdBrain', str(user_id_3)),
         ],
     )
     
@@ -95,7 +95,7 @@ def _iter_options():
             user_3,
         ],
         [
-            'BirdBrain',
+            ('BirdBrain', str(user_id_3)),
         ],
     )
     
@@ -171,6 +171,29 @@ def _iter_options():
             user_3,
         ],
         None,
+    )
+    
+    relationship_0 = Relationship(user_id_1, user_id_0, RELATIONSHIP_TYPE_MAMA, 1000, now)
+    relationship_1 = Relationship(user_id_2, user_id_0, RELATIONSHIP_TYPE_MAMA, 1002, now)
+    relationship_2 = Relationship(user_id_0, user_id_3, RELATIONSHIP_TYPE_MAMA, 1004, now)
+    
+    yield (
+        user_id_0,
+        str(user_id_3),
+        guild_id,
+        [
+            (relationship_0, None),
+            (relationship_1, None),
+            (relationship_2, None),
+        ],
+        [
+            user_1,
+            user_2,
+            user_3,
+        ],
+        [
+            ('BirdBrain', str(user_id_3)),
+        ],
     )
 
 
@@ -202,7 +225,7 @@ async def test__get_relationship_extended_user_names_like_at(
     
     Returns
     -------
-    output : `None | list<str>`
+    output : `None | list<(str, str)>`
     
     Raises
     ------
@@ -241,6 +264,9 @@ async def test__get_relationship_extended_user_names_like_at(
     
     if (output is not None):
         for element in output:
-            vampytest.assert_instance(element, str)
+            vampytest.assert_instance(element, tuple)
+            vampytest.assert_eq(len(element), 2)
+            vampytest.assert_instance(element[0], str)
+            vampytest.assert_instance(element[1], str)
     
     return output

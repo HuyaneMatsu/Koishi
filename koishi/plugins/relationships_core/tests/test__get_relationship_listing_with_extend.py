@@ -139,10 +139,10 @@ def _iter_options():
                     relationship_1,
                     relationship_2,
                     relationship_3,
-                    # TBD,
+                    relationship_4,
                     relationship_5,
-                    # TBD,
-                    # TBD,
+                    # N / A,
+                    # N / A,
                     
                     # extras:
                     # do not add unset
@@ -197,10 +197,10 @@ def _iter_options():
                     relationship_1,
                     relationship_2,
                     relationship_3,
-                    # TBD,
+                    relationship_4,
                     relationship_5,
-                    # TBD,
-                    # TBD,
+                    # N / A,
+                    # N / A,
                     
                     # extras:
                     # do not add unset
@@ -255,10 +255,10 @@ def _iter_options():
                     relationship_1,
                     relationship_2,
                     relationship_3,
-                    # TBD,
+                    relationship_4,
                     relationship_5,
-                    # TBD,
-                    # TBD,
+                    # N / A,
+                    relationship_7,
                     
                     # extras:
                     # do not add unset
@@ -266,7 +266,6 @@ def _iter_options():
             )
         ],
     )
-    
     
     
     # Sharing through daughter
@@ -314,10 +313,10 @@ def _iter_options():
                     relationship_1,
                     relationship_2,
                     relationship_3,
-                    # TBD,
-                    # TBD,
-                    # TBD,
-                    # TBD,
+                    # N / A,
+                    relationship_5,
+                    relationship_6,
+                    # N / A,
                     
                     # extras:
                     # do not add unset
@@ -325,7 +324,6 @@ def _iter_options():
             )
         ],
     )
-    
     
     # Sharing through mistress
     
@@ -370,11 +368,11 @@ def _iter_options():
                 relationship_0,
                 [
                     relationship_1,
-                    # TBD,
-                    # TBD,
-                    # TBD,
-                    # TBD,
-                    # TBD,
+                    # N / A,
+                    # N / A,
+                    # N / A,
+                    relationship_5,
+                    # N / A,
                     relationship_7,
                     
                     # extras:
@@ -383,7 +381,6 @@ def _iter_options():
             )
         ],
     )
-
     
     # Sharing through maid
     
@@ -406,19 +403,41 @@ def _iter_options():
                 (
                     relationship_0,
                 ),
-            ),
-            # All is N / A or TBD
+            ), (
+                user_id_01,
+                (
+                    relationship_1,
+                    relationship_2,
+                    relationship_3,
+                    relationship_4,
+                    relationship_5,
+                    relationship_6,
+                    relationship_7,
+                    
+                    # Extras:
+                    relationship_8,
+                )
+            )
         ),
         user_id_00,
         [
             (
                 relationship_0,
-                # all is N / A or TBD
-                None,
+                [
+                    # N / A,
+                    # N / A,
+                    # N / A,
+                    relationship_4,
+                    # N / A,
+                    # N / A,
+                    # N / A,
+                    
+                    # extras:
+                    # do not add unset
+                ],
             )
         ],
     )
-
     
     # Sharing through unset (not sharing and will not share)
     

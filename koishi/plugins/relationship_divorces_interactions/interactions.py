@@ -10,6 +10,7 @@ from ...bot_utils.user_getter import get_user
 from ...bot_utils.utils import send_embed_to
 from ...bots import FEATURE_CLIENTS
 
+from ..gift_common import check_can_gift
 from ..relationship_divorces_core import (
     CUSTOM_ID_RELATIONSHIP_DIVORCES_DECREMENT_PURCHASE_CANCEL_OTHER_PATTERN,
     CUSTOM_ID_RELATIONSHIP_DIVORCES_DECREMENT_PURCHASE_CANCEL_SELF,
@@ -91,7 +92,7 @@ async def relationship_divorces_decrement_invoke_other(event, target_user_id):
     yield await relationship_divorces_decrement_invoke_other_question(event, target_user)
 
 
-async def relationship_divorces_decrement_invoke_self_question(event):
+async def relationship_divorces_decrement_invoke_self_question(client, event):
     """
     Questions whether the user really wanna hire ninjas to locate and burn their relationship divorce papers.
     
@@ -99,13 +100,14 @@ async def relationship_divorces_decrement_invoke_self_question(event):
     
     Parameters
     ----------
+    client : ``Client``
+        The client who received the interaction.
+    
     event : ``InteractionEvent``
         The received interaction event.
-    
-    Yields
-    ------
-    response : ``InteractionResponse``
     """
+    await client.interaction_application_command_acknowledge(event, False, show_for_invoking_user_only = True)
+    
     user_id = event.user.id
     
     user_balance = await get_user_balance(user_id)
@@ -118,13 +120,14 @@ async def relationship_divorces_decrement_invoke_self_question(event):
     
     check_sufficient_balance_self(required_balance, available_balance, relationship_divorces)
     
-    return InteractionResponse(
+    await client.interaction_response_message_edit(
+        event,
         embed = build_question_embed_purchase_confirmation_self(required_balance, relationship_divorces),
         components = build_component_question_relationship_divorces_decrement_purchase_self(),
     )
 
 
-async def relationship_divorces_decrement_invoke_other_question(event, target_user):
+async def relationship_divorces_decrement_invoke_other_question(client, event, target_user, relationship_to_deepen):
     """
     Questions whether the user really wanna hire ninjas to locate and burn someone else's relationship divorce paper.
     
@@ -132,24 +135,29 @@ async def relationship_divorces_decrement_invoke_other_question(event, target_us
     
     Parameters
     ----------
+    client : ``Client``
+        The client who received the interaction.
+    
     event : ``InteractionEvent``
         The received interaction event.
     
     target_user : ``ClientUserBase``
         The targeted user.
     
-    Returns
-    -------
-    response : ``InteractionResponse``
+    relationship_to_deepen : `None | Relationship`
+        The relationship to deepen by the purchase.
     """
-    source_user_id = event.user.id
+    await client.interaction_application_command_acknowledge(event, False, show_for_invoking_user_only = True)
+    
+    source_user = event.user
+    check_can_gift(source_user, relationship_to_deepen)
     
     target_user_balance = await get_user_balance(target_user.id)
     relationship_divorces = target_user_balance.relationship_divorces
     
     check_no_relationship_divorces_other(relationship_divorces, target_user, event.guild_id)
     
-    source_user_balance = await get_user_balance(source_user_id)
+    source_user_balance = await get_user_balance(source_user.id)
     
     required_balance = get_relationship_divorce_reduction_required_balance(target_user.id, relationship_divorces)
     available_balance = source_user_balance.balance - source_user_balance.allocated
@@ -158,7 +166,8 @@ async def relationship_divorces_decrement_invoke_other_question(event, target_us
         required_balance, available_balance, relationship_divorces, target_user, event.guild_id
     )
     
-    return InteractionResponse(
+    await client.interaction_response_message_edit(
+        event,
         embed = build_question_embed_purchase_confirmation_other(
             required_balance, relationship_divorces, target_user, event.guild_id,
         ),
@@ -269,8 +278,8 @@ async def relationship_divorces_decrement_confirm_other(client, event, target_us
     -------
     acknowledge / response : `None | InteractionEvent`
     """
-    source_user_id = event.user_id
-    if event.message.interaction.user_id != source_user_id:
+    source_user = event.user
+    if event.message.interaction.user_id != source_user.id:
         return
     
     try:
@@ -283,10 +292,16 @@ async def relationship_divorces_decrement_confirm_other(client, event, target_us
     target_user = await get_user(target_user_id)
     
     # Get relationship to decrement its value if any.
-    relationship = await get_relationship_to_deepen(source_user_id, target_user_id)
+    relationship_to_deepen = await get_relationship_to_deepen(source_user.id, target_user_id)
     
-    user_balances = await get_user_balances((source_user_id, target_user_id))
-    source_user_balance = user_balances[source_user_id]
+    try:
+        check_can_gift(source_user, relationship_to_deepen)
+    except InteractionAbortedError as exception:
+        exception.response.abort = False
+        raise
+    
+    user_balances = await get_user_balances((source_user.id, target_user_id))
+    source_user_balance = user_balances[source_user.id]
     target_user_balance = user_balances[target_user_id]
     
     relationship_divorces = target_user_balance.relationship_divorces
@@ -314,13 +329,19 @@ async def relationship_divorces_decrement_confirm_other(client, event, target_us
     await target_user_balance.save()
     
     
-    if (relationship is not None):
+    if (relationship_to_deepen is not None):
         relationship_investment_increase = floor(required_balance * 0.01)
-        if relationship.source_user_id == source_user_id:
-            relationship.set('source_investment', relationship.source_investment + relationship_investment_increase)
+        if relationship_to_deepen.source_user_id == source_user.id:
+            relationship_to_deepen.set(
+                'source_investment',
+                relationship_to_deepen.source_investment + relationship_investment_increase
+            )
         else:
-            relationship.set('target_investment', relationship.target_investment + relationship_investment_increase)
-    
+            relationship_to_deepen.set(
+                'target_investment',
+                relationship_to_deepen.target_investment + relationship_investment_increase
+            )
+        await relationship_to_deepen.save()
     
     yield InteractionResponse(
         embed = build_success_embed_purchase_completed_other(
@@ -335,5 +356,5 @@ async def relationship_divorces_decrement_confirm_other(client, event, target_us
             await send_embed_to(
                 get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
                 target_user,
-                build_notification_embed_other(relationship_divorces, event.user, event.guild_id),
+                build_notification_embed_other(relationship_divorces, source_user, event.guild_id),
             )

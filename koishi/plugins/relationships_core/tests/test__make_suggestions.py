@@ -5,11 +5,11 @@ from ..relationship_completion import _make_suggestions
 
 
 def _iter_options():
-    user_id_0 = 202501070010
-    user_id_1 = 202501070011
-    user_id_2 = 202501070012
+    user_id_0 = 202501070010_000000
+    user_id_1 = 202501070011_000000
+    user_id_2 = 202501070012_000000
     
-    guild_id = 202501070014
+    guild_id = 202501070014_000000
     
     user_0 = User.precreate(user_id_0, name = 'Satori')
     user_0.guild_profiles[guild_id] = GuildProfile(nick = 'Sato')
@@ -24,28 +24,42 @@ def _iter_options():
         [user_0, user_1, user_2],
         None,
         0,
-        ['Rin', 'Satori', 'Utsuho'],
+        [
+            ('Rin', str(user_id_1)),
+            ('Satori', str(user_id_0)),
+            ('Utsuho', str(user_id_2)),
+        ],
     )
     
     yield (
         [user_0, user_1, user_2],
         None,
         guild_id,
-        ['Okuu', 'Orin', 'Sato'],
+        [
+            ('Okuu', str(user_id_2)),
+            ('Orin', str(user_id_1)),
+            ('Sato', str(user_id_0)),
+        ],
     )
     
     yield (
         [user_0, user_1, user_2],
         'ri',
         0,
-        ['Rin', 'Satori'],
+        [
+            ('Rin', str(user_id_1)),
+            ('Satori', str(user_id_0)),
+        ],
     )
     
     yield (
         [user_0, user_1, user_2],
         'ri',
         guild_id,
-        ['Orin', 'Sato'],
+        [
+            ('Orin', str(user_id_1)),
+            ('Sato', str(user_id_0)),
+        ],
     )
     
     yield (
@@ -59,7 +73,27 @@ def _iter_options():
         [user_0, user_1, user_2],
         'ok',
         guild_id,
-        ['Okuu'],
+        [
+            ('Okuu', str(user_id_2)),
+        ],
+    )
+    
+    yield (
+        [user_0, user_1, user_2],
+        'ok',
+        guild_id,
+        [
+            ('Okuu', str(user_id_2)),
+        ],
+    )
+    
+    yield (
+        [user_0, user_1, user_2],
+        str(user_id_1),
+        0,
+        [
+            ('Rin', str(user_id_1)),
+        ],
     )
 
 
@@ -81,7 +115,7 @@ def test__make_suggestions(users, value, guild_id):
     
     Returns
     -------
-    output : `set<int>`
+    output : `list<(str, str)>`
     """
     output = _make_suggestions(users, value, guild_id)
     vampytest.assert_instance(output, list, nullable = True)

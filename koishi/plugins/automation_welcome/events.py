@@ -14,6 +14,7 @@ from ..embed_image_refresh import schedule_image_refresh
 from .constants import (
     CUSTOM_ID_WELCOME_REPLY, CUSTOM_ID_WELCOME_REPLY_CUSTOM, ONBOARDING_MASK_ALL, ONBOARDING_MASK_STARTED
 )
+from .welcome_spam_protection import put_welcome_in_cache
 from .welcome_styles import get_welcome_style
 
 
@@ -43,6 +44,10 @@ async def welcome_user(client, guild, user, welcome_style, welcome_channel, welc
     welcome_reply_buttons_enabled : `bool`
         Whether welcome reply button should be added under the message.
     """
+    # Do not welcome the user if they were welcomed recently.
+    if put_welcome_in_cache(guild.id, user.id):
+        return
+    
     # select client if different
     client_id = welcome_style.client_id
     if client_id and client_id != client.id:
