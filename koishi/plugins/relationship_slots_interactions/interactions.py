@@ -2,8 +2,6 @@ __all__ = (
     'relationship_slot_increment_invoke_other_question', 'relationship_slot_increment_invoke_self_question',
 )
 
-from math import floor
-
 from hata import InteractionType
 from hata.ext.slash import InteractionAbortedError, InteractionResponse
 
@@ -19,7 +17,7 @@ from ..relationship_slots_core import (
     CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_INVOKE_OTHER_PATTERN, CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_INVOKE_SELF,
     build_component_question_relationship_slot_purchase_other, build_component_question_relationship_slot_purchase_self
 )
-from ..relationships_core import get_relationship_to_deepen
+from ..relationships_core import deepen_and_boost_relationship, get_relationship_to_deepen
 from ..user_balance import get_user_balance, get_user_balances
 from ..user_settings import get_one_user_settings, get_preferred_client_for_user
 
@@ -256,7 +254,8 @@ async def relationship_slot_increment_confirm_self(event):
     
     user_balance.set('balance', user_balance.balance - required_balance)
     user_balance.set('relationship_slots', new_relationship_slot_count)
-    await user_balance.save()
+    
+    await deepen_and_boost_relationship(user_balance, None, None, required_balance, save_source_user_balance = 2)
     
     yield InteractionResponse(
         embed = build_success_embed_purchase_completed_self(required_balance, new_relationship_slot_count),
@@ -334,24 +333,15 @@ async def relationship_slot_increment_confirm_other(client, event, target_user_i
     
     source_user_balance.set('balance', source_user_balance.balance - required_balance)
     target_user_balance.set('relationship_slots', new_relationship_slot_count)
-    await source_user_balance.save()
-    await target_user_balance.save()
-    
-    
-    if (relationship_to_deepen is not None):
-        relationship_investment_increase = floor(required_balance * 0.01)
-        if relationship_to_deepen.source_user_id == source_user.id:
-            relationship_to_deepen.set(
-                'source_investment',
-                relationship_to_deepen.source_investment + relationship_investment_increase
-            )
-        else:
-            relationship_to_deepen.set(
-                'target_investment',
-                relationship_to_deepen.target_investment + relationship_investment_increase
-            )
-        await relationship_to_deepen.save()
-    
+
+    await deepen_and_boost_relationship(
+        source_user_balance,
+        target_user_balance,
+        relationship_to_deepen,
+        required_balance,
+        save_source_user_balance = 2,
+        save_target_user_balance = 2,
+    )
     
     yield InteractionResponse(
         embed = build_success_embed_purchase_completed_other(

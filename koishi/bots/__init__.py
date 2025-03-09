@@ -24,6 +24,7 @@ if LOAD_KOISHI:
     from .flandre import *
     from .koishi import *
     from .nitori import *
+    from .nue import *
     from .orin import *
     from .renes import *
     from .satori import *
@@ -38,6 +39,7 @@ if LOAD_KOISHI:
         Alice,
         Flandre,
         Koishi,
+        Nue,
         Orin,
         ToyKoishi,
         Yoshika,
@@ -49,6 +51,7 @@ if LOAD_KOISHI:
         *flandre.__all__,
         *koishi.__all__,
         *nitori.__all__,
+        *nue.__all__,
         *orin.__all__,
         *renes.__all__,
         *satori.__all__,

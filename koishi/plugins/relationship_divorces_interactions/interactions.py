@@ -2,8 +2,6 @@ __all__ = (
     'relationship_divorces_decrement_invoke_other_question', 'relationship_divorces_decrement_invoke_self_question',
 )
 
-from math import floor
-
 from hata.ext.slash import InteractionAbortedError, InteractionResponse
 
 from ...bot_utils.user_getter import get_user
@@ -22,7 +20,7 @@ from ..relationship_divorces_core import (
     build_component_question_relationship_divorces_decrement_purchase_self,
     get_relationship_divorce_reduction_required_balance
 )
-from ..relationships_core import get_relationship_to_deepen
+from ..relationships_core import deepen_and_boost_relationship, get_relationship_to_deepen
 from ..user_balance import get_user_balance, get_user_balances
 from ..user_settings import get_one_user_settings, get_preferred_client_for_user
 
@@ -38,7 +36,7 @@ from .embed_builders import (
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_DIVORCES_DECREMENT_PURCHASE_INVOKE_SELF)
-async def relationship_divorces_decrement_invoke_self(event):
+async def relationship_divorces_decrement_invoke_self(client, event):
     """
     Inline caller for hiring ninjas to locate ad burn your relationship divorce papers.
     
@@ -46,6 +44,9 @@ async def relationship_divorces_decrement_invoke_self(event):
     
     Parameters
     ----------
+    client : ``Client``
+        The client who received the interaction.
+    
     event : ``InteractionEvent``
         The received interaction event.
     
@@ -57,11 +58,11 @@ async def relationship_divorces_decrement_invoke_self(event):
         return
     
     yield
-    yield await relationship_divorces_decrement_invoke_self_question(event)
+    yield await relationship_divorces_decrement_invoke_self_question(client, event)
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_DIVORCES_DECREMENT_PURCHASE_INVOKE_OTHER_PATTERN)
-async def relationship_divorces_decrement_invoke_other(event, target_user_id):
+async def relationship_divorces_decrement_invoke_other(client, event, target_user_id):
     """
     Inline caller for hiring ninjas to locate and burn the relationship divorce papers of someone else.
     
@@ -69,6 +70,9 @@ async def relationship_divorces_decrement_invoke_other(event, target_user_id):
     
     Parameters
     ----------
+    client : ``Client``
+        The client who received the interaction.
+    
     event : ``InteractionEvent``
         The received interaction event.
     
@@ -89,7 +93,7 @@ async def relationship_divorces_decrement_invoke_other(event, target_user_id):
     
     yield
     target_user = await get_user(target_user_id)
-    yield await relationship_divorces_decrement_invoke_other_question(event, target_user)
+    yield await relationship_divorces_decrement_invoke_other_question(client, event, target_user)
 
 
 async def relationship_divorces_decrement_invoke_self_question(client, event):
@@ -248,7 +252,8 @@ async def relationship_divorces_decrement_confirm_self(event):
     
     user_balance.set('balance', user_balance.balance - required_balance)
     user_balance.set('relationship_divorces', relationship_divorces -1)
-    await user_balance.save()
+    
+    await deepen_and_boost_relationship(user_balance, None, None, required_balance, save_source_user_balance = 2)
     
     yield InteractionResponse(
         embed = build_success_embed_purchase_completed_self(required_balance, relationship_divorces),
@@ -325,23 +330,15 @@ async def relationship_divorces_decrement_confirm_other(client, event, target_us
     
     source_user_balance.set('balance', source_user_balance.balance - required_balance)
     target_user_balance.set('relationship_divorces', relationship_divorces - 1)
-    await source_user_balance.save()
-    await target_user_balance.save()
     
-    
-    if (relationship_to_deepen is not None):
-        relationship_investment_increase = floor(required_balance * 0.01)
-        if relationship_to_deepen.source_user_id == source_user.id:
-            relationship_to_deepen.set(
-                'source_investment',
-                relationship_to_deepen.source_investment + relationship_investment_increase
-            )
-        else:
-            relationship_to_deepen.set(
-                'target_investment',
-                relationship_to_deepen.target_investment + relationship_investment_increase
-            )
-        await relationship_to_deepen.save()
+    await deepen_and_boost_relationship(
+        source_user_balance,
+        target_user_balance,
+        relationship_to_deepen,
+        required_balance,
+        save_source_user_balance = 2,
+        save_target_user_balance = 2,
+    )
     
     yield InteractionResponse(
         embed = build_success_embed_purchase_completed_other(

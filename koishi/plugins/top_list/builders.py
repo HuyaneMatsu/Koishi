@@ -13,7 +13,7 @@ from .constants import (
 )
 
 
-def build_content(page_index, processed_entries):
+def build_content(page_index, processed_entries, guild_id):
     """
     Builds a page_number of entries.
     
@@ -21,8 +21,12 @@ def build_content(page_index, processed_entries):
     ----------
     page_index : `int`
         Page index (0 based).
+    
     processed_entries : `list<(int, int, ClientUserBase)`
         Professed entries.
+    
+    guild_id : `int`
+        The respective guild's identifier.
     
     Returns
     -------
@@ -44,7 +48,7 @@ def build_content(page_index, processed_entries):
             content_parts.append(str(total_hearts).rjust(hearts_adjust))
             content_parts.append(' ')
             content_parts.append(STYLE_NAME)
-            content_parts.append(user.full_name)
+            content_parts.append(user.name_at(guild_id))
             content_parts.append('\n')
     else:
         content_parts.append('\nno result\n')
@@ -92,7 +96,7 @@ def build_components(page_index, entry_count):
     return Row(button_previous, button_next, BUTTON_CLOSE)
 
 
-def build_top_list_response(page_index, entries):
+def build_top_list_response(page_index, entries, guild_id):
     """
     Makes top list response.
     
@@ -100,8 +104,12 @@ def build_top_list_response(page_index, entries):
     ----------
     page_index : `int`
         The page's index to make the response for.
+    
     entries : `list<(int, int, ClientUserBase)`
         Processed entries.
+    
+    guild_id : `int`
+        The respective guild's identifier.
     
     Returns
     -------
@@ -109,7 +117,7 @@ def build_top_list_response(page_index, entries):
     """
     embed = Embed(
         f'{EMOJI__HEART_CURRENCY} Top-list {EMOJI__HEART_CURRENCY}',
-        build_content(page_index, entries),
+        build_content(page_index, entries, guild_id),
     ).add_field(
         'Page',
         (

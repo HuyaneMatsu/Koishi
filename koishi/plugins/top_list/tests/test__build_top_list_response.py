@@ -19,13 +19,14 @@ def test__build_top_list_response():
     
     user_0 = User.precreate(202309010000, name = 'okuu')
     user_1 = User.precreate(202309010001, name = 'orin')
+    guild_id = 0
     
     entries = [
         (page_index * PAGE_SIZE + 1, 1111, user_0),
         (page_index * PAGE_SIZE + 2, 1112, user_1),
     ]
     
-    output = build_top_list_response(page_index, entries)
+    output = build_top_list_response(page_index, entries, guild_id)
     
     
     vampytest.assert_eq(

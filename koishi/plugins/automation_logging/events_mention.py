@@ -7,11 +7,12 @@ from ...bot_utils.multi_client_utils import get_first_client_with_message_create
 from ...bots import FEATURE_CLIENTS
 
 from ..automation_core import get_log_mention_channel
-from .constants import PERMISSIONS_ATTACH_FILES
 from ..rendering_helpers import (
     MESSAGE_RENDER_MODE_CREATE, build_message_common_description, iter_build_attachment_message_content,
-    iter_build_attachment_message_mentions,
+    iter_build_attachment_message_mentions
 )
+
+from .constants import PERMISSIONS_ATTACH_FILES
 
 
 @FEATURE_CLIENTS.events

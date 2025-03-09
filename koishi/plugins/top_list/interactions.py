@@ -13,6 +13,7 @@ from .queries import get_top_list_entries
 
 @FEATURE_CLIENTS.interactions(is_global = True)
 async def top_list(
+    event,
     page : ('number', 'page?') = 1,
 ):
     """
@@ -22,6 +23,9 @@ async def top_list(
     
     Parameters
     ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    
     page : `int` = `1`, Optional
         Page number (1 based).
     
@@ -36,11 +40,11 @@ async def top_list(
     
     yield
     entries = await get_top_list_entries(page_index)
-    yield build_top_list_response(page_index, entries)
+    yield build_top_list_response(page_index, entries, event.guild_id)
 
 
 @FEATURE_CLIENTS.interactions(custom_id = re_compile(f'{re_escape(CUSTOM_ID_PAGE_BASE)}(\d+)'))
-async def top_list_page(page_index):
+async def top_list_page(event, page_index):
     """
     Gets the top list for the given page.
     
@@ -48,6 +52,9 @@ async def top_list_page(page_index):
     
     Parameters
     ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    
     page_index : `str`
         The page's index to make the response for. Later converted to `int`.
     
@@ -59,7 +66,7 @@ async def top_list_page(page_index):
     
     yield
     entries = await get_top_list_entries(page_index)
-    yield build_top_list_response(page_index, entries)
+    yield build_top_list_response(page_index, entries, event.guild_id)
 
 
 

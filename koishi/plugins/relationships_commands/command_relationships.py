@@ -288,46 +288,42 @@ async def divorce_confirm(
         source_investment, target_investment = target_investment, source_investment
     
     # We do some math
-    
+    #
     # The users get back some hearts.
     # Lets say:
     #    user 0 investment: 3000
     #    user 1 investment: 1000
-    # We create a water level for it which will be 2000 ((3000 + 1000) >> 1).
+    # We create a water level for it which will be 1000 ((3000 + 1000) >> 2).
+    #
     # Everything above the water level is given back to the users:
-    #     user 0 receives: 1000
+    #     user 0 receives: 2000
     #     user 1 receives: 0
     # Note: cannot be negative.
-    
-    investment_water_level = (source_investment + target_investment) >> 1
-    source_receives = max(source_investment - investment_water_level, 0)
-    target_receives = max(target_investment - investment_water_level, 0)
-    
-    # The users receive some to their relationship value.
-    # Lets use the values from above.
-    # Here the water level is lower than before: 1000 ((3000 + 1000) >> 2).
+    #
     # Everything above water level // 3 is added to the user's value.
     #    user 0 receives: 666
     #    user 1 receives: 0
     # Note: can be negative
     
-    value_water_level = investment_water_level >> 1
-    source_value = (source_investment - value_water_level) // 3
-    target_value = (target_investment - value_water_level) // 3
+    value_water_level = (source_investment + target_investment) >> 2
+    source_receives = source_investment - value_water_level
+    target_receives = target_investment - value_water_level
     
     user_balances = await get_user_balances((source_user_id, target_user_id))
     source_user_balance = user_balances[source_user_id]
     target_user_balance = user_balances[target_user_id]
     
-    source_user_balance.set('balance', source_user_balance.balance + source_receives)
-    target_user_balance.set('balance', target_user_balance.balance + target_receives)
+    source_user_balance.set('balance', source_user_balance.balance + max(source_receives, 0))
+    target_user_balance.set('balance', target_user_balance.balance + max(target_receives, 0))
     
     source_user_balance.set(
-        'relationship_value', get_root(get_square(source_user_balance.relationship_value) + get_square(source_value))
+        'relationship_value',
+        get_root(get_square(source_user_balance.relationship_value) + get_square(source_receives // 3)),
     )
     source_user_balance.set('relationship_divorces', source_user_balance.relationship_divorces + 1)
     target_user_balance.set(
-        'relationship_value', get_root(get_square(target_user_balance.relationship_value) + get_square(target_value))
+        'relationship_value',
+        get_root(get_square(target_user_balance.relationship_value) + get_square(target_receives // 3)),
     )
     
     # Save

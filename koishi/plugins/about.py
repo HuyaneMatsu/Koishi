@@ -221,7 +221,7 @@ async def render_about_generic(client, event):
         PYTHON_VERSION_FIELD_VALUE,
         inline = True,
     ).add_field(
-        'Library',
+        'Framework',
         LIBRARY_VERSION_FIELD_VALUE,
         inline = True,
     ).add_field(

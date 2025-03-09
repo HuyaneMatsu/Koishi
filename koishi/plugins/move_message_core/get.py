@@ -2,7 +2,7 @@ __all__ = ('get_files', 'get_message', 'get_webhook',)
 
 from hata import ERROR_CODES, DiscordException
 
-from .attachment_stream import AttachmentStream
+from ...bot_utils.response_data_streaming import create_http_stream_resource
 
 
 async def get_attachment(client, attachment):
@@ -73,7 +73,7 @@ def get_files(client, message):
         files = None
     else:
         files = [
-            (attachment.name, AttachmentStream(attachment.url, client.http), attachment.description)
+            (attachment.name, create_http_stream_resource(client.http, attachment.url), attachment.description)
             for attachment in attachments
         ]
     

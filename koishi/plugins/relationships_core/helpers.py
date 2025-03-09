@@ -4,6 +4,8 @@ __all__ = (
     'select_first_user_for_value', 'select_relationship', 'select_relationship_for_user_id',
 )
 
+from config import KOISHI_ID
+
 from ...bot_utils.constants import RELATIONSHIP_VALUE_DEFAULT
 
 from math import floor
@@ -28,6 +30,9 @@ def get_affinity_percent(source_user_id, target_user_id):
     -------
     percent : `int`
     """
+    if (source_user_id == KOISHI_ID) or (target_user_id == KOISHI_ID):
+        return 100
+    
     return ((source_user_id ^ target_user_id) >> 22) % 101
 
 

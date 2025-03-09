@@ -4,6 +4,7 @@ from .constants import *
 from .helpers import *
 from .relationship import *
 from .relationship_completion import *
+from .relationship_deepening import *
 from .relationship_queries import *
 from .relationship_request import *
 from .relationship_request_completion import *
@@ -20,6 +21,7 @@ __all__ = (
     *helpers.__all__,
     *relationship.__all__,
     *relationship_completion.__all__,
+    *relationship_deepening.__all__,
     *relationship_queries.__all__,
     *relationship_request_completion.__all__,
     *relationship_request_queries.__all__,

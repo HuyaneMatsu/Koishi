@@ -59,7 +59,7 @@ if (DATABASE_NAME is not None):
     from sqlalchemy.sql.expression import func
     
     try:
-        DB_ENGINE = create_engine(DATABASE_NAME)
+        DB_ENGINE = create_engine(DATABASE_NAME, max_overflow = -1, pool_size = 50)
     except ImportError as err:
         warn(
             f'Could not create database engine: {err!r}.',

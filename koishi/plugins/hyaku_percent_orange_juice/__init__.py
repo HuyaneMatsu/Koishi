@@ -5,6 +5,8 @@ __all__ = (
     *hyaku_percent_orange_juice.__all__,
 )
 
+# news page:
+# https://store.steampowered.com/news/app/282800
 
 # 2024-09-24
 # - 3.09.01
@@ -50,3 +52,10 @@ __all__ = (
 
 # 2024-12-05
 # - 3.24.00
+
+# 2025-03-01
+# - 3.24.01 (return of cakes)
+
+# Not on the wiki yet, so cannot add it
+# - 3.24.02 (dlc)
+# - anything after

@@ -78,7 +78,10 @@ def iter_relationship_and_extend_user_ids_to_request(
         if (relationship_listing_extend is None):
             continue
         
-        yield from _iter_relationship_user_ids_to_request(user_id, relationship_listing_extend)
+        for user_id in _iter_relationship_user_ids_to_request(user_id, relationship_listing_extend):
+            if user_id != excluded_user_id:
+                yield user_id
+        
         continue
 
 

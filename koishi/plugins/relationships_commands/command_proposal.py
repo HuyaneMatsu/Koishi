@@ -652,7 +652,7 @@ async def _handle_relationship_proposal_accept(client, event, source_user, targe
     await target_user_balance.save()
     
     relationship = Relationship(
-        source_user.id, target_user.id, relationship_type, investment, DateTime.now(tz = TimeZone.utc)
+        source_user.id, target_user.id, relationship_type, investment >> 1, DateTime.now(tz = TimeZone.utc)
     )
     await relationship.save()
     

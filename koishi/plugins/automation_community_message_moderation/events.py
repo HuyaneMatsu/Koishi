@@ -12,8 +12,8 @@ from ...bots import FEATURE_CLIENTS
 from ..automation_core import get_community_message_moderation_fields
 from ..blacklist_core import is_user_id_in_blacklist
 from ..rendering_helpers import (
-    MESSAGE_RENDER_MODE_DELETE, build_message_common_description, iter_build_attachment_message_content, 
-    iter_build_attachment_voters
+    MESSAGE_RENDER_MODE_DELETE, build_message_common_description, iter_build_attachment_message_attachments,
+    iter_build_attachment_message_content,  iter_build_attachment_voters
 )
 
 from .cache import get_lock_for, delete_lock_of
@@ -202,7 +202,8 @@ async def handle_reaction_event(client, message, emoji, user, addition):
             ),
             file = [
                 *iter_build_attachment_message_content(message),
-                *iter_build_attachment_voters(down_voters, up_voters, message.guild)
+                *iter_build_attachment_voters(down_voters, up_voters, message.guild),
+                *iter_build_attachment_message_attachments(client.http, message),
             ],
         )
     except ConnectionError:

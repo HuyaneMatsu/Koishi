@@ -104,16 +104,13 @@ def build_response(client, starter_text, verb, source_user, targets, client_in_t
         response_parts.append(starter_text)
         response_parts.append('; ')
     
-    user_count = len(targets)
-    if (user_count == 0) and (not client_in_targets):
-        response_parts.append(client.mention)
-    else:
-        response_parts.append(source_user.mention)
+    response_parts.append(source_user.mention)
     
     response_parts.append(' ')
     response_parts.append(verb)
     response_parts.append(' ')
     
+    user_count = len(targets)
     if user_count == 0:
         if client_in_targets:
             if random() > 0.5:
@@ -635,8 +632,15 @@ def create_action_command_function(action):
                 f'{expire_after:.2f} seconds.'
             )
         
+        # Reverse the users when there are no target.
+        if (not targets) and (not client_in_users):
+            source_user = client
+            targets = {event.user}
+        else:
+            source_user = event.user
+        
         content, embed = await create_response_content_and_embed(
-            action, client, event, event.guild_id, event.user, targets, client_in_users, user_in_users, allowed_mentions
+            action, client, event, event.guild_id, source_user, targets, client_in_users, user_in_users, allowed_mentions
         )
         
         await send_action_response(client, event, content, embed, allowed_mentions)

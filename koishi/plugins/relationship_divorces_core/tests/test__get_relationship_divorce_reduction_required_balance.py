@@ -4,8 +4,8 @@ from ..helpers import get_relationship_divorce_reduction_required_balance
 
 
 def _iter_options():
-    yield 1223312111565, 1, 9036
-    yield 1223312111565, 2, 21324
+    yield 1223312111565, 1, 4940
+    yield 1223312111565, 2, 13132
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())

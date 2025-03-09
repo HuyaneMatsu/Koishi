@@ -1,5 +1,5 @@
 import vampytest
-from hata import User
+from hata import GuildProfile, User
 
 from ..builders import build_content
 from ..constants import PAGE_SIZE, STYLE_HEARTS, STYLE_NAME, STYLE_NUMBER
@@ -10,19 +10,25 @@ def test__build_content():
     Tests whether ``build_content`` works as intended.
     """
     page_index = 20
+    
+    guild_id = 202503070003
+    user_0 = User.precreate(202308230004, name = 'okuu')
+    user_1 = User.precreate(202308230005, name = 'orin')
+    user_1.guild_profiles[guild_id] = GuildProfile(nick = 'rin rin')
+    
     processed_entries = [
-        (page_index * PAGE_SIZE + 1, 1111, User.precreate(202308230004, name = 'okuu')),
-        (page_index * PAGE_SIZE + 2, 1112, User.precreate(202308230005, name = 'orin')),
+        (page_index * PAGE_SIZE + 1, 1111, user_0),
+        (page_index * PAGE_SIZE + 2, 1112, user_1),
     ]
     
-    output = build_content(page_index, processed_entries)
+    output = build_content(page_index, processed_entries, guild_id)
     
     vampytest.assert_eq(
         output,
         (
             f'```ansi\n'
             f'{STYLE_NUMBER}{page_index * PAGE_SIZE + 1!s}.: {STYLE_HEARTS}{1111!s} {STYLE_NAME}okuu\n'
-            f'{STYLE_NUMBER}{page_index * PAGE_SIZE + 2!s}.: {STYLE_HEARTS}{1112!s} {STYLE_NAME}orin\n'
+            f'{STYLE_NUMBER}{page_index * PAGE_SIZE + 2!s}.: {STYLE_HEARTS}{1112!s} {STYLE_NAME}rin rin\n'
             f'```'
         ),
     )
@@ -37,7 +43,7 @@ def test__build_content__empty():
     page_index = 20
     processed_entries = []
     
-    output = build_content(page_index, processed_entries)
+    output = build_content(page_index, processed_entries, 0)
     
     vampytest.assert_eq(
         output,
@@ -68,7 +74,7 @@ def test__build_content__shifted():
         (10,  6969, User.precreate(202308230015, name = 'hisami')),
     ]
     
-    output = build_content(0, processed_entries)
+    output = build_content(0, processed_entries, 0)
     
     vampytest.assert_eq(
         output,

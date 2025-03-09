@@ -10,7 +10,9 @@ else:
     from . import models as module_models
     if module_models.DB_ENGINE is not None:
         
-        DB_ENGINE = create_engine(DATABASE_NAME, strategy = KOKORO_STRATEGY, single_worker = True)
+        DB_ENGINE = create_engine(
+            DATABASE_NAME, max_overflow = -1, pool_size = 50, strategy = KOKORO_STRATEGY, single_worker = False
+        )
         module_models.DB_ENGINE = DB_ENGINE
 
 from .bind_types import *

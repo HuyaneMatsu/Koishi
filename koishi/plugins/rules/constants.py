@@ -7,7 +7,8 @@ import config
 
 from ...bot_utils.constants import (
     ROLE__SUPPORT__BOT_ACCESS__ALICE, ROLE__SUPPORT__BOT_ACCESS__FLANDRE, ROLE__SUPPORT__BOT_ACCESS__KOISHI,
-    ROLE__SUPPORT__BOT_ACCESS__ORIN, ROLE__SUPPORT__BOT_ACCESS__TOY_KOISHI, ROLE__SUPPORT__BOT_ACCESS__YOSHIKA
+    ROLE__SUPPORT__BOT_ACCESS__NUE, ROLE__SUPPORT__BOT_ACCESS__ORIN, ROLE__SUPPORT__BOT_ACCESS__TOY_KOISHI,
+    ROLE__SUPPORT__BOT_ACCESS__YOSHIKA
 )
 
 
@@ -57,6 +58,10 @@ RULES_COMPONENTS = [
                     'Koishi',
                 ),
                 Option(
+                    str(config.NUE_ID),
+                    'Nue',
+                ),
+                Option(
                     str(config.ORIN_ID),
                     'Orin',
                 ),
@@ -80,6 +85,7 @@ BOT_ACCESS_ROLES = {
     config.ALICE_ID : ROLE__SUPPORT__BOT_ACCESS__ALICE,
     config.FLANDRE_ID : ROLE__SUPPORT__BOT_ACCESS__FLANDRE,
     config.KOISHI_ID : ROLE__SUPPORT__BOT_ACCESS__KOISHI,
+    config.NUE_ID : ROLE__SUPPORT__BOT_ACCESS__NUE,
     config.ORIN_ID : ROLE__SUPPORT__BOT_ACCESS__ORIN,
     config.TOY_KOISHI_ID : ROLE__SUPPORT__BOT_ACCESS__TOY_KOISHI,
     config.YOSHIKA_ID : ROLE__SUPPORT__BOT_ACCESS__YOSHIKA,

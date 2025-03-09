@@ -1,14 +1,39 @@
+### 2025-03-09
+
+- Fix `/action` and other action commands did reversed the invoking user preference (as they did it with the bot & user)
+    when not targeting anyone.
+- Fix `/love` was not using the users display name.
+- Ridge love affinity percents of Koishi.
+- How much value is added from an investment to a relationship is reduced to avoid inflating the value.
+     Refund value increased on break-up to match the changes.
+- Fix `/about`. `hata` is a framework for some time.
+- Previously the divorce cost was increased due to changing the formula. The cost has been tuned back by around 25%
+    on average.
+- User balance getting now does multi-query instead of parallel-query. High parallelism failed the db connector and
+    crashed `/daily` if the user had a lot of relationships uncached (20+).
+- `/automation community-message-moderation` now zips the message's attachments that are within the upload limit.
+- `/top-list` now uses the user's local name instead of their guild.
+- `/lucky-spin` is now available when user installed.
+- Add new `/coin-flip` command. This command was planned for almost 2 years now, just never got to it.
+- Add Nue bot.
+- Fix the components prompting relationship divorce decrement were not working (since last update).
+- Minimum Relationship deepening increased from 1 to 2. Now gives half the amount for indirect relationships.
+- Purchasing for yourself (includes daily, but excludes stat upgrade for now) now increases your relationship value
+    by 1% (min 2). If purchasing for somme-one who is non-related then the amount is halved.
+- Purchasing for related (includes daily) now boosts the relationship. Giving you 5% of the amount (min 8) as balance.
+    Gives half of the amount to them. All amounts are halved if the relationship is indirect. Has 22 hour cooldown.
+    Both sides of the relationship has their own cooldown, so technically could be used from both sides.
+
 ### 2025-02-25
 
-- `/autommation welcome` now will not welcome a user in a guild if they welcomed recently.
-- `/autommation farewell` now will not farewell a user in a guild if they farewelled recently.
+- `/autommation welcome` now will not welcome users in guilds where they were welcomed recently.
+- `/autommation farewell` now will not farewell users in guilds where they were farewelled recently.
 - Fix love affinity percentage had bottom heavy distribution instead of scattered. (Since first relationship update.)
 - Fill out the relationship extend rules.
-- Fix `/shop roles` did not increment relationship investment as intended.
 - `/shop roles`, `/shop divorce-papers`, `/shop buy-relationship-slot` now only allows you to gift to anyone who is
-    related, or you must have the required roles to gift to anyone to matching `/gift` behavior.
-- Fix `/shop burn-divorce-papers`, `/shop buy-relationship-slot` not saving the "deepened" relationship which could led
-    the deepening to be lost.
+    related, or you must have the required roles to gift to anyone. This is to match the new `/gift` behavior.
+- Fix `/shop burn-divorce-papers`, `/shop buy-relationship-slot` not saving the "deepened" relationship which could
+    lead the deepening to be lost.
 - Relationship request & relation auto completion now works with duplicate (or highly familiar) user names.
 - `/gift` now has `related` and `someone-else` parameters from previously only `target`.
 - `/gift` now allows you to gift to anyone who is related to you even if you do not have any of the required roles.

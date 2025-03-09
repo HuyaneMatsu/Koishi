@@ -43,8 +43,11 @@ RENES_ID = 0                     # bot id (int) for Renes.
 SAKUYA_TOKEN = ''                # bot token (str) for Sakuya.
 SAKUYA_ID = 0                    # bot id (int) for Sakuya.
 
-ALICE_TOKEN = ''                # bot token (str) for Alice.
-ALICE_ID = 0                    # bot id (int) for Alice.
+ALICE_TOKEN = ''                 # bot token (str) for Alice.
+ALICE_ID = 0                     # bot id (int) for Alice.
+
+NUE_TOKEN = ''                   # bot token (str) for Nue.
+NUE_ID = 0                       # bot id (int) for Nue.
 
 
 AUDIO_PLAY_POSSIBLE = False      # Whether FFmpeg and other voice requirement as satisfied

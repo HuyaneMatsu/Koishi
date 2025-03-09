@@ -10,7 +10,9 @@ from ...bot_utils.daily import DAILY_INTERVAL, calculate_daily_for, refresh_stre
 from ...bot_utils.utils import send_embed_to
 from ...bots import FEATURE_CLIENTS
 
-from ..relationships_core import get_extender_relationship_and_relationship_and_user_like_at
+from ..relationships_core import (
+    deepen_and_boost_relationship, get_extender_relationship_and_relationship_and_user_like_at
+)
 from ..user_balance import get_user_balance, get_user_balances
 from ..user_settings import (
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_BY_WAIFU_DISABLE, get_one_user_settings, get_preferred_client_for_user
@@ -63,7 +65,8 @@ async def claim_daily_for_yourself(client, interaction_event):
     user_balance.set('daily_can_claim_at', now + DAILY_INTERVAL)
     user_balance.set('count_daily_self', user_balance.count_daily_self + 1)
     user_balance.set('daily_reminded', False)
-    await user_balance.save()
+    
+    await deepen_and_boost_relationship(user_balance, None, None, received, save_source_user_balance = 2)
     
     top_gg_notify = should_top_gg_notify(user_balance.count_top_gg_vote, user_balance.top_gg_voted_at, now)
     
@@ -123,29 +126,21 @@ async def claim_daily_for_other(client, interaction_event, extender_relationship
     relationship_value_increase = 1 + floor(received * 0.01)
     
     source_user_balance.set('count_daily_for_related', source_user_balance.count_daily_for_related + 1)
-    await source_user_balance.save()
-    
-    if (extender_relationship is None):
-        invested_relationship = relationship
-    else:
-        invested_relationship = extender_relationship
-    
-    if invested_relationship.source_user_id == source_user.id:
-        invested_relationship.set(
-            'source_investment', invested_relationship.source_investment + relationship_value_increase
-        )
-    else:
-        invested_relationship.set(
-            'target_investment', invested_relationship.target_investment + relationship_value_increase
-        )
-    await invested_relationship.save()
     
     target_user_balance.set('balance', balance_new)
     target_user_balance.set('daily_can_claim_at', now + DAILY_INTERVAL)
     target_user_balance.set('streak', streak_new)
     target_user_balance.set('count_daily_by_related', target_user_balance.count_daily_by_related + 1)
     target_user_balance.set('daily_reminded', False)
-    await target_user_balance.save()
+    
+    await deepen_and_boost_relationship(
+        source_user_balance,
+        target_user_balance,
+        (relationship if (extender_relationship is None) else extender_relationship),
+        relationship_value_increase,
+        save_source_user_balance = 2,
+        save_target_user_balance = 2,
+    )
     
     yield build_embed_daily_claimed_other(
         received, balance_new, streak, streak_new, target_user, interaction_event.guild_id

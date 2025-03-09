@@ -76,7 +76,7 @@ And much more!
 
 - Games
     
-    `21` • `ds` • `kanako` • `lucky-spin` • `minesweeper` • `xox`
+    `21` • `coin-flip` • `ds` • `kanako` • `lucky-spin` • `minesweeper` • `xox`
 
 -  Help
     

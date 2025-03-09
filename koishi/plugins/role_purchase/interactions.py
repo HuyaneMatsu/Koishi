@@ -1,7 +1,5 @@
 __all__ = ('purchase_role_other', 'purchase_role_self',)
 
-from math import floor
-
 from hata import DiscordException, ERROR_CODES
 from hata.ext.slash import abort
 
@@ -9,7 +7,8 @@ from ...bot_utils.utils import send_embed_to
 from ...bots import MAIN_CLIENT
 
 from ..gift_common import check_can_gift
-from ..user_balance import get_user_balance
+from ..relationships_core import deepen_and_boost_relationship
+from ..user_balance import get_user_balance, get_user_balances
 from ..user_settings import get_one_user_settings, get_preferred_client_for_user
 
 from .checks import (
@@ -101,7 +100,8 @@ async def purchase_role_self(client, event, role, required_balance):
     
     balance = user_balance.balance
     user_balance.set('balance', balance - required_balance)
-    await user_balance.save()
+    
+    await deepen_and_boost_relationship(user_balance, None, None, required_balance, save_source_user_balance = 2)
     
     await client.interaction_response_message_edit(
         event,
@@ -146,8 +146,11 @@ async def purchase_role_other(client, event, role, required_balance, target_user
     check_has_role_other(role, target_user, event.guild_id)
     check_not_in_guild_other(role, target_user, event.guild_id)
     
-    user_balance = await get_user_balance(event.user_id)
-    available_balance = user_balance.balance - max(user_balance.allocated, 0)
+    user_balances = await get_user_balances((source_user.id, target_user.id))
+    source_user_balance = user_balances[source_user.id]
+    target_user_balance = user_balances[target_user.id]
+    
+    available_balance = source_user_balance.balance - max(source_user_balance.allocated, 0)
     
     check_insufficient_available_balance(role, available_balance, required_balance)
     success = await _add_role(target_user, role)
@@ -156,23 +159,17 @@ async def purchase_role_other(client, event, role, required_balance, target_user
             embed = build_failure_embed_not_in_guild_other(role, target_user, event.guild_id)
         )
     
-    balance = user_balance.balance
-    user_balance.set('balance', balance - required_balance)
-    await user_balance.save()
+    balance = source_user_balance.balance
+    source_user_balance.set('balance', balance - required_balance)
+    await source_user_balance.save()
     
-    if (relationship_to_deepen is not None):
-        relationship_investment_increase = floor(required_balance * 0.01)
-        if relationship_to_deepen.source_user_id == source_user.id:
-            relationship_to_deepen.set(
-                'source_investment',
-                relationship_to_deepen.source_investment + relationship_investment_increase
-            )
-        else:
-            relationship_to_deepen.set(
-                'target_investment',
-                relationship_to_deepen.target_investment + relationship_investment_increase
-            )
-        await relationship_to_deepen.save()
+    await deepen_and_boost_relationship(
+        source_user_balance,
+        target_user_balance,
+        relationship_to_deepen,
+        required_balance,
+        save_source_user_balance = 2,
+    )
     
     await client.interaction_response_message_edit(
         event,

@@ -17,4 +17,4 @@ def get_relationship_divorce_reduction_required_balance(user_id, divorce_count):
     -------
     required_balance : `int`
     """
-    return (4096 * divorce_count) + (user_id >> 22) % (8192 * divorce_count)
+    return (4096 * divorce_count) + (user_id >> 22) % (4096 * divorce_count)

@@ -30,10 +30,14 @@ ARROW_BLOCKS = tuple(
 )
 
 
-@FEATURE_CLIENTS.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+)
 async def lucky_spin(client, event,
     bet: ('int', 'The bet of hearts to bet') = None,
 ):
+    """Test your luck, spin the wheel!"""
     index = floor(random() * 8.0)
     
     if (bet is None):
