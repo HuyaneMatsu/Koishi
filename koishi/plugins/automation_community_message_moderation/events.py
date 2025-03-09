@@ -165,6 +165,39 @@ async def handle_reaction_event(client, message, emoji, user, addition):
         if len(down_voters) - len(up_voters) < vote_threshold:
             return
         
+        # First log and then delete, or else the attachments will not be zipped.
+        
+        # log if we can log.
+        if (
+            (log_channel is not None) and
+            log_channel.cached_permissions_for(client) & PERMISSIONS_MASK_LOG_REQUIRED == PERMISSIONS_MASK_LOG_REQUIRED
+        ):
+            try:
+                await client.message_create(
+                    log_channel,
+                    allowed_mentions = None,
+                    components = Button('Jump there', url = message.url),
+                    content = build_message_common_description(
+                        message, MESSAGE_RENDER_MODE_DELETE, title = 'Community message moderation log'
+                    ),
+                    file = [
+                        *iter_build_attachment_message_content(message),
+                        *iter_build_attachment_voters(down_voters, up_voters, message.guild),
+                        *iter_build_attachment_message_attachments(client.http, message),
+                    ],
+                )
+            except ConnectionError:
+                return
+            
+            except DiscordException as exception:
+                if exception.code not in (
+                    ERROR_CODES.unknown_channel, # channel deleted
+                    ERROR_CODES.missing_access, # client removed
+                    ERROR_CODES.missing_permissions, # permissions changed
+                ):
+                    raise
+        
+        
         try:
             await client.message_delete(message)
         except ConnectionError:
@@ -183,36 +216,3 @@ async def handle_reaction_event(client, message, emoji, user, addition):
             return
         
         delete_lock_of(message)
-    
-    # Return if we should not log / cant log
-    if (
-        log_channel is None or
-        log_channel.cached_permissions_for(client) & PERMISSIONS_MASK_LOG_REQUIRED != PERMISSIONS_MASK_LOG_REQUIRED
-    ):
-        return
-    
-    # log
-    try:
-        await client.message_create(
-            log_channel,
-            allowed_mentions = None,
-            components = Button('Jump there', url = message.url),
-            content = build_message_common_description(
-                message, MESSAGE_RENDER_MODE_DELETE, title = 'Community message moderation log'
-            ),
-            file = [
-                *iter_build_attachment_message_content(message),
-                *iter_build_attachment_voters(down_voters, up_voters, message.guild),
-                *iter_build_attachment_message_attachments(client.http, message),
-            ],
-        )
-    except ConnectionError:
-        return
-    
-    except DiscordException as exception:
-        if exception.code not in (
-            ERROR_CODES.unknown_channel, # channel deleted
-            ERROR_CODES.missing_access, # client removed
-            ERROR_CODES.missing_permissions, # permissions changed
-        ):
-            raise
