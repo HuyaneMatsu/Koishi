@@ -33,7 +33,7 @@ class ToDo(EntryProxy):
         The entry's name.
     
     saver : `None | ToDoSaver`
-        Saver responsible to save synchronization.
+        Saver responsible for save synchronization.
     """
     __slots__ = ('created_at', 'creator_id', 'description', 'name',)
     

@@ -26,7 +26,7 @@ class RelationshipRequest(EntryProxy):
         The requested relationship type.
     
     saver : `None | RelationshipRequestSaver`
-        Saver responsible to save synchronization.
+        Saver responsible for save synchronization.
     
     source_user_id : `int`
         Source user identifier.

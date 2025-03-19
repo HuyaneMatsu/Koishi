@@ -3,6 +3,8 @@ from hata import Embed, GuildProfile, User
 
 from ....bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY
 
+from ...balance_rendering.constants import COLOR_CODE_GREEN, COLOR_CODE_RESET
+
 from ..embed_builders import build_notification_embed
 
 
@@ -25,10 +27,11 @@ def _iter_options():
         ).add_field(
             f'Your {EMOJI__HEART_CURRENCY}',
             (
-                f'```\n'
-                f'2000 -> 3000\n'
+                f'```ansi\n'
+                f'2000 {COLOR_CODE_GREEN}->{COLOR_CODE_RESET} 3000\n'
                 f'```'
             ),
+            True,
         ),
     )
     
@@ -45,10 +48,11 @@ def _iter_options():
         ).add_field(
             f'Your {EMOJI__HEART_CURRENCY}',
             (
-                f'```\n'
-                f'2000 -> 3000\n'
+                f'```ansi\n'
+                f'2000 {COLOR_CODE_GREEN}->{COLOR_CODE_RESET} 3000\n'
                 f'```'
             ),
+            True,
         ).add_field(
             'Message',
             'mrrr',

@@ -5,7 +5,7 @@ from hata import ChannelType
 
 def is_private_channel_of_two(channel, source_user, target_user):
     """
-    Returns whether the given private channel is teh private channel of the two users.
+    Returns whether the given private channel is the private channel of the two users.
     
     Parameters
     ----------

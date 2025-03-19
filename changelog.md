@@ -1,3 +1,14 @@
+### 2025-03-19
+
+- Reduce the required investment needed for changing an unset relationship by around 88%.
+- `/coin-flip` now shows a large coin on large bets.
+- Fix `/action` did not put the `client` as source if there were no targets. (Since last update.)
+- Move `/stats upgrade` to `/shop upgrade-stat`.
+- Stat upgrade now does not show the price in auto completion, instead prompts a confirmation messages.
+- Allow upgrading stats of other users. Counts towards relationship deepening and boosting.
+- Fix a bad condition failing guild automations clean up in the database when all clients are removed from a guild.
+- Add global expression tracking, but no commands yet for retrieving it.
+
 ### 2025-03-09
 
 - Fix `/action` and other action commands did reversed the invoking user preference (as they did it with the bot & user)
@@ -12,7 +23,7 @@
 - User balance getting now does multi-query instead of parallel-query. High parallelism failed the db connector and
     crashed `/daily` if the user had a lot of relationships uncached (20+).
 - `/automation community-message-moderation` now zips the message's attachments that are within the upload limit.
-- `/top-list` now uses the user's local name instead of their guild.
+- `/top-list` now uses the user's local name instead of their global.
 - `/lucky-spin` is now available when user installed.
 - Add new `/coin-flip` command. This command was planned for almost 2 years now, just never got to it.
 - Add Nue bot.

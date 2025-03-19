@@ -1,0 +1,161 @@
+__all__ = ('Stats',)
+
+from scarletio import copy_docs
+
+from ...bot_utils.entry_proxy import EntryProxy
+
+from .constants import STATS_CACHE
+from .helpers import generate_user_stats_defaults
+from .stats_saver import StatsSaver
+
+
+class Stats(EntryProxy):
+    """
+    A user's stats.
+    
+    Attributes
+    ----------
+    entry_id : `int`
+        The entry's identifier in the database.
+    
+    experience : `int`
+        The collected experience of the user.
+    
+    level : `int`
+        The user's level.
+    
+    raw_costume : `bytes`
+        Source user's costume.
+    
+    raw_species : `bytes`
+        The user's species.
+    
+    raw_weapon : `bytes`
+        Target user's weapon.
+    
+    stat_bedroom : `int`
+        The user's bedroom skills.
+    
+    saver : `None | StatsSaver`
+        Saver responsible for save synchronization.
+    
+    stat_charm : `int`
+        The user's charm.
+    
+    stat_cuteness : `int`
+        The user's cuteness.
+    
+    stat_housewife : `int`
+        The user's housewife skills.
+    
+    stat_loyalty : `int`
+        The user's loyalty.
+    
+    user_id : `int`
+        The represented user's identifier.
+    """
+    __slots__ = (
+        '__weakref__', 'experience', 'level', 'raw_species', 'raw_costume', 'raw_weapon', 'saver', 'stat_bedroom',
+        'stat_charm', 'stat_cuteness', 'stat_housewife', 'stat_loyalty', 'user_id',
+    )
+    
+    saver_type = StatsSaver
+    
+    
+    def __new__(cls, user_id):
+        """
+        Creates new stats.
+        
+        Parameters
+        ----------
+        user_id : `int`
+            The user's identifier.
+        """
+        self = object.__new__(cls)
+        self.saver = None
+        
+        self.entry_id = -1
+        self.user_id = user_id
+        
+        self.experience = 0
+        self.level = 0
+        
+        self.raw_costume = b''
+        self.raw_species = b''
+        self.raw_weapon = b''
+        
+        (
+            self.stat_housewife,
+            self.stat_cuteness,
+            self.stat_bedroom,
+            self.stat_charm,
+            self.stat_loyalty,
+        ) = generate_user_stats_defaults(user_id)
+        
+        return self
+    
+    
+    @copy_docs(EntryProxy._put_repr_parts)
+    def _put_repr_parts(self, repr_parts, field_added):
+        if field_added:
+            repr_parts.append(',')
+        
+        # source_user_id
+        repr_parts.append(' user_id = ')
+        repr_parts.append(repr(self.user_id))
+        
+        return repr_parts
+    
+    
+    async def save(self):
+        """
+        Saves the entry and then caches it.
+        
+        This function is a coroutine.
+        """
+        saver = self.get_saver()
+        await saver.begin()
+        self._store_in_cache()
+    
+    
+    @copy_docs(EntryProxy._store_in_cache)
+    def _store_in_cache(self):
+        STATS_CACHE[self.user_id] = self
+    
+    
+    @copy_docs(EntryProxy._pop_from_cache)
+    def _pop_from_cache(self):
+        try:
+            del STATS_CACHE[self.user_id]
+        except KeyError:
+            pass
+    
+    
+    @classmethod
+    @copy_docs(EntryProxy.from_entry)
+    def from_entry(cls, entry):
+        user_id = entry['user_id']
+        
+        try:
+            self = STATS_CACHE[user_id]
+        except KeyError:
+            self = object.__new__(cls)
+            self.entry_id = entry['id']
+            self.user_id = user_id
+            self.saver = None
+            STATS_CACHE[user_id] = self
+        
+        self.stat_housewife = entry['stat_housewife']
+        self.stat_cuteness = entry['stat_cuteness']
+        self.stat_bedroom = entry['stat_bedroom']
+        self.stat_charm = entry['stat_charm']
+        self.stat_loyalty = entry['stat_loyalty']
+        
+        self.level = entry['level']
+        self.experience = entry['experience']
+        
+        self.raw_species = entry['raw_species']
+        self.raw_weapon = entry['raw_weapon']
+        self.raw_costume = entry['raw_costume']
+        
+        return self

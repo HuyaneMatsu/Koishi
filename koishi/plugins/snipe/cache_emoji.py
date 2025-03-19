@@ -53,7 +53,7 @@ async def request_emoji_details(client, emoji):
     guild = emoji.guild
     if (emoji.user is ZEROUSER) and (guild is not None) and (guild in client.guilds):
         try:
-            await client.emoji_get(emoji, force_update = True)
+            await client.emoji_get_guild(emoji, force_update = True)
         except DiscordException as err:
             if err.code not in (
                 ERROR_CODES.missing_access, # Client removed.

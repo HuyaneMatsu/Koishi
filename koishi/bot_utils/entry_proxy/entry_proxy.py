@@ -16,7 +16,7 @@ class EntryProxy(RichAttributeErrorBaseType, metaclass = EntryProxyType):
         The entry's identifier in the database.
     
     saver : `None | EntryProxySaver`
-        Saver responsible to save synchronization.
+        Saver responsible for save synchronization.
     """
     __slots__ = ('entry_id', 'saver')
     

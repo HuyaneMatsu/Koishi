@@ -97,7 +97,7 @@ class AutomationConfiguration(EntryProxy):
         Additional role assigned to the `reaction-copy` feature.
     
     saver : `None | AutomationConfigurationSaver`
-        Saver responsible to save synchronization.
+        Saver responsible for save synchronization.
     
     touhou_feed_enabled : `bool`
         Whether touhou-feed is enabled in the guild.

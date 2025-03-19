@@ -14,6 +14,8 @@ from ..relationship_slots_interactions import (
 )
 from ..relationships_core import autocomplete_relationship_extended_user_name
 from ..role_purchase import PURCHASABLE_ROLES, ROLE_CHOICES, purchase_role_other, purchase_role_self
+from ..stats_core import STAT_CHOICES
+from ..stats_upgrade_interactions import stat_upgrade_invoke_other_question, stat_upgrade_invoke_self_question
 
 
 SHOP = FEATURE_CLIENTS.interactions(
@@ -61,10 +63,6 @@ async def buy_relationship_slot(
     
     target_user : `None | ClientUserBase` = `None`, Optional
         The targeted user.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
     """
     target_user, relationship_to_deepen = await identify_targeted_user(
         event.user, target_related_name, target_user, event.guild_id
@@ -180,3 +178,58 @@ async def roles(
         coroutine = purchase_role_other(client, event, role, required_balance, target_user, relationship_to_deepen)
     
     await coroutine
+
+
+
+@SHOP.interactions
+async def upgrade_stat(
+    client,
+    event,
+    stat_index : (STAT_CHOICES, 'select a stat to upgrade', 'stat'),
+    target_related_name : P(
+        str,
+        'Buy relationship slot for someone related',
+        'related',
+        autocomplete = autocomplete_relationship_extended_user_name,
+    ) = None,
+    target_user : (
+        ClientUserBase,
+        'Buy waifu slot for someone else?',
+        'someone-else',
+    ) = None,
+):
+    """
+    Upgrade a stat of yours or someone selected.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction event.
+    
+    event : ``InteractionEvent``
+        The received interaction event.
+    
+    stat_index : `int`
+        The chosen stat's index.
+    
+    target_related_name : `None | str` = `None`, Optional
+        The targeted related user's name.
+    
+    target_user : `None | ClientUserBase` = `None`, Optional
+        The targeted user.
+    """
+    target_user, relationship_to_deepen = await identify_targeted_user(
+        event.user, target_related_name, target_user, event.guild_id
+    )
+    
+    if (target_user is None):
+        coroutine = stat_upgrade_invoke_self_question(client, event, stat_index)
+    else:
+        coroutine = stat_upgrade_invoke_other_question(
+            client, event, target_user, relationship_to_deepen, stat_index
+        )
+    
+    await coroutine
+

@@ -276,8 +276,8 @@ async def relationship_divorces_decrement_confirm_other(client, event, target_us
     event : ``InteractionEvent``
         The received interaction event.
     
-    target_user_id : `int`
-        The targeted user's identifier.
+    target_user_id : `str`
+        The targeted user's identifier encoded as base 16.
     
     Yields
     -------

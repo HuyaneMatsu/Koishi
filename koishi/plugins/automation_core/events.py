@@ -27,7 +27,7 @@ def guild_delete(client, guild, guild_profile):
         The client's guild profile at the guild.
     """
     # Do nothing if the guild still has clients left.
-    if client.guilds:
+    if guild.clients:
         return
     
     yield

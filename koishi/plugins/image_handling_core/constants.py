@@ -29,6 +29,7 @@ SAFE_TAGS_BANNED = frozenset((
     'slingshot_swimsuit',
     'bikini',
     'ai-generated'
+    'middle_finger',
 ))
 
 

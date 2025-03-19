@@ -26,7 +26,7 @@ class Relationship(EntryProxy):
         The requested relationship type.
     
     saver : `None | RelationshipSaver`
-        Saver responsible to save synchronization.
+        Saver responsible for save synchronization.
     
     source_can_boost_at : `Datetime`
         When the source user can boost next.

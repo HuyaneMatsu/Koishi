@@ -13,7 +13,7 @@ class RelationshipRequestSaver(EntryProxySaver):
     Attributes
     ----------
     entry_proxy : ``RelationshipRequest``
-        The user balance to save.
+        The relationship request to save.
     
     ensured_for_deletion : `bool`
         Whether the entry should be deleted.

@@ -112,7 +112,7 @@ def _filter_relationships_unset_outgoing(user_id, relationships):
         else:
             relationship_value = relationship.target_investment
         
-        if relationship_value < RELATIONSHIP_VALUE_DEFAULT:
+        if relationship_value < RELATIONSHIP_VALUE_DEFAULT >> 3:
             continue
         
         if filtered_relationships is None:

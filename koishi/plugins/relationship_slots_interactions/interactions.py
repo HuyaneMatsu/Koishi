@@ -278,8 +278,8 @@ async def relationship_slot_increment_confirm_other(client, event, target_user_i
     event : ``InteractionEvent``
         The received interaction event.
     
-    target_user_id : `int`
-        The targeted user's identifier.
+    target_user_id : `str`
+        The targeted user's identifier encoded as base 16.
     
     Yields
     -------

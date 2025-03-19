@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import CLIENTS, Embed, now_as_id
+from hata import CLIENTS, DiscordException, Embed, ERROR_CODES, now_as_id
 from hata.ext.slash import Button, ButtonStyle, Row
 
 from ...bot_utils.multi_client_utils import (
@@ -86,13 +86,21 @@ async def welcome_user(client, guild, user, welcome_style, welcome_channel, welc
     else:
         welcome_reply_buttons = None
     
-    message = await client.message_create(
-        welcome_channel,
-        components = welcome_reply_buttons,
-        content = f'> {message_content}',
-        embed = Embed(color = color).add_image(image).add_footer(f'By {welcome_style.image_creator}.'),
-        silent = True,
-    )
+    try:
+        message = await client.message_create(
+            welcome_channel,
+            components = welcome_reply_buttons,
+            content = f'> {message_content}',
+            embed = Embed(color = color).add_image(image).add_footer(f'By {welcome_style.image_creator}.'),
+            silent = True,
+        )
+    except DiscordException as exception:
+        # This should not happen because we check for it before, but I found it in logs still.
+        if exception.code == ERROR_CODES.missing_access:
+            return
+        
+        raise
+    
     schedule_image_refresh(client, message)
 
 

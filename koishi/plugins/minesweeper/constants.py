@@ -27,9 +27,9 @@ TILE_NEAR_6 = BUILTIN_EMOJIS['six']
 TILE_NEAR_7 = BUILTIN_EMOJIS['seven']
 TILE_NEAR_8 = BUILTIN_EMOJIS['eight']
 
-TILE_BOMB = BUILTIN_EMOJIS['bomb']
-TILE_SKULL = BUILTIN_EMOJIS['skull']
 TILE_FLAG = BUILTIN_EMOJIS['triangular_flag_on_post']
+
+TILE_BOMB = BUILTIN_EMOJIS['bomb']
 
 
 TILE_MAP = [
@@ -59,8 +59,23 @@ TILE_MAP_ORIN = [
     TILE_NEAR_6,
     TILE_NEAR_7,
     TILE_NEAR_8,
-    TILE_SKULL,
-    TILE_FLAG,
+    BUILTIN_EMOJIS['skull'],
+    BUILTIN_EMOJIS['shopping_cart'],
+]
+
+TILE_MAP_NUE = [
+    TILE_UNKNOWN,
+    TILE_EMPTY,
+    TILE_NEAR_1,
+    TILE_NEAR_2,
+    TILE_NEAR_3,
+    TILE_NEAR_4,
+    TILE_NEAR_5,
+    TILE_NEAR_6,
+    TILE_NEAR_7,
+    TILE_NEAR_8,
+    Emoji.precreate(1348713585995546706),
+    BUILTIN_EMOJIS['flying_saucer'],
 ]
 
 STYLE_MAP = {

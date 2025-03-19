@@ -3,10 +3,11 @@ __all__ = ()
 from math import floor
 from random import random
 
-from config import ORIN_ID
+from config import NUE_ID, ORIN_ID
 
-from .constants import SIZE_TOTAL, SIZE_X, TILE_MAP, TILE_MAP_ORIN, TILE_VALUE_BOMB, TILE_VALUE_EMPTY, TILE_VALUE_FLAG
-
+from .constants import (
+    SIZE_TOTAL, SIZE_X, TILE_MAP, TILE_MAP_NUE, TILE_MAP_ORIN, TILE_VALUE_BOMB, TILE_VALUE_EMPTY, TILE_VALUE_FLAG
+)
 
 def to_index(position_x, position_y):
     """
@@ -253,5 +254,8 @@ def get_tile_map(client_id):
     """
     if client_id == ORIN_ID:
         return TILE_MAP_ORIN
+    
+    if client_id == NUE_ID:
+        return TILE_MAP_NUE
     
     return TILE_MAP

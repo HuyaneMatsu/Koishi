@@ -8,17 +8,14 @@ from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as T
 from math import floor, log
 
 from dateutil.relativedelta import relativedelta as RelativeDelta
-from hata import EMOJIS, Embed, USERS, parse_custom_emojis, parse_emoji
+from hata import EMOJIS, Embed, USERS, parse_emoji
 from hata.ext.slash import abort
 from sqlalchemy import and_, func as alchemy_function
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.sql import desc, select
 
-from ..bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__EMOJI_MANAGER
-from ..bot_utils.models import (
-    DB_ENGINE, EMOJI_COUNTER_TABLE, STICKER_COUNTER_TABLE, emoji_counter_model, sticker_counter_model
-)
-from ..bots import MAIN_CLIENT, Satori
+from ..bot_utils.constants import GUILD__SUPPORT
+from ..bot_utils.models import DB_ENGINE, emoji_counter_model
+from ..bots import MAIN_CLIENT
 
 
 EMOJI_ACTION_TYPE_MESSAGE_CONTENT = 1
@@ -31,161 +28,7 @@ MONTH = TimeDelta(days = 367, hours = 6) / 12
 MOST_USED_PER_PAGE = 90
 
 
-@Satori.events
-async def message_create(client, message):
-    if message.guild is not GUILD__SUPPORT:
-        return
-    
-    user = message.author
-    if user.bot:
-        return
-    
-    content = message.content
-    if content:
-        custom_emojis = parse_custom_emojis(content)
-        if custom_emojis:
-            await upload_emojis(custom_emojis, user.id, message.created_at)
-    
-    stickers = message.stickers
-    if (stickers is not None):
-         await upload_stickers(stickers, user.id, message.created_at)
 
-
-@Satori.events
-async def message_edit(client, message, old_attributes):
-    if (old_attributes is None):
-        # The was not cached, we cannot calculate difference.
-        return
-    
-    if message.guild is not GUILD__SUPPORT:
-        return
-    
-    user = message.author
-    if user.bot:
-        return
-    
-    try:
-        old_content = old_attributes['content']
-    except KeyError:
-        return
-    
-    new_content = message.content
-    if not new_content:
-        return
-    
-    new_custom_emojis = parse_custom_emojis(new_content)
-    if not new_custom_emojis:
-        return
-    
-    if old_content:
-        old_custom_emojis = parse_custom_emojis(old_content)
-        if not old_custom_emojis:
-            old_custom_emojis = None
-    else:
-        old_custom_emojis = None
-    
-    if (old_custom_emojis is None):
-        custom_emojis = new_custom_emojis
-    else:
-        custom_emojis = new_custom_emojis - old_custom_emojis
-    
-    timestamp = message.edited_at
-    if timestamp is None:
-        timestamp = message.created_at
-    
-    await upload_emojis(custom_emojis, user.id, timestamp)
-
-
-
-async def upload_emojis(emojis, user_id, timestamp):
-    data = None
-    
-    for emoji in emojis:
-        if emoji.guild is not GUILD__SUPPORT:
-            continue
-        
-        if data is None:
-            data = []
-        
-        data.append({
-            'user_id': user_id,
-            'emoji_id': emoji.id,
-            'timestamp': timestamp,
-            'action_type': EMOJI_ACTION_TYPE_MESSAGE_CONTENT,
-        })
-    
-    if (data is not None):
-        async with DB_ENGINE.connect() as connector:
-            await connector.execute(insert(EMOJI_COUNTER_TABLE, data))
-
-
-async def upload_stickers(stickers, user_id, timestamp):
-    data = None
-    
-    for sticker in stickers:
-        if sticker.guild_id != GUILD__SUPPORT.id:
-            continue
-        
-        if data is None:
-            data = []
-        
-        data.append({
-            'user_id': user_id,
-            'sticker_id': sticker.id,
-            'timestamp': timestamp,
-        })
-    
-    async with DB_ENGINE.connect() as connector:
-        await connector.execute(insert(STICKER_COUNTER_TABLE, data))
-
-
-@Satori.events
-async def emoji_delete(client, emoji):
-    if emoji.guild is not GUILD__SUPPORT:
-        return
-    
-    async with DB_ENGINE.connect() as connector:
-        await connector.execute(
-            EMOJI_COUNTER_TABLE.delete().where(
-                emoji_counter_model.emoji_id == emoji.id,
-            )
-        )
-
-@Satori.events
-async def sticker_delete(client, sticker):
-    if sticker.guild is not GUILD__SUPPORT:
-        return
-    
-    async with DB_ENGINE.connect() as connector:
-        await connector.execute(
-            STICKER_COUNTER_TABLE.delete().where(
-                sticker_counter_model.sticker_id == sticker.id,
-            )
-        )
-
-
-@Satori.events
-async def reaction_add(client, event):
-    user = event.user
-    if user.bot:
-        return
-    
-    emoji = event.emoji
-    if emoji.guild is not GUILD__SUPPORT:
-        return
-    
-    user_id = user.id
-    timestamp = DateTime.now(TimeZone.utc)
-    
-    async with DB_ENGINE.connect() as connector:
-        await connector.execute(
-            EMOJI_COUNTER_TABLE.insert().values(
-                user_id = user_id,
-                emoji_id = emoji.id,
-                timestamp = timestamp,
-                action_type = EMOJI_ACTION_TYPE_REACTION,
-            )
-        )
 
 
 ORDER_DECREASING = 1
@@ -379,69 +222,6 @@ async def emoji_top(
     ).add_thumbnail(
         emoji.url,
     )
-
-
-
-EMOJI_SYNC_COMMANDS = EMOJI_COMMANDS.interactions(None,
-    name = 'sync',
-    description = 'Syncs emoji table. (You must have emoji-council role)',
-)
-
-@EMOJI_SYNC_COMMANDS.interactions
-async def sync_emojis_(event):
-    """Syncs emoji list emojis. (You must have emoji-council role)"""
-    if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
-        abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')
-    
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select([emoji_counter_model.emoji_id]).distinct(emoji_counter_model.emoji_id),
-        )
-        
-        results = await response.fetchall()
-        
-        emoji_ids = [result[0] for result in results]
-        guild_emojis = GUILD__SUPPORT.emojis
-        
-        emoji_ids_to_remove = [emoji_id for emoji_id in emoji_ids if (emoji_id not in guild_emojis)]
-        
-        if emoji_ids_to_remove:
-            await connector.execute(
-                EMOJI_COUNTER_TABLE.delete().where(
-                    emoji_counter_model.emoji_id.in_(emoji_ids_to_remove)
-                )
-            )
-    
-    return f'Unused emoji entries removed: {len(emoji_ids_to_remove)}'
-
-
-@EMOJI_SYNC_COMMANDS.interactions
-async def sync_users_(event):
-    """Syncs emoji list users. (You must have emoji-council role)"""
-    if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
-        abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')
-    
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select([emoji_counter_model.user_id]).distinct(emoji_counter_model.user_id),
-        )
-        
-        results = await response.fetchall()
-        
-        user_ids = [result[0] for result in results]
-        guild_users = GUILD__SUPPORT.users
-        
-        user_ids_to_remove = [user_id for user_id in user_ids if (user_id not in guild_users)]
-        
-        if user_ids_to_remove:
-            await connector.execute(
-                EMOJI_COUNTER_TABLE.delete().where(
-                    emoji_counter_model.user_id.in_(user_ids_to_remove)
-                )
-            )
-    
-    return f'Unused user entries removed: {len(user_ids_to_remove)}'
-
 
 
 def item_sort_key(item):

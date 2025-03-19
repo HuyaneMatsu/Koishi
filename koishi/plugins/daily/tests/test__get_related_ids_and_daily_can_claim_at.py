@@ -90,7 +90,7 @@ async def test__get_related_users_with_name_and_next_daily(relationships, user_b
         User balances of the filtered users.
     
     users : `list<ClientUserBase>`
-        Users mentioned in teh relationships. Excluding teh source user obviously.
+        Users mentioned in the relationships. Excluding the source user obviously.
     
     user_id : `int`
         Use id to query for.

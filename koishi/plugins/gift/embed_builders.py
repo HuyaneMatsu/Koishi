@@ -4,6 +4,8 @@ from hata import Embed
 
 from ...bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY
 
+from ..balance_rendering import add_other_balance_modification_embed_field, add_self_balance_modification_embed_field
+
 
 def build_failure_embed_no_target_user():
     """
@@ -107,21 +109,10 @@ def build_success_embed(source_balance, target_balance, amount, target_user, gui
         'Aww, so lovely',
         f'You gifted {amount} {EMOJI__HEART_CURRENCY} to {target_user.name_at(guild_id)}.',
         color = COLOR__GAMBLING,
-    ).add_field(
-        f'Your {EMOJI__HEART_CURRENCY}',
-        (
-            f'```\n'
-            f'{source_balance} -> {source_balance - amount}\n'
-            f'```'
-        ),
-    ).add_field(
-        f'Their {EMOJI__HEART_CURRENCY}',
-        (
-            f'```\n'
-            f'{target_balance} -> {target_balance + amount}\n'
-            f'```'
-        ),
     )
+    
+    embed = add_self_balance_modification_embed_field(embed, source_balance, -amount)
+    embed = add_other_balance_modification_embed_field(embed, target_balance, amount)
     
     if (message is not None):
         embed.add_field('Message', message)
@@ -158,14 +149,9 @@ def build_notification_embed(target_balance, amount, source_user, guild_id, mess
         'Aww, love is in the air',
         f'You have been gifted {amount} {EMOJI__HEART_CURRENCY} by {source_user.name_at(guild_id)}.',
         color = COLOR__GAMBLING,
-    ).add_field(
-        f'Your {EMOJI__HEART_CURRENCY}',
-        (
-            f'```\n'
-            f'{target_balance} -> {target_balance + amount}\n'
-            f'```'
-        ),
     )
+    
+    embed = add_self_balance_modification_embed_field(embed, target_balance, amount)
     
     if (message is not None):
         embed.add_field('Message', message)

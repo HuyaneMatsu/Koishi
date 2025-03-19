@@ -127,7 +127,6 @@ async def wild_card_action(
             f'{client.name_at(event.guild_id)} got bored of enacting your {event.interaction.name} try again in '
             f'{expire_after:.2f} seconds.'
         )
-    
     action, image_detail = get_action_and_image_detail(
         action_tag_name, source_character_name, target_character_name, image_name
     )
@@ -137,7 +136,14 @@ async def wild_card_action(
     if (image_detail is None):
         abort('Could not match any images.')
     
-    content = build_response(client, action.starter_text, action.verb, event.user, targets, client_in_users)
+    # Reverse the users when there are no target.
+    if (not targets) and (not client_in_users):
+        source_user = client
+        targets = {event.user}
+    else:
+        source_user = event.user
+    
+    content = build_response(client, action.starter_text, action.verb, source_user, targets, client_in_users)
     embed = create_response_embed(client, event.guild_id, event.user, targets, client_in_users, image_detail)
     
     

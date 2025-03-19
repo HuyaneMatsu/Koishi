@@ -21,8 +21,8 @@ STICKER_COUNTER_TABLE = None
 
 DB_ENGINE = None
 
-waifu_stats_model = None
-WAIFU_STATS_TABLE = None
+stats_model = None
+STATS_TABLE = None
 
 todo_model = None
 TODO_TABLE = None
@@ -51,13 +51,16 @@ RELATIONSHIP_REQUEST_TABLE = None
 relationship_model = None
 RELATIONSHIP_TABLE = None
 
+expression_counter_model = None
+EXPRESSION_COUNTER_TABLE = None
+
 
 if (DATABASE_NAME is not None):
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy import Column, Integer as Int32, BIGINT as Int64, LargeBinary as Binary, create_engine, DateTime, \
         String, Boolean, Unicode, SmallInteger as Int16
     from sqlalchemy.sql.expression import func
-    
+        
     try:
         DB_ENGINE = create_engine(DATABASE_NAME, max_overflow = -1, pool_size = 50)
     except ImportError as err:
@@ -176,7 +179,7 @@ if (DB_ENGINE is not None):
     TODO_TABLE = todo_model.__table__
     
     
-    class waifu_stats_model(BASE):
+    class stats_model(BASE):
         __tablename__ = 'WAIFU_STATS'
         
         id = Column(Int64, primary_key = True)
@@ -196,7 +199,7 @@ if (DB_ENGINE is not None):
         raw_costume = Column(Binary(), nullable = True)
     
     
-    WAIFU_STATS_TABLE = waifu_stats_model.__table__
+    STATS_TABLE = stats_model.__table__
     
         
     class automation_configuration_model(BASE):
@@ -328,6 +331,21 @@ if (DB_ENGINE is not None):
     
     RELATIONSHIP_TABLE = relationship_model.__table__
     
+    
+    class expression_counter_model(BASE):
+        __tablename__   = 'EXPRESSION_COUNTER'
+        id              = Column(Int64, primary_key = True)
+        
+        entity_id       = Column(Int64, nullable = False)
+        action_type     = Column(Int16, nullable = False)
+        
+        user_id         = Column(Int64, nullable = False)
+        message_id      = Column(Int64, nullable = False)
+        channel_id      = Column(Int64, nullable = False)
+        guild_id        = Column(Int64, nullable = False)
+        timestamp       = Column(DateTime, nullable = False)
+    
+    EXPRESSION_COUNTER_TABLE = expression_counter_model.__table__
     
     DB_ENGINE.dispose()
     # BASE.metadata.create_all(DB_ENGINE)

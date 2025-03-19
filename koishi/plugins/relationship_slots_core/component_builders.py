@@ -48,7 +48,7 @@ def build_component_invoke_relationship_slot_purchase_other(user_id):
 
 def build_component_question_relationship_slot_purchase_self():
     """
-    Builds a (row) component to invoke relationship purchase for yourself.
+    Builds a (row) component to confirm relationship purchase for yourself.
     
     Returns
     -------
@@ -70,7 +70,7 @@ def build_component_question_relationship_slot_purchase_self():
 
 def build_component_question_relationship_slot_purchase_other(user_id):
     """
-    Builds a (row) component to invoke relationship purchase for someone else.
+    Builds a (row) component to confirm relationship purchase for someone else.
     
     Parameters
     ----------

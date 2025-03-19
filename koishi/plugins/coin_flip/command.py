@@ -7,7 +7,8 @@ from ...bots import FEATURE_CLIENTS
 
 from ..user_balance import get_user_balance
 
-from .checks import check_sufficient_available_balance, check_sufficient_bet 
+from .checks import check_sufficient_available_balance, check_sufficient_bet
+from .constants import BET_LARGE_COIN_THRESHOLD
 from .embed_builders import build_success_embed
 
 
@@ -58,4 +59,4 @@ async def coin_flip(
     user_balance.set('balance', balance + change)
     await user_balance.save()
     
-    return build_success_embed(rolled_side, balance, change)
+    return build_success_embed(rolled_side, balance, change, bet_amount >= BET_LARGE_COIN_THRESHOLD)
