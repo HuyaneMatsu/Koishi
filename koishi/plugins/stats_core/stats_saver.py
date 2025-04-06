@@ -45,12 +45,12 @@ class StatsSaver(EntryProxySaver):
                 stat_charm = entry_proxy.stat_charm,
                 stat_loyalty = entry_proxy.stat_loyalty,
                 
-                level = entry_proxy.level,
-                experience = entry_proxy.experience,
+                credibility = entry_proxy.credibility,
                 
-                raw_species = entry_proxy.raw_species,
-                raw_weapon = entry_proxy.raw_weapon,
-                raw_costume = entry_proxy.raw_costume,
+                item_id_costume = entry_proxy.item_id_costume,
+                item_id_head = entry_proxy.item_id_head,
+                item_id_species = entry_proxy.item_id_species,
+                item_id_weapon = entry_proxy.item_id_weapon,
             ).returning(
                 stats_model.id,
             )

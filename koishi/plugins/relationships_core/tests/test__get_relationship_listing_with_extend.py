@@ -2,7 +2,7 @@ from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
 
-from ..constants import RELATIONSHIP_CACHE_LISTING
+from ..constants import RELATIONSHIP_LISTING_CACHE
 from ..relationship import Relationship
 from ..relationship_queries import get_relationship_listing_with_extend
 from ..relationship_types import (
@@ -494,12 +494,12 @@ async def test__get_relationship_listing_with_extend__in_cache(cache, user_id):
     
     try:
         for cache_user_id, cache_relationships in cache:
-            RELATIONSHIP_CACHE_LISTING[cache_user_id] = None if cache_relationships is None else [*cache_relationships]
+            RELATIONSHIP_LISTING_CACHE[cache_user_id] = None if cache_relationships is None else [*cache_relationships]
         
         output = await mocked(user_id)
         
     finally:
-        RELATIONSHIP_CACHE_LISTING.clear()
+        RELATIONSHIP_LISTING_CACHE.clear()
         
     vampytest.assert_instance(output, list, nullable = True)
     return output

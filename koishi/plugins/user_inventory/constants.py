@@ -1,0 +1,71 @@
+__all__ = ('SORT_BY_DEFAULT', 'SORT_BYES', 'SORT_ORDER_DEFAULT', 'SORT_ORDERS')
+
+from re import compile as re_compile, escape as re_escape
+
+from hata import BUILTIN_EMOJIS
+
+
+SORT_BY_NAME = 0
+SORT_BY_AMOUNT = 1
+SORT_BY_VALUE = 2
+SORT_BY_WEIGHT = 3
+SORT_BY_TYPE = 4
+SORT_BY_CUMULATIVE_VALUE = 5
+SORT_BY_CUMULATIVE_WEIGHT = 6
+
+
+SORT_BY_DEFAULT = SORT_BY_NAME
+SORT_BYES = {
+    'name' : SORT_BY_NAME,
+    'amount' : SORT_BY_AMOUNT,
+    'value' : SORT_BY_VALUE,
+    'weight' : SORT_BY_WEIGHT,
+    'type' : SORT_BY_TYPE,
+    'cumulative value' : SORT_BY_CUMULATIVE_VALUE,
+    'cumulative weight' : SORT_BY_CUMULATIVE_WEIGHT,
+}
+
+
+SORT_BY_REVERSED_DEFAULT = 'name'
+SORT_BYES_REVERSED = {
+    value : key for key, value in SORT_BYES.items()
+}
+
+
+SORT_ORDER_INCREASING = 0
+SORT_ODER_DECREASING = 1
+
+SORT_ORDER_DEFAULT = SORT_ORDER_INCREASING
+SORT_ORDERS = {
+    'increasing': SORT_ORDER_INCREASING,
+    'decreasing': SORT_ODER_DECREASING,
+}
+
+
+SORT_ORDER_REVERSED_DEFAULT = 'increasing'
+SORT_ORDERS_REVERSED = {
+    value : key for key, value in SORT_ORDERS.items()
+}
+
+
+PAGE_SIZE = 20
+
+
+CUSTOM_ID_INVENTORY_PAGE_BASE = 'inventory.page'
+
+CUSTOM_ID_INVENTORY_PAGE_N_PATTERN = re_compile(
+    f'{re_escape(CUSTOM_ID_INVENTORY_PAGE_BASE)}\\.([0-9a-z]+)\\.([0-9a-z]+)\\.([0-9a-z]+)'
+)
+CUSTOM_ID_INVENTORY_PAGE_N_BUILDER = (
+    lambda sort_by, sort_order, page_index :
+    f'{CUSTOM_ID_INVENTORY_PAGE_BASE}.{sort_by:x}.{sort_order:x}.{page_index:x}'
+)
+
+CUSTOM_ID_INVENTORY_PAGE_DISABLED_DECREMENT = f'{CUSTOM_ID_INVENTORY_PAGE_BASE}.D'
+CUSTOM_ID_INVENTORY_PAGE_DISABLED_INCREMENT = f'{CUSTOM_ID_INVENTORY_PAGE_BASE}.I'
+CUSTOM_ID_INVENTORY_PAGE_CLOSE = f'{CUSTOM_ID_INVENTORY_PAGE_BASE}.close'
+
+
+EMOJI_LEFT = BUILTIN_EMOJIS['arrow_backward']
+EMOJI_RIGHT = BUILTIN_EMOJIS['arrow_forward']
+EMOJI_CLOSE = BUILTIN_EMOJIS['x']

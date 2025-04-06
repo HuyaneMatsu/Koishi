@@ -729,7 +729,7 @@ CATEGORY_KOISHI_KKHTA = TriviaCategory(
             'All souls escaped the netherworld and could not reincarnate anymore.',
             (
                 'The dead started rising from their graves.',
-                'Gensokyo\'s barrier broke.',
+                'Gensoukyou\'s barrier broke.',
                 'She just broke free.',
             ),
         ),
@@ -748,7 +748,7 @@ CATEGORY_KOISHI_KKHTA = TriviaCategory(
             (
                 'Japan.',
                 'Russia.',
-                'Gensokyo.',
+                'Gensoukyou.',
             ),
         ),
         TriviaItem(

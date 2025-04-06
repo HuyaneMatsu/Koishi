@@ -27,9 +27,6 @@ STATS_TABLE = None
 todo_model = None
 TODO_TABLE = None
 
-item_model = None
-ITEM_TABLE = None
-
 automation_configuration_model = None
 AUTOMATION_CONFIGURATION_TABLE = None
 
@@ -53,6 +50,9 @@ RELATIONSHIP_TABLE = None
 
 expression_counter_model = None
 EXPRESSION_COUNTER_TABLE = None
+
+item_model = None
+ITEM_TABLE = None
 
 
 if (DATABASE_NAME is not None):
@@ -115,17 +115,7 @@ if (DB_ENGINE is not None):
         client_id       = Column(Int64)
     
     AUTO_REACT_ROLE_TABLE = auto_react_role_model.__table__
-    
-    
-    class item_model(BASE):
-        __tablename__   = 'ITEM'
-        id              = Column(Int64, primary_key = True)
-        user_id         = Column(Int64)
-        amount          = Column(Int64, default = 0)
-        type            = Column(Int32, default = 0)
-    
-    ITEM_TABLE = item_model.__table__
-    
+
     
     class emoji_counter_model(BASE):
         __tablename__   = 'EMOJI_COUNTER'
@@ -191,12 +181,12 @@ if (DB_ENGINE is not None):
         stat_charm = Column(Int32)
         stat_loyalty = Column(Int32)
         
-        level = Column(Int32)
-        experience = Column(Int32)
+        credibility = Column(Int64, default = 0, nullable = False)
         
-        raw_species = Column(Binary(), nullable = True)
-        raw_weapon = Column(Binary(), nullable = True)
-        raw_costume = Column(Binary(), nullable = True)
+        item_id_costume = Column(Int32, default = 0, nullable = False)
+        item_id_head = Column(Int32, default = 0, nullable = False)
+        item_id_species = Column(Int32, default = 0, nullable = False)
+        item_id_weapon = Column(Int32, default = 0, nullable = False)
     
     
     STATS_TABLE = stats_model.__table__
@@ -346,6 +336,17 @@ if (DB_ENGINE is not None):
         timestamp       = Column(DateTime, nullable = False)
     
     EXPRESSION_COUNTER_TABLE = expression_counter_model.__table__
+    
+    
+    class item_model(BASE):
+        __tablename__   = 'ITEM'
+        id              = Column(Int64, primary_key = True)
+        user_id         = Column(Int64, nullable = False)
+        amount          = Column(Int64, nullable = False, default = 0)
+        item_id         = Column(Int32, nullable = False)
+    
+    ITEM_TABLE = item_model.__table__
+    
     
     DB_ENGINE.dispose()
     # BASE.metadata.create_all(DB_ENGINE)

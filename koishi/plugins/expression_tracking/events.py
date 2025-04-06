@@ -5,7 +5,7 @@ from hata import StickerType, parse_custom_emojis
 from ...bot_utils.multi_client_utils import get_first_client_with_permissions
 from ...bots import FEATURE_CLIENTS
 
-from .constants import PERMISSION_MASK
+from .constants import PERMISSION_MASK, TRACKING_QUERY_LOCK
 from .tracking_queries import (
     execute_channel_delete, execute_emoji_delete, execute_guild_delete, execute_message_create, execute_message_delete,
     execute_message_update, execute_reaction_add, execute_reaction_clear, execute_reaction_delete,
@@ -50,7 +50,10 @@ async def message_create(client, message):
         if not stickers:
             stickers = None
     
-    if (custom_emojis is not None) or (stickers is not None):
+    if (custom_emojis is None) and (stickers is None):
+        return
+    
+    async with TRACKING_QUERY_LOCK:
         await execute_message_create(message, custom_emojis, stickers)
 
 
@@ -73,7 +76,8 @@ async def message_delete(client, message):
     if client is not get_first_client_with_permissions(message.channel, FEATURE_CLIENTS, PERMISSION_MASK):
         return
     
-    await execute_message_delete(message)
+    async with TRACKING_QUERY_LOCK:
+        await execute_message_delete(message)
 
 
 @FEATURE_CLIENTS.events
@@ -159,7 +163,8 @@ async def message_update(client, message, old_attributes):
         
         add_new_emojis = new_custom_emojis
     
-    await execute_message_update(message, delete_old_emojis, delete_all_old_emoji, add_new_emojis)
+    async with TRACKING_QUERY_LOCK:
+        await execute_message_update(message, delete_old_emojis, delete_all_old_emoji, add_new_emojis)
 
 
 @FEATURE_CLIENTS.events
@@ -189,7 +194,8 @@ async def reaction_add(client, event):
     if client is not get_first_client_with_permissions(message.channel, FEATURE_CLIENTS, PERMISSION_MASK):
         return
     
-    await execute_reaction_add(message, emoji, user)
+    async with TRACKING_QUERY_LOCK:
+        await execute_reaction_add(message, emoji, user)
 
 
 @FEATURE_CLIENTS.events
@@ -219,7 +225,8 @@ async def reaction_delete(client, event):
     if client is not get_first_client_with_permissions(message.channel, FEATURE_CLIENTS, PERMISSION_MASK):
         return
     
-    await execute_reaction_delete(message, emoji, user)
+    async with TRACKING_QUERY_LOCK:
+        await execute_reaction_delete(message, emoji, user)
 
 
 def _reaction_mapping_line_are_users_all_bot(reaction_mapping_line):
@@ -283,7 +290,8 @@ async def reaction_delete_emoji(client, message, emoji, removed_reactions):
     if client is not get_first_client_with_permissions(message.channel, FEATURE_CLIENTS, PERMISSION_MASK):
         return
     
-    await execute_reaction_delete_emoji(message, emoji)
+    async with TRACKING_QUERY_LOCK:
+        await execute_reaction_delete_emoji(message, emoji)
 
 
 @FEATURE_CLIENTS.events
@@ -318,7 +326,8 @@ async def reaction_clear(client, message, reactions):
     if client is not get_first_client_with_permissions(message.channel, FEATURE_CLIENTS, PERMISSION_MASK):
         return
     
-    await execute_reaction_clear(message)
+    async with TRACKING_QUERY_LOCK:
+        await execute_reaction_clear(message)
 
 
 @FEATURE_CLIENTS.events
@@ -342,7 +351,8 @@ async def emoji_delete(client, emoji):
         if clients and (client is not clients[0]):
             return
     
-    await execute_emoji_delete(emoji)
+    async with TRACKING_QUERY_LOCK:
+        await execute_emoji_delete(emoji)
 
 
 @FEATURE_CLIENTS.events
@@ -366,7 +376,8 @@ async def sticker_delete(client, sticker):
         if clients and (client is not clients[0]):
             return
     
-    await execute_sticker_delete(sticker)
+    async with TRACKING_QUERY_LOCK:
+        await execute_sticker_delete(sticker)
 
 
 @FEATURE_CLIENTS.events
@@ -390,7 +401,8 @@ async def channel_delete(client, channel):
         if clients and (client is not clients[0]):
             return
     
-    await execute_channel_delete(channel)
+    async with TRACKING_QUERY_LOCK:
+        await execute_channel_delete(channel)
 
 
 @FEATURE_CLIENTS.events
@@ -414,4 +426,5 @@ async def guild_delete(client, guild, guild_profile):
     if guild.clients:
         return
     
+    # Do not lock this one.
     await execute_guild_delete(guild)

@@ -8,7 +8,7 @@ from hata import DATETIME_FORMAT_CODE
 from ...bot_utils.entry_proxy import EntryProxy
 from ...bot_utils.models import DB_ENGINE
 
-from .constants import RELATIONSHIP_CACHE, RELATIONSHIP_CACHE_LISTING
+from .constants import RELATIONSHIP_CACHE, RELATIONSHIP_LISTING_CACHE
 from .relationship_saver import RelationshipSaver
 from .relationship_types import get_relationship_type_name
 
@@ -145,7 +145,7 @@ class Relationship(EntryProxy):
         
         for listing_key in (self.source_user_id, self.target_user_id):
             try:
-                listing = RELATIONSHIP_CACHE_LISTING[listing_key]
+                listing = RELATIONSHIP_LISTING_CACHE[listing_key]
             except KeyError:
                 if (DB_ENGINE is not None):
                     continue
@@ -153,7 +153,7 @@ class Relationship(EntryProxy):
                 listing = None
             
             if (listing is None):
-                RELATIONSHIP_CACHE_LISTING[listing_key] = [self]
+                RELATIONSHIP_LISTING_CACHE[listing_key] = [self]
                 continue
             
             if (self not in listing):
@@ -171,7 +171,7 @@ class Relationship(EntryProxy):
         
         for listing_key in (self.source_user_id, self.target_user_id):
             try:
-                listing = RELATIONSHIP_CACHE_LISTING[listing_key]
+                listing = RELATIONSHIP_LISTING_CACHE[listing_key]
             except KeyError:
                 continue
             
@@ -186,7 +186,7 @@ class Relationship(EntryProxy):
             if listing:
                 continue
             
-            RELATIONSHIP_CACHE_LISTING[listing_key] = None
+            RELATIONSHIP_LISTING_CACHE[listing_key] = None
             continue
     
     

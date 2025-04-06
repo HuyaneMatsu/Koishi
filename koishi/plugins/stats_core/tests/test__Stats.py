@@ -5,6 +5,7 @@ from ....bot_utils.models import DB_ENGINE
 
 from ..constants import STATS_CACHE
 from ..stats import Stats
+from ..stats_calculated import StatsCalculated
 from ..stats_saver import StatsSaver
 
 
@@ -18,12 +19,13 @@ def _assert_fields_set(stats):
         Stats to test.
     """
     vampytest.assert_instance(stats, Stats)
+    vampytest.assert_instance(stats._cache_stats_calculated, StatsCalculated, nullable = True)
     vampytest.assert_instance(stats.entry_id, int)
-    vampytest.assert_instance(stats.experience, int)
-    vampytest.assert_instance(stats.level, int)
-    vampytest.assert_instance(stats.raw_costume, bytes)
-    vampytest.assert_instance(stats.raw_species, bytes)
-    vampytest.assert_instance(stats.raw_weapon, bytes)
+    vampytest.assert_instance(stats.credibility, int)
+    vampytest.assert_instance(stats.item_id_costume, int)
+    vampytest.assert_instance(stats.item_id_head, int)
+    vampytest.assert_instance(stats.item_id_species, int)
+    vampytest.assert_instance(stats.item_id_weapon, int)
     vampytest.assert_instance(stats.stat_bedroom, int)
     vampytest.assert_instance(stats.stat_charm, int)
     vampytest.assert_instance(stats.stat_cuteness, int)
@@ -143,34 +145,34 @@ def test__Stats__from_entry():
     stat_charm = 14
     stat_loyalty = 15
     
-    level = 25
-    experience = 12222
+    credibility = 12222
     
-    raw_species = b'a'
-    raw_weapon = b'b'
-    raw_costume = b'c'
+    item_id_costume = 2
+    item_id_head = 3
+    item_id_species = 4
+    item_id_weapon = 5
     
     entry_id = 3501
     
-    try:
-        entry = {
-            'id': entry_id,
-            'user_id': user_id,
-            
-            'stat_housewife': stat_housewife,
-            'stat_cuteness': stat_cuteness,
-            'stat_bedroom': stat_bedroom,
-            'stat_charm': stat_charm,
-            'stat_loyalty': stat_loyalty,
-            
-            'level': level,
-            'experience': experience,
-            
-            'raw_species': raw_species,
-            'raw_weapon': raw_weapon,
-            'raw_costume': raw_costume,
-        }
+    entry = {
+        'id': entry_id,
+        'user_id': user_id,
         
+        'stat_housewife': stat_housewife,
+        'stat_cuteness': stat_cuteness,
+        'stat_bedroom': stat_bedroom,
+        'stat_charm': stat_charm,
+        'stat_loyalty': stat_loyalty,
+        
+        'credibility': credibility,
+        
+        'item_id_costume': item_id_costume,
+        'item_id_head': item_id_head,
+        'item_id_species': item_id_species,
+        'item_id_weapon': item_id_weapon,
+    }
+    
+    try:
         stats = Stats.from_entry(entry)
         _assert_fields_set(stats)
         
@@ -184,11 +186,11 @@ def test__Stats__from_entry():
         vampytest.assert_eq(stats.stat_bedroom, stat_bedroom)
         vampytest.assert_eq(stats.stat_charm, stat_charm)
         vampytest.assert_eq(stats.stat_loyalty, stat_loyalty)
-        vampytest.assert_eq(stats.level, level)
-        vampytest.assert_eq(stats.experience, experience)
-        vampytest.assert_eq(stats.raw_species, raw_species)
-        vampytest.assert_eq(stats.raw_weapon, raw_weapon)
-        vampytest.assert_eq(stats.raw_costume, raw_costume)
+        vampytest.assert_eq(stats.credibility, credibility)
+        vampytest.assert_eq(stats.item_id_costume, item_id_costume)
+        vampytest.assert_eq(stats.item_id_head, item_id_head)
+        vampytest.assert_eq(stats.item_id_species, item_id_species)
+        vampytest.assert_eq(stats.item_id_weapon, item_id_weapon)
     
     finally:
         STATS_CACHE.clear()
@@ -208,38 +210,38 @@ def test__Stats__from_entry__cache():
     stat_charm = 14
     stat_loyalty = 15
     
-    level = 25
-    experience = 12222
+    credibility = 12222
     
-    raw_species = b'a'
-    raw_weapon = b'b'
-    raw_costume = b'c'
+    item_id_costume = 2
+    item_id_head = 3
+    item_id_species = 4
+    item_id_weapon = 5
     
     entry_id = 3502
+    
+    entry = {
+        'id': entry_id,
+        'user_id': user_id,
+        
+        'stat_housewife': stat_housewife,
+        'stat_cuteness': stat_cuteness,
+        'stat_bedroom': stat_bedroom,
+        'stat_charm': stat_charm,
+        'stat_loyalty': stat_loyalty,
+        
+        'credibility': credibility,
+        
+        'item_id_costume': item_id_costume,
+        'item_id_head': item_id_head,
+        'item_id_species': item_id_species,
+        'item_id_weapon': item_id_weapon,
+    }
     
     try:
         stats = Stats(user_id)
         stats.user_id = user_id
         stats.entry_id = entry_id
         STATS_CACHE[user_id] = stats
-        
-        entry = {
-            'id': entry_id,
-            'user_id': user_id,
-            
-            'stat_housewife': stat_housewife,
-            'stat_cuteness': stat_cuteness,
-            'stat_bedroom': stat_bedroom,
-            'stat_charm': stat_charm,
-            'stat_loyalty': stat_loyalty,
-            
-            'level': level,
-            'experience': experience,
-            
-            'raw_species': raw_species,
-            'raw_weapon': raw_weapon,
-            'raw_costume': raw_costume,
-        }
         
         output = Stats.from_entry(entry)
         vampytest.assert_is(output, stats)
@@ -251,11 +253,11 @@ def test__Stats__from_entry__cache():
         vampytest.assert_eq(stats.stat_bedroom, stat_bedroom)
         vampytest.assert_eq(stats.stat_charm, stat_charm)
         vampytest.assert_eq(stats.stat_loyalty, stat_loyalty)
-        vampytest.assert_eq(stats.level, level)
-        vampytest.assert_eq(stats.experience, experience)
-        vampytest.assert_eq(stats.raw_species, raw_species)
-        vampytest.assert_eq(stats.raw_weapon, raw_weapon)
-        vampytest.assert_eq(stats.raw_costume, raw_costume)
+        vampytest.assert_eq(stats.credibility, credibility)
+        vampytest.assert_eq(stats.item_id_costume, item_id_costume)
+        vampytest.assert_eq(stats.item_id_head, item_id_head)
+        vampytest.assert_eq(stats.item_id_species, item_id_species)
+        vampytest.assert_eq(stats.item_id_weapon, item_id_weapon)
         
     finally:
         STATS_CACHE.clear()
@@ -360,3 +362,47 @@ async def test__Stats__set__save():
         
     finally:
         STATS_CACHE.clear()
+
+
+@vampytest.skip_if(DB_ENGINE is not None)
+async def test__Stats__set__stats_calculated_reset():
+    """
+    Tests whether ``Stats.set`` works as intended.
+    
+    This function is a coroutine.
+    
+    Case: Stats calculated reset.
+    """
+    user_id = 202503230003
+    
+    new_stat_bedroom = 2002
+    
+    try:
+        stats = Stats(user_id)
+        stats.stats_calculated
+        
+        stats.set('stat_bedroom', new_stat_bedroom)
+        
+        vampytest.assert_is(stats._cache_stats_calculated, None)
+        
+    finally:
+        STATS_CACHE.clear()
+
+
+def test__Stats__stats_calculated():
+    """
+    Tests whether ``Stats.stats_calculated`` works as intended.
+    """
+    user_id = 202503230002
+    
+    try:
+        stats = Stats(user_id)
+        _assert_fields_set(stats)
+        
+        output = stats.stats_calculated
+        vampytest.assert_instance(output, StatsCalculated)
+        vampytest.assert_is(stats._cache_stats_calculated, output)
+        
+    finally:
+        STATS_CACHE.clear()
+

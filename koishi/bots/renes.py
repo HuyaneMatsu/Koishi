@@ -8,6 +8,7 @@ import config
 from ..bot_utils.constants import (
     CHANNEL__ESTS_HOME__STREAM_NOTIFICATION, GUILD__ESTS_HOME, ROLE__ESTS_HOME__STREAM_NOTIFICATION, USER__EST
 )
+from ..bot_utils.response_data_streaming import create_http_stream_resource
 
 
 Renes = Client(
@@ -42,12 +43,12 @@ async def guild_user_add(client, guild, user):
         system_channel,
         f'Thanks for coming {user:m}, enjoy your stay~\n'
         f'If you wish to get notifications every time {USER__EST.name_at(GUILD__ESTS_HOME)} goes live '
-        f'or wants to share something with you, please use the {ping_me_hime:m} command.'
+        f'or wants to share something with you, please use the {ping_me_alice:m} command.'
     )
 
 
 @Renes.interactions(guild = GUILD__ESTS_HOME)
-async def ping_me_hime(client, event):
+async def ping_me_alice(client, event):
     user = event.user
     if user.has_role(ROLE__ESTS_HOME__STREAM_NOTIFICATION):
         await client.user_role_delete(user, ROLE__ESTS_HOME__STREAM_NOTIFICATION)
@@ -63,7 +64,7 @@ class STREAM_DETAILS:
     DISCORD_STREAM_ENDED = -STREAM_PING_DIFFERENCE
 
 
-async def send_stream_notification(activity, join_url, image, source):
+async def send_stream_notification(activity, join_url, image_url, source):
     """
     Sends stream notification.
     
@@ -77,8 +78,8 @@ async def send_stream_notification(activity, join_url, image, source):
     join_url : `str`
         Activity to join the activity.
     
-    image : `None`, `bytes`
-        Image url for banner.
+    image_url : `None | str`
+        Image url to stream as banner.
     
     source : `str`
         Where did est go live.
@@ -101,17 +102,14 @@ async def send_stream_notification(activity, join_url, image, source):
         EST_STREAMING_SETUP_IMAGE_URL,
     )
     
-    if (image is None):
+    if (image_url is None):
         image_url = EST_DEFAULT_IMAGE_URL
-    else:
-        image_url = 'attachment://image.png'
-        
-    embed.add_image(image_url)
-    
-    if image is None:
         file = None
     else:
-        file = ('image.png', image)
+        image_url = 'attachment://image.png'
+        file = ('image.png', create_http_stream_resource(Renes.http, image_url))
+    
+    embed.add_image(image_url)
     
     message = await Renes.message_create(
         CHANNEL__ESTS_HOME__STREAM_NOTIFICATION,
@@ -167,17 +165,7 @@ async def twitch_stream_started(activity):
     if LOOP_TIME() < STREAM_DETAILS.TWITCH_STREAM_ENDED + STREAM_PING_DIFFERENCE:
         return
     
-    image_url = activity.twitch_preview_image_url
-    if (image_url is None):
-        image = None
-    else:
-        async with Renes.http.get(image_url) as response:
-            if response.status == 200:
-                image = await response.read()
-            else:
-                image = None
-    
-    await send_stream_notification(activity, activity.url, image, 'twitch')
+    await send_stream_notification(activity, activity.url, activity.twitch_preview_image_url, 'twitch')
 
 
 async def twitch_stream_ended():

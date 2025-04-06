@@ -5,6 +5,7 @@ from datetime import timedelta as TimeDelta
 
 from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import Permission
+from scarletio import ScarletLock, get_event_loop
 
 
 ACTION_TYPE_EMOJI_CONTENT = 1
@@ -22,3 +23,5 @@ STATISTIC_CACHE_SIZE_MAX = OrderedDict
 STATISTIC_CACHE_TIMEOUT = 300.0
 
 STATISTIC_QUERY_TASKS = {}
+
+TRACKING_QUERY_LOCK = ScarletLock(get_event_loop(), 5)

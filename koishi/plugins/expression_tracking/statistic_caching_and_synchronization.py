@@ -65,7 +65,7 @@ def _query_done_callback(key, waiters, task):
             del STATISTIC_CACHE[next(iter(STATISTIC_CACHE))]
         
         for waiter in waiters:
-            waiter.set_result_if_pending(waiter)
+            waiter.set_result_if_pending(entries)
         
     finally:
         del STATISTIC_QUERY_TASKS[key]

@@ -346,7 +346,7 @@ def render_message_common_description_into(into, field_added, message, mode, tit
         into.append('\n')
         field_added = True
     
-    content_parst, field_added = render_string_field_into(
+    content_parts, field_added = render_string_field_into(
         into, field_added, str(message.id), title = 'Id'
     )
     into, field_added = render_preinstanced_field_into(
@@ -370,7 +370,7 @@ def render_message_common_description_into(into, field_added, message, mode, tit
             title = 'Deleted',
         )
     
-    content_parst, field_added = render_string_field_into(
+    content_parts, field_added = render_string_field_into(
         into, field_added, str(len(message)), title = 'Length'
     )
     into, field_added = render_user_field_into(

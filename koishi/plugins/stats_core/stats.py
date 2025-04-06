@@ -6,6 +6,7 @@ from ...bot_utils.entry_proxy import EntryProxy
 
 from .constants import STATS_CACHE
 from .helpers import generate_user_stats_defaults
+from .stats_calculated import StatsCalculated
 from .stats_saver import StatsSaver
 
 
@@ -15,29 +16,32 @@ class Stats(EntryProxy):
     
     Attributes
     ----------
+    _cache_stats_calculated : `None | StatsCalculated`
+        Cache field for the calculated stats after applying the modifiers.
+    
     entry_id : `int`
         The entry's identifier in the database.
     
-    experience : `int`
-        The collected experience of the user.
+    credibility : `int`
+        The accumulated credibility of the user.
     
-    level : `int`
-        The user's level.
+    item_id_costume : `int`
+        The user's costume item's identifier.
     
-    raw_costume : `bytes`
-        Source user's costume.
+    item_id_head : `int`
+        The user's head item's identifier.
     
-    raw_species : `bytes`
-        The user's species.
+    item_id_species : `int`
+        Target user's species' identifier.
     
-    raw_weapon : `bytes`
-        Target user's weapon.
-    
-    stat_bedroom : `int`
-        The user's bedroom skills.
+    item_id_weapon : `int`
+        The user's weapon item's identifier.
     
     saver : `None | StatsSaver`
         Saver responsible for save synchronization.
+    
+    stat_bedroom : `int`
+        The user's bedroom skills.
     
     stat_charm : `int`
         The user's charm.
@@ -55,8 +59,9 @@ class Stats(EntryProxy):
         The represented user's identifier.
     """
     __slots__ = (
-        '__weakref__', 'experience', 'level', 'raw_species', 'raw_costume', 'raw_weapon', 'saver', 'stat_bedroom',
-        'stat_charm', 'stat_cuteness', 'stat_housewife', 'stat_loyalty', 'user_id',
+        '__weakref__', '_cache_stats_calculated', 'credibility', 'item_id_costume', 'item_id_head', 'item_id_species',
+        'item_id_weapon', 'saver', 'stat_bedroom', 'stat_charm', 'stat_cuteness', 'stat_housewife', 'stat_loyalty',
+        'user_id',
     )
     
     saver_type = StatsSaver
@@ -72,17 +77,18 @@ class Stats(EntryProxy):
             The user's identifier.
         """
         self = object.__new__(cls)
+        self._cache_stats_calculated = None
         self.saver = None
         
         self.entry_id = -1
         self.user_id = user_id
         
-        self.experience = 0
-        self.level = 0
+        self.credibility = 0
         
-        self.raw_costume = b''
-        self.raw_species = b''
-        self.raw_weapon = b''
+        self.item_id_costume = 0
+        self.item_id_head = 0
+        self.item_id_species = 0
+        self.item_id_weapon = 0
         
         (
             self.stat_housewife,
@@ -142,6 +148,7 @@ class Stats(EntryProxy):
             self = object.__new__(cls)
             self.entry_id = entry['id']
             self.user_id = user_id
+            self._cache_stats_calculated = None
             self.saver = None
             STATS_CACHE[user_id] = self
         
@@ -151,11 +158,34 @@ class Stats(EntryProxy):
         self.stat_charm = entry['stat_charm']
         self.stat_loyalty = entry['stat_loyalty']
         
-        self.level = entry['level']
-        self.experience = entry['experience']
+        self.credibility = entry['credibility']
         
-        self.raw_species = entry['raw_species']
-        self.raw_weapon = entry['raw_weapon']
-        self.raw_costume = entry['raw_costume']
+        self.item_id_costume = entry['item_id_costume']
+        self.item_id_head = entry['item_id_head']
+        self.item_id_species = entry['item_id_species']
+        self.item_id_weapon = entry['item_id_weapon']
         
         return self
+    
+    
+    @copy_docs(EntryProxy.set)
+    def set(self, field_name, field_value):
+        EntryProxy.set(self, field_name, field_value)
+        self._cache_stats_calculated = None
+    
+    
+    @property
+    def stats_calculated(self):
+        """
+        Returns the calculated stats.
+        
+        Returns
+        -------
+        stats_calculated : ``StatsCalculated``
+        """
+        stats_calculated = self._cache_stats_calculated
+        if stats_calculated is None:
+            stats_calculated = StatsCalculated(self)
+            self._cache_stats_calculated = stats_calculated
+        
+        return stats_calculated

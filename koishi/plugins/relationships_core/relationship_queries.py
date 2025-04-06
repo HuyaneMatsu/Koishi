@@ -1,13 +1,52 @@
 __all__ = ('get_relationship_listing', 'get_relationship_listing_with_extend')
 
-from scarletio import copy_docs
+from functools import partial as partial_func
+
+from scarletio import Future, Task, copy_docs, get_event_loop
 from sqlalchemy import or_
 
 from ...bot_utils.models import DB_ENGINE, RELATIONSHIP_TABLE, relationship_model
 
-from .constants import RELATIONSHIP_CACHE_LISTING, RELATIONSHIP_CACHE_LISTING_SIZE_MAX
+from .constants import (
+    RELATIONSHIP_LISTING_CACHE, RELATIONSHIP_LISTING_CACHE_SIZE_MAX, RELATIONSHIP_LISTING_GET_QUERY_TASKS
+)
 from .relationship import Relationship
 from .relationship_types import RELATIONSHIP_TYPE_NONE, RELATIONSHIP_TYPE_RELATIONSHIPS, RELATION_TYPE_ALLOWED_EXTENDS
+
+
+EVENT_LOOP = get_event_loop()
+
+
+def _relationship_listing_query_done_callback(key, waiters, task):
+    """
+    Added as a callback of a query to set the result into the waiters and caches the result.
+    
+    Parameters
+    ----------
+    key : `int`
+        The user's identifier used as a key.
+    
+    waiters : `list<Future>`
+        Result waiters.
+    
+    task : ``Future``
+        The ran task.
+    """
+    try:
+        listing = task.get_result()
+    except BaseException as exception:
+        for waiter in waiters:
+            waiter.set_exception_if_pending(exception)
+    else:
+        RELATIONSHIP_LISTING_CACHE[key] = listing
+        if len(RELATIONSHIP_LISTING_CACHE) > RELATIONSHIP_LISTING_CACHE_SIZE_MAX:
+            del RELATIONSHIP_LISTING_CACHE[next(iter(RELATIONSHIP_LISTING_CACHE))]
+        
+        for waiter in waiters:
+            waiter.set_result_if_pending(listing)
+        
+    finally:
+        del RELATIONSHIP_LISTING_GET_QUERY_TASKS[key]
 
 
 async def get_relationship_listing(user_id):
@@ -25,22 +64,25 @@ async def get_relationship_listing(user_id):
     -------
     relationship_listing : `None | list<Relationship>`
     """
-    listing_key = user_id
-    
     try:
-        listing = RELATIONSHIP_CACHE_LISTING[user_id]
+        listing = RELATIONSHIP_LISTING_CACHE[user_id]
     except KeyError:
         pass
     else:
-        RELATIONSHIP_CACHE_LISTING.move_to_end(user_id)
+        RELATIONSHIP_LISTING_CACHE.move_to_end(user_id)
         return listing
     
-    listing = await query_relationship_listing(user_id)
-    RELATIONSHIP_CACHE_LISTING[listing_key] = listing
-    if len(RELATIONSHIP_CACHE_LISTING) > RELATIONSHIP_CACHE_LISTING_SIZE_MAX:
-        del RELATIONSHIP_CACHE_LISTING[next(iter(RELATIONSHIP_CACHE_LISTING))]
-        
-    return listing
+    try:
+        task, waiters = RELATIONSHIP_LISTING_GET_QUERY_TASKS[user_id]
+    except KeyError:
+        waiters = []
+        task = Task(EVENT_LOOP, query_relationship_listing(user_id))
+        task.add_done_callback(partial_func(_relationship_listing_query_done_callback, user_id, waiters))
+        RELATIONSHIP_LISTING_GET_QUERY_TASKS[user_id] = (task, waiters)
+    
+    waiter = Future(EVENT_LOOP)
+    waiters.append(waiter)
+    return await waiter
 
 
 def _select_extended_relationships(

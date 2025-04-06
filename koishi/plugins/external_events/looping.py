@@ -21,6 +21,9 @@ async def loop_step():
     This function is a coroutine.
     """
     external_events = await pull_external_events()
+    if external_events is None:
+        return
+    
     task_group = None
     
     for external_event in external_events:

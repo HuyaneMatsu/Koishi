@@ -1,3 +1,20 @@
+### 2025-04-06
+
+- Fix `/to-do` did not use the user's local name & avatar.
+- Stream notifications now use attachment streaming. (AH only)
+- The user's equipped items' modifiers now affect their stats.
+- `/ping-me-hime` command renamed to `/ping-me-alice`. (AH only)
+- Retrieving external events (`top.gg` votes for now), do not stop when the db is being restarted. (aspecialguest)
+- `/action` reply required more permissions than it actually needed possibly making a wrong client reply. (opecuted)
+- `/hearts` moved to `/user hearts`.
+- `/stats show` moved to `/user stats`.
+- Add `/user equipment`.
+- Add `/user equip`.
+- Add `/user unequip`.
+- Add `/user inventory`.
+- Add `/user discard-item`.
+- Update `/help`, readme and top.gg description.
+
 ### 2025-03-19
 
 - Reduce the required investment needed for changing an unset relationship by around 88%.

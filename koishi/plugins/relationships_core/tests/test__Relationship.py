@@ -7,7 +7,7 @@ from hata import DATETIME_FORMAT_CODE
 from ....bot_utils.models import DB_ENGINE
 
 from ..constants import (
-    RELATIONSHIP_CACHE, RELATIONSHIP_CACHE_LISTING
+    RELATIONSHIP_CACHE, RELATIONSHIP_LISTING_CACHE
 )
 from ..relationship import Relationship
 from ..relationship_saver import RelationshipSaver
@@ -331,8 +331,8 @@ async def test__Relationship__delete():
         )
         relationship.entry_id = entry_id
         RELATIONSHIP_CACHE[entry_id] = relationship
-        RELATIONSHIP_CACHE_LISTING[source_user_id] = [relationship]
-        RELATIONSHIP_CACHE_LISTING[target_user_id] = [relationship]
+        RELATIONSHIP_LISTING_CACHE[source_user_id] = [relationship]
+        RELATIONSHIP_LISTING_CACHE[target_user_id] = [relationship]
         
         vampytest.assert_is(relationship.saver, None)
         vampytest.assert_is_not(RELATIONSHIP_CACHE.get(entry_id, None), None)
@@ -347,12 +347,12 @@ async def test__Relationship__delete():
         
         vampytest.assert_is(relationship.saver, None)
         vampytest.assert_is(RELATIONSHIP_CACHE.get(entry_id, None), None)
-        vampytest.assert_is(RELATIONSHIP_CACHE_LISTING.get(source_user_id, None), None)
-        vampytest.assert_is(RELATIONSHIP_CACHE_LISTING.get(target_user_id, None), None)
+        vampytest.assert_is(RELATIONSHIP_LISTING_CACHE.get(source_user_id, None), None)
+        vampytest.assert_is(RELATIONSHIP_LISTING_CACHE.get(target_user_id, None), None)
     
     finally:
         RELATIONSHIP_CACHE.clear()
-        RELATIONSHIP_CACHE_LISTING.clear()
+        RELATIONSHIP_LISTING_CACHE.clear()
 
 
 @vampytest.skip_if(DB_ENGINE is not None)
@@ -430,8 +430,8 @@ async def test__Relationship__set__save():
         )
         relationship.entry_id = entry_id
         
-        RELATIONSHIP_CACHE_LISTING[source_user_id] = None
-        RELATIONSHIP_CACHE_LISTING[target_user_id] = [relationship]
+        RELATIONSHIP_LISTING_CACHE[source_user_id] = None
+        RELATIONSHIP_LISTING_CACHE[target_user_id] = [relationship]
         
         task = Task(get_event_loop(), relationship.save())
         
@@ -446,11 +446,11 @@ async def test__Relationship__set__save():
         vampytest.assert_is_not(key, None)
         vampytest.assert_eq(relationship.entry_id, key)
         vampytest.assert_is(RELATIONSHIP_CACHE.get(key, None), relationship)
-        vampytest.assert_eq(RELATIONSHIP_CACHE_LISTING.get(source_user_id, None), [relationship])
-        vampytest.assert_eq(RELATIONSHIP_CACHE_LISTING.get(target_user_id, None), [relationship])
+        vampytest.assert_eq(RELATIONSHIP_LISTING_CACHE.get(source_user_id, None), [relationship])
+        vampytest.assert_eq(RELATIONSHIP_LISTING_CACHE.get(target_user_id, None), [relationship])
         
         vampytest.assert_is(relationship.saver, None)
         
     finally:
         RELATIONSHIP_CACHE.clear()
-        RELATIONSHIP_CACHE_LISTING.clear()
+        RELATIONSHIP_LISTING_CACHE.clear()

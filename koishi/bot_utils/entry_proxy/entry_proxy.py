@@ -84,7 +84,7 @@ class EntryProxy(RichAttributeErrorBaseType, metaclass = EntryProxyType):
         
         return saver
     
-        
+    
     def set(self, field_name, field_value):
         """
         Sets a value of the auto moderation configuration.

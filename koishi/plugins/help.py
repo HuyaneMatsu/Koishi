@@ -66,14 +66,14 @@ CATEGORIES = (
     ), (
         'Economy',
         EMOJI__HEART_CURRENCY,
-        ('daily', 'gift', 'shop', 'hearts', 'top-list',),
+        ('daily', 'gift', 'shop', 'top-list',),
         (),
     ), (
         'Fun',
         EMOJI_PAPER_DRAGON,
         (
-            '9ball', 'ascii', 'meme', 'message-me', 'minesweeper', 'oj', 'paranoia', 'random', 'rate', 'roll',
-            'sex', 'stats', 'trivia', 'urban', 'yuno'
+            '9ball', 'ascii', 'choose', 'meme', 'minesweeper', 'oj', 'paranoia', 'random', 'rate', 'roll',
+            'sex', 'trivia', 'urban', 'yuno'
         ),
         (),
     ), (
@@ -84,7 +84,7 @@ CATEGORIES = (
     ), (
         'Help',
         EMOJI_SPEECH_BUBBLE,
-        ('about', 'ask', 'help',),
+        ('accessibility', 'about', 'ask', 'help',),
         (),
     ), (
         'Relationships',
@@ -95,7 +95,7 @@ CATEGORIES = (
         'Utility',
         EMOJI_MAGIC_WAND,
         (
-            'calc', 'choose', 'create-activity', 'color', 'format-time', 'guild', 'id',
+            'calc', 'create-activity', 'color', 'escape', 'format-time', 'guild', 'id', 'message-me',
             'ping', 'rawr', 'role-info', 'roles', 'snipe', 'style-text', 'user'
         ),
         (),
@@ -199,6 +199,12 @@ HEARD_GUIDE_EMBED = Embed(
 ).add_thumbnail(
     EMOJI__HEART_CURRENCY.url,
 ).add_field(
+    'Overview of your hearts',
+    (
+        '**•** `/user hearts` - How much hearts you have.\n'
+        '**•** `/top-list` - The horde of the heart hoarders.'
+    )
+).add_field(
     'Getting hearts',
     (
         f'**•** `/daily` - Claim you daily reward.\n'
@@ -215,7 +221,7 @@ HEARD_GUIDE_EMBED = Embed(
         '**•** `/shop roles` - Buy roles inside of my support server.\n'
         '**•** `/shop buy-relationship-slot ` - More waifus.\n'
         '**•** `/shop burn-divorce-papers` - We all make mistakes.\n'
-        '**•** `/stats upgrade` - Upgrade your waifus stats.'
+        '**•** `/shop upgrade-stats` - Upgrade your stats.'
     ),
 ).add_field(
     'Gambling hearts',

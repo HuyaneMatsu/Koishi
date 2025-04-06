@@ -16,7 +16,7 @@ from .constants import (
 from .queries import query_to_dos
 
 
-def create_to_do_embed(to_do, user):
+def create_to_do_embed(to_do, user, guild_id):
     """
     Creates an embed representing a to-do.
     
@@ -28,6 +28,9 @@ def create_to_do_embed(to_do, user):
     user : ``ClientUserBase``
         The user who added the to-do entry.
     
+    guild_id : `int`
+        The respective guild's identifier.
+    
     Returns
     -------
     embed : ``Embed``
@@ -38,7 +41,7 @@ def create_to_do_embed(to_do, user):
         'By',
         (
             f'```\n'
-            f'{user.full_name}\n'
+            f'{user.name_at(guild_id)}\n'
             f'```'
         ),
         inline = True,
@@ -65,7 +68,7 @@ def create_to_do_embed(to_do, user):
             f'```'
         ),
     ).add_thumbnail(
-        user.avatar_url,
+        user.avatar_url_at(guild_id),
     )
 
 

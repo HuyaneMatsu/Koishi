@@ -4,7 +4,7 @@ import vampytest
 
 from ...user_balance import UserBalance
 
-from ..constants import RELATIONSHIP_CACHE_LISTING
+from ..constants import RELATIONSHIP_LISTING_CACHE
 from ..relationship import Relationship
 from ..relationship_deepening import deepen_and_boost_relationship
 from ..relationship_types import RELATIONSHIP_TYPE_MAMA
@@ -67,7 +67,7 @@ async def test__deepen_and_boost_relationship__direct_related_without_boost():
     try:
         await deepen_and_boost_relationship(source_user_balance, target_user_balance, relationship_to_deepen, 1000)
     finally:
-        RELATIONSHIP_CACHE_LISTING.clear()
+        RELATIONSHIP_LISTING_CACHE.clear()
     
     vampytest.assert_eq(source_user_balance.balance, 0)
     vampytest.assert_eq(source_user_balance.relationship_value, 0)
@@ -101,7 +101,7 @@ async def test__deepen_and_boost_relationship__indirect_related_without_boost():
     try:
         await deepen_and_boost_relationship(source_user_balance, target_user_balance, relationship_to_deepen, 1000)
     finally:
-        RELATIONSHIP_CACHE_LISTING.clear()
+        RELATIONSHIP_LISTING_CACHE.clear()
     
     vampytest.assert_eq(source_user_balance.balance, 0)
     vampytest.assert_eq(source_user_balance.relationship_value, 0)
@@ -134,7 +134,7 @@ async def test__deepen_and_boost_relationship__direct_related_with_boost():
     try:
         await deepen_and_boost_relationship(source_user_balance, target_user_balance, relationship_to_deepen, 1000)
     finally:
-        RELATIONSHIP_CACHE_LISTING.clear()
+        RELATIONSHIP_LISTING_CACHE.clear()
     
     vampytest.assert_eq(source_user_balance.balance, 50)
     vampytest.assert_eq(source_user_balance.relationship_value, 0)
@@ -167,7 +167,7 @@ async def test__deepen_and_boost_relationship__inverted_direct_related_with_boos
     try:
         await deepen_and_boost_relationship(source_user_balance, target_user_balance, relationship_to_deepen, 1000)
     finally:
-        RELATIONSHIP_CACHE_LISTING.clear()
+        RELATIONSHIP_LISTING_CACHE.clear()
     
     vampytest.assert_eq(source_user_balance.balance, 50)
     vampytest.assert_eq(source_user_balance.relationship_value, 0)
@@ -201,7 +201,7 @@ async def test__deepen_and_boost_relationship__indirect_related_with_boost():
     try:
         await deepen_and_boost_relationship(source_user_balance, target_user_balance, relationship_to_deepen, 1000)
     finally:
-        RELATIONSHIP_CACHE_LISTING.clear()
+        RELATIONSHIP_LISTING_CACHE.clear()
     
     vampytest.assert_eq(source_user_balance.balance, 25)
     vampytest.assert_eq(source_user_balance.relationship_value, 0)
@@ -235,7 +235,7 @@ async def test__deepen_and_boost_relationship__inverted_indirect_related_with_bo
     try:
         await deepen_and_boost_relationship(source_user_balance, target_user_balance, relationship_to_deepen, 1000)
     finally:
-        RELATIONSHIP_CACHE_LISTING.clear()
+        RELATIONSHIP_LISTING_CACHE.clear()
     
     vampytest.assert_eq(source_user_balance.balance, 25)
     vampytest.assert_eq(source_user_balance.relationship_value, 0)

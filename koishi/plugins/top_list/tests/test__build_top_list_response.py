@@ -47,7 +47,15 @@ def test__build_top_list_response():
                     f'{page_index + 1}\n'
                     f'```'
                 ),
-                inline = True,
+                True,
+            ).add_field(
+                'Sort order',
+                (
+                    f'```\n'
+                    f'decreasing\n'
+                    f'```'
+                ),
+                True,
             ),
             components = Row(
                 Button(

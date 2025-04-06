@@ -65,12 +65,12 @@ async def test__get_stats__request():
     stat_charm = 14
     stat_loyalty = 15
     
-    level = 25
-    experience = 12222
+    credibility = 12222
     
-    raw_species = b'a'
-    raw_weapon = b'b'
-    raw_costume = b'c'
+    item_id_costume = 2
+    item_id_head = 3
+    item_id_species = 4
+    item_id_weapon = 5
     
     entry_id = 3502
     
@@ -86,12 +86,12 @@ async def test__get_stats__request():
         'stat_charm': stat_charm,
         'stat_loyalty': stat_loyalty,
         
-        'level': level,
-        'experience': experience,
+        'credibility': credibility,
         
-        'raw_species': raw_species,
-        'raw_weapon': raw_weapon,
-        'raw_costume': raw_costume,
+        'item_id_costume': item_id_costume,
+        'item_id_head': item_id_head,
+        'item_id_species': item_id_species,
+        'item_id_weapon': item_id_weapon,
     }
     
     async def mocked_query_stats(input_user_id):

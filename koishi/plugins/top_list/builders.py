@@ -125,7 +125,15 @@ def build_top_list_response(page_index, entries, guild_id):
             f'{page_index + 1}\n'
             f'```'
         ),
-        inline = True,
+        True,
+    ).add_field(
+        'Sort order',
+        (
+            f'```\n'
+            f'decreasing\n'
+            f'```'
+        ),
+        True,
     )
     
     components = build_components(page_index, len(entries))

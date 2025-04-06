@@ -28,7 +28,7 @@ MAX_ACTION_COMMAND_LENGTH = max(len(name) for name in ACTIONS_BY_NAME.keys())
 
 ACTION_CONTENT_RP = re_compile(f'> .*?{USER_MENTION_RP.pattern}', re_multiline | re_unicode)
 PERMISSION_MANAGE_MESSAGES = Permission().update_by_keys(manage_messages = True)
-PERMISSION_IMAGES = Permission().update_by_keys(attach_files = True, embed_links = True)
+PERMISSION_IMAGES = Permission().update_by_keys(embed_links = True)
 
 
 def is_message_action_interaction(client, message):
