@@ -686,7 +686,7 @@ def render_emoji_difference_into(into, old_emoji, activity):
     into : `list<str>`
         The container to render into.
     
-    old_emoji : `None | Emoji`
+    old_emoji : ``None | Emoji``
         The old emoji to render.
     
     activity : ``Activity``

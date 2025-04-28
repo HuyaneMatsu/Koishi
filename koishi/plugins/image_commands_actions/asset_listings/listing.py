@@ -4013,7 +4013,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    ')https://cdn.discordapp.com/attachments/568837922288173058/1294663084194926592/reimu-pocky_self-0002.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1294663084194926592/reimu-pocky_self-0002.png',
 ).with_action(
     ACTION_TAG_POCKY_SELF, HAKUREI_REIMU, HAKUREI_REIMU,
 ).with_creator(

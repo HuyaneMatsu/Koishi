@@ -33,7 +33,7 @@ def _add_items_row(
     item_left_slot_name : `str`
         Left item slot name.
     
-    item_left_emoji_default : `None | Emoji`
+    item_left_emoji_default : ``None | Emoji``
         Left item's default emoji to use.
     
     item_left_name_default : `str`
@@ -45,7 +45,7 @@ def _add_items_row(
     item_right_slot_name : `str`
         Left item slot name.
     
-    item_right_emoji_default : `None | Emoji`
+    item_right_emoji_default : ``None | Emoji``
         Left item's default emoji to use.
     
     item_right_name_default : `str`
@@ -96,7 +96,7 @@ def _build_item_field_description(item_emoji, item_name, item_modifiers, modifie
     
     Parameters
     ----------
-    item_emoji : `None | Emoji`
+    item_emoji : ``None | Emoji``
         The emoji of the item.
     
     item_name : `str`

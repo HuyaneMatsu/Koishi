@@ -36,7 +36,7 @@ def get_emoji_representation(emoji):
     
     Parameters
     ----------
-    emoji : `None | Emoji`
+    emoji : ``None | Emoji``
         The emoji.
     
     Returns

@@ -109,7 +109,7 @@ def build_sticker_update_embeds(sticker, old_attributes):
     ----------
     sticker : ``Sticker``
         The updated sticker.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The sticker's old attributes that have been updated.
     
     Returns

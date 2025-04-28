@@ -122,7 +122,7 @@ async def get_user_from_referenced_message(client, referenced_message):
     
     Returns
     -------
-    user : `None`, ``ClientUserBase``
+    user : ``None | ClientUserBase``
     """
     content = referenced_message.content
     if content is None:

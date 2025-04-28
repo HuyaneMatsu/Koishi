@@ -1,6 +1,14 @@
+### 2025-04-28
+
+- Fix `anilist` commands did not respond if the media's constructed title was above embed title length limit.
+- Fix `shop upgrade` balance check had `required` and `available` balance reversed in its message. (aspecialguest)
+- `/shop` is now available globally.
+- Add **5** images to `/meme`.
+- Fix a `/pocky` (self) url being not well formed.
+
 ### 2025-04-06
 
-- Fix `/to-do` did not use the user's local name & avatar.
+- Fix `/to-do` did not use the user's local name & avatar. (Testers only)
 - Stream notifications now use attachment streaming. (AH only)
 - The user's equipped items' modifiers now affect their stats.
 - `/ping-me-hime` command renamed to `/ping-me-alice`. (AH only)
@@ -14,6 +22,7 @@
 - Add `/user inventory`.
 - Add `/user discard-item`.
 - Update `/help`, readme and top.gg description.
+- Add `6` items, although they cannot be acquired yet.
 
 ### 2025-03-19
 

@@ -69,7 +69,7 @@ async def sticker_update(client, sticker, old_attributes):
         The client who received the event.
     sticker : ``Sticker``
         The edited sticker.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The sticker's old attributes that have been edited.
     """
     channel = get_log_sticker_channel(sticker.guild_id)

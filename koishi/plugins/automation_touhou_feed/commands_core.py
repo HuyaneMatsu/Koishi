@@ -166,7 +166,7 @@ def get_channel_like(client, guild, channel_name):
     
     Returns
     -------
-    channel : `None`, ``Channel``
+    channel : ``None | Channel``
         The matched channel.
     """
     priority_queue = _channel_match_priority_queue(client, guild, channel_name)

@@ -9,7 +9,7 @@ from .keys import (
 from .parsers_date import parse_media_date_range
 from .parsers_description import parse_description_media
 from .parsers_media import parse_media_format, parse_media_status
-from .parsers_name import parse_name_media
+from .parsers_name import parse_media_name
 from .parsers_url import parse_url_anime, parse_url_manga, parse_image_url_media
 
 
@@ -29,7 +29,7 @@ def build_embed_media_based(media_data, url_parser):
     embed : ``Embed``
     """
     embed = Embed(
-        parse_name_media(media_data),
+        parse_media_name(media_data),
         parse_description_media(media_data),
         url = url_parser(media_data),
     )

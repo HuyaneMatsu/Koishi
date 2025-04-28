@@ -7,7 +7,7 @@ from threading import current_thread
 from time import time as time_now
 
 from hata import (
-    Achievement, ApplicationCommand, ApplicationCommandPermission, ApplicationCommandPermissionOverwrite,
+    ApplicationCommand, ApplicationCommandPermission, ApplicationCommandPermissionOverwrite,
     AutoModerationAction, AutoModerationRule, BUILTIN_EMOJIS, CHANNELS, CLIENTS, Channel, Client, ComponentType,
     DISCORD_EPOCH, DiscordException, DiscoveryCategory, ERROR_CODES, Embed, Emoji, EntitlementOwnerType,
     ExplicitContentFilterLevel, ForumTag, GUILDS, Guild, InteractionResponseType, KOKORO, MessageNotificationLevel,
@@ -36,9 +36,10 @@ from scarletio.web_common.headers import (
     METHOD_PUT
 )
 
+Achievement = NotImplemented
+
 MAIN_CLIENT : Client
 RATE_LIMIT_COMMANDS = eventlist(type_ = Command, category = 'RATE_LIMIT TESTS')
-
 
 def setup(lib):
     MAIN_CLIENT.command_processor.create_category('RATE_LIMIT TESTS', checks = [checks.owner_only()])
@@ -3681,6 +3682,24 @@ async def subscription_get_chunk_sku_user(client, sku_id, user_id):
         None,
         {'user_id': user_id},
     )
+
+
+async def guild_activity_overview_get(client, guild_id):
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/profile',
+    )
+
+
+async def guild_activity_overview_edit(client, guild_id, name):
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
+        f'{API_ENDPOINT}/guilds/{guild_id}/profile',
+        {'name': name},
+    )
+
 
 
 @RATE_LIMIT_COMMANDS
@@ -8802,3 +8821,37 @@ async def rate_limit_test_0234(client, message):
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0234') as RLT:
         await Task(KOKORO, entitlement_get(client)).wait_for_completion()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0235(client, message):
+    """
+    Gets the guild's activity overview.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0235') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not guild.cached_permissions_for(client).administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        await Task(KOKORO, guild_activity_overview_get(client, guild.id)).wait_for_completion()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0236(client, message):
+    """
+    Edits the guild's activity overview.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0236') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not guild.cached_permissions_for(client).administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        await Task(KOKORO, guild_activity_overview_edit(client, guild.id, 'Flandre\'s basement')).wait_for_completion()

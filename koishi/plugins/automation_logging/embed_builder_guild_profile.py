@@ -20,7 +20,7 @@ def build_guild_profile_update_embed(guild_profile, old_attributes):
     ----------
     guild_profile : ``GuildProfile``
         The edited guild profile.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The emoji's old attributes that have been edited.
     
     Returns

@@ -20,7 +20,7 @@ async def get_source_user_from_client_entry(entry):
     
     Returns
     -------
-    source_user : `None`, ``ClientUserBase``
+    source_user : ``None | ClientUserBase``
     """
     reason = entry.reason
     if (reason is None):

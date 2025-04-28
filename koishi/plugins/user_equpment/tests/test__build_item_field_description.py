@@ -53,7 +53,7 @@ def test__build_item_field_description(item_emoji, item_name, item_modifiers, mo
     
     Parameters
     ----------
-    item_emoji : `None | Emoji`
+    item_emoji : ``None | Emoji``
         The emoji of the item.
     
     item_name : `str`

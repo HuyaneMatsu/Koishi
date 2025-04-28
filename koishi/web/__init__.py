@@ -62,6 +62,7 @@ BOT_NAMES = [
         'mozilla/5.0 (windows nt 10.0; win64; x64) applewebkit/537.36 (khtml, like gecko) '
         'chrome/131.0.0.0 safari/537.36 edg/131.0.0.0'
     ),
+    'Ai2Bot-Dolma',
     
     # From google:
     'googlebot',
@@ -120,6 +121,7 @@ BLOCKED_IPS = {
     
     # Tries to request Wordpress Blog login page (and then login), for real its not a wordpress site
     '34.64.218.102',
+    '144.91.119.115',
     
     # Tries to request env variable file & redirect to google???
     '79.110.62.123',
@@ -235,6 +237,46 @@ BLOCKED_IPS = {
     '47.82.11.9',
     '47.82.11.90',
     '47.82.11.92',
+    
+    # Scraper "Mozilla/5.0 (compatible) Ai2Bot-Dolma (+https://www.allenai.org/crawl)"
+    '104.238.140.158',
+    '144.202.84.81',
+    '207.148.6.129',
+    '45.76.6.132',
+    '45.77.164.21',
+    '50.28.107.56',
+    '50.28.107.59',
+    '50.28.40.163',
+    '67.225.188.31',
+    '67.227.250.168',
+    '72.52.132.18',
+    '72.52.196.79',
+    
+    # Scraper "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+    '47.238.13.6',
+    '47.238.13.15',
+    '47.238.13.16',
+    '47.238.13.17',
+    '47.242.77.69',
+    '47.243.56.196',
+    '8.210.11.248',
+    '8.210.152.184',
+    '8.210.230.104',
+    
+    # Search engine "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36"
+    '157.55.39.202',
+    '207.46.13.18',
+    '207.46.13.150',
+    '40.77.167.247',
+    '40.77.167.61',
+    '40.77.167.68',
+    '40.77.188.140',
+    '40.77.188.64',
+    '40.77.189.243',
+    '52.167.144.159',
+    '52.167.144.16',
+    '52.167.144.183',
+    '52.167.144.19'
 }
 
 

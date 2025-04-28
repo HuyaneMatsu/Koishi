@@ -11,8 +11,8 @@ from .constants import ITEMS
 from .flags import ITEM_FLAG_EDIBLE, ITEM_FLAG_WEAPON
 from .item import Item
 from .item_ids import (
-    ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANATA,
-    ITEM_ID_PEACH, ITEM_ID_STRAWBERRY
+    ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FISHING_ROD,
+    ITEM_ID_FLYKILLER_AMANATA, ITEM_ID_GARLIC, ITEM_ID_PEACH, ITEM_ID_SCARLETIO_ONION, ITEM_ID_STRAWBERRY
 )
 
 
@@ -142,6 +142,60 @@ ITEM_BLUEFRANKISH = ITEMS[ITEM_ID_BLUEFRANKISH] = Item(
     None,
 )
 
+
+ITEM_CARROT = ITEMS[ITEM_ID_CARROT] = Item(
+    ITEM_ID_CARROT,
+    'Carrot',
+    BUILTIN_EMOJIS['carrot'],
+    (
+        'A root vegetable cultivated in many colors from yellow through red till purple. '
+        'It is sweet and a significant source of vitamins. '
+        'Its a biennial plant, first year it stores its energy in its taproot enabling itself to flower in the second.\n'
+        '\n'
+        'They can be found in the **Human Village** and at the outskirts of the **Eientei** mansion.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    18, # value (hearts)
+    240, # weight (grams)
+    None,
+)
+
+
+ITEM_GARLIC = ITEMS[ITEM_ID_GARLIC] = Item(
+    ITEM_ID_GARLIC,
+    'Garlic',
+    BUILTIN_EMOJIS['garlic'],
+    (
+        'A bulbous plant used as seasoning and as medical remedy. '
+        'It has virus, bacterium and fungi killing effect, rich of minerals and vitamins. '
+        'Used as meat seasoning and marinade. '
+        'Because of its medical properties and strong odor it is considered to repel and dispel evil spirits.\n'
+        '\n'
+        'Can be found in the **Human Village**.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    47, # value (hearts)
+    85, # weight (grams)
+    None,
+)
+
+
+SCARLET_ONION = ITEMS[ITEM_ID_SCARLETIO_ONION] = Item(
+    ITEM_ID_SCARLETIO_ONION,
+    'Scarlet onion',
+    BUILTIN_EMOJIS['onion'],
+    (
+        'An bulbous plant used as seasoning since the ancients. '
+        'Its one of the most important and widespread vegetable. '
+        'Depending on its kind it is either biennial or perennial. Its inflorescence is fascinating, sphere shaped.\n'
+        '\n'
+        'Can be found in the **Human Village**.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    9, # value (hearts)
+    170, # weight (grams)
+    None,
+)
 
 
 # Some ideas:

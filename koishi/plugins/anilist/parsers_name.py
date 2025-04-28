@@ -1,5 +1,7 @@
 __all__ = ()
 
+from hata.discord.embed.embed.constants import TITLE_LENGTH_MAX
+
 from .keys import (
     KEY_CHARACTER_NAME, KEY_CHARACTER_NAME_FIRST, KEY_CHARACTER_NAME_LAST, KEY_CHARACTER_NAME_MIDDLE,
     KEY_CHARACTER_NAME_NATIVE, KEY_MEDIA_NAME, KEY_MEDIA_NAME_NATIVE, KEY_MEDIA_NAME_ROMAJI
@@ -8,7 +10,7 @@ from .keys import (
 NAME_DEFAULT = '???'
 
 
-def parse_name_character(character_data):
+def parse_character_name(character_data):
     """
     Parses the name of the character from the given data.
     
@@ -72,7 +74,7 @@ def parse_name_character(character_data):
     return ''.join(name_parts)
 
 
-def parse_name_media(media_data):
+def parse_media_name(media_data):
     """
     Parses the name of the media from the given data.
     
@@ -92,15 +94,31 @@ def parse_name_media(media_data):
     name_romaji = name_data.get(KEY_MEDIA_NAME_ROMAJI, None)
     name_native = name_data.get(KEY_MEDIA_NAME_NATIVE, None)
     
-    if (name_romaji is None):
-        if (name_native is None):
-            name = NAME_DEFAULT
+    while True:
+        if (name_romaji is None):
+            if (name_native is None):
+                name = NAME_DEFAULT
+            else:
+                name = name_native
         else:
-            name = name_native
-    else:
-        if (name_native is None) or (name_romaji == name_native):
-            name = name_romaji
-        else:
-            name = f'{name_romaji} ({name_native})'
+            if (name_native is None) or (name_romaji == name_native):
+                name = name_romaji
+            else:
+                if len(name_romaji) >= TITLE_LENGTH_MAX:
+                    name = name_romaji[:(TITLE_LENGTH_MAX - 10)] + ' ... (...)'
+                
+                elif len(name_romaji) > (TITLE_LENGTH_MAX - 8):
+                    name = name_romaji + ' (...)'
+                
+                elif len(name_romaji) + len(name_native) > TITLE_LENGTH_MAX:
+                    name = f'{name_romaji} ({name_native[TITLE_LENGTH_MAX - 7 - len(name_romaji)]} ...)'
+                
+                else:
+                    name = f'{name_romaji} ({name_native})'
+                break
+        
+        if len(name) > TITLE_LENGTH_MAX:
+            name = name[:(TITLE_LENGTH_MAX - 4)] + ' ...'
+        break
     
     return name

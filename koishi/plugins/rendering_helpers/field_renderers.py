@@ -62,7 +62,7 @@ def render_date_time_with_relative_field_into(
         The container to render into.
     field_added : `bool`
         Whether any fields were added already.
-    date_time : `None`, `DateTime`
+    date_time : `None | DateTime`
         The date time to render.
     add_ago : `bool` = `True`, Optional (Keyword only)
         Whether `ago` word should be added into the relative date option.
@@ -115,7 +115,7 @@ def render_date_time_field_into(into, field_added, date_time, *, optional = True
         The container to render into.
     field_added : `bool`
         Whether any fields were added already.
-    date_time : `None`, `DateTime`
+    date_time : `None | DateTime`
         The date time to render.
     add_ago : `bool` = `True`, Optional (Keyword only)
         Whether `ago` word should be added into the relative date option.
@@ -157,9 +157,9 @@ def render_date_time_difference_field_into(
         The container to render into.
     field_added : `bool`
         Whether any fields were added already.
-    date_time_0 : `None`, `DateTime`
+    date_time_0 : `None | DateTime`
         Date to make the difference from.
-    date_time_1 : `None`, `DateTime`
+    date_time_1 : `None | DateTime`
         The other date.
     optional : `bool` = `True`, Optional (Keyword only)
         Whether should not render if `date_time` is `None`.
@@ -444,7 +444,7 @@ def render_emoji_field_into(into, field_added, emoji, *, optional = True, title 
     field_added : `bool`
         Whether any fields were added already.
     
-    emoji : `None | Emoji`
+    emoji : ``None | Emoji``
         The emoji to render.
     
     optional : `bool` = `True`, Optional (Keyword only)

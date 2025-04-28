@@ -104,7 +104,7 @@ def test__render_date_time_with_relative_field_into(current_date, field_added, d
         The current time to use as a reference.
     field_added : `bool`
         Whether any fields were added already.
-    date_time : `None`, `DateTime`
+    date_time : `None | DateTime`
         The date to render.
     add_ago : `bool`
         Whether `ago` word should be added into the relative date option.
@@ -189,7 +189,7 @@ def test__render_date_time_with_relative_field_into__condition(current_date, dat
     ----------
     current_date : `DateTime`
         The current time to use as a reference.
-    date_time : `None`, `DateTime`
+    date_time : `None | DateTime`
         The date to render.
     condition : `int`
         Whether we only wanna render future time, current or perhaps both?
@@ -235,7 +235,7 @@ def test__render_date_time_field_into(field_added, date_time, optional, title):
     ----------
     field_added : `bool`
         Whether any fields were added already.
-    date_time : `None`, `DateTime`
+    date_time : `None | DateTime`
         The date to render.
     optional : `bool`
         Whether should not render if `date_time` is `None`.
@@ -381,9 +381,9 @@ def test__render_date_time_difference_field_into(field_added, date_time_0, date_
     ----------
     field_added : `bool`
         Whether any fields were added already.
-    date_time_0 : `None`, `DateTime`
+    date_time_0 : `None | DateTime`
         Date time to get the difference of.
-    date_time_1 : `None`, `DateTime`
+    date_time_1 : `None | DateTime`
         Date time to get the difference with.
     optional : `bool`
         Whether should not render if `string` is empty.

@@ -5,7 +5,7 @@ from hata import Embed
 from .constants import SUB_ENTRY_PER_PAGE
 from .keys import KEY_CHARACTER
 from .parsers_description import parse_description_character, parse_character_media_connections_description
-from .parsers_name import parse_name_character
+from .parsers_name import parse_character_name
 from .parsers_url import parse_image_url_character, parse_url_character
 
 
@@ -31,7 +31,7 @@ def build_embed_character(data):
     character_data = data['data'][KEY_CHARACTER]
     
     embed = Embed(
-        parse_name_character(character_data),
+        parse_character_name(character_data),
         parse_description_character(character_data),
         url = parse_url_character(character_data),
     )

@@ -9,7 +9,7 @@ from .keys import (
     KEY_CHARACTER_GENDER, KEY_MEDIA_DESCRIPTION, KEY_MEDIA_GENRES, KEY_CHARACTER_MEDIA_CONNECTIONS,
     KEY_CHARACTER_MEDIA_CONNECTIONS_MEDIA_ARRAY
 )
-from .parsers_name import parse_name_media, parse_name_character
+from .parsers_name import parse_media_name, parse_character_name
 from .parsers_url import parse_url_media, parse_url_anime, parse_url_character, parse_url_manga
 
 
@@ -351,7 +351,7 @@ def parse_listing_anime(array_data):
     -------
     entity_listing : `None`, `str`
     """
-    return parse_listing_base(array_data, parse_name_media, parse_url_anime)
+    return parse_listing_base(array_data, parse_media_name, parse_url_anime)
 
 
 def parse_listing_character(array_data):
@@ -367,7 +367,7 @@ def parse_listing_character(array_data):
     -------
     entity_listing : `None`, `str`
     """
-    return parse_listing_base(array_data, parse_name_character, parse_url_character)
+    return parse_listing_base(array_data, parse_character_name, parse_url_character)
 
 
 def parse_listing_manga(array_data):
@@ -383,7 +383,7 @@ def parse_listing_manga(array_data):
     -------
     entity_listing : `None`, `str`
     """
-    return parse_listing_base(array_data, parse_name_media, parse_url_manga)
+    return parse_listing_base(array_data, parse_media_name, parse_url_manga)
 
 
 def parse_character_media_connections_description(character_data):
@@ -404,4 +404,4 @@ def parse_character_media_connections_description(character_data):
         return
     
     media_connections_array_data = media_connections_data.get(KEY_CHARACTER_MEDIA_CONNECTIONS_MEDIA_ARRAY, None)
-    return parse_listing_base(media_connections_array_data, parse_name_media, parse_url_media)
+    return parse_listing_base(media_connections_array_data, parse_media_name, parse_url_media)

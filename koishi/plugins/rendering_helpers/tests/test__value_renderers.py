@@ -130,7 +130,7 @@ def test__render_nullable_emoji_into(input_value):
     
     Parameters
     ----------
-    input_value : `None | Emoji`
+    input_value : ``None | Emoji``
         The value to render.
     
     Returns

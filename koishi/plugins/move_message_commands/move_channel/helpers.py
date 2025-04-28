@@ -46,7 +46,7 @@ def add_embed_thumbnail(embed, guild):
     ----------
     embed : ``Embed``
         The embed to add the thumbnail to.
-    guild : `None`, ``Guild``
+    guild : ``None | Guild``
         Respective guild.
     
     Returns

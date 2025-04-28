@@ -109,7 +109,7 @@ async def wild_card_action(
         Name of the target character.
     image_name : `None | str` = `None`, Optional
         The name of the image.
-    user_{n} : `None`, ``ClientUserBase`` = `None`, Optional
+    user_{n} : ``None | ClientUserBase`` = `None`, Optional
         Additional users to target.
     """
     targets, client_in_users, user_in_users, allowed_mentions = get_allowed_users(

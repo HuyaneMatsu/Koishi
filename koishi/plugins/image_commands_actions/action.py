@@ -605,7 +605,7 @@ def create_action_command_function(action):
             The client who received the event.
         event : ``InteractionEvent``
             The received interaction event.
-        user_{n} : `None`, ``ClientUserBase`` = `None`, Optional
+        user_{n} : ``None | ClientUserBase`` = `None`, Optional
             Additional users to target.
         
         Raises

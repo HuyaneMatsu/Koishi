@@ -22,6 +22,7 @@ SHOP = FEATURE_CLIENTS.interactions(
     None,
     name = 'shop',
     description = 'Trade your hearts!',
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
 

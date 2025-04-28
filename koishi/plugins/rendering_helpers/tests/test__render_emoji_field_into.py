@@ -48,7 +48,7 @@ def test__render_emoji_field_into(field_added, emoji, optional, title):
     field_added : `bool`
         Whether a field was already added.
     
-    emoji : `None | Emoji`
+    emoji : ``None | Emoji``
         The emoji to render.
     
     title : `str`

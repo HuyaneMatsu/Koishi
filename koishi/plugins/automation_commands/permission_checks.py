@@ -23,7 +23,7 @@ def default_channel_and_check_its_guild(event, channel):
     ----------
     event : ``InteractionEvent``
         The received interaction event.
-    channel : `None`, ``Channel``
+    channel : ``None | Channel``
         The selected channel
     
     Returns

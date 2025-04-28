@@ -4268,7 +4268,7 @@ CHARACTER_SAKE_SWEET_MAKER = OJCharacter(
 
 CHARACTER_SWEET_CREATOR = OJCharacter(
     85,
-    'Saki (Sweet Maker)',
+    'Sweet Creator',
     4,
     0,
     +1,

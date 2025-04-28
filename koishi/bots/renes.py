@@ -103,11 +103,11 @@ async def send_stream_notification(activity, join_url, image_url, source):
     )
     
     if (image_url is None):
-        image_url = EST_DEFAULT_IMAGE_URL
         file = None
+        image_url = EST_DEFAULT_IMAGE_URL
     else:
-        image_url = 'attachment://image.png'
         file = ('image.png', create_http_stream_resource(Renes.http, image_url))
+        image_url = 'attachment://image.png'
     
     embed.add_image(image_url)
     

@@ -1688,7 +1688,7 @@ class HistoryElement:
         
         Parameters
         ----------
-        data : `dict` of (`str`, `object`) items
+        data : `dict<str, object>`
             Decoded json data.
         
         Returns
@@ -1707,7 +1707,7 @@ class HistoryElement:
         
         Returns
         -------
-        data : `dict` of (`str`, `object`) items
+        data : `dict<str, object>`
         """
         return {
             JSON_KEY_HISTORY_ELEMENT_POSITION: self.position,
@@ -1821,7 +1821,7 @@ class StageSource:
         
         Parameters
         ----------
-        data : `dict` of (`str`, `object`) items
+        data : `dict<str, object>`
             Decoded json data.
         
         Returns
@@ -2821,7 +2821,7 @@ class GameState:
         
         Parameters
         ----------
-        data : `dict` of (`str`, `object`) items
+        data : `dict<str, object>`
             Json data.
         
         Returns
@@ -2872,7 +2872,7 @@ class GameState:
         
         Returns
         -------
-        data : `dict` of (`str`, `object`) items
+        data : `dict<str, object>`
         """
         data = {}
         stage = self.stage

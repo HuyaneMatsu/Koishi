@@ -33,7 +33,7 @@ def test__render_emoji_difference_into(old_value, activity):
     
     Parameters
     ----------
-    old_value : `None | Emoji`
+    old_value : ``None | Emoji``
         The old value to render.
     
     activity : ``Activity``

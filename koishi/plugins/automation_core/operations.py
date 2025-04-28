@@ -62,7 +62,7 @@ def get_log_emoji_channel(guild_id):
     
     Returns
     -------
-    channel : `None`, ``Channel``
+    channel : ``None | Channel``
     """
     try:
         automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
@@ -96,7 +96,7 @@ def get_log_mention_channel(guild_id):
     
     Returns
     -------
-    channel : `None`, ``Channel``
+    channel : ``None | Channel``
     """
     try:
         automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
@@ -130,7 +130,7 @@ def get_log_satori_channel(guild_id):
     
     Returns
     -------
-    channel : `None`, ``Channel``
+    channel : ``None | Channel``
     """
     try:
         automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
@@ -164,7 +164,7 @@ def get_log_satori_channel_if_auto_start(guild_id):
     
     Returns
     -------
-    channel : `None`, ``Channel``
+    channel : ``None | Channel``
     """
     try:
         automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
@@ -227,7 +227,7 @@ def get_log_sticker_channel(guild_id):
     
     Returns
     -------
-    channel : `None`, ``Channel``
+    channel : ``None | Channel``
     """
     try:
         automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
@@ -261,7 +261,7 @@ def get_log_user_channel(guild_id):
     
     Returns
     -------
-    channel : `None`, ``Channel``
+    channel : ``None | Channel``
     """
     try:
         automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]

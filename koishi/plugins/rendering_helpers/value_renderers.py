@@ -50,7 +50,7 @@ def render_date_time_with_relative_into(into, date_time, add_ago):
     ----------
     into : `list` of `str`
         Container.
-    date_time : `None`, `DateTime`
+    date_time : `None | DateTime`
         Date time to convert.
     add_ago : `bool`
         Whether ago should be added to the relative representation.
@@ -292,7 +292,7 @@ def render_nullable_emoji_into(into, emoji):
     into : `list<str>`
         The container to render into.
     
-    emoji : `None | Emoji`
+    emoji : ``None | Emoji``
         The emoji to render.
     
     Returns

@@ -243,7 +243,7 @@ async def avatar(
     event : ``InteractionEvent``
         The received interaction event.
     
-    user : `None`, ``ClientUserBase`` = `None`, Optional
+    user : ``None | ClientUserBase`` = `None`, Optional
         The defined user to get the avatar of.
     
     style_name : `str` = `default`, Optional
@@ -257,7 +257,7 @@ async def avatar(
     
     Returns
     -------
-    responder : `CoroutineGenerator`
+    responder : `CoroutineGeneratorType`
     """
     if user is None:
         user = event.user
@@ -305,7 +305,7 @@ async def guild_icon(
     
     Returns
     -------
-    responder : `CoroutineGenerator`
+    responder : `CoroutineGeneratorType`
     """
     guild = event.guild
     if guild is None:

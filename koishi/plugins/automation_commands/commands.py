@@ -179,7 +179,7 @@ async def log_emoji_set_channel(
         The client who received the event.
     event : ``InteractionEvent``
         The received interaction event.
-    channel : `None`, ``Channel`` = `None`, Optional
+    channel : ``None | Channel`` = `None`, Optional
         The channel to log into.
     
     Returns
@@ -255,7 +255,7 @@ async def log_mention_set_channel(
         The client who received the event.
     event : ``InteractionEvent``
         The received interaction event.
-    channel : `None`, ``Channel`` = `None`, Optional
+    channel : ``None | Channel`` = `None`, Optional
         The channel to log into.
     
     Returns
@@ -342,7 +342,7 @@ async def log_satori_set_channel(
     ----------
     event : ``InteractionEvent``
         The received interaction event.
-    channel : `None`, ``Channel`` = `None`, Optional
+    channel : ``None | Channel`` = `None`, Optional
         The channel to log into.
     
     Returns
@@ -462,7 +462,7 @@ async def log_sticker_set_channel(
         The client who received the event.
     event : ``InteractionEvent``
         The received interaction event.
-    channel : `None`, ``Channel`` = `None`, Optional
+    channel : ``None | Channel`` = `None`, Optional
         The channel to log into.
     
     Returns
@@ -538,7 +538,7 @@ async def log_user_set_channel(
         The client who received the event.
     event : ``InteractionEvent``
         The received interaction event.
-    channel : `None`, ``Channel`` = `None`, Optional
+    channel : ``None | Channel`` = `None`, Optional
         The channel to log into.
     
     Returns
@@ -892,7 +892,7 @@ async def welcome_set_channel(
         The client who received the event.
     event : ``InteractionEvent``
         The received interaction event.
-    channel : `None`, ``Channel`` = `None`, Optional
+    channel : ``None | Channel`` = `None`, Optional
         The channel to log into.
     
     Returns
@@ -1027,7 +1027,7 @@ async def farewell_set_channel(
         The client who received the event.
     event : ``InteractionEvent``
         The received interaction event.
-    channel : `None`, ``Channel`` = `None`, Optional
+    channel : ``None | Channel`` = `None`, Optional
         The channel to log into.
     
     Returns
@@ -1331,7 +1331,7 @@ async def community_message_moderation_set_log_channel(
         The client who received the event.
     event : ``InteractionEvent``
         The received interaction event.
-    channel : `None`, ``Channel`` = `None`, Optional
+    channel : ``None | Channel`` = `None`, Optional
         The channel to log into.
     
     Returns

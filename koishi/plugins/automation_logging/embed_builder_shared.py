@@ -247,7 +247,7 @@ def try_get_modified_difference(entity, old_attributes, attribute_name):
     ----------
     entity : `object`
         The entity in context.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The entity's old attributes that have been edited.
     attribute_name : `str`
         The attribute's name.
@@ -275,7 +275,7 @@ def _maybe_add_difference_field(embed, entity, old_attributes, attribute_name, p
         The embed to extend.
     entity : `object`
         The entity in context.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The entity's old attributes that have been edited.
     attribute_name : `str`
         The attribute's name.
@@ -315,7 +315,7 @@ def maybe_add_modified_string_field(embed, entity, old_attributes, attribute_nam
         The embed to extend.
     entity : `object`
         The entity in context.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The entity's old attributes that have been edited.
     attribute_name : `str`
         The attribute's name.
@@ -339,7 +339,7 @@ def maybe_add_modified_bool_field(embed, entity, old_attributes, attribute_name,
         The embed to extend.
     entity : `object`
         The entity in context.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The entity's old attributes that have been edited.
     attribute_name : `str`
         The attribute's name.
@@ -363,7 +363,7 @@ def maybe_add_modified_nullable_string_field(embed, entity, old_attributes, attr
         The embed to extend.
     entity : `object`
         The entity in context.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The entity's old attributes that have been edited.
     attribute_name : `str`
         The attribute's name.
@@ -394,7 +394,7 @@ def maybe_add_modified_nullable_container_field(embed, entity, old_attributes, a
         The embed to extend.
     entity : `object`
         The entity in context.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The entity's old attributes that have been edited.
     attribute_name : `str`
         The attribute's name.
@@ -425,7 +425,7 @@ def maybe_add_modified_role_ids_field(embed, entity, old_attributes, attribute_n
         The embed to extend.
     entity : `object`
         The entity in context.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The entity's old attributes that have been edited.
     attribute_name : `str`
         The attribute's name.
@@ -456,7 +456,7 @@ def maybe_add_modified_role_ids_difference_field(embed, entity, old_attributes, 
         The embed to extend.
     entity : `object`
         The entity in context.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The entity's old attributes that have been edited.
     attribute_name : `str`
         The attribute's name.
@@ -510,7 +510,7 @@ def maybe_add_modified_flags_field(embed, entity, old_attributes, attribute_name
         The embed to extend.
     entity : `object`
         The entity in context.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The entity's old attributes that have been edited.
     attribute_name : `str`
         The attribute's name.
@@ -541,7 +541,7 @@ def maybe_add_modified_icon_field(embed, entity, old_attributes, attribute_name,
         The embed to extend.
     entity : `object`
         The entity in context.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The entity's old attributes that have been edited.
     attribute_name : `str`
         The attribute's name.
@@ -572,7 +572,7 @@ def maybe_add_modified_date_time_field(embed, entity, old_attributes, attribute_
         The embed to extend.
     entity : `object`
         The entity in context.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The entity's old attributes that have been edited.
     attribute_name : `str`
         The attribute's name.

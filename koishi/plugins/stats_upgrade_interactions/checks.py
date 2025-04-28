@@ -76,6 +76,6 @@ def check_sufficient_available_balance_other(
     
     abort(
         embed = build_failure_embed_insufficient_available_balance_other(
-            available_balance, required_balance, stat_index, stat_value_after, user, guild_id
+            required_balance, available_balance, stat_index, stat_value_after, user, guild_id
         ),
     )

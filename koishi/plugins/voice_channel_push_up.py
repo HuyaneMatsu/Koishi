@@ -267,7 +267,7 @@ async def user_voice_update(client, voice_state, old_attributes):
         The client who received the event.
     voice_state : ``VoiceState``
         The voice state of the user.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The voice state's old attributes that changed.
     """
     if voice_state.guild_id != GUILD__KOISHI_CLAN.id:

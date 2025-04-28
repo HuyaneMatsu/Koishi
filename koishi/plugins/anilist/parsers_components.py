@@ -10,7 +10,7 @@ from .constants import (
 )
 from .keys import KEY_CHARACTER_ID, KEY_MEDIA_ID, KEY_PAGE_INFO_CURRENT, KEY_PAGE_INFO_TOTAL
 from .parsers_description import limit_string_length
-from .parsers_name import parse_name_character, parse_name_media
+from .parsers_name import parse_character_name, parse_media_name
 
 
 def parse_option_base(entity_data, key_id, name_parser):
@@ -53,7 +53,7 @@ def parse_option_character(entity_data):
     -------
     option : ``StringSelectOption``
     """
-    return parse_option_base(entity_data, KEY_CHARACTER_ID, parse_name_character)
+    return parse_option_base(entity_data, KEY_CHARACTER_ID, parse_character_name)
 
 
 def parse_option_media(entity_data):
@@ -69,7 +69,7 @@ def parse_option_media(entity_data):
     -------
     option : ``StringSelectOption``
     """
-    return parse_option_base(entity_data, KEY_MEDIA_ID, parse_name_media)
+    return parse_option_base(entity_data, KEY_MEDIA_ID, parse_media_name)
 
 
 def parse_select_base(entity_array_data, select_base, option_parser):

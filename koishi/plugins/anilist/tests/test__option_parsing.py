@@ -5,14 +5,14 @@ from hata.ext.slash import Option
 from ..keys import KEY_CHARACTER_ID, KEY_CHARACTER_NAME, KEY_MEDIA_ID, KEY_MEDIA_NAME, \
     KEY_CHARACTER_NAME_FIRST, KEY_MEDIA_NAME_ROMAJI
 from ..parsers_components import parse_option_character, parse_option_media, parse_option_base
-from ..parsers_name import NAME_DEFAULT, parse_name_character, parse_name_media
+from ..parsers_name import NAME_DEFAULT, parse_character_name, parse_media_name
 
 
 def _iter_options__parse_option_base():
     yield (
         {},
         KEY_CHARACTER_ID,
-        parse_name_character,
+        parse_character_name,
         Option('-1', NAME_DEFAULT),
     )
     
@@ -24,7 +24,7 @@ def _iter_options__parse_option_base():
             KEY_CHARACTER_ID: 56,
         },
         KEY_CHARACTER_ID,
-        parse_name_character,
+        parse_character_name,
         Option(
             str(56),
             'koishi',
@@ -39,7 +39,7 @@ def _iter_options__parse_option_base():
             KEY_MEDIA_ID: 56,
         },
         KEY_MEDIA_ID,
-        parse_name_media,
+        parse_media_name,
         Option(
             str(56),
             'koishi',

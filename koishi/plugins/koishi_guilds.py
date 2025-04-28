@@ -182,7 +182,7 @@ async def build_guild_embed(guild):
         'Boost level',
         (
             f'```\n'
-            f'{guild.premium_tier}\n'
+            f'{guild.boost_level}\n'
             f'```'
         ),
         inline = True,

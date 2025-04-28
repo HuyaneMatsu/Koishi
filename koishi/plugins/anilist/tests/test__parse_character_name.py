@@ -1,6 +1,6 @@
 import vampytest
 
-from ..parsers_name import NAME_DEFAULT, parse_name_character
+from ..parsers_name import NAME_DEFAULT, parse_character_name
 from ..keys import (
     KEY_CHARACTER_NAME, KEY_CHARACTER_NAME_FIRST, KEY_CHARACTER_NAME_LAST, KEY_CHARACTER_NAME_MIDDLE,
     KEY_CHARACTER_NAME_NATIVE
@@ -34,9 +34,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__parse_name_character(input_data):
+def test__parse_character_name(input_data):
     """
-    Tests whether ``parse_name_character`` works as intended.
+    Tests whether ``parse_character_name`` works as intended.
     
     Parameters
     ----------
@@ -45,6 +45,8 @@ def test__parse_name_character(input_data):
     
     Returns
     -------
-    name_value : `None`, `str`
+    name_value : `str`
     """
-    return parse_name_character(input_data)
+    output = parse_character_name(input_data)
+    vampytest.assert_instance(output, str)
+    return output

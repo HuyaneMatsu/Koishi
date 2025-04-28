@@ -73,7 +73,7 @@ def test__add_items_row(
     item_left_slot_name : `str`
         Left item slot name.
     
-    item_left_emoji_default : `None | Emoji`
+    item_left_emoji_default : ``None | Emoji``
         Left item's default emoji to use.
     
     item_left_name_default : `str`
@@ -85,7 +85,7 @@ def test__add_items_row(
     item_right_slot_name : `str`
         Left item slot name.
     
-    item_right_emoji_default : `None | Emoji`
+    item_right_emoji_default : ``None | Emoji``
         Left item's default emoji to use.
     
     item_right_name_default : `str`

@@ -6,20 +6,20 @@ from ..keys import (
     KEY_MEDIA_TYPE, KEY_MEDIA_TYPE_ANIME
 )
 from ..parsers_description import parse_listing_base, parse_listing_anime, parse_listing_manga, parse_listing_character
-from ..parsers_name import parse_name_character, parse_name_media
+from ..parsers_name import parse_character_name, parse_media_name
 from ..parsers_url import parse_url_anime, parse_url_character, parse_url_manga, parse_url_media
 
 
 def _iter_options__parse_listing_base():
     yield (
         None,
-        parse_name_media,
+        parse_media_name,
         parse_url_media,
         None,
     )
     yield (
         [],
-        parse_name_media,
+        parse_media_name,
         parse_url_media,
         None,
     )
@@ -33,7 +33,7 @@ def _iter_options__parse_listing_base():
                 KEY_MEDIA_ID: 12,
             }
         ],
-        parse_name_media,
+        parse_media_name,
         parse_url_media,
         (
             f'[Koishi]({URL_BASE_ANIME}{12})'
@@ -53,7 +53,7 @@ def _iter_options__parse_listing_base():
                 KEY_MEDIA_ID: 12,
             }
         ],
-        parse_name_media,
+        parse_media_name,
         parse_url_media,
         (
             f'Satori\n'
@@ -69,7 +69,7 @@ def _iter_options__parse_listing_base():
                 KEY_MEDIA_ID: 12,
             }
         ],
-        parse_name_media,
+        parse_media_name,
         parse_url_anime,
         (
             f'[Koishi]({URL_BASE_ANIME}{12})'
@@ -84,7 +84,7 @@ def _iter_options__parse_listing_base():
                 KEY_MEDIA_ID: 12,
             }
         ],
-        parse_name_media,
+        parse_media_name,
         parse_url_manga,
         (
             f'[Koishi]({URL_BASE_MANGA}{12})'
@@ -99,7 +99,7 @@ def _iter_options__parse_listing_base():
                 KEY_CHARACTER_ID: 12,
             }
         ],
-        parse_name_character,
+        parse_character_name,
         parse_url_character,
         (
             f'[Koishi]({URL_BASE_CHARACTER}{12})'

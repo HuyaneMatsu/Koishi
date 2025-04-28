@@ -275,7 +275,7 @@ if USER_STATS_AVAILABLE:
         event : ``InteractionEvent``
             The received interaction event.
         
-        user : `None`, ``ClientUserBase`` = `None`, Optional
+        user : ``None | ClientUserBase`` = `None`, Optional
             The selected user.
         
         Returns
@@ -305,7 +305,7 @@ if USER_EQUIPMENT_AVAILABLE:
         event : ``InteractionEvent``
             The received interaction event.
         
-        user : `None`, ``ClientUserBase`` = `None`, Optional
+        user : ``None | ClientUserBase`` = `None`, Optional
             The selected user.
         
         Returns

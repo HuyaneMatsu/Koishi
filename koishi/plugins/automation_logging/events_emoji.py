@@ -68,7 +68,7 @@ async def emoji_update(client, emoji, old_attributes):
         The client who received the event.
     emoji : ``Emoji``
         The edited emoji.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The emoji's old attributes that have been edited.
     """
     channel = get_log_emoji_channel(emoji.guild_id)

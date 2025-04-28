@@ -70,7 +70,7 @@ def build_emoji_update_embed(emoji, old_attributes):
     ----------
     emoji : ``Emoji``
         The updated emoji.
-    old_attributes : `dict` of (`str`, `object`) items
+    old_attributes : `dict<str, object>`
         The emoji's old attributes that have been updated.
     
     Returns

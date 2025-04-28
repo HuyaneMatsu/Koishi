@@ -12,7 +12,7 @@ class Item(RichAttributeErrorBaseType):
     description : `str`
         Description of the item.
     
-    emoji : `None | Emoji`
+    emoji : ``None | Emoji``
         Emoji representing the item.
     
     flags : `int`
@@ -47,7 +47,7 @@ class Item(RichAttributeErrorBaseType):
         name : `str`
             The name of the item.
         
-        emoji : `None | Emoji`
+        emoji : ``None | Emoji``
             Emoji representing the item.
         
         description : `str`

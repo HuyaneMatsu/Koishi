@@ -24,7 +24,7 @@ async def test__get_emoji_representation(emoji, extra):
     
     Parameters
     ----------
-    emoji : `None | Emoji`
+    emoji : ``None | Emoji``
         Value to get representation for.
     extra : `list<object>`
         Entities to keep in the cache.

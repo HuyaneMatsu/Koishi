@@ -32,7 +32,7 @@ def _iter_options():
     )
     
     yield (
-        Guild.precreate(202503060005, premium_tier = 0),
+        Guild.precreate(202503060005, boost_level = 0),
         (
             Attachment.precreate(202503060006, size = 8 * (1 << 20)),
         ),
@@ -40,7 +40,7 @@ def _iter_options():
     )
     
     yield (
-        Guild.precreate(202503060007, premium_tier = 1),
+        Guild.precreate(202503060007, boost_level = 1),
         (
             Attachment.precreate(202503060008, size = 8 * (1 << 20)),
         ),
