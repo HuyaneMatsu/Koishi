@@ -1,7 +1,6 @@
 import vampytest
 
-from hata import Component
-from hata.ext.slash import Button, Row
+from hata import Component, create_button, create_row
 
 from ..component_builders import build_component_relationship_divorce_question
 from ..constants import EMOJI_NO, EMOJI_YES
@@ -14,13 +13,13 @@ def _iter_options():
     yield (
         source_user_id,
         target_user_id,
-        Row(
-            Button(
+        create_row(
+            create_button(
                 'Yes',
                 EMOJI_YES,
                 custom_id = 'relationship_divorce.confirm.2f2610fb30.2f2610fb31',
             ),
-            Button(
+            create_button(
                 'No',
                 EMOJI_NO,
                 custom_id = 'relationship_divorce.cancel.2f2610fb30.2f2610fb31',

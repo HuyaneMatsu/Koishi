@@ -1,7 +1,7 @@
 __all__ = ()
 
+from hata import StringSelectOption, create_row
 from hata.discord.component.component_metadata.constants import LABEL_LENGTH_MAX
-from hata.ext.slash import Option, Row
 
 from .constants import (
     COMPONENT_LEFT_ANIME, COMPONENT_LEFT_CHARACTER, COMPONENT_LEFT_DISABLED, COMPONENT_LEFT_MANGA,
@@ -37,7 +37,7 @@ def parse_option_base(entity_data, key_id, name_parser):
         entity_id_str = str(entity_id)
     
     entity_name = limit_string_length(name_parser(entity_data), LABEL_LENGTH_MAX)
-    return Option(entity_id_str, entity_name)
+    return StringSelectOption(entity_id_str, entity_name)
 
 
 def parse_option_character(entity_data):
@@ -83,7 +83,7 @@ def parse_select_base(entity_array_data, select_base, option_parser):
     select_base : ``Component``
         Base component to copy.
     option_parser : `FunctionType`
-        Option parser to parse a single option.
+        StringSelectOption parser to parse a single option.
     
     Returns
     -------
@@ -91,7 +91,7 @@ def parse_select_base(entity_array_data, select_base, option_parser):
     """
     if (entity_array_data is None) or (not entity_array_data):
         return select_base.copy_with(
-            options = [Option('-1', 'No result', default = True)],
+            options = [StringSelectOption('-1', 'No result', default = True)],
             enabled = False,
         )
     
@@ -175,7 +175,7 @@ def parse_page_info_components_base(page_info_data, button_left, button_right):
     if page_current >= page_total:
         button_right = COMPONENT_RIGHT_DISABLED
     
-    return Row(button_left, button_right)
+    return create_row(button_left, button_right)
 
 
 def parse_page_info_components_anime(page_info_data):

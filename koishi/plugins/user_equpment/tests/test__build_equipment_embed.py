@@ -2,7 +2,7 @@ import vampytest
 from hata import Embed, Icon, IconType, GuildProfile, User
 
 from ...item_core import ITEM_ID_FISHING_ROD, get_item
-from ...stats_core import Stats
+from ...user_stats_core import UserStats
 
 from ..embed_builders import build_equipment_embed, EMPTY_UNICODE
 
@@ -13,7 +13,7 @@ def _iter_options():
     guild_id = 202503310001
     user = User.precreate(user_id, avatar = Icon(IconType.static, 2), name = 'Koishi')
     user.guild_profiles[guild_id] = GuildProfile(avatar = Icon(IconType.static, 3), nick = 'Flower')
-    stats = Stats(user_id)
+    stats = UserStats(user_id)
     stats.set('item_id_weapon', ITEM_ID_FISHING_ROD)
     weapon = get_item(ITEM_ID_FISHING_ROD)
     
@@ -98,7 +98,7 @@ def test__build_equipment_embed(user, stats, guild_id):
     user : ``ClientUserBase``
         The stats.
     
-    stats : ``Stats``
+    stats : ``UserStats``
         The user's stats.
     
     guild_id : `int`

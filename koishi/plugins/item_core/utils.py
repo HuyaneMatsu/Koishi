@@ -1,4 +1,4 @@
-__all__ = ('get_item', 'get_item_nullable')
+__all__ = ('get_item', 'get_item_name', 'get_item_nullable')
 
 from .constants import ITEM_DESCRIPTION_DEFAULT, ITEM_EMOJI_DEFAULT, ITEM_NAME_DEFAULT, ITEMS
 
@@ -56,3 +56,26 @@ def get_item(item_id):
     
     ITEMS[item_id] = item
     return item
+
+
+def get_item_name(item_id):
+    """
+    Gets the item's name.
+    
+    Parameters
+    ----------
+    item_id : `int`
+        The item identifier.
+    
+    Returns
+    -------
+    item_name : `str`
+    """
+    try:
+        item = ITEMS[item_id]
+    except KeyError:
+        item_name = ITEM_NAME_DEFAULT
+    else:
+        item_name = item.name
+    
+    return item_name

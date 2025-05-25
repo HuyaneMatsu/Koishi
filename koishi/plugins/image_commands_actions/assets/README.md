@@ -582,7 +582,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ### kyouko-fluff-0000
 
-- Creator: **ammer (sunset beach)**
+- Creator: **hammer (sunset beach)**
 - Editor: *none*
 - Characters: **Kasodani Kyouko**
 - Source: **Touhou**

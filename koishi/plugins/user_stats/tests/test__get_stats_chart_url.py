@@ -3,13 +3,13 @@ from scarletio import from_json
 from scarletio.web_common import URL
 from hata import Color
 
-from ...stats_core import Stats
+from ...user_stats_core import UserStats
 
 from ..embed_builders import get_stats_chart_url
 
 
 def _iter_options():
-    stats = Stats(202503120010)
+    stats = UserStats(202503120010)
     stats.stat_housewife = 5
     stats.stat_cuteness = 6
     stats.stat_bedroom = 7
@@ -70,7 +70,7 @@ def test__get_stats_chart_url(stats, color):
     
     Parameters
     ----------
-    stats : ``Stats``
+    stats : ``UserStats``
         The user's stats
     
     color : ``Color``

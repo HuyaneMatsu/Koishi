@@ -1,7 +1,7 @@
 __all__ = ()
 
+from hata import create_button
 from scarletio import Future, Task, TaskGroup, get_event_loop
-from hata.ext.slash import Button
 
 from ...bot_utils.constants import IN_GAME_IDS
 from ...bots import FEATURE_CLIENTS
@@ -264,7 +264,7 @@ async def game_21_multi_player(client, event, amount):
                 try_deliver_end_notification(
                     client,
                     player.latest_interaction_event,
-                    Button('Get me there!', url = message.url),
+                    create_button('Get me there!', url = message.url),
                     f'> {player.user.mention} !!! The winners have been announced !!!'
                 ),
             )

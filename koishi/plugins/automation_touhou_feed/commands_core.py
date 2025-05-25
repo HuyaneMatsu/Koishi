@@ -6,8 +6,8 @@ from itertools import chain
 from re import I as re_ignore_case, U as re_unicode, compile as re_compile, escape as re_escape
 
 from dateutil.relativedelta import relativedelta as RelativeDelta
-from hata import Embed, elapsed_time
-from hata.ext.slash import Button, InteractionResponse, Row
+from hata import Embed, create_button, create_row, elapsed_time
+from hata.ext.slash import InteractionResponse
 
 from .constants import (
     BUTTON_CLOSE, BUTTON_NEXT_DISABLED, BUTTON_PREVIOUS_DISABLED, BUTTON_REFRESH_BASE, COMPONENTS_ABOUT_EXAMPLES,
@@ -353,7 +353,7 @@ def build_touhou_feed_listing_response(client, guild, page, enabled):
     if page <= 1:
         button_previous_page = BUTTON_PREVIOUS_DISABLED
     else:
-        button_previous_page = Button(
+        button_previous_page = create_button(
             emoji = EMOJI_PAGE_PREVIOUS,
             custom_id = f'{CUSTOM_ID_PAGE_BASE}{page - 1}',
         )
@@ -361,14 +361,14 @@ def build_touhou_feed_listing_response(client, guild, page, enabled):
     if page >= page_count:
         button_next_page = BUTTON_NEXT_DISABLED
     else:
-        button_next_page = Button(
+        button_next_page = create_button(
             emoji = EMOJI_PAGE_NEXT,
             custom_id = f'{CUSTOM_ID_PAGE_BASE}{page + 1}',
         )
     
     return InteractionResponse(
         embed = embed,
-        components = Row(
+        components = create_row(
             button_previous_page,
             button_next_page,
             BUTTON_REFRESH_BASE.copy_with(custom_id = f'{CUSTOM_ID_REFRESH_BASE}{page}'),

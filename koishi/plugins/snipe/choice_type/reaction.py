@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata.ext.slash import Option
+from hata import StringSelectOption
 from scarletio import class_property, copy_docs
 
 from .emoji import ChoiceTypeEmoji
@@ -29,4 +29,4 @@ class ChoiceTypeReaction(ChoiceTypeEmoji):
     
     @classmethod
     def select_option_builder(cls, entity):
-        return Option(cls._create_emoji_option_value(entity), entity.name, entity)
+        return StringSelectOption(cls._create_emoji_option_value(entity), entity.name, entity)

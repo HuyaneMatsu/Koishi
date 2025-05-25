@@ -1,7 +1,7 @@
 import vampytest
 from hata import Color, Embed, GuildProfile, User
 
-from ...stats_core import Stats
+from ...user_stats_core import UserStats
 
 from ..embed_builders import build_stats_embed
 
@@ -10,7 +10,7 @@ def _iter_options():
     user_id = 202503120020
     guild_id = 202503120021
     
-    stats = Stats(user_id)
+    stats = UserStats(user_id)
     stats.stat_housewife = 5
     stats.stat_cuteness = 6
     stats.stat_bedroom = 7
@@ -55,7 +55,7 @@ def test__build_stats_embed(user, stats, guild_id):
     user : ``ClientUserBase``
         The stats.
     
-    stats : ``Stats``
+    stats : ``UserStats``
         The user's stats.
     
     guild_id : `int`

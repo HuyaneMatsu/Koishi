@@ -3,8 +3,8 @@ __all__ = ()
 import re
 from random import choice, randint, shuffle
 
-from hata import BUILTIN_EMOJIS, Color, Embed, Emoji, InteractionType
-from hata.ext.slash import Button, ButtonStyle, InteractionResponse, Row
+from hata import BUILTIN_EMOJIS, ButtonStyle, Color, Embed, Emoji, InteractionType, create_button, create_row
+from hata.ext.slash import InteractionResponse
 
 from ...bots import FEATURE_CLIENTS
 
@@ -169,10 +169,10 @@ def build_components(selected_options, user_id, category_id, item_id):
     
     Returns
     -------
-    components : `list` of ``Component``
+    components : ``list<Component>``
     """
     return [
-        Row(Button(
+        create_row(create_button(
             option[:100],
             emoji,
             custom_id = f'trivia.{user_id:x}.option.{category_id:x}.{item_id:x}.{option_id:x}',
@@ -200,11 +200,11 @@ def build_final_components(selected_options, user_id, category_id, item_id, sele
     
     Returns
     -------
-    components : `list` of ``Component``
+    components : ``list<Component>``
     """
     return [
         *(
-            Row(Button(
+            create_row(create_button(
                 option[:100],
                 emoji,
                 custom_id = f'trivia.{user_id:x}.option.{category_id:x}.{item_id:x}.{option_id:x}',
@@ -213,7 +213,7 @@ def build_final_components(selected_options, user_id, category_id, item_id, sele
             ))
             for (option, option_id), emoji in zip(selected_options, OPTION_EMOJIS)
         ),
-        Row(Button(
+        create_row(create_button(
             '!! Another one !!',
             EMOJI_NEW,
             custom_id = f'trivia.{user_id:x}.new.{category_id:x}.{item_id:x}',

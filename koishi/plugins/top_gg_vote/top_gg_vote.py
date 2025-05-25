@@ -2,8 +2,7 @@ __all__ = ()
 
 from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 
-from hata import Embed
-from hata.ext.slash import Button
+from hata import Embed, create_button
 
 from ...bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY
 from ...bot_utils.daily import calculate_daily_new, calculate_vote_for
@@ -65,7 +64,7 @@ async def handle_top_gg_vote(external_event):
                 ),
                 color = COLOR__GAMBLING,
             ),
-            Button(
+            create_button(
                 'I don\'t want notifs, nya!!',
                 custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_VOTE_DISABLE,
             ),

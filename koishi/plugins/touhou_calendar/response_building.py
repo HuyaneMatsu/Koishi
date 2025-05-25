@@ -2,8 +2,8 @@ __all__ = ()
 
 from datetime import datetime as DateTime, timezone as TimeZone
 
-from hata import Embed
-from hata.ext.slash import Button, InteractionResponse, Row
+from hata import Embed, create_button, create_row
+from hata.ext.slash import InteractionResponse
 
 from .calendar_events import CALENDAR_EVENTS
 from .constants import (
@@ -119,7 +119,7 @@ def build_year_component(year):
     else:
         year_previous = year - 1
     
-        button_back = Button(
+        button_back = create_button(
             str(year_previous),
             EMOJI_BACK,
             custom_id = f'touhou_calendar.year.{year_previous}',
@@ -130,13 +130,13 @@ def build_year_component(year):
     else:
         year_next = year + 1
         
-        button_next = Button(
+        button_next = create_button(
             str(year_next),
             EMOJI_NEXT,
             custom_id = f'touhou_calendar.year.{year_next}',
         )
     
-    return Row(
+    return create_row(
         button_back,
         button_next,
         BUTTON_CLOSE,

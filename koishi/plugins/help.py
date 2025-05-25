@@ -3,8 +3,8 @@ __all__ = ()
 from functools import partial as partial_func
 from time import perf_counter
 
-from hata import BUILTIN_EMOJIS, Embed
-from hata.ext.slash import Button, InteractionResponse, Row, abort
+from hata import BUILTIN_EMOJIS, Embed, create_button, create_row
+from hata.ext.slash import InteractionResponse, abort
 from hata.ext.slash.menus import Closer, Pagination
 
 from ..bot_utils.constants import (
@@ -243,8 +243,8 @@ async def render_help_heart_guide(client, event):
 CUSTOM_ID_HELP_CLOSE = 'help.close'
 
 
-HELP_COMPONENTS = Row(
-    Button(
+HELP_COMPONENTS = create_row(
+    create_button(
         'Close',
         BUILTIN_EMOJIS['x'],
         custom_id = CUSTOM_ID_HELP_CLOSE,

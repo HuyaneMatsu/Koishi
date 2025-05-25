@@ -1,10 +1,12 @@
 __all__ = ()
 
-from scarletio import Task, IgnoreCaseString, LOOP_TIME, sleep, CancelledError, TaskGroup
+from hata import (
+    ButtonStyle, DiscordException, ERROR_CODES, Embed, KOKORO, Message, Permission, TIMESTAMP_STYLES, create_button,
+    create_row, format_loop_time, now_as_id, seconds_to_elapsed_time, seconds_to_id_difference
+)
+from hata.ext.slash import abort, wait_for_component_interaction
+from scarletio import CancelledError, IgnoreCaseString, LOOP_TIME, Task, TaskGroup, sleep
 from scarletio.web_common.headers import CONTENT_LENGTH
-from hata import Embed, KOKORO, seconds_to_elapsed_time, Message, DiscordException, ERROR_CODES, now_as_id, \
-    seconds_to_id_difference, format_loop_time, TIMESTAMP_STYLES, Permission
-from hata.ext.slash import Button, abort, ButtonStyle, Row, wait_for_component_interaction
 
 from ..bots import FEATURE_CLIENTS, MAIN_CLIENT
 
@@ -93,24 +95,24 @@ CUSTOM_ID_CLOSE = 'dupe_image_filter.close'
 
 
 
-BUTTON_APPROVE = Button(
+BUTTON_APPROVE = create_button(
     'approve',
     custom_id = CUSTOM_ID_APPROVE,
     style = ButtonStyle.green,
 )
 
-BUTTON_CANCEL = Button(
+BUTTON_CANCEL = create_button(
     'cancel',
     custom_id = CUSTOM_ID_CANCEL,
     style = ButtonStyle.red,
 )
 
-COMPONENTS_APPROVE = Row(
+COMPONENTS_APPROVE = create_row(
     BUTTON_APPROVE,
     BUTTON_CANCEL,
 )
 
-BUTTON_CLOSE = Button(
+BUTTON_CLOSE = create_button(
     'close',
     custom_id = CUSTOM_ID_CLOSE,
 )
@@ -430,7 +432,7 @@ class DupeImageFilter:
             await self.client.message_create(
                 channel,
                 f'Your dupe message filtering finished.\n\n{description}',
-                components = Button('Go to message', url = message.url),
+                components = create_button('Go to message', url = message.url),
             )
         except ConnectionError:
             return

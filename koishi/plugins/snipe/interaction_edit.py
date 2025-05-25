@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import Client, DiscordException, ERROR_CODES, Emoji
-from hata.ext.slash import Form, TextInput, TextInputStyle
+from hata import Client, DiscordException, ERROR_CODES, InteractionForm, Emoji, TextInputStyle, create_text_input
 
 from ...bots import FEATURE_CLIENTS
 
@@ -82,10 +81,10 @@ async def snipe_interaction_edit_emoji(client, event):
     if not await check_emoji_guild(client, event, emoji):
         return
     
-    return Form(
+    return InteractionForm(
         f'Edit emoji: {emoji.name}',
         [
-            TextInput(
+            create_text_input(
                 'Name',
                 min_length = 2,
                 max_length = 32,
@@ -93,7 +92,7 @@ async def snipe_interaction_edit_emoji(client, event):
                 placeholder = 'Emoji name',
                 value = emoji.name,
             ),
-            TextInput(
+            create_text_input(
                 'Roles (separate with comma)',
                 min_length = 0,
                 max_length = 1024,
@@ -217,10 +216,10 @@ async def snipe_interaction_edit_sticker(client, event):
     if not await check_sticker_guild(client, event, sticker):
         return
     
-    return Form(
+    return InteractionForm(
         f'Edit sticker: {sticker.name}',
         [
-            TextInput(
+            create_text_input(
                 'Name',
                 min_length = 2,
                 max_length = 32,
@@ -228,7 +227,7 @@ async def snipe_interaction_edit_sticker(client, event):
                 placeholder = 'Sticker name',
                 value = sticker.name,
             ),
-            TextInput(
+            create_text_input(
                 'Tags',
                 min_length = 0,
                 max_length = 100,
@@ -236,7 +235,7 @@ async def snipe_interaction_edit_sticker(client, event):
                 placeholder = 'Sticker tags',
                 value = join_sticker_tags(sticker),
             ),
-            TextInput(
+            create_text_input(
                 'Description',
                 min_length = 0,
                 max_length = 1024,

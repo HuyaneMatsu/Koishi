@@ -1,7 +1,6 @@
 import vampytest
 
-from hata import Component
-from hata.ext.slash import Button, Row
+from hata import Component, create_button, create_row
 
 from ..component_builders import build_component_question_relationship_slot_purchase_self
 from ..constants import EMOJI_NO, EMOJI_YES
@@ -9,13 +8,13 @@ from ..constants import EMOJI_NO, EMOJI_YES
 
 def _iter_options():
     yield (
-        Row(
-            Button(
+        create_row(
+            create_button(
                 'Yes',
                 EMOJI_YES,
                 custom_id = 'user_balance.relationship_slots.increment.confirm.self',
             ),
-            Button(
+            create_button(
                 'No',
                 EMOJI_NO,
                 custom_id = 'user_balance.relationship_slots.increment.cancel.self',

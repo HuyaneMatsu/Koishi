@@ -8,6 +8,9 @@ __all__ = (
 # news page:
 # https://store.steampowered.com/news/app/282800
 
+# wiki moved in 2024
+# https://orangejuice.wiki/wiki/100%25_Orange_Juice_Wiki
+
 # 2024-09-24
 # - 3.09.01
 # - 3.09.02
@@ -59,3 +62,5 @@ __all__ = (
 # Not on the wiki yet, so cannot add it
 # - 3.24.02 (dlc)
 # - anything after
+
+# Since wiki was moved, will have to backtrack changes as well.

@@ -3,8 +3,7 @@ __all__ = ()
 from re import compile as re_compile, escape as re_escape
 from datetime import timedelta as TimeDelta
 
-from hata import AnsiForegroundColor, BUILTIN_EMOJIS, Permission, create_ansi_format_code
-from hata.ext.slash import Button
+from hata import AnsiForegroundColor, BUILTIN_EMOJIS, Permission, create_ansi_format_code, create_button
 
 
 DELTA_DAY = TimeDelta(days = 1)
@@ -70,21 +69,21 @@ CUSTOM_ID_NEXT_DISABLED = f'{CUSTOM_ID_PAGE_BASE}.n+1.disabled'
 CUSTOM_ID_CLOSE = 'mod.top_list.close'
 CUSTOM_ID_PAGE_RP = re_compile(f'{re_escape(CUSTOM_ID_PAGE_BASE)}(\d+);s=(\d+);d=(\d+)')
 
-BUTTON_PAGE_PREVIOUS_DISABLED = Button(
+BUTTON_PAGE_PREVIOUS_DISABLED = create_button(
     f'Page {PAGE_MIN}',
     EMOJI_PAGE_PREVIOUS,
     custom_id = CUSTOM_ID_PAGE_BACK_DISABLED,
     enabled = False,
 )
 
-BUTTON_PAGE_NEXT_DISABLED = Button(
+BUTTON_PAGE_NEXT_DISABLED = create_button(
     f'Page {PAGE_MAX + 2}',
     EMOJI_PAGE_NEXT,
     custom_id = CUSTOM_ID_NEXT_DISABLED,
     enabled = False,
 )
 
-BUTTON_CLOSE = Button(
+BUTTON_CLOSE = create_button(
     'Close',
     EMOJI_CLOSE,
     custom_id = CUSTOM_ID_CLOSE,

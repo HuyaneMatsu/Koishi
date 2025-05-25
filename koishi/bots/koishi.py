@@ -19,6 +19,11 @@ Koishi = Client(
         _18 = 1,
         _19 = 1,
         _21 = 1, # Gonna catch them all
+        _24 = 1,
+        _25 = 1,
+        _26 = 1,
+        _27 = 1,
+        _28 = 1,
     ),
     application_id = config.KOISHI_ID,
     extensions = ('slash', 'top_gg'),

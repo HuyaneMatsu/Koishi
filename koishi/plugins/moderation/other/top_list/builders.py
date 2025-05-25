@@ -1,7 +1,7 @@
 __all__ = ()
 
-from hata import Embed
-from hata.ext.slash import Button, InteractionResponse, Row
+from hata import Embed, create_button, create_row
+from hata.ext.slash import InteractionResponse
 
 from .constants import (
     BUTTON_CLOSE, BUTTON_PAGE_NEXT_DISABLED, BUTTON_PAGE_PREVIOUS_DISABLED, CUSTOM_ID_PAGE_BASE, EMOJI_PAGE_NEXT,
@@ -120,7 +120,7 @@ def build_components(page_index, entry_count, sort_by, days):
     if page_index == PAGE_MIN:
         button_back = BUTTON_PAGE_PREVIOUS_DISABLED
     else:
-        button_back = Button(
+        button_back = create_button(
             f'Page {page_index}',
             EMOJI_PAGE_PREVIOUS,
             custom_id = f'{CUSTOM_ID_PAGE_BASE}{page_index - 1};s={sort_by!s};d={days!s}',
@@ -133,13 +133,13 @@ def build_components(page_index, entry_count, sort_by, days):
             label = f'Page {page_index + 2}'
         )
     else:
-        button_next = Button(
+        button_next = create_button(
             f'Page {page_index + 2}',
             EMOJI_PAGE_NEXT,
             custom_id = f'{CUSTOM_ID_PAGE_BASE}{page_index + 1 !s};s={sort_by!s};d={days!s}',
         )
     
-    return Row(button_back, button_next, BUTTON_CLOSE)
+    return create_row(button_back, button_next, BUTTON_CLOSE)
 
 
 def build_top_list_response(page_index, entries, sort_by, days):

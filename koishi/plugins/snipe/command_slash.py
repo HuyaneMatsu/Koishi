@@ -190,7 +190,7 @@ async def snipe_emoji_autocomplete_emoji_name(event, emoji_name):
     
     Returns
     -------
-    suggestions : `None`, `list` of `str`
+    suggestions : `None | list<str>`
     """
     if emoji_name is None:
         guild = event.guild
@@ -277,7 +277,7 @@ async def snipe_soundboard_sound_autocomplete_soundboard_sound_name(client, even
     
     Returns
     -------
-    suggestions : `None`, `list` of `str`
+    suggestions : `None | list<str>`
     """
     guild = event.guild
     if guild is None:
@@ -344,7 +344,7 @@ async def snipe_sticker_autocomplete_sticker_name_or_id(event, sticker_name):
     
     Returns
     -------
-    suggestions : `None`, `list` of `str`
+    suggestions : `None | list<str>`
     """
     guild = event.guild
     if guild is None:

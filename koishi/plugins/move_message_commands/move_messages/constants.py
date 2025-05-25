@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import Emoji
-from hata.ext.slash import Button, ButtonStyle, Form, Row, TextInput
+from hata import ButtonStyle, Emoji, InteractionForm, create_button, create_row, create_text_input
 
 
 MESSAGE_MOVER_CONTEXT_TIMEOUT = 600.0
@@ -18,7 +17,7 @@ CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID = 'message_mover.add_by_id'
 MESSAGE_MOVER_SUBMITTING_EMOJI = Emoji.precreate(704393708467912875)
 
 
-BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED = Button(
+BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED = create_button(
     'Submit',
     custom_id = CUSTOM_ID_MESSAGE_MOVER_SUBMIT,
     style = ButtonStyle.green,
@@ -28,44 +27,44 @@ BUTTON_MESSAGE_MOVE_SUBMIT_DISABLED = BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED.copy_wi
     enabled = False,
 )
 
-BUTTON_MESSAGE_MOVE_ADD_BY_ID = Button(
+BUTTON_MESSAGE_MOVE_ADD_BY_ID = create_button(
     'Enter message id',
     custom_id = CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID,
     style = ButtonStyle.blue,
 )
 
-BUTTON_MESSAGE_MOVE_CANCEL = Button(
+BUTTON_MESSAGE_MOVE_CANCEL = create_button(
     'Cancel',
     custom_id = CUSTOM_ID_MESSAGE_MOVER_CANCEL,
     style = ButtonStyle.red,
 )
 
-BUTTON_MESSAGE_MOVE_CLOSE = Button(
+BUTTON_MESSAGE_MOVE_CLOSE = create_button(
     'Close',
     custom_id = CUSTOM_ID_MESSAGE_MOVER_CLOSE,
     style = ButtonStyle.red,
 )
 
-MESSAGE_MOVER_COMPONENTS_ENABLED = Row(
+MESSAGE_MOVER_COMPONENTS_ENABLED = create_row(
     BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED,
     BUTTON_MESSAGE_MOVE_ADD_BY_ID,
     BUTTON_MESSAGE_MOVE_CANCEL,
 )
 
-MESSAGE_MOVER_COMPONENTS_DISABLED = Row(
+MESSAGE_MOVER_COMPONENTS_DISABLED = create_row(
     BUTTON_MESSAGE_MOVE_SUBMIT_DISABLED,
     BUTTON_MESSAGE_MOVE_ADD_BY_ID,
     BUTTON_MESSAGE_MOVE_CANCEL,
 )
 
-MESSAGE_MOVER_COMPONENTS_AFTERLIFE = Row(
+MESSAGE_MOVER_COMPONENTS_AFTERLIFE = create_row(
     BUTTON_MESSAGE_MOVE_CLOSE,
 )
 
-MESSAGE_MOVER_ADD_BY_ID_FORM = Form(
+MESSAGE_MOVER_ADD_BY_ID_FORM = InteractionForm(
     'Add message by id to move group',
     [
-        TextInput(
+        create_text_input(
             'message\'s id',
             min_length = 7,
             max_length = 21,

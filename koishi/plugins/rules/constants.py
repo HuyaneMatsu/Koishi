@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import Emoji
-from hata.ext.slash import Button, Option, Row, Select
+from hata import Emoji, StringSelectOption, create_button, create_row, create_string_select
 
 import config
 
@@ -25,51 +24,51 @@ CUSTOM_ID_CLAIM_ROLE_BOT_ACCESS = 'rules.bot_select'
 
 
 RULES_COMPONENTS = [
-    Row(
-        Button(
+    create_row(
+        create_button(
             'Accept rules (I wont fry fumos)',
             CLAIM_ROLE_VERIFIED_EMOJI,
             custom_id = CUSTOM_ID_CLAIM_ROLE_VERIFIED,
         ),
-        Button(
+        create_button(
             'Claim announcements role',
             CLAIM_ROLE_ANNOUNCEMENTS_EMOJI,
             custom_id = CUSTOM_ID_CLAIM_ROLE_ANNOUNCEMENTS,
         ),
-        Button(
+        create_button(
             'Claim polls role',
             CLAIM_ROLE_POLLS_EMOJI,
             custom_id = CUSTOM_ID_CLAIM_ROLE_POLLS,
         ),
     ),
-    Row(
-        Select(
+    create_row(
+        create_string_select(
             [
-                Option(
+                StringSelectOption(
                     str(config.ALICE_ID),
                     'Alice',
                 ),
-                Option(
+                StringSelectOption(
                     str(config.FLANDRE_ID),
                     'Flandre',
                 ),
-                Option(
+                StringSelectOption(
                     str(config.KOISHI_ID),
                     'Koishi',
                 ),
-                Option(
+                StringSelectOption(
                     str(config.NUE_ID),
                     'Nue',
                 ),
-                Option(
+                StringSelectOption(
                     str(config.ORIN_ID),
                     'Orin',
                 ),
-                Option(
+                StringSelectOption(
                     str(config.TOY_KOISHI_ID),
                     'Toy Koishi',
                 ),
-                Option(
+                StringSelectOption(
                     str(config.YOSHIKA_ID),
                     'Yoshika',
                 ),

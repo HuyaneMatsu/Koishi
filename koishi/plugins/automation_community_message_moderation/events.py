@@ -3,8 +3,7 @@ __all__ = ()
 from datetime import datetime as DateTime, timezone as TimeZone
 from math import ceil
 
-from hata import Permission, DiscordException, ERROR_CODES
-from hata.ext.slash import Button
+from hata import Permission, DiscordException, ERROR_CODES, create_button
 
 from ...bot_utils.multi_client_utils import get_first_client_with_permissions
 from ...bots import FEATURE_CLIENTS
@@ -176,7 +175,7 @@ async def handle_reaction_event(client, message, emoji, user, addition):
                 await client.message_create(
                     log_channel,
                     allowed_mentions = None,
-                    components = Button('Jump there', url = message.url),
+                    components = create_button('Jump there', url = message.url),
                     content = build_message_common_description(
                         message, MESSAGE_RENDER_MODE_DELETE, title = 'Community message moderation log'
                     ),

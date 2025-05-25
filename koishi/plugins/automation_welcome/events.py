@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import CLIENTS, DiscordException, Embed, ERROR_CODES, now_as_id
-from hata.ext.slash import Button, ButtonStyle, Row
+from hata import ButtonStyle, CLIENTS, DiscordException, Embed, ERROR_CODES, create_button, create_row, now_as_id
 
 from ...bot_utils.multi_client_utils import (
     has_client_message_create_permissions, get_first_client_with_message_create_permissions_from
@@ -70,14 +69,14 @@ async def welcome_user(client, guild, user, welcome_style, welcome_channel, welc
         reply_styles = welcome_style.reply_styles
         reply_style = reply_styles[seed % len(reply_styles)]
         
-        welcome_reply_buttons = Row(
-            Button(
+        welcome_reply_buttons = create_row(
+            create_button(
                 reply_style.button_content,
                 reply_style.button_emoji,
                 custom_id = CUSTOM_ID_WELCOME_REPLY,
                 style = ButtonStyle.green,
             ),
-            Button(
+            create_button(
                 'Your greeting',
                 custom_id = CUSTOM_ID_WELCOME_REPLY_CUSTOM,
                 style = ButtonStyle.green,

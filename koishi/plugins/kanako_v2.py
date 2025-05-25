@@ -5,9 +5,9 @@ from itertools import chain
 from random import choice, randint
 
 from PIL import Image as PIL
-from hata import Color, DiscordException, Embed, ERROR_CODES, KOKORO
-from hata.ext.slash import Button, ButtonStyle, InteractionResponse, Row, abort
-from scarletio import CancelledError, Future, LOOP_TIME, ReuBytesIO, Task, any_to_any
+from hata import ButtonStyle, Color, DiscordException, Embed, ERROR_CODES, KOKORO, create_button, create_row
+from hata.ext.slash import InteractionResponse, abort
+from scarletio import Future, LOOP_TIME, ReuBytesIO, Task, any_to_any
 
 from ..bot_utils.constants import GUILD__STORAGE, PATH__KOISHI
 from ..bot_utils.tools import Pagination10step
@@ -656,7 +656,7 @@ CUSTOM_ID_KANAKO_JOIN_OR_LEAVE = 'kanako.join_or_leave'
 CUSTOM_ID_KANAKO_START = 'kanako.start'
 CUSTOM_ID_KANAKO_CANCEL = 'kanako.cancel'
 
-BUTTON_KANAKO_JOIN_OR_LEAVE = Button(
+BUTTON_KANAKO_JOIN_OR_LEAVE = create_button(
     'Join / Leave',
     custom_id = CUSTOM_ID_KANAKO_JOIN_OR_LEAVE,
     style = ButtonStyle.blue,
@@ -666,26 +666,26 @@ BUTTON_KANAKO_JOIN_OR_LEAVE_DISABLED = BUTTON_KANAKO_JOIN_OR_LEAVE.copy_with(
     enabled = False,
 )
 
-BUTTON_KANAKO_START = Button(
+BUTTON_KANAKO_START = create_button(
     'Start',
     custom_id = CUSTOM_ID_KANAKO_START,
     style = ButtonStyle.green,
 )
 
-BUTTON_KANAKO_CANCEL = Button(
+BUTTON_KANAKO_CANCEL = create_button(
     'Cancel',
     custom_id = CUSTOM_ID_KANAKO_CANCEL,
     style = ButtonStyle.red,
 )
 
 
-COMPONENTS_KANAKO = Row(
+COMPONENTS_KANAKO = create_row(
     BUTTON_KANAKO_JOIN_OR_LEAVE,
     BUTTON_KANAKO_START,
     BUTTON_KANAKO_CANCEL,
 )
 
-COMPONENTS_KANAKO_FULL = Row(
+COMPONENTS_KANAKO_FULL = create_row(
     BUTTON_KANAKO_JOIN_OR_LEAVE_DISABLED,
     BUTTON_KANAKO_START,
     BUTTON_KANAKO_CANCEL,
@@ -909,24 +909,24 @@ class KanakoRunner:
                 
                 self.options = options = self.generate_options(answer)
                 
-                components = Row(
-                    Button(
+                components = create_row(
+                    create_button(
                         options[0],
                         custom_id = CUSTOM_ID_OPTION_0,
                     ),
-                    Button(
+                    create_button(
                         options[1],
                         custom_id = CUSTOM_ID_OPTION_1,
                     ),
-                    Button(
+                    create_button(
                         options[2],
                         custom_id = CUSTOM_ID_OPTION_2,
                     ),
-                    Button(
+                    create_button(
                         options[3],
                         custom_id = CUSTOM_ID_OPTION_3,
                     ),
-                    Button(
+                    create_button(
                         options[4],
                         custom_id = CUSTOM_ID_OPTION_4,
                     ),

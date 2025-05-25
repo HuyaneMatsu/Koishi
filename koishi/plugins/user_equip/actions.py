@@ -2,7 +2,7 @@ __all__ = ('equip_item', 'get_equip_item_suggestions', 'unequip_item')
 
 from ..inventory_core import create_item_suggestions, get_inventory, save_inventory, select_item
 from ..item_core import ITEM_FLAG_HEAD, ITEM_FLAG_COSTUME, get_item_nullable
-from ..stats_core import get_stats
+from ..user_stats_core import get_user_stats
 
 from .constants import ITEM_FLAGS_ALLOWED
 
@@ -64,7 +64,7 @@ async def equip_item(user_id, item_flag, value):
     if item is None:
         return None, None
     
-    stats = await get_stats(user_id)
+    stats = await get_user_stats(user_id)
     
     if item_flag == ITEM_FLAG_HEAD:
         old_item_id = stats.item_id_head
@@ -109,12 +109,12 @@ async def unequip_item(user_id, item_flag):
     
     Returns
     -------
-    old_item : `None | Item`
+    old_item : ``None | Item``
     """
     if item_flag not in ITEM_FLAGS_ALLOWED:
         return None
     
-    stats = await get_stats(user_id)
+    stats = await get_user_stats(user_id)
     
     if item_flag == ITEM_FLAG_HEAD:
         old_item_id = stats.item_id_head

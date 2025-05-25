@@ -131,7 +131,7 @@ def with_image(embed, entity):
     
     Returns
     -------
-    embeds : `list` of ``Embed``
+    embeds : ``list<Embed>``
     """
     embeds = [embed]
     

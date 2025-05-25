@@ -33,7 +33,7 @@ def test__should_render_exception(exception):
     
     Parameters
     ----------
-    Exception : ``BaseException``
+    Exception : `BaseException`
         The exception to decide about.
     
     Returns

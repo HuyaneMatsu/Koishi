@@ -2,8 +2,7 @@ __all__ = ()
 
 import re
 
-from hata import BUILTIN_EMOJIS, Emoji
-from hata.ext.slash import Button, Row
+from hata import BUILTIN_EMOJIS, Emoji, create_button, create_row
 
 
 CUSTOM_ID_SNIPE_SELECT = 'snipe.select'
@@ -55,7 +54,7 @@ EMOJI_SNIPE_EDIT = Emoji.precreate(1031941507881644093)
 
 # details
 
-BUTTON_SNIPE_DETAILS_EMOJI = Button(
+BUTTON_SNIPE_DETAILS_EMOJI = create_button(
     'Details',
     EMOJI_SNIPE_DETAILS,
     custom_id = CUSTOM_ID_SNIPE_DETAILS_EMOJI,
@@ -80,7 +79,7 @@ BUTTON_SNIPE_DETAILS_DISABLED = BUTTON_SNIPE_DETAILS_EMOJI.copy_with(
 
 # dm
 
-BUTTON_SNIPE_DM = Button(
+BUTTON_SNIPE_DM = create_button(
     'Dm me',
     EMOJI_SNIPE_DM,
     custom_id = CUSTOM_ID_SNIPE_DM,
@@ -93,7 +92,7 @@ BUTTON_SNIPE_DM_DISABLED = BUTTON_SNIPE_DM.copy_with(
 
 # reveal
 
-BUTTON_SNIPE_REVEAL = Button(
+BUTTON_SNIPE_REVEAL = create_button(
     'Reveal',
     EMOJI_SNIPE_REVEAL,
     custom_id = CUSTOM_ID_SNIPE_REVEAL,
@@ -106,7 +105,7 @@ BUTTON_SNIPE_REVEAL_DISABLED = BUTTON_SNIPE_REVEAL.copy_with(
 
 # actions
 
-BUTTON_SNIPE_ACTIONS_EMOJI = Button(
+BUTTON_SNIPE_ACTIONS_EMOJI = create_button(
     'Actions',
     EMOJI_SNIPE_ACTIONS,
     custom_id = CUSTOM_ID_SNIPE_ACTIONS_EMOJI,
@@ -126,7 +125,7 @@ BUTTON_SNIPE_ACTIONS_DISABLED = BUTTON_SNIPE_ACTIONS_EMOJI.copy_with(
 )
 
 # close
-BUTTON_SNIPE_CLOSE = Button(
+BUTTON_SNIPE_CLOSE = create_button(
     'Close',
     emoji = EMOJI_SNIPE_CLOSE,
     custom_id = CUSTOM_ID_SNIPE_CLOSE,
@@ -134,7 +133,7 @@ BUTTON_SNIPE_CLOSE = Button(
 
 # add
 
-BUTTON_SNIPE_ADD_EMOJI = Button(
+BUTTON_SNIPE_ADD_EMOJI = create_button(
     'Borrow',
     EMOJI_SNIPE_ADD,
     custom_id = CUSTOM_ID_SNIPE_ADD_EMOJI,
@@ -155,7 +154,7 @@ BUTTON_SNIPE_ADD_DISABLED = BUTTON_SNIPE_ADD_EMOJI.copy_with(
 
 # remove
 
-BUTTON_SNIPE_REMOVE_EMOJI = Button(
+BUTTON_SNIPE_REMOVE_EMOJI = create_button(
     'Yeet',
     EMOJI_SNIPE_REMOVE,
     custom_id = CUSTOM_ID_SNIPE_REMOVE_EMOJI,
@@ -176,7 +175,7 @@ BUTTON_SNIPE_REMOVE_DISABLED = BUTTON_SNIPE_REMOVE_EMOJI.copy_with(
 
 # edit
 
-BUTTON_SNIPE_EDIT_EMOJI = Button(
+BUTTON_SNIPE_EDIT_EMOJI = create_button(
     'Edit',
     EMOJI_SNIPE_EDIT,
     custom_id = CUSTOM_ID_SNIPE_EDIT_EMOJI,
@@ -197,7 +196,7 @@ BUTTON_SNIPE_EDIT_DISABLED = BUTTON_SNIPE_EDIT_EMOJI.copy_with(
 
 # action response
 
-ROW_SNIPE_ACTION_RESPONSE = Row(
+ROW_SNIPE_ACTION_RESPONSE = create_row(
     BUTTON_SNIPE_REVEAL,
     BUTTON_SNIPE_CLOSE,
 )

@@ -35,7 +35,7 @@ else:
     USER_HEARTS_AVAILABLE = True
 
 try:
-    from ..stats_core import get_stats
+    from ..user_stats_core import get_user_stats
 except ImportError:
     if not MARISA_MODE:
         raise
@@ -45,6 +45,7 @@ except ImportError:
     USER_EQUIP_AVAILABLE = False
     USER_INVENTORY_AVAILABLE = False
     USER_DISCARD_ITEM_AVAILABLE = False
+    USER_QUESTS_AVAILABLE = False
 else:
     try:
         from ..user_stats import build_stats_embed
@@ -109,6 +110,18 @@ else:
     
     else:
         USER_DISCARD_ITEM_AVAILABLE = True
+    
+    
+    try:
+        from ..quest_board import build_user_quests_response
+    except ImportError:
+        if not MARISA_MODE:
+            raise
+        
+        USER_QUESTS_AVAILABLE = False
+    
+    else:
+        USER_QUESTS_AVAILABLE = True
 
 
 USER_COMMANDS = FEATURE_CLIENTS.interactions(
@@ -285,7 +298,7 @@ if USER_STATS_AVAILABLE:
         if user is None:
             user = event.user
         
-        stats = await get_stats(user.id)
+        stats = await get_user_stats(user.id)
         return build_stats_embed(user, stats, event.guild_id)
 
 
@@ -315,7 +328,7 @@ if USER_EQUIPMENT_AVAILABLE:
         if user is None:
             user = event.user
         
-        stats = await get_stats(user.id)
+        stats = await get_user_stats(user.id)
         return build_equipment_embed(user, stats, event.guild_id)
 
 
@@ -503,3 +516,26 @@ if USER_DISCARD_ITEM_AVAILABLE:
         suggestions : `None | list<(str, int)>`
         """
         return await get_discard_item_suggestions(event.user_id, value)
+
+
+if USER_QUESTS_AVAILABLE:
+    @USER_COMMANDS.interactions(name = 'quests')
+    async def user_quests(
+        event,
+    ):
+        """
+        Lists your accepted quests.
+        
+        This function is a coroutine generator.
+        
+        Parameters
+        ----------
+        event : ``InteractionEvent``
+            The received interaction event.
+        
+        Returns
+        -------
+        acknowledge / response : `None` / ``InteractionResponse``
+        """
+        yield
+        yield (await build_user_quests_response(event.user, event.guild_id))

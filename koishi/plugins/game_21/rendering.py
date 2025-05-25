@@ -18,7 +18,7 @@ def build_join_description(users, guild, amount, ask_to_join):
     ----------
     users : `list<ClientUserBase>`
         The joined users.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild where the game is.
     amount : `int`
         Bet amount.
@@ -56,7 +56,7 @@ def build_join_embed_base(users, guild, amount, title, ask_to_join):
     ----------
     users : `list<ClientUserBase>`
         The joined users.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild where the game is.
     amount : `int`
         Bet amount.
@@ -84,7 +84,7 @@ def build_join_embed(users, guild, amount):
     ----------
     users : `list<ClientUserBase>`
         The joined users.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild where the game is.
     amount : `int`
         Bet amount.
@@ -106,7 +106,7 @@ def build_join_embed_cancelled(users, guild, amount):
     ----------
     users : `list<ClientUserBase>`
         The joined users.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild where the game is.
     amount : `int`
         Bet amount.
@@ -128,7 +128,7 @@ def build_join_embed_timed_out(users, guild, amount):
     ----------
     users : `list<ClientUserBase>`
         The joined users.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild where the game is.
     amount : `int`
         Bet amount.
@@ -150,7 +150,7 @@ def build_join_embed_game_started(users, guild, amount):
     ----------
     users : `list<ClientUserBase>`
         The joined users.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild where the game is.
     amount : `int`
         Bet amount.
@@ -321,7 +321,7 @@ def add_done_field(embed, user, guild, hand):
         The embed to extend.
     user : ``ClientUserBase``
         The user who owns the hand.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild where the game is.
     hand : ``Hand``
         The hand to add its done field for.
@@ -526,7 +526,7 @@ def build_user_listing_description(users, guild):
     ----------
     users : `list<ClientUserBase>`
         The users to list.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild.
     
     Returns

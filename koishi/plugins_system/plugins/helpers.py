@@ -3,9 +3,9 @@ __all__ = ()
 from itertools import islice
 from re import compile as re_compile
 
-from hata import BUILTIN_EMOJIS, CLIENTS, KOKORO
+from hata import BUILTIN_EMOJIS, CLIENTS, KOKORO, StringSelectOption, create_button, create_row, create_string_select
 from hata.ext.plugin_loader import PLUGINS, PluginError, frame_filter, get_plugin_like
-from hata.ext.slash import Button, InteractionResponse, Option, Row, Select, abort
+from hata.ext.slash import InteractionResponse, abort
 from scarletio import render_exception_into_async
 
 from ...bot_utils.constants import ROLE__SUPPORT__ADMIN
@@ -127,10 +127,10 @@ def create_plugins_page_components(client, plugins_sequence, page):
     
     Parameters
     ----------
-    client : `None | Client`
+    client : ``None | Client``
         Client to get page for.
     
-    plugins_sequence : `sequence<Plugin>`
+    plugins_sequence : ``sequence<Plugin>``
         A sequence of plugins to get page for.
     
     page : ``Page``
@@ -145,21 +145,21 @@ def create_plugins_page_components(client, plugins_sequence, page):
     components = []
     
     components.append(
-        Row(
-            Button(
+        create_row(
+            create_button(
                 f'Page {page - 1!s}',
                  EMOJI_LEFT,
                 custom_id = create_custom_id_page_n(0 if client is None else client.id, page - 1),
                 enabled = (page > 1),
                 
             ),
-            Button(
+            create_button(
                 f'Page {page + 1!s}',
                 EMOJI_RIGHT,
                 custom_id = create_custom_id_page_n(0 if client is None else client.id, page + 1),
                 enabled = (page < page_count),
             ),
-            Button(
+            create_button(
                 None,
                 EMOJI_CLOSE,
                 custom_id = CUSTOM_ID_PAGE_CLOSE,
@@ -169,10 +169,10 @@ def create_plugins_page_components(client, plugins_sequence, page):
     
     if (client is not None):
         components.append(
-            Row(
-                Select(
+            create_row(
+                create_string_select(
                     [
-                        Option(
+                        StringSelectOption(
                             format(option_client.id, 'x'),
                             option_client.full_name,
                             default = (option_client is client),

@@ -11,11 +11,11 @@ from ..bot_utils.constants import CATEGORY__SUPPORT__BOTS, PATH__KOISHI, ROLE__S
 from ..bot_utils.tools import Cell
 from ..bots import COMMAND_CLIENT
 
-from hata import KOKORO, Embed, BUILTIN_EMOJIS
-from scarletio import Lock, alchemy_incendiary, Task
-from hata.ext.slash import Button, Row, wait_for_component_interaction
+from hata import KOKORO, Embed, BUILTIN_EMOJIS, create_button, create_row
+from hata.ext.slash import wait_for_component_interaction
 from hata.ext.slash.menus import Pagination, Closer
 from hata.ext.commands_v2 import checks
+from scarletio import Lock, alchemy_incendiary, Task
 
 
 FILE_NAME = 'channel_names.csv'
@@ -284,10 +284,10 @@ def check_staff_role(event):
 ADD_EMOJI_OK = BUILTIN_EMOJIS['ok_hand']
 ADD_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
 
-ADD_BUTTON_OK = Button(emoji = ADD_EMOJI_OK)
-ADD_BUTTON_CANCEL = Button(emoji = ADD_EMOJI_CANCEL)
+ADD_BUTTON_OK = create_button(emoji = ADD_EMOJI_OK)
+ADD_BUTTON_CANCEL = create_button(emoji = ADD_EMOJI_CANCEL)
 
-ADD_COMPONENTS = Row(ADD_BUTTON_OK, ADD_BUTTON_CANCEL)
+ADD_COMPONENTS = create_row(ADD_BUTTON_OK, ADD_BUTTON_CANCEL)
 
 @COMMAND_CLIENT.commands(category = 'CHANNEL NAMES', separator = '|')
 async def add_bot_channel_name(client, message, weight : int, name):

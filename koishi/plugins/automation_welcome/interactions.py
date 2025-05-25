@@ -1,8 +1,7 @@
 __all__ = ()
 
-from hata import Embed, INVITE_URL_RP
+from hata import Embed, INVITE_URL_RP, InteractionForm, TextInputStyle, create_row, create_text_input
 from hata.discord.utils import URL_RP
-from hata.ext.slash import Form, Row, TextInput, TextInputStyle
 
 from ...bots import FEATURE_CLIENTS
 
@@ -35,7 +34,7 @@ def get_disabled_components(event):
     if components is None:
         return None
     
-    return [Row(*(component.copy_with(enabled = False) for component in row.components)) for row in components]
+    return [create_row(*(component.copy_with(enabled = False) for component in row.components)) for row in components]
 
 
 def get_censor_reason_for_message_content(message_content):
@@ -395,10 +394,10 @@ async def welcome_reply_custom_form(client, event):
         return
     
     
-    return Form(
+    return InteractionForm(
         'Custom welcome',
         [
-            TextInput(
+            create_text_input(
                 'Message content',
                 min_length = 2,
                 max_length = 256,

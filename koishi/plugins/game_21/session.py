@@ -15,7 +15,7 @@ class Session(RichAttributeErrorBaseType):
         The amount of gambled hearts by user.
     deck : ``Deck``
         The session's deck.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The owner guild.
     latest_interaction_event : ``InteractionEvent``
         The latest interaction event the user received.
@@ -28,7 +28,7 @@ class Session(RichAttributeErrorBaseType):
         
         Parameters
         ----------
-        guild : `None | Guild`
+        guild : ``None | Guild``
             The owner guild.
         amount : `int`
             The amount of gambled hearts by user.

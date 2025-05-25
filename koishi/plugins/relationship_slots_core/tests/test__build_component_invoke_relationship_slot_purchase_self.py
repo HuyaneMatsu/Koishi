@@ -1,14 +1,13 @@
 import vampytest
 
-from hata import Component
-from hata.ext.slash import Button
+from hata import Component, create_button
 
 from ..component_builders import build_component_invoke_relationship_slot_purchase_self
 
 
 def _iter_options():
     yield (
-        Button(
+        create_button(
             'I want some More! More!',
             custom_id = 'user_balance.relationship_slots.increment.invoke.self'
         ),

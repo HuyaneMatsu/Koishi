@@ -5,8 +5,10 @@ from math import ceil, floor
 from os.path import join as join_paths
 from zlib import compress, decompress
 
-from hata import BUILTIN_EMOJIS, Color, DiscordException, ERROR_CODES, Embed, Emoji, KOKORO
-from hata.ext.slash import Button, ButtonStyle, Row, Timeouter, abort
+from hata import (
+    BUILTIN_EMOJIS, ButtonStyle, Color, DiscordException, ERROR_CODES, Embed, Emoji, KOKORO, create_button, create_row
+)
+from hata.ext.slash import Timeouter, abort
 from scarletio import AsyncIO, CancelledError, Lock, Task, TaskGroup, copy_docs
 
 from ..bot_utils.constants import PATH__KOISHI
@@ -391,7 +393,7 @@ RULES_HELP = Embed(
     'Game based on Sweeper of Suika.'
 )
 
-BUTTON_UP_ENABLED = Button(
+BUTTON_UP_ENABLED = create_button(
     emoji = EMOJI_UP,
     custom_id = CUSTOM_ID_UP,
     style = ButtonStyle.blue,
@@ -399,7 +401,7 @@ BUTTON_UP_ENABLED = Button(
 
 BUTTON_UP_DISABLED = BUTTON_UP_ENABLED.copy_with(enabled = False)
 
-BUTTON_DOWN_ENABLED = Button(
+BUTTON_DOWN_ENABLED = create_button(
     emoji = EMOJI_DOWN,
     custom_id = CUSTOM_ID_DOWN,
     style = ButtonStyle.blue,
@@ -407,7 +409,7 @@ BUTTON_DOWN_ENABLED = Button(
 
 BUTTON_DOWN_DISABLED = BUTTON_DOWN_ENABLED.copy_with(enabled = False)
 
-BUTTON_UP2_ENABLED = Button(
+BUTTON_UP2_ENABLED = create_button(
     emoji = EMOJI_UP2,
     custom_id = CUSTOM_ID_UP2,
     style = ButtonStyle.blue,
@@ -415,7 +417,7 @@ BUTTON_UP2_ENABLED = Button(
 
 BUTTON_UP2_DISABLED = BUTTON_UP2_ENABLED.copy_with(enabled = False)
 
-BUTTON_DOWN2_ENABLED = Button(
+BUTTON_DOWN2_ENABLED = create_button(
     emoji = EMOJI_DOWN2,
     custom_id = CUSTOM_ID_DOWN2,
     style = ButtonStyle.blue,
@@ -423,7 +425,7 @@ BUTTON_DOWN2_ENABLED = Button(
 
 BUTTON_DOWN2_DISABLED = BUTTON_DOWN2_ENABLED.copy_with(enabled = False)
 
-BUTTON_LEFT_ENABLED = Button(
+BUTTON_LEFT_ENABLED = create_button(
     emoji = EMOJI_LEFT,
     custom_id = CUSTOM_ID_LEFT,
     style = ButtonStyle.blue,
@@ -431,7 +433,7 @@ BUTTON_LEFT_ENABLED = Button(
 
 BUTTON_LEFT_DISABLED = BUTTON_LEFT_ENABLED.copy_with(enabled = False)
 
-BUTTON_RIGHT_ENABLED = Button(
+BUTTON_RIGHT_ENABLED = create_button(
     emoji = EMOJI_RIGHT,
     custom_id = CUSTOM_ID_RIGHT,
     style = ButtonStyle.blue,
@@ -439,7 +441,7 @@ BUTTON_RIGHT_ENABLED = Button(
 
 BUTTON_RIGHT_DISABLED = BUTTON_RIGHT_ENABLED.copy_with(enabled = False)
 
-BUTTON_SELECT_ENABLED = Button(
+BUTTON_SELECT_ENABLED = create_button(
     emoji = EMOJI_SELECT,
     custom_id = CUSTOM_ID_SELECT,
     style = ButtonStyle.green,
@@ -447,7 +449,7 @@ BUTTON_SELECT_ENABLED = Button(
 
 BUTTON_SELECT_DISABLED = BUTTON_SELECT_ENABLED.copy_with(enabled = False)
 
-BUTTON_EMPTY_1 = Button(
+BUTTON_EMPTY_1 = create_button(
     emoji = EMOJI_NOTHING,
     custom_id = CUSTOM_ID_EMPTY_1,
     style = ButtonStyle.gray,
@@ -458,7 +460,7 @@ BUTTON_EMPTY_2 = BUTTON_EMPTY_1.copy_with(custom_id = CUSTOM_ID_EMPTY_2)
 BUTTON_EMPTY_3 = BUTTON_EMPTY_1.copy_with(custom_id = CUSTOM_ID_EMPTY_3)
 BUTTON_EMPTY_4 = BUTTON_EMPTY_1.copy_with(custom_id = CUSTOM_ID_EMPTY_4)
 
-BUTTON_SKILL_REIMU_ENABLED = Button(
+BUTTON_SKILL_REIMU_ENABLED = create_button(
     emoji = EMOJI_REIMU,
     custom_id = CUSTOM_ID_SKILL,
     style = ButtonStyle.blue,
@@ -476,7 +478,7 @@ BUTTON_SKILL_YUKARI_DISABLED = BUTTON_SKILL_YUKARI_ENABLED.copy_with(enabled = F
 BUTTON_SKILL_YUKARI_USED = BUTTON_SKILL_YUKARI_DISABLED.copy_with(button_style = ButtonStyle.gray)
 BUTTON_SKILL_YUKARI_ACTIVATED = BUTTON_SKILL_YUKARI_ENABLED.copy_with(button_style = ButtonStyle.green)
 
-BUTTON_WEST_ENABLED = Button(
+BUTTON_WEST_ENABLED = create_button(
     emoji = EMOJI_WEST,
     custom_id = CUSTOM_ID_WEST,
     style = ButtonStyle.blue,
@@ -484,7 +486,7 @@ BUTTON_WEST_ENABLED = Button(
 
 BUTTON_WEST_DISABLED = BUTTON_WEST_ENABLED.copy_with(enabled = False)
 
-BUTTON_NORTH_ENABLED = Button(
+BUTTON_NORTH_ENABLED = create_button(
     emoji = EMOJI_NORTH,
     custom_id = CUSTOM_ID_NORTH,
     style = ButtonStyle.blue,
@@ -492,7 +494,7 @@ BUTTON_NORTH_ENABLED = Button(
 
 BUTTON_NORTH_DISABLED = BUTTON_NORTH_ENABLED.copy_with(enabled = False)
 
-BUTTON_SOUTH_ENABLED = Button(
+BUTTON_SOUTH_ENABLED = create_button(
     emoji = EMOJI_SOUTH,
     custom_id = CUSTOM_ID_SOUTH,
     style = ButtonStyle.blue,
@@ -500,7 +502,7 @@ BUTTON_SOUTH_ENABLED = Button(
 
 BUTTON_SOUTH_DISABLED = BUTTON_SOUTH_ENABLED.copy_with(enabled = False)
 
-BUTTON_EAST_ENABLED = Button(
+BUTTON_EAST_ENABLED = create_button(
     emoji = EMOJI_EAST,
     custom_id = CUSTOM_ID_EAST,
     style = ButtonStyle.blue,
@@ -508,7 +510,7 @@ BUTTON_EAST_ENABLED = Button(
 
 BUTTON_EAST_DISABLED = BUTTON_EAST_ENABLED.copy_with(enabled = False)
 
-BUTTON_NORTH_TO_EAST_ENABLED = Button(
+BUTTON_NORTH_TO_EAST_ENABLED = create_button(
     emoji = EMOJI_NORTH_EAST,
     custom_id = CUSTOM_ID_NORTH_TO_EAST,
     style = ButtonStyle.blue,
@@ -521,7 +523,7 @@ BUTTON_NORTH_EAST_DISABLED = BUTTON_NORTH_TO_EAST_ENABLED.copy_with(
     enabled = False,
 )
 
-BUTTON_NORTH_TO_WEST_ENABLED = Button(
+BUTTON_NORTH_TO_WEST_ENABLED = create_button(
     emoji = EMOJI_NORTH_WEST,
     custom_id = CUSTOM_ID_NORTH_TO_WEST,
     style = ButtonStyle.blue,
@@ -535,7 +537,7 @@ BUTTON_NORTH_WEST_DISABLED = BUTTON_NORTH_TO_WEST_ENABLED.copy_with(
 )
 
 
-BUTTON_SOUTH_TO_EAST_ENABLED = Button(
+BUTTON_SOUTH_TO_EAST_ENABLED = create_button(
     emoji = EMOJI_SOUTH_EAST,
     custom_id = CUSTOM_ID_SOUTH_TO_EAST,
     style = ButtonStyle.blue,
@@ -548,7 +550,7 @@ BUTTON_SOUTH_EAST_DISABLED = BUTTON_SOUTH_TO_EAST_ENABLED.copy_with(
     enabled = False,
 )
 
-BUTTON_SOUTH_TO_WEST_ENABLED = Button(
+BUTTON_SOUTH_TO_WEST_ENABLED = create_button(
     emoji = EMOJI_SOUTH_WEST,
     custom_id = CUSTOM_ID_SOUTH_TO_WEST,
     style = ButtonStyle.blue,
@@ -561,7 +563,7 @@ BUTTON_SOUTH_WEST_DISABLED = BUTTON_SOUTH_TO_WEST_ENABLED.copy_with(
     enabled = False,
 )
 
-BUTTON_BACK_ENABLED = Button(
+BUTTON_BACK_ENABLED = create_button(
     emoji = EMOJI_BACK,
     custom_id = CUSTOM_ID_BACK,
     style = ButtonStyle.blue,
@@ -569,7 +571,7 @@ BUTTON_BACK_ENABLED = Button(
 
 BUTTON_BACK_DISABLED = BUTTON_BACK_ENABLED.copy_with(enabled = False)
 
-BUTTON_RESET_ENABLED = Button(
+BUTTON_RESET_ENABLED = create_button(
     emoji = EMOJI_RESET,
     custom_id = CUSTOM_ID_RESET,
     style = ButtonStyle.blue,
@@ -577,13 +579,13 @@ BUTTON_RESET_ENABLED = Button(
 
 BUTTON_RESET_DISABLED = BUTTON_RESET_ENABLED.copy_with(enabled = False)
 
-BUTTON_CANCEL = Button(
+BUTTON_CANCEL = create_button(
     emoji = EMOJI_CANCEL,
     custom_id = CUSTOM_ID_CANCEL,
     style = ButtonStyle.blue,
 )
 
-BUTTON_NEXT = Button(
+BUTTON_NEXT = create_button(
     emoji = EMOJI_NEXT,
     custom_id = CUSTOM_ID_NEXT,
     style = ButtonStyle.blue,
@@ -591,13 +593,13 @@ BUTTON_NEXT = Button(
 
 BUTTON_NEXT_DISABLED = BUTTON_NEXT.copy_with(enabled = False)
 
-BUTTON_CLOSE = Button(
+BUTTON_CLOSE = create_button(
     emoji = EMOJI_CLOSE,
     custom_id = CUSTOM_ID_CLOSE,
     style = ButtonStyle.blue,
 )
 
-BUTTON_RESTART = Button(
+BUTTON_RESTART = create_button(
     emoji = EMOJI_RESTART,
     custom_id = CUSTOM_ID_RESTART,
     style = ButtonStyle.blue,
@@ -977,7 +979,7 @@ class MoveDirections:
         
         Returns
         -------
-        button : ``ComponentButton``
+        button : ``Component``
         """
         if self._get(MOVE_DIRECTION_NORTH):
             button = BUTTON_NORTH_ENABLED
@@ -993,7 +995,7 @@ class MoveDirections:
         
         Returns
         -------
-        button : ``ComponentButton``
+        button : ``Component``
         """
         if self._get(MOVE_DIRECTION_EAST):
             button = BUTTON_EAST_ENABLED
@@ -1009,7 +1011,7 @@ class MoveDirections:
         
         Returns
         -------
-        button : ``ComponentButton``
+        button : ``Component``
         """
         if self._get(MOVE_DIRECTION_SOUTH):
             button = BUTTON_SOUTH_ENABLED
@@ -1025,7 +1027,7 @@ class MoveDirections:
         
         Returns
         -------
-        button : ``ComponentButton``
+        button : ``Component``
         """
         if self._get(MOVE_DIRECTION_WEST):
             button = BUTTON_WEST_ENABLED
@@ -1041,7 +1043,7 @@ class MoveDirections:
         
         Returns
         -------
-        button : ``ComponentButton``
+        button : ``Component``
         """
         if self._get(MOVE_DIRECTION_NORTH_TO_EAST):
             button = BUTTON_NORTH_TO_EAST_ENABLED
@@ -1059,7 +1061,7 @@ class MoveDirections:
         
         Returns
         -------
-        button : ``ComponentButton``
+        button : ``Component``
         """
         if self._get(MOVE_DIRECTION_NORTH_TO_WEST):
             button = BUTTON_NORTH_TO_WEST_ENABLED
@@ -1077,7 +1079,7 @@ class MoveDirections:
         
         Returns
         -------
-        button : ``ComponentButton``
+        button : ``Component``
         """
         if self._get(MOVE_DIRECTION_SOUTH_TO_EAST):
             button = BUTTON_SOUTH_TO_EAST_ENABLED
@@ -1095,7 +1097,7 @@ class MoveDirections:
         
         Returns
         -------
-        button : ``ComponentButton``
+        button : ``Component``
         """
         if self._get(MOVE_DIRECTION_SOUTH_TO_WEST):
             button = BUTTON_SOUTH_TO_WEST_ENABLED
@@ -2011,13 +2013,13 @@ class Chapter:
     
     Attributes
     ----------
-    button_skill_activated : ``ComponentButton``
+    button_skill_activated : ``Component``
         The skill button when the next move is a skill.
-    button_skill_disabled : ``ComponentButton``
+    button_skill_disabled : ``Component``
         The skill button, when the skill cannot be used.
-    button_skill_enabled : ``ComponentButton``
+    button_skill_enabled : ``Component``
         The skill button, when the skill can be used.
-    button_skill_activated : ``ComponentButton``
+    button_skill_activated : ``Component``
         The skill button, when it was already used.
     difficulties : `dict` of (`int`, `dict` (`int`, ``StageSource``) items) items
         The difficulties of the chapter.
@@ -2115,13 +2117,13 @@ class Chapter:
             The chapter's character's emoji.
         style : `dict` of (`int`, `str`) items
             The tiles of the stage based on the tile's value.
-        button_skill_enabled : ``ComponentButton``
+        button_skill_enabled : ``Component``
             The skill button, when the skill can be used.
-        button_skill_disabled : ``ComponentButton``
+        button_skill_disabled : ``Component``
             The skill button, when the skill cannot be used.
-        button_skill_used : ``ComponentButton``
+        button_skill_used : ``Component``
             The skill button, when it was already used.
-        button_skill_activated : ``ComponentButton``
+        button_skill_activated : ``Component``
             The skill button when the next move is a skill.
         skill_can_activate : `Function`
             Checks whether the chapter's character's skill can be activated.
@@ -3134,7 +3136,7 @@ class GameState:
         
         Returns
         -------
-        button : `ComponentButton``
+        button : `Component``
         """
         chapter = self.chapter
         if self.next_skill:
@@ -3205,7 +3207,7 @@ class GameState:
         -------
         embed : ``Embed``
             The game's embed.
-        components : `tuple` of ``Row`` of ``ComponentButton``
+        components : ``tuple<Component>`
             The components of the game.
         """
         stage = self.stage
@@ -3249,9 +3251,9 @@ class GameState:
             button_reset = BUTTON_RESET_DISABLED
         
         components = (
-            Row(button_north_west , button_north , button_north_east , button_back   ,),
-            Row(button_west       , button_skill , button_east       , button_reset  ,),
-            Row(button_south_west , button_south , button_south_east , BUTTON_CANCEL ,),
+            create_row(button_north_west , button_north , button_north_east , button_back   ,),
+            create_row(button_west       , button_skill , button_east       , button_reset  ,),
+            create_row(button_south_west , button_south , button_south_east , BUTTON_CANCEL ,),
         )
         
         return embed, components
@@ -3265,7 +3267,7 @@ class GameState:
         -------
         embed : ``Embed``
             The game's embed.
-        components : `tuple` of ``Row`` of ``ComponentButton``
+        components : ``tuple<Component>`
             The components of the game.
         """
         stage = self.stage
@@ -3293,7 +3295,7 @@ class GameState:
             button_next = BUTTON_NEXT
         
         components = (
-            Row(BUTTON_CLOSE , BUTTON_RESTART , button_next ,),
+            create_row(BUTTON_CLOSE , BUTTON_RESTART , button_next ,),
         )
         
         return embed, components
@@ -3507,7 +3509,7 @@ def render_menu(user_state):
     -------
     embed : ``Embed``
         The menu's embed.
-    components : `tuple` of ``Row`` of ``ComponentButton``
+    components : ``tuple<Component>``
         The components of the menu.
     """
     try:
@@ -3584,9 +3586,9 @@ def render_menu(user_state):
         button_chapter_before = BUTTON_LEFT_ENABLED
     
     components = (
-        Row(BUTTON_EMPTY_1        , button_stage_after     , button_stage_after2   , BUTTON_EMPTY_2      ,),
-        Row(button_chapter_before , button_select          , BUTTON_CLOSE          , button_chapter_next ,),
-        Row(BUTTON_EMPTY_3        , button_stage_before    , button_stage_before2  , BUTTON_EMPTY_4      ,),
+        create_row(BUTTON_EMPTY_1        , button_stage_after     , button_stage_after2   , BUTTON_EMPTY_2      ,),
+        create_row(button_chapter_before , button_select          , BUTTON_CLOSE          , button_chapter_next ,),
+        create_row(BUTTON_EMPTY_3        , button_stage_before    , button_stage_before2  , BUTTON_EMPTY_4      ,),
     )
     
     return embed, components
@@ -4723,7 +4725,7 @@ class DungeonSweeperRunner:
         
         Parameters
         ----------
-        exception : `None`, ``BaseException``, Optional
+        exception : `None`, `BaseException`, Optional
             Exception to cancel the pagination with. Defaults to `None`
         
         Returns
@@ -4754,7 +4756,7 @@ class DungeonSweeperRunner:
         
         Parameters
         ----------
-        exception : `None`, ``BaseException``
+        exception : `None`, `BaseException`
         """
         await self.user_state.upload()
         

@@ -1,10 +1,11 @@
 import vampytest
+from hata import StringSelectOption
 from hata.discord.component.component_metadata.constants import LABEL_LENGTH_MAX
-from hata.ext.slash import Option
 
-from ..keys import KEY_CHARACTER_ID, KEY_CHARACTER_NAME, KEY_MEDIA_ID, KEY_MEDIA_NAME, \
-    KEY_CHARACTER_NAME_FIRST, KEY_MEDIA_NAME_ROMAJI
-from ..parsers_components import parse_option_character, parse_option_media, parse_option_base
+from ..keys import (
+    KEY_CHARACTER_ID, KEY_CHARACTER_NAME, KEY_CHARACTER_NAME_FIRST, KEY_MEDIA_ID, KEY_MEDIA_NAME, KEY_MEDIA_NAME_ROMAJI
+)
+from ..parsers_components import parse_option_base, parse_option_character, parse_option_media
 from ..parsers_name import NAME_DEFAULT, parse_character_name, parse_media_name
 
 
@@ -13,7 +14,7 @@ def _iter_options__parse_option_base():
         {},
         KEY_CHARACTER_ID,
         parse_character_name,
-        Option('-1', NAME_DEFAULT),
+        StringSelectOption('-1', NAME_DEFAULT),
     )
     
     yield (
@@ -25,7 +26,7 @@ def _iter_options__parse_option_base():
         },
         KEY_CHARACTER_ID,
         parse_character_name,
-        Option(
+        StringSelectOption(
             str(56),
             'koishi',
         )
@@ -40,7 +41,7 @@ def _iter_options__parse_option_base():
         },
         KEY_MEDIA_ID,
         parse_media_name,
-        Option(
+        StringSelectOption(
             str(56),
             'koishi',
         )
@@ -71,7 +72,7 @@ def test__parse_option_base(entity_data, key_id, name_parser):
 def _iter_options__parse_option_character():
     yield (
         {},
-        Option('-1', NAME_DEFAULT),
+        StringSelectOption('-1', NAME_DEFAULT),
     )
     
     yield (
@@ -81,7 +82,7 @@ def _iter_options__parse_option_character():
             },
             KEY_CHARACTER_ID: 56,
         },
-        Option(
+        StringSelectOption(
             str(56),
             'koishi',
         )
@@ -93,7 +94,7 @@ def _iter_options__parse_option_character():
                 KEY_CHARACTER_NAME_FIRST: 'a' * (LABEL_LENGTH_MAX + 1),
             },
         },
-        Option(
+        StringSelectOption(
             '-1',
             'a' * (LABEL_LENGTH_MAX - 4) + ' ...',
         )
@@ -120,7 +121,7 @@ def test__parse_option_character(entity_data):
 def _iter_options__parse_option_media():
     yield (
         {},
-        Option('-1', NAME_DEFAULT),
+        StringSelectOption('-1', NAME_DEFAULT),
     )
     
     yield (
@@ -130,7 +131,7 @@ def _iter_options__parse_option_media():
             },
             KEY_MEDIA_ID: 56,
         },
-        Option(
+        StringSelectOption(
             str(56),
             'koishi',
         )
@@ -142,7 +143,7 @@ def _iter_options__parse_option_media():
                 KEY_MEDIA_NAME_ROMAJI: 'a' * (LABEL_LENGTH_MAX + 1),
             },
         },
-        Option(
+        StringSelectOption(
             '-1',
             'a' * (LABEL_LENGTH_MAX - 4) + ' ...',
         )

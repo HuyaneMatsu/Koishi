@@ -42,7 +42,7 @@ def test__render_user_field_into(field_added, user, optional, guild, title):
         The user to render.
     optional : `bool`
         Whether the field should not be rendered if `user` is `None`.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The guild to pull name for.
     title : `str`
         The title to use.

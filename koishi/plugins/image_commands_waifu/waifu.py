@@ -1,7 +1,7 @@
 __all__ = ()
 
-from hata import Embed
-from hata.ext.slash import Button, abort
+from hata import Embed, create_button
+from hata.ext.slash import abort
 
 from ..image_handling_core import ImageHandlerWaifuPics, add_embed_provider
 
@@ -104,7 +104,7 @@ class Waifu:
         if image_detail is None:
             components = None
         else:
-            components = Button(
+            components = create_button(
                 emoji = EMOJI_NEW,
                 custom_id = self.custom_id,
             )

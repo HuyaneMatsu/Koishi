@@ -3,8 +3,8 @@ __all__ = ()
 from datetime import datetime as DateTime, timezone as TimeZone
 from math import floor
 
-from hata import ClientUserBase, Embed, InteractionType
-from hata.ext.slash import Button, InteractionAbortedError, P, abort
+from hata import ClientUserBase, Embed, InteractionType, create_button
+from hata.ext.slash import InteractionAbortedError, P, abort
 
 from ...bot_utils.user_getter import get_user, get_users_unordered
 from ...bot_utils.utils import send_embed_to
@@ -192,7 +192,7 @@ async def create(
                     ),
                     [
                         build_component_relationship_proposal_actions(source_user.id, target_user.id),
-                        Button(
+                        create_button(
                             'I don\'t want notifs, nya!!',
                             custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_PROPOSAL_DISABLE,
                         ),
@@ -364,7 +364,7 @@ async def cancel(
                     build_notification_embed_request_cancelled(
                         relationship_type, investment, source_user, event.guild_id
                     ),
-                    Button(
+                    create_button(
                         'I don\'t want notifs, nya!!',
                         custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_PROPOSAL_DISABLE,
                     ),

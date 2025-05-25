@@ -1,6 +1,6 @@
 import vampytest
-from hata import Embed, User
-from hata.ext.slash import Button, InteractionResponse, Row
+from hata import Embed, User, create_button, create_row
+from hata.ext.slash import InteractionResponse
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
@@ -57,8 +57,8 @@ def test__build_top_list_response():
                 ),
                 True,
             ),
-            components = Row(
-                Button(
+            components = create_row(
+                create_button(
                     f'Page {page_index}',
                     EMOJI_PAGE_PREVIOUS,
                     custom_id = f'{CUSTOM_ID_PAGE_BASE}{page_index - 1!s}',

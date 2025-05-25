@@ -7,7 +7,7 @@ from scarletio import copy_docs
 from ...bot_utils.entry_proxy import EntryProxy
 
 from .user_balance_saver import UserBalanceSaver
-from .constants import USER_WAIFU_SLOTS_DEFAULT, USER_BALANCE_CACHE, USER_BALANCE_CACHE_SIZE
+from .constants import USER_RELATIONSHIP_SLOTS_DEFAULT, USER_BALANCE_CACHE, USER_BALANCE_CACHE_SIZE
 
 
 class UserBalance(EntryProxy):
@@ -61,6 +61,9 @@ class UserBalance(EntryProxy):
     
     relationship_slots : `int`
         The maximal amount of waifus the user can have.
+    
+    saver : ``None | UserBalanceSaver``
+        Saver set while saving.
     """
     __slots__ = (
         'balance', 'allocated', 'count_daily_by_related', 'count_daily_for_related', 'count_daily_self',
@@ -98,7 +101,7 @@ class UserBalance(EntryProxy):
         self.user_id = user_id
         self.relationship_value = 0
         self.relationship_divorces = 0
-        self.relationship_slots = USER_WAIFU_SLOTS_DEFAULT
+        self.relationship_slots = USER_RELATIONSHIP_SLOTS_DEFAULT
         return self
     
     
@@ -182,7 +185,7 @@ class UserBalance(EntryProxy):
         
         # relationship_slots
         relationship_slots = self.relationship_slots
-        if relationship_slots != USER_WAIFU_SLOTS_DEFAULT:
+        if relationship_slots != USER_RELATIONSHIP_SLOTS_DEFAULT:
             repr_parts.append(', relationship_slots = ')
             repr_parts.append(repr(relationship_slots))
     

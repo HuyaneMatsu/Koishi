@@ -66,7 +66,7 @@ def with_sticker_image(embed, sticker):
     
     Returns
     -------
-    embeds : `list` of ``Embed``
+    embeds : ``list<Embed>``
     """
     embeds = [embed]
     image_embed = build_sticker_image_embed(sticker, embed.color)
@@ -87,7 +87,7 @@ def build_sticker_create_embeds(sticker):
     
     Returns
     -------
-    embed : `list` of ``Embed``
+    embed : ``list<Embed>``
     """
     embed = Embed(
         f'Sticker created: {sticker.name} ({sticker.id})',

@@ -1,4 +1,4 @@
-__all__ = ()
+__all__ = ('ITEM_NAME_DEFAULT', 'ITEMS',)
 
 from hata import BUILTIN_EMOJIS
 

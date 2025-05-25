@@ -14,7 +14,7 @@ def should_render_exception(exception):
     
     Parameters
     ----------
-    exception : ``BaseException``
+    exception : `BaseException`
         The exception to decide about.
     
     Returns
@@ -44,7 +44,7 @@ def is_exception_expiration(exception):
     
     Parameters
     ----------
-    exception : ``BaseException``
+    exception : `BaseException`
         The exception to decide about.
     
     Returns

@@ -107,7 +107,7 @@ def iter_build_attachment_voters(down_voters, up_voters, guild):
         Down voters to create attachment for.
     up_voters : `set<ClientUserBase>`
         Up voters to create attachment for.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild where the votes were counted at.
     
     Yields
@@ -144,7 +144,7 @@ def _get_uploadable_attachment_count(guild, attachments):
     
     Parameters
     ----------
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild where the message will be sent.
     
     attachments : `tuple<Attachment>`

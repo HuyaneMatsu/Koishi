@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import ComponentType, Emoji, SoundboardSound, Sticker, StickerType
-from hata.ext.slash import Row
+from hata import ComponentType, Emoji, SoundboardSound, Sticker, StickerType, create_row
 
 from .constants import EMBED_AUTHOR_ID_PATTERN
 
@@ -60,7 +59,7 @@ def translate_component(component, table):
     component : ``Component``
     """
     if component.type is ComponentType.row:
-        return Row(*(table.get(sub_component.custom_id, sub_component) for sub_component in component))
+        return create_row(*(table.get(sub_component.custom_id, sub_component) for sub_component in component))
     
     return table.get(component.custom_id, component)
 
@@ -78,7 +77,7 @@ def translate_components(components, table):
     
     Returns
     -------
-    components : `list` of ``Component``
+    components : ``list<Component>``
     """
     return [translate_component(component, table) for component in components]
 
@@ -132,7 +131,7 @@ def discard_entity_from_components(components, entity_id):
                 if (sub_component is None):
                     continue
                 
-                row_component = Row(sub_component)
+                row_component = create_row(sub_component)
         
         new_components.append(row_component)
     

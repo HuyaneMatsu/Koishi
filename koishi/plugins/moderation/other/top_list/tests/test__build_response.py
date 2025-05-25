@@ -1,6 +1,6 @@
 import vampytest
-from hata import Embed, User
-from hata.ext.slash import Button, InteractionResponse, Row
+from hata import Embed, User, create_button, create_row
+from hata.ext.slash import InteractionResponse
 
 from ..action_counter import ActionCounter
 from ..builders import build_top_list_response
@@ -78,8 +78,8 @@ def test__build_top_list_response():
                 ),
                 inline = True,
             ),
-            components = Row(
-                Button(
+            components = create_row(
+                create_button(
                     'Page 1',
                     emoji = EMOJI_PAGE_PREVIOUS,
                     custom_id = f'{CUSTOM_ID_PAGE_BASE}{page_index - 1 !s};s={sort_by!s};d={days!s}',

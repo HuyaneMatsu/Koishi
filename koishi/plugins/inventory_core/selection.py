@@ -140,7 +140,7 @@ def select_item(inventory, item_flag, value):
     
     Returns
     -------
-    item : `None | Item`
+    item : ``None | Item``
     """
     if value.isdigit():
         item_entry = inventory.get_item_entry_by_id(int(value))

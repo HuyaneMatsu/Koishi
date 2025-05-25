@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import DATETIME_FORMAT_CODE, GUILDS, StickerFormat, StickerType, ZEROUSER, elapsed_time
-from hata.ext.slash import Option
+from hata import DATETIME_FORMAT_CODE, GUILDS, StickerFormat, StickerType, StringSelectOption, ZEROUSER, elapsed_time
 from scarletio import class_property, copy_docs
 
 from ..cache_sticker import get_sticker
@@ -73,7 +72,7 @@ class ChoiceTypeSticker(ChoiceTypeBase):
     @classmethod
     @copy_docs(ChoiceTypeBase.select_option_builder)
     def select_option_builder(cls, entity):
-        return Option(cls._create_select_option_value(entity.guild_id, entity.id, '', ''), entity.name)
+        return StringSelectOption(cls._create_select_option_value(entity.guild_id, entity.id, '', ''), entity.name)
     
     
     @classmethod

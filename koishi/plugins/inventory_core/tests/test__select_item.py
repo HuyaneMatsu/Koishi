@@ -69,7 +69,7 @@ def test__select_item(user_id, item_ids, item_flag, value):
     
     Returns
     -------
-    output : `None | Item`
+    output : ``None | Item``
     """
     inventory = Inventory(user_id)
     

@@ -141,7 +141,7 @@ async def autocomplete_input(client, event, input_value, safe):
     
     Returns
     -------
-    suggestions : `None`, `list` of `str`
+    suggestions : `None | list<str>`
     """
     if input_value is None:
         return None
@@ -199,7 +199,7 @@ async def autocomplete_safe_tags(client, event, input_value):
     
     Returns
     -------
-    suggestions : `None`, `list` of `str`
+    suggestions : `None | list<str>`
     """
     return await autocomplete_input(client, event, input_value, True)
 
@@ -222,7 +222,7 @@ async def autocomplete_nsfw_tags(client, event, input_value):
     
     Returns
     -------
-    suggestions : `None`, `list` of `str`
+    suggestions : `None | list<str>`
     """
     return await autocomplete_input(client, event, input_value, False)
 

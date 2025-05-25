@@ -1,7 +1,7 @@
 __all__ = ()
 
-from hata import DiscordException, ERROR_CODES, Permission
-from hata.ext.slash import Form, InteractionResponse, TextInput, TextInputStyle, abort
+from hata import DiscordException, ERROR_CODES, InteractionForm, Permission, TextInputStyle, create_text_input
+from hata.ext.slash import InteractionResponse, abort
 from scarletio import CancelledError
 
 from ...bot_utils.user_getter import get_user
@@ -37,10 +37,10 @@ def create_response_form(title, reason_name, custom_id):
     -------
     form : ``InteractionForm``
     """
-    return  Form(
+    return  InteractionForm(
         title,
         [
-            TextInput(
+            create_text_input(
                 'Reason',
                 max_length = REASON_LENGTH_MAX,
                 custom_id = 'reason',

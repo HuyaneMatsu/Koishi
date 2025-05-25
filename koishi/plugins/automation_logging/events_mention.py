@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import Client
-from hata.ext.slash import Button
+from hata import Client, create_button
 
 from ...bot_utils.multi_client_utils import get_first_client_with_message_create_permissions_from
 from ...bots import FEATURE_CLIENTS
@@ -45,7 +44,7 @@ async def message_create(client, message):
     await client.message_create(
         channel,
         allowed_mentions = None,
-        components = Button('Jump there', url = message.url),
+        components = create_button('Jump there', url = message.url),
         content = build_message_common_description(message, MESSAGE_RENDER_MODE_CREATE, title = 'Mention log'),
         file = [
             *iter_build_attachment_message_content(message),

@@ -1,8 +1,8 @@
 __all__ = ()
 
-from hata.ext.slash import Button, Row
+from hata import create_button, create_row, ButtonStyle
 
-from .constants import ARRAY_IDENTIFIER_EMPTY, ARRAY_IDENTIFIER_P1, ButtonStyle, EMOJI_NOTHING
+from .constants import ARRAY_IDENTIFIER_EMPTY, EMOJI_NOTHING
 
 
 def create_component(array, disabled, player_settings_1, player_settings_2, index):
@@ -11,7 +11,7 @@ def create_component(array, disabled, player_settings_1, player_settings_2, inde
     
     Parameters
     ----------
-    array : `list` of `int`
+    array : `list<int>`
         The array to render.
     disabled : `bool`
         Whether the component should be rendered as disabled.
@@ -38,7 +38,7 @@ def create_component(array, disabled, player_settings_1, player_settings_2, inde
         emoji = player_settings_2.emoji
         style = player_settings_2.style
     
-    return Button(
+    return create_button(
         emoji = emoji,
         custom_id = str(index),
         style = style,
@@ -52,7 +52,7 @@ def render_components(array, all_disabled, player_settings_1, player_settings_2)
     
     Parameters
     ----------
-    array : `list` of `int`
+    array : `list<int>`
         The array to render.
     disabled : `bool`
         Whether all components should be rendered as disabled.
@@ -63,10 +63,10 @@ def render_components(array, all_disabled, player_settings_1, player_settings_2)
     
     Returns
     -------
-    components : `list` of ``Component``
+    components : ``list<Component>``
     """
     return [
-        Row(*(
+        create_row(*(
             create_component(array, all_disabled, player_settings_1, player_settings_2, index)
             for index in range(row_start, row_start + 3)
         ))

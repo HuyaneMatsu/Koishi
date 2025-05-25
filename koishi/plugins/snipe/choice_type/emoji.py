@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import DATETIME_FORMAT_CODE, GUILDS, ZEROUSER, elapsed_time
-from hata.ext.slash import Option
+from hata import DATETIME_FORMAT_CODE, GUILDS, StringSelectOption, ZEROUSER, elapsed_time
 from scarletio import class_property, copy_docs
 
 from ..cache_emoji import update_emoji_details
@@ -99,7 +98,7 @@ class ChoiceTypeEmoji(ChoiceTypeBase):
     @classmethod
     @copy_docs(ChoiceTypeBase.select_option_builder)
     def select_option_builder(cls, entity):
-        return Option(cls._create_emoji_option_value(entity), entity.name, entity)
+        return StringSelectOption(cls._create_emoji_option_value(entity), entity.name, entity)
     
     
     @classmethod

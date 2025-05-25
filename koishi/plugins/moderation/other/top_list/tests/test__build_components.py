@@ -1,5 +1,5 @@
 import vampytest
-from hata.ext.slash import Button, Row
+from hata import create_button, create_row
 
 from ..builders import build_components
 from ..constants import (
@@ -14,7 +14,7 @@ def _iter_options():
         PAGE_SIZE,
         TYPE_BAN,
         10,
-        Row(
+        create_row(
             BUTTON_PAGE_PREVIOUS_DISABLED,
             BUTTON_PAGE_NEXT_DISABLED.copy_with(
                 label = 'Page 2',
@@ -28,9 +28,9 @@ def _iter_options():
         PAGE_SIZE + 1,
         TYPE_BAN,
         10,
-        Row(
+        create_row(
             BUTTON_PAGE_PREVIOUS_DISABLED,
-            Button(
+            create_button(
                 'Page 2',
                 EMOJI_PAGE_NEXT,
                 custom_id = f'{CUSTOM_ID_PAGE_BASE}{1!s};s={TYPE_BAN!s};d={10!s}',
@@ -44,8 +44,8 @@ def _iter_options():
         6 * PAGE_SIZE,
         TYPE_ALL,
         45,
-        Row(
-            Button(
+        create_row(
+            create_button(
                 'Page 6',
                 emoji = EMOJI_PAGE_PREVIOUS,
                 custom_id = f'{CUSTOM_ID_PAGE_BASE}{5!s};s={TYPE_ALL!s};d={45!s}',
@@ -62,13 +62,13 @@ def _iter_options():
         PAGE_SIZE * 10,
         TYPE_KICK,
         45,
-        Row(
-            Button(
+        create_row(
+            create_button(
                 'Page 6',
                 EMOJI_PAGE_PREVIOUS,
                 custom_id = f'{CUSTOM_ID_PAGE_BASE}{5!s};s={TYPE_KICK!s};d={45!s}',
             ),
-            Button(
+            create_button(
                 'Page 8',
                 EMOJI_PAGE_NEXT,
                 custom_id = f'{CUSTOM_ID_PAGE_BASE}{7!s};s={TYPE_KICK!s};d={45!s}',
@@ -82,8 +82,8 @@ def _iter_options():
         PAGE_MAX * PAGE_SIZE + 2,
         TYPE_MUTE,
         45,
-        Row(
-            Button(
+        create_row(
+            create_button(
                 f'Page {PAGE_MAX}',
                 EMOJI_PAGE_PREVIOUS,
                 custom_id = f'{CUSTOM_ID_PAGE_BASE}{PAGE_MAX - 1!s};s={TYPE_MUTE!s};d={45!s}',

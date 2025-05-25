@@ -8,9 +8,9 @@ from random import choice
 
 from hata import (
     BUILTIN_EMOJIS, CHANNELS, CLIENTS, Client, EMOJIS, Embed, GUILDS, InteractionType, MESSAGES, ROLES, STICKERS, USERS,
-    __package__ as LIBRARY_NAME, __version__ as LIBRARY_VERSION, elapsed_time
+    __package__ as LIBRARY_NAME, __version__ as LIBRARY_VERSION, create_button, create_row, elapsed_time
 )
-from hata.ext.slash import Button, InteractionResponse, Row, abort
+from hata.ext.slash import InteractionResponse, abort
 
 from ..bot_utils.constants import (
     COLOR__KOISHI_HELP, GUILD__ORIN_PARTY_HOUSE, INVITE__SUPPORT, PATH__KOISHI, STARTUP, URL__KOISHI_TOP_GG
@@ -75,7 +75,7 @@ CUSTOM_ID_ABOUT_CLOSE = 'about.close'
 
 
 def iter_about_components(client):
-    yield Button(
+    yield create_button(
         'Invite me!',
         url = (
             f'https://discord.com/oauth2/authorize'
@@ -84,7 +84,7 @@ def iter_about_components(client):
         ),
     )
     
-    yield Button(
+    yield create_button(
         'Install me!',
         url = (
             f'https://discord.com/oauth2/authorize'
@@ -94,23 +94,23 @@ def iter_about_components(client):
         ),
     )
     
-    yield Button(
+    yield create_button(
         'Support server',
          url = INVITE__SUPPORT.url,
     )
     
-    # yield Button(
+    # yield create_button(
     #     'Source code',
     #     url = URL__KOISHI_GIT,
     # )
     
     if client is MAIN_CLIENT:
-        yield Button(
+        yield create_button(
             'Vote for me!',
             url = URL__KOISHI_TOP_GG,
         )
     
-    yield Button(
+    yield create_button(
         'Close',
         BUILTIN_EMOJIS['x'],
         custom_id = CUSTOM_ID_ABOUT_CLOSE,
@@ -587,7 +587,7 @@ async def about(
     embed = await field_renderer(client, event)
     return InteractionResponse(
         embed = embed,
-        components = Row(*iter_about_components(client)),
+        components = create_row(*iter_about_components(client)),
     )
 
 

@@ -2,8 +2,7 @@ __all__ = ()
 
 from collections import namedtuple as NamedTuple
 
-from hata import Emoji
-from hata.ext.slash import Button, ButtonStyle
+from hata import ButtonStyle, Emoji, create_button
 
 
 EMOJI_KOISHI = Emoji.precreate(704393708467912875)
@@ -23,7 +22,7 @@ GAME_STATE_P2_WIN = 3
 CUSTOM_ID_MAP = {str(index): index for index in range(9)}
 CUSTOM_ID_CHALLENGE = 'xox.challenge'
 
-BUTTON_CHALLENGE_ENABLED = Button(
+BUTTON_CHALLENGE_ENABLED = create_button(
     label = 'Challenge!',
     custom_id = CUSTOM_ID_CHALLENGE,
 )

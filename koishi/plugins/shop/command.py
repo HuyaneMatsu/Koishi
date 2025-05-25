@@ -14,8 +14,8 @@ from ..relationship_slots_interactions import (
 )
 from ..relationships_core import autocomplete_relationship_extended_user_name
 from ..role_purchase import PURCHASABLE_ROLES, ROLE_CHOICES, purchase_role_other, purchase_role_self
-from ..stats_core import STAT_CHOICES
-from ..stats_upgrade_interactions import stat_upgrade_invoke_other_question, stat_upgrade_invoke_self_question
+from ..user_stats_core import STAT_CHOICES
+from ..user_stats_upgrade_interactions import stat_upgrade_invoke_other_question, stat_upgrade_invoke_self_question
 
 
 SHOP = FEATURE_CLIENTS.interactions(

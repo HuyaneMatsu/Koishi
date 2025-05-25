@@ -10,7 +10,7 @@ def accumulate_modifier_values(*items):
     
     Parameters
     ----------
-    *items : `None | Item`
+    *items : ``None | Item``
         The items to accumulate the values from.
     
     Returns

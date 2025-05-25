@@ -3,8 +3,8 @@ __all__ = ()
 from functools import partial as partial_func
 from random import random
 
-from hata import Client, DiscordException, ERROR_CODES, Embed, KOKORO
-from hata.ext.slash import Button, wait_for_component_interaction
+from hata import Client, DiscordException, ERROR_CODES, Embed, KOKORO, create_button
+from hata.ext.slash import wait_for_component_interaction
 from scarletio import Task
 
 from .constants import (
@@ -73,7 +73,7 @@ async def try_send_notification(client, event, message, user_1, user_2, timestam
         await client.message_create(
             channel,
             embed = embed,
-            components = Button(
+            components = create_button(
                 label = 'Go to message',
                 url = message.url,
             )

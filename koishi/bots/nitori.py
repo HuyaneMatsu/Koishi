@@ -5,21 +5,23 @@ from enum import Enum
 from random import choice, random
 from time import perf_counter
 
-from bs4 import BeautifulSoup
 from hata import (
-    BUILTIN_EMOJIS, Channel, Client, DATETIME_FORMAT_CODE, DiscordException, ERROR_CODES, Embed, Emoji, IntentFlag,
-    Permission, Role, elapsed_time, id_to_datetime, parse_emoji
+    BUILTIN_EMOJIS, ButtonStyle, Channel, Client, Color, DATETIME_FORMAT_CODE, DiscordException, ERROR_CODES, Embed,
+    Emoji, InteractionForm, Permission, Role, SeparatorSpacingSize, StringSelectOption, TextInputStyle,
+    create_attachment_media, create_button, create_container, create_media_gallery, create_row, create_section,
+    create_separator, create_string_select, create_text_display, create_text_input, create_thumbnail_media,
+    elapsed_time, id_to_datetime, parse_emoji
 )
 from hata.ext.slash import (
-    Button, ButtonStyle, Form, InteractionResponse, Option, P, Row, Select, TextInput, TextInputStyle, abort,
-    configure_parameter, iter_component_interactions, wait_for_component_interaction
+    InteractionResponse, P, abort, configure_parameter, iter_component_interactions, wait_for_component_interaction
 )
 from scarletio import sleep
 
-import config
-
 from ..bot_utils.constants import GUILD__SUPPORT as TEST_GUILD, ROLE__SUPPORT__MODERATOR
 from ..bot_utils.utils import random_error_message_getter
+
+import config
+from bs4 import BeautifulSoup
 
 
 Nitori = Client(
@@ -947,15 +949,81 @@ async def get_sticker_id(
     return f'{sticker.name}\'s id: `{sticker.id}`'
 
 # command end
-# command start components ping-pong
+# command start content-components nitori-info
+
+NITORI_IMAGE_URL = 'https://en.touhouwiki.net/images/7/70/Th185Nitori.png'
+NITORI_CV = '*mechanical arm blue print*'
+NITORI_COLOR = Color.from_rgb(0, 0, 255)
+
+NITORI_CUSTOM_ID_BASE = 'nitori_info'
+NITORI_CUSTOM_ID_FOLLOW = f'{NITORI_CUSTOM_ID_BASE}.follow'
+NITORI_CUSTOM_ID_HUG = f'{NITORI_CUSTOM_ID_BASE}.hug'
+NITORI_CUSTOM_ID_PAT = f'{NITORI_CUSTOM_ID_BASE}.pat'
+NITORI_CUSTOM_ID_IGNORE = f'{NITORI_CUSTOM_ID_BASE}.ignore'
+
+
+@Nitori.interactions(guild = TEST_GUILD)
+async def nitori_info():
+    """Information about Kawashiro Nitori."""
+    return InteractionResponse(
+        attachments = [
+            ('cv.txt', NITORI_CV),
+        ],
+        components = [
+            create_container(
+                create_text_display('# Kawashiro Nitori'),
+                create_separator(),
+                create_section(
+                    create_text_display(
+                        'I am a shy kappa who lives in Genbu Ravine next to the Youkai Mountain. '
+                        'I have the power to control water, I am specializing in engineering and technology.'
+                    ),
+                    thumbnail = create_thumbnail_media(NITORI_IMAGE_URL),
+                ),
+                create_section(
+                    create_text_display('-# *Runs away*'),
+                    thumbnail = create_button('Follow', custom_id = NITORI_CUSTOM_ID_FOLLOW),
+                ),
+                create_separator(divider = False, spacing_size = SeparatorSpacingSize.large),
+                create_text_display('my cv:'),
+                create_attachment_media('attachment://cv.txt'),
+                create_separator(divider = False, spacing_size = SeparatorSpacingSize.large),
+                create_text_display('Reference images:'),
+                create_media_gallery(NITORI_IMAGE_URL, NITORI_IMAGE_URL, NITORI_IMAGE_URL),
+                create_row(
+                    create_button('Hug them (dangerous)', custom_id = NITORI_CUSTOM_ID_HUG),
+                    create_button('Pat them (dangerous)', custom_id = NITORI_CUSTOM_ID_PAT),
+                    create_button('Ignore them (certain death)', custom_id = NITORI_CUSTOM_ID_IGNORE),
+                ),
+                color = NITORI_COLOR,
+            ),
+        ],
+    )
+
+
+@Nitori.interactions(
+    custom_id = [
+        NITORI_CUSTOM_ID_FOLLOW,
+        NITORI_CUSTOM_ID_HUG,
+        NITORI_CUSTOM_ID_PAT,
+        NITORI_CUSTOM_ID_IGNORE,
+    ],
+)
+async def nitori_action(client, event):
+    await client.interaction_component_acknowledge(event)
+    await client.interaction_followup_message_create(event, 'You died')
+
+
+# command end
+# command start interactive-components ping-pong
 
 EMOJI_PING_PONG = BUILTIN_EMOJIS['ping_pong']
 
 CUSTOM_ID_PING = 'ping_pong.ping'
 CUSTOM_ID_PONG = 'ping_pong.pong'
 
-BUTTON_PING = Button('ping', EMOJI_PING_PONG, custom_id = CUSTOM_ID_PING, style = ButtonStyle.green)
-BUTTON_PONG = Button('pong', EMOJI_PING_PONG, custom_id = CUSTOM_ID_PONG, style = ButtonStyle.blue)
+BUTTON_PING = create_button('ping', EMOJI_PING_PONG, custom_id = CUSTOM_ID_PING, style = ButtonStyle.green)
+BUTTON_PONG = create_button('pong', EMOJI_PING_PONG, custom_id = CUSTOM_ID_PONG, style = ButtonStyle.blue)
 
 
 @Nitori.interactions(guild = TEST_GUILD)
@@ -977,7 +1045,7 @@ async def ping_pong_pong():
     return InteractionResponse(components = BUTTON_PING)
 
 # command end
-# command start components cat-feeder
+# command start interactive-components cat-feeder
 
 # Static variables
 CAT_FEEDER_CAT_EMOJI = Emoji.precreate(853998730071638056)
@@ -991,7 +1059,7 @@ async def cat_feeder():
     """Hungry cat feeder!"""
     return InteractionResponse(
         f'Please feed my cat {CAT_FEEDER_CAT_EMOJI}, she is hungry.',
-        components = Button(
+        components = create_button(
             'Feed cat', CAT_FEEDER_FOOD_EMOJI, custom_id = CAT_FEEDER_CUSTOM_ID, style = ButtonStyle.green
         )
     )
@@ -1007,16 +1075,16 @@ async def cat_fed(event):
     )
 
 # command end
-# command start components role-claimer
+# command start interactive-components role-claimer
 
 
 ROLE_NSFW_ACCESS = Role.precreate(828576094776590377)
 ROLE_ANNOUNCEMENTS = Role.precreate(538397994421190657)
 
-BUTTON_NSFW_ACCESS = Button('Nsfw access', custom_id = f'role_claimer.{ROLE_NSFW_ACCESS.id}')
-BUTTON_ANNOUNCEMENTS = Button('Announcements', custom_id = f'role_claimer.{ROLE_ANNOUNCEMENTS.id}')
+BUTTON_NSFW_ACCESS = create_button('Nsfw access', custom_id = f'role_claimer.{ROLE_NSFW_ACCESS.id}')
+BUTTON_ANNOUNCEMENTS = create_button('Announcements', custom_id = f'role_claimer.{ROLE_ANNOUNCEMENTS.id}')
 
-ROLE_CLAIMER_COMPONENTS = Row(BUTTON_NSFW_ACCESS, BUTTON_ANNOUNCEMENTS)
+ROLE_CLAIMER_COMPONENTS = create_row(BUTTON_NSFW_ACCESS, BUTTON_ANNOUNCEMENTS)
 
 ROLE_CLAIMER_ROLES = {
     ROLE_NSFW_ACCESS.id: ROLE_NSFW_ACCESS,
@@ -1044,7 +1112,7 @@ async def give_role(client, event, role_id):
         await client.user_role_add(event.user, role)
 
 # command end
-# command start components choose-your-poison
+# command start interactive-components choose-your-poison
 
 CUSTOM_ID_CAKE = 'choose_your_poison.cake'
 CUSTOM_ID_CAT = 'choose_your_poison.cat'
@@ -1056,11 +1124,11 @@ EMOJI_CAT = BUILTIN_EMOJIS['cat']
 EMOJI_SNAKE = BUILTIN_EMOJIS['snake']
 EMOJI_EGGPLANT = BUILTIN_EMOJIS['eggplant']
 
-CHOOSE_YOUR_POISON_ROW = Row(
-    Button('cake', custom_id = CUSTOM_ID_CAKE, style = ButtonStyle.blue),
-    Button('cat', custom_id = CUSTOM_ID_CAT, style = ButtonStyle.gray),
-    Button('snake', custom_id = CUSTOM_ID_SNAKE, style = ButtonStyle.green),
-    Button('eggplant', custom_id = CUSTOM_ID_EGGPLANT, style = ButtonStyle.red),
+CHOOSE_YOUR_POISON_ROW = create_row(
+    create_button('cake', custom_id = CUSTOM_ID_CAKE, style = ButtonStyle.blue),
+    create_button('cat', custom_id = CUSTOM_ID_CAT, style = ButtonStyle.gray),
+    create_button('snake', custom_id = CUSTOM_ID_SNAKE, style = ButtonStyle.green),
+    create_button('eggplant', custom_id = CUSTOM_ID_EGGPLANT, style = ButtonStyle.red),
 )
 
 CHOOSE_YOUR_POISON_CUSTOM_ID_TO_EMOJI = {
@@ -1084,19 +1152,19 @@ async def poison_edit_cake(event):
         return emoji.as_emoji
 
 # command end
-# command start components add-emoji
-# command start components zoo
+# command start interactive-components add-emoji
+# command start interactive-components zoo
 
 def check_is_user_same(user, event):
     return (user is event.user)
 
 # command end
-# command start components add-emoji
+# command start interactive-components add-emoji
 
-ADD_EMOJI_BUTTON_ADD = Button('Add!', style = ButtonStyle.green)
-ADD_EMOJI_BUTTON_CANCEL = Button('Nah.', style = ButtonStyle.red)
+ADD_EMOJI_BUTTON_ADD = create_button('Add!', style = ButtonStyle.green)
+ADD_EMOJI_BUTTON_CANCEL = create_button('Nah.', style = ButtonStyle.red)
 
-ADD_EMOJI_COMPONENTS = Row(ADD_EMOJI_BUTTON_ADD, ADD_EMOJI_BUTTON_CANCEL)
+ADD_EMOJI_COMPONENTS = create_row(ADD_EMOJI_BUTTON_ADD, ADD_EMOJI_BUTTON_CANCEL)
 
 @Nitori.interactions(guild = TEST_GUILD)
 async def add_emoji(
@@ -1155,9 +1223,9 @@ async def add_emoji(
     yield InteractionResponse(embed = embed, components = None, message = message, event = component_interaction)
 
 # command end
-# command start components pick
+# command start interactive-components pick
 
-BUTTON_ATTEND = Button('Attend', style = ButtonStyle.green)
+BUTTON_ATTEND = create_button('Attend', style = ButtonStyle.green)
 
 def check_is_user_unique(users, event):
     return (event.user not in users)
@@ -1234,7 +1302,7 @@ async def pick(client, event):
     )
 
 # command end
-# command start components waifu
+# command start interactive-components waifu
 
 WAIFU_API_BASE_URL = 'https://api.waifu.pics'
 
@@ -1261,8 +1329,8 @@ WAIFU_CACHE_BY_KEY = {waifu_type: [] for waifu_type in WAIFU_TYPES}
 async def waifu():
     """Ships waifus!"""
     embed = Embed('Please select a waifu type to ship.')
-    select = Select(
-        [Option(waifu_type, waifu_type) for waifu_type in WAIFU_TYPES],
+    select = create_string_select(
+        [StringSelectOption(waifu_type, waifu_type) for waifu_type in WAIFU_TYPES],
         custom_id = WAIFU_CUSTOM_ID,
     )
     
@@ -1334,15 +1402,15 @@ async def handle_waifu_select(client, event):
         embed.add_image(url)
     
     # We re-build the select again with one difference, we mark the used one as default.
-    select = Select(
-        [Option(waifu_type, waifu_type, default = (waifu_type == selected_waifu_type)) for waifu_type in WAIFU_TYPES],
+    select = create_string_select(
+        [StringSelectOption(waifu_type, waifu_type, default = (waifu_type == selected_waifu_type)) for waifu_type in WAIFU_TYPES],
         custom_id = WAIFU_CUSTOM_ID,
     )
     
     yield InteractionResponse(embed = embed, components = select)
 
 # command end
-# command start components zoo
+# command start interactive-components zoo
 
 EMOJI_ELEPHANT = BUILTIN_EMOJIS['elephant']
 LABEL_ELEPHANT = 'elephant'
@@ -1371,11 +1439,11 @@ ANIMAL_IDENTIFIER_TO_DESCRIPTION = {
     LABEL_ZEBRA: DESCRIPTION_ZEBRA,
 }
 
-ZOO_SELECT = Select(
+ZOO_SELECT = create_string_select(
     [
-        Option(LABEL_ELEPHANT, LABEL_ELEPHANT, emoji = EMOJI_ELEPHANT),
-        Option(LABEL_LION, LABEL_LION, emoji = EMOJI_LION),
-        Option(LABEL_ZEBRA, LABEL_ZEBRA, emoji = EMOJI_ZEBRA),
+        StringSelectOption(LABEL_ELEPHANT, LABEL_ELEPHANT, emoji = EMOJI_ELEPHANT),
+        StringSelectOption(LABEL_LION, LABEL_LION, emoji = EMOJI_LION),
+        StringSelectOption(LABEL_ZEBRA, LABEL_ZEBRA, emoji = EMOJI_ZEBRA),
     ],
     placeholder = 'Select animals!',
     min_values = 0,
@@ -1417,13 +1485,13 @@ async def zoo(event):
     yield InteractionResponse(content, components = None, message = message, event = component_interaction)
 
 # command end
-# command start components user-info
+# command start interactive-components user-info
 
 
 CUSTOM_ID_USER_INFO_CLOSE = 'user_info.close'
 EMOJI_X = BUILTIN_EMOJIS['x']
 
-BUTTON_USER_INFO_CLOSE = Button(
+BUTTON_USER_INFO_CLOSE = create_button(
     emoji = EMOJI_X,
     custom_id = CUSTOM_ID_USER_INFO_CLOSE,
 )
@@ -1471,7 +1539,7 @@ async def close_user_info(client, event):
     await client.interaction_response_message_delete(event)
 
 # command end
-# command start components orindance
+# command start interactive-components orindance
 
 ORIN_DANCE_IMAGES = [
     'https://cdn.discordapp.com/attachments/850843243695439892/850843328127959060/5e672f97dc555.gif',
@@ -1485,7 +1553,7 @@ ORIN_DANCE_IMAGES = [
 CUSTOM_ID_ORIN_DANCE = 'orin_dance_please'
 EMOJI_ORIN_DANCE = Emoji.precreate(704392145330634812)
 
-BUTTON_ORIN_DANCE = Button(
+BUTTON_ORIN_DANCE = create_button(
     emoji = EMOJI_ORIN_DANCE,
     custom_id = CUSTOM_ID_ORIN_DANCE,
     style = ButtonStyle.green,
@@ -1521,16 +1589,16 @@ async def party(client, event):
 # command end
 # command start forms introduce-myself
 
-INTRODUCTION_FORM = Form(
+INTRODUCTION_FORM = InteractionForm(
     'Introduce yourself',
     [
-        TextInput(
+        create_text_input(
             'What is your name?',
             min_length = 2,
             max_length = 128,
             custom_id = 'name',
         ),
-        TextInput(
+        create_text_input(
             'Something about you?',
             style = TextInputStyle.paragraph,
             min_length = 64,
@@ -1562,10 +1630,10 @@ async def introduction_form_submit(event, *, name, bio):
 # command end
 # command start forms add-role
 
-ADD_ROLE_FORM = Form(
+ADD_ROLE_FORM = InteractionForm(
     'Add role', # Any dummy title does it
     [
-        TextInput(
+        create_text_input(
             'Additional message to send?',
             style = TextInputStyle.paragraph,
             max_length = 512,
@@ -1694,7 +1762,7 @@ class Waifu:
 
 # We will need these 3 in an example later
 
-TEXT_INPUT_WAIFU_BIO = TextInput(
+TEXT_INPUT_WAIFU_BIO = create_text_input(
     'Bio',
     style = TextInputStyle.paragraph,
     min_length = 64,
@@ -1702,14 +1770,14 @@ TEXT_INPUT_WAIFU_BIO = TextInput(
     custom_id = CUSTOM_ID_WAIFU_BIO,
 )
 
-TEXT_INPUT_WAIFU_AGE = TextInput(
+TEXT_INPUT_WAIFU_AGE = create_text_input(
     'Age',
     min_length = 1,
     max_length = 1024,
     custom_id = CUSTOM_ID_WAIFU_AGE,
 )
 
-TEXT_INPUT_WAIFU_HAIR = TextInput(
+TEXT_INPUT_WAIFU_HAIR = create_text_input(
     'hair',
     min_length = 1,
     max_length = 1024,
@@ -1717,10 +1785,10 @@ TEXT_INPUT_WAIFU_HAIR = TextInput(
 )
 
 
-WAIFU_FORM = Form(
+WAIFU_FORM = InteractionForm(
     'Describe your waifu',
     [
-        TextInput(
+        create_text_input(
             'Name',
             min_length = 2,
             max_length = 64,
@@ -1823,7 +1891,7 @@ async def edit_waifu(
     # We auto-fill the current value
     text_input = text_input.copy_with(value = FIELD_TO_ATTRIBUTE[field].__get__(waifu, Waifu))
     
-    return Form(
+    return InteractionForm(
         f'Editing {waifu.name}',
         [text_input],
         custom_id = f'{CUSTOM_ID_WAIFU_EDIT_BASE}{key}',
@@ -1878,10 +1946,10 @@ async def rate_cakes(
     # Filter
     cakes = {cake for cake in (cake_1, cake_2, cake_3, cake_4, cake_5) if (cake is not None)}
     
-    return Form(
+    return InteractionForm(
         'Rate your cakes',
         [
-            TextInput(
+            create_text_input(
                 f'Please rate {cake}',
                 min_length = 2,
                 max_length = 128,
@@ -2221,13 +2289,13 @@ class InteractionCommandSource:
         page = command_source[0]
         
         if len(command_source) > 1:
-            components = Row(
-                Button(
+            components = create_row(
+                create_button(
                     emoji = EMOJI_LEFT,
                     custom_id = f'source.{self.command_type}.{command_name}._',
                     enabled = False,
                 ),
-                Button(
+                create_button(
                     emoji = EMOJI_RIGHT,
                     custom_id = f'source.{self.command_type}.{command_name}.1',
                     enabled = True,
@@ -2238,6 +2306,7 @@ class InteractionCommandSource:
             components = None
         
         yield InteractionResponse(page, components = components)
+
 
 class AutoCompleteInteractionCommandSource:
     __slots__ = ('command_names', )
@@ -2313,13 +2382,13 @@ async def switch_page(event, command_type, command_name, page_index):
     
     page = command_source[page_index]
     
-    components = Row(
-        Button(
+    components = create_row(
+        create_button(
             emoji = EMOJI_LEFT,
             custom_id = f'source.{command_type}.{command_name}.{button_back_page_index}',
             enabled = button_back_enabled,
         ),
-        Button(
+        create_button(
             emoji = EMOJI_RIGHT,
             custom_id = f'source.{command_type}.{command_name}.{button_next_page_index}',
             enabled = button_next_enabled,

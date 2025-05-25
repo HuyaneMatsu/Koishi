@@ -6,7 +6,8 @@ from random import random
 from config import NUE_ID, ORIN_ID
 
 from .constants import (
-    SIZE_TOTAL, SIZE_X, TILE_MAP, TILE_MAP_NUE, TILE_MAP_ORIN, TILE_VALUE_BOMB, TILE_VALUE_EMPTY, TILE_VALUE_FLAG
+    SIZE_TOTAL, SIZE_X, SIZE_Y, TILE_MAP, TILE_MAP_NUE, TILE_MAP_ORIN, TILE_VALUE_BOMB, TILE_VALUE_EMPTY,
+    TILE_VALUE_FLAG
 )
 
 def to_index(position_x, position_y):
@@ -60,7 +61,7 @@ def iter_tiles_indexes_around(position_x, position_y):
     for index_change_x, index_change_y in ((-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)):
         local_x = position_x + index_change_x
         local_y = position_y + index_change_y
-        if local_x != SIZE_X and local_x != -1 and local_y != SIZE_X and local_y != -1:
+        if local_x != SIZE_X and local_x != -1 and local_y != SIZE_Y and local_y != -1:
             yield to_index(local_x, local_y)
 
 
@@ -250,7 +251,7 @@ def get_tile_map(client_id):
     
     Returns
     -------
-    tile_map : `list<Emoji>`
+    tile_map : ``list<Emoji>``
     """
     if client_id == ORIN_ID:
         return TILE_MAP_ORIN

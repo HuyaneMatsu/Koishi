@@ -2,8 +2,7 @@ __all__ = ()
 
 from re import compile as re_compile
 
-from hata import BUILTIN_EMOJIS, KOKORO
-from hata.ext.slash import Button, Select
+from hata import BUILTIN_EMOJIS, KOKORO, create_button, create_string_select
 from scarletio import IgnoreCaseString, ScarletLock
 
 
@@ -46,63 +45,63 @@ EMOJI_RIGHT = BUILTIN_EMOJIS['arrow_forward']
 DECIMAL_RP = re_compile('\d+')
 
 
-COMPONENT_LEFT_ANIME = Button(
+COMPONENT_LEFT_ANIME = create_button(
     emoji = EMOJI_LEFT,
     custom_id = CUSTOM_ID_FIND_LEFT_ANIME,
 )
 
-COMPONENT_RIGHT_ANIME = Button(
+COMPONENT_RIGHT_ANIME = create_button(
     emoji = EMOJI_RIGHT,
     custom_id = CUSTOM_ID_FIND_RIGHT_ANIME,
 )
 
-COMPONENT_SELECT_ANIME = Select(
+COMPONENT_SELECT_ANIME = create_string_select(
     None,
     custom_id = CUSTOM_ID_FIND_SELECT_ANIME,
     placeholder = 'Select an anime!',
 )
 
 
-COMPONENT_LEFT_CHARACTER = Button(
+COMPONENT_LEFT_CHARACTER = create_button(
     emoji = EMOJI_LEFT,
     custom_id = CUSTOM_ID_FIND_LEFT_CHARACTER,
 )
 
-COMPONENT_RIGHT_CHARACTER = Button(
+COMPONENT_RIGHT_CHARACTER = create_button(
     emoji = EMOJI_RIGHT,
     custom_id = CUSTOM_ID_FIND_RIGHT_CHARACTER,
 )
 
-COMPONENT_SELECT_CHARACTER = Select(
+COMPONENT_SELECT_CHARACTER = create_string_select(
     None,
     custom_id = CUSTOM_ID_FIND_SELECT_CHARACTER,
     placeholder = 'Select a character!',
 )
 
 
-COMPONENT_LEFT_MANGA = Button(
+COMPONENT_LEFT_MANGA = create_button(
     emoji = EMOJI_LEFT,
     custom_id = CUSTOM_ID_FIND_LEFT_MANGA,
 )
 
-COMPONENT_RIGHT_MANGA = Button(
+COMPONENT_RIGHT_MANGA = create_button(
     emoji = EMOJI_RIGHT,
     custom_id = CUSTOM_ID_FIND_RIGHT_MANGA,
 )
 
-COMPONENT_SELECT_MANGA = Select(
+COMPONENT_SELECT_MANGA = create_string_select(
     None,
     custom_id = CUSTOM_ID_FIND_SELECT_MANGA,
     placeholder = 'Select a manga!',
 )
 
-COMPONENT_LEFT_DISABLED = Button(
+COMPONENT_LEFT_DISABLED = create_button(
     emoji = EMOJI_LEFT,
     custom_id = CUSTOM_ID_FIND_LEFT_DISABLED,
     enabled = False,
 )
 
-COMPONENT_RIGHT_DISABLED = Button(
+COMPONENT_RIGHT_DISABLED = create_button(
     emoji = EMOJI_RIGHT,
     custom_id = CUSTOM_ID_FIND_RIGHT_DISABLED,
     enabled = False,

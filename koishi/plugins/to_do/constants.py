@@ -2,8 +2,7 @@ __all__ = ()
 
 from re import compile as re_compile
 
-from hata import BUILTIN_EMOJIS
-from hata.ext.slash import Button, ButtonStyle, Form, P, TextInput, TextInputStyle
+from hata import BUILTIN_EMOJIS, ButtonStyle, InteractionForm, TextInputStyle, create_button, create_text_input
 
 
 TO_DOS = {}
@@ -28,14 +27,14 @@ create_custom_id_to_do_change_page = lambda query, page: f'to-do.page.{query}.{p
 CUSTOM_ID_TO_DO_CHANGE_PAGE_RP = re_compile('to-do\\.page\\.([A-Za-z0-9\\+\\/\\=]+)?\\.(\\d+)')
 
 
-TEXT_INPUT_NAME = TextInput(
+TEXT_INPUT_NAME = create_text_input(
     'Name',
     min_length = 2,
     max_length = 128,
     custom_id = 'name',
 )
 
-TEXT_INPUT_DESCRIPTION = TextInput(
+TEXT_INPUT_DESCRIPTION = create_text_input(
     'Description',
     style = TextInputStyle.paragraph,
     min_length = 2,
@@ -44,7 +43,7 @@ TEXT_INPUT_DESCRIPTION = TextInput(
 )
 
 
-ADD_TO_DO_FORM = Form(
+ADD_TO_DO_FORM = InteractionForm(
     'Add todo entry',
     [
         TEXT_INPUT_NAME,
@@ -54,13 +53,13 @@ ADD_TO_DO_FORM = Form(
 )
 
 
-DELETE_TO_DO_APPROVE = Button(
+DELETE_TO_DO_APPROVE = create_button(
     'FATALITY',
     style = ButtonStyle.red,
     custom_id = f'{CUSTOM_ID_TO_DO_DELETE_BASE}.0',
 )
 
-DELETE_TO_DO_CANCEL = Button(
+DELETE_TO_DO_CANCEL = create_button(
     'Nah.',
     style = ButtonStyle.blue,
     custom_id = f'{CUSTOM_ID_TO_DO_DELETE_BASE}.0',

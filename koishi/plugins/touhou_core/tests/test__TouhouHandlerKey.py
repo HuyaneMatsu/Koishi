@@ -213,7 +213,7 @@ def test__TouhouHandlerKey__get_handler(handler_key):
     
     Parameters
     ----------
-    handler_key : ``TouhouHandlerKey```
+    handler_key : ``TouhouHandlerKey``
         Handler key to get its image handler of.
     
     Returns
@@ -249,7 +249,7 @@ def test__TouhouHandlerKey__create_handler(handler_key):
     
     Parameters
     ----------
-    handler_key : ``TouhouHandlerKey```
+    handler_key : ``TouhouHandlerKey``
         Handler key to create its image handler of.
     
     Returns

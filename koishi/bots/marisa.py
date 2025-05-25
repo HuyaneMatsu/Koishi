@@ -48,7 +48,17 @@ Marisa = Client(
         },
     },
     shard_count = 2,
-    intents = IntentFlag().update_by_keys(_17 = 1, _18 = 1, _19 = 1, _21 = 1),
+    intents = IntentFlag().update_by_keys(
+        _17 = 1,
+        _18 = 1,
+        _19 = 1,
+        _21 = 1,
+        _24 = 1,
+        _25 = 1,
+        _26 = 1,
+        _27 = 1,
+        _28 = 1,
+    ),
     # assert_application_command_permission_missmatch_at = [GUILD__SUPPORT],
     # enforce_application_command_permissions = True,
 )

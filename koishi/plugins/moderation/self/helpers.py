@@ -1,7 +1,7 @@
 __all__ = ()
 
-from hata import Embed
-from hata.ext.slash import Form, TextInput, TextInputStyle, abort
+from hata import Embed, InteractionForm, TextInputStyle, create_text_input
+from hata.ext.slash import abort
 
 
 def check_required_permissions(client, event, guild, required_permission, word_config):
@@ -92,10 +92,10 @@ def create_response_form(title, reason_name, custom_id):
     -------
     form : ``InteractionForm``
     """
-    return  Form(
+    return InteractionForm(
         title,
         [
-            TextInput(
+            create_text_input(
                 'Reason',
                 max_length = 512,
                 custom_id = 'reason',

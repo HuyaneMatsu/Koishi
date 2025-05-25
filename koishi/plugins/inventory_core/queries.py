@@ -61,7 +61,7 @@ async def get_inventory(user_id):
     
     Returns
     -------
-    inventory : `Inventory`
+    inventory : ``Inventory``
     """
     try:
         inventory = INVENTORY_CACHE[user_id]

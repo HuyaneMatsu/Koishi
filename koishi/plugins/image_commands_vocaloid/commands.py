@@ -1,13 +1,12 @@
 __all__ = ()
 
-from hata.ext.slash import Button
+from hata import create_button
 
 from ...bots import FEATURE_CLIENTS
 
 from ..image_handling_core import ImageHandlerMeekMoe
 
 from .constants import EMOJI_NEW
-
 from .vocaloid import NewVocaloid, VOCALOID_CHARACTERS, make_custom_id_of_vocaloid, build_vocaloid_embed
 
 
@@ -32,7 +31,7 @@ async def vocaloid(
     if (image_detail is None):
         components = None
     else:
-        components = Button(
+        components = create_button(
             emoji = EMOJI_NEW,
             custom_id = make_custom_id_of_vocaloid(character),
         )

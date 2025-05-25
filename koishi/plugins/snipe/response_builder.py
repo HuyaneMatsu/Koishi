@@ -1,6 +1,7 @@
 __all__ = ()
 
-from hata.ext.slash import InteractionResponse, Row, Select
+from hata import create_row, create_string_select
+from hata.ext.slash import InteractionResponse
 
 from .constants import (
     BUTTON_SNIPE_ACTIONS_DISABLED, BUTTON_SNIPE_CLOSE, BUTTON_SNIPE_DETAILS_DISABLED, BUTTON_SNIPE_DM,
@@ -29,9 +30,9 @@ async def build_initial_response_parts(client, event, target, choices, show_for_
     
     Returns
     -------
-    embeds : `list` of ``Embed``
+    embeds : ``list<Embed>``
         Embeds to send.
-    components : `list` of ``Component``
+    components : ``list<Component>``
         Components to send.
     file : `None`, `tuple` (`str`, `bytes`)
         File attachment if any.
@@ -66,8 +67,8 @@ async def build_initial_response_parts(client, event, target, choices, show_for_
         del choices[25:]
         
         components.append(
-            Row(
-                Select(
+            create_row(
+                create_string_select(
                     [choice.type.select_option_builder(choice.entity) for choice in choices],
                     custom_id = CUSTOM_ID_SNIPE_SELECT,
                     placeholder = 'Select an entity!',
@@ -76,7 +77,7 @@ async def build_initial_response_parts(client, event, target, choices, show_for_
         )
     
     components.append(
-        Row(
+        create_row(
             button_details,
             BUTTON_SNIPE_DM,
             button_actions,

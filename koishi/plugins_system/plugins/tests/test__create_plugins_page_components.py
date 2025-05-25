@@ -1,7 +1,6 @@
 import vampytest
-from hata import Client
+from hata import Client, StringSelectOption, create_button, create_row, create_string_select
 from hata.ext.plugin_loader.plugin import Plugin
-from hata.ext.slash import Button, Option, Row, Select
 
 from ..helpers import (
     CUSTOM_ID_PAGE_CLOSE, EMOJI_CLOSE, EMOJI_LEFT, EMOJI_RIGHT, create_custom_id_page_n, create_custom_switch_client,
@@ -33,20 +32,20 @@ def test__create_plugins_page_components():
     vampytest.assert_eq(
         output,
         [
-            Row(
-                Button(
+            create_row(
+                create_button(
                     'Page 0',
                     EMOJI_LEFT,
                     custom_id = create_custom_id_page_n(0, 0),
                     enabled = False,
                 ),
-                Button(
+                create_button(
                     'Page 2',
                     EMOJI_RIGHT,
                     custom_id = create_custom_id_page_n(0, 2),
                     enabled = False,
                 ),
-                Button(
+                create_button(
                     None,
                     EMOJI_CLOSE,
                     custom_id = CUSTOM_ID_PAGE_CLOSE,
@@ -86,29 +85,29 @@ def test__create_plugins_page_components__with_client():
         vampytest.assert_eq(
             output,
             [
-                Row(
-                    Button(
+                create_row(
+                    create_button(
                         'Page 0',
                         EMOJI_LEFT,
                         custom_id = create_custom_id_page_n(client_id, 0),
                         enabled = False,
                     ),
-                    Button(
+                    create_button(
                         'Page 2',
                         EMOJI_RIGHT,
                         custom_id = create_custom_id_page_n(client_id, 2),
                         enabled = False,
                     ),
-                    Button(
+                    create_button(
                         None,
                         EMOJI_CLOSE,
                         custom_id = CUSTOM_ID_PAGE_CLOSE,
                     ),
                 ),
-                Row(
-                    Select(
+                create_row(
+                    create_string_select(
                         [
-                            Option(
+                            StringSelectOption(
                                 format(client_id, 'x'),
                                 client_name,
                                 default = True,

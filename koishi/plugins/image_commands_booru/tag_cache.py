@@ -36,7 +36,7 @@ async def get_tag_auto_completion(client, query, safe, excluded_tags):
     
     Returns
     -------
-    tag_names : `None`, `list` of `str`
+    tag_names : `None | list<str>`
         Autocomplete suggestions.
     """
     if safe:

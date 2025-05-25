@@ -5,7 +5,7 @@ from hata.ext.slash import InteractionResponse
 from ...bots import FEATURE_CLIENTS
 
 from ..inventory_core import get_inventory
-from ..stats_core import get_stats
+from ..user_stats_core import get_user_stats
 
 from .component_builders import build_component_switch_page
 from .constants import (
@@ -40,7 +40,7 @@ async def get_inventory_page_response(user_id, sort_by, sort_order, page_index):
     -------
     response : ``InteractionResponse``
     """
-    stats = await get_stats(user_id)
+    stats = await get_user_stats(user_id)
     inventory = await get_inventory(user_id)
     item_entries, page_count = get_inventory_page(inventory, sort_by, sort_order, page_index)
     

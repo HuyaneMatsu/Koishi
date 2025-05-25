@@ -1,7 +1,6 @@
 import vampytest
 
-from hata import Component
-from hata.ext.slash import Button, Row
+from hata import Component, create_button, create_row
 
 from ..component_builders import build_component_relationship_proposal_actions
 
@@ -13,12 +12,12 @@ def _iter_options():
     yield (
         source_user_id,
         target_user_id,
-        Row(
-            Button(
+        create_row(
+            create_button(
                 'Accept <3',
                 custom_id = 'relationship_proposal.accept.2f26105ef0.2f26105ef1',
             ),
-            Button(
+            create_button(
                 'Reject </3',
                 custom_id = 'relationship_proposal.reject.2f26105ef0.2f26105ef1',
             ),

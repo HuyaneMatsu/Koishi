@@ -1,7 +1,7 @@
 __all__ = ()
 
-
-from hata.ext.slash import Form, InteractionResponse, P, Row, abort
+from hata import InteractionForm, create_row
+from hata.ext.slash import InteractionResponse, P, abort
 
 from ...bot_utils.constants import GUILD__SUPPORT
 from ...bot_utils.user_getter import get_user
@@ -160,7 +160,7 @@ async def edit(
     if to_do.creator_id != event.user.id:
         abort('You can edit only your own to-dos.')
     
-    return Form(
+    return InteractionForm(
         f'Editing todo entry #{to_do.entry_id}',
         [
             TEXT_INPUT_NAME.copy_with(value = to_do.name),
@@ -202,7 +202,7 @@ async def del_(
     
     return InteractionResponse(
         embed = embed,
-        components = Row(
+        components = create_row(
             DELETE_TO_DO_APPROVE.copy_with(custom_id = f'{CUSTOM_ID_TO_DO_DELETE_BASE}.{to_do.entry_id}.1'),
             DELETE_TO_DO_CANCEL.copy_with(custom_id = f'{CUSTOM_ID_TO_DO_DELETE_BASE}.{to_do.entry_id}.0'),
         )

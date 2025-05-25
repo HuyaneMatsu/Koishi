@@ -48,7 +48,7 @@ def build_satori_auto_start_embeds(user, guild_id):
     
     Returns
     -------
-    embeds : `list` of ``Embed``
+    embeds : ``list<Embed>``
     """
     embeds = [
         build_satori_auto_start_header_embed(user, guild_id),

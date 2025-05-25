@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import Embed
-from hata.ext.slash import Button
+from hata import Embed, create_button
 
 from config import FLANDRE_ID
 
@@ -27,7 +26,7 @@ def _notification_builder_daily_reminder_default():
         ).add_thumbnail(
             IMAGE_ORIN_POKE,
         ),
-        Button(
+        create_button(
             'I don\'t want notifs, nya!!',
             custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_REMINDER_DISABLE,
         ),
@@ -49,7 +48,7 @@ def _notification_builder_daily_reminder_flandre():
         ).add_thumbnail(
             IMAGE_FLANDRE_HAPPY,
         ),
-        Button(
+        create_button(
             'Go back to your basement!!',
             custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_REMINDER_DISABLE,
         ),

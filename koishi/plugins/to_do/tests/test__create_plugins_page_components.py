@@ -2,7 +2,7 @@ from base64 import b64encode as base64_encode
 from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
-from hata.ext.slash import Button, Row
+from hata import create_button, create_row
 
 from ..constants import (
     CUSTOM_ID_TO_DO_LIST_CLOSE, EMOJI_CLOSE, EMOJI_LEFT, EMOJI_RIGHT, create_custom_id_to_do_change_page
@@ -39,20 +39,20 @@ def test__create_to_do_page_components():
     vampytest.assert_instance(output, list)
     
     expected_output = [
-        Row(
-            Button(
+        create_row(
+            create_button(
                 'Page 0',
                 EMOJI_LEFT,
                 custom_id = create_custom_id_to_do_change_page(query, 0),
                 enabled = False,
             ),
-            Button(
+            create_button(
                 'Page 2',
                 EMOJI_RIGHT,
                 custom_id = create_custom_id_to_do_change_page(query, 2),
                 enabled = False,
             ),
-            Button(
+            create_button(
                 None,
                 EMOJI_CLOSE,
                 custom_id = CUSTOM_ID_TO_DO_LIST_CLOSE,

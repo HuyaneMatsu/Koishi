@@ -3,8 +3,8 @@ __all__ = ()
 from datetime import datetime as DateTime, timezone as TimeZone
 from math import floor
 
-from hata import DiscordException
-from hata.ext.slash import Button, P
+from hata import DiscordException, create_button
+from hata.ext.slash import P
 
 from ...bot_utils.daily import DAILY_INTERVAL, calculate_daily_for, refresh_streak
 from ...bot_utils.utils import send_embed_to
@@ -155,7 +155,7 @@ async def claim_daily_for_other(client, interaction_event, extender_relationship
                 build_embed_daily_claimed_other_notification(
                     received, balance_new, streak_new, source_user, interaction_event.guild_id
                 ),
-                Button(
+                create_button(
                     'I don\'t want notifs, nya!!',
                     custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_BY_WAIFU_DISABLE,
                 ),

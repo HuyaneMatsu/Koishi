@@ -64,7 +64,7 @@ def test__add_done_field(embed, user, guild, hand):
         The embed to extend.
     user : ``ClientUserBase``
         The user who owns the hand.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild where the game is.
     hand : ``Hand``
         The hand to add its done field for.

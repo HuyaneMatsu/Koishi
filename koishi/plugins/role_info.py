@@ -2,8 +2,10 @@ __all__ = ()
 
 import re
 
-from hata import BUILTIN_EMOJIS, DATETIME_FORMAT_CODE, Embed, ROLES, RoleManagerType, elapsed_time
-from hata.ext.slash import Button, InteractionResponse, Row, abort
+from hata import (
+    BUILTIN_EMOJIS, DATETIME_FORMAT_CODE, Embed, ROLES, RoleManagerType, create_button, create_row, elapsed_time
+)
+from hata.ext.slash import InteractionResponse, abort
 
 from ..bots import FEATURE_CLIENTS
 
@@ -19,13 +21,13 @@ CUSTOM_ID_ROLE_INFO_SHOW_PERMISSIONS = 'role_info.show_permissions'
 ROLE_ID_RP = re.compile('```\n(\d+)\n```', re.M)
 
 
-COMPONENTS_ROLE_INFO = Row(
-    Button(
+COMPONENTS_ROLE_INFO = create_row(
+    create_button(
         'Show permissions',
         LIST_EMOJI,
         custom_id = CUSTOM_ID_ROLE_INFO_SHOW_PERMISSIONS,
     ),
-    Button(
+    create_button(
         'Close',
         CLOSE_EMOJI,
         custom_id = CUSTOM_ID_ROLE_INFO_CLOSE,

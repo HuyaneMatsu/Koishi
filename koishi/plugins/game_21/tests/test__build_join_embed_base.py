@@ -45,7 +45,7 @@ def test__build_join_embed_base(users, guild, amount, title, ask_to_join):
     ----------
     users : `list<ClientUserBase>`
         The joined users.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild where the game is.
     amount : `int`
         Bet amount.

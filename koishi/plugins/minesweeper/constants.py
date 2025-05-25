@@ -6,7 +6,7 @@ from hata import BUILTIN_EMOJIS, ButtonStyle, Emoji
 
 
 SIZE_X = 5
-SIZE_Y = 5
+SIZE_Y = 6
 
 SIZE_TOTAL = SIZE_X * SIZE_Y
 

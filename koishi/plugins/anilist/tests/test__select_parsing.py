@@ -1,5 +1,5 @@
 import vampytest
-from hata.ext.slash import Option, Select
+from hata import StringSelectOption, create_string_select
 
 from ..constants import COMPONENT_SELECT_ANIME, COMPONENT_SELECT_CHARACTER, COMPONENT_SELECT_MANGA
 from ..keys import (
@@ -12,7 +12,7 @@ from ..parsers_components import (
 
 
 def _iter_options__parse_select_base():
-    select_base = Select(
+    select_base = create_string_select(
         None,
         'komeiji',
         placeholder = 'koishi',
@@ -23,7 +23,7 @@ def _iter_options__parse_select_base():
         select_base,
         parse_option_character,
         select_base.copy_with(
-            options = [Option('-1', 'No result', default = True)],
+            options = [StringSelectOption('-1', 'No result', default = True)],
             enabled = False,
         ),
     )
@@ -33,7 +33,7 @@ def _iter_options__parse_select_base():
         select_base,
         parse_option_character,
         select_base.copy_with(
-            options = [Option('-1', 'No result', default = True)],
+            options = [StringSelectOption('-1', 'No result', default = True)],
             enabled = False,
         ),
     )
@@ -56,11 +56,11 @@ def _iter_options__parse_select_base():
         parse_option_character,
         select_base.copy_with(
             options = [
-                Option(
+                StringSelectOption(
                     str(56),
                     'orin',
                 ),
-                Option(
+                StringSelectOption(
                     str(69),
                     'okuu',
                 )
@@ -86,11 +86,11 @@ def _iter_options__parse_select_base():
         parse_option_media,
         select_base.copy_with(
             options = [
-                Option(
+                StringSelectOption(
                     str(56),
                     'orin',
                 ),
-                Option(
+                StringSelectOption(
                     str(69),
                     'okuu',
                 )
@@ -124,7 +124,7 @@ def _iter_options__parse_select_character():
     yield (
         None,
         COMPONENT_SELECT_CHARACTER.copy_with(
-            options = [Option('-1', 'No result', default = True)],
+            options = [StringSelectOption('-1', 'No result', default = True)],
             enabled = False,
         ),
     )
@@ -132,7 +132,7 @@ def _iter_options__parse_select_character():
     yield (
         [],
         COMPONENT_SELECT_CHARACTER.copy_with(
-            options = [Option('-1', 'No result', default = True)],
+            options = [StringSelectOption('-1', 'No result', default = True)],
             enabled = False,
         ),
     )
@@ -153,11 +153,11 @@ def _iter_options__parse_select_character():
         ],
         COMPONENT_SELECT_CHARACTER.copy_with(
             options = [
-                Option(
+                StringSelectOption(
                     str(56),
                     'orin',
                 ),
-                Option(
+                StringSelectOption(
                     str(69),
                     'okuu',
                 )
@@ -187,7 +187,7 @@ def _iter_options__parse_select_anime():
     yield (
         None,
         COMPONENT_SELECT_ANIME.copy_with(
-            options = [Option('-1', 'No result', default = True)],
+            options = [StringSelectOption('-1', 'No result', default = True)],
             enabled = False,
         ),
     )
@@ -195,7 +195,7 @@ def _iter_options__parse_select_anime():
     yield (
         [],
         COMPONENT_SELECT_ANIME.copy_with(
-            options = [Option('-1', 'No result', default = True)],
+            options = [StringSelectOption('-1', 'No result', default = True)],
             enabled = False,
         ),
     )
@@ -216,11 +216,11 @@ def _iter_options__parse_select_anime():
         ],
         COMPONENT_SELECT_ANIME.copy_with(
             options = [
-                Option(
+                StringSelectOption(
                     str(56),
                     'orin',
                 ),
-                Option(
+                StringSelectOption(
                     str(69),
                     'okuu',
                 )
@@ -250,7 +250,7 @@ def _iter_options__parse_select_manga():
     yield (
         None,
         COMPONENT_SELECT_MANGA.copy_with(
-            options = [Option('-1', 'No result', default = True)],
+            options = [StringSelectOption('-1', 'No result', default = True)],
             enabled = False,
         ),
     )
@@ -258,7 +258,7 @@ def _iter_options__parse_select_manga():
     yield (
         [],
         COMPONENT_SELECT_MANGA.copy_with(
-            options = [Option('-1', 'No result', default = True)],
+            options = [StringSelectOption('-1', 'No result', default = True)],
             enabled = False,
         ),
     )
@@ -279,11 +279,11 @@ def _iter_options__parse_select_manga():
         ],
         COMPONENT_SELECT_MANGA.copy_with(
             options = [
-                Option(
+                StringSelectOption(
                     str(56),
                     'orin',
                 ),
-                Option(
+                StringSelectOption(
                     str(69),
                     'okuu',
                 )

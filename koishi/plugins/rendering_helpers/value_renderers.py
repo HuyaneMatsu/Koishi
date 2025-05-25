@@ -113,7 +113,7 @@ def render_user_into(into, user, guild):
         Container to render to.
     user : ``ClientUserBase``
         The user to render.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         Respective guild to pull nick for.
     
     Returns
@@ -270,7 +270,7 @@ def render_voters_into(into, voters, guild):
         Container to render to.
     voters : `set<ClientUserBase>`
         Voters to show.
-    guild : `None | Guild` = `None`
+    guild : ``None | Guild`` = `None`
         The respective guild where the votes were counted at.
     
     Returns

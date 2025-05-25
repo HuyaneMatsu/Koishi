@@ -1,6 +1,6 @@
 import vampytest
-from hata import Embed
-from hata.ext.slash import InteractionResponse, Option, Row
+from hata import Embed, StringSelectOption, create_row
+from hata.ext.slash import InteractionResponse
 
 from ..constants import (
     COMPONENT_LEFT_ANIME, COMPONENT_LEFT_CHARACTER, COMPONENT_LEFT_DISABLED, COMPONENT_LEFT_MANGA,
@@ -46,10 +46,10 @@ def _iter_options__build_listing_response_base():
             ),
             components = [
                 COMPONENT_SELECT_CHARACTER.copy_with(
-                    options = [Option('-1', 'No result', default = True)],
+                    options = [StringSelectOption('-1', 'No result', default = True)],
                     enabled = False,
                 ),
-                Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
+                create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
             ]
         )
     )
@@ -98,17 +98,17 @@ def _iter_options__build_listing_response_base():
             components = [
                 COMPONENT_SELECT_CHARACTER.copy_with(
                     options = [
-                        Option(
+                        StringSelectOption(
                             str(56),
                             'orin',
                         ),
-                        Option(
+                        StringSelectOption(
                             str(69),
                             'okuu',
                         )
                     ],
                 ),
-                Row(COMPONENT_LEFT_CHARACTER, COMPONENT_RIGHT_CHARACTER),
+                create_row(COMPONENT_LEFT_CHARACTER, COMPONENT_RIGHT_CHARACTER),
             ]
         )
     )
@@ -166,10 +166,10 @@ def _iter_options__build_listing_response_character():
             ),
             components = [
                 COMPONENT_SELECT_CHARACTER.copy_with(
-                    options = [Option('-1', 'No result', default = True)],
+                    options = [StringSelectOption('-1', 'No result', default = True)],
                     enabled = False,
                 ),
-                Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
+                create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
             ]
         )
     )
@@ -214,17 +214,17 @@ def _iter_options__build_listing_response_character():
             components = [
                 COMPONENT_SELECT_CHARACTER.copy_with(
                     options = [
-                        Option(
+                        StringSelectOption(
                             str(56),
                             'orin',
                         ),
-                        Option(
+                        StringSelectOption(
                             str(69),
                             'okuu',
                         )
                     ],
                 ),
-                Row(COMPONENT_LEFT_CHARACTER, COMPONENT_RIGHT_CHARACTER),
+                create_row(COMPONENT_LEFT_CHARACTER, COMPONENT_RIGHT_CHARACTER),
             ]
         )
     )
@@ -270,10 +270,10 @@ def _iter_options__build_listing_response_anime():
             ),
             components = [
                 COMPONENT_SELECT_ANIME.copy_with(
-                    options = [Option('-1', 'No result', default = True)],
+                    options = [StringSelectOption('-1', 'No result', default = True)],
                     enabled = False,
                 ),
-                Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
+                create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
             ]
         )
     )
@@ -318,17 +318,17 @@ def _iter_options__build_listing_response_anime():
             components = [
                 COMPONENT_SELECT_ANIME.copy_with(
                     options = [
-                        Option(
+                        StringSelectOption(
                             str(56),
                             'orin',
                         ),
-                        Option(
+                        StringSelectOption(
                             str(69),
                             'okuu',
                         )
                     ],
                 ),
-                Row(COMPONENT_LEFT_ANIME, COMPONENT_RIGHT_ANIME),
+                create_row(COMPONENT_LEFT_ANIME, COMPONENT_RIGHT_ANIME),
             ]
         )
     )
@@ -374,10 +374,10 @@ def _iter_options__build_listing_response_manga():
             ),
             components = [
                 COMPONENT_SELECT_MANGA.copy_with(
-                    options = [Option('-1', 'No result', default = True)],
+                    options = [StringSelectOption('-1', 'No result', default = True)],
                     enabled = False,
                 ),
-                Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
+                create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
             ]
         )
     )
@@ -422,17 +422,17 @@ def _iter_options__build_listing_response_manga():
             components = [
                 COMPONENT_SELECT_MANGA.copy_with(
                     options = [
-                        Option(
+                        StringSelectOption(
                             str(56),
                             'orin',
                         ),
-                        Option(
+                        StringSelectOption(
                             str(69),
                             'okuu',
                         )
                     ],
                 ),
-                Row(COMPONENT_LEFT_MANGA, COMPONENT_RIGHT_MANGA),
+                create_row(COMPONENT_LEFT_MANGA, COMPONENT_RIGHT_MANGA),
             ]
         )
     )

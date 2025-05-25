@@ -2,8 +2,8 @@ __all__ = ()
 
 from math import floor, log10
 
-from hata import Embed
-from hata.ext.slash import Button, InteractionResponse, Row
+from hata import Embed, create_button, create_row
+from hata.ext.slash import InteractionResponse
 
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 
@@ -76,7 +76,7 @@ def build_components(page_index, entry_count):
     if page_index <= 0:
         button_previous = BUTTON_PAGE_PREVIOUS_DISABLED
     else:
-        button_previous = Button(
+        button_previous = create_button(
             f'Page {page_index}',
             EMOJI_PAGE_PREVIOUS,
             custom_id = f'{CUSTOM_ID_PAGE_BASE}{page_index - 1!s}',
@@ -87,13 +87,13 @@ def build_components(page_index, entry_count):
             label = f'Page {page_index + 2}'
         )
     else:
-        button_next = Button(
+        button_next = create_button(
             f'Page {page_index + 2}',
             emoji = EMOJI_PAGE_NEXT,
             custom_id = f'{CUSTOM_ID_PAGE_BASE}{page_index + 1!s}',
         )
     
-    return Row(button_previous, button_next, BUTTON_CLOSE)
+    return create_row(button_previous, button_next, BUTTON_CLOSE)
 
 
 def build_top_list_response(page_index, entries, guild_id):

@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import Embed, KOKORO
-from hata.ext.slash import Button, Row
+from hata import Embed, KOKORO, create_button, create_row
 from scarletio import LOOP_TIME
 
 from ..image_handling_core import ImageHandlerBooru, add_embed_provider
@@ -82,7 +81,7 @@ def create_image_link_button(image_url):
     -------
     component : ``Component``
     """
-    return Button(
+    return create_button(
         'Open',
         url = image_url,
     )
@@ -103,13 +102,13 @@ def build_booru_components(image_detail, cache_id):
     -------
     components : ``Component``
     """
-    return Row(
-        Button(
+    return create_row(
+        create_button(
             'Another',
             EMOJI_NEW,
             custom_id = f'booru.{SESSION_ID}.{cache_id}.new',
         ),
-        Button(
+        create_button(
             'Show tags',
             EMOJI_TAGS,
             custom_id = f'booru.{SESSION_ID}.{cache_id}.tags',
@@ -132,14 +131,14 @@ def build_booru_disabled_components(image_url):
     -------
     components : ``Component``
     """
-    button_new = Button(
+    button_new = create_button(
         'Another',
         EMOJI_NEW,
         custom_id = CUSTOM_ID_NEW_DISABLED,
         enabled = False,
     )
     
-    button_tags = Button(
+    button_tags = create_button(
         'Show tags',
         EMOJI_TAGS,
         custom_id = CUSTOM_ID_TAGS_DISABLED,
@@ -147,13 +146,13 @@ def build_booru_disabled_components(image_url):
     )
     
     if (image_url is None):
-        return Row(
+        return create_row(
             button_new,
             button_tags,
             BUTTON_CLOSE,
         )
     
-    return Row(
+    return create_row(
         button_new,
         button_tags,
         BUTTON_CLOSE,

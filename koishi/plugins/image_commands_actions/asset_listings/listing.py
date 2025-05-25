@@ -13,7 +13,7 @@ from ...touhou_core import (
     KONPAKU_YOUMU, KUDAMAKI_TSUKASA, KUMOI_ICHIRIN, KURODANI_YAMAME, KUROKOMA_SAKI, LETTY_WHITEROCK, LILY_BLACK,
     LILY_WHITE, LUNA_CHILD, MARGATROID_ALICE, MATARA_OKINA, MEDICINE_MELANCHOLY, MISHAGUJI, MITSUGASHIRA_ENOKO,
     MIYAKO_YOSHIKA, MIZUHASHI_PARSEE, MONONOBE_NO_FUTO, MORICHIKA_RINNOSUKE, MORIYA_SUWAKO, MOTOORI_KOSUZU,
-    MURASA_MINAMITSU, MYSTIA_LORELEI, NAGAE_IKU, NAZRIN, NIPPAKU_ZANMU, NISHIDA_SATONO, NIWATARI_KUTAKA, OKUNODA_MIYOI,
+    MURASA_MINAMITSU, LORELEI_MYSTIA, NAGAE_IKU, NAZRIN, NIPPAKU_ZANMU, NISHIDA_SATONO, NIWATARI_KUTAKA, OKUNODA_MIYOI,
     ONOZUKA_KOMACHI, PATCHOULI_KNOWLEDGE, PRISMRIVER_LYRICA, PRISMRIVER_MERLIN, REISEN_UDONGEIN_INABA, REIUJI_UTSUHO,
     RINGO, RUMIA, SAIGYOUJI_YUYUKO, SCARLET_FLANDRE, SCARLET_REMILIA, SEIRAN, SEKIBANKI, SHAMEIMARU_AYA,
     SHIKI_EIKI_YAMAXANADU, SHINKI, SOGA_NO_TOJIKO, STAR_SAPPHIRE, SUKUNA_SHINMYOUMARU, SUNNY_MILK, TATARA_KOGASA,
@@ -732,7 +732,7 @@ TOUHOU_ACTION_ALL.add(
 ).with_action(
     ACTION_TAG_FLUFF, None, KASODANI_KYOUKO,
 ).with_creator(
-    'ammer (sunset beach)',
+    'hammer (sunset beach)',
 )
 
 TOUHOU_ACTION_ALL.add(
@@ -3097,8 +3097,8 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1223996169852686377/alice-mystia-pocky-0000.png',
 ).with_actions(
-    (ACTION_TAG_POCKY, MYSTIA_LORELEI, MARGATROID_ALICE),
-    (ACTION_TAG_POCKY, MARGATROID_ALICE, MYSTIA_LORELEI),
+    (ACTION_TAG_POCKY, LORELEI_MYSTIA, MARGATROID_ALICE),
+    (ACTION_TAG_POCKY, MARGATROID_ALICE, LORELEI_MYSTIA),
 ).with_creator(
     'ayagi daifuku',
 ).with_editor(
@@ -3470,7 +3470,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1223999446355017958/mystia-rumia-pocky-0000.png',
 ).with_action(
-    ACTION_TAG_POCKY, RUMIA, MYSTIA_LORELEI,
+    ACTION_TAG_POCKY, RUMIA, LORELEI_MYSTIA,
 ).with_creator(
     'earlgrey',
 )
@@ -3478,7 +3478,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1223998997077954560/mystia-yuyuko-pocky-0000.png',
 ).with_action(
-    ACTION_TAG_POCKY, SAIGYOUJI_YUYUKO, MYSTIA_LORELEI,
+    ACTION_TAG_POCKY, SAIGYOUJI_YUYUKO, LORELEI_MYSTIA,
 ).with_creator(
     'nise nanatsura',
 )
@@ -3897,7 +3897,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1294661887946133504/mystia-pocky_self-0000.png',
 ).with_action(
-    ACTION_TAG_POCKY_SELF, MYSTIA_LORELEI, MYSTIA_LORELEI,
+    ACTION_TAG_POCKY_SELF, LORELEI_MYSTIA, LORELEI_MYSTIA,
 ).with_creator(
     'phantom2071',
 ).with_editor(
@@ -7427,8 +7427,8 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1292604724381749328/mystia-yuyuko-hug-nom-0000.png',
 ).with_actions(
-    (ACTION_TAG_HUG, SAIGYOUJI_YUYUKO, MYSTIA_LORELEI),
-    (ACTION_TAG_NOM, SAIGYOUJI_YUYUKO, MYSTIA_LORELEI),
+    (ACTION_TAG_HUG, SAIGYOUJI_YUYUKO, LORELEI_MYSTIA),
+    (ACTION_TAG_NOM, SAIGYOUJI_YUYUKO, LORELEI_MYSTIA),
 ).with_creator(
     'terrajin',
 ).with_editor(
@@ -7970,7 +7970,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1294585862473912363/mystia-stare-0004.png',
 ).with_action(
-    ACTION_TAG_STARE, MYSTIA_LORELEI, None,
+    ACTION_TAG_STARE, LORELEI_MYSTIA, None,
 ).with_creator(
     'ichirugi',
 )
@@ -8411,7 +8411,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1294586154611642388/mystia-stare-0000.png',
 ).with_action(
-    ACTION_TAG_STARE, MYSTIA_LORELEI, None,
+    ACTION_TAG_STARE, LORELEI_MYSTIA, None,
 ).with_creator(
     'ichirugi',
 )
@@ -9017,7 +9017,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1294586521835274263/mystia-stare-0006.png',
 ).with_action(
-    ACTION_TAG_STARE, MYSTIA_LORELEI, None,
+    ACTION_TAG_STARE, LORELEI_MYSTIA, None,
 ).with_creator(
     'ichirugi',
 )
@@ -9490,7 +9490,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1294586818435743764/mystia-stare-0003.png',
 ).with_action(
-    ACTION_TAG_STARE, MYSTIA_LORELEI, None,
+    ACTION_TAG_STARE, LORELEI_MYSTIA, None,
 ).with_creator(
     'ichirugi',
 )
@@ -9668,7 +9668,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1294586947229978644/mystia-stare-0007.png',
 ).with_action(
-    ACTION_TAG_STARE, MYSTIA_LORELEI, None,
+    ACTION_TAG_STARE, LORELEI_MYSTIA, None,
 ).with_creator(
     'ichirugi',
 )
@@ -9877,7 +9877,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1294587081724530729/mystia-stare-0001.png',
 ).with_action(
-    ACTION_TAG_STARE, MYSTIA_LORELEI, None,
+    ACTION_TAG_STARE, LORELEI_MYSTIA, None,
 ).with_creator(
     'ichirugi',
 )
@@ -10061,7 +10061,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1294587209646608404/mystia-stare-0002.png',
 ).with_action(
-    ACTION_TAG_STARE, MYSTIA_LORELEI, None,
+    ACTION_TAG_STARE, LORELEI_MYSTIA, None,
 ).with_creator(
     'ichirugi',
 )
@@ -10286,7 +10286,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1294587354572656660/mystia-stare-0005.png',
 ).with_action(
-    ACTION_TAG_STARE, MYSTIA_LORELEI, None,
+    ACTION_TAG_STARE, LORELEI_MYSTIA, None,
 ).with_creator(
     'ichirugi',
 )
@@ -10890,8 +10890,8 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1300133856183193741/mokou-mystia-hug-0000.png',
 ).with_actions(
-    (ACTION_TAG_HUG, FUJIWARA_NO_MOKOU, MYSTIA_LORELEI),
-    (ACTION_TAG_HUG, MYSTIA_LORELEI, FUJIWARA_NO_MOKOU),
+    (ACTION_TAG_HUG, FUJIWARA_NO_MOKOU, LORELEI_MYSTIA),
+    (ACTION_TAG_HUG, LORELEI_MYSTIA, FUJIWARA_NO_MOKOU),
 ).with_creator(
     'makoto jon',
 )

@@ -67,7 +67,7 @@ def test__add_items_row(
     embed : ``Embed``
         Embed to extend.
     
-    item_left : `None | Item`
+    item_left : ``None | Item``
         Left item to render.
     
     item_left_slot_name : `str`
@@ -79,7 +79,7 @@ def test__add_items_row(
     item_left_name_default : `str`
         Left item's default name.
     
-    item_right : `None | Item`
+    item_right : ``None | Item``
         Left item to render.
     
     item_right_slot_name : `str`

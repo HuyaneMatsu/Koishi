@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import Client, DiscordException, ERROR_CODES, Emoji
-from hata.ext.slash import Form, TextInput, TextInputStyle
+from hata import Client, DiscordException, ERROR_CODES, Emoji, InteractionForm, TextInputStyle, create_text_input
 
 from ...bots import FEATURE_CLIENTS
 
@@ -47,10 +46,10 @@ async def snipe_interaction_remove_emoji(client, event):
     if not await check_emoji_guild(client, event, emoji):
         return
     
-    return Form(
+    return InteractionForm(
         f'Remove emoji: {emoji.name}',
         [
-            TextInput(
+            create_text_input(
                 'Reason',
                 min_length = 0,
                 max_length = 400,
@@ -165,10 +164,10 @@ async def snipe_interaction_remove_sticker(client, event):
     if not await check_sticker_guild(client, event, sticker):
         return
     
-    return Form(
+    return InteractionForm(
         f'Remove sticker: {sticker.name}',
         [
-            TextInput(
+            create_text_input(
                 'Reason',
                 min_length = 0,
                 max_length = 400,

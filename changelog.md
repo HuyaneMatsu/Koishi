@@ -1,3 +1,11 @@
+### 2025-05-26
+
+- Increase `minesweeper` size from 5x5 to 5x6 (new largest allowed size).
+- Add `/guild quest-board`.
+- Add `/user quests`.
+- Fix `shop upgrade` balance check had `required` and `available` balance reversed in its message (again).
+    (aspecialguest)
+
 ### 2025-04-28
 
 - Fix `anilist` commands did not respond if the media's constructed title was above embed title length limit.

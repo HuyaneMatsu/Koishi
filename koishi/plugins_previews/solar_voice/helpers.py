@@ -1,8 +1,8 @@
 __all__ = ()
 
 from math import floor
-from hata import Embed, escape_markdown
-from hata.ext.slash import  Select, Option, abort
+from hata import Embed, StringSelectOption, create_string_select, escape_markdown
+from hata.ext.slash import abort
 
 from .constants import EMOJI_CURRENT_TRACK, EMOJI_STOPPED, EMOJI_PLAYING, EMBED_COLOR, \
     LAVA_VOICE_TRACK_SELECT_CUSTOM_ID
@@ -280,12 +280,12 @@ def create_track_select(tracks, length):
         
         option_label = ''.join(option_label_parts)
         
-        options.append(Option(option_value, option_label))
+        options.append(StringSelectOption(option_value, option_label))
         
         if index == length:
             break
     
-    return Select(
+    return create_string_select(
         options,
         LAVA_VOICE_TRACK_SELECT_CUSTOM_ID,
         placeholder = 'Select a track to play',

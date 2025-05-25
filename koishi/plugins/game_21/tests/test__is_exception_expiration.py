@@ -33,7 +33,7 @@ def test__is_exception_expiration(exception):
     
     Parameters
     ----------
-    Exception : ``BaseException``
+    Exception : `BaseException`
         The exception to decide about.
     
     Returns

@@ -1,7 +1,6 @@
 __all__ = ('MASK_PARSE_NAME_UNICODE', 'MASK_PARSE_TOPIC_CUSTOM', 'MASK_PARSE_TOPIC_UNICODE')
 
-from hata import BUILTIN_EMOJIS
-from hata.ext.slash import Button, Row
+from hata import BUILTIN_EMOJIS, create_button, create_row
 
 
 CUSTOM_ID_REFRESH = 'reaction_copy.refresh'
@@ -11,19 +10,19 @@ EMOJI_REFRESH = BUILTIN_EMOJIS['arrows_counterclockwise']
 EMOJI_CLOSE = BUILTIN_EMOJIS['x']
 
 
-BUTTON_REFRESH = Button(
+BUTTON_REFRESH = create_button(
     'Refresh',
     EMOJI_REFRESH,
     custom_id = CUSTOM_ID_REFRESH
 )
 
-BUTTON_CLOSE = Button(
+BUTTON_CLOSE = create_button(
     'Close',
     EMOJI_CLOSE,
     custom_id = CUSTOM_ID_CLOSE,
 )
 
-COMPONENTS = Row(BUTTON_REFRESH, BUTTON_CLOSE)
+COMPONENTS = create_row(BUTTON_REFRESH, BUTTON_CLOSE)
 
 
 MASK_PARSE_NAME_UNICODE = 1 << 0

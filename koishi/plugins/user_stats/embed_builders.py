@@ -6,9 +6,9 @@ from hata import Color, Embed
 from scarletio import to_json
 from scarletio.web_common import quote
 
-from ..stats_core import (
-    STAT_NAME_FULL_BEDROOM, STAT_NAME_FULL_CHARM, STAT_NAME_FULL_CUTENESS, STAT_NAME_FULL_HOUSEWIFE,
-    STAT_NAME_FULL_LOYALTY
+from ..user_stats_core import (
+    USER_STAT_NAME_FULL_BEDROOM, USER_STAT_NAME_FULL_CHARM, USER_STAT_NAME_FULL_CUTENESS, USER_STAT_NAME_FULL_HOUSEWIFE,
+    USER_STAT_NAME_FULL_LOYALTY
 )
 
 from .constants import (
@@ -19,11 +19,11 @@ from .table_building import build_table_into
 
 
 STAT_NAMES_FULL = (
-    STAT_NAME_FULL_HOUSEWIFE.capitalize(),
-    STAT_NAME_FULL_CUTENESS.capitalize(),
-    STAT_NAME_FULL_BEDROOM.capitalize(),
-    STAT_NAME_FULL_CHARM.capitalize(),
-    STAT_NAME_FULL_LOYALTY.capitalize(),
+    USER_STAT_NAME_FULL_HOUSEWIFE.capitalize(),
+    USER_STAT_NAME_FULL_CUTENESS.capitalize(),
+    USER_STAT_NAME_FULL_BEDROOM.capitalize(),
+    USER_STAT_NAME_FULL_CHARM.capitalize(),
+    USER_STAT_NAME_FULL_LOYALTY.capitalize(),
 )
 
 
@@ -49,7 +49,7 @@ def get_user_chart_color(stats):
     
     Parameters
     ----------
-    stats : ``Stats``
+    stats : ``UserStats``
         The user's stats
     
     Returns
@@ -154,7 +154,7 @@ def get_stats_chart_url(stats, color):
     
     Parameters
     ----------
-    stats : ``Stats``
+    stats : ``UserStats``
         The user's stats
     
     color : ``Color`
@@ -257,7 +257,7 @@ def get_stats_description(stats):
     
     Parameters
     ----------
-    stats : ``Stats``
+    stats : ``UserStats``
         The user's stats
     
     Returns
@@ -297,7 +297,7 @@ def build_stats_embed(user, stats, guild_id):
     user : ``ClientUserBase``
         The stats.
     
-    stats : ``Stats``
+    stats : ``UserStats``
         The user's stats.
     
     guild_id : `int`

@@ -8,11 +8,12 @@ from ..item_modifier_core import (
 )
 
 from .constants import ITEMS
-from .flags import ITEM_FLAG_EDIBLE, ITEM_FLAG_WEAPON
+from .flags import ITEM_FLAG_EDIBLE, ITEM_FLAG_NPC, ITEM_FLAG_WEAPON
 from .item import Item
 from .item_ids import (
     ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FISHING_ROD,
-    ITEM_ID_FLYKILLER_AMANATA, ITEM_ID_GARLIC, ITEM_ID_PEACH, ITEM_ID_SCARLETIO_ONION, ITEM_ID_STRAWBERRY
+    ITEM_ID_FLYKILLER_AMANATA, ITEM_ID_GARLIC, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_PEACH, ITEM_ID_SAKUYA,
+    ITEM_ID_SCARLET_ONION, ITEM_ID_STRAWBERRY
 )
 
 
@@ -180,8 +181,8 @@ ITEM_GARLIC = ITEMS[ITEM_ID_GARLIC] = Item(
 )
 
 
-SCARLET_ONION = ITEMS[ITEM_ID_SCARLETIO_ONION] = Item(
-    ITEM_ID_SCARLETIO_ONION,
+ITEM_SCARLET_ONION = ITEMS[ITEM_ID_SCARLET_ONION] = Item(
+    ITEM_ID_SCARLET_ONION,
     'Scarlet onion',
     BUILTIN_EMOJIS['onion'],
     (
@@ -194,6 +195,39 @@ SCARLET_ONION = ITEMS[ITEM_ID_SCARLETIO_ONION] = Item(
     ITEM_FLAG_EDIBLE,
     9, # value (hearts)
     170, # weight (grams)
+    None,
+)
+
+ITEM_MYSTIA = ITEMS[ITEM_ID_MYSTIA] = Item(
+    ITEM_ID_MYSTIA,
+    'Mystia',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+ITEM_SAKUYA = ITEMS[ITEM_ID_SAKUYA] = Item(
+    ITEM_ID_SAKUYA,
+    'Sakuya',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+ITEM_MARISA = ITEMS[ITEM_ID_MARISA] = Item(
+    ITEM_ID_MARISA,
+    'Marisa',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
     None,
 )
 

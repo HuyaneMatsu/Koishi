@@ -1,9 +1,11 @@
 __all__ = ('build_component_relationship_divorce_question', 'build_component_relationship_proposal_actions',)
 
-from hata.ext.slash import Button, Row
+from hata import create_button, create_row
 
-from .constants import CUSTOM_ID_RELATIONSHIP_PROPOSAL_ACCEPT_BUILDER, CUSTOM_ID_RELATIONSHIP_PROPOSAL_REJECT_BUILDER, \
-    CUSTOM_ID_RELATIONSHIP_DIVORCE_CONFIRM_BUILDER, CUSTOM_ID_RELATIONSHIP_DIVORCE_CANCEL_BUILDER, EMOJI_YES, EMOJI_NO
+from .constants import (
+    CUSTOM_ID_RELATIONSHIP_DIVORCE_CANCEL_BUILDER, CUSTOM_ID_RELATIONSHIP_DIVORCE_CONFIRM_BUILDER,
+    CUSTOM_ID_RELATIONSHIP_PROPOSAL_ACCEPT_BUILDER, CUSTOM_ID_RELATIONSHIP_PROPOSAL_REJECT_BUILDER, EMOJI_NO, EMOJI_YES
+)
 
 
 def build_component_relationship_proposal_actions(source_user_id, target_user_id):
@@ -22,12 +24,12 @@ def build_component_relationship_proposal_actions(source_user_id, target_user_id
     -------
     component : ``Component``
     """
-    return Row(
-        Button(
+    return create_row(
+        create_button(
             'Accept <3',
             custom_id = CUSTOM_ID_RELATIONSHIP_PROPOSAL_ACCEPT_BUILDER(source_user_id, target_user_id),
         ),
-        Button(
+        create_button(
             'Reject </3',
             custom_id = CUSTOM_ID_RELATIONSHIP_PROPOSAL_REJECT_BUILDER(source_user_id, target_user_id),
         ),
@@ -50,13 +52,13 @@ def build_component_relationship_divorce_question(source_user_id, target_user_id
     -------
     component : ``Component``
     """
-    return Row(
-        Button(
+    return create_row(
+        create_button(
             'Yes',
             EMOJI_YES,
             custom_id = CUSTOM_ID_RELATIONSHIP_DIVORCE_CONFIRM_BUILDER(source_user_id, target_user_id),
         ),
-        Button(
+        create_button(
             'No',
             EMOJI_NO,
             custom_id = CUSTOM_ID_RELATIONSHIP_DIVORCE_CANCEL_BUILDER(source_user_id, target_user_id),

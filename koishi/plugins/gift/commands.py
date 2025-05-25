@@ -1,7 +1,7 @@
 __all__ = ()
 
-from hata import ClientUserBase
-from hata.ext.slash import Button, P
+from hata import ClientUserBase, create_button
+from hata.ext.slash import P
 
 from ...bot_utils.utils import send_embed_to
 from ...bots import FEATURE_CLIENTS
@@ -109,7 +109,7 @@ async def gift(
                 get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
                 target_user.id,
                 build_notification_embed(target_balance, amount, source_user, event.guild_id, message),
-                Button(
+                create_button(
                     'I don\'t want notifs, nya!!',
                     custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_GIFT_DISABLE,
                 ),

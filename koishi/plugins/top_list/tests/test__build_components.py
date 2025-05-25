@@ -1,5 +1,5 @@
 import vampytest
-from hata.ext.slash import Button, Row
+from hata import create_button, create_row
 
 from ..builders import build_components
 from ..constants import (
@@ -12,7 +12,7 @@ def _iter_options():
     yield (
         0,
         PAGE_SIZE - 1,
-        Row(
+        create_row(
             BUTTON_PAGE_PREVIOUS_DISABLED,
             BUTTON_PAGE_NEXT_DISABLED.copy_with(
                 label = 'Page 2',
@@ -24,9 +24,9 @@ def _iter_options():
     yield (
         0,
         PAGE_SIZE,
-        Row(
+        create_row(
             BUTTON_PAGE_PREVIOUS_DISABLED,
-            Button(
+            create_button(
                 'Page 2',
                 EMOJI_PAGE_NEXT,
                 custom_id = f'{CUSTOM_ID_PAGE_BASE}{1!s}',
@@ -38,8 +38,8 @@ def _iter_options():
     yield (
         6,
         PAGE_SIZE - 1,
-        Row(
-            Button(
+        create_row(
+            create_button(
                 'Page 6',
                 emoji = EMOJI_PAGE_PREVIOUS,
                 custom_id = f'{CUSTOM_ID_PAGE_BASE}{5!s}',
@@ -54,13 +54,13 @@ def _iter_options():
     yield (
         6,
         PAGE_SIZE,
-        Row(
-            Button(
+        create_row(
+            create_button(
                 'Page 6',
                 EMOJI_PAGE_PREVIOUS,
                 custom_id = f'{CUSTOM_ID_PAGE_BASE}{5!s}',
             ),
-            Button(
+            create_button(
                 'Page 8',
                 EMOJI_PAGE_NEXT,
                 custom_id = f'{CUSTOM_ID_PAGE_BASE}{7!s}',

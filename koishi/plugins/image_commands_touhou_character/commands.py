@@ -1,6 +1,7 @@
 __all__ = ()
 
-from hata.ext.slash import Button, P, abort
+from hata import create_button
+from hata.ext.slash import P, abort
 
 from ...bots import FEATURE_CLIENTS
 
@@ -49,7 +50,7 @@ async def touhou_character(
     if image_detail is None:
         components = None
     else:
-        components = Button(
+        components = create_button(
             emoji = EMOJI_NEW,
             custom_id = make_custom_id_of_character(touhou_character),
         )

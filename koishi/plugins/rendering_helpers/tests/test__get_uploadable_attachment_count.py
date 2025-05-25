@@ -55,7 +55,7 @@ def test__get_uploadable_attachment_count(guild, attachments):
     
     Parameters
     ----------
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild where the message will be sent.
     
     attachments : `tuple<Attachment>`

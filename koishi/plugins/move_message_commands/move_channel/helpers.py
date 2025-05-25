@@ -1,7 +1,7 @@
 __all__ = ()
 
-from hata import InteractionType
-from hata.ext.slash import Button, Row, abort
+from hata import InteractionType, create_button, create_row
+from hata.ext.slash import abort
 
 from ...move_message_core import get_webhook
 
@@ -74,8 +74,8 @@ def build_components_continue(source_channel, target_channel, last_message_id):
     last_message_id : `int`
         The last moved message's identifier.
     """
-    return Row(
-        Button(
+    return create_row(
+        create_button(
             'Try to resume',
             custom_id = f'channel_mover.resume.{source_channel.id}.{target_channel.id}.{last_message_id}',
         ),

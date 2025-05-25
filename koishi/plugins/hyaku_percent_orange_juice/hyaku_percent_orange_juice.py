@@ -6,8 +6,8 @@ from functools import partial as partial_func
 
 from scarletio.web_common import quote
 from scarletio import ReuAsyncIO
-from hata import BUILTIN_EMOJIS, Embed
-from hata.ext.slash import abort, Select, Option, InteractionResponse
+from hata import BUILTIN_EMOJIS, Embed, StringSelectOption, create_string_select
+from hata.ext.slash import abort, InteractionResponse
 
 from ...bot_utils.constants import GUILD__STORAGE, PATH__KOISHI
 from ...bots import FEATURE_CLIENTS, MAIN_CLIENT
@@ -4882,14 +4882,14 @@ def filter_entities_by(filters, container, select_custom_id_enabled, select_cust
     embed = Embed(f'Matched {entity_type_name}s', description)
     
     if entities:
-        select = Select(
-            [Option(str(entity.id), entity.name) for entity in entities],
+        select = create_string_select(
+            [StringSelectOption(str(entity.id), entity.name) for entity in entities],
             select_custom_id_enabled,
             placeholder = f'Select a {entity_type_name}',
         )
     else:
-        select = Select(
-            [Option('_', 'No result', default = True)],
+        select = create_string_select(
+            [StringSelectOption('_', 'No result', default = True)],
             select_custom_id_disabled,
             placeholder = 'No result',
         )

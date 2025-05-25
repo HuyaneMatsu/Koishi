@@ -3,8 +3,7 @@ __all__ = ()
 import re
 from datetime import datetime as DateTime, timezone as TimeZone
 
-from hata import BUILTIN_EMOJIS, Color, datetime_to_unix_time
-from hata.ext.slash import Button
+from hata import BUILTIN_EMOJIS, Color, create_button, datetime_to_unix_time
 
 
 SESSION_ID = datetime_to_unix_time(DateTime.now(TimeZone.utc))
@@ -23,7 +22,7 @@ EMOJI_TAGS = BUILTIN_EMOJIS['notepad_spiral']
 EMOJI_CLOSE = BUILTIN_EMOJIS['x']
 
 
-BUTTON_CLOSE = Button(
+BUTTON_CLOSE = create_button(
     'Close',
     EMOJI_CLOSE,
     custom_id = CUSTOM_ID_CLOSE,

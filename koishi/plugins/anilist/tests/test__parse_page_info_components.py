@@ -1,5 +1,5 @@
 import vampytest
-from hata.ext.slash import Button, Row
+from hata import create_button, create_row
 
 from ..constants import (
     COMPONENT_LEFT_ANIME, COMPONENT_LEFT_CHARACTER, COMPONENT_LEFT_DISABLED, COMPONENT_LEFT_MANGA,
@@ -13,8 +13,8 @@ from ..parsers_components import (
 
 
 def _iter_options__parse_page_info_components_base():
-    component_0 = Button('koishi')
-    component_1 = Button('satori')
+    component_0 = create_button('koishi')
+    component_1 = create_button('satori')
     
     yield (
         {
@@ -23,7 +23,7 @@ def _iter_options__parse_page_info_components_base():
         },
         component_0,
         component_1,
-        Row(component_0, component_1),
+        create_row(component_0, component_1),
     )
     
     yield (
@@ -33,7 +33,7 @@ def _iter_options__parse_page_info_components_base():
         },
         component_0,
         component_1,
-        Row(component_0, COMPONENT_RIGHT_DISABLED),
+        create_row(component_0, COMPONENT_RIGHT_DISABLED),
     )
 
     yield (
@@ -43,7 +43,7 @@ def _iter_options__parse_page_info_components_base():
         },
         component_0,
         component_1,
-        Row(COMPONENT_LEFT_DISABLED, component_1),
+        create_row(COMPONENT_LEFT_DISABLED, component_1),
     )
 
     yield (
@@ -53,14 +53,14 @@ def _iter_options__parse_page_info_components_base():
         },
         component_0,
         component_1,
-        Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
+        create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
     )
 
     yield (
         {},
         component_0,
         component_1,
-        Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
+        create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
     )
 
 
@@ -91,7 +91,7 @@ def _iter_options__parse_page_info_components_character():
             KEY_PAGE_INFO_CURRENT: 2,
             KEY_PAGE_INFO_TOTAL: 3,
         },
-        Row(COMPONENT_LEFT_CHARACTER, COMPONENT_RIGHT_CHARACTER),
+        create_row(COMPONENT_LEFT_CHARACTER, COMPONENT_RIGHT_CHARACTER),
     )
     
     yield (
@@ -99,7 +99,7 @@ def _iter_options__parse_page_info_components_character():
             KEY_PAGE_INFO_CURRENT: 2,
             KEY_PAGE_INFO_TOTAL: 2,
         },
-        Row(COMPONENT_LEFT_CHARACTER, COMPONENT_RIGHT_DISABLED),
+        create_row(COMPONENT_LEFT_CHARACTER, COMPONENT_RIGHT_DISABLED),
     )
 
     yield (
@@ -107,7 +107,7 @@ def _iter_options__parse_page_info_components_character():
             KEY_PAGE_INFO_CURRENT: 1,
             KEY_PAGE_INFO_TOTAL: 3,
         },
-        Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_CHARACTER),
+        create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_CHARACTER),
     )
 
     yield (
@@ -115,12 +115,12 @@ def _iter_options__parse_page_info_components_character():
             KEY_PAGE_INFO_CURRENT: 1,
             KEY_PAGE_INFO_TOTAL: 1,
         },
-        Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
+        create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
     )
 
     yield (
         {},
-        Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
+        create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
     )
 
 
@@ -147,7 +147,7 @@ def _iter_options__parse_page_info_components_anime():
             KEY_PAGE_INFO_CURRENT: 2,
             KEY_PAGE_INFO_TOTAL: 3,
         },
-        Row(COMPONENT_LEFT_ANIME, COMPONENT_RIGHT_ANIME),
+        create_row(COMPONENT_LEFT_ANIME, COMPONENT_RIGHT_ANIME),
     )
     
     yield (
@@ -155,7 +155,7 @@ def _iter_options__parse_page_info_components_anime():
             KEY_PAGE_INFO_CURRENT: 2,
             KEY_PAGE_INFO_TOTAL: 2,
         },
-        Row(COMPONENT_LEFT_ANIME, COMPONENT_RIGHT_DISABLED),
+        create_row(COMPONENT_LEFT_ANIME, COMPONENT_RIGHT_DISABLED),
     )
 
     yield (
@@ -163,7 +163,7 @@ def _iter_options__parse_page_info_components_anime():
             KEY_PAGE_INFO_CURRENT: 1,
             KEY_PAGE_INFO_TOTAL: 3,
         },
-        Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_ANIME),
+        create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_ANIME),
     )
 
     yield (
@@ -171,12 +171,12 @@ def _iter_options__parse_page_info_components_anime():
             KEY_PAGE_INFO_CURRENT: 1,
             KEY_PAGE_INFO_TOTAL: 1,
         },
-        Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
+        create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
     )
 
     yield (
         {},
-        Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
+        create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
     )
 
 
@@ -203,7 +203,7 @@ def _iter_options__parse_page_info_components_manga():
             KEY_PAGE_INFO_CURRENT: 2,
             KEY_PAGE_INFO_TOTAL: 3,
         },
-        Row(COMPONENT_LEFT_MANGA, COMPONENT_RIGHT_MANGA),
+        create_row(COMPONENT_LEFT_MANGA, COMPONENT_RIGHT_MANGA),
     )
     
     yield (
@@ -211,7 +211,7 @@ def _iter_options__parse_page_info_components_manga():
             KEY_PAGE_INFO_CURRENT: 2,
             KEY_PAGE_INFO_TOTAL: 2,
         },
-        Row(COMPONENT_LEFT_MANGA, COMPONENT_RIGHT_DISABLED),
+        create_row(COMPONENT_LEFT_MANGA, COMPONENT_RIGHT_DISABLED),
     )
 
     yield (
@@ -219,7 +219,7 @@ def _iter_options__parse_page_info_components_manga():
             KEY_PAGE_INFO_CURRENT: 1,
             KEY_PAGE_INFO_TOTAL: 3,
         },
-        Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_MANGA),
+        create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_MANGA),
     )
 
     yield (
@@ -227,12 +227,12 @@ def _iter_options__parse_page_info_components_manga():
             KEY_PAGE_INFO_CURRENT: 1,
             KEY_PAGE_INFO_TOTAL: 1,
         },
-        Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
+        create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
     )
 
     yield (
         {},
-        Row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
+        create_row(COMPONENT_LEFT_DISABLED, COMPONENT_RIGHT_DISABLED),
     )
 
 

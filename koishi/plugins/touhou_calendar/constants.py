@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import AnsiForegroundColor, BUILTIN_EMOJIS, create_ansi_format_code
-from hata.ext.slash import Button
+from hata import AnsiForegroundColor, BUILTIN_EMOJIS, create_ansi_format_code, create_button
 
 
 EMOJI_BACK = BUILTIN_EMOJIS['arrow_backward']
@@ -56,21 +55,21 @@ CUSTOM_ID_NEXT_DISABLED = 'touhou_calendar.year.max.disabled'
 CUSTOM_ID_CLOSE = 'touhou_calendar.close'
 
 
-BUTTON_BACK_DISABLED = Button(
+BUTTON_BACK_DISABLED = create_button(
     str(YEAR_MIN - 1),
     EMOJI_BACK,
     custom_id = CUSTOM_ID_BACK_DISABLED,
     enabled = False,
 )
 
-BUTTON_NEXT_DISABLED = Button(
+BUTTON_NEXT_DISABLED = create_button(
     str(YEAR_MAX + 1),
     EMOJI_NEXT,
     custom_id = CUSTOM_ID_NEXT_DISABLED,
     enabled = False,
 )
 
-BUTTON_CLOSE = Button(
+BUTTON_CLOSE = create_button(
     'Close',
     EMOJI_CLOSE,
     custom_id = CUSTOM_ID_CLOSE,

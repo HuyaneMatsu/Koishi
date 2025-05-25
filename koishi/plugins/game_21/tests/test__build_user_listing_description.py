@@ -39,7 +39,7 @@ def test__build_user_listing_description(users, guild):
     ----------
     users : `list<ClientUserBase>`
         The users to list.
-    guild : `None | Guild`
+    guild : ``None | Guild``
         The respective guild.
     
     Returns

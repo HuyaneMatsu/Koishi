@@ -1,6 +1,5 @@
 import vampytest
-from hata import Component
-from hata.ext.slash import Button, Row
+from hata import Component, create_button, create_row
 
 from ..component_builders import build_component_switch_page
 from ..constants import EMOJI_CLOSE, EMOJI_LEFT, EMOJI_RIGHT
@@ -12,20 +11,20 @@ def _iter_options():
         3,
         0,
         0,
-        Row(
-            Button(
+        create_row(
+            create_button(
                 'Page 0',
                 EMOJI_LEFT,
                 custom_id = 'inventory.page.D',
                 enabled = False,
             ),
-            Button(
+            create_button(
                 'Page 2',
                 EMOJI_RIGHT,
                 custom_id = 'inventory.page.I',
                 enabled = False,
             ),
-            Button(
+            create_button(
                 'Close',
                 EMOJI_CLOSE,
                 custom_id = 'inventory.page.close',
@@ -38,18 +37,18 @@ def _iter_options():
         3,
         1,
         3,
-        Row(
-            Button(
+        create_row(
+            create_button(
                 'Page 1',
                 EMOJI_LEFT,
                 custom_id = 'inventory.page.1.3.0',
             ),
-            Button(
+            create_button(
                 'Page 3',
                 EMOJI_RIGHT,
                 custom_id = 'inventory.page.1.3.2',
             ),
-            Button(
+            create_button(
                 'Close',
                 EMOJI_CLOSE,
                 custom_id = 'inventory.page.close',

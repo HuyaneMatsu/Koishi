@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import AnsiForegroundColor, BUILTIN_EMOJIS, create_ansi_format_code
-from hata.ext.slash import Button
+from hata import AnsiForegroundColor, BUILTIN_EMOJIS, create_ansi_format_code, create_button
 
 
 STYLE_NUMBER = create_ansi_format_code(foreground_color = AnsiForegroundColor.white)
@@ -24,21 +23,21 @@ CUSTOM_ID_CLOSE = 'top_list.close'
 
 
 
-BUTTON_PAGE_PREVIOUS_DISABLED = Button(
+BUTTON_PAGE_PREVIOUS_DISABLED = create_button(
     'Page 0',
     EMOJI_PAGE_PREVIOUS,
     custom_id = CUSTOM_ID_PAGE_PREVIOUS_DISABLED,
     enabled = False,
 )
 
-BUTTON_PAGE_NEXT_DISABLED = Button(
+BUTTON_PAGE_NEXT_DISABLED = create_button(
     'Page n',
     EMOJI_PAGE_NEXT,
     custom_id = CUSTOM_ID_PAGE_NEXT_DISABLED,
     enabled = False,
 )
 
-BUTTON_CLOSE = Button(
+BUTTON_CLOSE = create_button(
     'Close',
     EMOJI_CLOSE,
     custom_id = CUSTOM_ID_CLOSE,

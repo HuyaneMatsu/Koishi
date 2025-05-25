@@ -5,9 +5,10 @@ from functools import partial as partial_func
 from random import random
 
 from hata import (
-    BUILTIN_EMOJIS, DiscordException, ERROR_CODES, Embed, InteractionType, KOKORO, Permission, parse_tdelta
+    BUILTIN_EMOJIS, DiscordException, ERROR_CODES, Embed, InteractionType, KOKORO, Permission, create_button,
+    create_row, parse_tdelta
 )
-from hata.ext.slash import Button, Row, abort, wait_for_component_interaction
+from hata.ext.slash import abort, wait_for_component_interaction
 from scarletio import CancelledError, Future, Task
 
 from ..bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY, GUILD__SUPPORT, ROLE__SUPPORT__ADMIN
@@ -27,10 +28,10 @@ EVENT_OK_EMOJI = BUILTIN_EMOJIS['ok_hand']
 EVENT_ABORT_EMOJI = BUILTIN_EMOJIS['x']
 EVENT_DAILY_MIN_AMOUNT = 1
 EVENT_DAILY_MAX_AMOUNT = 7
-EVENT_OK_BUTTON = Button(emoji = EVENT_OK_EMOJI)
-EVENT_ABORT_BUTTON = Button(emoji = EVENT_ABORT_EMOJI)
-EVENT_COMPONENTS = Row(EVENT_OK_BUTTON, EVENT_ABORT_BUTTON)
-EVENT_CURRENCY_BUTTON = Button(emoji = EMOJI__HEART_CURRENCY)
+EVENT_OK_BUTTON = create_button(emoji = EVENT_OK_EMOJI)
+EVENT_ABORT_BUTTON = create_button(emoji = EVENT_ABORT_EMOJI)
+EVENT_COMPONENTS = create_row(EVENT_OK_BUTTON, EVENT_ABORT_BUTTON)
+EVENT_CURRENCY_BUTTON = create_button(emoji = EMOJI__HEART_CURRENCY)
 
 
 def convert_tdelta(delta):

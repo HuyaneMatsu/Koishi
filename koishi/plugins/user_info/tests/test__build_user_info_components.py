@@ -1,6 +1,5 @@
 import vampytest
-from hata import Component, GuildProfile, User
-from hata.ext.slash import Button, Row
+from hata import Component, GuildProfile, User, create_button, create_row
 
 from ..component_builders import build_user_info_components
 
@@ -15,20 +14,20 @@ def _iter_options():
     yield (
         user,
         0,
-        Row(
-            Button('Show avatar', custom_id = f'user.info.{user_id}.1.2'),
-            Button('Show banner', custom_id = f'user.info.{user_id}.2.2'),
+        create_row(
+            create_button('Show avatar', custom_id = f'user.info.{user_id}.1.2'),
+            create_button('Show banner', custom_id = f'user.info.{user_id}.2.2'),
         ),
     )
     
     yield (
         user,
         guild_id,
-        Row(
-            Button('Show global avatar', custom_id = f'user.info.{user_id}.1.2'),
-            Button('Show guild avatar', custom_id = f'user.info.{user_id}.1.3'),
-            Button('Show global banner', custom_id = f'user.info.{user_id}.2.2'),
-            Button('Show guild banner', custom_id = f'user.info.{user_id}.2.3'),
+        create_row(
+            create_button('Show global avatar', custom_id = f'user.info.{user_id}.1.2'),
+            create_button('Show guild avatar', custom_id = f'user.info.{user_id}.1.3'),
+            create_button('Show global banner', custom_id = f'user.info.{user_id}.2.2'),
+            create_button('Show guild banner', custom_id = f'user.info.{user_id}.2.3'),
         )
     )
 

@@ -1,7 +1,7 @@
 __all__ = ()
 
 import re
-from hata.ext.slash import Button, ButtonStyle, Row
+from hata import ButtonStyle, create_button, create_row
 
 
 CHANNEL_MOVER_ACTIVE_FROM = set()
@@ -23,13 +23,13 @@ CUSTOM_ID_CHANNEL_MOVER_CANCEL = 'channel_mover.cancel'
 CUSTOM_ID_RP_CHANNEL_MOVER_RESUME = re.compile('channel_mover\.resume\.(\d+)\.(\d+)\.(\d+)')
 
 
-BUTTON_CHANNEL_MOVE_CANCEL = Button(
+BUTTON_CHANNEL_MOVE_CANCEL = create_button(
     'Cancel',
     custom_id = CUSTOM_ID_CHANNEL_MOVER_CANCEL,
     style = ButtonStyle.red,
 )
     
 
-CHANNEL_MOVE_COMPONENTS = Row(
+CHANNEL_MOVE_COMPONENTS = create_row(
     BUTTON_CHANNEL_MOVE_CANCEL,
 )

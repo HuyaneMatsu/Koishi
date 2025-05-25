@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata.ext.slash import Button, ButtonStyle, Row
+from hata import ButtonStyle, create_button, create_row
 
 from .constants import (
     CUSTOM_ID_CONTINUOUS, CUSTOM_ID_INITIAL, SIZE_TOTAL, SIZE_X, STYLE_DEFAULT, STYLE_MAP, TILE_UNKNOWN
@@ -13,11 +13,11 @@ def render_initial(bomb_count):
     
     Returns
     -------
-    components : `list` of ``Component``
+    components : ``list<Component>``
     """
     return [
-        Row(*(
-            Button(
+        create_row(*(
+            create_button(
                 emoji = TILE_UNKNOWN,
                 style = ButtonStyle.gray,
                 custom_id = CUSTOM_ID_INITIAL(tile_index, bomb_count),
@@ -42,7 +42,7 @@ def create_continuous_button(tiles, flipped_tiles, index, tile_map):
     index : `int`
         The button's total position.
     
-    tile_map : `list<Emoji>`
+    tile_map : ``list<Emoji>``
         Tile map to use.
     
     Returns
@@ -59,7 +59,7 @@ def create_continuous_button(tiles, flipped_tiles, index, tile_map):
         emoji = TILE_UNKNOWN
         style = ButtonStyle.gray
     
-    return Button(
+    return create_button(
         emoji = emoji,
         style = style,
         custom_id = CUSTOM_ID_CONTINUOUS(index, value),
@@ -79,15 +79,15 @@ def render_continuous(tiles, flipped_tiles, tile_map):
     flipped_tiles : `list<bool>`
         Whether a tile is flipped or nah.
     
-    tile_map : `list<Emoji>`
+    tile_map : ``list<Emoji>``
         Tile map to use.
     
     Returns
     -------
-    components : `list` of ``Component``
+    components : ``list<Component>``
     """
     return [
-        Row(*(
+        create_row(*(
             create_continuous_button(tiles, flipped_tiles, tile_index, tile_map)
             for tile_index in range(line_start_index, line_start_index + SIZE_X)
         )) for line_start_index in range(0, SIZE_TOTAL, SIZE_X)

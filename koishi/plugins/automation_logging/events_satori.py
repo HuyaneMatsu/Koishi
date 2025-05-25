@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import ChannelType, Client, DiscordException, ERROR_CODES, Permission
-from hata.ext.slash import Button
+from hata import ChannelType, Client, DiscordException, ERROR_CODES, Permission, create_button
 from scarletio import CancelledError
 
 from ...bots import MAIN_CLIENT
@@ -490,7 +489,7 @@ async def reaction_event(client, event):
         return
     
     embed = build_reaction_event_embed(event)
-    components = Button('Jump there', url = event.message.url)
+    components = create_button('Jump there', url = event.message.url)
     
     for channel in channels:
         if channel.cached_permissions_for(client) & REQUIRED_PERMISSIONS != REQUIRED_PERMISSIONS:

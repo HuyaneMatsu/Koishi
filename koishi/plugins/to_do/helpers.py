@@ -3,8 +3,8 @@ __all__ = ()
 from base64 import b64encode as base64_encode
 from itertools import islice
 
-from hata import DATETIME_FORMAT_CODE, Embed
-from hata.ext.slash import Button, Row, abort
+from hata import DATETIME_FORMAT_CODE, Embed, create_button, create_row
+from hata.ext.slash import abort
 from sqlalchemy.exc import OperationalError
 
 from ...bot_utils.constants import ROLE__SUPPORT__TESTER
@@ -425,21 +425,21 @@ def create_to_do_page_components(to_dos_list, page, value):
     page_count = get_to_do_page_count(to_dos_list)
     
     return [
-        Row(
-            Button(
+        create_row(
+            create_button(
                 f'Page {page - 1!s}',
                  EMOJI_LEFT,
                 custom_id = create_custom_id_to_do_change_page(query, page - 1),
                 enabled = (page > 1),
                 
             ),
-            Button(
+            create_button(
                 f'Page {page + 1!s}',
                 EMOJI_RIGHT,
                 custom_id = create_custom_id_to_do_change_page(query, page + 1),
                 enabled = (page < page_count),
             ),
-            Button(
+            create_button(
                 None,
                 EMOJI_CLOSE,
                 custom_id = CUSTOM_ID_TO_DO_LIST_CLOSE,

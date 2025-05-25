@@ -314,7 +314,7 @@ def render_user_field_into(into, field_added, user, *, guild = None, optional = 
         Whether any fields were added already.
     user : `None | ClientUserBase`
         The user to render.
-    guild : `None | Guild` = `None`, Optional (Keyword only)
+    guild : ``None | Guild`` = `None`, Optional (Keyword only)
         The guild to pull the user's nick name for.
     optional : `bool` = `True`, Optional (Keyword only)
         Whether should not render if `user` is `None`.

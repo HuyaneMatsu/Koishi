@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import Client
-from hata.ext.slash import Row
+from hata import Client, create_row
 
 from ...bots import FEATURE_CLIENTS
 
@@ -40,7 +39,7 @@ async def respond_with_actions(client, event, choice_type):
         return
     
     components = translate_components(event.message.iter_components(), ACTIONS_DISABLE)
-    components.append(Row(*choice_type.iter_action_components(entity, event)))
+    components.append(create_row(*choice_type.iter_action_components(entity, event)))
     
     await client.interaction_response_message_edit(
         event,

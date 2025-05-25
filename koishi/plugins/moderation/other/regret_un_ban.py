@@ -1,7 +1,6 @@
 __all__ = ()
 
-from hata import AuditLogEntryType, Embed, User
-from hata.ext.slash import Button
+from hata import AuditLogEntryType, Embed, User, create_button
 
 from ..shared_constants import PERMISSIONS__BAN, WORD_CONFIG__REGRET_UN_BAN
 from ..shared_helpers import add_reason_field, process_reason
@@ -61,7 +60,7 @@ def build_regret_ban_notification_embed(guild, reason, user, invite_url):
         user.full_name, user.avatar_url
     )
     add_reason_field(embed, reason)
-    return embed, Button('Join back here', url = invite_url)
+    return embed, create_button('Join back here', url = invite_url)
 
 
 async def regret_un_ban_command(

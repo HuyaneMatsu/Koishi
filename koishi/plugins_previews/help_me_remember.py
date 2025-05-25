@@ -1,8 +1,8 @@
 import re
 
-from hata import Client, Embed
+from hata import Client, Embed, create_button
 from hata.ext.plugin_loader import require
-from hata.ext.slash import abort, Button, InteractionResponse
+from hata.ext.slash import InteractionResponse, abort
 from random import choice, randint, random
 from math import sqrt, ceil
 
@@ -741,7 +741,7 @@ class GameState:
             embed.add_field(answer.ask(), answer.answer())
         
         components = [
-            Button(question.ask(), custom_id = f'{CUSTOM_ID_QUESTION_BASE}.{index}')
+            create_button(question.ask(), custom_id = f'{CUSTOM_ID_QUESTION_BASE}.{index}')
             for index, question in enumerate(self.questions)
         ]
         
@@ -798,7 +798,7 @@ async def rember_preview(
         if message is None:
             components = None
         else:
-            components = Button('Go there', url = message.url)
+            components = create_button('Go there', url = message.url)
             
         abort('You are already in a game', components = components)
         return

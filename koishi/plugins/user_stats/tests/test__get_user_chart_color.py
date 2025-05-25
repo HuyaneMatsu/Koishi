@@ -2,14 +2,14 @@ import vampytest
 
 from hata import Color
 
-from ...stats_core import Stats
+from ...user_stats_core import UserStats
 
 from ..embed_builders import get_user_chart_color
 
 
 def _iter_options():
     expected_output = 0x123425
-    stats = Stats((((5566 << 24) | expected_output) << 22) | 4555)
+    stats = UserStats((((5566 << 24) | expected_output) << 22) | 4555)
     stats.stat_housewife = 0
     stats.stat_cuteness = 0
     stats.stat_bedroom = 0
@@ -21,7 +21,7 @@ def _iter_options():
         Color(expected_output),
     )
     
-    stats = Stats(202503120000)
+    stats = UserStats(202503120000)
     stats.stat_housewife = 10
     stats.stat_cuteness = 0
     stats.stat_bedroom = 0
@@ -33,7 +33,7 @@ def _iter_options():
         Color(0xff9900),
     )
     
-    stats = Stats(202503120001)
+    stats = UserStats(202503120001)
     stats.stat_housewife = 0
     stats.stat_cuteness = 10
     stats.stat_bedroom = 0
@@ -45,7 +45,7 @@ def _iter_options():
         Color(0xff0099),
     )
     
-    stats = Stats(202503120002)
+    stats = UserStats(202503120002)
     stats.stat_housewife = 0
     stats.stat_cuteness = 0
     stats.stat_bedroom = 10
@@ -57,7 +57,7 @@ def _iter_options():
         Color(0x3300ff),
     )
     
-    stats = Stats(202503120003)
+    stats = UserStats(202503120003)
     stats.stat_housewife = 0
     stats.stat_cuteness = 0
     stats.stat_bedroom = 0
@@ -69,7 +69,7 @@ def _iter_options():
         Color(0x00ffff),
     )
     
-    stats = Stats(202503120004)
+    stats = UserStats(202503120004)
     stats.stat_housewife = 0
     stats.stat_cuteness = 0
     stats.stat_bedroom = 0
@@ -81,7 +81,7 @@ def _iter_options():
         Color(0x33ff00),
     )
     
-    stats = Stats(202503120005)
+    stats = UserStats(202503120005)
     stats.stat_housewife = 10
     stats.stat_cuteness = 10
     stats.stat_bedroom = 10
@@ -101,7 +101,7 @@ def test__get_user_chart_color(stats):
     
     Parameters
     ----------
-    stats : ``Stats``
+    stats : ``UserStats``
         The user's stats
     
     Returns

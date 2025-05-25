@@ -9,7 +9,7 @@ from hata.ext.slash.menus import Pagination
 from scarletio import (
     Lock, add_console_input, get_highlight_streamer, is_awaitable, render_exception_into, write_exception_async
 )
-from scarletio.utils.trace.rendering import _render_exception_representation_syntax_error_into
+from scarletio.utils.trace.rendering import _produce_exception_representation_syntax_error
 from scarletio.utils.trace.exception_representation import ExceptionRepresentationSyntaxError
 from scarletio.utils.trace.exception_representation.syntax_error_helpers import (
     fixup_syntax_error_line_from_buffer, is_syntax_error
@@ -199,16 +199,19 @@ class Interpreter:
                     # module.
                     into = []
                     
-                    if is_syntax_error(syntax_error):
+                    if not is_syntax_error(syntax_error):
+                        render_exception_into(syntax_error, into, filter = _ignore_console_frames)
+                    
+                    else:
                         fixup_syntax_error_line_from_buffer(syntax_error, source.splitlines())
                         
                         highlighter_stream = get_highlight_streamer(None)
-                        _render_exception_representation_syntax_error_into(
-                            ExceptionRepresentationSyntaxError(syntax_error, None), highlighter_stream, into
-                        )
+                        for item in _produce_exception_representation_syntax_error(
+                            ExceptionRepresentationSyntaxError(syntax_error, None)
+                        ):
+                            into.extend(highlighter_stream.asend(item))
+                        
                         into.extend(highlighter_stream.asend(None))
-                    else:
-                        render_exception_into(syntax_error, into, filter = _ignore_console_frames)
                     
                     buffer.write(''.join(into))
                     into = None

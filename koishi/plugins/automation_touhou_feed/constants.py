@@ -3,8 +3,9 @@ __all__ = ()
 import re
 
 from dateutil.relativedelta import relativedelta as RelativeDelta
-from hata import AnsiForegroundColor, BUILTIN_EMOJIS, Permission, create_ansi_format_code, elapsed_time
-from hata.ext.slash import Button, Row
+from hata import (
+    AnsiForegroundColor, BUILTIN_EMOJIS, Permission, create_ansi_format_code, create_button, create_row, elapsed_time
+)
 
 
 FEEDERS = {}
@@ -54,59 +55,59 @@ CUSTOM_ID_ABOUT_EXAMPLES = 'touhou_feed.about.examples'
 CUSTOM_ID_ABOUT_INTERVAL = 'touhou_feed.about.interval'
 
 
-BUTTON_PREVIOUS_DISABLED = Button(
+BUTTON_PREVIOUS_DISABLED = create_button(
     emoji = EMOJI_PAGE_PREVIOUS,
     custom_id = CUSTOM_ID_PAGE_PREVIOUS_DISABLED,
     enabled = False,
 )
 
-BUTTON_NEXT_DISABLED = Button(
+BUTTON_NEXT_DISABLED = create_button(
     emoji = EMOJI_PAGE_NEXT,
     custom_id = CUSTOM_ID_PAGE_NEXT_DISABLED,
     enabled = False,
 )
 
-BUTTON_REFRESH_BASE = Button(
+BUTTON_REFRESH_BASE = create_button(
     'Refresh',
     EMOJI_REFRESH,
 )
     
-BUTTON_CLOSE = Button(
+BUTTON_CLOSE = create_button(
     'Close',
     EMOJI_CLOSE,
     custom_id = CUSTOM_ID_CLOSE,
 )
 
-BUTTON_ABOUT_MAIN = Button(
+BUTTON_ABOUT_MAIN = create_button(
     'About',
     custom_id = CUSTOM_ID_ABOUT_MAIN,
 )
 
-BUTTON_ABOUT_EXAMPLES = Button(
+BUTTON_ABOUT_EXAMPLES = create_button(
     'Examples',
     custom_id = CUSTOM_ID_ABOUT_EXAMPLES,
 )
 
-BUTTON_ABOUT_INTERVAL = Button(
+BUTTON_ABOUT_INTERVAL = create_button(
     'Interval',
     custom_id = CUSTOM_ID_ABOUT_INTERVAL,
 )
 
-COMPONENTS_ABOUT_MAIN = Row(
+COMPONENTS_ABOUT_MAIN = create_row(
     BUTTON_ABOUT_MAIN.copy_with(enabled = False),
     BUTTON_ABOUT_EXAMPLES,
     BUTTON_ABOUT_INTERVAL,
     BUTTON_CLOSE,
 )
 
-COMPONENTS_ABOUT_EXAMPLES = Row(
+COMPONENTS_ABOUT_EXAMPLES = create_row(
     BUTTON_ABOUT_MAIN,
     BUTTON_ABOUT_EXAMPLES.copy_with(enabled = False),
     BUTTON_ABOUT_INTERVAL,
     BUTTON_CLOSE,
 )
 
-COMPONENTS_ABOUT_INTERVAL = Row(
+COMPONENTS_ABOUT_INTERVAL = create_row(
     BUTTON_ABOUT_MAIN,
     BUTTON_ABOUT_EXAMPLES,
     BUTTON_ABOUT_INTERVAL.copy_with(enabled = False),

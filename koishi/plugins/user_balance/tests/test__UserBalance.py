@@ -34,6 +34,7 @@ def _assert_fields_set(user_balance):
     vampytest.assert_instance(user_balance.relationship_value, int)
     vampytest.assert_instance(user_balance.relationship_divorces, int)
     vampytest.assert_instance(user_balance.relationship_slots, int)
+    vampytest.assert_instance(user_balance.user_id, int)
 
 
 def test__UserBalance__new():
