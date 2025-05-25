@@ -357,6 +357,7 @@ if (DB_ENGINE is not None):
     class guild_stats_model(BASE):
         __tablename__ = 'GUILD_STATS'
         id            = Column(Int64, primary_key = True)
+        guild_id      = Column(Int64, default = 0, nullable = False)
         credibility   = Column(Int64, default = 0, nullable = False)
     
     GUILD_STATS_TABLE = guild_stats_model.__table__
