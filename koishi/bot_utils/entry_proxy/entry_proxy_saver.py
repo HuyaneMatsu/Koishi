@@ -135,16 +135,16 @@ class EntryProxySaver(RichAttributeErrorBaseType):
             async with DB_ENGINE.connect() as connector:
                 entry_id = entry_proxy.entry_id
                 # Entry new that is all
-                if (entry_id == -1) and entry_proxy:
+                if (entry_id == 0) and entry_proxy:
                     self.modified_fields = None
                     entry_id = await self._insert_entry(connector, entry_proxy)
                     entry_proxy.entry_id = entry_id
                 
                 while self.is_modified():
                     if self.ensured_for_deletion:
-                        if entry_id != -1:
+                        if entry_id != 0:
                             await self._delete_entry(connector, entry_id)
-                            entry_proxy.entry_id = -1
+                            entry_proxy.entry_id = 0
                         
                         # We done!
                         return
@@ -153,7 +153,7 @@ class EntryProxySaver(RichAttributeErrorBaseType):
                     if (modified_fields is not None):
                         self.modified_fields = None
                         
-                        if entry_id == -1:
+                        if entry_id == 0:
                             entry_id = await self._insert_entry(connector, entry_proxy)
                             entry_proxy.entry_id = entry_id
                         
@@ -203,7 +203,7 @@ class EntryProxySaver(RichAttributeErrorBaseType):
         -------
         entry_id : `int`
         """
-        return -1
+        return 0
     
     
     async def _update_entry(self, connector, entry_id, modified_fields):
@@ -243,7 +243,7 @@ class EntryProxySaver(RichAttributeErrorBaseType):
         @copy_docs(run)
         async def run(self):
             entry_proxy = self.entry_proxy
-            if entry_proxy.entry_id == -1:
+            if entry_proxy.entry_id == 0:
                 entry_proxy.entry_id = next(COUNTER)
                 
             self.run_task = None

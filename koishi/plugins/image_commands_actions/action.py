@@ -662,7 +662,7 @@ async def create_response_content_and_embed(
         The action to work on.
     client : ``Client``
         The client who received the event.
-    event : `None`, ``InteractionEvent``
+    event : ``None | InteractionEvent``
         The received interaction event if called from a command.
     guild_id : `int`
         The guild's identifier where the command was called from.

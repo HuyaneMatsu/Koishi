@@ -59,7 +59,7 @@ class RelationshipRequest(EntryProxy):
         """
         self = object.__new__(cls)
         self.investment = investment
-        self.entry_id = -1
+        self.entry_id = 0
         self.relationship_type = relationship_type
         self.saver = None
         self.source_user_id = source_user_id

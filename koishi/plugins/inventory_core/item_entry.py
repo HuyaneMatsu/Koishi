@@ -36,7 +36,7 @@ class ItemEntry(RichAttributeErrorBaseType):
         """
         self = object.__new__(cls)
         self.amount = amount
-        self.entry_id = -1
+        self.entry_id = 0
         self.item = item
         return self
     

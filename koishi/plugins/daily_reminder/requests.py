@@ -119,7 +119,7 @@ async def try_message_create(client, channel, embed, components, entry_id, conne
     
     Returns
     -------
-    message : `None | Message`
+    message : ``None | Message``
     """
     try:
         message = await client.message_create(

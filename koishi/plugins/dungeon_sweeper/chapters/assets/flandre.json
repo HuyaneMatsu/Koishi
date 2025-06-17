@@ -1,0 +1,644 @@
+{
+    "id": 2,
+    "unlock_prerequisite_stage_id": 13,
+    "first_stage_id": 34,
+    "previous_chapter_id": 1,
+    "next_chapter_id": 3,
+    "skill_id": 2,
+    "style_id": 2,
+    "rule_id": 2,
+    "display_name": "Flandre",
+    "stages": [
+        {
+            "difficulty_id": 0,
+            "in_difficulty_index": 0,
+            "id": 34,
+            "start_position": 15,
+            "target_count": 1,
+            "size_x": 7,
+            "best": 4,
+            "previous_stage_id": 33,
+            "next_stage_id": 35,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "HOLE"      , "HOLE"      , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "CE_FLOOR"  , "FLOOR"     , "OBSTACLE"  , "BOX"       , "TARGET"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 1,
+            "in_difficulty_index": 0,
+            "id": 35,
+            "start_position": 22,
+            "target_count": 1,
+            "size_x": 7,
+            "best": 14,
+            "previous_stage_id": 34,
+            "next_stage_id": 36,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "HOLE"      , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "HOLE"      , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 1,
+            "in_difficulty_index": 1,
+            "id": 36,
+            "start_position": 8,
+            "target_count": 1,
+            "size_x": 5,
+            "best": 18,
+            "previous_stage_id": 35,
+            "next_stage_id": 37,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "CS_FLOOR"  , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "BOX"       , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "HOLE"      , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "BOX"       , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "TARGET"    , "FLOOR"     , "HOLE"      , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 1,
+            "in_difficulty_index": 2,
+            "id": 37,
+            "start_position": 49,
+            "target_count": 2,
+            "size_x": 8,
+            "best": 31,
+            "previous_stage_id": 36,
+            "next_stage_id": 38,
+            "map": [
+                "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "WALL_N"    , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+                "WALL_W"    , "CN_FLOOR"  , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 1,
+            "in_difficulty_index": 3,
+            "id": 38,
+            "start_position": 24,
+            "target_count": 2,
+            "size_x": 7,
+            "best": 18,
+            "previous_stage_id": 37,
+            "next_stage_id": 39,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "HOLE"      , "OBSTACLE"  , "BOX"       , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "TARGET"    , "FLOOR"     , "CS_FLOOR"  , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "BOX"       , "OBSTACLE"  , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_SW"   , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+                "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 1,
+            "in_difficulty_index": 4,
+            "id": 39,
+            "start_position": 29,
+            "target_count": 3,
+            "size_x": 7,
+            "best": 35,
+            "previous_stage_id": 38,
+            "next_stage_id": 40,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "BOX"       , "OBSTACLE"  , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 1,
+            "in_difficulty_index": 5,
+            "id": 40,
+            "start_position": 57,
+            "target_count": 2,
+            "size_x": 8,
+            "best": 36,
+            "previous_stage_id": 39,
+            "next_stage_id": 41,
+            "map": [
+                "NOTHING"   , "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "TARGET"    , "OBSTACLE"  , "BOX"       , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "BOX"       , "TARGET"    , "WALL_E"    ,
+                "WALL_W"    , "CN_FLOOR"  , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 1,
+            "in_difficulty_index": 6,
+            "id": 41,
+            "start_position": 45,
+            "target_count": 2,
+            "size_x": 8,
+            "best": 36,
+            "previous_stage_id": 40,
+            "next_stage_id": 42,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "BOX"       , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "HOLE"      , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "OBSTACLE"  , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "HOLE"      , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "CN_FLOOR"  , "OBSTACLE"  , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 1,
+            "in_difficulty_index": 7,
+            "id": 42,
+            "start_position": 46,
+            "target_count": 3,
+            "size_x": 9,
+            "best": 47,
+            "previous_stage_id": 41,
+            "next_stage_id": 43,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "HOLE"      , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "BOX"       , "HOLE"      , "FLOOR"     , "TARGET"    , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "WALL_SE"   , "NOTHING"   ,
+                "WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "WALL_SE"   , "NOTHING"   , "NOTHING"   ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"   , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 1,
+            "in_difficulty_index": 8,
+            "id": 43,
+            "start_position": 38,
+            "target_count": 1,
+            "size_x": 8,
+            "best": 29,
+            "previous_stage_id": 42,
+            "next_stage_id": 44,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "HOLE"      , "BOX"       , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE"      , "OBSTACLE"  , "OBSTACLE"  , "BOX"       , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "HOLE"      , "TARGET"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE"      , "FLOOR"     , "HOLE"      , "CS_FLOOR"  , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "BOX"       , "OBSTACLE"  , "BOX"       , "HOLE"      , "BOX"       , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 1,
+            "in_difficulty_index": 9,
+            "id": 44,
+            "start_position": 10,
+            "target_count": 2,
+            "size_x": 7,
+            "best": 29,
+            "previous_stage_id": 43,
+            "next_stage_id": 45,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "TARGET"    , "CS_FLOOR"  , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "HOLE"      , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "BOX"       , "OBSTACLE"  , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_SW"   , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 2,
+            "in_difficulty_index": 0,
+            "id": 45,
+            "start_position": 9,
+            "target_count": 1,
+            "size_x": 8,
+            "best": 27,
+            "previous_stage_id": 44,
+            "next_stage_id": 46,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "CE_FLOOR"  , "FLOOR"     , "OBSTACLE"  , "TARGET"    , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "HOLE"      , "BOX"       , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "OBSTACLE"  , "BOX"       , "HOLE"      , "BOX"       , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 2,
+            "in_difficulty_index": 1,
+            "id": 46,
+            "start_position": 40,
+            "target_count": 1,
+            "size_x": 7,
+            "best": 39,
+            "previous_stage_id": 45,
+            "next_stage_id": 47,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "HOLE"      , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "HOLE"      , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "BOX"       , "OBSTACLE"  , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "CW_FLOOR"  , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "BOX"       , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 2,
+            "in_difficulty_index": 2,
+            "id": 47,
+            "start_position": 9,
+            "target_count": 1,
+            "size_x": 8,
+            "best": 22,
+            "previous_stage_id": 46,
+            "next_stage_id": 48,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "CE_FLOOR"  , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "TARGET"    , "OBSTACLE"  , "BOX"       , "OBSTACLE"  , "HOLE"      , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "HOLE"      , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "OBSTACLE"  , "HOLE"      , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 2,
+            "in_difficulty_index": 3,
+            "id": 48,
+            "start_position": 34,
+            "target_count": 2,
+            "size_x": 10,
+            "best": 42,
+            "previous_stage_id": 47,
+            "next_stage_id": 49,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE"      , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "TARGET"    , "BOX"       , "CS_FLOOR"  , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "HOLE"      , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 2,
+            "in_difficulty_index": 4,
+            "id": 49,
+            "start_position": 10,
+            "target_count": 4,
+            "size_x": 8,
+            "best": 59,
+            "previous_stage_id": 48,
+            "next_stage_id": 50,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "CS_TARGET" , "TARGET"    , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX_TARGET", "FLOOR"     , "OBSTACLE"  , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "TARGET"    , "BOX"       , "HOLE"      , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_SW"   , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 2,
+            "in_difficulty_index": 5,
+            "id": 50,
+            "start_position": 56,
+            "target_count": 2,
+            "size_x": 11,
+            "best": 41,
+            "previous_stage_id": 49,
+            "next_stage_id": 51,
+            "map": [
+                "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "WALL_N"    , "OBSTACLE"  , "TARGET"    , "FLOOR"     , "FLOOR"     , "HOLE"      , "FLOOR"     , "HOLE"      , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "OBSTACLE"  , "HOLE"      , "FLOOR"     , "FLOOR"     , "BOX"       , "BOX"       , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "OBSTACLE"  , "BOX"       , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "CE_FLOOR"  , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "OBSTACLE"  , "HOLE"      , "BOX"       , "TARGET"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 2,
+            "in_difficulty_index": 6,
+            "id": 51,
+            "start_position": 73,
+            "target_count": 2,
+            "size_x": 10,
+            "best": 47,
+            "previous_stage_id": 50,
+            "next_stage_id": 52,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+                "WALL_W"    , "OBSTACLE"  , "TARGET"    , "OBSTACLE"  , "TARGET"    , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "HOLE"      , "BOX"       , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "OBSTACLE"  , "HOLE"      , "HOLE"      , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "BOX"       , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "BOX"       , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "HOLE"      , "FLOOR"     , "CE_FLOOR"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 2,
+            "in_difficulty_index": 7,
+            "id": 52,
+            "start_position": 54,
+            "target_count": 2,
+            "size_x": 10,
+            "best": 51,
+            "previous_stage_id": 51,
+            "next_stage_id": 53,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "HOLE"      , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "CN_FLOOR"  , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "BOX"       , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 2,
+            "in_difficulty_index": 8,
+            "id": 53,
+            "start_position": 11,
+            "target_count": 2,
+            "size_x": 10,
+            "best": 39,
+            "previous_stage_id": 52,
+            "next_stage_id": 54,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "HOLE"      , "BOX"       , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "HOLE"      , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "HOLE"      , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "TARGET"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "HOLE"      , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 2,
+            "in_difficulty_index": 9,
+            "id": 54,
+            "start_position": 46,
+            "target_count": 2,
+            "size_x": 9,
+            "best": 66,
+            "previous_stage_id": 53,
+            "next_stage_id": 55,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "HOLE"      , "OBSTACLE"  , "FLOOR"     , "BOX_TARGET", "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "HOLE"      , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "CE_FLOOR"  , "HOLE_F"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "HOLE"      , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "HOLE"      , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "HOLE"      , "TARGET"    , "HOLE"      , "OBSTACLE"  , "FLOOR"     , "BOX"       , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE"      , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 3,
+            "in_difficulty_index": 0,
+            "id": 55,
+            "start_position": 65,
+            "target_count": 1,
+            "size_x": 8,
+            "best": 52,
+            "previous_stage_id": 54,
+            "next_stage_id": 56,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "HOLE"      , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "HOLE"      , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "HOLE"      , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "HOLE"      , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "HOLE"      , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "HOLE"      , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "BOX"       , "OBSTACLE"  , "HOLE"      , "BOX"       , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "CN_TARGET" , "OBSTACLE"  , "HOLE"      , "HOLE"      , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 3,
+            "in_difficulty_index": 1,
+            "id": 56,
+            "start_position": 60,
+            "target_count": 1,
+            "size_x": 11,
+            "best": 48,
+            "previous_stage_id": 55,
+            "next_stage_id": 57,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "BOX"       , "FLOOR"     , "FLOOR"     , "TARGET"    , "OBSTACLE"  , "HOLE"      , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "HOLE"      , "FLOOR"     , "OBSTACLE"  , "HOLE"      , "HOLE"      , "HOLE"      , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE"      , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "HOLE"      , "FLOOR"     , "BOX"       , "FLOOR"     , "OBSTACLE"  , "BOX"       , "FLOOR"     , "FLOOR"     , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "CW_FLOOR"  , "FLOOR"     , "HOLE"      , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 3,
+            "in_difficulty_index": 2,
+            "id": 57,
+            "start_position": 43,
+            "target_count": 3,
+            "size_x": 9,
+            "best": 48,
+            "previous_stage_id": 56,
+            "next_stage_id": 58,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+                "WALL_W"    , "OBSTACLE"  , "TARGET"    , "FLOOR"     , "FLOOR"     , "TARGET"    , "OBSTACLE"  , "WALL_E"    , "NOTHING"   ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "OBSTACLE"  , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "OBSTACLE"  , "HOLE"      , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "CS_FLOOR"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE"      , "FLOOR"     , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "BOX"       , "OBSTACLE"  , "BOX"       , "OBSTACLE"  , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "HOLE"      , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 3,
+            "in_difficulty_index": 3,
+            "id": 58,
+            "start_position": 10,
+            "target_count": 3,
+            "size_x": 9,
+            "best": 62,
+            "previous_stage_id": 57,
+            "next_stage_id": 59,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "HOLE"      , "BOX"       , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "BOX"       , "FLOOR"     , "HOLE"      , "FLOOR"     , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "TARGET"    , "FLOOR"     , "HOLE"      , "FLOOR"     , "TARGET"    , "OBSTACLE"  , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 3,
+            "in_difficulty_index": 4,
+            "id": 59,
+            "start_position": 14,
+            "target_count": 1,
+            "size_x": 8,
+            "best": 64,
+            "previous_stage_id": 58,
+            "next_stage_id": 60,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "HOLE"      , "FLOOR"     , "FLOOR"     , "FLOOR"     , "CS_TARGET" , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "HOLE"      , "HOLE"      , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "BOX"       , "WALL_E"    ,
+                "WALL_W"    , "HOLE"      , "BOX"       , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 3,
+            "in_difficulty_index": 5,
+            "id": 60,
+            "start_position": 74,
+            "target_count": 1,
+            "size_x": 12,
+            "best": 43,
+            "previous_stage_id": 59,
+            "next_stage_id": 61,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "BOX"       , "OBSTACLE"  , "HOLE"      , "BOX"       , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "HOLE"      , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "BOX"       , "BOX"       , "BOX"       , "FLOOR"     , "HOLE"      , "HOLE"      , "BOX"       , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "HOLE"      , "CE_FLOOR"  , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "OBSTACLE"  , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 3,
+            "in_difficulty_index": 6,
+            "id": 61,
+            "start_position": 43,
+            "target_count": 2,
+            "size_x": 9,
+            "best": 64,
+            "previous_stage_id": 60,
+            "next_stage_id": 62,
+            "map": [
+            "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+            "WALL_W"    , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+            "WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "WALL_E"    ,
+            "WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE"      , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+            "WALL_W"    , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "CE_FLOOR"  , "WALL_E"    ,
+            "WALL_W"    , "FLOOR"     , "HOLE"      , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+            "WALL_W"    , "HOLE"      , "HOLE"      , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+            "WALL_W"    , "TARGET"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "WALL_E"    ,
+            "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 3,
+            "in_difficulty_index": 7,
+            "id": 62,
+            "start_position": 86,
+            "target_count": 2,
+            "size_x": 11,
+            "best": 56,
+            "previous_stage_id": 61,
+            "next_stage_id": 63,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "HOLE"      , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE"      , "OBSTACLE"  , "OBSTACLE"  , "BOX"       , "OBSTACLE"  , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "HOLE"      , "BOX"       , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "HOLE"      , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "BOX"       , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "HOLE"      , "HOLE"      , "HOLE"      , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "HOLE"      , "HOLE"      , "HOLE"      , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "HOLE"      , "HOLE"      , "BOX"       , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "HOLE"      , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "BOX"       , "FLOOR"     , "CW_FLOOR"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 3,
+            "in_difficulty_index": 8,
+            "id": 63,
+            "start_position": 15,
+            "target_count": 1,
+            "size_x": 10,
+            "best": 59,
+            "previous_stage_id": 62,
+            "next_stage_id": 64,
+            "map": [
+                "NOTHING"   , "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+                "NOTHING"   , "NOTHING"   , "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "CS_FLOOR"  , "FLOOR"     , "OBSTACLE"  , "WALL_E"    , "NOTHING"   ,
+                "NOTHING"   , "NOTHING"   , "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "BOX"       , "FLOOR"     , "OBSTACLE"  , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "OBSTACLE"  , "FLOOR"     , "HOLE"      , "HOLE"      , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "OBSTACLE"  , "FLOOR"     , "HOLE"      , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "OBSTACLE"  , "BOX"       , "HOLE"      , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "HOLE"      , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "BOX"       , "HOLE"      , "OBSTACLE"  , "OBSTACLE"  , "OBSTACLE"  , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_SW"   , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBSTACLE"  , "WALL_SE"   , "NOTHING"   ,
+                "NOTHING"   , "NOTHING"   , "WALL_W"    , "OBSTACLE"  , "HOLE"      , "FLOOR"     , "TARGET"    , "OBSTACLE"  , "WALL_E"    , "NOTHING"   ,
+                "NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"   
+            ]
+        }, {
+            "difficulty_id": 3,
+            "in_difficulty_index": 9,
+            "id": 64,
+            "start_position": 77,
+            "target_count": 2,
+            "size_x": 10,
+            "best": 98,
+            "previous_stage_id": 63,
+            "next_stage_id": 65,
+            "map": [
+                "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+                "WALL_W"    , "OBSTACLE"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "TARGET"    , "TARGET"    , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "BOX"       , "HOLE"      , "OBSTACLE"  , "BOX"       , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "FLOOR"     , "OBSTACLE"  , "HOLE"      , "OBSTACLE"  , "OBSTACLE"  , "HOLE"      , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE"      , "HOLE"      , "HOLE"      , "OBSTACLE"  , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "OBSTACLE"  , "HOLE"      , "BOX"       , "OBSTACLE"  , "HOLE"      , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "HOLE"      , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "BOX"       , "FLOOR"     , "WALL_E"    ,
+                "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE"      , "OBSTACLE"  , "FLOOR"     , "CN_FLOOR"  , "FLOOR"     , "WALL_E"    ,
+                "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   
+            ]
+        }
+    ]
+}

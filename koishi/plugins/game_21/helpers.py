@@ -318,18 +318,28 @@ async def try_edit_response(
     ----------
     client : ``ClientUserBase``
         The respective client.
+    
     interaction_event : `None | InteractionEvent`
         The received interaction event.
+    
+    latest_interaction_event : `int`
+        Previous interaction event.
+    
     message : ``Message``
         The message to edit if required.
+    
     player : ``Player``
         The respective player.
+    
     session : ``Session``
         The respective session.
+    
     single_player : `bool`
         Whether the game mode is single player.
-    components : `None | Component | list<Component>`
+    
+    components : ``None | Component | list<Component>``
         The components to send.
+    
     embed : ``Embed``
         The embed to send.
     
@@ -341,11 +351,20 @@ async def try_edit_response(
         try:
             if interaction_event.is_acknowledged():
                 if message is None:
-                    await client.interaction_response_message_edit(
-                        interaction_event,
-                        components = components,
-                        embed = embed,
-                    )
+                    if interaction_event.is_response_invoking_user_only():
+                        await client.interaction_response_message_edit(interaction_event, '-# _ _')
+                        await client.interaction_response_message_delete(interaction_event)
+                        await client.interaction_followup_message_create(
+                            interaction_event,
+                            components = components,
+                            embed = embed,
+                        )
+                    else:
+                        await client.interaction_response_message_edit(
+                            interaction_event,
+                            components = components,
+                            embed = embed,
+                        )
                 else:
                     await client.interaction_followup_message_edit(
                         interaction_event,

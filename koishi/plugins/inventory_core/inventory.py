@@ -183,7 +183,7 @@ class Inventory(RichAttributeErrorBaseType):
             item_entry.amount = new_amount
         
         # Ignore freshly removed & added back items.
-        if (item_entry.entry_id != - 1) or new_amount:
+        if (item_entry.entry_id != 0) or new_amount:
             if item_entries_modified is None:
                 item_entries_modified = {}
             

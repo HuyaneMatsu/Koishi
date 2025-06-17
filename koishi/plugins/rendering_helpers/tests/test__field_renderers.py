@@ -52,7 +52,7 @@ def test__render_role_mentions_field_into(field_added, roles, optional, title):
     ----------
     field_added : `bool`
         Whether any fields were added already.
-    roles : `None`, `tuple` of ``Role``
+    roles : ``None | tuple<Role>``
         The roles to render.
     optional : `bool`
         Whether should not render if `roles` is `None`.

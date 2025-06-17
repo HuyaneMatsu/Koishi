@@ -166,7 +166,7 @@ async def query_delete_linked_quest(entry_id):
     entry_id : `int`
         The entry's identifier to delete.
     """
-    if entry_id == -1:
+    if entry_id == 0:
         return
     
     async with DB_ENGINE.connect() as connector:
@@ -290,7 +290,7 @@ async def query_modify_lined_quest_amount_submitted(entry_id, amount):
     amount : `int`
         New amount to set.
     """
-    if entry_id == -1:
+    if entry_id == 0:
         return
     
     async with DB_ENGINE.connect() as connector:

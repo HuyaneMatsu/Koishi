@@ -16,7 +16,7 @@ def render_role_mentions_into(into, roles):
     ----------
     into : `list` of `str`
         Container.
-    roles : `tuple` of ``Role``
+    roles : ``tuple<Role>``
         Date time to convert.
     
     Returns

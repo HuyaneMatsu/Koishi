@@ -58,7 +58,7 @@ class Detail:
         The object's name.
     mutually_exclusive_with : `None`, `frozenset` of ``Detail``
         A frozenset of mutually exclusive details.
-    value_by_question_type : `None` or `dict` of (`int`, `str`) items
+    value_by_question_type : `None | dict<int, str>`
         Question type value overwrites.
     sort_value : `int`
         Sort value of the detail.

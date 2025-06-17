@@ -258,7 +258,7 @@ async def confirm_action(client, event, guild, user, embed_builder, word_config,
     
     Returns
     -------
-    component_interaction : `None`, ``InteractionEvent``
+    component_interaction : ``None | InteractionEvent``
     """
     message = await client.interaction_followup_message_create(
         event,

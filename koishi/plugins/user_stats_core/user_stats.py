@@ -80,7 +80,7 @@ class UserStats(EntryProxy):
         self._cache_stats_calculated = None
         self.saver = None
         
-        self.entry_id = -1
+        self.entry_id = 0
         self.user_id = user_id
         
         self.credibility = 0

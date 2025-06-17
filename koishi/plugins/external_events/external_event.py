@@ -71,7 +71,7 @@ class ExternalEvent(RichAttributeErrorBaseType):
         """
         self = object.__new__(cls)
         self.client_id = client_id
-        self.entry_id = -1
+        self.entry_id = 0
         self.event_data = event_data
         self.event_type = event_type
         self.guild_id = guild_id
@@ -122,7 +122,7 @@ class ExternalEvent(RichAttributeErrorBaseType):
         
         # entry_id
         entry_id = self.entry_id
-        if (entry_id != -1):
+        if (entry_id != 0):
             repr_parts.append(' entry_id = ')
             repr_parts.append(repr(entry_id))
             repr_parts.append(',')

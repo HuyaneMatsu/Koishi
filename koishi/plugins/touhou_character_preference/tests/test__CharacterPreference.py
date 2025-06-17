@@ -32,7 +32,7 @@ def test__CharacterPreference__new():
     character_preference = CharacterPreference(user_id, system_name)
     _assert_fields_set(character_preference)
     
-    vampytest.assert_eq(character_preference.entry_id, -1)
+    vampytest.assert_eq(character_preference.entry_id, 0)
     vampytest.assert_eq(character_preference.user_id, user_id)
     vampytest.assert_eq(character_preference.system_name, system_name)
 

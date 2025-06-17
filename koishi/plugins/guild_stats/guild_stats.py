@@ -48,7 +48,7 @@ class GuildStats(EntryProxy):
         self = object.__new__(cls)
         self._cache_quest_batch = None
         self.credibility = 0
-        self.entry_id = -1
+        self.entry_id = 0
         self.guild_id = guild_id
         self.saver = None
         return self

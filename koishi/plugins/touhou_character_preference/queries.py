@@ -277,7 +277,7 @@ async def _add_touhou_character_preference(character_preference):
     """
     async with DB_ENGINE.connect() as connector:
         entry_id = character_preference.entry_id
-        if entry_id == -1:
+        if entry_id == 0:
             # Add if new.
             response = await connector.execute(
                 CHARACTER_PREFERENCE_TABLE.insert().values(
@@ -344,7 +344,7 @@ async def _remove_touhou_character_preference(character_preference):
     """
     entry_id = character_preference.entry_id
     # Do nothing if the entry doesnt exists.
-    if entry_id == -1:
+    if entry_id == 0:
         return
     
     async with DB_ENGINE.connect() as connector:

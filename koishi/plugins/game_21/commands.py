@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import create_button
+from hata import DiscordException, ERROR_CODES, create_button
 from scarletio import Future, Task, TaskGroup, get_event_loop
 
 from ...bot_utils.constants import IN_GAME_IDS
@@ -55,6 +55,16 @@ async def game_21(
     mode : `str` = `single`, Optional
         Game mode.
     """
+    try:
+        await client.interaction_application_command_acknowledge(
+            interaction_event,
+            show_for_invoking_user_only = True,
+        )
+    except DiscordException as exception:
+        if exception.code != ERROR_CODES.unknown_interaction:
+            raise
+        return
+    
     check_in_game(interaction_event)
     check_bet_too_low(amount)
     
@@ -75,8 +85,6 @@ async def game_21(
         target_user_balance.set('allocated', max(target_user_balance.allocated + amount, 0))
         await target_user_balance.save()
     
-    
-    await client.interaction_application_command_acknowledge(interaction_event)
     
     if single_player_mode:
         coroutine_function = game_21_single_player

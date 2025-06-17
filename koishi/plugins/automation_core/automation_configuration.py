@@ -147,7 +147,7 @@ class AutomationConfiguration(EntryProxy):
         self.community_message_moderation_log_channel_id = 0
         self.community_message_moderation_up_vote_emoji_id = 0
         self.community_message_moderation_vote_threshold = 0
-        self.entry_id = -1
+        self.entry_id = 0
         self.farewell_channel_id = 0
         self.farewell_enabled = False
         self.farewell_style_name = None

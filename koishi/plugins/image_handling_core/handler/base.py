@@ -37,7 +37,7 @@ class ImageHandlerBase(RichAttributeErrorBaseType):
         ----------
         client : ``Client``
             The respective client who received the event.
-        event : `None`, ``InteractionEvent``
+        event : ``None | InteractionEvent``
             The respective interaction event.
         **acknowledge_parameters : Keyword parameters
             Additional parameter used when acknowledging.
@@ -59,7 +59,7 @@ class ImageHandlerBase(RichAttributeErrorBaseType):
         -------
         client : ``Client``
             The respective client who received the event.
-        event : `None`, ``InteractionEvent``
+        event : ``None | InteractionEvent``
             The respective interaction event.
         weight_map : `dict<int, int>`
             Weight map to prefer an image source over an other.

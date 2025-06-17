@@ -52,7 +52,7 @@ def test__UserSettings__new():
     )
     _assert_fields_set(user_settings)
     
-    vampytest.assert_eq(user_settings.entry_id, -1)
+    vampytest.assert_eq(user_settings.entry_id, 0)
     vampytest.assert_eq(user_settings.user_id, user_id)
     vampytest.assert_eq(user_settings.notification_daily_by_waifu, notification_daily_by_waifu)
     vampytest.assert_eq(user_settings.notification_daily_reminder, notification_daily_reminder)

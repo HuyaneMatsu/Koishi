@@ -106,7 +106,7 @@ async def urban(
     if (channel is None) or (not channel.nsfw):
         abort('Command only allowed in nsfw channels.')
     
-    async with client.http.get(URBAN_DICTIONARY_API_URL, params={'term': term}) as response:
+    async with client.http.get(URBAN_DICTIONARY_API_URL, params = {'term': term}) as response:
         if response.status != 200:
             abort(f'Something went wrong: status = {response.status!r} reason = {response.reason!r}.')
         

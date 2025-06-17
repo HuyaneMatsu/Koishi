@@ -62,7 +62,7 @@ class ToDo(EntryProxy):
         self.created_at = created_at
         self.creator_id = creator_id
         self.description = description
-        self.entry_id = -1
+        self.entry_id = 0
         self.name = name
         self.saver = None
         

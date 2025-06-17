@@ -284,7 +284,7 @@ async def test__ToDo__set__add_field():
     
     new_name = 'hey mister'
     
-    entry_id = -1
+    entry_id = 0
     
     try:
         to_do = ToDo(name, description, created_at, creator_id)

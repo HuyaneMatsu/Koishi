@@ -64,7 +64,7 @@ def test__LinkedQuest__new():
     vampytest.assert_eq(linked_quest.amount_submitted, 0)
     vampytest.assert_eq(linked_quest.amount_required, amount)
     vampytest.assert_eq(linked_quest.batch_id, batch_id)
-    vampytest.assert_eq(linked_quest.entry_id, -1)
+    vampytest.assert_eq(linked_quest.entry_id, 0)
     # skip expires_at
     vampytest.assert_eq(linked_quest.guild_id, guild_id)
     vampytest.assert_eq(linked_quest.reward_balance, reward_balance)

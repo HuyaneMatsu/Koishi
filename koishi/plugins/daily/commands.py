@@ -3,8 +3,9 @@ __all__ = ()
 from datetime import datetime as DateTime, timezone as TimeZone
 from math import floor
 
-from hata import DiscordException, create_button
+from hata import DiscordException, ERROR_CODES, KOKORO, create_button
 from hata.ext.slash import P
+from scarletio import Task
 
 from ...bot_utils.daily import DAILY_INTERVAL, calculate_daily_for, refresh_streak
 from ...bot_utils.utils import send_embed_to
@@ -30,7 +31,7 @@ async def claim_daily_for_yourself(client, interaction_event):
     """
     Claims daily for yourself.
     
-    This function is a coroutine generator.
+    This function is a coroutine.
     
     Parameters
     ----------
@@ -39,10 +40,6 @@ async def claim_daily_for_yourself(client, interaction_event):
     
     interaction_event : ``InteractionEvent``
         The received interaction event.
-    
-    Yields
-    ------
-    embed : ``Embed``
     """
     user = interaction_event.user
     
@@ -51,7 +48,23 @@ async def claim_daily_for_yourself(client, interaction_event):
     
     now = DateTime.now(TimeZone.utc)
     if daily_can_claim_at > now:
-        yield build_embed_already_claimed_self(daily_can_claim_at)
+        try:
+            await client.interaction_response_message_edit(
+                interaction_event,
+                build_embed_already_claimed_self(daily_can_claim_at),
+            )
+        except GeneratorExit:
+            raise
+        
+        except ConnectionError:
+            pass
+        
+        except DiscordException as exception:
+            if (
+                exception.status < 500 and
+                exception.code != ERROR_CODES.unknown_interaction
+            ):
+                raise
         return
     
     streak = user_balance.streak
@@ -66,11 +79,40 @@ async def claim_daily_for_yourself(client, interaction_event):
     user_balance.set('count_daily_self', user_balance.count_daily_self + 1)
     user_balance.set('daily_reminded', False)
     
-    await deepen_and_boost_relationship(user_balance, None, None, received, save_source_user_balance = 2)
+    send_response_task = Task(
+        KOKORO,
+        client.interaction_response_message_edit(
+            interaction_event,
+            embed = build_embed_daily_claimed_self(
+                received,
+                balance_new,
+                streak,
+                streak_new,
+                should_top_gg_notify(user_balance.count_top_gg_vote, user_balance.top_gg_voted_at, now),
+            ),
+        ),
+    )
     
-    top_gg_notify = should_top_gg_notify(user_balance.count_top_gg_vote, user_balance.top_gg_voted_at, now)
+    try:
+        await deepen_and_boost_relationship(user_balance, None, None, received, save_source_user_balance = 2)
+    except:
+        send_response_task.cancel()
+        raise
     
-    yield build_embed_daily_claimed_self(received, balance_new, streak, streak_new, top_gg_notify)
+    try:
+        await send_response_task
+    except GeneratorExit:
+        raise
+    
+    except ConnectionError:
+        pass
+    
+    except DiscordException as exception:
+        if (
+            exception.status < 500 and
+            exception.code != ERROR_CODES.unknown_interaction
+        ):
+            raise
     return
 
 
@@ -78,7 +120,7 @@ async def claim_daily_for_other(client, interaction_event, extender_relationship
     """
     Claims daily for someone else.
     
-    This function is a coroutine generator.
+    This function is a coroutine.
     
     Parameters
     ----------
@@ -88,7 +130,7 @@ async def claim_daily_for_other(client, interaction_event, extender_relationship
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    extender_relationship : `None | Relationship`
+    extender_relationship : ``None | Relationship``
         The relationship through what is the target user is related to the source user if its through some-one else.
         Given as `None` if its a direct relationship.
     
@@ -97,10 +139,6 @@ async def claim_daily_for_other(client, interaction_event, extender_relationship
     
     target_user : ``ClientUserBase``
         The targeted user.
-    
-    Yields
-    ------
-    embed : ``Embed``
     """
     source_user = interaction_event.user
     
@@ -113,7 +151,25 @@ async def claim_daily_for_other(client, interaction_event, extender_relationship
     target_daily_can_claim_at = target_user_balance.daily_can_claim_at
     
     if target_daily_can_claim_at > now:
-        yield build_embed_already_claimed_other(target_daily_can_claim_at, target_user, interaction_event.guild_id)
+        try:
+            await client.interaction_response_message_edit(
+                interaction_event,
+                embed = build_embed_already_claimed_other(
+                    target_daily_can_claim_at, target_user, interaction_event.guild_id
+                ),
+            )
+        except GeneratorExit:
+            raise
+        
+        except ConnectionError:
+            pass
+        
+        except DiscordException as exception:
+            if (
+                exception.status < 500 and
+                exception.code != ERROR_CODES.unknown_interaction
+            ):
+                raise
         return
     
     streak = target_user_balance.streak
@@ -133,18 +189,43 @@ async def claim_daily_for_other(client, interaction_event, extender_relationship
     target_user_balance.set('count_daily_by_related', target_user_balance.count_daily_by_related + 1)
     target_user_balance.set('daily_reminded', False)
     
-    await deepen_and_boost_relationship(
-        source_user_balance,
-        target_user_balance,
-        (relationship if (extender_relationship is None) else extender_relationship),
-        relationship_value_increase,
-        save_source_user_balance = 2,
-        save_target_user_balance = 2,
+    send_response_task = Task(
+        KOKORO,
+        client.interaction_response_message_edit(
+            interaction_event,
+            embed = build_embed_daily_claimed_other(
+                received, balance_new, streak, streak_new, target_user, interaction_event.guild_id
+            ),
+        )
     )
     
-    yield build_embed_daily_claimed_other(
-        received, balance_new, streak, streak_new, target_user, interaction_event.guild_id
-    )
+    try:
+        await deepen_and_boost_relationship(
+            source_user_balance,
+            target_user_balance,
+            (relationship if (extender_relationship is None) else extender_relationship),
+            relationship_value_increase,
+            save_source_user_balance = 2,
+            save_target_user_balance = 2,
+        )
+    except:
+        send_response_task.cancel()
+        raise
+    
+    try:
+        await send_response_task
+    except GeneratorExit:
+        raise
+    
+    except ConnectionError:
+        pass
+    
+    except DiscordException as exception:
+        if (
+            exception.status < 500 and
+            exception.code != ERROR_CODES.unknown_interaction
+        ):
+            raise
     
     if (not target_user.bot):
         target_user_settings = await get_one_user_settings(target_user.id)
@@ -177,7 +258,7 @@ async def daily(
     """
     Claim a share of my hearts every day for yourself or for your related.
     
-    This function is a coroutine generator.
+    This function is a coroutine.
     
     Parameters
     ----------
@@ -189,37 +270,38 @@ async def daily(
     
     target_user_name : `None | str` = `None`, Optional
         The targeted user's name if any.
-    
-    Yields
-    ------
-    acknowledge / embed : `None | Embed`
     """
     try:
-        yield
+        await client.interaction_application_command_acknowledge(
+            interaction_event,
+            False,
+        )
+    except GeneratorExit:
+        raise
+    
     except ConnectionError:
         return
     
     except DiscordException as exception:
-        if exception.status >= 500:
-            return
-        
-        raise
+        if (
+            exception.status < 500 and
+            exception.code != ERROR_CODES.unknown_interaction
+        ):
+            raise
+        return
     
     if (target_user_name is None):
-        coroutine_generator = claim_daily_for_yourself(client, interaction_event)
-        
-    else:
-        (
-            extender_relationship,
-            relationship,
-            target_user
-        ) = await get_extender_relationship_and_relationship_and_user_like_at(
-            interaction_event.user_id, remove_comment(target_user_name), interaction_event.guild_id
-        )
-        
-        coroutine_generator = claim_daily_for_other(
-            client, interaction_event, extender_relationship, relationship, target_user
-        )
+        await claim_daily_for_yourself(client, interaction_event)
+        return
     
-    async for embed in coroutine_generator:
-        yield embed
+    (
+        extender_relationship,
+        relationship,
+        target_user
+    ) = await get_extender_relationship_and_relationship_and_user_like_at(
+        interaction_event.user_id, remove_comment(target_user_name), interaction_event.guild_id
+    )
+    
+    await claim_daily_for_other(
+        client, interaction_event, extender_relationship, relationship, target_user
+    )

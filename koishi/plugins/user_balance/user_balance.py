@@ -94,7 +94,7 @@ class UserBalance(EntryProxy):
         self.count_top_gg_vote = 0
         self.daily_can_claim_at = now
         self.daily_reminded = False
-        self.entry_id = -1
+        self.entry_id = 0
         self.streak = 0
         self.saver = None
         self.top_gg_voted_at = now

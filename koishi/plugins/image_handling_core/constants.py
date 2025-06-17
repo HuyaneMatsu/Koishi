@@ -30,6 +30,7 @@ SAFE_TAGS_BANNED = frozenset((
     'bikini',
     'ai-generated'
     'middle_finger',
+    'smoking',
 ))
 
 
@@ -49,6 +50,7 @@ NSFW_TAGS_BANNED = frozenset((
     'shotacon',
     'huge_filesize',
     'ai-generated',
+    'smoking',
 ))
 
 

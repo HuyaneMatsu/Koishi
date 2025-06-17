@@ -10,8 +10,8 @@ from ..user_balance import get_user_balance
 from .checks import check_has_enough_balance, check_in_game, check_max_players
 from .constants import (
     GAME_21_CUSTOM_ID_CANCEL, GAME_21_CUSTOM_ID_ENTER, GAME_21_CUSTOM_ID_START, GAME_21_JOINER_TIMEOUT,
-    GAME_21_JOIN_ROW_DISABLED, GAME_21_JOIN_ROW_ENABLED, GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_EDITING,
-    GUI_STATE_READY, GUI_STATE_SWITCHING_CONTEXT
+    GAME_21_JOIN_ROW_DISABLED, GAME_21_JOIN_ROW_ENABLED, UI_STATE_CANCELLED, UI_STATE_CANCELLING, UI_STATE_EDITING,
+    UI_STATE_READY, UI_STATE_SWITCHING_CONTEXT
 )
 from .helpers import should_render_exception, try_acknowledge, try_edit_response
 from .player import Player
@@ -31,9 +31,9 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
     
     Attributes
     ----------
-    _gui_state : `int`
+    _ui_state : `int`
         The state of the graphical user interface. Tracked, so we do not overlap operations that should not be.
-    _previous_player : `list<Player>`
+    _previous_player : ``list<Player>``
         The previously rendered players.
         Stored so we do not render the same message after each other in case we have a backlog.
     _timeout_handle : `None | TimerHandle`
@@ -42,7 +42,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
         Lock used to synchronise message updates.
     client : ``Client``
         the respective client.
-    message : `None | Message`
+    message : ``None | Message``
         Message to operate on.
     players : `list<Player>`
         The joined players. The 0th element is always the creator who cannot leave.
@@ -54,7 +54,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
         A future that has its result set when the runner is finished.
     """
     __slots__ = (
-        '_gui_state', '_previous_player', '_timeout_handle', '_update_lock', 'client', 'message', 'players', 'session',
+        '_ui_state', '_previous_player', '_timeout_handle', '_update_lock', 'client', 'message', 'players', 'session',
         'waiter'
     )
     
@@ -76,6 +76,8 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
             A future that has its result set when the runner is finished.
         """
         try:
+            await client.interaction_response_message_edit(session.latest_interaction_event, '-# _ _')
+            await client.interaction_response_message_delete(session.latest_interaction_event)
             message = await client.interaction_followup_message_create(
                 session.latest_interaction_event,
                 embed = build_join_embed([player.user for player in players], session.guild, session.amount),
@@ -91,7 +93,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
             message = None
         
         self = object.__new__(cls)
-        self._gui_state = GUI_STATE_SWITCHING_CONTEXT if message is None else GUI_STATE_READY
+        self._ui_state = UI_STATE_SWITCHING_CONTEXT if message is None else UI_STATE_READY
         self._previous_player = players.copy()
         self._timeout_handle = None
         self._update_lock = Lock(EVENT_LOOP)
@@ -260,7 +262,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
             return
         
         # start
-        self._gui_state = GUI_STATE_SWITCHING_CONTEXT
+        self._ui_state = UI_STATE_SWITCHING_CONTEXT
         
         try:
             await self._update_message(interaction_event, players[0], True)
@@ -284,7 +286,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
             await try_acknowledge(self.client, interaction_event, None, self.session, True)
             return
         
-        self._gui_state = GUI_STATE_CANCELLING
+        self._ui_state = UI_STATE_CANCELLING
         
         try:
             await self._update_message(interaction_event, self.players[0], True)
@@ -317,11 +319,11 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
                 await try_acknowledge(client, interaction_event, player, session, True)
         
         async with lock:
-            gui_state = self._gui_state
-            if (gui_state != GUI_STATE_READY) and (not force):
+            ui_state = self._ui_state
+            if (ui_state != UI_STATE_READY) and (not force):
                 return
             
-            if gui_state == GUI_STATE_READY:
+            if ui_state == UI_STATE_READY:
                 # We want to render the general embed.
                 if self._previous_player == players:
                     # If nothing changed nothing to do.
@@ -333,7 +335,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
                 )
                 components = GAME_21_JOIN_ROW_ENABLED
             
-            elif gui_state == GUI_STATE_SWITCHING_CONTEXT:
+            elif ui_state == UI_STATE_SWITCHING_CONTEXT:
                 # We want to render the started embed.
                 embed = build_join_embed_game_started(
                     [player.user for player in players], session.guild, session.amount,
@@ -341,7 +343,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
                 components = GAME_21_JOIN_ROW_DISABLED
             
             
-            elif gui_state == GUI_STATE_CANCELLING or gui_state == GUI_STATE_CANCELLED:
+            elif ui_state == UI_STATE_CANCELLING or ui_state == UI_STATE_CANCELLED:
                 # We want to render the cancelling embed.
                 embed = build_join_embed_cancelled(
                     [player.user for player in players], session.guild, session.amount,
@@ -352,8 +354,8 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
                 # Should not happen
                 return
             
-            if gui_state == gui_state:
-                self._gui_state = GUI_STATE_EDITING
+            if ui_state == ui_state:
+                self._ui_state = UI_STATE_EDITING
             
             try:
                 success = await try_edit_response(
@@ -378,8 +380,8 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
                 
             else:
                 if success:
-                    if self._gui_state == GUI_STATE_EDITING:
-                        self._gui_state = GUI_STATE_READY
+                    if self._ui_state == UI_STATE_EDITING:
+                        self._ui_state = UI_STATE_READY
                 else:
                     self._invoke_cancellation(False)
     
@@ -405,8 +407,8 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
         if (message is not None):
             self.client.slasher.remove_component_interaction_waiter(message, self)
         
-        if self._gui_state != GUI_STATE_SWITCHING_CONTEXT:
-            self._gui_state = GUI_STATE_CANCELLED
+        if self._ui_state != UI_STATE_SWITCHING_CONTEXT:
+            self._ui_state = UI_STATE_CANCELLED
         
         self.waiter.set_result_if_pending(False)
     

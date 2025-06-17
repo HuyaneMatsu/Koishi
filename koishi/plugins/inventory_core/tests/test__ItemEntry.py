@@ -27,7 +27,7 @@ def test__ItemEntry__new():
     
     vampytest.assert_eq(item_entry.amount, amount)
     vampytest.assert_is(item_entry.item, item)
-    vampytest.assert_eq(item_entry.entry_id, -1)
+    vampytest.assert_eq(item_entry.entry_id, 0)
 
 
 def test__ItemEntry__repr():

@@ -352,7 +352,7 @@ async def _save_user_settings_with_connector(user_settings, connector):
         Database connector.
     """
     entry_id = user_settings.entry_id
-    if entry_id == -1:
+    if entry_id == 0:
         # Add if new.
         response = await connector.execute(
             USER_SETTINGS_TABLE.insert().values(
@@ -433,7 +433,7 @@ async def _remove_user_settings_with_connector(user_settings, connector):
     """
     entry_id = user_settings.entry_id
     # Do nothing if the entry doesnt exists.
-    if entry_id == -1:
+    if entry_id == 0:
         return
     
     await connector.execute(

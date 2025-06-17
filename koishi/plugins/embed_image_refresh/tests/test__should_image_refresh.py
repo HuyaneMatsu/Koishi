@@ -23,7 +23,7 @@ def test__should_image_refresh(message):
     
     Parameters
     ----------
-    message : `None | Message`
+    message : ``None | Message``
         Message to test.
     
     Returns

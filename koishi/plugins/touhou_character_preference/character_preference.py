@@ -32,7 +32,7 @@ class CharacterPreference(RichAttributeErrorBaseType):
             The character's system name.
         """
         self = object.__new__(cls)
-        self.entry_id = -1
+        self.entry_id = 0
         self.user_id = user_id
         self.system_name = system_name
         return self
@@ -61,10 +61,10 @@ class CharacterPreference(RichAttributeErrorBaseType):
     
     def __repr__(self):
         """Returns the character preference's representation."""
-        repr_parts = ['<', self.__class__.__name__]
+        repr_parts = ['<', type(self).__name__]
         
         entry_id = self.entry_id
-        if (entry_id != -1):
+        if (entry_id != 0):
             repr_parts.append(' entry_id = ')
             repr_parts.append(repr(entry_id))
             repr_parts.append(',')

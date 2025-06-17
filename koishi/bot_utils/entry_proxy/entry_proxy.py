@@ -28,7 +28,7 @@ class EntryProxy(RichAttributeErrorBaseType, metaclass = EntryProxyType):
         Creates a new automation config.
         """
         self = object.__new__(cls)
-        self.entry_id = -1
+        self.entry_id = 0
         self.saver = None
         return self
     
@@ -39,7 +39,7 @@ class EntryProxy(RichAttributeErrorBaseType, metaclass = EntryProxyType):
         
         # entry_id
         entry_id = self.entry_id
-        if entry_id != -1:
+        if entry_id != 0:
             repr_parts.append(' entry_id = ')
             repr_parts.append(repr(entry_id))
             field_added = True
@@ -151,5 +151,5 @@ class EntryProxy(RichAttributeErrorBaseType, metaclass = EntryProxyType):
         self : `instance<cls>`
         """
         self = object.__new__(cls)
-        self.entry_id = -1
+        self.entry_id = 0
         return self

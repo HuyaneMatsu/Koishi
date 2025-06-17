@@ -76,7 +76,7 @@ class Relationship(EntryProxy):
             The investment the target user.
         """
         self = object.__new__(cls)
-        self.entry_id = -1
+        self.entry_id = 0
         self.relationship_type = relationship_type
         self.saver = None
         self.source_can_boost_at = now

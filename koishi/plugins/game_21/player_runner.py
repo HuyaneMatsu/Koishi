@@ -4,7 +4,7 @@ from scarletio import RichAttributeErrorBaseType, Task, get_event_loop
 
 from .constants import (
     GAME_21_CUSTOM_ID_NEW, GAME_21_CUSTOM_ID_STOP, GAME_21_ROW_DISABLED, GAME_21_ROW_ENABLED, GAME_21_RUNNER_TIMEOUT,
-    GUI_STATE_CANCELLED, GUI_STATE_EDITING, GUI_STATE_READY, GUI_STATE_SWITCHING_CONTEXT,
+    UI_STATE_CANCELLED, UI_STATE_EDITING, UI_STATE_READY, UI_STATE_SWITCHING_CONTEXT,
     PLAYER_STATE_CANCELLED_TIMEOUT, PLAYER_STATE_FINISH, PLAYER_STATE_INITIALIZATION_ERROR, PLAYER_STATE_IN_GAME_ERROR
 )
 from .helpers import should_render_exception, store_event, try_acknowledge, try_edit_response
@@ -20,13 +20,13 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
     
     Attributes
     ----------
-    _gui_state : `int`
+    _ui_state : `int`
         The state of the graphical user interface. Tracked, so we do not overlap operations that should not be.
     _timeout_handle : `None | TimerHandle`
         handle to timeout the runner.
     client : ``Client``
         the respective client.
-    message : `None | Message`
+    message : ``None | Message``
         Message to operate on.
     player : ``Player``
         User player.
@@ -37,7 +37,7 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
     waiter : `Future<bool>`
         A future that has its result set when the runner is finished.
     """
-    __slots__ = ('_gui_state', '_timeout_handle', 'client', 'message', 'player', 'session', 'single_player', 'waiter')
+    __slots__ = ('_ui_state', '_timeout_handle', 'client', 'message', 'player', 'session', 'single_player', 'waiter')
     
     async def __new__(cls, client, session, player, single_player, waiter):
         """
@@ -59,6 +59,7 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
             A future that has its result set when the runner is finished.
         """
         game_ended = player.hand.is_finished()
+        
         if game_ended:
             if single_player:
                 message = None
@@ -86,6 +87,10 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
                 player.state = PLAYER_STATE_FINISH
         
         else:
+            if single_player:
+                await client.interaction_response_message_edit(player.latest_interaction_event, '-# _ _')
+                await client.interaction_response_message_delete(player.latest_interaction_event)
+                
             try:
                 # even on single player it still will not create new message, because we just acknowledged it,
                 # so no need to check for it.
@@ -94,7 +99,7 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
                     content = (None if single_player else f'> {player.user.mention}'),
                     embed = build_gamble_embed(player.hand, session.amount),
                     components = GAME_21_ROW_ENABLED,
-                    show_for_invoking_user_only = True,
+                    show_for_invoking_user_only = (not single_player),
                 )
             except GeneratorExit:
                 raise
@@ -111,7 +116,7 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
         
         
         self = object.__new__(cls)
-        self._gui_state = GUI_STATE_SWITCHING_CONTEXT if game_ended else GUI_STATE_READY
+        self._ui_state = UI_STATE_SWITCHING_CONTEXT if game_ended else UI_STATE_READY
         self._timeout_handle = None
         self.client = client
         self.message = message
@@ -130,8 +135,8 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
             client.slasher.add_component_interaction_waiter(message, self)
         
         return self
-
-
+    
+    
     async def __call__(self, interaction_event):
         """
         Handles a component interaction on the respective message.
@@ -153,7 +158,7 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
             return
         
         # Are we ready? If we arent acknowledge the event and we can store it as the latest event. Great success.
-        if self._gui_state != GUI_STATE_READY:
+        if self._ui_state != UI_STATE_READY:
             await try_acknowledge(client, interaction_event, player, session, self.single_player)
             return
         
@@ -170,7 +175,7 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
             return
         
         if game_ended:
-            self._gui_state = GUI_STATE_SWITCHING_CONTEXT
+            self._ui_state = UI_STATE_SWITCHING_CONTEXT
             if self.waiter.set_result_if_pending(True):
                 player.state = PLAYER_STATE_FINISH
             
@@ -193,7 +198,7 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
             )
             return
         
-        self._gui_state = GUI_STATE_EDITING
+        self._ui_state = UI_STATE_EDITING
         try:
             success = await try_edit_response(
                 client,
@@ -217,8 +222,8 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
             
         else:
             if success:
-                if self._gui_state == GUI_STATE_EDITING:
-                    self._gui_state = GUI_STATE_READY
+                if self._ui_state == UI_STATE_EDITING:
+                    self._ui_state = UI_STATE_READY
             else:
                 self._invoke_cancellation(False)
     
@@ -244,8 +249,8 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
         if (message is not None):
             self.client.slasher.remove_component_interaction_waiter(message, self)
         
-        if self._gui_state != GUI_STATE_SWITCHING_CONTEXT:
-            self._gui_state = GUI_STATE_CANCELLED
+        if self._ui_state != UI_STATE_SWITCHING_CONTEXT:
+            self._ui_state = UI_STATE_CANCELLED
         
         if self.waiter.set_result_if_pending(timeout):
             self.player.state = PLAYER_STATE_CANCELLED_TIMEOUT if timeout else PLAYER_STATE_IN_GAME_ERROR

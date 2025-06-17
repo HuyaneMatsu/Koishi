@@ -119,7 +119,7 @@ class ImageHandlerGroup(ImageHandlerBase):
         
         client : ``Client``
             The respective client who received the event.
-        event : `None`, ``InteractionEvent``
+        event : ``None | InteractionEvent``
             The respective interaction event.
         weights : `list<int>`
             Weights for each handler.

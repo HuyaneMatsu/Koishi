@@ -779,7 +779,7 @@ def build_relationship_request_listing_embed(outgoing, relationship_request_list
     relationship_request_listing : `None | list<RelationshipRequest>`
         Incoming relationship requests.
     
-    users : `None | list<ClientUserBase>`
+    users : ``None | list<ClientUserBase>``
         The requested user for each relationship.
     
     guild_id : `int`
@@ -949,7 +949,7 @@ def build_relationship_listing_embed(
     target_relationship_request_listing : `None | list<RelationshipProposal>`
         The outgoing relationship proposals of the targeted user.
     
-    users : `None | list<ClientUserBase>`
+    users : ``None | list<ClientUserBase>``
         The user entities the `target_user` has relationships with.
     
     guild_id : `int`

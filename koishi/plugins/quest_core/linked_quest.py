@@ -80,7 +80,7 @@ class LinkedQuest(RichAttributeErrorBaseType):
         self.amount_submitted = 0
         self.amount_required = quest.amount
         self.batch_id = batch_id
-        self.entry_id = -1
+        self.entry_id = 0
         self.expires_at = now + TimeDelta(seconds = quest.duration)
         self.guild_id = guild_id
         self.reward_balance = quest.reward_balance
@@ -105,7 +105,7 @@ class LinkedQuest(RichAttributeErrorBaseType):
         
         # entry_id
         entry_id = self.entry_id
-        if (entry_id != -1):
+        if (entry_id != 0):
             repr_parts.append(', entry_id = ')
             repr_parts.append(repr(entry_id))
         

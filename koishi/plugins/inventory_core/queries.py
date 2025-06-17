@@ -204,11 +204,11 @@ async def query_save_inventory(inventory):
             entry_id = item_entry.entry_id
             
             # New but instantly deleted?
-            if (entry_id == -1) and (not amount):
+            if (entry_id == 0) and (not amount):
                 pass
             
             # New?
-            elif (entry_id == -1):
+            elif (entry_id == 0):
                 response = await connector.execute(
                     ITEM_TABLE.insert().values(
                         user_id = inventory.user_id,

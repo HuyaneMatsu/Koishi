@@ -33,7 +33,7 @@ def get_role_ids_repr(role_ids, truncate, truncate_at):
     
     Parameters
     ----------
-    role_ids : `None`, `tuple` of `int`
+    role_ids : `None | tuple<int>`
         The roles' identifiers.
     truncate : `bool`
         Whether the amount of roles should be truncated.
@@ -88,7 +88,7 @@ def get_role_ids_repr_defaulted(role_ids):
     
     Parameters
     ----------
-    role_ids : `None`, `tuple` of `int`
+    role_ids : `None | tuple<int>`
         The roles' identifiers.
     
     Returns
@@ -184,7 +184,7 @@ def get_icon_repr(value):
     
     Parameters
     ----------
-    value : `None`, ``Icon``
+    value : ``None | Icon``
         Icon to get their representation of.
     
     Returns
@@ -708,7 +708,7 @@ def add_role_ids_field(embed, role_ids, pretty_name):
     ----------
     embed : ``Embed``
         The embed to extend.
-    role_ids : `None`, `tuple` of `int`
+    role_ids : `None | tuple<int>`
         The value to add.
     pretty_name : `str`
         Pretty name to use as field name.

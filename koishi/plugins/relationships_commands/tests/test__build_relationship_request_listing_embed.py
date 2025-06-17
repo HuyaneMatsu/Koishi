@@ -144,7 +144,7 @@ def test__build_relationship_request_listing_embed(outgoing, relationship_reques
     relationship_request_listing : `None | list<RelationshipRequest>`
         Incoming relationship requests.
     
-    users : `None | list<ClientUserBase>`
+    users : ``None | list<ClientUserBase>``
         The requested user for each relationship.
     
     guild_id : `int`

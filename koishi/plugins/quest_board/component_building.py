@@ -68,20 +68,17 @@ def build_quest_board_quest_listing_components(guild, guild_stats, page_index):
     guild_adventurer_rank_info = get_guild_adventurer_rank_info(guild_stats.credibility)
     quest_batch = guild_stats.get_quest_batch()
     
+    header_content_component = create_text_display(build_quest_board_header_description(
+        guild, guild_adventurer_rank_info, len(quest_batch.quests)),
+    )
+    
     icon_url = guild.icon_url
     if (icon_url is None):
-        thumbnail = None
+        component = header_content_component
     else:
-        thumbnail = create_thumbnail_media(icon_url)
+        component = create_section(header_content_component, thumbnail = create_thumbnail_media(icon_url))
     
-    components.append(
-        create_section(
-            create_text_display(build_quest_board_header_description(
-                guild, guild_adventurer_rank_info, len(quest_batch.quests)),
-            ),
-            thumbnail = thumbnail,
-        ),
-    )
+    components.append(component)
     
     components.append(create_separator())
     

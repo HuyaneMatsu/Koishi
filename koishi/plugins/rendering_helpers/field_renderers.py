@@ -22,7 +22,7 @@ def render_role_mentions_field_into(into, field_added, roles, *, optional = True
         The container to render into.
     field_added : `bool`
         Whether any fields were added already.
-    roles : `None`, `tuple` of ``Role``
+    roles : ``None | tuple<Role>``
         The roles to render.
     optional : `bool` = `True`, Optional (Keyword only)
         Whether should not render if `roles` is `None`.

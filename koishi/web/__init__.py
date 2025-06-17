@@ -97,6 +97,11 @@ BOT_NAMES = [
     'google-site-verification',
     # Google Site Verifier -> Google-Site-Verification
     
+    # An http client?
+    'sindresorhus',
+    
+    # Content management system checker? huh
+    'cms-Checker'
 ]
 
 
@@ -283,9 +288,10 @@ BLOCKED_IPS = {
     '8.210.146.98',
     '8.210.15.252',
     '8.210.152.184',
+    '8.210.218.201',
     '8.210.230.104',
     '8.210.8.206',
-    
+                                                                                                          
     # Search engine "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36"
     '157.55.39.202',
     '207.46.13.18',
@@ -300,6 +306,14 @@ BLOCKED_IPS = {
     '52.167.144.16',
     '52.167.144.183',
     '52.167.144.19'
+    
+    # Bot sindresorhus
+    '100.28.128.3',
+    '18.234.64.190',
+    '98.81.123.187',
+    
+    # cms-checker "Mozilla/5.0 (compatible; CMS-Checker/1.0; +https://example.com)"
+    '34.125.200.116',
 }
 
 

@@ -69,7 +69,7 @@ EMOJI__HEART_CURRENCY = Emoji.precreate(603533301516599296, name = 'youkai_kokor
 
 COLOR__SATORI_HELP = Color.from_rgb(118, 0, 161)
 COLOR__KOISHI_HELP = Color.from_html('#ffd21e')
-COLOR__FLAN_HELP = Color.from_rgb(230, 69, 0)
+COLOR__FLANDRE_HELP = Color.from_rgb(230, 69, 0)
 COLOR__MARISA_HELP = Color.from_html('#e547ed')
 COLOR__EVENT = Color(2316923)
 COLOR__GAMBLING = Color.from_rgb(254, 254, 164)

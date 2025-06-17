@@ -16,7 +16,7 @@ def schedule_image_refresh(client, message, interaction_event = None):
     ----------
     client : ``Client``
         Client to call refresh with.
-    message : `None | Message`
+    message : ``None | Message``
         The message to refresh.
     interaction_event : `None | InteractionEvent` = `None`, Optional
         Interaction event to refresh with if applicable.

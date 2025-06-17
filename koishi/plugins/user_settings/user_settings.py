@@ -87,7 +87,7 @@ class UserSettings(RichAttributeErrorBaseType):
             The image source the user prefers if multiple choices are available.
         """
         self = object.__new__(cls)
-        self.entry_id = -1
+        self.entry_id = 0
         self.user_id = user_id
         self.notification_daily_by_waifu = notification_daily_by_waifu
         self.notification_daily_reminder = notification_daily_reminder
@@ -131,7 +131,7 @@ class UserSettings(RichAttributeErrorBaseType):
         repr_parts = ['<', type(self).__name__]
         
         entry_id = self.entry_id
-        if (entry_id != -1):
+        if (entry_id != 0):
             repr_parts.append(' entry_id = ')
             repr_parts.append(repr(entry_id))
             repr_parts.append(',')

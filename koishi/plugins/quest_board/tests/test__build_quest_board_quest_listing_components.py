@@ -126,6 +126,41 @@ def _iter_options():
         ],
     )
 
+    guild_id = 202505260000
+    
+    yield (
+        guild_id,
+        'Orin\'s dance house',
+        None,
+        1 << 7,
+        0,
+        QuestBatch(
+            123,
+            (),
+        ),
+        [
+            create_text_display(
+                f'# Orin\'s dance house\'s quest board\n'
+                f'\n'
+                f'Guild rank: G\n'
+                f'Quest count: 0 / 3'
+            ),
+            create_separator(),
+            create_row(
+                create_button(
+                    emoji = EMOJI_PAGE_PREVIOUS,
+                    custom_id = 'quest_board.page_decrement_disabled',
+                    enabled = False,
+                ),
+                create_button(
+                    emoji = EMOJI_PAGE_NEXT,
+                    custom_id = 'quest_board.page_increment_disabled',
+                    enabled = False,
+                ),
+            ),
+        ],
+    )
+
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__build_quest_board_quest_listing_components(

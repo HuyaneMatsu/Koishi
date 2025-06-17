@@ -1,3 +1,15 @@
+### 2025-06-17
+
+- Fix `/guild quest-board` produced "invalid form body" when showing the quests of a guild that has no icon.
+  (Actually just omitted section thumbnail as intended, but turns out you have to have thumbnail when using section.)
+- `/ds` has been fully reworked. Now the user interface is shown using display components.
+    This results in the tiles appearing larger.
+- Fix `/coin-flip` responding slowly.
+- Fix `/21` responding slowly.
+- Fix `/lucky-spin` responding slowly.
+- Fix `/daily` responding slowly. Now responds instantly after the initial calculations.
+    Saving is done while the response is being sent. (alpha_514)
+
 ### 2025-05-26
 
 - Increase `minesweeper` size from 5x5 to 5x6 (new largest allowed size).
