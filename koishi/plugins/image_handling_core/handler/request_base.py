@@ -134,7 +134,7 @@ class ImageHandlerRequestBase(ImageHandlerBase):
         
         Returns
         -------
-        data : `None`, `object`
+        data : `None | object`
         """
         return None
     

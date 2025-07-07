@@ -22,7 +22,7 @@ def remove_deleted_emojis(choices, exception):
     
     Parameters
     ----------
-    choices : `list` of ``ChoiceBase``
+    choices : ``list<ChoiceBase>``
         A list of choices in context.
     exception : ``DiscordException``
         The exception received from the discord api.
@@ -111,11 +111,17 @@ def _build_snipe_choices(message):
     
     Returns
     -------
-    choices : `list` of ``ChoiceBase``
+    choices : ``list<ChoiceBase>``
     """
+    snapshot = message.snapshot
+    if (snapshot is None):
+        content = message.content
+    else:
+        content = snapshot.content
+    
     return [
         *(Choice(sticker, ChoiceTypeSticker) for sticker in message.iter_stickers()),
-        *(Choice(emoji, ChoiceTypeEmoji) for emoji in parse_custom_emojis_ordered(message.content)),
+        *(Choice(emoji, ChoiceTypeEmoji) for emoji in parse_custom_emojis_ordered(content)),
         *(Choice(emoji, ChoiceTypeReaction) for emoji in _iter_custom_message_reactions(message)),
     ]
 

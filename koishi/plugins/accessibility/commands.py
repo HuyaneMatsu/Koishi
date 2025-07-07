@@ -177,7 +177,7 @@ CHARACTER_PREFERENCE = ACCESSIBILITY_INTERACTIONS.interactions(
 
 
 @CHARACTER_PREFERENCE.interactions(name = 'show')
-async def character_preference_show(event):
+async def character_preference_show(client, interaction_event):
     """
     Shows your preferred character(s).
     
@@ -185,24 +185,37 @@ async def character_preference_show(event):
     
     Parameters
     ----------
-    event : ``InteractionEvent``
-        The received event.
+    client : ``Client``
+        The client who received the interaction event.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
     
     Returns
     -------
     response : ``InteractionResponse``
     """
-    user = event.user
+    user = interaction_event.user
+    
+    await client.interaction_application_command_acknowledge(
+        interaction_event, False, show_for_invoking_user_only = True
+    )
+    
     character_preferences = await get_one_touhou_character_preference(user.id)
-    return InteractionResponse(
+    
+    await client.interaction_response_message_edit(interaction_event, '-# _ _')
+    await client.interaction_response_message_delete(interaction_event)
+    
+    await client.interaction_followup_message_create(
+        interaction_event,
         embed = build_character_preference_embed(user, character_preferences),
-        show_for_invoking_user_only = True,
     )
 
 
 @CHARACTER_PREFERENCE.interactions(name = 'add')
 async def character_preference_add(
-    event,
+    client,
+    interaction_event,
     name : P(str, 'Select a character', autocomplete = auto_complete_touhou_character_name),
 ):
     """
@@ -212,8 +225,12 @@ async def character_preference_add(
     
     Parameters
     ----------
-    event : ``InteractionEvent``
-        The received event.
+    client : ``Client``
+        The client who received the interaction event.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
     name : `str`
         Character's name.
     
@@ -225,22 +242,31 @@ async def character_preference_add(
     if (character is None):
         abort('Could not identify character.')
     
-    user = event.user
+    await client.interaction_application_command_acknowledge(
+        interaction_event, False, show_for_invoking_user_only = True
+    )
+    
+    user = interaction_event.user
     character_preferences = await get_one_touhou_character_preference(user.id)
     if (character_preferences is not None) and (len(character_preferences) >= PREFERRED_CHARACTER_MAX):
         abort(f'Can not add more character preferences. ({len(character_preferences)!r} / {PREFERRED_CHARACTER_MAX!r})')
     
+    
     await add_touhou_character_to_preference(user.id, character)
     
-    return InteractionResponse(
+    await client.interaction_response_message_edit(interaction_event, '-# _ _')
+    await client.interaction_response_message_delete(interaction_event)
+    
+    await client.interaction_followup_message_create(
+        interaction_event,
         embed = build_character_preference_change_embed(user, character, True),
-        show_for_invoking_user_only = True,
     )
 
 
 @CHARACTER_PREFERENCE.interactions(name = 'remove')
 async def character_preference_remove(
-    event,
+    client,
+    interaction_event,
     name : (str, 'Select a character'),
 ):
     """
@@ -250,8 +276,12 @@ async def character_preference_remove(
     
     Parameters
     ----------
-    event : ``InteractionEvent``
-        The received event.
+    client : ``Client``
+        The client who received the interaction event.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
     name : `str`
         Character's name.
     
@@ -263,12 +293,13 @@ async def character_preference_remove(
     if (character is None):
         abort('Could not identify character.')
     
-    user = event.user
+    await client.interaction_application_command_acknowledge(interaction_event, False)
+    
+    user = interaction_event.user
     await remove_touhou_character_from_preference(user.id, character)
     
     return InteractionResponse(
         embed = build_character_preference_change_embed(user, character, False),
-        show_for_invoking_user_only = True,
     )
 
 

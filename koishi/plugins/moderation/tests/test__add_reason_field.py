@@ -6,7 +6,7 @@ from ..shared_helpers import add_reason_field
 
 def _iter_options():
     yield Embed('Scarlet'), None, Embed('Scarlet').add_field('Reason', f'```\n \n```', inline = True)
-    yield Embed('Scarlet'), 'Ban reimu', Embed('Scarlet').add_field('Reason', f'```\nBan reimu\n```', inline = True)
+    yield Embed('Scarlet'), 'Ban reimu', Embed('Scarlet').add_field('Reason', f'```\nBan reimu\n```', inline = False)
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())

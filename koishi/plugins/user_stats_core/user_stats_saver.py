@@ -6,7 +6,7 @@ from ...bot_utils.entry_proxy import EntryProxySaver
 from ...bot_utils.models import STATS_TABLE, stats_model
 
 
-class UserStatsSaver(EntryProxySaver):
+class UserStatsSaver(EntryProxySaver):  
     """
     Used to save stats.
     
@@ -39,6 +39,8 @@ class UserStatsSaver(EntryProxySaver):
     async def _insert_entry(self, connector, entry_proxy):
         response = await connector.execute(
             STATS_TABLE.insert().values(
+                user_id = entry_proxy.user_id,
+                
                 stat_housewife = entry_proxy.stat_housewife,
                 stat_cuteness = entry_proxy.stat_cuteness,
                 stat_bedroom = entry_proxy.stat_bedroom,

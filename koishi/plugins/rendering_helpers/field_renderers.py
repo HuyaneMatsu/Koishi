@@ -392,7 +392,7 @@ def render_attachments_field_into(into, field_added, attachments, *, optional = 
         The container to render into.
     field_added : `bool`
         Whether any fields were added already.
-    attachments : `None | tuple<Attachment>`
+    attachments : ``None | tuple<Attachment>``
         The attachments to render.
     optional : `bool` = `True`, Optional (Keyword only)
         Whether should not render if `attachments` is `None`.

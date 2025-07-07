@@ -46,8 +46,8 @@ PIL.Image.draw = methodsimulator(ImageDraw)
 PIL.font = truetype
 del ImageDraw, truetype
 
-def char_range(start,end):
-    for x in range(ord(start),ord(end) + 1):
+def char_range(start, end):
+    for x in range(ord(start), ord(end) + 1):
         yield chr(x)
 
 

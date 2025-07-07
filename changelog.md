@@ -1,3 +1,23 @@
+### 2025-07-07
+
+- `snipe` now also looks into message snapshots' content (forwarded messages). (braindead_monke)
+- Message copy now copies the snapshot instead of the message if the message has a snapshot (forwarded messages).
+- `/action` is now also available when koishi is guild installed.
+    Wanted to keep this as user install only, but since discord inserted ads into a related endpoint,
+    made its show-up collide with the created blocking rule.
+- `/murder` command was called `/kill` at multiple places. (superior_mac)
+- `/user stats` on upgrade were not saving new entries correctly.
+    (For like 2 months, if you are affected please drop a message.) (chaos3326)
+- Fix `/ds` using wrong chapter title. (superior_mac)
+- Fix `/mod mute` did not respond if the action failed due to missing permissions.
+- Increase award for using commands to 50 (from 10),
+- /accessibility character-preference` embeds are now show to everyone (excluding the error ones).
+- Add missing `Houjuu Chimi` touhou character.
+- Add missing `Chirizuka Ubame` touhou character.
+- Update `/roles collectible` command of supper guild to correctly reflect better what each collectible role gives.
+- Update `/mod` commands to not use vertical reason if given, to make it better readable. (tenshi_h1nanawi)
+- Update `/oj` command to be up to date.
+
 ### 2025-06-17
 
 - Fix `/guild quest-board` produced "invalid form body" when showing the quests of a guild that has no icon.

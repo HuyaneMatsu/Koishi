@@ -73,8 +73,8 @@ Although here is a "short" description for all of her commands by category:
 
 ### Actions
 
-- `/bite`, `/blush`, `/bully`, `/cringe`, `/cry`, `/dance`, `/feed`, `/fluff`, `/glomp`, `/handhold`, `happy`,
-    `highfive`, `hug`, `kick`, `kill`, `kiss`, `kon`, `lap-sleep`, `like`, `lick`, `nom`, `pat`, `peg`,
+- `/action`, `/bite`, `/blush`, `/bully`, `/cringe`, `/cry`, `/dance`, `/feed`, `/fluff`, `/glomp`, `/handhold`,
+    `happy`, `highfive`, `hug`, `kick`, `kiss`, `kon`, `lap-sleep`, `like`, `lick`, `murder`, `nom`, `pat`, `peg`,
     `pocky-kiss`, `poke`, `slap`, `smile`, `smug`, `stare`, `wave`, `wink`, `yeet` (with / for / at) someone.
 - `/action` - Wildcard command to invoke any other action with selecting an exact (touhou only) image.
     Available after the bot has been user installed.

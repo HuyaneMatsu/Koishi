@@ -23,7 +23,7 @@ async def build_initial_response_parts(client, event, target, choices, show_for_
         The received interaction event.
     target : `None`, ``Message``
         The target message type.
-    choices : `list` of ``ChoiceBase``
+    choices : ``list<ChoiceBase>``
         Entities in context.
     show_for_invoking_user_only : `bool`
         Whether the message is an invoking user only message.
@@ -105,7 +105,7 @@ async def build_initial_response(client, event, target, choices, show_for_invoki
         The received interaction event.
     target : `None`, ``Message``
         The target message type.
-    choices : `list` of ``ChoiceBase``
+    choices : ``list<ChoiceBase>``
         The choices in context.
     show_for_invoking_user_only : `bool`
         Whether the message is an invoking user only message.

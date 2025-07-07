@@ -115,7 +115,7 @@ def select_from_match_groups(match_groups_by_weight):
     
     Parameters
     ----------
-    match_groups : `tuple<list<ImageDetailBase>>`
+    match_groups_by_weight : `tuple<list<ImageDetailBase>>`
         A tuple of image details.
     
     Returns

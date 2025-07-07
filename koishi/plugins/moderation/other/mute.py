@@ -114,7 +114,11 @@ async def mute_command(
         )
     except DiscordException as exception:
         if exception.code == ERROR_CODES.unknown_member:
-            note = 'The user left while performing the action'
+            note = 'The user left while performing the action.'
+        
+        elif exception.code == ERROR_CODES.missing_permissions:
+            note = 'I failed to perform the permissions due to missing required permissions.'
+        
         else:
             raise
         

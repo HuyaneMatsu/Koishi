@@ -224,7 +224,7 @@ def build_components_in_game(game_state):
     # ---- title ----
     
     text_display_title = create_text_display(
-        f'Chapter {stage.chapter_id + 1} {style.emoji}, '
+        f'Chapter {chapter.display_name} {style.emoji}, '
         f'{DIFFICULTY_NAMES.get(stage.difficulty_id, DIFFICULTY_NAME_DEFAULT)}: {stage.in_difficulty_index + 1}'
     )
     
@@ -467,7 +467,7 @@ def build_components_end_screen(game_state):
     # ---- title ----
     
     text_display_title = create_text_display(
-        f'Chapter {stage.chapter_id + 1} {style.emoji} '
+        f'Chapter {chapter.display_name} {style.emoji} '
         f'{DIFFICULTY_NAMES.get(stage.difficulty_id, DIFFICULTY_NAME_DEFAULT)} {stage.in_difficulty_index + 1} '
         f'finished with {steps} steps with {get_rating_for(stage.best, steps)} rating!'
     )
@@ -628,7 +628,7 @@ def build_components_in_menu(user_state):
     
     # ---- title ----
     
-    text_display_title = create_text_display(f'### Chapter {chapter.id + 1}')
+    text_display_title = create_text_display(f'### Chapter {chapter.display_name}')
     
     # ---- thumbnail ----
     

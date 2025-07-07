@@ -1,4 +1,4 @@
-__all__ = ()
+__all__ = ('ChoiceTypeBase',)
 
 from hata import Embed
 from scarletio import RichAttributeErrorBaseType, class_property
@@ -202,7 +202,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         
         Parameters
         ----------
-        entity : ``Emoji``, ``SoundboardSound``, ``Sticker`` 
+        entity : ``Emoji | SoundboardSound | Sticker`` 
             The entity to create option for.
         
         Returns
@@ -221,7 +221,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         
         Parameters
         ----------
-        entity : ``Emoji``, ``SoundboardSound``, ``Sticker`` 
+        entity : ``Emoji | SoundboardSound | Sticker`` 
             The entity to update for.
         client : ``Client``
             Client to update the entity with.
@@ -236,7 +236,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         
         Parameters
         ----------
-        entity : ``Emoji``, ``SoundboardSound``, ``Sticker`` 
+        entity : ``Emoji | SoundboardSound | Sticker`` 
             The entity to build the detailed embed for.
         
         Returns
@@ -253,7 +253,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         
         Parameters
         ----------
-        entity : ``Emoji``, ``SoundboardSound``, ``Sticker``
+        entity : ``Emoji | SoundboardSound | Sticker``
             The entity in context.
         event : ``InteractionEvent``
             The received interaction event.
@@ -297,7 +297,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         entity_id : `int`
             The entity's identifier. Can be used to remove the entity's choice from select if the entity was not found.
-        entity : `None`, ``Emoji``, ``SoundboardSound``, ``Sticker``
+        entity : ``None | Emoji | SoundboardSound | Sticker``
             The back-parsed entity.
         """
         raise NotImplementedError
@@ -312,7 +312,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         
         Parameters
         ----------
-        entity : ``Emoji``, ``SoundboardSound``, ``Sticker`` 
+        entity : ``Emoji | SoundboardSound | Sticker`` 
             The entity to get file of as required.
         client : ``Client``
             The client who received the interaction event.

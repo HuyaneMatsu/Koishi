@@ -53,14 +53,13 @@ __all__ = (
 # - 3.22.00
 # - 3.23.00
 
-# 2024-12-05
-# - 3.24.00
+# 2024-07-04
+# - 3.24.00 - Extracurricular Crisis
+# - 3.24.01 - Clash of Cakes
 
-# 2025-03-01
-# - 3.24.01 (return of cakes)
+# 3.24.02 - Poyo & Chuu character pack
+# 3.24.03 - Beware Pigformation
+# 3.25.00 - Segmentation fault (core dumped) | Haruka & Kanata character pack | Fool's Gambit
+# 3.25.01 - Shroom Zoom
 
-# Not on the wiki yet, so cannot add it
-# - 3.24.02 (dlc)
-# - anything after
-
-# Since wiki was moved, will have to backtrack changes as well.
+# https://orangejuice.wiki/wiki/Version_3.24.2

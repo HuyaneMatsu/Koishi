@@ -50,7 +50,7 @@ def _iter_options():
                 'because i said so\n'
                 '```'
             ),
-            inline = True
+            inline = False
         ).add_footer(
             'hello',
         )

@@ -70,7 +70,7 @@ async def get_should_use_default_response_method(client, event):
     name = 'action',
     description = 'Reality is subjective and all is mental.',
     is_global = True,
-    integration_types = ['user_install'],
+    integration_types = ['guild_install', 'user_install'],
 )
 async def wild_card_action(
     client,

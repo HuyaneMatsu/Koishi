@@ -58,9 +58,9 @@ CATEGORIES = (
         'Actions',
         EMOJI_MASKS,
         (
-            'bite', 'blush', 'bully', 'cringe', 'cry', 'dance', 'feed', 'fluff', 'glomp', 'handhold', 'happy',
-            'highfive', 'hug', 'kick', 'kill', 'kiss', 'kon', 'lap-sleep', 'lick', 'like', 'nom', 'pat', 'peg',
-            'pocky-kiss', 'poke', 'slap', 'smile', 'smug', 'stare', 'wave', 'wink', 'yeet',
+            'action', 'bite', 'blush', 'bully', 'cringe', 'cry', 'dance', 'feed', 'fluff', 'glomp', 'handhold',
+            'happy', 'highfive', 'hug', 'kick', 'kiss', 'kon', 'lap-sleep', 'lick', 'like', 'murder', 'nom', 'pat',
+            'peg', 'pocky-kiss', 'poke', 'slap', 'smile', 'smug', 'stare', 'wave', 'wink', 'yeet',
         ),
         (),
     ), (
@@ -485,17 +485,28 @@ async def collectible():
     """A list of collectible roles in KW."""
     embed = Embed(
         'Collectible roles:',
-        f'Collect roles by buying them for heart {EMOJI__HEART_CURRENCY} using the `shop roles` command.',
+        (
+            f'Collect roles by buying them for heart {EMOJI__HEART_CURRENCY} using the `shop roles` command.'
+        ),
         color = COLOR__KOISHI_HELP,
     ).add_field(
         ROLE__SUPPORT__NSFW_ACCESS.name,
-        f'Gives access to nsfw channels.',
+        (
+            f'- Get access to nsfw channels.'
+        ),
     ).add_field(
         ROLE__SUPPORT__ELEVATED.name,
-        f'Unlocks secret nekogirl only content.',
+        (
+            f'- Raised daily bonus limit.\n'
+            f'- Be able to gift to others without being related.\n'
+            f'- Unlocks secret nekogirl only content.'
+        ),
     ).add_field(
         ROLE__SUPPORT__HEART_BOOST.name,
-        f'Become favored by Koishi receiving more hearts from her each day.',
+        (
+            f'- Get a separated role on the user list.'
+            f'- Receive more hearts from each daily.'
+        ),
     )
     
     return InteractionResponse(embed = embed, allowed_mentions = None)

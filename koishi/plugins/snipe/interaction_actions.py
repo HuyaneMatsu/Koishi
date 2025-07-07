@@ -26,7 +26,7 @@ async def respond_with_actions(client, event, choice_type):
     event : ``InteractionEvent``
         The received interaction event.
     
-    choice_type : `type<ChoiceTypeBase>`
+    choice_type : ``type<ChoiceTypeBase>``
         Choice type.
     """
     if not await check_has_manage_guild_expressions_permission(client, event):

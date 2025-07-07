@@ -184,7 +184,7 @@ async def test__create_webhook_message__empty():
         
     try:
         await create_webhook_message(client, webhook, message, thread_id, None)
-        vampytest.assert_eq(mock_api_webhook_message_create_call_counter, 1)
+        vampytest.assert_eq(mock_api_webhook_message_create_call_counter, 0)
     
     finally:
         client._delete()

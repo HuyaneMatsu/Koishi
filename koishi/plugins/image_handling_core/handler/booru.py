@@ -24,9 +24,6 @@ BLACKLISTED_TAGS = {
     'oekakizuki',
     'rikatan',
     'ai-generated',
-    
-    # I heard they scam ppl
-    'rion_(user_ufvg8527)',
 }
 
 

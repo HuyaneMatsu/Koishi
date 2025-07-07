@@ -25,7 +25,7 @@ def _iter_options():
                 f'hey mister\n'
                 f'```'
             ),
-            inline = True,
+            inline = False,
         ),
     )
     
@@ -45,7 +45,7 @@ def _iter_options():
                 f'hey sister\n'
                 f'```'
             ),
-            inline = True,
+            inline = False,
         ),
     )
 

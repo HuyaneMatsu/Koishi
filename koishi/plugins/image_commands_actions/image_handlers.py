@@ -26,7 +26,7 @@ IMAGE_HANDLER_HUG = ImageHandlerGroup(
     TOUHOU_ACTION_HUG,
 )
 IMAGE_HANDLER_KICK = ImageHandlerWaifuPics('kick', False)
-IMAGE_HANDLER_KILL = ImageHandlerWaifuPics('kill', False)
+IMAGE_HANDLER_MURDER = ImageHandlerWaifuPics('kill', False)
 IMAGE_HANDLER_KISS = ImageHandlerGroup(
     ImageHandlerWaifuPics('kiss', False),
     TOUHOU_ACTION_KISS,

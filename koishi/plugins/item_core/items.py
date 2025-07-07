@@ -186,7 +186,7 @@ ITEM_SCARLET_ONION = ITEMS[ITEM_ID_SCARLET_ONION] = Item(
     'Scarlet onion',
     BUILTIN_EMOJIS['onion'],
     (
-        'An bulbous plant used as seasoning since the ancients. '
+        'A bulbous plant used as seasoning since the ancients. '
         'Its one of the most important and widespread vegetable. '
         'Depending on its kind it is either biennial or perennial. Its inflorescence is fascinating, sphere shaped.\n'
         '\n'

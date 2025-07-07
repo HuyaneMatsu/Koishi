@@ -34,7 +34,7 @@ def _iter_options():
                 '2 weeks\n'
                 '```'
             ),
-            inline = True
+            inline = True,
         ).add_field(
             'Notify user',
             (
@@ -42,7 +42,7 @@ def _iter_options():
                 'true\n'
                 '```'
             ),
-            inline = True
+            inline = True,
         ).add_field(
             'Reason',
             (
@@ -50,7 +50,7 @@ def _iter_options():
                 'because i said so\n'
                 '```'
             ),
-            inline = True
+            inline = False,
         ).add_footer(
             'hello',
         )

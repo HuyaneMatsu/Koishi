@@ -65,10 +65,15 @@ def get_files(client, message):
     
     Returns
     -------
-    files : `None | list<(str, AttachmentStream, None | str)>
+    files : ``None | list<(str, AttachmentStream, None | str)>``
         Files of the message.
     """
-    attachments = message.attachments
+    snapshot = message.snapshot
+    if snapshot is None:
+        attachments = message.attachments
+    else:
+        attachments = snapshot.attachments
+    
     if (attachments is None):
         files = None
     else:

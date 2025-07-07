@@ -28,7 +28,7 @@ class Relationship(EntryProxy):
     saver : `None | RelationshipSaver`
         Saver responsible for save synchronization.
     
-    source_can_boost_at : `Datetime`
+    source_can_boost_at : `DateTime`
         When the source user can boost next.
     
     source_investment : `int`
@@ -37,7 +37,7 @@ class Relationship(EntryProxy):
     source_user_id : `int`
         Source user identifier.
     
-    target_can_boost_at : `Datetime`
+    target_can_boost_at : `DateTime`
         When the target user can boost next.
     
     target_investment : `int`

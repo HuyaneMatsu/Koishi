@@ -1,5 +1,8 @@
 __all__ = ()
 
+from datetime import datetime as DateTime, timezone as TimeZone
+
+from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import DATETIME_FORMAT_CODE, elapsed_time, id_to_datetime, now_as_id, parse_emoji
 from hata.ext.slash import abort
 
@@ -181,6 +184,28 @@ async def now():
 async def to_time(
     snowflake: ('int', 'Id please!'),
 ):
-    """Converts the given Discord snowflake to time."""
+    """
+    Converts the given Discord snowflake to time.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    snowflake : `int`
+        Identifier.
+    
+    Returns
+    -------
+    output : `str`
+    """
     time = id_to_datetime(snowflake)
-    return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago'
+    now = DateTime.now(tz = TimeZone.utc)
+    
+    if time > now:
+        delta = RelativeDelta(time, now)
+        postfix = 'from now'
+    else:
+        delta = RelativeDelta(now, time)
+        postfix = 'ago'
+        
+    return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(delta)} {postfix}'

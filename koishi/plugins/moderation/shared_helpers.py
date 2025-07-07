@@ -72,10 +72,22 @@ def add_reason_field(embed, reason):
     reason : `None`, `str`
         Action reason.
     """
-    if reason is None:
+    if reason is not None:
+        inline = False
+    
+    else:
+        inline = True
         reason = ' '
     
-    add_standalone_field(embed, 'Reason', reason)
+    embed.add_field(
+        'Reason',
+        (
+            f'```\n'
+            f'{reason}\n'
+            f'```'
+        ),
+        inline = inline,
+    )
 
 
 def add_standalone_field(embed, name, value):
@@ -98,7 +110,7 @@ def add_standalone_field(embed, name, value):
             f'{value}\n'
             f'```'
         ),
-        inline = True
+        inline = True,
     )
 
 

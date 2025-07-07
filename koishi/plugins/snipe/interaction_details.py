@@ -28,7 +28,7 @@ async def snipe_interaction_respond_with_details(client, event, choice_type):
     event : ``InteractionEvent``
         The received interaction event.
     
-    choice_type : `type<ChoiceTypeBase>`
+    choice_type : ``type<ChoiceTypeBase>``
         Choice type.
     """
     await client.interaction_component_acknowledge(event, wait = False)

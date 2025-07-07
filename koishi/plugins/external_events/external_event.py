@@ -28,7 +28,7 @@ class ExternalEvent(RichAttributeErrorBaseType):
     guild_id : `int`
         The guild identifier the event is bound to.
     
-    trigger_after : `None | Datetime`
+    trigger_after : `None | DateTime`
         After when the event should be triggered.
     
     user_id : `int`
@@ -63,7 +63,7 @@ class ExternalEvent(RichAttributeErrorBaseType):
         guild_id : `int`
             The guild identifier the event is bound to.
         
-        trigger_after : `None | Datetime` = `None`, Optional (Keyword only)
+        trigger_after : `None | DateTime` = `None`, Optional (Keyword only)
             After when the event should be triggered.
         
         user_id : `int` = `0`, Optional (Keyword only)

@@ -86,7 +86,7 @@ def test__render_attachments_field_into(field_added, attachments, optional, titl
     ----------
     field_added : `bool`
         Whether any fields were added already.
-    attachments : `None | tuple<Attachment>`
+    attachments : ``None | tuple<Attachment>``
         The attachments to render.
     optional : `bool` = `True`
         Whether should not render if `attachments` is `None`.
