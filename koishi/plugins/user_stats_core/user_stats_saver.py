@@ -48,6 +48,7 @@ class UserStatsSaver(EntryProxySaver):
                 stat_loyalty = entry_proxy.stat_loyalty,
                 
                 credibility = entry_proxy.credibility,
+                recovering_until = entry_proxy.recovering_until,
                 
                 item_id_costume = entry_proxy.item_id_costume,
                 item_id_head = entry_proxy.item_id_head,

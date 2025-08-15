@@ -2,79 +2,57 @@ __all__ = ()
 
 from hata import Embed
 
+from ..item_core import produce_weight
+
 from .constants import SORT_BY_REVERSED_DEFAULT, SORT_BYES_REVERSED, SORT_ORDER_REVERSED_DEFAULT, SORT_ORDERS_REVERSED
 
 
-def _render_weight_into(weight, into):
+def produce_inventory_description(item_entries):
     """
-    Renders the given weight.
+    Produces inventory description.
     
-    Parameters
-    ----------
-    weight : `int`
-        Weight in grams.
-    
-    into : `list<str>`
-        Container to extend.
-    
-    Returns
-    -------
-    into : `list<str>`
-    """
-    kilo_grams, grams = divmod(weight, 1000)
-    into.append(str(kilo_grams))
-    into.append('.')
-    grams_string = str(grams)
-    into.append('0' * (3 - len(grams_string)))
-    into.append(grams_string)
-    return into
-
-
-def _build_inventory_description(item_entries):
-    """
-    Builds inventory description.
+    This function is an iterable generator.
     
     Parameters
     ----------
     item_entries : `list<ItemEntry>`
         Item entries to render.
     
-    Returns
-    -------
-    description : `str`
+    Yields
+    ------
+    part : `str`
     """
-    description_parts = []
     item_added = False
     
     for item_entry in item_entries:
         if item_added:
-            description_parts.append('\n')
+            yield '\n'
         else:
             item_added = True
         
         item = item_entry.item
         emoji = item.emoji
         if (emoji is not None):
-            description_parts.append(emoji.as_emoji)
-            description_parts.append(' ')
+            yield emoji.as_emoji
+            yield ' '
         
-        description_parts.append(item.name)
-        description_parts.append(' x')
+        yield item.name
+        yield ' x'
         
         amount = item_entry.amount
         
-        description_parts.append(str(amount))
+        yield str(amount)
         
-        description_parts.append(' (')
-        description_parts = _render_weight_into(amount * item.weight, description_parts)
-        description_parts.append(' kg)')
-    
-    return ''.join(description_parts)
+        yield ' ('
+        yield from produce_weight(amount * item.weight)
+        yield ' kg)'
 
 
-def _build_inventory_footer(weight, capacity):
+def produce_inventory_footer(weight, capacity):
     """
-    Builds inventory footer.
+    Produces inventory footer.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
@@ -84,20 +62,18 @@ def _build_inventory_footer(weight, capacity):
     capacity : `int`
         Inventory capacity.
     
-    Returns
+    Yields
     -------
-    description : `str`
+    part : `str`
     """
     footer_parts = []
     
     # Weight
-    footer_parts.append('Weight: ')
-    footer_parts = _render_weight_into(weight, footer_parts)
-    footer_parts.append(' / ')
-    footer_parts = _render_weight_into(capacity, footer_parts)
-    footer_parts.append(' kg')
-    
-    return ''.join(footer_parts)
+    yield 'Weight: '
+    yield from produce_weight(weight)
+    yield ' / '
+    yield from produce_weight(capacity)
+    yield ' kg'
 
 
 def build_inventory_embed(item_entries, page_index, sort_by, sort_order, weight, capacity):
@@ -133,7 +109,7 @@ def build_inventory_embed(item_entries, page_index, sort_by, sort_order, weight,
     """
     return Embed(
         'Inventory',
-        _build_inventory_description(item_entries),
+        ''.join([*produce_inventory_description(item_entries)]),
     ).add_field(
         'Page',
         (
@@ -159,5 +135,5 @@ def build_inventory_embed(item_entries, page_index, sort_by, sort_order, weight,
         ),
         True,
     ).add_footer(
-        _build_inventory_footer(weight, capacity),
+        ''.join([*produce_inventory_footer(weight, capacity)]),
     )

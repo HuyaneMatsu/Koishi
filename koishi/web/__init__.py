@@ -62,7 +62,7 @@ BOT_NAMES = [
         'mozilla/5.0 (windows nt 10.0; win64; x64) applewebkit/537.36 (khtml, like gecko) '
         'chrome/131.0.0.0 safari/537.36 edg/131.0.0.0'
     ),
-    'Ai2Bot-Dolma',
+    'ai2bot-dolma',
     
     # From google:
     'googlebot',
@@ -314,6 +314,13 @@ BLOCKED_IPS = {
     
     # cms-checker "Mozilla/5.0 (compatible; CMS-Checker/1.0; +https://example.com)"
     '34.125.200.116',
+    
+    # Scraper openai
+    #  "114.119.147.181" response-time=0.018
+    # "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36; compatible; OAI-SearchBot/1.0; +https://openai.com/searchbot"
+    '104.210.140.138',
+    '20.171.207.180',
+    '4.227.36.18',
 }
 
 

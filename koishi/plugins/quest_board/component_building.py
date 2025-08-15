@@ -192,6 +192,19 @@ def build_quest_details_components(quest, user_stats):
     return components
 
 
+def build_quest_failure_on_adventure_components():
+    """
+    Builds response components if the user is already on an adventure and therefore cannot accept a quest.
+    
+    Returns
+    -------
+    components : ``list<Component>``
+    """
+    return [
+        create_text_display('You cannot accept quests while adventuring.'),
+    ]
+
+
 def build_quest_failure_no_such_quest_components():
     """
     Builds response components when a quest is no longer available.
@@ -423,6 +436,19 @@ def build_linked_quest_details_components(linked_quest, user_stats):
     )
     
     return components
+
+
+def build_linked_quest_failure_on_adventure_components():
+    """
+    Builds response components for the case when the user cannot submit items due to being on an adventure.
+    
+    Returns
+    -------
+    components : ``list<Component>``
+    """
+    return [
+        create_text_display('You cannot submit items while on adventure.'),
+    ]
 
 
 def build_linked_quest_failure_no_such_quest_components():

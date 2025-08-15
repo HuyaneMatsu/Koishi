@@ -84,7 +84,7 @@ CATEGORIES = (
     ), (
         'Help',
         EMOJI_SPEECH_BUBBLE,
-        ('accessibility', 'about', 'ask', 'help',),
+        ('accessibility', 'about', 'ask', 'hello', 'help',),
         (),
     ), (
         'Relationships',

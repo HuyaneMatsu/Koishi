@@ -1,3 +1,5 @@
+from datetime import datetime as DateTime, timezone as TimeZone
+
 import vampytest
 from scarletio import Task, get_event_loop, skip_ready_cycle
 

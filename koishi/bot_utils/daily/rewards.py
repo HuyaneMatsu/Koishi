@@ -1,8 +1,8 @@
 __all__ = ('REWARDS_DAILY', 'REWARDS_VOTE',)
 
-from ..constants import ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__BOOSTER, ROLE__SUPPORT__HEART_BOOST
+from ..constants import GUILD__SUPPORT, ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__BOOSTER, ROLE__SUPPORT__HEART_BOOST
 
-from .condition import ConditionRole, ConditionWeekend
+from .condition import ConditionGuildBadge, ConditionRole, ConditionWeekend
 from .reward import Reward
 
 
@@ -19,7 +19,7 @@ class daily_bonus_with_elevated(Reward):
 
 class daily_bonus_with_booster(Reward):
     base = 100
-    extra_per_streak = 5
+    extra_per_streak = 6
     extra_limit = 300
     condition = ConditionRole(ROLE__SUPPORT__BOOSTER)
 
@@ -28,6 +28,13 @@ class daily_bonus_with_heart_boost(Reward):
     base = 100
     extra_limit = 900
     condition = ConditionRole(ROLE__SUPPORT__HEART_BOOST)
+
+
+class daily_bonus_with_guild_badge(Reward):
+    base = 50
+    extra_per_streak = 3
+    extra_limit = 150
+    condition = ConditionGuildBadge(GUILD__SUPPORT)
 
 
 class vote_base(Reward):
@@ -43,7 +50,7 @@ class vote_bonus_with_elevated(Reward):
 
 class vote_bonus_with_booster(Reward):
     base = 100
-    extra_per_streak = 5
+    extra_per_streak = 6
     extra_limit = 300
     condition = ConditionRole(ROLE__SUPPORT__BOOSTER)
 
@@ -52,6 +59,13 @@ class vote_bonus_with_heart_boost(Reward):
     base = 50
     extra_limit = 450
     condition = ConditionRole(ROLE__SUPPORT__HEART_BOOST)
+
+
+class vote_bonus_with_guild_badge(Reward):
+    base = 50
+    extra_per_streak = 3
+    extra_limit = 150
+    condition = ConditionGuildBadge(GUILD__SUPPORT)
 
 
 class vote_bonus_with_weekend(Reward):
@@ -66,6 +80,7 @@ REWARDS_DAILY = (
     daily_bonus_with_elevated,
     daily_bonus_with_booster,
     daily_bonus_with_heart_boost,
+    daily_bonus_with_guild_badge,
 )
 
 REWARDS_VOTE = (
@@ -73,5 +88,6 @@ REWARDS_VOTE = (
     vote_bonus_with_elevated,
     vote_bonus_with_booster,
     vote_bonus_with_heart_boost,
+    vote_bonus_with_guild_badge,
     vote_bonus_with_weekend,
 )

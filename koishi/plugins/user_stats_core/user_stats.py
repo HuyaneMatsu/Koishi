@@ -1,5 +1,7 @@
 __all__ = ('UserStats',)
 
+from datetime import timezone as TimeZone
+
 from scarletio import copy_docs
 
 from ...bot_utils.entry_proxy import EntryProxy
@@ -37,6 +39,9 @@ class UserStats(EntryProxy):
     item_id_weapon : `int`
         The user's weapon item's identifier.
     
+    recovering_until : `None | DateTime`
+        Until when the user is in recovery.
+    
     saver : `None | UserStatsSaver`
         Saver responsible for save synchronization.
     
@@ -60,8 +65,8 @@ class UserStats(EntryProxy):
     """
     __slots__ = (
         '__weakref__', '_cache_stats_calculated', 'credibility', 'item_id_costume', 'item_id_head', 'item_id_species',
-        'item_id_weapon', 'saver', 'stat_bedroom', 'stat_charm', 'stat_cuteness', 'stat_housewife', 'stat_loyalty',
-        'user_id',
+        'item_id_weapon', 'recovering_until', 'saver', 'stat_bedroom', 'stat_charm', 'stat_cuteness', 'stat_housewife',
+        'stat_loyalty', 'user_id',
     )
     
     saver_type = UserStatsSaver
@@ -84,6 +89,7 @@ class UserStats(EntryProxy):
         self.user_id = user_id
         
         self.credibility = 0
+        self.recovering_until = None
         
         self.item_id_costume = 0
         self.item_id_head = 0
@@ -159,6 +165,11 @@ class UserStats(EntryProxy):
         self.stat_loyalty = entry['stat_loyalty']
         
         self.credibility = entry['credibility']
+        
+        recovering_until = entry['recovering_until']
+        if (recovering_until is not None):
+            recovering_until = recovering_until.replace(tzinfo = TimeZone.utc)
+        self.recovering_until = recovering_until
         
         self.item_id_costume = entry['item_id_costume']
         self.item_id_head = entry['item_id_head']

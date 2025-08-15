@@ -326,7 +326,7 @@ async def receive_sync(client, partner):
         await Pagination(client, message.channel, pages)
 
 async def sync_request_command(client, message, days: int = 7):
-    if days < 1 or days > 30:
+    if days < 1 or days > 100:
         await client.message_create(message.channel, f'please enter a valid day between 1 and 30 days, got {days}.')
         return
     

@@ -40,11 +40,12 @@ Although here is a "short" description for all of her commands by category:
 - `/accessibility` - Configure your preference.
 - `/about` - Shows information about the bot's runtime.
 - `/ask` - How to ask.
+- `/hello` - Please don't just say "hello".
 - `/help` - Lists the commands of the bot, or shows the selected guide (only 1 yet).
     Some commands may have their own `about` sub-command with a more detailed explanation.
 
 ### Administration
-    
+
 - `/automation` - Setup automations for your guild.
     - `community-message-moderation` - Allow users in your guild to `x` messages.
         When hitting the threshold the bot deleting them.
@@ -77,7 +78,6 @@ Although here is a "short" description for all of her commands by category:
     `happy`, `highfive`, `hug`, `kick`, `kiss`, `kon`, `lap-sleep`, `like`, `lick`, `murder`, `nom`, `pat`, `peg`,
     `pocky-kiss`, `poke`, `slap`, `smile`, `smug`, `stare`, `wave`, `wink`, `yeet` (with / for / at) someone.
 - `/action` - Wildcard command to invoke any other action with selecting an exact (touhou only) image.
-    Available after the bot has been user installed.
 
 ### Fun
 

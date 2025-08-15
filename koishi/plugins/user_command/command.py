@@ -1,5 +1,7 @@
 __all__ = ()
 
+from math import floor, inf
+
 from hata import ClientUserBase, Embed
 from hata.ext.slash import InteractionResponse, abort
 
@@ -99,8 +101,9 @@ else:
     
     try:
         from ..user_discard_item import (
-            build_failure_embed_no_item_discarded, build_failure_embed_no_item_like, build_success_embed_item_discarded,
-            discard_item, get_discard_item_suggestions
+            build_failure_embed_cannot_discard_less_than_one, build_failure_embed_no_item_discarded,
+            build_failure_embed_no_item_like, build_success_embed_item_discarded, discard_item,
+            get_discard_item_suggestions
         )
     except ImportError:
         if not MARISA_MODE:
@@ -335,7 +338,8 @@ if USER_EQUIPMENT_AVAILABLE:
 if USER_EQUIP_AVAILABLE:
     @USER_COMMANDS.interactions(name = 'equip')
     async def user_equip_command(
-        event,
+        client,
+        interaction_event,
         item_slot : (ITEM_SLOTS, 'Select an item slot'),
         item_name : (str, 'The item\'s name', 'item'),
     ):
@@ -346,7 +350,10 @@ if USER_EQUIP_AVAILABLE:
         
         Parameters
         ----------
-        event : ``InteractionEvent``
+        client : ``Client``
+            The client who received the interaction.
+        
+        interaction_event : ``InteractionEvent``
             The received interaction event.
         
         item_slot : `int`
@@ -354,22 +361,37 @@ if USER_EQUIP_AVAILABLE:
         
         item_name : `str`
             The give item name.
-        
-        Returns
-        -------
-        response : ``Embed``
         """
-        old_item, new_item = await equip_item(event.user_id, item_slot, item_name)
+        await client.interaction_application_command_acknowledge(
+            interaction_event,
+            False,
+            show_for_invoking_user_only = True,
+        )
+        
+        old_item, new_item = await equip_item(interaction_event.user_id, item_slot, item_name)
         if new_item is None:
-            return build_failure_embed_no_equipment_like(item_slot, item_name)
+            await client.interaction_response_message_edit(
+                interaction_event,
+                embed = build_failure_embed_no_equipment_like(item_slot, item_name),
+            )
+            return
         
         if old_item is new_item:
-            return build_failure_embed_same_item(item_slot, old_item)
+            await client.interaction_response_message_edit(
+                interaction_event,
+                embed = build_failure_embed_same_item(item_slot, old_item),
+            )
+            return
+        
+        await client.interaction_response_message_edit(interaction_event, '-# _ _')
+        await client.interaction_response_message_delete(interaction_event)
         
         if old_item is None:
-            return build_success_embed_item_equipped(item_slot, new_item)
-        
-        return build_success_embed_item_replaced(item_slot, old_item, new_item)
+            embed = build_success_embed_item_equipped(item_slot, new_item)
+        else:
+            embed = build_success_embed_item_replaced(item_slot, old_item, new_item)
+    
+        await client.interaction_followup_message_create(interaction_event, embed = embed)
     
     
     @user_equip_command.autocomplete('item')
@@ -403,7 +425,8 @@ if USER_EQUIP_AVAILABLE:
     
     @USER_COMMANDS.interactions(name = 'unequip')
     async def user_unequip_command(
-        event,
+        client,
+        interaction_event,
         item_slot : (ITEM_SLOTS, 'Select an item slot'),
     ):
         """
@@ -413,21 +436,36 @@ if USER_EQUIP_AVAILABLE:
         
         Parameters
         ----------
-        event : ``InteractionEvent``
+        client : ``Client``
+            The client who received the interaction.
+        
+        interaction_event : ``InteractionEvent``
             The received interaction event.
         
         item_slot : `int`
             The selected user.
-        
-        Returns
-        -------
-        response : ``Embed``
         """
-        old_item = await unequip_item(event.user_id, item_slot)
-        if old_item is None:
-            return build_failure_embed_empty_equipment_slot(item_slot)
+        await client.interaction_application_command_acknowledge(
+            interaction_event,
+            False,
+            show_for_invoking_user_only = True,
+        )
         
-        return build_success_embed_item_unequipped(item_slot, old_item)
+        old_item = await unequip_item(interaction_event.user_id, item_slot)
+        if old_item is None:
+            await client.interaction_response_message_edit(
+                interaction_event,
+                embed = build_failure_embed_empty_equipment_slot(item_slot),
+            )
+            return
+        
+        await client.interaction_response_message_edit(interaction_event, '-# _ _')
+        await client.interaction_response_message_delete(interaction_event)
+        
+        await client.interaction_followup_message_create(
+            interaction_event,
+            embed = build_success_embed_item_unequipped(item_slot, old_item),
+        )
 
 
 if USER_INVENTORY_AVAILABLE:
@@ -464,7 +502,8 @@ if USER_INVENTORY_AVAILABLE:
 if USER_DISCARD_ITEM_AVAILABLE:
     @USER_COMMANDS.interactions(name = 'discard-item')
     async def user_discard_command(
-        event,
+        client,
+        interaction_event,
         item_name : (str, 'The item\'s name', 'item'),
         amount : ('expression', 'The amount of items to discard.'),
     ):
@@ -475,7 +514,10 @@ if USER_DISCARD_ITEM_AVAILABLE:
         
         Parameters
         ----------
-        event : ``InteractionEvent``
+        client : ``Client``
+            The client who received the interaction.
+        
+        interaction_event : ``InteractionEvent``
             The received interaction event.
         
         item_slot : `int`
@@ -484,18 +526,53 @@ if USER_DISCARD_ITEM_AVAILABLE:
         item_name : `str`
             The give item name.
         
+        amount : `int | float`
+        
         Returns
         -------
         response : ``Embed``
         """
-        item, discarded_amount, new_amount = await discard_item(event.user_id, item_name, amount)
+        if amount < 1.0:
+            await client.interaction_response_message_create(
+                interaction_event,
+                embed = build_failure_embed_cannot_discard_less_than_one()
+            )
+            return
+        
+        if isinstance(amount, float):
+            if amount == inf:
+                amount = 1 << 64    
+            else:
+                amount = floor(amount)
+        
+        await client.interaction_application_command_acknowledge(
+            interaction_event,
+            False,
+            show_for_invoking_user_only = True
+        )
+        
+        item, discarded_amount, new_amount = await discard_item(interaction_event.user_id, item_name, amount)
         if item is None:
-            return build_failure_embed_no_item_like(item_name)
+            await client.interaction_response_message_edit(
+                interaction_event,
+                embed = build_failure_embed_no_item_like(item_name)
+            )
+            return
         
         if not discarded_amount:
-            return build_failure_embed_no_item_discarded(item, new_amount)
+            await client.interaction_response_message_edit(
+                interaction_event,
+                embed = build_failure_embed_no_item_discarded(item, new_amount)
+            )
+            return
         
-        return build_success_embed_item_discarded(item, discarded_amount, new_amount)
+        await client.interaction_response_message_edit(interaction_event, '-# _ _')
+        await client.interaction_response_message_delete(interaction_event)
+        
+        await client.interaction_followup_message_create(
+            interaction_event,
+            embed = build_success_embed_item_discarded(item, discarded_amount, new_amount),
+        )
     
     
     @user_discard_command.autocomplete('item')

@@ -1,3 +1,5 @@
+from datetime import datetime as DateTime, timezone as TimeZone
+
 import vampytest
 from scarletio import Task, get_event_loop, skip_ready_cycle
 
@@ -26,6 +28,7 @@ def _assert_fields_set(stats):
     vampytest.assert_instance(stats.item_id_head, int)
     vampytest.assert_instance(stats.item_id_species, int)
     vampytest.assert_instance(stats.item_id_weapon, int)
+    vampytest.assert_instance(stats.recovering_until, DateTime, nullable = True)
     vampytest.assert_instance(stats.stat_bedroom, int)
     vampytest.assert_instance(stats.stat_charm, int)
     vampytest.assert_instance(stats.stat_cuteness, int)
@@ -146,6 +149,7 @@ def test__UserStats__from_entry():
     stat_loyalty = 15
     
     credibility = 12222
+    recovering_until = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
     
     item_id_costume = 2
     item_id_head = 3
@@ -165,6 +169,7 @@ def test__UserStats__from_entry():
         'stat_loyalty': stat_loyalty,
         
         'credibility': credibility,
+        'recovering_until': recovering_until.replace(tzinfo = None),
         
         'item_id_costume': item_id_costume,
         'item_id_head': item_id_head,
@@ -181,12 +186,16 @@ def test__UserStats__from_entry():
         
         vampytest.assert_eq(stats.entry_id, entry_id)
         vampytest.assert_eq(stats.user_id, user_id)
+        
         vampytest.assert_eq(stats.stat_housewife, stat_housewife)
         vampytest.assert_eq(stats.stat_cuteness, stat_cuteness)
         vampytest.assert_eq(stats.stat_bedroom, stat_bedroom)
         vampytest.assert_eq(stats.stat_charm, stat_charm)
         vampytest.assert_eq(stats.stat_loyalty, stat_loyalty)
+        
         vampytest.assert_eq(stats.credibility, credibility)
+        vampytest.assert_eq(stats.recovering_until, recovering_until)
+        
         vampytest.assert_eq(stats.item_id_costume, item_id_costume)
         vampytest.assert_eq(stats.item_id_head, item_id_head)
         vampytest.assert_eq(stats.item_id_species, item_id_species)
@@ -211,6 +220,7 @@ def test__UserStats__from_entry__cache():
     stat_loyalty = 15
     
     credibility = 12222
+    recovering_until = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
     
     item_id_costume = 2
     item_id_head = 3
@@ -230,6 +240,7 @@ def test__UserStats__from_entry__cache():
         'stat_loyalty': stat_loyalty,
         
         'credibility': credibility,
+        'recovering_until': recovering_until.replace(tzinfo = TimeZone.utc),
         
         'item_id_costume': item_id_costume,
         'item_id_head': item_id_head,
@@ -248,12 +259,16 @@ def test__UserStats__from_entry__cache():
         
         vampytest.assert_eq(stats.entry_id, entry_id)
         vampytest.assert_eq(stats.user_id, user_id)
+        
         vampytest.assert_eq(stats.stat_housewife, stat_housewife)
         vampytest.assert_eq(stats.stat_cuteness, stat_cuteness)
         vampytest.assert_eq(stats.stat_bedroom, stat_bedroom)
         vampytest.assert_eq(stats.stat_charm, stat_charm)
         vampytest.assert_eq(stats.stat_loyalty, stat_loyalty)
+        
         vampytest.assert_eq(stats.credibility, credibility)
+        vampytest.assert_eq(stats.recovering_until, recovering_until)
+        
         vampytest.assert_eq(stats.item_id_costume, item_id_costume)
         vampytest.assert_eq(stats.item_id_head, item_id_head)
         vampytest.assert_eq(stats.item_id_species, item_id_species)
@@ -405,4 +420,3 @@ def test__UserStats__stats_calculated():
         
     finally:
         STATS_CACHE.clear()
-

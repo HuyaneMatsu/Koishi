@@ -6,6 +6,7 @@ from hata.ext.slash import InteractionResponse
 
 from ...bots import FEATURE_CLIENTS
 
+from ..adventure_core import get_active_adventure
 from ..guild_stats import get_guild_stats
 from ..inventory_core import get_inventory, save_inventory
 from ..item_core import get_item_nullable
@@ -18,15 +19,15 @@ from ..user_stats_core import get_user_stats
 
 from .component_building import (
     build_item_components, build_linked_quest_abandon_success_components, build_linked_quest_details_components,
-    build_linked_quest_failure_no_such_quest_components, build_linked_quest_failure_broken_quest_components,
-    build_linked_quest_failure_expired_quest_components,
+    build_linked_quest_failure_no_such_quest_components, build_linked_quest_failure_on_adventure_components,
+    build_linked_quest_failure_broken_quest_components, build_linked_quest_failure_expired_quest_components,
     build_linked_quest_submit_failure_no_items_to_submit_components,
     build_linked_quest_submit_success_completed_components, build_linked_quest_submit_success_n_left_components,
     build_linked_quests_listing_components, build_quest_accept_failure_duplicate_components,
     build_quest_accept_failure_quest_limit_components, build_quest_accept_success_components,
     build_quest_accept_failure_user_level_low_components, build_quest_board_failure_guild_only_components,
     build_quest_board_quest_listing_components, build_quest_details_components,
-    build_quest_failure_no_such_quest_components
+    build_quest_failure_no_such_quest_components, build_quest_failure_on_adventure_components
 )
 from .constants import (
     CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN, CUSTOM_ID_LINKED_QUEST_DETAILS_PATTERN,
@@ -226,6 +227,12 @@ async def quest_accept(client, event, quest_template_id):
     await client.interaction_component_acknowledge(event)
     
     while True:
+        adventure = await get_active_adventure(event.user_id)
+        if (adventure is not None):
+            components = build_quest_failure_on_adventure_components()
+            new_message = True
+            break
+        
         guild = event.guild
         if guild is None:
             components = build_quest_board_failure_guild_only_components()
@@ -393,6 +400,12 @@ async def linked_quest_submit_item(client, event, linked_quest_entry_id):
     await client.interaction_component_acknowledge(event)
     
     while True:
+        adventure = await get_active_adventure(event.user_id)
+        if (adventure is not None):
+            components = build_linked_quest_failure_on_adventure_components()
+            new_message = False
+            break
+        
         linked_quest_entry_id = int(linked_quest_entry_id, 16)
         linked_quest_listing = await get_linked_quest_listing(event.user_id)
         linked_quest = get_linked_quest_with_entry_id(linked_quest_listing, linked_quest_entry_id)

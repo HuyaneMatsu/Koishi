@@ -60,6 +60,11 @@ GUILD_STATS_TABLE = None
 linked_quest_model = None
 LINKED_QUEST_TABLE = None
 
+adventure_action_model = None
+ADVENTURE_ACTION_TABLE = None
+
+adventure_model = None
+ADVENTURE_TABLE = None
 
 if (DATABASE_NAME is not None):
     from sqlalchemy.ext.declarative import declarative_base
@@ -188,12 +193,13 @@ if (DB_ENGINE is not None):
         stat_loyalty = Column(Int32)
         
         credibility = Column(Int64, default = 0, nullable = False)
+        recovering_until = Column(DateTime, nullable = True)
         
         item_id_costume = Column(Int32, default = 0, nullable = False)
         item_id_head = Column(Int32, default = 0, nullable = False)
         item_id_species = Column(Int32, default = 0, nullable = False)
         item_id_weapon = Column(Int32, default = 0, nullable = False)
-    
+        
     
     STATS_TABLE = stats_model.__table__
     
@@ -377,8 +383,49 @@ if (DB_ENGINE is not None):
         template_id        = Column(Int64, default = 0, nullable = False)
         user_id            = Column(Int64, default = 0, nullable = False)
     
-    
     LINKED_QUEST_TABLE = linked_quest_model.__table__
+    
+    
+    class adventure_action_model(BASE):
+        __tablename__   = 'ADVENTURE_ACTIONS'
+        id              = Column(Int64, primary_key = True)
+        adventure_entry_id = Column(Int64, nullable = False)
+        action_id       = Column(Int32, nullable = False)
+        created_at      = Column(DateTime, nullable = False)
+        
+        battle_data     = Column(Binary(), nullable = True)
+        loot_data       = Column(Binary(), nullable = True)
+        
+        health_exhausted = Column(Int64, nullable = False)
+        energy_exhausted = Column(Int64, nullable = False)
+    
+    
+    ADVENTURE_ACTION_TABLE = adventure_action_model.__table__
+    
+    
+    class adventure_model(BASE):
+        __tablename__   = 'ADVENTURES'
+        id              = Column(Int64, primary_key = True)
+        user_id         = Column(Int64, nullable = False)
+        
+        location_id     = Column(Int32, nullable = False)
+        target_id       = Column(Int32, nullable = False)
+        return_id       = Column(Int32, nullable = False)
+        auto_cancellation_id = Column(Int32, nullable = False)
+        state           = Column(Int32, nullable = False)
+        
+        initial_duration = Column(Int64, nullable = False)
+        created_at      = Column(DateTime, nullable = False)
+        updated_at      = Column(DateTime, nullable = False)
+        action_count    = Column(Int32, nullable = False)
+        seed            = Column(Int64, nullable = False)
+        
+        health_initial = Column(Int64, nullable = False)
+        health_exhausted = Column(Int64, nullable = False)
+        energy_initial = Column(Int64, nullable = False)
+        energy_exhausted = Column(Int64, nullable = False)
+    
+    ADVENTURE_TABLE = adventure_model.__table__
     
     DB_ENGINE.dispose()
     # BASE.metadata.create_all(DB_ENGINE)

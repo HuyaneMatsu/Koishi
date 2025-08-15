@@ -226,8 +226,8 @@ async def send_action_response_with_interaction_event(client, event, content, em
                 event, content, allowed_mentions = allowed_mentions, embed = embed, silent = True
             )
         else:
-            await client.interaction_response_message_edit(
-                event, content, allowed_mentions = allowed_mentions, embed = embed
+            await client.interaction_followup_message_edit(
+                event, event.message, content, allowed_mentions = allowed_mentions, embed = embed
             )
     except ConnectionError:
         # No internet access

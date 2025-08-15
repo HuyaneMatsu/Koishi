@@ -123,6 +123,7 @@ ITEM_FISHING_ROD = ITEMS[ITEM_ID_FISHING_ROD] = Item(
     ),
 )
 
+
 ITEM_BLUEFRANKISH = ITEMS[ITEM_ID_BLUEFRANKISH] = Item(
     ITEM_ID_BLUEFRANKISH,
     'Bluefrankish',
@@ -153,7 +154,7 @@ ITEM_CARROT = ITEMS[ITEM_ID_CARROT] = Item(
         'It is sweet and a significant source of vitamins. '
         'Its a biennial plant, first year it stores its energy in its taproot enabling itself to flower in the second.\n'
         '\n'
-        'They can be found in the **Human Village** and at the outskirts of the **Eientei** mansion.'
+        'They can be found in the **Human Village** and at the outskirts of the **Eientei mansion**.'
     ),
     ITEM_FLAG_EDIBLE,
     18, # value (hearts)
@@ -198,6 +199,7 @@ ITEM_SCARLET_ONION = ITEMS[ITEM_ID_SCARLET_ONION] = Item(
     None,
 )
 
+
 ITEM_MYSTIA = ITEMS[ITEM_ID_MYSTIA] = Item(
     ITEM_ID_MYSTIA,
     'Mystia',
@@ -209,6 +211,7 @@ ITEM_MYSTIA = ITEMS[ITEM_ID_MYSTIA] = Item(
     None,
 )
 
+
 ITEM_SAKUYA = ITEMS[ITEM_ID_SAKUYA] = Item(
     ITEM_ID_SAKUYA,
     'Sakuya',
@@ -219,6 +222,7 @@ ITEM_SAKUYA = ITEMS[ITEM_ID_SAKUYA] = Item(
     0, # weight (grams)
     None,
 )
+
 
 ITEM_MARISA = ITEMS[ITEM_ID_MARISA] = Item(
     ITEM_ID_MARISA,

@@ -1,3 +1,5 @@
+from datetime import datetime as DateTime, timezone as TimeZone
+
 import vampytest
 
 from ...item_core import Item
@@ -9,7 +11,7 @@ from ..user_stats_calculated import UserStatsCalculated
 
 def _assert_fields_set(user_stats_calculated):
     """
-    Tests whether teh given stats calculated has all of its fields set.
+    Tests whether the given stats calculated has all of its fields set.
     
     Parameters
     ----------
@@ -17,12 +19,22 @@ def _assert_fields_set(user_stats_calculated):
         The instance to check its fields.
     """
     vampytest.assert_instance(user_stats_calculated, UserStatsCalculated)
+    
+    vampytest.assert_instance(user_stats_calculated.extra_butchering, int)
     vampytest.assert_instance(user_stats_calculated.extra_fishing, int)
+    vampytest.assert_instance(user_stats_calculated.extra_energy, int)
+    vampytest.assert_instance(user_stats_calculated.extra_foraging, int)
+    vampytest.assert_instance(user_stats_calculated.extra_gardening, int)
+    vampytest.assert_instance(user_stats_calculated.extra_health, int)
+    vampytest.assert_instance(user_stats_calculated.extra_hunting, int)
     vampytest.assert_instance(user_stats_calculated.extra_inventory, int)
+    vampytest.assert_instance(user_stats_calculated.extra_movement, int)
+    
     vampytest.assert_instance(user_stats_calculated.item_costume, Item, nullable = True)
     vampytest.assert_instance(user_stats_calculated.item_head, Item, nullable = True)
     vampytest.assert_instance(user_stats_calculated.item_species, Item, nullable = True)
     vampytest.assert_instance(user_stats_calculated.item_weapon, Item, nullable = True)
+    
     vampytest.assert_instance(user_stats_calculated.stat_bedroom, int)
     vampytest.assert_instance(user_stats_calculated.stat_charm, int)
     vampytest.assert_instance(user_stats_calculated.stat_cuteness, int)
@@ -43,6 +55,7 @@ def test__UserStatsCalculated__new():
     stat_loyalty = 15
     
     credibility = 12222
+    recovering_until = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
     
     item_id_costume = 0
     item_id_head = 0
@@ -62,6 +75,7 @@ def test__UserStatsCalculated__new():
         'stat_loyalty': stat_loyalty,
         
         'credibility': credibility,
+        'recovering_until': recovering_until.replace(tzinfo = None),
         
         'item_id_costume': item_id_costume,
         'item_id_head': item_id_head,
@@ -76,8 +90,17 @@ def test__UserStatsCalculated__new():
         user_stats_calculated = UserStatsCalculated(stats)
         _assert_fields_set(user_stats_calculated)
         
+        vampytest.assert_eq(user_stats_calculated.extra_butchering, 21)
         vampytest.assert_eq(user_stats_calculated.extra_fishing, 23)
+        vampytest.assert_eq(user_stats_calculated.extra_foraging, 22)
+        vampytest.assert_eq(user_stats_calculated.extra_gardening, 22)
+        vampytest.assert_eq(user_stats_calculated.extra_hunting, 24)
+        
         vampytest.assert_eq(user_stats_calculated.extra_inventory, 56250)
+        vampytest.assert_eq(user_stats_calculated.extra_movement, 1304)
+        vampytest.assert_eq(user_stats_calculated.extra_health, 236)
+        vampytest.assert_eq(user_stats_calculated.extra_energy, 226)
+        
         vampytest.assert_is(user_stats_calculated.item_costume, None)
         vampytest.assert_is(user_stats_calculated.item_head, None)
         vampytest.assert_is(user_stats_calculated.item_species, None)
@@ -105,6 +128,7 @@ def test__UserStatsCalculated__repr():
     stat_loyalty = 15
     
     credibility = 12222
+    recovering_until = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
     
     item_id_costume = 0
     item_id_head = 0
@@ -124,6 +148,7 @@ def test__UserStatsCalculated__repr():
         'stat_loyalty': stat_loyalty,
         
         'credibility': credibility,
+        'recovering_until': recovering_until.replace(tzinfo = None),
         
         'item_id_costume': item_id_costume,
         'item_id_head': item_id_head,

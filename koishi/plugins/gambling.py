@@ -8,16 +8,14 @@ from hata import (
     BUILTIN_EMOJIS, DiscordException, ERROR_CODES, Embed, InteractionType, KOKORO, Permission, create_button,
     create_row, parse_tdelta
 )
-from hata.ext.slash import abort, wait_for_component_interaction
+from hata.ext.slash import wait_for_component_interaction
 from scarletio import CancelledError, Future, Task
 
 from ..bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY, GUILD__SUPPORT, ROLE__SUPPORT__ADMIN
 from ..bot_utils.daily import calculate_daily_new
-from ..bot_utils.utils import send_embed_to
 from ..bots import FEATURE_CLIENTS
 
 from .user_balance import get_user_balance
-from .user_settings import get_one_user_settings, get_preferred_client_for_user
 
 
 EVENT_MAX_DURATION = TimeDelta(hours = 24)
@@ -594,135 +592,6 @@ class DailyEventGUI:
             
             await client.events.error(client, f'{self!r}.countdown', err)
             return
-
-
-AWARD_TYPES = [
-    ('hearts', 'hearts'),
-    ('streak', 'streak')
-]
-
-
-@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
-async def award(
-    client,
-    event,
-    target_user: ('user', 'Who do you want to award?'),
-    amount: ('int', 'With how much hearts do you wanna award them?'),
-    message : ('str', 'Optional message to send with the gift.') = None,
-    with_: (AWARD_TYPES, 'Select award type') = 'hearts',
-):
-    """Awards the user with balance or streak."""
-    if not event.user_permissions.administrator:
-        abort(f'You must have administrator permission to invoke this command.')
-    
-    if amount <= 0:
-        yield Embed(
-            'BAKA !!',
-            'You cannot award non-positive amount of hearts..',
-            color = COLOR__GAMBLING,
-        )
-        return
-    
-    if (message is not None) and len(message) > 1000:
-        message = message[ : 1000] + '...'
-    
-    target_user_balance = await get_user_balance(target_user.id)
-    target_balance = target_user_balance.balance
-    target_streak = target_user_balance.streak
-    target_daily_can_claim_at = target_user_balance.daily_can_claim_at
-    
-    if with_ == 'hearts':
-        target_new_balance = target_balance + amount
-        target_new_streak = target_streak
-    else:
-        now = DateTime.now(TimeZone.utc)
-        target_new_balance = target_user_balance.balance
-        target_new_streak, target_daily_can_claim_at = calculate_daily_new(
-            target_streak, 
-            target_daily_can_claim_at,
-            now,
-        )
-        
-        target_new_streak = target_streak + amount
-    
-    target_user_balance.set('balance', target_new_balance)
-    target_user_balance.set('streak', target_new_streak)
-    target_user_balance.set('daily_can_claim_at', target_daily_can_claim_at)
-    await target_user_balance.save()
-    
-    if with_ == 'hearts':
-        awarded_with = EMOJI__HEART_CURRENCY.as_emoji
-        up_from = target_balance
-        up_to = target_new_balance
-    else:
-        awarded_with = 'streak(s)'
-        up_from = target_streak
-        up_to = target_new_streak
-    
-    embed = Embed(
-        f'You awarded {target_user.name_at(event.guild_id)} with {amount} {awarded_with}',
-        f'Now they are up from {up_from} to {up_to} {awarded_with}',
-        color = COLOR__GAMBLING,
-    )
-    
-    if (message is not None):
-        embed.add_field('Message:', message)
-    
-    yield embed
-    
-    if target_user.bot:
-        return
-    
-    embed = Embed(
-        'Aww, love is in the air',
-        f'You have been awarded {amount} {awarded_with} by {event.user.name_at(event.guild_id)}',
-        color = COLOR__GAMBLING,
-    ).add_field(
-        f'Your {awarded_with}',
-        f'{up_from} -> {up_to}',
-    )
-    
-    if (message is not None):
-        embed.add_field('Message:', message)
-    
-    target_user_settings = await get_one_user_settings(target_user.id)
-    
-    await send_embed_to(
-        get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
-        target_user.id,
-        embed,
-        None,
-    )
-
-
-@FEATURE_CLIENTS.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
-async def take(
-    client,
-    event,
-    target_user: ('user', 'From who do you want to take hearts away?'),
-    amount: ('int', 'How much hearts do you want to take away?'),
-):
-    """Takes away hearts form the lucky user."""
-    if not event.user_permissions.administrator:
-        abort(f'You must have administrator permission to invoke this command.')
-    
-    if amount <= 0:
-        abort('You cannot award non-positive amount of hearts..')
-    
-    user_balance = await get_user_balance(target_user.id)
-    
-    balance = target_user.balance
-    can_take = min(balance - user_balance.allocated, amount)
-    
-    if can_take:
-        user_balance.set('balance', balance - can_take)
-        await user_balance.save()
-    
-    yield Embed(
-        f'You took {amount} {EMOJI__HEART_CURRENCY} away from {target_user.full_name}',
-        f'They got down from {balance} to {balance - can_take} {EMOJI__HEART_CURRENCY}',
-        color = COLOR__GAMBLING,
-    )
 
 
 HEART_GENERATOR_COOLDOWNS = set()

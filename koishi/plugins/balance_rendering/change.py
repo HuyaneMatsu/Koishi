@@ -1,4 +1,7 @@
-__all__ = ('add_other_balance_modification_embed_field', 'add_self_balance_modification_embed_field', )
+__all__ = (
+    'add_modification_embed_field', 'add_other_balance_modification_embed_field',
+    'add_self_balance_modification_embed_field'
+)
 
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 

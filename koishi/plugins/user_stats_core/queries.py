@@ -24,19 +24,19 @@ async def get_user_stats(user_id):
     entries : ``UserStats``
     """
     try:
-        listing = STATS_CACHE[user_id]
+        stats = STATS_CACHE[user_id]
     except KeyError:
         pass
     else:
         STATS_CACHE.move_to_end(user_id)
-        return listing
+        return stats
     
-    listing = await query_stats(user_id)
-    STATS_CACHE[user_id] = listing
+    stats = await query_stats(user_id)
+    STATS_CACHE[user_id] = stats
     if len(STATS_CACHE) > STATS_CACHE_SIZE_MAX:
         del STATS_CACHE[next(iter(STATS_CACHE))]
     
-    return listing
+    return stats
 
 
 async def query_stats(user_id):

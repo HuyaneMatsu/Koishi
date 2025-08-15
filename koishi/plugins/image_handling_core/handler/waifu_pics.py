@@ -90,10 +90,14 @@ class ImageHandlerWaifuPics(ImageHandlerRequestBase):
     async def _request(self, client):
         try:
             async with client.http.post(self._url, headers = HEADERS, data = DATA) as response:
-                if response.status == 200:
-                    data = await response.json()
-                else:
+                if response.status != 200:
                     data = None
+                
+                elif 'json' not in response.headers.get(CONTENT_TYPE, '').casefold():
+                    data = None
+                
+                else:
+                    data = await response.json()
         except TimeoutError:
             data = None
         

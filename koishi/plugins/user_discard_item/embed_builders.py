@@ -1,8 +1,23 @@
 __all__ = (
-    'build_failure_embed_no_item_discarded', 'build_failure_embed_no_item_like', 'build_success_embed_item_discarded',
+    'build_failure_embed_cannot_discard_less_than_one', 'build_failure_embed_no_item_discarded',
+    'build_failure_embed_no_item_like', 'build_success_embed_item_discarded',
 )
 
 from hata import Embed
+
+
+def build_failure_embed_cannot_discard_less_than_one():
+    """
+    Builds a failure embed for the case when the user wants to discard less than 1 item.
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
+    return Embed(
+        'Oh no',
+        f'You cannot discard less than 1 items.',
+    )
 
 
 def build_failure_embed_no_item_like(value):

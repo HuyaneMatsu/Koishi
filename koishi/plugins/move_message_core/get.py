@@ -5,30 +5,6 @@ from hata import ERROR_CODES, DiscordException
 from ...bot_utils.response_data_streaming import create_http_stream_resource
 
 
-async def get_attachment(client, attachment):
-    """
-    Requests the given attachment's file.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The respective client.
-    attachment : ``Attachment``
-        The attachment to request.
-    
-    Returns
-    -------
-    attachment : ``Attachment``
-        The requested attachment to reproduce their order.
-    file : `bytes`
-        The requested file.
-    """
-    file = await client.download_attachment(attachment)
-    return attachment, file
-
-
 async def get_webhook(client, channel_id):
     """
     Gets the optimal webhook to use for the given channel by it's identifier.

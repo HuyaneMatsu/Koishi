@@ -6,8 +6,7 @@ __all__ = (
     'set_user_settings_option',
 )
 
-from hata import CLIENTS, Permission
-from hata.ext.slash import InteractionResponse
+from hata import CLIENTS, InteractionType, Permission
 
 from ...bots import FEATURE_CLIENTS, MAIN_CLIENT
 
@@ -55,7 +54,7 @@ async def set_user_settings_option(user_settings, option, value):
     return True
 
 
-async def handle_user_settings_change(event, option, value):
+async def handle_user_settings_change(client, interaction_event, option, value):
     """
     handles a user settings change.
     
@@ -63,23 +62,45 @@ async def handle_user_settings_change(event, option, value):
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    client : ``Client``
+        The client who received the interaction event.
+    
+    interaction_event : ``InteractionEvent``
         The received event.
+    
     option : ``NotificationOption``
         Option representing the changed user setting.
+    
     value : `bool`
         The new value to set.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
     """
-    user_settings = await get_one_user_settings(event.user.id)
+    if interaction_event.type is InteractionType.application_command:
+        await client.interaction_application_command_acknowledge(
+            interaction_event,
+            False,
+        )
+    else:
+        await client.interaction_component_acknowledge(interaction_event)
+    
+    user_settings = await get_one_user_settings(interaction_event.user.id)
     changed = await set_user_settings_option(user_settings, option, value)
-    return InteractionResponse(
-        embed = build_user_settings_notification_change_embed(event.user, option, value, changed),
-        show_for_invoking_user_only = True,
-    )
+    
+    if interaction_event.type is InteractionType.application_command:
+        await client.interaction_response_message_edit(interaction_event, '-# _ _')
+        await client.interaction_response_message_delete(interaction_event)
+        
+    embed = build_user_settings_notification_change_embed(interaction_event.user, option, value, changed)
+    
+    if interaction_event.type is InteractionType.application_command:
+        await client.interaction_response_message_edit(
+            interaction_event,
+            embed = embed,
+        )
+    else:
+        await client.interaction_followup_message_create(
+            interaction_event,
+            embed = embed,
+        )
 
 
 def get_available_clients(user):
@@ -144,7 +165,7 @@ def get_preferred_client_in_channel(channel, preferred_client_id, default_client
     
     Parameters
     ----------
-    chanel : ``Channel``
+    channel : ``Channel``
         Channel to check the client's permissions in.
     preferred_client_id : `int`
         The client's identifier to get.
@@ -261,7 +282,7 @@ def get_user_settings_preferred_client(event, value):
     return False, None
 
 
-async def handle_user_settings_set_preferred_client(event, value):
+async def handle_user_settings_set_preferred_client(client, interaction_event, value):
     """
     Handles a set preferred client.
     
@@ -269,34 +290,50 @@ async def handle_user_settings_set_preferred_client(event, value):
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    client : ``Client``
+        The client who received the interaction event.
+    
+    interaction_event : ``InteractionEvent``
         The received event.
+    
     value : `str`
         The new value to set.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
     """
-    hit, client = get_user_settings_preferred_client(event, value)
+    if interaction_event.type is InteractionType.application_command:
+        await client.interaction_application_command_acknowledge(
+            interaction_event,
+            False,
+        )
+    else:
+        await client.interaction_component_acknowledge(interaction_event)
+    
+    hit, client = get_user_settings_preferred_client(interaction_event, value)
     if not hit:
         changed = False
     
     else:
-        user_settings = await get_one_user_settings(event.user.id)
+        user_settings = await get_one_user_settings(interaction_event.user_id)
         changed = await set_user_settings_option(
             user_settings,
             OPTION_PREFERRED_CLIENT_ID,
             0 if client is None else client.id,
         )
+    
+    embed = build_user_settings_preferred_client_change_embed(interaction_event.user, client, hit, changed)
+    
+    if interaction_event.type is InteractionType.application_command:
+        await client.interaction_response_message_edit(
+            interaction_event,
+            embed = embed,
+        )
+    else:
+        await client.interaction_followup_message_create(
+            interaction_event,
+            embed = embed,
+        )
 
-    return InteractionResponse(
-        embed = build_user_settings_preferred_client_change_embed(event.user, client, hit, changed),
-        show_for_invoking_user_only = True,
-    )
 
-
-async def handle_user_settings_set_preferred_image_source(event, value):
+async def handle_user_settings_set_preferred_image_source(client, interaction_event, value):
     """
     Handles a set preferred image source.
     
@@ -304,18 +341,26 @@ async def handle_user_settings_set_preferred_image_source(event, value):
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    client : ``Client``
+        The client who received the interaction event.
+    
+    interaction_event : ``InteractionEvent``
         The received event.
+    
     value : `int`
         The new value to set.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
     """
+    if interaction_event.type is InteractionType.application_command:
+        await client.interaction_application_command_acknowledge(
+            interaction_event,
+            False,
+        )
+    else:
+        await client.interaction_component_acknowledge(interaction_event)
+    
     if value in PREFERRED_IMAGE_SOURCE_NAMES.keys():
         hit = True
-        user_settings = await get_one_user_settings(event.user.id)
+        user_settings = await get_one_user_settings(interaction_event.user_id)
         changed = await set_user_settings_option(
             user_settings,
             OPTION_PREFERRED_IMAGE_SOURCE,
@@ -326,10 +371,18 @@ async def handle_user_settings_set_preferred_image_source(event, value):
         hit = False
         changed = False
     
-    return InteractionResponse(
-        embed = build_user_settings_preferred_image_source_change_embed(event.user, value, hit, changed),
-        show_for_invoking_user_only = True,
-    )
+    embed = build_user_settings_preferred_image_source_change_embed(interaction_event.user, value, hit, changed)
+    
+    if interaction_event.type is InteractionType.application_command:
+        await client.interaction_response_message_edit(
+            interaction_event,
+            embed = embed,
+        )
+    else:
+        await client.interaction_followup_message_create(
+            interaction_event,
+            embed = embed,
+        )
 
 
 async def get_preferred_image_source_weight_map(user_ids):

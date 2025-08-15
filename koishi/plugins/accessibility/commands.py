@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata.ext.slash import InteractionResponse, P, abort
+from hata.ext.slash import P
 
 from ...bots import FEATURE_CLIENTS
 
@@ -35,7 +35,7 @@ NOTIFICATION_SETTINGS = ACCESSIBILITY_INTERACTIONS.interactions(
 
 
 @NOTIFICATION_SETTINGS.interactions(name = 'show')
-async def notification_settings_show_show(event):
+async def notification_settings_show(client, interaction_event):
     """
     Shows your notification settings.
     
@@ -43,24 +43,29 @@ async def notification_settings_show_show(event):
     
     Parameters
     ----------
-    event : ``InteractionEvent``
-        The received event.
+    client : ``Client``
+        The client who received this event.
     
-    Returns
-    -------
-    response : ``InteractionResponse``
+    interaction_event : ``InteractionEvent``
+        The received event.
     """
-    user = event.user
-    user_settings = await get_one_user_settings(user.id)
-    return InteractionResponse(
-        embed = build_notification_settings_embed(user, user_settings),
-        show_for_invoking_user_only = True,
+    await client.interaction_application_command_acknowledge(
+        interaction_event,
+        False,
+    )
+    
+    user_settings = await get_one_user_settings(interaction_event.user_id)
+    
+    await client.interaction_response_message_edit(
+        interaction_event,
+        embed = build_notification_settings_embed(interaction_event.user, user_settings),
     )
 
 
 @NOTIFICATION_SETTINGS.interactions(name = 'change')
-async def notification_settings_show_change(
-    event,
+async def notification_settings_change(
+    client,
+    interaction_event,
     notification_type: (NOTIFICATION_SETTINGS_CHOICES, 'Select the notification to change.'),
     enabled: (bool, 'Whether the notification should be enabled.'),
 ):
@@ -71,19 +76,21 @@ async def notification_settings_show_change(
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    client : ``Client``
+        The client who received the event.
+    
+    interaction_event : ``InteractionEvent``
         The received event.
+    
     notification_type : `int`
         The notification's type.
+    
     enabled : `bool`
         Whether we should enable the notification.
     
-    Returns
-    -------
-    response : ``InteractionResponse``
     """
-    return await handle_user_settings_change(
-        event, NOTIFICATION_SETTING_RESOLUTION[notification_type], enabled
+    await handle_user_settings_change(
+        client, interaction_event, NOTIFICATION_SETTING_RESOLUTION[notification_type], enabled
     )
 
 
@@ -94,7 +101,7 @@ PREFERENCE_SETTINGS = ACCESSIBILITY_INTERACTIONS.interactions(
 )
 
 @PREFERENCE_SETTINGS.interactions(name = 'show')
-async def preference_settings_show_show(event):
+async def preference_settings_show(client, interaction_event):
     """
     Shows your preference settings.
     
@@ -102,24 +109,29 @@ async def preference_settings_show_show(event):
     
     Parameters
     ----------
-    event : ``InteractionEvent``
-        The received event.
+    client : ``Client``
+        The client who received the event.
     
-    Returns
-    -------
-    response : ``InteractionResponse``
+    interaction_event : ``InteractionEvent``
+        The received event.
     """
-    user = event.user
-    user_settings = await get_one_user_settings(user.id)
-    return InteractionResponse(
-        embed = build_preference_settings_embed(user, user_settings),
-        show_for_invoking_user_only = True,
+    await client.interaction_application_command_acknowledge(
+        interaction_event,
+        False,
+    )
+    
+    user_settings = await get_one_user_settings(interaction_event.user_id)
+    
+    await client.interaction_response_message_edit(
+        interaction_event,
+        embed = build_preference_settings_embed(interaction_event.user, user_settings),
     )
 
 
 @PREFERENCE_SETTINGS.interactions(name = 'set-preferred-client')
 async def preference_settings_set_preferred_client(
-    event,
+    client,
+    interaction_event,
     client_name : P(str, 'Select a client', 'client', autocomplete = autocomplete_user_settings_preferred_client),
 ):
     """
@@ -129,21 +141,22 @@ async def preference_settings_set_preferred_client(
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    client : ``Client``
+        The client who received the event.
+    
+    interaction_event : ``InteractionEvent``
         The received event.
+    
     client_name : `str`
         The client's name.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
     """
-    return await handle_user_settings_set_preferred_client(event, client_name)
+    await handle_user_settings_set_preferred_client(client, interaction_event, client_name)
 
 
 @PREFERENCE_SETTINGS.interactions(name = 'set-preferred-image-source')
 async def preference_settings_set_preferred_image_source(
-    event,
+    client,
+    interaction_event,
     value : (
         [(value, key) for key, value in sorted(PREFERRED_IMAGE_SOURCE_NAMES.items())],
         'Select an image source',
@@ -157,16 +170,16 @@ async def preference_settings_set_preferred_image_source(
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    client : ``Client``
+        The client who received the event.
+    
+    interaction_event : ``InteractionEvent``
         The received event.
+    
     client_name : `str`
         The client's name.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
     """
-    return await handle_user_settings_set_preferred_image_source(event, value)
+    await handle_user_settings_set_preferred_image_source(client, interaction_event, value)
 
 
 CHARACTER_PREFERENCE = ACCESSIBILITY_INTERACTIONS.interactions(
@@ -190,23 +203,17 @@ async def character_preference_show(client, interaction_event):
     
     interaction_event : ``InteractionEvent``
         The received interaction event.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
     """
     user = interaction_event.user
     
     await client.interaction_application_command_acknowledge(
-        interaction_event, False, show_for_invoking_user_only = True
+        interaction_event,
+        False,
     )
     
     character_preferences = await get_one_touhou_character_preference(user.id)
     
-    await client.interaction_response_message_edit(interaction_event, '-# _ _')
-    await client.interaction_response_message_delete(interaction_event)
-    
-    await client.interaction_followup_message_create(
+    await client.interaction_response_message_edit(
         interaction_event,
         embed = build_character_preference_embed(user, character_preferences),
     )
@@ -233,31 +240,34 @@ async def character_preference_add(
     
     name : `str`
         Character's name.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
     """
     character = get_touhou_character_like(name)
     if (character is None):
-        abort('Could not identify character.')
-    
-    await client.interaction_application_command_acknowledge(
-        interaction_event, False, show_for_invoking_user_only = True
-    )
+        await client.interaction_response_message_create(
+            interaction_event,
+            'Could not identify character.',
+            show_for_invoking_user_only = True,
+        )
+        return
     
     user = interaction_event.user
     character_preferences = await get_one_touhou_character_preference(user.id)
     if (character_preferences is not None) and (len(character_preferences) >= PREFERRED_CHARACTER_MAX):
-        abort(f'Can not add more character preferences. ({len(character_preferences)!r} / {PREFERRED_CHARACTER_MAX!r})')
+        await client.interaction_response_message_create(
+            interaction_event,
+            f'Can not add more character preferences. ({len(character_preferences)!r} / {PREFERRED_CHARACTER_MAX!r})',
+            show_for_invoking_user_only = True,
+        )
+        return
     
+    await client.interaction_application_command_acknowledge(
+        interaction_event,
+        False,
+    )
     
     await add_touhou_character_to_preference(user.id, character)
     
-    await client.interaction_response_message_edit(interaction_event, '-# _ _')
-    await client.interaction_response_message_delete(interaction_event)
-    
-    await client.interaction_followup_message_create(
+    await client.interaction_response_message_edit(
         interaction_event,
         embed = build_character_preference_change_embed(user, character, True),
     )
@@ -284,21 +294,26 @@ async def character_preference_remove(
     
     name : `str`
         Character's name.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
     """
     character = get_touhou_character_like(name)
     if (character is None):
-        abort('Could not identify character.')
+        await client.interaction_response_message_create(
+            interaction_event,
+            'Could not identify character.',
+            show_for_invoking_user_only = True,
+        )
+        return
     
-    await client.interaction_application_command_acknowledge(interaction_event, False)
+    await client.interaction_application_command_acknowledge(
+        interaction_event,
+        False,
+    )
     
     user = interaction_event.user
     await remove_touhou_character_from_preference(user.id, character)
     
-    return InteractionResponse(
+    await client.interaction_followup_message_edit(
+        interaction_event,
         embed = build_character_preference_change_embed(user, character, False),
     )
 

@@ -3,8 +3,10 @@ __all__ = ()
 from random import random, randint
 
 from hata import Client, Embed, DiscordException, ERROR_CODES
+from hata.ext.slash import P
 
 from ..bots import FEATURE_CLIENTS
+
 
 
 @FEATURE_CLIENTS.interactions(show_for_invoking_user_only = True, is_global = True)
@@ -88,8 +90,8 @@ async def yuno():
 
 @FEATURE_CLIENTS.interactions(is_global = True)
 async def random_(
-    n1: ('int', 'Number limit.'),
-    n2: ('int', 'Other number limit!') = 0,
+    n1: P('int', 'Number limit.', min_value = - 1 << 52, max_value = 1 << 52),
+    n2: P('int', 'Other number limit!', min_value = - 1 << 52, max_value = 1 << 52) = 0,
 ):
     """Do you need some random numbers?"""
     if n1 == n2:

@@ -101,7 +101,7 @@ def get_linked_quest_for_deduplication(linked_quest_listing, guild_id, quest_bat
         The guild's identifier is quest is from.
     
     quest_batch_id : `int`
-        The identifier of the batch teh quest is from.
+        The identifier of the batch the quest is from.
     
     quest_template_id : `int`
         The quest's template's identifier.

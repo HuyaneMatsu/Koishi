@@ -3,151 +3,163 @@ __all__ = ()
 from .constants import ESCAPED_AT_SIGN
 
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
-from ...bot_utils.daily import ConditionRole, ConditionWeekend, ConditionName, RewardAccumulator
+from ...bot_utils.daily import ConditionGuildBadge, ConditionRole, ConditionWeekend, ConditionName, RewardAccumulator
 
 
-def render_condition_head_none_into(into, condition, interaction_event):
+def produce_condition_head_none(condition, interaction_event):
     """
-    Renders a condition head (no condition).
+    produces a condition head (no condition).
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
-    into : `list<str>`
-        Container to render into.
-    
     condition : `None`
-        Condition to render.
+        Condition to produce.
     
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    Returns
+    Yields
     -------
-    into : `list<str>`
+    part : `str`
     """
-    into.append('**Base:**\n')
-    return into
-    
+    yield '**Base:**\n'
 
-def render_condition_head_role_into(into, condition, interaction_event):
+
+def produce_condition_head_guild_badge(condition, interaction_event):
     """
-    Renders a condition head (condition role).
+    Produces a condition head (condition guild badge).
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
-    into : `list<str>`
-        Container to render into.
-    
-    condition : ``ConditionRole``
-        Condition to render.
+    condition : ``ConditionGuildBadge``
+        Condition to produce.
     
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    Returns
+    Yields
     -------
-    into : `list<str>`
+    part : `str`
     """
-    into.append('**Has role ')
+    yield '**Has tag of '
+    yield condition.guild.name
+    yield ':**\n'
+
+
+def produce_condition_head_role(condition, interaction_event):
+    """
+    Produces a condition head (condition role).
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    condition : ``ConditionRole``
+        Condition to produce.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    Yields
+    -------
+    part : `str`
+    """
+    yield '**Has role '
     role = condition.role
     if role.guild_id == interaction_event.guild_id:
-        into.append(role.mention)
+        yield role.mention
     else:
-        into.append(ESCAPED_AT_SIGN)
-        into.append(role.name)
-    into.append(':**\n')
-    
-    return into
+        yield ESCAPED_AT_SIGN
+        yield role.name
+    yield ':**\n'
 
 
-def render_condition_head_weekend_into(into, condition, interaction_event):
+def produce_condition_head_weekend(condition, interaction_event):
     """
-    Renders a condition head (condition weekend).
+    Produces a condition head (condition weekend).
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
-    into : `list<str>`
-        Container to render into.
-    
     condition : ``ConditionWeekend``
-        Condition to render.
+        Condition to produce.
     
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    Returns
+    Yields
     -------
-    into : `list<str>`
+    part : `str`
     """
-    into.append('**Its weekend:**\n')
-    return into
+    yield '**Its weekend:**\n'
 
 
-def render_condition_head_name_into(into, condition, interaction_event):
+def produce_condition_head_name(condition, interaction_event):
     """
     Renders a condition head (condition name).
     
+    This function is an iterable generator.
+    
     Parameters
     ----------
-    into : `list<str>`
-        Container to render into.
-    
     condition : ``ConditionName``
-        Condition to render.
+        Condition to produce.
     
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    Returns
+    Yields
     -------
-    into : `list<str>`
+    part : `str`
     """
-    into.append('**Called as `')
-    into.append(condition.name)
-    into.append('`:**\n')
-    return into
+    yield '**Called as `'
+    yield condition.name
+    yield '`:**\n'
 
 
-def render_condition_head_unknown_into(into, condition, interaction_event):
+def produce_condition_head_unknown(condition, interaction_event):
     """
     Renders a condition head (condition unknown).
     
+    This function is an iterable generator.
+    
     Parameters
     ----------
-    into : `list<str>`
-        Container to render into.
-    
     condition : ``ConditionBase``
-        Condition to render.
+        Condition to produce.
     
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    Returns
+    Yields
     -------
-    into : `list<str>`
+    part : `str`
     """
-    into.append('**Unknown:**\n')
-    return into
+    yield '**Unknown:**\n'
 
 
-CONDITION_HEAD_RENDERERS = {
-    type(None): render_condition_head_none_into,
-    ConditionRole: render_condition_head_role_into,
-    ConditionWeekend: render_condition_head_weekend_into,
-    ConditionName: render_condition_head_name_into,
+CONDITION_HEAD_PRODUCERS = {
+    type(None): produce_condition_head_none,
+    ConditionGuildBadge : produce_condition_head_guild_badge,
+    ConditionRole: produce_condition_head_role,
+    ConditionWeekend: produce_condition_head_weekend,
+    ConditionName: produce_condition_head_name,
 }
 
 
-def render_reward_fields_into(into, prefix, base, extra_limit, extra_per_streak):
+def produce_reward_fields(prefix, base, extra_limit, extra_per_streak):
     """
-    Renders the given reward fields.
+    Produces the given reward fields.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
-    into : `list<str>`
-        Container to render into.
-    
     prefix : `None | str`
         Prefix to use if any.
     
@@ -160,9 +172,9 @@ def render_reward_fields_into(into, prefix, base, extra_limit, extra_per_streak)
     extra_per_streak : `int`
         Reward extra per streak.
     
-    Returns
+    Yields
     -------
-    into : `list<str>`
+    part : `str`
     """
     for name, value in zip(
         ('Base', 'Extra limit', 'Extra per streak'),
@@ -172,48 +184,76 @@ def render_reward_fields_into(into, prefix, base, extra_limit, extra_per_streak)
             continue
         
         if (prefix is not None):
-            into.append(prefix)
-            into.append(' ')
+            yield prefix
+            yield ' '
         
-        into.append(name)
-        into.append(': ')
-        into.append(repr(value))
-        into.append('\n')
-    
-    return into
+        yield name
+        yield ': '
+        yield repr(value)
+        yield '\n'
 
 
-def render_reward_into(into, interaction_event, reward):
+def produce_reward(interaction_event, reward):
     """
     Renders the given reward.
     
+    This function is an iterable generator.
+    
     Parameters
     ----------
-    into : `list<str>`
-        Container to render into.
-    
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
     reward : ``Reward``
         Reward to render.
     
-    Returns
+    Yields
     -------
-    into : `list<str>`
+    part : `str`
     """
     condition = reward.condition
-    into = CONDITION_HEAD_RENDERERS.get(type(condition), render_condition_head_unknown_into)(
-        into, condition, interaction_event
-    )
-    into = render_reward_fields_into(
-        into,
+    condition_head_producer = CONDITION_HEAD_PRODUCERS.get(type(condition), produce_condition_head_unknown)
+    
+    yield from condition_head_producer(condition, interaction_event)
+    yield from produce_reward_fields(
         (None if reward.condition is None else '+'),
         reward.base,
         reward.extra_limit,
         reward.extra_per_streak,
     )
-    return into
+
+
+def produce_hearts_short_title(interaction_event, target_user, balance):
+    """
+    Produces a shot hearts title.
+    
+    This function is an iterable generator.
+    
+    Returns
+    -------
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    target_user : ``ClientUserBase``
+        The targeted user.
+    
+    balance : `int`
+        The user's balance.
+    
+    Yields
+    -------
+    part : `str`
+    """
+    if interaction_event.user is target_user:
+        yield 'You have'
+    else:
+        yield target_user.name_at(interaction_event.guild)
+        yield ' has'
+    
+    yield ' '
+    yield str(balance)
+    yield ' '
+    yield EMOJI__HEART_CURRENCY.as_emoji
 
 
 def render_hearts_short_title(interaction_event, target_user, balance):
@@ -235,20 +275,66 @@ def render_hearts_short_title(interaction_event, target_user, balance):
     -------
     title : `str`
     """
-    into = []
+    return ''.join([*produce_hearts_short_title(interaction_event, target_user, balance)])
+
+
+def produce_hearts_short_description(
+    interaction_event, target_user, balance, streak, ready_to_claim, ready_to_claim_string
+):
+    """
+    Produces a short hearts description.
     
-    if interaction_event.user is target_user:
-        into.append('You have')
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    target_user : ``ClientUserBase``
+        The targeted user.
+    
+    balance : `int`
+        The user's balance.
+    
+    streak : `int`
+        The user's streak
+    
+    ready_to_claim : `bool`
+        Whether daily is ready to claim.
+    
+    ready_to_claim_string : `str`
+        String to use when the user is ready to claim its reward.
+    
+    Yields
+    -------
+    part : `str`
+    """
+    own = target_user is interaction_event.user
+    
+    if not (streak or balance):
+        yield 'Awww, '
+        yield ('you' if own else 'they')
+        yield ' seem so lonely..'
+        return
+    
+    yield ('You' if own else 'They')
+    yield ' are on a '
+    yield str(streak)
+    yield ' day streak, '
+    
+    if not own:
+        yield 'hope they will keep up their good work.'
+        return
+    
+    if ready_to_claim:
+        yield 'and you are ready to '
+        yield ready_to_claim_string
     else:
-        into.append(target_user.name_at(interaction_event.guild))
-        into.append(' has')
+        yield 'keep up the good work'
     
-    into.append(' ')
-    into.append(str(balance))
-    into.append(' ')
-    into.append(EMOJI__HEART_CURRENCY.as_emoji)
-    
-    return ''.join(into)
+    yield '!'
+    return
 
 
 def render_hearts_short_description(
@@ -284,32 +370,68 @@ def render_hearts_short_description(
     if (not streak) and balance:
         return
     
-    own = target_user is interaction_event.user
-    into = []
+    return ''.join([*produce_hearts_short_description(
+        interaction_event, target_user, balance, streak, ready_to_claim, ready_to_claim_string
+    )])
+
+
+def produce_hearts_extended_description(interaction_event, target_user, rewards, streak):
+    """
+    Produces extended hearts description.
     
-    if streak or balance:
-        into.append('You' if own else 'They')
-        into.append(' are on a ')
-        into.append(str(streak))
-        into.append(' day streak, ')
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    target_user : ``ClientUserBase``
+        User to calculate the reward of.
+    
+    rewards : `tuple<Reward>`
+        Rewards to render.
+    
+    streak : `int`
+        The user's streak.
+    
+    Yields
+    -------
+    part : `str`
+    """
+    reward_accumulator = RewardAccumulator()
+    
+    added_count = 0
+    
+    for reward in rewards:
+        if not reward_accumulator.add_reward(reward, target_user):
+            continue
         
-        if own:
-            if ready_to_claim:
-                into.append('and you are ready to ')
-                into.append(ready_to_claim_string)
-            else:
-                into.append('keep up the good work')
-            
-            into.append('!')
-        else:
-            into.append('hope they will keep up their good work.')
+        if added_count:
+            yield '\n'
+        
+        yield from produce_reward(interaction_event, reward)
+        added_count += 1
+        continue
     
-    else:
-        into.append('Awww, ')
-        into.append('you' if own else 'they')
-        into.append(' seem so lonely..')
+    if added_count > 1:
+        yield '**\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_**\n\n**Total**\n'
+        yield from produce_reward_fields(
+            None, reward_accumulator.base, reward_accumulator.extra_limit, reward_accumulator.extra_per_streak
+        )
     
-    return ''.join(into)
+    yield '\n**Formula:**\nbase + min(extra\\_limit, extra\\_per\\_streak * streak) + streak\n'
+    yield str(reward_accumulator.base)
+    yield ' + min('
+    yield str(reward_accumulator.extra_limit)
+    yield ', '
+    yield str(reward_accumulator.extra_per_streak)
+    yield ' * '
+    yield str(streak)
+    yield ') + '
+    yield str(streak)
+    yield ' = '
+    yield str(reward_accumulator.sum_rewards(streak))
 
 
 def render_hearts_extended_description(interaction_event, target_user, rewards, streak):
@@ -334,42 +456,7 @@ def render_hearts_extended_description(interaction_event, target_user, rewards, 
     -------
     description : `str`
     """
-    into = []
-    
-    reward_accumulator = RewardAccumulator()
-    
-    added_count = 0
-    
-    for reward in rewards:
-        if not reward_accumulator.add_reward(reward, target_user):
-            continue
-        
-        if added_count:
-            into.append('\n')
-        
-        into = render_reward_into(into, interaction_event, reward)
-        added_count += 1
-        continue
-    
-    if added_count > 1:
-        into.append('**\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_**\n\n**Total**\n')
-        into = render_reward_fields_into(
-            into, None, reward_accumulator.base, reward_accumulator.extra_limit, reward_accumulator.extra_per_streak
-        )
-    
-    into.append('\n**Formula:**\nbase + min(extra\\_limit, extra\\_per\\_streak * streak) + streak\n')
-    into.append(str(reward_accumulator.base))
-    into.append(' + min(')
-    into.append(str(reward_accumulator.extra_limit))
-    into.append(', ')
-    into.append(str(reward_accumulator.extra_per_streak))
-    into.append(' * ')
-    into.append(str(streak))
-    into.append(') + ')
-    into.append(str(streak))
-    into.append(' = ')
-    into.append(str(reward_accumulator.sum_rewards(streak)))
-    return ''.join(into)
+    return ''.join([*produce_hearts_extended_description(interaction_event, target_user, rewards, streak)])
 
 
 def render_int_block(value):

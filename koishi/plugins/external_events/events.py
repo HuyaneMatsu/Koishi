@@ -61,4 +61,4 @@ async def shutdown(client):
         The client who received the event.
     """
     MAIN_CLIENT.events(ready)
-    stop_looping()
+    await stop_looping()

@@ -1,3 +1,50 @@
+### 2025-08-15
+
+- `/gift` responses are now show to everyone (excluding the error ones).
+- Fix `/gift` allowed to gift decimals. (superior_mac)
+- Fix message-copy did not move if message had only attachments (since last update).
+- Fix message-copy did not handle forwarded messages as intended.
+- Fix `choose` not having input length limit, making it fail on large inputs. (superior_mac)
+- Fix `/gift` failing to gift if `inf` is given. Now it will gift all the hearts the user have. (superior_mac)
+- Fix `/awaird` responding slowly.
+- Fix `/take` responding slowly.
+- Add daily bonus based on guild badge, it equals to half of the booster bonus.
+    Booster bonus modified, so all of its values are dividable by 2.
+- Fix expression parameters do not handle `sqrt(...)` with negative input as intended. (superior_mac)
+- Fix expression parameters do not handle `floor(...)` with infinite input as intended.
+    Also applicable for `ceil` and `round` as well. (superior_mac)
+- Fix `/user discard-item` allowed discarded decimals.
+- Fix `/user discard-item` did not handle discarding infinite amount of items.
+- Fix `/user discard-item` responding slowly.
+- Fix `/user unequip` responding slowly.
+- `/accessibility preference-settings show` responses are now shown to everyone.
+- Fix `/accessibility preference-settings show` responding slowly.
+- `/accessibility notification-settings show` responses are now shown to everyone.
+- Fix `/accessibility notification-settings show` responding slowly.
+- `/accessibility notification-settings change` responses are now shown to everyone.
+- Fix `/accessibility notification-settings change` responding slowly.
+- `/accessibility preference-settings set-preferred-client` responses are now shown to everyone.
+- Fix `/accessibility preference-settings set-preferred-client` responding slowly.
+- `/accessibility preference-settings set-preferred-image-source` responses are now shown to everyone.
+- Fix `/accessibility preference-settings set-preferred-image-source` responding slowly.
+- Fix `/accessibility character-preference add` responding slowly.
+- Fix `/accessibility character-preference remove` responding slowly.
+- Add `/hello`.
+- Fix some relationship prompts could fail due to losing interaction metadata somehow of the original interaction.
+- Fix `/random` had no input value range.
+- Add new extra stats: butchering, foraging, hunting, gardening, movement, health, energy.
+- Add new `/adventure` command.
+    This command allows you to go on an adventure to collect items.
+    Note that while on adventure a few other features become disabled to be used.
+    The starting available locations are: Human village outskirts, Human village vineyards, Ruins, Eientei mansion,
+    Bamboo forest.
+    Each location has their own target tasks you can select you want to do.
+    After arriving at the place, the system will semi randomly chose an option to do.
+    When you decide to go home, or when the system decides that you should go home, you head home.
+    After you arrived home, the locked features become available again and you go on a resting period, not being able
+    to go on an adventure while on it.
+- Fix flandre welcome style being broken due to emoji not being updated in code after being replaced (opecuted).
+
 ### 2025-07-07
 
 - `snipe` now also looks into message snapshots' content (forwarded messages). (braindead_monke)
@@ -10,13 +57,15 @@
     (For like 2 months, if you are affected please drop a message.) (chaos3326)
 - Fix `/ds` using wrong chapter title. (superior_mac)
 - Fix `/mod mute` did not respond if the action failed due to missing permissions.
-- Increase award for using commands to 50 (from 10),
-- /accessibility character-preference` embeds are now show to everyone (excluding the error ones).
+- Increase award (heart generation) for using commands to 50 (from 10).
+- `/accessibility character-preference` responses are now shown to everyone (excluding the error ones).
 - Add missing `Houjuu Chimi` touhou character.
 - Add missing `Chirizuka Ubame` touhou character.
-- Update `/roles collectible` command of supper guild to correctly reflect better what each collectible role gives.
+- Update `/roles collectible` command of support guild to correctly reflect better what each collectible role gives.
 - Update `/mod` commands to not use vertical reason if given, to make it better readable. (tenshi_h1nanawi)
 - Update `/oj` command to be up to date.
+- Add missing `Michigami Nareko` touhou character.
+- Fix `/accessibility character-preference add` responding slowly.
 
 ### 2025-06-17
 

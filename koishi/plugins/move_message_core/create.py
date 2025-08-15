@@ -38,11 +38,11 @@ async def create_webhook_message(client, webhook, message, thread_id, files):
         poll = message.poll
     
     else:
-        content = message.content
-        embeds = message.embeds
-        poll = message.poll
+        content = snapshot.content
+        embeds = snapshot.embeds
+        poll = snapshot.poll
     
-    if (content is None) and (embeds is None) and (poll is None):
+    if (content is None) and (embeds is None) and (poll is None) and (files is None):
         return
     
     name = _get_user_name(message)

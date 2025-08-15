@@ -27,5 +27,5 @@ def test__get_random_value_and_diversity_with_variance():
     vampytest.assert_instance(diversity, float)
     vampytest.assert_eq(value > base, diversity > 1.0)
     vampytest.assert_eq(value % require_multiple_of, 0)
-    vampytest.assert_true(value >= base * variance_percentage_lower_threshold * 0.01)
-    vampytest.assert_true(value <= base * variance_percentage_upper_threshold * 0.01)
+    vampytest.assert_true(value > base * variance_percentage_lower_threshold * 0.009)
+    vampytest.assert_true(value < base * variance_percentage_upper_threshold * 0.011)

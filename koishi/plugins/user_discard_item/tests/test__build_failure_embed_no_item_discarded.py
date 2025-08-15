@@ -32,7 +32,6 @@ def test__build_failure_embed_no_item_discarded(item, new_amount):
     new_amount : `int`
         Items left.
     
-    
     Returns
     -------
     output : ``Embed``

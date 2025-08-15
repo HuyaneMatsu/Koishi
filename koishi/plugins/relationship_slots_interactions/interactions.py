@@ -37,7 +37,7 @@ async def relationship_slot_increment_invoke_self(client, event):
     """
     Inline caller for buying a relationship slot for yourself.
     
-    This function is a coroutine generator.
+    This function is a generator.
     
     Parameters
     ----------
@@ -46,12 +46,9 @@ async def relationship_slot_increment_invoke_self(client, event):
     
     event : ``InteractionEvent``
         The received interaction event.
-    
-    Yields
-    ------
-    acknowledge / response : `None | InteractionEvent`
     """
-    if event.message.interaction.user_id != event.user_id:
+    interaction = event.message.interaction
+    if (interaction is not None) and (interaction.user_id != event.user_id):
         return
     
     await client.interaction_component_acknowledge(event, False)
@@ -63,7 +60,7 @@ async def relationship_slot_increment_invoke_other(client, event, target_user_id
     """
     Inline caller for buying a relationship slot for someone else.
     
-    This function is a coroutine generator.
+    This function is a coroutine.
     
     Parameters
     ----------
@@ -75,12 +72,9 @@ async def relationship_slot_increment_invoke_other(client, event, target_user_id
     
     target_user_id : `str`
         The targeted user's identifier. Converted to int.
-    
-    Yields
-    ------
-    acknowledge / response : `None | InteractionEvent`
     """
-    if event.message.interaction.user_id != event.user_id:
+    interaction = event.message.interaction
+    if (interaction is not None) and (interaction.user_id != event.user_id):
         return
     
     try:
@@ -226,13 +220,13 @@ async def relationship_slot_increment_confirm_self(event):
     -------
     acknowledge / response : `None | InteractionEvent`
     """
-    user_id = event.user_id
-    if event.message.interaction.user_id != user_id:
+    interaction = event.message.interaction
+    if (interaction is not None) and (interaction.user_id != event.user_id):
         return
     
     yield
     
-    user_balance = await get_user_balance(user_id)
+    user_balance = await get_user_balance(event.user_id)
     relationship_slots = user_balance.relationship_slots
     
     try:
@@ -286,7 +280,8 @@ async def relationship_slot_increment_confirm_other(client, event, target_user_i
     acknowledge / response : `None | InteractionEvent`
     """
     source_user = event.user
-    if event.message.interaction.user_id != source_user.id:
+    interaction = event.message.interaction
+    if (interaction is not None) and (interaction.user_id != source_user.id):
         return
     
     try:

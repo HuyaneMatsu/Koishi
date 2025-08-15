@@ -1,4 +1,4 @@
-__all__ = ('get_item', 'get_item_name', 'get_item_nullable')
+__all__ = ('get_item', 'get_item_name', 'get_item_nullable', 'produce_weight')
 
 from .constants import ITEM_DESCRIPTION_DEFAULT, ITEM_EMOJI_DEFAULT, ITEM_NAME_DEFAULT, ITEMS
 
@@ -79,3 +79,26 @@ def get_item_name(item_id):
         item_name = item.name
     
     return item_name
+
+
+def produce_weight(weight):
+    """
+    Produces the given weight.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    weight : `int`
+        Weight in grams.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    kilo_grams, grams = divmod(weight, 1000)
+    yield str(kilo_grams)
+    yield '.'
+    grams_string = str(grams)
+    yield '0' * (3 - len(grams_string))
+    yield grams_string
