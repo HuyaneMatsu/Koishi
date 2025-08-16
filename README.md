@@ -124,6 +124,7 @@ Although here is a "short" description for all of her commands by category:
 
 ### Economy
 
+- `adventure` - Depart to adventures to collect items for completing quests.
 - `/daily` - Claim your daily hearts and your beloveds' one.
 - `/gift` - Gift hearts to your beloved ones.
 - `/shop` - Spend your hearts.

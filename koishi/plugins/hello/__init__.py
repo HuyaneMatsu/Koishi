@@ -30,7 +30,7 @@ def build_hello_response(user_name_0, user_name_1):
             f'Did someone just start a conversation by saying “Hello” or “Good Morning!” waiting for a response, '
             f'making you curios what they tried to tell you?\n'
             f'\n'
-            f'**Is it wrong to start a conversation with a greeting?*\n'
+            f'**Is it wrong to start a conversation with a greeting?**\n'
             f'Yes and no.'
             f'- It is polite to start with an introduction.\n'
             f'- When you are saying just “Hello” and then wait for a response you either force the other person to '
