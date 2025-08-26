@@ -84,7 +84,7 @@ async def regret_un_kick_command(
     
     if not regret_mode:
         await client.interaction_response_message_edit(
-            event, embed = build_cannot_regret_embed(user, reason, 'kicking'),
+            event, embed = build_cannot_regret_embed(user, guild.id, reason, 'kicking'),
         )
         return
     
@@ -107,6 +107,6 @@ async def regret_un_kick_command(
         allowed_mentions = None,
         components = None,
         embed = build_action_completed_embed(
-            user, build_regret_kick_embed, WORD_CONFIG__REGRET_UN_KICK, notify_note, reason
+            user, guild.id, build_regret_kick_embed, WORD_CONFIG__REGRET_UN_KICK, notify_note, reason
         ),
     )

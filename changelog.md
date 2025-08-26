@@ -1,12 +1,55 @@
+### 2025-08-26
+
+- Fix `/accessibility character-preference remove` failed to respond (since last update).
+- If `/minesweeper` component interaction fails to respond with interaction, try to edit the message normally.
+- Silence `internal server error`-s received from discord when trying to respond to an action command (like `/hug`).
+- Fix `/accessibility notification-settings change` failed to respond if used through the command (since last update).
+- Fix `/accessibility notification-settings change`'s `notification` type parameter displaying the system name
+    of notification options instead of their display name.
+- Fix `/gift` not handing `nan` values. (superior_mac)
+- Fix `/user discard-item` not handing `nan` values.
+- Silence possible `message deleted` errors and `internal server error`-s received from discord in `/mod ban` and in
+    the other moderation commands on timeout.
+- Fix `item` (like in `/user discard-item`) parameter auto completion when the user has more than 1 different items
+    and did not type in anything yet.
+- Fix submitting items to a quest requiring weight (or value), increasing the target amount by submitted item count
+    instead of their `property * submitted count`.
+- Silence `unknown interaction` and `internal server error`-s received from auto-completing `/action` command's
+    parameters.
+- Silence `unknown interaction` and `internal server error`-s received from auto-completing a touhou character's name.
+- Fix `/nsfwbooru` not showing any images. (kikhatadevin)
+- `/nsfwbooru` is now uses `danbooru` instead of `gelbooru`. This required rather big changes internally.
+    This also means that due to danbooru having gold upgrade disabled, limits the queries to 2 tags only.
+- Fix guild rank up requiring (way) more credibility than intended beyond rank G.
+- Fix `/mod` commands using the user's global name instead of their local.
+- Add `automation-farewell` linking to `link-assets` cli command.
+- Fix passing `%` in reason parameters failing the action.
+- Fix `Bamboo forest - Foraging` collection actions were typed as `gardening` instead of `foraging`. 
+- Fix `quest abandon` said in the response that the user accepted the quest instead of abandoned it. (.wakasagihime)
+- Add `Goutokuji Mike` touhou character. (fariz_12134).
+- Add `Yuiman Asama` touhou character.
+- Add `Iwanaga Ariya` touhou character.
+- Add `Watari Nina` touhou character.
+- Balance items & quests for:
+    - flykiller amanata: decrease item value & weight
+    - onion: increase item value, follow with quest reward
+    - carrot: increase item value, follow with quest reward, make quest require weight instead of amount for variance.
+    - bluefrankish: increase quest rank to F.
+- Add new adventure locations & targets:
+    - Hakugyokurou mansion - gardening
+    - Moriya Shrine - foraging
+- Add rule based trie ip blacklisting to koishi web to protect it from AICDDOS attacks.
+    Does not directly affect koishi bot, but helps performance wise a lot since they use shared resources.
+
 ### 2025-08-15
 
-- `/gift` responses are now show to everyone (excluding the error ones).
+- `/gift` responses are now shown to everyone (excluding the error ones).
 - Fix `/gift` allowed to gift decimals. (superior_mac)
 - Fix message-copy did not move if message had only attachments (since last update).
 - Fix message-copy did not handle forwarded messages as intended.
 - Fix `choose` not having input length limit, making it fail on large inputs. (superior_mac)
 - Fix `/gift` failing to gift if `inf` is given. Now it will gift all the hearts the user have. (superior_mac)
-- Fix `/awaird` responding slowly.
+- Fix `/award` responding slowly.
 - Fix `/take` responding slowly.
 - Add daily bonus based on guild badge, it equals to half of the booster bonus.
     Booster bonus modified, so all of its values are dividable by 2.
@@ -43,7 +86,7 @@
     When you decide to go home, or when the system decides that you should go home, you head home.
     After you arrived home, the locked features become available again and you go on a resting period, not being able
     to go on an adventure while on it.
-- Fix flandre welcome style being broken due to emoji not being updated in code after being replaced (opecuted).
+- Fix Flandre welcome style being broken due to emoji not being updated in code after being replaced (opecuted).
 
 ### 2025-07-07
 

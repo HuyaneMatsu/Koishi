@@ -4,10 +4,10 @@ from hata import (
     InteractionOption, InteractionType
 )
 
-from ...touhou_core import KAENBYOU_RIN, KOMEIJI_KOISHI, NAZRIN, REIUJI_UTSUHO
+from ...touhou_core import CHEN, KAENBYOU_RIN, KOMEIJI_KOISHI, REIUJI_UTSUHO
 
 from ..action_filtering import (
-    PARAMETER_NAME_ACTION_TAG, PARAMETER_NAME_SOURCE, PARAMETER_NAME_TARGET, PARAMETER_WILD_CARD, autocomplete_target
+    PARAMETER_NAME_ACTION_TAG, PARAMETER_NAME_SOURCE, PARAMETER_NAME_TARGET, PARAMETER_WILD_CARD, get_source_character_suggestions
 )
 
 
@@ -20,7 +20,7 @@ def _iter_options():
                     InteractionOption(
                         focused = True,
                         option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
+                        name = PARAMETER_NAME_SOURCE,
                         value = None,
                     ),
                 ],
@@ -38,7 +38,7 @@ def _iter_options():
                     InteractionOption(
                         focused = True,
                         option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
+                        name = PARAMETER_NAME_SOURCE,
                         value = None,
                     ),
                     InteractionOption(
@@ -50,14 +50,14 @@ def _iter_options():
                     InteractionOption(
                         focused = False,
                         option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_SOURCE,
+                        name = PARAMETER_NAME_TARGET,
                         value = KAENBYOU_RIN.name,
                     ),
                 ],
             )
         ),
         None,
-        [PARAMETER_WILD_CARD, NAZRIN.name, REIUJI_UTSUHO.name],
+        [PARAMETER_WILD_CARD, CHEN.name, KOMEIJI_KOISHI.name, REIUJI_UTSUHO.name],
     )
     
     yield (
@@ -68,7 +68,7 @@ def _iter_options():
                     InteractionOption(
                         focused = True,
                         option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
+                        name = PARAMETER_NAME_SOURCE,
                         value = 'ran',
                     ),
                 ],
@@ -86,7 +86,7 @@ def _iter_options():
                     InteractionOption(
                         focused = True,
                         option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
+                        name = PARAMETER_NAME_SOURCE,
                         value = 'rei',
                     ),
                     InteractionOption(
@@ -98,14 +98,14 @@ def _iter_options():
                     InteractionOption(
                         focused = False,
                         option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_SOURCE,
+                        name = PARAMETER_NAME_TARGET,
                         value = KAENBYOU_RIN.name,
                     ),
                 ],
             )
         ),
         'rei',
-        ['reiuji utsuho'],
+        [REIUJI_UTSUHO.name.casefold()],
     )
     
     # Allow duplication only if source == target
@@ -117,7 +117,7 @@ def _iter_options():
                     InteractionOption(
                         focused = True,
                         option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
+                        name = PARAMETER_NAME_SOURCE,
                         value = 'koi',
                     ),
                     InteractionOption(
@@ -129,7 +129,7 @@ def _iter_options():
                     InteractionOption(
                         focused = False,
                         option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_SOURCE,
+                        name = PARAMETER_NAME_TARGET,
                         value = KOMEIJI_KOISHI.name,
                     ),
                 ],
@@ -139,12 +139,11 @@ def _iter_options():
         ['koishi'],
     )
 
+
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-async def test__autocomplete_target(event, input_value):
+def test__get_source_character_suggestions(event, input_value):
     """
-    Tests whether ``autocomplete_target`` works as intended.
-    
-    This function is a coroutine.
+    Tests whether ``get_source_character_suggestions`` works as intended.
     
     Parameters
     ----------
@@ -157,7 +156,7 @@ async def test__autocomplete_target(event, input_value):
     -------
     output : `None | list<str>`
     """
-    output = await autocomplete_target(event, input_value)
+    output = get_source_character_suggestions(event, input_value)
     vampytest.assert_instance(output, list, nullable = True)
     if (output is not None):
         for element in output:

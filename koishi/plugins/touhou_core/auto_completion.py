@@ -1,5 +1,7 @@
 __all__ = ('auto_complete_touhou_character_name',)
 
+from hata import DiscordException, ERROR_CODES
+
 from .characters import (
     CHIRUNO, FUJIWARA_NO_MOKOU, HAKUREI_REIMU, HATA_NO_KOKORO, HINANAWI_TENSHI, HONG_MEILING, IZAYOI_SAKUYA,
     KAZAMI_YUUKA, KIRISAME_MARISA, KOCHIYA_SANAE, KOMEIJI_KOISHI, KOMEIJI_SATORI, MARGATROID_ALICE, MORIYA_SUWAKO,
@@ -38,7 +40,7 @@ POPULAR_TOUHOU_CHARACTER_NAMES = [
 ]
 
 
-async def auto_complete_touhou_character_name(name):
+async def auto_complete_touhou_character_name(client, interaction_event, name):
     """
     Auto completes touhou character name based on the given input.
     
@@ -46,16 +48,31 @@ async def auto_complete_touhou_character_name(name):
     
     Parameters
     ----------
-    name : `None`, `str`
-        Input of the user.
+    client : ``Client``
+        The client who received this interaction.
     
-    Returns
-    -------
-    suggestions : `list<str>`
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    name : `None | str`
+        Input of the user.
     """
     if name is None:
         suggestions = POPULAR_TOUHOU_CHARACTER_NAMES
     else:
         suggestions = get_touhou_character_names_like(name)
     
-    return suggestions
+    try:
+        await client.interaction_application_command_autocomplete(
+            interaction_event,
+            suggestions,
+        )
+    except ConnectionError:
+        pass
+    
+    except DiscordException as exception:
+        if (
+            (exception.status < 500) and
+            (exception.code != ERROR_CODES.unknown_interaction)
+        ):
+            raise

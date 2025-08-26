@@ -63,5 +63,5 @@ async def self_kick(client, event, *, reason = None):
     await client.interaction_response_message_edit(
         event,
         allowed_mentions = None,
-        embed = build_action_completed_embed(event.user, build_kick_embed, WORD_CONFIG__KICK, reason)
+        embed = build_action_completed_embed(event.user, guild.id, build_kick_embed, WORD_CONFIG__KICK, reason)
     )

@@ -1,6 +1,6 @@
 __all__ = ()
 
-from math import floor, inf
+from math import floor, inf, isnan as is_nan
 
 from hata import ClientUserBase, Embed
 from hata.ext.slash import InteractionResponse, abort
@@ -532,18 +532,25 @@ if USER_DISCARD_ITEM_AVAILABLE:
         -------
         response : ``Embed``
         """
-        if amount < 1.0:
+        if isinstance(amount, float):
+            if is_nan(amount):
+                amount = 0
+            
+            elif amount == inf:
+                amount = (1 << 64) - 1
+            
+            elif amount == -inf:
+                amount = -1
+            
+            else:
+                amount = floor(amount)
+        
+        if amount <= 0:
             await client.interaction_response_message_create(
                 interaction_event,
                 embed = build_failure_embed_cannot_discard_less_than_one()
             )
             return
-        
-        if isinstance(amount, float):
-            if amount == inf:
-                amount = 1 << 64    
-            else:
-                amount = floor(amount)
         
         await client.interaction_application_command_acknowledge(
             interaction_event,

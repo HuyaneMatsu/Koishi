@@ -1,6 +1,6 @@
 __all__ = ()
 
-from math import floor, inf
+from math import floor, inf, isnan as is_nan
 
 from hata import ClientUserBase, create_button
 from hata.ext.slash import P
@@ -69,12 +69,18 @@ async def gift(
         gift_all = False
     
     else:
-        if amount == inf:
+        if is_nan(amount):
+            gift_all = False
+            amount = 0
+                
+        elif amount == inf:
             gift_all = True
             amount = 0
+        
         elif amount == -inf:
             gift_all = False
             amount = 0
+        
         else:
             gift_all = False
             amount = floor(amount)

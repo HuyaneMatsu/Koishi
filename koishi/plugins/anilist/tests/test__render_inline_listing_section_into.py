@@ -26,7 +26,7 @@ def test__render_inline_listing_section_into(field_added, section_title, listing
         Whether any fields were already added.
     section_title : `str`
         The value the section's title should be.
-    listing : `None`, `list<str>`
+    listing : `None | list<str>`
         The section's listing.
     
     Returns

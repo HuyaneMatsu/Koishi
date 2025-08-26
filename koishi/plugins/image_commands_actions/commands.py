@@ -13,7 +13,8 @@ from .action import (
 )
 from .action_filtering import (
     PARAMETER_NAME_ACTION_TAG, PARAMETER_NAME_NAME, PARAMETER_NAME_SOURCE, PARAMETER_NAME_TARGET,
-    autocomplete_action_tag, autocomplete_name, autocomplete_source, autocomplete_target, get_action_and_image_detail
+    get_action_tag_suggestions, get_name_suggestions, get_source_character_suggestions,
+    get_target_character_suggestions, get_action_and_image_detail
 )
 from .actions import ACTIONS
 from .events import PERMISSION_IMAGES
@@ -75,10 +76,10 @@ async def get_should_use_default_response_method(client, event):
 async def wild_card_action(
     client,
     event,
-    action_tag_name : P(str, 'Select action tag', PARAMETER_NAME_ACTION_TAG, autocomplete = autocomplete_action_tag) = None,
-    source_character_name : P(str, 'Source character name.', PARAMETER_NAME_SOURCE, autocomplete = autocomplete_source) = None,
-    target_character_name : P(str, 'Target character mame.', PARAMETER_NAME_TARGET, autocomplete = autocomplete_target) = None,
-    image_name : P(str, 'Image name', PARAMETER_NAME_NAME, autocomplete = autocomplete_name) = None,
+    action_tag_name : P(str, 'Select action tag', PARAMETER_NAME_ACTION_TAG) = None,
+    source_character_name : P(str, 'Source character name.', PARAMETER_NAME_SOURCE) = None,
+    target_character_name : P(str, 'Target character mame.', PARAMETER_NAME_TARGET) = None,
+    image_name : P(str, 'Image name', PARAMETER_NAME_NAME) = None,
     target_00: ('mentionable', 'Select someone', 'target-1') = None,
     target_01: ('mentionable', 'Select someone', 'target-2') = None,
     target_02: ('mentionable', 'Select someone', 'target-3') = None,
@@ -159,9 +160,148 @@ async def wild_card_action(
     except ConnectionError:
         return
     
-    except DiscordException as err:
-        if err.code != ERROR_CODES.unknown_interaction:
+    except DiscordException as exception:
+        if exception.status >= 500:
+            return
+        
+        if exception.code != ERROR_CODES.unknown_interaction:
             raise
     
     await send_action_response_to(client, event.channel, content, embed, allowed_mentions)
     return
+
+
+@wild_card_action.autocomplete('action_tag_name')
+async def autocomplete_action_tag_name(client, interaction_event, value):
+    """
+    Autocompletes the tag name field.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received this interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    value : `None | str`
+        The value typed by the user.
+    """
+    try:
+        await client.interaction_application_command_autocomplete(
+            interaction_event,
+            get_action_tag_suggestions(interaction_event, value),
+        )
+    except ConnectionError:
+        pass
+    
+    except DiscordException as exception:
+        if (
+            (exception.status < 500) and
+            (exception.code != ERROR_CODES.unknown_interaction)
+        ):
+            raise
+
+
+@wild_card_action.autocomplete('source_character_name')
+async def autocomplete_source_character_name(client, interaction_event, value):
+    """
+    Autocompletes the source character name field.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received this interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    value : `None | str`
+        The value typed by the user.
+    """
+    try:
+        await client.interaction_application_command_autocomplete(
+            interaction_event,
+            get_source_character_suggestions(interaction_event, value),
+        )
+    except ConnectionError:
+        pass
+    
+    except DiscordException as exception:
+        if (
+            (exception.status < 500) and
+            (exception.code != ERROR_CODES.unknown_interaction)
+        ):
+            raise
+
+
+@wild_card_action.autocomplete('target_character_name')
+async def autocomplete_target_character_name(client, interaction_event, value):
+    """
+    Autocompletes the target character name field.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received this interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    value : `None | str`
+        The value typed by the user.
+    """
+    try:
+        await client.interaction_application_command_autocomplete(
+            interaction_event,
+            get_target_character_suggestions(interaction_event, value),
+        )
+    except ConnectionError:
+        pass
+    
+    except DiscordException as exception:
+        if (
+            (exception.status < 500) and
+            (exception.code != ERROR_CODES.unknown_interaction)
+        ):
+            raise
+
+
+@wild_card_action.autocomplete('image_name')
+async def autocomplete_image_name(client, interaction_event, value):
+    """
+    Autocompletes the image name field.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received this interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    value : `None | str`
+        The value typed by the user.
+    """
+    try:
+        await client.interaction_application_command_autocomplete(
+            interaction_event,
+            get_name_suggestions(interaction_event, value),
+        )
+    except ConnectionError:
+        pass
+    
+    except DiscordException as exception:
+        if (
+            (exception.status < 500) and
+            (exception.code != ERROR_CODES.unknown_interaction)
+        ):
+            raise

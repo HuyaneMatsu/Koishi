@@ -63,5 +63,5 @@ async def self_ban(client, event, *, reason = None):
     await client.interaction_response_message_edit(
         event,
         allowed_mentions = None,
-        embed = build_action_completed_embed(event.user, build_ban_embed, WORD_CONFIG__BAN, reason)
+        embed = build_action_completed_embed(event.user, guild.id, build_ban_embed, WORD_CONFIG__BAN, reason)
     )

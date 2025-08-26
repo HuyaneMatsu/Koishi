@@ -5,7 +5,7 @@ from ..utils import get_touhou_character_names_like
 
 def _iter_options():
     yield 'Komeiji Koishi', ['komeiji koishi']
-    yield 'aya', ['ayana', 'aya', 'layla', 'sakuya', 'kaguya']
+    yield 'aya', ['ayana', 'aya', 'layla', 'ariya', 'sakuya', 'kaguya']
     yield 'oguu', ['okuu']
     yield 'Gilgamesh', []
 

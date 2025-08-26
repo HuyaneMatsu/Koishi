@@ -35,7 +35,7 @@ from ...bots import MAIN_CLIENT
 
 async def setup(module):
     """
-    Called when the plugin is loaded. If the client is already running, resumes teh active adventures.
+    Called when the plugin is loaded. If the client is already running, resumes the active adventures.
     """
     if MAIN_CLIENT.running:
         await resume_active_adventures()

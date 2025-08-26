@@ -45,7 +45,7 @@ def test__build_hello_response():
                 f'> 5:14 **{user_name_1}:** Hey {user_name_0}, I was wondering how to import a model into Blender?\n'
                 f'> 5:16 **{user_name_0}:** Hello there {user_name_1}, [...]\n'
                 f'\n'
-                f'Here are some things that went better this time:'
+                f'Here are some things that went better this time:\n'
                 f'- {user_name_1} Already finished typing its question, so {user_name_0} could instantly reply on it.\n'
                 f'- {user_name_0} seen whether the question should be answered directly, or it can be postponed.'
             ),

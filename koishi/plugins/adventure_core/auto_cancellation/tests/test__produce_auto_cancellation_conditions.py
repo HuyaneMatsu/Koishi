@@ -125,7 +125,7 @@ def _iter_options():
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
             None,
         ),
-        'health >= 20 or energy >= 56',
+        'health >= 20 % or energy >= 56',
     )
     
     # different signs
@@ -137,11 +137,11 @@ def _iter_options():
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_EQUAL, 20),
+            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_EQUAL, 21),
             None,
             None,
         ),
-        'health == 20',
+        'health == 21 %',
     )
     
     yield (
@@ -151,11 +151,11 @@ def _iter_options():
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, 20),
+            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, 22),
             None,
             None,
         ),
-        'health > 20',
+        'health > 22 %',
     )
     
     yield (
@@ -165,11 +165,11 @@ def _iter_options():
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_LESS_OR_EQUAL, 20),
+            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_LESS_OR_EQUAL, 23),
             None,
             None,
         ),
-        'health <= 20',
+        'health <= 23 %',
     )
     
     yield (
@@ -179,11 +179,11 @@ def _iter_options():
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_LESS_THAN, 20),
+            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_LESS_THAN, 24),
             None,
             None,
         ),
-        'health < 20',
+        'health < 24 %',
     )
     
     yield (
@@ -193,16 +193,16 @@ def _iter_options():
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_NOT_EQUAL, 20),
+            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_NOT_EQUAL, 25),
             None,
             None,
         ),
-        'health != 20',
+        'health != 25 %',
     )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def tets__produce_auto_cancellation_conditions(auto_cancellation):
+def test__produce_auto_cancellation_conditions(auto_cancellation):
     """
     Tests whether ``produce_auto_cancellation_conditions`` works as intended.
     

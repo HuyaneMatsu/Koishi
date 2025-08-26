@@ -83,7 +83,7 @@ async def regret_un_ban_command(
     
     if not regret_mode:
         await client.interaction_response_message_edit(
-            event, embed = build_cannot_regret_embed(user, reason, 'banning'),
+            event, embed = build_cannot_regret_embed(user, guild.id, reason, 'banning'),
         )
         return
     
@@ -107,7 +107,7 @@ async def regret_un_ban_command(
         )
         
         embed = build_action_completed_embed(
-            user, build_regret_ban_embed, WORD_CONFIG__REGRET_UN_BAN, notify_note, reason
+            user, guild.id, build_regret_ban_embed, WORD_CONFIG__REGRET_UN_BAN, notify_note, reason
         )
         
     else:

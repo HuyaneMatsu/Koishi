@@ -16,9 +16,9 @@ def _assert_fields_set(option):
         The option to check.
     """
     vampytest.assert_instance(option, UserSettingsOption)
+    vampytest.assert_instance(option.display_name, str)
     vampytest.assert_instance(option.field_descriptor, MemberDescriptorType)
     vampytest.assert_instance(option.name, str)
-    vampytest.assert_instance(option.long_name, str)
 
 
 def test__UserSettingsOption__new():
@@ -27,19 +27,19 @@ def test__UserSettingsOption__new():
     """
     field_descriptor = UserSettings.notification_daily_by_waifu
     name = 'daily'
-    long_name = 'daily-by-waifu'
+    display_name = 'daily-by-waifu'
     
     option = UserSettingsOption(
         field_descriptor,
         name,
-        long_name,
+        display_name,
     )
     
     _assert_fields_set(option)
     
+    vampytest.assert_eq(option.display_name, display_name)
     vampytest.assert_is(option.field_descriptor, field_descriptor)
     vampytest.assert_eq(option.name, name)
-    vampytest.assert_eq(option.long_name, long_name)
 
 
 def test__UserSettingsOption__system_name():
@@ -61,12 +61,12 @@ def test__UserSettingsOption__repr():
     """
     field_descriptor = UserSettings.notification_daily_by_waifu
     name = 'daily'
-    long_name = 'daily-by-waifu'
+    display_name = 'daily-by-waifu'
     
     option = UserSettingsOption(
         field_descriptor,
         name,
-        long_name,
+        display_name,
     )
     
     output = repr(option)

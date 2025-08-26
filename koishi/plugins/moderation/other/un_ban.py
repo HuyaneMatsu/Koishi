@@ -144,7 +144,7 @@ async def un_ban_command(
             notify_note = None
         
         embed = build_action_completed_embed(
-            user, build_un_ban_embed, WORD_CONFIG__UN_BAN, notify_note, reason, notify_user
+            user, guild.id, build_un_ban_embed, WORD_CONFIG__UN_BAN, notify_note, reason, notify_user
         )
     
     else:

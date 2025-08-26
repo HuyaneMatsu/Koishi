@@ -1,8 +1,9 @@
 import vampytest
 
 from ...inventory_core import Inventory
-from ...item_core import ITEM_FLAG_HEAD, ITEM_FLAG_WEAPON, ITEM_ID_FISHING_ROD, get_item
-
+from ...item_core import (
+    ITEM_FLAG_HEAD, ITEM_FLAG_EDIBLE, ITEM_ID_PEACH, ITEM_FLAG_WEAPON, ITEM_ID_FISHING_ROD, ITEM_ID_STRAWBERRY, get_item
+)
 from ..selection import create_item_suggestions
 
 
@@ -74,6 +75,21 @@ def _iter_options():
         str(ITEM_ID_FISHING_ROD),
         [
             (get_item(ITEM_ID_FISHING_ROD).name, ITEM_ID_FISHING_ROD),
+        ],
+    )
+    
+    # Test whether sorting works as intended.
+    yield (
+        202508190000,
+        (
+            ITEM_ID_PEACH,
+            ITEM_ID_STRAWBERRY,
+        ),
+        ITEM_FLAG_EDIBLE,
+        None,
+        [
+            (get_item(ITEM_ID_PEACH).name, ITEM_ID_PEACH),
+            (get_item(ITEM_ID_STRAWBERRY).name, ITEM_ID_STRAWBERRY),
         ],
     )
 

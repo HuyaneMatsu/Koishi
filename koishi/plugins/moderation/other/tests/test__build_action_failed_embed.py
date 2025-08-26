@@ -15,6 +15,7 @@ def _iter_options():
     
     yield (
         user,
+        0,
         build_mute_embed,
         WORD_CONFIG__MUTE,
         'hello',
@@ -58,7 +59,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_action_failed_embed(user, embed_builder, word_config, note, *position_parameters):
+def test__build_action_failed_embed(user, guild_id, embed_builder, word_config, note, *position_parameters):
     """
     Tests whether ``build_action_failed_embed`` works as intended.
     
@@ -69,6 +70,9 @@ def test__build_action_failed_embed(user, embed_builder, word_config, note, *pos
     
     embed_builder : `FunctionType``
         Base embed builder.
+    
+    guild_id : `int`
+        The local guild's identifier.
     
     word_config : ``WordConfig``
         Words to use for filling up the error messages about the action to be executed.
@@ -83,6 +87,6 @@ def test__build_action_failed_embed(user, embed_builder, word_config, note, *pos
     -------
     output : ``Embed``
     """
-    output = build_action_failed_embed(user, embed_builder, word_config, note, *position_parameters)
+    output = build_action_failed_embed(user, guild_id, embed_builder, word_config, note, *position_parameters)
     vampytest.assert_instance(output, Embed)
     return output

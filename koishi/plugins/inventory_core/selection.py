@@ -96,8 +96,7 @@ def create_item_suggestions(inventory, item_flag, value):
         return
     
     if (value is None):
-        items.sort()
-        return [(item.name, item.id) for item in items]
+        return sorted((item.name, item.id) for item in items)
     
     item_name_pattern = re_compile('.*?'.join(re_escape(char) for char in value), re_ignore_case)
     

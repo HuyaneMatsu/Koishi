@@ -127,7 +127,7 @@ def check_user(user, event):
     return user is event.user
 
 
-def build_action_completed_embed(user, embed_builder, word_config, note, *position_parameters):
+def build_action_completed_embed(user, guild_id, embed_builder, word_config, note, *position_parameters):
     """
     Builds an action done embed.
     
@@ -135,6 +135,9 @@ def build_action_completed_embed(user, embed_builder, word_config, note, *positi
     ----------
     user : ``ClientUserBase``
         The user on who the action was executed.
+    
+    guild_id : `int`
+        The local guild's identifier.
     
     embed_builder : `FunctionType``
         Base embed builder.
@@ -155,7 +158,7 @@ def build_action_completed_embed(user, embed_builder, word_config, note, *positi
     embed = embed_builder(
         user,
         'Hecatia yeah!',
-        f'**{user.full_name}** has been {word_config.to_be}.',
+        f'**{user.name_at(guild_id)}** has been {word_config.to_be}.',
         *position_parameters,
     )
     
@@ -165,7 +168,7 @@ def build_action_completed_embed(user, embed_builder, word_config, note, *positi
     return embed
 
 
-def build_action_failed_embed(user, embed_builder, word_config, note, *position_parameters):
+def build_action_failed_embed(user, guild_id, embed_builder, word_config, note, *position_parameters):
     """
     Builds an action not done embed.
     
@@ -173,6 +176,9 @@ def build_action_failed_embed(user, embed_builder, word_config, note, *position_
     ----------
     user : ``ClientUserBase``
         The user on who the action was executed.
+    
+    guild_id : `int`
+        The local guild's identifier.
     
     embed_builder : `FunctionType``
         Base embed builder.
@@ -193,7 +199,7 @@ def build_action_failed_embed(user, embed_builder, word_config, note, *position_
     embed = embed_builder(
         user,
         'Oh snap..',
-        f'Failed to {word_config.name!s} **{user.full_name}**.',
+        f'Failed to {word_config.name!s} **{user.name_at(guild_id)}**.',
         *position_parameters,
     )
     
@@ -203,7 +209,7 @@ def build_action_failed_embed(user, embed_builder, word_config, note, *position_
     return embed
 
 
-def build_cannot_regret_embed(user, reason, action):
+def build_cannot_regret_embed(user, guild_id, reason, action):
     """
     Builds a regret embed when the client detects that the respective user is not applicable for the actions.
     
@@ -211,8 +217,13 @@ def build_cannot_regret_embed(user, reason, action):
     ----------
     user : ``ClientUserBase``
         The user in context.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
     reason : `str`
         Regret-ban reason.
+    
     action : `str`
         The action's name within its `-ed` form.
     
@@ -223,7 +234,7 @@ def build_cannot_regret_embed(user, reason, action):
     embed = Embed(
         'Denied',
         (
-            f'You cannot regret {action} **{user.full_name}**.\n'
+            f'You cannot regret {action} **{user.name_at(guild_id)}**.\n'
             f'Was the action different, or is it is already too late?!'
         )
     )
@@ -267,7 +278,10 @@ async def confirm_action(client, event, guild, user, embed_builder, word_config,
         embed = embed_builder(
             user,
             'Confirmation',
-            f'Are you sure to {word_config.name} **{user.full_name}** {word_config.connector} **{guild.name}**?',
+            (
+                f'Are you sure to {word_config.name} **{user.name_at(event.guild_id)}** '
+                f'{word_config.connector} **{guild.name}**?'
+            ),
             *positional_parameters,
         ),
     )
@@ -278,17 +292,35 @@ async def confirm_action(client, event, guild, user, embed_builder, word_config,
         )
     except TimeoutError:
         # Edit the source message with the source interaction
-        await client.interaction_response_message_edit(
-            event,
-            allowed_mentions = None,
-            components = None,
-            embed = embed_builder(
-                user,
-                'Timeout',
-                f'**{user.full_name}** was not {word_config.to_be} {word_config.connector} **{guild.name}**.',
-                *positional_parameters,
-            ),
-        )
+        try:
+            await client.interaction_response_message_edit(
+                event,
+                allowed_mentions = None,
+                components = None,
+                embed = embed_builder(
+                    user,
+                    'Timeout',
+                    (
+                        f'**{user.name_at(event.guild_id)}** was not {word_config.to_be} '
+                        f'{word_config.connector} **{guild.name}**.'
+                    ),
+                    *positional_parameters,
+                ),
+            )
+        except ConnectionError:
+            pass
+        
+        except DiscordException as exception:
+            if (
+                (exception.status < 500) and
+                (
+                    exception.code not in (
+                        ERROR_CODES.unknown_message, # message already deleted
+                    )
+                )
+            ):
+                raise
+        
         return None
     
     if component_interaction.interaction == COMPONENT__CANCEL:
@@ -300,7 +332,10 @@ async def confirm_action(client, event, guild, user, embed_builder, word_config,
             embed = embed_builder(
                 user,
                 'Cancelled',
-                f'**{user.full_name}** was not {word_config.to_be} {word_config.connector} **{guild.name}**.',
+                (
+                    f'**{user.name_at(event.guild_id)}** was not {word_config.to_be} {word_config.connector} '
+                    f'**{guild.name}**.'
+                ),
                 *positional_parameters,
             ),
         )

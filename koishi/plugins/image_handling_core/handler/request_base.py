@@ -2,11 +2,14 @@ __all__ = ('ImageHandlerRequestBase',)
 
 from collections import deque as Deque
 
-from hata import KOKORO, InteractionType
-from scarletio import copy_docs, Future, Task, TaskGroup
+from hata import KOKORO
+from scarletio import copy_docs, Future, Task
+from scarletio.http_client import HTTPClient
 
 from .base import ImageHandlerBase
 
+
+HTTP_CLIENT = HTTPClient(KOKORO)
 
 
 class ImageHandlerRequestBase(ImageHandlerBase):
@@ -15,12 +18,14 @@ class ImageHandlerRequestBase(ImageHandlerBase):
     
     Attributes
     ----------
-    _cache : `list` of ``ImageDetailBase``
-        Additional requested card details.
-    _waiters : `Deque` of ``Future``
-        Waiter futures for card detail.
-    _request_task : `None`, ``Task`` of ``._request_loop``
+    _cache : ``list<ImageDetailBase>``
+        Additional requested image details.
+    
+    _request_task : ``None | Task<._request_loop>``
         Active request loop.
+    
+    _waiters : ``Deque<Future>``
+        Waiter futures for image detail.
     """
     __slots__ = ('_cache', '_waiters', '_request_task')
     
@@ -33,84 +38,39 @@ class ImageHandlerRequestBase(ImageHandlerBase):
         return self
     
     
-    @copy_docs(ImageHandlerBase.get_image)
-    async def get_image(self, client, event, **acknowledge_parameters):
+    @copy_docs(ImageHandlerBase.cg_get_image)
+    async def cg_get_image(self):
         cache = self._cache
         if cache:
-            return cache.pop()
+            yield cache.pop()
+            return
+        
+        yield None
         
         waiter = Future(KOKORO)
         self._waiters.appendleft(waiter)
-        
-        self._maybe_start_request_loop(client)
-        
-        if (event is None):
-            coroutine = None
-        
-        elif acknowledge_parameters:
-            coroutine = client.interaction_response_message_create(
-                event, **acknowledge_parameters
-            )
-        
-        else:
-            if event.type is InteractionType.application_command:
-                coroutine = client.interaction_application_command_acknowledge(event)
-            
-            elif event.type is InteractionType.message_component:
-                coroutine = client.interaction_component_acknowledge(event)
-            
-            else:
-                coroutine = None
-        
-        if coroutine is None:
-            return await waiter
-        
-        acknowledge_task = Task(KOKORO, coroutine)
-        
-        await TaskGroup(KOKORO, [acknowledge_task, waiter]).wait_all()
-        
-        try:
-            acknowledge_task.get_result()
-        except:
-            waiter.cancel()
-            raise
-        
-        return waiter.get_result()
+        self._maybe_start_request_loop()
+        yield await waiter
 
     
-    def _maybe_start_request_loop(self, client):
+    def _maybe_start_request_loop(self):
         """
         Starts ``._request_loop`` if not yet running.
-        
-        Parameters
-        ----------
-        client : ``Client``
-            The respective client who received the event.
         """
         if (self._request_task is None):
-            self._request_task = Task(KOKORO, self._request_loop(client))
+            self._request_task = Task(KOKORO, self._request_loop())
     
     
-    async def _request_loop(self, client):
+    async def _request_loop(self):
         """
         Keeps requesting new image details while required.
         
         This method is a coroutine.
-        
-        Parameters
-        ----------
-        client : ``Client``
-            The respective client who received the event.
         """
         try:
             while self._waiters:
-                data = await self._request(client)
-                if data is None:
-                    self._abort_waiters()
-                    break
-                
-                details = self._process_data(data)
-                if (details is None) or (not details):
+                details = await self._request()
+                if details is None:
                     self._abort_waiters()
                     break
                 
@@ -121,35 +81,15 @@ class ImageHandlerRequestBase(ImageHandlerBase):
             self._request_task = None
     
     
-    async def _request(self, client):
+    async def _request(self):
         """
-        Requests a chunk of image data.
+        Requests a chunk of image data and processes it.
         
         This method is a coroutine
         
-        Parameters
-        ----------
-        client : ``Client``
-            The respective client who received the event.
-        
         Returns
         -------
-        data : `None | object`
-        """
-        return None
-    
-    
-    def _process_data(self, data):
-        """
-        Processes a chunk of data returned by ``._request``.
-        
-        Parameters
-        ----------
-        data : `object`
-        
-        Returns
-        -------
-        card_details : `None`,  list` of ``ImageDetailBase``
+        image_details : ``None | list<ImageDetailBase>``
         """
         return None
     
@@ -172,7 +112,7 @@ class ImageHandlerRequestBase(ImageHandlerBase):
         
         Parameters
         ----------
-        details : `list` of ``ImageDetailBase``
+        details : ``list<ImageDetailBase>``
         """
         waiters = self._waiters
         while True:

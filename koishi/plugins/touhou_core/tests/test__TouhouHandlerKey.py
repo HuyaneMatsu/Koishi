@@ -1,9 +1,8 @@
 import vampytest
 
-from ...image_handling_core import ImageHandlerBase, ImageHandlerBooru, ImageHandlerGroup
-from ...image_handling_core.constants import (
-    SAFE_BOORU_ENDPOINT, SAFE_BOORU_PROVIDER, SOLO_REQUIRED_TAGS, TOUHOU_TAGS_BANNED
-)
+from ...image_handling_core import ImageHandlerSafeBooru, ImageHandlerGroup
+from ...image_handling_core.constants import SOLO_REQUIRED_TAGS, TOUHOU_TAGS_BANNED
+
 from ..character import TOUHOU_CHARACTERS
 from ..characters import KOMEIJI_KOISHI, KOMEIJI_SATORI
 from ..handler_key import TOUHOU_IMAGE_HANDLERS, TouhouHandlerKey
@@ -168,36 +167,37 @@ def _iter_options__handler_pairs():
         
         yield (
             TouhouHandlerKey(KOMEIJI_KOISHI, solo = True),
-            ImageHandlerBooru(
-                SAFE_BOORU_PROVIDER,
-                SAFE_BOORU_ENDPOINT,
+            ImageHandlerSafeBooru(
                 SOLO_REQUIRED_TAGS,
                 TOUHOU_TAGS_BANNED,
-                {'komeiji_koishi',},
+                {
+                    (True, 'komeiji_koishi'),
+                },
                 True,
             )
         )
         
         yield (
             TouhouHandlerKey(KOMEIJI_KOISHI, solo = False),
-            ImageHandlerBooru(
-                SAFE_BOORU_PROVIDER,
-                SAFE_BOORU_ENDPOINT,
+            ImageHandlerSafeBooru(
                 None,
                 TOUHOU_TAGS_BANNED,
-                {'komeiji_koishi',},
+                {
+                    (True, 'komeiji_koishi'),
+                },
                 True,
             )
         )
         
         yield (
             TouhouHandlerKey(KOMEIJI_KOISHI, KOMEIJI_SATORI),
-            ImageHandlerBooru(
-                SAFE_BOORU_PROVIDER,
-                SAFE_BOORU_ENDPOINT,
+            ImageHandlerSafeBooru(
                 None,
                 TOUHOU_TAGS_BANNED,
-                {'komeiji_koishi', 'komeiji_satori'},
+                {
+                    (True, 'komeiji_koishi'),
+                    (True, 'komeiji_satori'),
+                },
                 True,
             )
         )

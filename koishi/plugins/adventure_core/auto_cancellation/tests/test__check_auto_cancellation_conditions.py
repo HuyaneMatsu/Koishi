@@ -280,7 +280,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def tets__check_auto_cancellation_conditions(
+def test__check_auto_cancellation_conditions(
     auto_cancellation,
     inventory_total,
     inventory_exhausted,

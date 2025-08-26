@@ -1,17 +1,18 @@
-__all__ = ('ImageHandlerWaifuPics', )
+__all__ = ('API_BASE_URL_WAIFU_PICS', 'ImageHandlerWaifuPics', 'PROVIDER_WAIFU_PICS')
 
 from scarletio import IgnoreCaseMultiValueDictionary, copy_docs
+from scarletio.web_common import URL
 from scarletio.web_common.headers import CONTENT_TYPE
 
 from ...user_settings import PREFERRED_IMAGE_SOURCE_WAIFU_PICS
 
 from ..image_detail import ImageDetailProvided
 
-from .request_base import ImageHandlerRequestBase
+from .request_base import HTTP_CLIENT, ImageHandlerRequestBase
 
 
-WAIFU_API_BASE_URL = 'https://api.waifu.pics'
-PROVIDER = 'waifu.pics'
+API_BASE_URL_WAIFU_PICS = URL('https://api.waifu.pics/')
+PROVIDER_WAIFU_PICS = 'waifu.pics'
 
 HEADERS = IgnoreCaseMultiValueDictionary()
 HEADERS[CONTENT_TYPE] = 'application/json'
@@ -50,28 +51,38 @@ class ImageHandlerWaifuPics(ImageHandlerRequestBase):
     
     Attributes
     ----------
-    _cache : `list` of ``ImageDetailBase``
-        Additional requested card details.
-    _waiters : `Deque` of ``Future``
-        Waiter futures for card detail.
-    _request_task : `None`, ``Task`` of ``._request_loop``
-        Active request loop.
-    _url : `str`
-        The url to do request towards.
-    """
-    __slots__ = ('_url',)
+    _cache : ``list<ImageDetailBase>``
+        Additional requested image details.
     
-    def __new__(cls, waifu_type, nsfw):
+    _request_task : ``None | Task<._request_loop>``
+        Active request loop.
+    
+    _safe : `bool`
+        Whether to request safe images.
+    
+    _waifu_type : `str`
+        The url to do request towards.
+    
+    _waiters : ``Deque<Future>``
+        Waiter futures for image detail.
+    """
+    __slots__ = ('_safe', '_waifu_type')
+    
+    def __new__(cls, waifu_type, safe):
         """
+        Creates a waifu.pics image handler.
+        
         Parameters
         ----------
         waifu_type : `str`
             The waifu's type.
-        nsfw : `bool`
-            Ara ara.
+        
+        safe : `bool`
+        Whether to request safe images.
         """
         self = ImageHandlerRequestBase.__new__(cls)
-        self._url = f'{WAIFU_API_BASE_URL}/many/{"n" if nsfw else ""}sfw/{waifu_type}'
+        self._safe = safe
+        self._waifu_type = waifu_type
         return self
     
     
@@ -80,41 +91,51 @@ class ImageHandlerWaifuPics(ImageHandlerRequestBase):
         if type(self) is not type(other):
             return NotImplemented
         
-        if self._url != other._url:
+        if self._safe != other._safe:
+            return False
+        
+        if self._waifu_type != other._waifu_type:
             return False
         
         return True
     
     
-    @copy_docs(ImageHandlerRequestBase._request)
-    async def _request(self, client):
-        try:
-            async with client.http.post(self._url, headers = HEADERS, data = DATA) as response:
-                if response.status != 200:
-                    data = None
-                
-                elif 'json' not in response.headers.get(CONTENT_TYPE, '').casefold():
-                    data = None
-                
-                else:
-                    data = await response.json()
-        except TimeoutError:
-            data = None
+    @copy_docs(ImageHandlerRequestBase._produce_representation_middle)
+    def _produce_representation_middle(self):
+        yield ' safe = '
+        yield repr(self._safe)
         
-        return data
+        yield ', waifu_type = '
+        yield repr(self._waifu_type)
     
     
-    @copy_docs(ImageHandlerRequestBase._process_data)
-    def _process_data(self, data):
+    @copy_docs(ImageHandlerRequestBase._request)
+    async def _request(self):
+        try:
+            async with HTTP_CLIENT.post(
+                API_BASE_URL_WAIFU_PICS / 'many' / ('sfw' if self._safe else 'nsfw') / self._waifu_type,
+                headers = HEADERS,
+                data = DATA,
+            ) as response:
+                if response.status != 200:
+                    return None
+                
+                if 'json' not in response.headers.get(CONTENT_TYPE, '').casefold():
+                    return None
+                
+                data = await response.json()
+        except TimeoutError:
+            return None
+        
         if not isinstance(data, dict):
-            return
+            return None
         
         try:
             urls = data['files']
         except KeyError:
             return None
         
-        return [ImageDetailProvided(url).with_provider(PROVIDER) for url in urls if url not in BLACKLIST]
+        return [ImageDetailProvided(url).with_provider(PROVIDER_WAIFU_PICS) for url in urls if url not in BLACKLIST]
 
     
     @copy_docs(ImageHandlerRequestBase.get_image_source)

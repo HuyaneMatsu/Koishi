@@ -9,18 +9,18 @@ class UserSettingsOption(RichAttributeErrorBaseType):
     
     Attributes
     ----------
+    display_name : `str`
+        The field's display name.
+    
     field_descriptor : `member_descriptor`
         Field get-set descriptor.
-    
-    long_name : `str`
-        The field's long name.
     
     name : `str`
         The field's name.
     """
-    __slots__ = ('field_descriptor', 'long_name', 'name')
+    __slots__ = ('field_descriptor', 'display_name', 'name')
     
-    def __new__(cls, field_descriptor, name, long_name):
+    def __new__(cls, field_descriptor, name, display_name):
         """
         Creates a new user settings option with the given parameters.
         
@@ -32,12 +32,12 @@ class UserSettingsOption(RichAttributeErrorBaseType):
         name : `str`
             The field's name.
         
-        long_name : `str`
+        display_name : `str`
             The field's long name.
         """
         self = object.__new__(cls)
+        self.display_name = display_name
         self.field_descriptor = field_descriptor
-        self.long_name = long_name
         self.name = name
         return self
     

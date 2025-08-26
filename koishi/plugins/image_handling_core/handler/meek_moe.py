@@ -1,14 +1,15 @@
-__all__ = ('ImageHandlerMeekMoe', )
+__all__ = ('API_BASE_URL_MEEK_MOE', 'ImageHandlerMeekMoe', 'PROVIDER_MEEK_MOE')
 
 from scarletio import copy_docs
+from scarletio.web_common import URL
 
 from ..image_detail import ImageDetailProvided
 
-from .request_base import ImageHandlerRequestBase
+from .request_base import HTTP_CLIENT, ImageHandlerRequestBase
 
 
-MEEK_API_BASE_URL = 'https://api.meek.moe'
-PROVIDER = 'meek.moe'
+API_BASE_URL_MEEK_MOE = URL('https://api.meek.moe/')
+PROVIDER_MEEK_MOE = 'meek.moe'
 
 
 class ImageHandlerMeekMoe(ImageHandlerRequestBase):
@@ -17,26 +18,31 @@ class ImageHandlerMeekMoe(ImageHandlerRequestBase):
     
     Attributes
     ----------
-    _cache : `list` of ``ImageDetailBase``
-        Additional requested card details.
-    _waiters : `Deque` of ``Future``
-        Waiter futures for card detail.
-    _request_task : `None`, ``Task`` of ``._request_loop``
+    _cache : ``list<ImageDetailBase>``
+        Additional requested image details.
+    
+    _request_task : ``None | Task<._request_loop>``
         Active request loop.
-    _url : `str`
+    
+    _waiters : ``Deque<Future>``
+        Waiter futures for image detail.
+    
+    _vocaloid_type : `str`
         The url to do request towards.
     """
-    __slots__ = ('_url',)
+    __slots__ = ('_vocaloid_type',)
     
     def __new__(cls, vocaloid_type):
         """
+        Creates a meek.moe image handler.
+        
         Parameters
         ----------
         vocaloid_type : `str`
             The vocaloid's type.
         """
         self = ImageHandlerRequestBase.__new__(cls)
-        self._url = f'{MEEK_API_BASE_URL}/{vocaloid_type}'
+        self._vocaloid_type = vocaloid_type
         return self
     
     
@@ -45,26 +51,30 @@ class ImageHandlerMeekMoe(ImageHandlerRequestBase):
         if type(self) is not type(other):
             return NotImplemented
         
-        if self._url != other._url:
+        if self._vocaloid_type != other._vocaloid_type:
             return False
         
         return True
     
     
+    @copy_docs(ImageHandlerRequestBase._produce_representation_middle)
+    def _produce_representation_middle(self):
+        yield ' vocaloid_type = '
+        yield repr(self._vocaloid_type)
+    
+    
     @copy_docs(ImageHandlerRequestBase._request)
-    async def _request(self, client):
-        async with client.http.get(self._url) as response:
-            if response.status == 200:
+    async def _request(self):
+        try:
+            async with HTTP_CLIENT.get(API_BASE_URL_MEEK_MOE / self._vocaloid_type) as response:
+                if response.status != 200:
+                    return None
+                
                 data = await response.json()
-            else:
-                data = None
+        except TimeoutError:
+            return None
         
-        return data
-    
-    
-    @copy_docs(ImageHandlerRequestBase._process_data)
-    def _process_data(self, data):
         if not isinstance(data, dict):
-            return
+            return None
         
-        return [ImageDetailProvided(data['url']).with_provider(PROVIDER)]
+        return [ImageDetailProvided(data['url']).with_provider(PROVIDER_MEEK_MOE)]

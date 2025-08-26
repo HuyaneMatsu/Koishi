@@ -1,9 +1,15 @@
-__all__ = ('SAFE_BOORU_ENDPOINT', 'SAFE_BOORU_PROVIDER', 'SOLO_REQUIRED_TAGS', 'TOUHOU_TAGS_BANNED',)
+__all__ = ('SAFE_TAGS_BANNED', 'NSFW_TAGS_BANNED', 'SOLO_REQUIRED_TAGS', 'TOUHOU_TAGS_BANNED',)
 
+
+SHARED_TAGS_BANNED = (
+    'huge_filesize',
+    'ai-generated',
+    'smoking',
+)
 
 SAFE_TAGS_BANNED = frozenset((
+    *SHARED_TAGS_BANNED,
     'bdsm',
-    'huge_filesize',
     'underwear',
     'sideboob',
     'pov_feet',
@@ -28,9 +34,7 @@ SAFE_TAGS_BANNED = frozenset((
     'clothes_lift',
     'slingshot_swimsuit',
     'bikini',
-    'ai-generated'
     'middle_finger',
-    'smoking',
 ))
 
 
@@ -44,13 +48,11 @@ TOUHOU_TAGS_BANNED = frozenset((
 
 
 NSFW_TAGS_BANNED = frozenset((
+    *SHARED_TAGS_BANNED,
     'loli',
     'lolicon',
     'shota',
     'shotacon',
-    'huge_filesize',
-    'ai-generated',
-    'smoking',
 ))
 
 
@@ -58,15 +60,16 @@ SOLO_REQUIRED_TAGS = frozenset((
     'solo',
 ))
 
+BLACKLISTED_TAGS = {
+    # ai
+    'pigsir13152',
+    'dobostorte',
+    'oekakizuki',
+    'rikatan',
+    'ai-generated',
+}
 
-SAFE_BOORU_ENDPOINT = 'https://safebooru.org'
-SAFE_BOORU_PROVIDER = 'safebooru'
-SAFE_BOORU_AUTOCOMPLETE_ENDPOINT = f'{SAFE_BOORU_ENDPOINT}/autocomplete.php'
-SAFE_BOORU_AUTOCOMPLETE_PARAMETERS = {}
-SAFE_BOORU_AUTOCOMPLETE_QUERY_KEY = 'q'
 
-NSFW_BOORU_ENDPOINT = 'https://gelbooru.com'
-NSFW_BOORU_PROVIDER = 'gelbooru'
-NSFW_BOORU_AUTOCOMPLETE_ENDPOINT = f'{NSFW_BOORU_ENDPOINT}/index.php'
-NSFW_BOORU_AUTOCOMPLETE_PARAMETERS = {'page': 'autocomplete2', 'type': 'tag_query', 'limit': '10'}
-NSFW_BOORU_AUTOCOMPLETE_QUERY_KEY = 'term'
+PAGE_SIZE = 100
+RETRIES_MAX = 5
+AUTOCOMPLETE_PAGE_SIZE = 25

@@ -18,7 +18,7 @@ def _assert_fields_set(target):
     vampytest.assert_instance(target.name, str)
 
 
-def tets__Target__new():
+def test__Target__new():
     """
     Tests whether ``Target.__new__`` works as intended.
     """
@@ -42,7 +42,7 @@ def tets__Target__new():
     vampytest.assert_eq(target.action_ids, action_ids)
 
 
-def tets__Target__repr():
+def test__Target__repr():
     """
     Tests whether ``Target.__new__`` works as intended.
     """

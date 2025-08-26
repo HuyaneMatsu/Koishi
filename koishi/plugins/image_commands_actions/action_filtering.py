@@ -184,22 +184,21 @@ def get_character_suggestions(characters, allow_wild_card, input_value):
     return get_touhou_character_names_like_from(input_value, characters)
 
 
-async def autocomplete_action_tag(event, input_value):
+def get_action_tag_suggestions(event, input_value):
     """
-    Auto completes the given action tag.
-    
-    This function is a coroutine.
+    gets action tag suggestions for the given value.
     
     Parameters
     ----------
     event : ``InteractionEvent``
         The received event.
-    input_value : `None`, `str`
+    
+    input_value : `None | str`
         The value to autocomplete.
     
     Returns
     -------
-    suggestions : `None`, `list<str>`
+    suggestions : `None | list<str>`
     """
     parameters = event.get_non_focused_values()
     
@@ -241,22 +240,21 @@ async def autocomplete_action_tag(event, input_value):
     )
 
 
-async def autocomplete_source(event, input_value):
+def get_source_character_suggestions(event, input_value):
     """
     Auto completes the given source.
-    
-    This function is a coroutine.
     
     Parameters
     ----------
     event : ``InteractionEvent``
         The received event.
-    input_value : `None`, `str`
+    
+    input_value : `None | str`
         The value to autocomplete.
     
     Returns
     -------
-    suggestions : `None`, `list<str>`
+    suggestions : `None | list<str>`
     """
     source, target, image_details = get_image_details_from_parameters(event.get_non_focused_values())
     
@@ -278,22 +276,21 @@ async def autocomplete_source(event, input_value):
     return get_character_suggestions(characters, allow_wild_card, input_value)
 
 
-async def autocomplete_target(event, input_value):
+def get_target_character_suggestions(event, input_value):
     """
     Auto completes the given target.
-    
-    This function is a coroutine.
     
     Parameters
     ----------
     event : ``InteractionEvent``
         The received event.
-    input_value : `None`, `str`
+    
+    input_value : `None | str`
         The value to autocomplete.
     
     Returns
     -------
-    suggestions : `None`, `list<str>`
+    suggestions : `None | list<str>`
     """
     source, target, image_details = get_image_details_from_parameters(event.get_non_focused_values())
     
@@ -315,11 +312,9 @@ async def autocomplete_target(event, input_value):
     return get_character_suggestions(characters, allow_wild_card, input_value)
 
 
-async def autocomplete_name(event, input_value):
+def get_name_suggestions(event, input_value):
     """
     Auto completes the given name.
-    
-    This function is a coroutine.
     
     Parameters
     ----------
@@ -330,7 +325,7 @@ async def autocomplete_name(event, input_value):
     
     Returns
     -------
-    suggestions : `None`, `list<str>`
+    suggestions : `None | list<str>`
     """
     source, target, image_details = get_image_details_from_parameters(event.get_non_focused_values())
     

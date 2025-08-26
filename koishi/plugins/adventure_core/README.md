@@ -68,8 +68,13 @@ Each action offers their own cost, battles and loot.
             - Flykiller amanata (common)
         - Trapped
 
-
-Additional listed locations in item descriptions that are unavailable:
-
 - Hakugyokurou mansion
+    - Gardening
+        - Gardening
+            - Peach (common)
+            - Peach (rare)
+
 - Moriya shrine
+    - Foraging
+        - Foraging
+            - BlueBerry (common)

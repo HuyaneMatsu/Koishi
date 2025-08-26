@@ -117,6 +117,6 @@ async def un_mute_command(
         allowed_mentions = None,
         components = None,
         embed = build_action_completed_embed(
-            user, build_un_mute_embed, WORD_CONFIG__UN_MUTE, notify_note, reason, notify_user
+            user, guild.id, build_un_mute_embed, WORD_CONFIG__UN_MUTE, notify_note, reason, notify_user
         )
     )

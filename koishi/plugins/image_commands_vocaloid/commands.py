@@ -24,7 +24,20 @@ async def vocaloid(
 ):
     """Baka Baka Baka"""
     handler = HANDLERS[character]
-    image_detail = await handler.get_image(client, event)
+    
+    cg_get_image = handler.cg_get_image()
+    
+    try:
+        image_detail = await cg_get_image.asend(None)
+        if (image_detail is None):
+            await client.interaction_application_command_acknowledge(event, False)
+            image_detail = await cg_get_image.asend(None)
+        
+    except StopAsyncIteration:
+        image_detail = None
+    
+    finally:
+        cg_get_image.aclose().close()
     
     embed = build_vocaloid_embed(character, image_detail)
     

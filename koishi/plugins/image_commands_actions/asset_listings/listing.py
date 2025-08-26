@@ -146,7 +146,7 @@ from .constants import (
 # https://danbooru.donmai.us/posts?tags=touhou+staring+&z=5
 # Till page 4 I think
 
-TOUHOU_ACTION_ALL = ImageHandlerStatic(PREFERRED_IMAGE_SOURCE_TOUHOU)
+TOUHOU_ACTION_ALL = ImageHandlerStatic(PREFERRED_IMAGE_SOURCE_TOUHOU, None)
 
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1219193725947871262/chiruno-feed-0000.png',

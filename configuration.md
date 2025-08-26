@@ -66,6 +66,9 @@ RUN_WEBAPP_AS_MAIN = True        # (bool) Whether web app should be started if m
 WEBAPP_SECRET_KEY = None         # (str) Secret key for webapp.
 
 GOOGLE_API_KEYS = None           # (None or list of str) A list of google api keys.
+
+DAN_BOORU_USER_ID = ''           # (str) Danbooru user name.
+DAN_BOORU_PASSWORD = ''          # (str) Danbooru password (api token).
 ```
 
 #### Koishi requirements

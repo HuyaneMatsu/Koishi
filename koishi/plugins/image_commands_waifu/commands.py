@@ -22,8 +22,8 @@ NSFW_WAIFU_TYPES = [
     'trap',
 ]
 
-SAFE_HANDLERS = {waifu_type: Waifu(waifu_type, False) for waifu_type in SAFE_WAIFU_TYPES}
-NSFW_HANDLERS = {waifu_type: Waifu(waifu_type, True ) for waifu_type in NSFW_WAIFU_TYPES}
+SAFE_HANDLERS = {waifu_type: Waifu(waifu_type, True) for waifu_type in SAFE_WAIFU_TYPES}
+NSFW_HANDLERS = {waifu_type: Waifu(waifu_type, False) for waifu_type in NSFW_WAIFU_TYPES}
 
 
 @FEATURE_CLIENTS.interactions(is_global = True)

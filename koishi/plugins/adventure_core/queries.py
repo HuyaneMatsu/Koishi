@@ -64,7 +64,7 @@ async def get_active_adventures():
 
 async def query_get_active_adventures():
     """
-    Queries all teh active adventures.
+    Queries all the active adventures.
     
     This function is a coroutine.
     

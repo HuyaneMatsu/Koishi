@@ -15,14 +15,15 @@ class ImageHandlerStatic(ImageHandlerBase):
     
     Attributes
     ----------
-    _images : `list` of ``ImageDetailBase``
+    _images : ``list<ImageDetailBase>``
         The registered imaged.
+    
     _source : `int`
         Image source identifier for preference adjustment.
     """
     __slots__ = ('_images', '_source')
     
-    def __new__(cls, source):
+    def __new__(cls, source, images):
         """
         Creates a new static image handler.
         
@@ -30,9 +31,12 @@ class ImageHandlerStatic(ImageHandlerBase):
         ---------
         source : `int`
             Image source identifier for preference adjustment.
+        
+        images : ``None | list<ImageDetailBase>``
+            Images to register.
         """
         self = object.__new__(cls)
-        self._images = []
+        self._images = [] if (images is None) else images
         self._source = source
         return self
     
@@ -42,17 +46,24 @@ class ImageHandlerStatic(ImageHandlerBase):
         if type(self) is not type(other):
             return NotImplemented
         
+        # images
         if self._images != other._images:
+            return False
+        
+        # source
+        if self._source != other._source:
             return False
         
         return True
     
     
-    @copy_docs(ImageHandlerBase.get_image)
-    async def get_image(self, client, event, **acknowledge_parameters):
+    @copy_docs(ImageHandlerBase.cg_get_image)
+    async def cg_get_image(self):
         images = self._images
         if images:
-            return choice(images)
+            yield choice(images)
+        
+        return
     
     
     @copy_docs(ImageHandlerBase.get_weight)
@@ -110,28 +121,11 @@ class ImageHandlerStatic(ImageHandlerBase):
         -------
         new : `instance<type<self>>`
         """
-        new = type(self)(self._source)
-        
-        for image in self._images:
-            image = image.create_action_subset(action_tag)
-            if (image is not None):
-                new._images.append(image)
-        
-        return new
-    
-    
-    def with_images(self, images):
-        """
-        Returns the image detail extending itself with the given images.
-        
-        Parameters
-        ----------
-        images : `list` of ``ImageDetailBase``
-            Images to extend self with.
-        
-        Returns
-        -------
-        self : `instance<type<self>>`
-        """
-        self._images.extend(images)
-        return self
+        return type(self)(
+            self._source,
+            [
+                image for image in
+                (image.create_action_subset(action_tag) for image in self._images)
+                if (image is not None)
+            ],
+        )

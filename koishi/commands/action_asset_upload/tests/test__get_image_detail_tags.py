@@ -12,7 +12,7 @@ def test__get_image_detail_tags():
     """
     Tests whether ``get_image_detail_tags`` works as intended.
     """
-    ACTIONS = ImageHandlerStatic(PREFERRED_IMAGE_SOURCE_TOUHOU)
+    ACTIONS = ImageHandlerStatic(PREFERRED_IMAGE_SOURCE_TOUHOU, None)
     
     ACTIONS.add(
         'https://orindance.party/miaus/chiruno-feed-0000.png',

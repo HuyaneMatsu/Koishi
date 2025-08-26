@@ -14,7 +14,7 @@ def build_waifu_embed(image_detail):
     
     Parameters
     ----------
-    image_detail : ``ImageDetailBase``
+    image_detail : ``None | ImageDetailBase``
         The image detail to work from.
     
     Returns
@@ -46,14 +46,14 @@ class Waifu:
         The `custom-id` used to identify the command's component.
     handler : ``ImageHandlerWaifuPics``
         The handler to use.
-    nsfw : `bool`
-        Whether the waifu does ara ara.
+    safe : `bool`
+        Whether to request safe image.
     waifu_type : `str`
         The waifu's type.
     """
-    __slots__ = ('custom_id', 'handler', 'nsfw', 'waifu_type')
+    __slots__ = ('custom_id', 'handler', 'safe', 'waifu_type')
     
-    def __new__(cls, waifu_type, nsfw):
+    def __new__(cls, waifu_type, safe):
         """
         Creates a new waifu command.
         
@@ -61,16 +61,17 @@ class Waifu:
         ----------
         waifu_type : `str`
             The waifu's type.
-        nsfw : `bool`
-            Whether the waifu does ara ara.
+        
+        safe : `bool`
+            Whether to request safe images.
         """
-        handler = ImageHandlerWaifuPics(waifu_type, nsfw)
-        custom_id = f'waifu.{"n" if nsfw else ""}sfv.{waifu_type}'
+        handler = ImageHandlerWaifuPics(waifu_type, safe)
+        custom_id = f'waifu.{"" if safe else "n"}sfv.{waifu_type}'
         
         self = object.__new__(cls)
         self.custom_id = custom_id
         self.handler = handler
-        self.nsfw = nsfw
+        self.safe = safe
         self.waifu_type = waifu_type
         
         
@@ -87,17 +88,29 @@ class Waifu:
         ----------
         client : ``Client``
             The client who received the event.
+        
         event : ``InteractionEvent``
             The received interaction event.
         """
         if event.guild_id == 0:
             abort('Guild only command')
         
-        if self.nsfw and (not event.channel.nsfw):
+        if (not self.safe) and (not event.channel.nsfw):
             abort('Nsfw channel only!')
         
+        cg_get_image = self.handler.cg_get_image()
         
-        image_detail = await self.handler.get_image(client, event)
+        try:
+            image_detail = await cg_get_image.asend(None)
+            if (image_detail is None):
+                await client.interaction_component_acknowledge(event, False)
+                image_detail = await cg_get_image.asend(None)
+        
+        except StopAsyncIteration:
+            image_detail = None
+        
+        finally:
+            cg_get_image.aclose().close()
         
         embed = build_waifu_embed(image_detail)
         
@@ -168,13 +181,26 @@ class NewWaifu:
         ----------
         client : ``Client``
             The client who received the event.
+        
         event : ``InteractionEvent``
             The received interaction event.
         """
         if event.user is not event.message.interaction.user:
             return
-            
-        image_detail = await self.handler.get_image(client, event)
+        
+        cg_get_image = self.handler.cg_get_image()
+        
+        try:
+            image_detail = await cg_get_image.asend(None)
+            if (image_detail is None):
+                await client.interaction_component_acknowledge(event, False)
+                image_detail = await cg_get_image.asend(None)
+        
+        except StopAsyncIteration:
+            image_detail = None
+        
+        finally:
+            cg_get_image.aclose().close()
         
         embed = build_waifu_embed(image_detail)
         

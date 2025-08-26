@@ -446,7 +446,7 @@ async def linked_quest_submit_item(client, event, linked_quest_entry_id):
         amount_used, amount_used_count = get_submit_amount(item, amount_type, amount_to_be_used, current_amount_count)
         
         if amount_to_be_used > amount_used:
-            await modify_linked_quest_amount_submitted(linked_quest, amount_submitted + current_amount_count)
+            await modify_linked_quest_amount_submitted(linked_quest, amount_submitted + amount_used)
             
             inventory.modify_item_amount(item, -amount_used_count)
             await save_inventory(inventory)

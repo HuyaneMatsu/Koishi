@@ -1,0 +1,5 @@
+__all__ = ('IP_TYPE_IP_V4', 'IP_TYPE_IP_V6', 'IP_TYPE_NONE')
+
+IP_TYPE_NONE = 0
+IP_TYPE_IP_V4 = 1
+IP_TYPE_IP_V6 = 2

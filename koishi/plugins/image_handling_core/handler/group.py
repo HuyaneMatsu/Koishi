@@ -52,9 +52,10 @@ class ImageHandlerGroup(ImageHandlerBase):
     
     Attributes
     ----------
-    _handlers : `list` of ``ImageHandlerBase``
+    _handlers : ``list<ImageHandlerBase``
         Registered sub handlers.
-    _weights : `list` of `float`
+    
+    _weights : `list<float>`
         The weight of each handler.
     """
     __slots__ = ('_handlers', '_weights')
@@ -98,48 +99,67 @@ class ImageHandlerGroup(ImageHandlerBase):
         return True
 
     
-    @copy_docs(ImageHandlerBase.get_image)
-    async def get_image(self, client, event, **acknowledge_parameters):
-        return await self._get_image_with_weights(client, event, self._weights, acknowledge_parameters)
+    @copy_docs(ImageHandlerBase.cg_get_image)
+    async def cg_get_image(self):
+        async for image_detail in self._get_image_with_weights(self._weights):
+            yield image_detail
     
     
     
-    @copy_docs(ImageHandlerBase.get_image_weighted)
-    async def get_image_weighted(self, client, event, weight_map, **acknowledge_parameters):
+    @copy_docs(ImageHandlerBase.cg_get_image_weighted)
+    async def cg_get_image_weighted(self, weight_map, **acknowledge_parameters):
         weights = get_handler_weights_with_weight_map(self._handlers, weight_map)
-        return await self._get_image_with_weights(client, event, weights, acknowledge_parameters)
+        
+        async for image_detail in  self._get_image_with_weights(weights):
+            yield image_detail
     
     
-    async def _get_image_with_weights(self, client, event, weights, acknowledge_parameters):
+    async def _get_image_with_weights(self, weights):
         """
         Gets an image detail with weight for each handler.
         If an image handler cannot produce image is discarded temporarily.
         
-        This function is a coroutine.
+        This function is a coroutine generator.
         
-        client : ``Client``
-            The respective client who received the event.
-        event : ``None | InteractionEvent``
-            The respective interaction event.
         weights : `list<int>`
             Weights for each handler.
-        acknowledge_parameters : `dict<str, object>`
-            Additional parameter used when acknowledging.
         
         Returns
         -------
-        image_detail : `None`, ``ImageDetailBase``
+        image_detail : ``None | ImageDetailBase``
         """
         handlers = self._handlers
+        yielt_none = False
+        
         while True:
             index = random_index(weights)
             if index == -1:
-                return None
+                return
             
             handler = handlers[index]
-            image_detail = await handler.get_image(client, event, **acknowledge_parameters)
-            if (image_detail is not None):
-                return image_detail
+            
+            cg_get_image = handler.cg_get_image()
+            
+            try:
+                image_detail = await cg_get_image.asend(None)
+                if (image_detail is not None):
+                    yield image_detail
+                    return
+                
+                if not yielt_none:
+                    yield None
+                    yielt_none = True
+                
+                image_detail = await cg_get_image.asend(None)
+                if (image_detail is not None):
+                    yield image_detail
+                    return
+            
+            except StopAsyncIteration:
+                pass
+            
+            finally:
+                cg_get_image.aclose().close()
             
             handlers = [*islice(handlers, 0, index), *islice(handlers, index + 1, None)]
             weights = [*islice(weights, 0, index), *islice(weights, index + 1, None)]

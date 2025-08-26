@@ -9,6 +9,10 @@ PATHS_TO_LINK = (
         'automation_chat_interaction',
     ),
     (
+        ('plugins', 'automation_farewell', 'assets'),
+        'automation_farewell',
+    ),
+    (
         ('plugins', 'automation_logging', 'assets'),
         'automation_logging',
     ),

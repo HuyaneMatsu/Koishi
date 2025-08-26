@@ -16,7 +16,7 @@ def _assert_fields_set(return_):
     vampytest.assert_instance(return_.name, str)
 
 
-def tets__Return__new():
+def test__Return__new():
     """
     Tests whether ``Return.__new__`` works as intended.
     """
@@ -34,7 +34,7 @@ def tets__Return__new():
     vampytest.assert_eq(return_.name, name)
 
 
-def tets__Return__repr():
+def test__Return__repr():
     """
     Tests whether ``Return.__new__`` works as intended.
     """

@@ -17,7 +17,8 @@ def build_touhou_character_embed(touhou_character, image_detail):
     ----------
     touhou_character : ``TouhouCharacter``
         The respective touhou character.
-    image_detail : ``ImageDetailBase``
+    
+    image_detail : ``None | ImageDetailBase``
         The image detail to work from.
     
     Returns
@@ -139,7 +140,19 @@ class NewTouhouCharacter:
         if event.user is not event.message.interaction.user:
             return
          
-        image_detail = await self.handler.get_image(client, event)
+        cg_get_image = self.handler.cg_get_image()
+        
+        try:
+            image_detail = await cg_get_image.asend(None)
+            if (image_detail is None):
+                await client.interaction_component_acknowledge(event, False)
+                image_detail = await cg_get_image.asend(None)
+        
+        except StopAsyncIteration:
+            image_detail = None
+        
+        finally:
+            cg_get_image.aclose().close()
         
         embed = build_touhou_character_embed(self.touhou_character, image_detail)
         

@@ -8,7 +8,7 @@ from ..component_building import build_linked_quest_abandon_success_components
 def _iter_options():
     yield (
         [
-            create_text_display('You successfully accepted the quest.'),
+            create_text_display('You successfully abandoned the quest.'),
         ],
     )
 

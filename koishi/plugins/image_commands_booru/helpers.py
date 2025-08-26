@@ -19,7 +19,8 @@ def split_down_full_tags(input_value):
     -------
     full_tags : `None`, `str`
         Already prompted input.
-    input_last : `None`, `str`
+    
+    input_last : `None | str`
         The last tag we are auto completing now.
     """
     # If input ends with space, we do not split anything down.
@@ -42,55 +43,6 @@ def split_down_full_tags(input_value):
         full_tags = None
     
     return full_tags, input_last
-
-
-def build_tag_safe_booru(tag_data):
-    """
-    Builds a safe-booru tag output value from the given tag data.
-    
-    Parameters
-    ----------
-    tag_data : `dict` of `object`
-        Raw tag data.
-    
-    Returns
-    -------
-    tag_name_value_pair : `None`, `tuple` (`str`, `str`)
-    """
-    return unquote_tag_safe_booru(tag_data['label']), unquote_tag_safe_booru(tag_data['value'])
-
-
-def build_tag_gel_booru(tag_data):
-    """
-    Builds a gel-booru tag output value from the given tag data.
-    
-    Parameters
-    ----------
-    tag_data : `dict` of `object`
-        Raw tag data.
-    
-    Returns
-    -------
-    tag_name_value_pair : `None`, `tuple` (`str`, `str`)
-    """
-    value = tag_data['value']
-    return f'{value} ({tag_data["post_count"]})', value
-
-
-def unquote_tag_safe_booru(tag):
-    """
-    Unquotes a safe-booru tag.
-    
-    Parameters
-    ----------
-    tag : `str`
-        The tag to process.
-    
-    Returns
-    -------
-    raw_tag : `str`
-    """
-    return tag.replace('\'', '&#039')
 
 
 def quote_tag_safe_booru(raw_tag):
@@ -165,14 +117,15 @@ def split_tags(raw_tags, safe):
     
     Parameters
     ----------
-    raw_tags : `iterable` of (`None`, `str`)
+    raw_tags : `iterable<None | str>
         The raw tags to split.
+    
     safe : `bool`
         Whether to use `safe-booru` splitting or nah.
     
     Returns
     -------
-    tags : `set` of `str`
+    tags : `set<str>`
     """
     if safe:
         splitter = iter_split_tags_safe_booru

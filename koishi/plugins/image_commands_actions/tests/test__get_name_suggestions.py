@@ -8,7 +8,7 @@ from ...touhou_core import KAENBYOU_RIN, REIUJI_UTSUHO
 
 from ..action_filtering import (
     PARAMETER_NAME_ACTION_TAG, PARAMETER_NAME_NAME, PARAMETER_NAME_SOURCE, PARAMETER_NAME_TARGET, PARAMETER_WILD_CARD,
-    autocomplete_name
+    get_name_suggestions
 )
 
 
@@ -134,11 +134,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-async def test__autocomplete_name(event, input_value):
+def test__get_name_suggestions(event, input_value):
     """
-    Tests whether ``autocomplete_name`` works as intended.
-    
-    This function is a coroutine.
+    Tests whether ``get_name_suggestions`` works as intended.
     
     Parameters
     ----------
@@ -151,7 +149,7 @@ async def test__autocomplete_name(event, input_value):
     -------
     output : `None | list<str>`
     """
-    output = await autocomplete_name(event, input_value)
+    output = get_name_suggestions(event, input_value)
     vampytest.assert_instance(output, list, nullable = True)
     if (output is not None):
         for element in output:

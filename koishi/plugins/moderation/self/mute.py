@@ -94,6 +94,6 @@ async def self_mute(client, event, duration_seconds, *, reason = None):
         event,
         allowed_mentions = None,
         embed = build_action_completed_embed(
-            event.user, build_mute_embed, WORD_CONFIG__MUTE, reason, build_duration_string(duration)
+            event.user, guild.id, build_mute_embed, WORD_CONFIG__MUTE, reason, build_duration_string(duration)
         )
     )

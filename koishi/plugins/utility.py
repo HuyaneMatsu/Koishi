@@ -48,8 +48,6 @@ STATUS_VALUE_TO_HEART_EMOJI = {
     STATUS_OFFLINE.value: EMOJI_HEART_BLACK,
 }
 
-PLATFORMS = ('desktop', 'mobile', 'web')
-
 @FEATURE_CLIENTS.interactions(is_global = True)
 async def rawr(client, event):
     """Sends a message with everyone from my universe."""
@@ -409,13 +407,12 @@ async def status_(user):
     
     embed = Embed(f'{user.full_name}\'s status', f'{emoji} {status.name}').add_thumbnail(user.avatar_url)
     
-    statuses = user.statuses
-    if (statuses is not None) and statuses:
+    status_by_platform = user.status_by_platform
+    if (status_by_platform is not None):
         field_value_parts = []
         
-        for platform in PLATFORMS:
-            status_value = statuses.get(platform, STATUS_VALUE_OFFLINE)
-            emoji = STATUS_VALUE_TO_HEART_EMOJI.get(status_value, EMOJI_HEART_BLACK)
+        for platform, status in status_by_platform.iter_status_by_platform():
+            emoji = STATUS_VALUE_TO_HEART_EMOJI.get(status.value, EMOJI_HEART_BLACK)
             
             if field_value_parts:
                 field_value_parts.append('\n')
@@ -424,7 +421,7 @@ async def status_(user):
             field_value_parts.append(': ')
             field_value_parts.append(emoji.as_emoji)
             field_value_parts.append(' ')
-            field_value_parts.append(status_value)
+            field_value_parts.append(status.name)
         
         field_value = ''.join(field_value_parts)
         

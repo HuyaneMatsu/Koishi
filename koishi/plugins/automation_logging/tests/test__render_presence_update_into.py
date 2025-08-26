@@ -1,7 +1,7 @@
 from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
-from hata import Activity, ActivityChange, ActivityUpdate, ActivityType, Status, User
+from hata import Activity, ActivityChange, ActivityUpdate, Status, StatusByPlatform, User
 
 from ..embed_builder_satori import render_presence_update_into
 
@@ -20,10 +20,10 @@ def _iter_options():
         202410160000,
         name = 'Flandre',
         status = Status.online,
-        statuses = {
-            'desktop': 'idle',
-            'web': 'online',
-        },
+        status_by_platform = StatusByPlatform(
+            desktop = Status.idle,
+            web = Status.online,
+        ),
         activities = [activity_1, activity_2],
     )
     
@@ -31,10 +31,10 @@ def _iter_options():
         user,
         {
             'status': Status.idle,
-            'statuses': {
-                'desktop': 'idle',
-                'web': 'dnd',
-            },
+            'status_by_platform' : StatusByPlatform(
+                desktop = Status.idle,
+                web = Status.dnd,
+            ),
             'activities': ActivityChange(
                 added = added_activities,
                 updated = updated_activities,
@@ -51,6 +51,7 @@ def _iter_options():
             '\n'
             '**Statuses by device**\n'
             'desktop: idle -> idle\n'
+            'embedded: offline -> offline\n'
             'mobile: offline -> offline\n'
             'web: dnd -> online\n'
             '\n'

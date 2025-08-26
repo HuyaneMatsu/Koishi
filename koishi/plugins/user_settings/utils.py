@@ -91,16 +91,10 @@ async def handle_user_settings_change(client, interaction_event, option, value):
         
     embed = build_user_settings_notification_change_embed(interaction_event.user, option, value, changed)
     
-    if interaction_event.type is InteractionType.application_command:
-        await client.interaction_response_message_edit(
-            interaction_event,
-            embed = embed,
-        )
-    else:
-        await client.interaction_followup_message_create(
-            interaction_event,
-            embed = embed,
-        )
+    await client.interaction_followup_message_create(
+        interaction_event,
+        embed = embed,
+    )
 
 
 def get_available_clients(user):

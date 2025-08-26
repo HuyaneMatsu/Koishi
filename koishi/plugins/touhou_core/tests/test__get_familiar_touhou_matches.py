@@ -1,7 +1,8 @@
 import vampytest
 
 from ..characters import (
-    AYANA, HOURAISAN_KAGUYA, IZAYOI_SAKUYA, KOMEIJI_KOISHI, PRISMRIVER_LAYLA, REIUJI_UTSUHO, SHAMEIMARU_AYA
+    AYANA, HOURAISAN_KAGUYA, IWANAGA_ARIYA, IZAYOI_SAKUYA, KOMEIJI_KOISHI, PRISMRIVER_LAYLA, REIUJI_UTSUHO,
+    SHAMEIMARU_AYA
 )
 from ..utils import get_familiar_touhou_matches
 
@@ -14,6 +15,7 @@ def _iter_options():
             (SHAMEIMARU_AYA, 'aya'),
             (PRISMRIVER_LAYLA, 'layla'),
             (AYANA, 'ayana'),
+            (IWANAGA_ARIYA, 'ariya'),
             (IZAYOI_SAKUYA, 'sakuya'),
             (HOURAISAN_KAGUYA, 'kaguya'),
         ],

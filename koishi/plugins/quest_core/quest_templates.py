@@ -72,7 +72,7 @@ QUEST_TEMPLATE_MYSTIA_PEACH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_PEACH] = 
     70,
     100,
     2,
-    400,
+    600,
     50,
     80,
     120,
@@ -207,6 +207,7 @@ QUEST_TEMPLATE_MARISA_FLYKILLER_AMANATA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARI
 
 
 # - Sakuya +1 level
+# - long term quest +1 level
 # Reward is around 1.0x of the value
 #
 # This quest requires a lot of grapes, making it great. 
@@ -220,7 +221,7 @@ QUEST_TEMPLATE_SAKUYA_BLUEFRANKISH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BL
         'I would like to request a great amount of grapes.'
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
-    1,
+    2,
     ITEM_ID_BLUEFRANKISH,
     ITEM_ID_SAKUYA,
     100000,
@@ -232,7 +233,7 @@ QUEST_TEMPLATE_SAKUYA_BLUEFRANKISH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BL
     HOUR_IN_SECONDS,
     90,
     110,
-    2,
+    3,
     10000,
     100,
     100,
@@ -254,17 +255,17 @@ QUEST_TEMPLATE_MYSTIA_CARROT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_CARROT] 
     0,
     ITEM_ID_CARROT,
     ITEM_ID_MYSTIA,
-    40,
-    1,
+    9000,
+    1000,
     50,
     120,
-    AMOUNT_TYPE_COUNT,
+    AMOUNT_TYPE_WEIGHT,
     DAY_IN_SECONDS * 6,
     HOUR_IN_SECONDS,
     90,
     110,
     1,
-    400,
+    600,
     50,
     90,
     110,
@@ -322,7 +323,7 @@ QUEST_TEMPLATE_MYSTIA_SCARLET_ONION = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_S
     100,
     120,
     1,
-    900,
+    1300,
     100,
     90,
     110,

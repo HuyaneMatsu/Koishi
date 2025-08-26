@@ -7,11 +7,22 @@ from hata import Client, DiscordException, ERROR_CODES, MessageType, Permission,
 from ...bot_utils.multi_client_utils import get_first_client_with_message_create_permissions_from
 from ...bots import FEATURE_CLIENTS
 
-from ..blacklist_core import is_user_id_in_blacklist
 from ..user_settings import get_one_user_settings, get_preferred_client_in_channel
 
 from .action import COOLDOWN_HANDLER, create_response_content_and_embed, send_action_response_to
 from .actions import ACTIONS
+
+# Optional dependencies
+from config import MARISA_MODE
+
+try:
+    from ..blacklist_core import is_user_id_in_blacklist
+except ImportError:
+    if not MARISA_MODE:
+        raise
+    
+    def is_user_id_in_blacklist(user_id):
+        return False
 
 
 ACTIONS_BY_NAME = {}

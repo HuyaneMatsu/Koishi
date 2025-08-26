@@ -9,10 +9,10 @@ def _iter_options():
     yield 63, (0, 2)
     
     yield 64, (1, 3)
-    yield 255, (1, 3)
+    yield 127, (1, 3)
     
-    yield 256, (2, 4)
-    yield 1023, (2, 4)
+    yield 228, (2, 4)
+    yield 255, (2, 4)
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())

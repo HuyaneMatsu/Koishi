@@ -51,7 +51,7 @@ def get_guild_adventurer_rank_info(credibility):
             break
         
         rank += 1
-        credibility >>= 2
+        credibility >>= 1
         continue
     
     return AdventurerRankInfo(rank, 2 + rank)

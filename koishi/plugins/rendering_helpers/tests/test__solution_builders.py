@@ -3,7 +3,7 @@ from datetime import datetime as DateTime, timezone as TimeZone
 import vampytest
 from hata import (
     Activity, ActivityAssets, ActivityFlag, ActivityParty, ActivitySecrets, ActivityTimestamps, ActivityType,
-    GuildProfile, GuildProfileFlag, Role, User, UserFlag, Status
+    GuildProfile, GuildProfileFlag, Role, User, UserFlag, Status, StatusByPlatform
 )
 
 from ..solution_builders import (
@@ -382,11 +382,11 @@ def test__build_activity_description(activity, current_date):
 def _iter_options__build_user_status_description():
     user_0 = User()
     user_0.status = Status.idle
-    user_0.statuses = {
-        'desktop': Status.dnd.value,
-        'mobile': Status.idle.value,
-        'web': Status.online.value,
-    }
+    user_0.status_by_platform = StatusByPlatform(
+        desktop = Status.dnd,
+        mobile = Status.idle,
+        web = Status.online,
+    )
     
     # Maximal
     yield (

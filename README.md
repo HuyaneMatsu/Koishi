@@ -120,11 +120,11 @@ Although here is a "short" description for all of her commands by category:
 - `/roles` - Batch role info.
 - `snipe`, `/snipe` - Snipe emojis and stickers to get their detail description or to manage them.
 - `style-text`, `/style-text` - Style text using discord's "ansi" highlights.
-- `/user` - Show various information about your user. This includes many things generated through or by koishi.
+- `/user` - Show various information about your user. This includes many things generated through or by Koishi.
 
 ### Economy
 
-- `adventure` - Depart to adventures to collect items for completing quests.
+- `/adventure` - Depart to adventures to collect items for completing quests.
 - `/daily` - Claim your daily hearts and your beloveds' one.
 - `/gift` - Gift hearts to your beloved ones.
 - `/shop` - Spend your hearts.

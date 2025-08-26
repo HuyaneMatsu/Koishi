@@ -123,7 +123,7 @@ async def mute_command(
             raise
         
         embed = build_action_failed_embed(
-            user, build_mute_embed, WORD_CONFIG__MUTE, note, reason, notify_user, duration_string, False
+            user, guild.id, build_mute_embed, WORD_CONFIG__MUTE, note, reason, notify_user, duration_string, False
         )
     else:
         if notify_user:
@@ -134,7 +134,7 @@ async def mute_command(
             note = None
         
         embed = build_action_completed_embed(
-            user, build_mute_embed, WORD_CONFIG__MUTE, note, reason, notify_user, duration_string, nazrin_mode
+            user, guild.id, build_mute_embed, WORD_CONFIG__MUTE, note, reason, notify_user, duration_string, nazrin_mode
         )
         
     await client.interaction_response_message_edit(

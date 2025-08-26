@@ -16,7 +16,7 @@ def _assert_fields_set(duration_suggestion_set):
     vampytest.assert_instance(duration_suggestion_set.id, int)
 
 
-def tets__DurationSuggestionSet__new():
+def test__DurationSuggestionSet__new():
     """
     Tests whether ``DurationSuggestionSet.__new__`` works as intended.
     """
@@ -34,7 +34,7 @@ def tets__DurationSuggestionSet__new():
     vampytest.assert_eq(duration_suggestion_set.durations, durations)
 
 
-def tets__DurationSuggestionSet__repr():
+def test__DurationSuggestionSet__repr():
     """
     Tests whether ``DurationSuggestionSet.__new__`` works as intended.
     """

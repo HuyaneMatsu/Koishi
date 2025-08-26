@@ -122,6 +122,14 @@ async def ban_command(
         allowed_mentions = None,
         components = None,
         embed = build_action_completed_embed(
-            user, build_ban_embed, WORD_CONFIG__BAN, notify_note, reason, notify_user, delete_message_days, orin_mode
+            user,
+            guild.id,
+            build_ban_embed,
+            WORD_CONFIG__BAN,
+            notify_note,
+            reason,
+            notify_user,
+            delete_message_days,
+            orin_mode,
         )
     )

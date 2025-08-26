@@ -1,10 +1,13 @@
-from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed, Color, eventlist, Permission, \
-    KOKORO, Client
-from scarletio import Task, list_difference
-from hata.discord.events.core import DEFAULT_EVENT_HANDLER, EVENT_HANDLER_NAME_TO_PARSER_NAMES
-from hata.ext.slash.menus import Pagination, Closer
 from types import MethodType
+
+from hata import (
+    Client, Color, DiscordException, EXTRA_EMBED_TYPES, Embed, KOKORO, Permission, SessionPlatformType, Status,
+    cchunkify, eventlist
+)
+from hata.discord.events.core import DEFAULT_EVENT_HANDLER, EVENT_HANDLER_NAME_TO_PARSER_NAMES
 from hata.ext.commands_v2 import Command
+from hata.ext.slash.menus import Closer, Pagination
+from scarletio import Task, list_difference
 
 DISPATCH_TESTS = eventlist(type_ = Command)
 DISPATCH_COLOR = Color.from_rgb(120, 108, 128)
@@ -308,19 +311,36 @@ class dispatch_tester:
         
         result = [f'Presence update on user: {user:f} {user.id}']
         try:
-            statuses = old['statuses']
+            old_status_by_platform = old['status_by_platform']
         except KeyError:
             pass
         else:
-            for key in ('desktop', 'mobile', 'web'):
-                result.append(f'{key} status: {statuses.get(key, Status.offline)} -> {user.statuses.get(key, Status.offline)}')
+            new_status_by_platform = user.status_by_platform
+            
+            for platform in (
+                SessionPlatformType.desktop,
+                SessionPlatformType.embedded,
+                SessionPlatformType.mobile,
+                SessionPlatformType.web,
+            ):
+                if old_status_by_platform is None:
+                    old_status =  Status.offline
+                else:
+                    old_status = old_status_by_platform[platform]
+                
+                if new_status_by_platform is None:
+                    new_status =  Status.offline
+                else:
+                    new_status = new_status_by_platform[platform]
+                
+                result.append(f'{platform.name} status: {old_status.name} -> {new_status.name}')
             
             try:
                 status = old['status']
             except KeyError:
                 pass
             else:
-                result.append(f'status changed: {status} -> {user.status}')
+                result.append(f'status changed: {status.name} -> {user.status.name}')
         
         try:
             activities = old['activities']

@@ -2,7 +2,7 @@ __all__ = ()
 
 from datetime import datetime as DateTime, timezone as TimeZone
 
-from hata import ActivityType, DATETIME_FORMAT_CODE, Embed, Status
+from hata import ActivityType, DATETIME_FORMAT_CODE, Embed, SessionPlatformType, Status
 
 from ..rendering_helpers import (
     render_activity_description_into, render_date_time_with_relative_into, render_flags_into,
@@ -13,7 +13,6 @@ from .constants import COLOR_UPDATE
 
 MAX_CHUNK_SIZE = 2000
 BREAK_AFTER_LENGTH = 1500
-OFFLINE = Status.offline.name
 
 
 def render_presence_update_into(into, user, old_attributes):
@@ -49,7 +48,7 @@ def render_presence_update_into(into, user, old_attributes):
     into.append('\n')
     
     try:
-        statuses = old_attributes['statuses']
+        old_status_by_platform = old_attributes['status_by_platform']
     except KeyError:
         pass
     else:
@@ -69,18 +68,29 @@ def render_presence_update_into(into, user, old_attributes):
         into.append('**Statuses by device**')
         into.append('\n')
         
-        for key in ('desktop', 'mobile', 'web'):
-            into.append(key)
-            into.append(': ')
-            into.append(OFFLINE if statuses is None else statuses.get(key, OFFLINE))
-            into.append(' -> ')
-            
-            user_statuses = user.statuses
-            if user_statuses is None:
-                status_by_platform = OFFLINE
+        new_status_by_platform = user.status_by_platform
+        
+        for platform in (
+            SessionPlatformType.desktop,
+            SessionPlatformType.embedded,
+            SessionPlatformType.mobile,
+            SessionPlatformType.web,
+        ):
+            if old_status_by_platform is None:
+                old_status = Status.offline
             else:
-                status_by_platform = user_statuses.get(key, OFFLINE)
-            into.append(status_by_platform)
+                old_status = old_status_by_platform[platform]
+            
+            if new_status_by_platform is None:
+                new_status = Status.offline
+            else:
+                new_status = new_status_by_platform[platform]
+            
+            into.append(platform.name)
+            into.append(': ')
+            into.append(old_status.name)
+            into.append(' -> ')
+            into.append(new_status.name)
             into.append('\n')
         
         into.append('\n')

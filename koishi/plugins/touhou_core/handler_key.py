@@ -2,10 +2,7 @@ __all__ = ('TouhouHandlerKey',)
 
 from scarletio import RichAttributeErrorBaseType
 
-from ..image_handling_core import (
-    ImageHandlerBooru, ImageHandlerGroup, SAFE_BOORU_ENDPOINT, SAFE_BOORU_PROVIDER, SOLO_REQUIRED_TAGS,
-    TOUHOU_TAGS_BANNED
-)
+from ..image_handling_core import ImageHandlerSafeBooru, ImageHandlerGroup, SOLO_REQUIRED_TAGS, TOUHOU_TAGS_BANNED
 
 from .character import TOUHOU_CHARACTERS
 from .safe_booru_tags import TOUHOU_SAFE_BOORU_TAGS
@@ -104,7 +101,7 @@ class TouhouHandlerKey(RichAttributeErrorBaseType):
         
         Returns
         -------
-        handler : ``ImageHandlerBooru``
+        handler : ``ImageHandlerSafeBooru``
         """
         try:
             handler = TOUHOU_IMAGE_HANDLERS[self]
@@ -170,12 +167,10 @@ def _create_solo_single_handler(character):
     handler : ``HandlerBase``
     """
     return ImageHandlerGroup(*(
-        ImageHandlerBooru(
-            SAFE_BOORU_PROVIDER,
-            SAFE_BOORU_ENDPOINT,
+        ImageHandlerSafeBooru(
             SOLO_REQUIRED_TAGS,
             TOUHOU_TAGS_BANNED,
-            {tag},
+            {(True, tag)},
             True,
         ) for tag in TOUHOU_SAFE_BOORU_TAGS[character]
     ))
@@ -213,9 +208,7 @@ def _create_wide_handler(characters):
     handler : ``HandlerBase``
     """
     return ImageHandlerGroup(*(
-        ImageHandlerBooru(
-            SAFE_BOORU_PROVIDER,
-            SAFE_BOORU_ENDPOINT,
+        ImageHandlerSafeBooru(
             None,
             TOUHOU_TAGS_BANNED,
             tags,
@@ -237,14 +230,14 @@ def _iter_combine_character_tags(characters):
     
     Yields
     ------
-    tags : `set<str>`
+    tags : `set<(bool, str)>`
     """
     tag_groups = tuple(TOUHOU_SAFE_BOORU_TAGS[character] for character in characters)
     
     tags = []
     
     for _ in _walk_tags(tags, tag_groups):
-        yield {*tags}
+        yield {(True, tag) for tag in tags}
 
 
 def _walk_tags(tags, tag_groups):

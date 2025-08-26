@@ -486,7 +486,7 @@ def build_linked_quest_abandon_success_components():
     components : ``list<Component>``
     """
     return [
-        create_text_display('You successfully accepted the quest.'),
+        create_text_display('You successfully abandoned the quest.'),
     ]
 
 

@@ -3,7 +3,7 @@ from datetime import datetime as DateTime, timezone as TimeZone
 import vampytest
 from hata import (
     Activity, ActivityAssets, ActivityFlag, ActivityParty, ActivitySecrets, ActivityTimestamps, ActivityType,
-    BUILTIN_EMOJIS, HangType, GuildProfile, GuildProfileFlag, Role, Status, User, UserFlag
+    BUILTIN_EMOJIS, HangType, GuildProfile, GuildProfileFlag, Role, Status, StatusByPlatform, User, UserFlag
 )
 
 from ..constants import GUILD_PROFILE_RENDER_MODE_GENERAL, GUILD_PROFILE_RENDER_MODE_JOIN, GUILD_PROFILE_RENDER_MODE_LEAVE
@@ -646,11 +646,11 @@ def _iter_options__render_user_status_description_into():
     
     user_1 = User()
     user_1.status = Status.idle
-    user_1.statuses = {
-        'desktop': Status.dnd.value,
-        'mobile': Status.idle.value,
-        'web': Status.online.value,
-    }
+    user_1.status_by_platform = StatusByPlatform(
+        desktop = Status.dnd,
+        mobile = Status.idle,
+        web = Status.online,
+    )
     
     # minimal
     yield (

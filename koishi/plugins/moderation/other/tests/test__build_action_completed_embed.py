@@ -15,6 +15,7 @@ def _iter_options():
     
     yield (
         user,
+        0,
         build_mute_embed,
         WORD_CONFIG__MUTE,
         'hello',
@@ -58,7 +59,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_action_completed_embed(user, embed_builder, word_config, note, *position_parameters):
+def test__build_action_completed_embed(user, guild_id, embed_builder, word_config, note, *position_parameters):
     """
     Tests whether ``build_action_completed_embed`` works as intended.
     
@@ -66,6 +67,9 @@ def test__build_action_completed_embed(user, embed_builder, word_config, note, *
     ----------
     user : ``ClientUserBase``
         The user on who the action was executed.
+    
+    guild_id : `int`
+        The local guild's identifier.
     
     embed_builder : `FunctionType``
         Base embed builder.
@@ -83,6 +87,6 @@ def test__build_action_completed_embed(user, embed_builder, word_config, note, *
     -------
     output : ``Embed``
     """
-    output = build_action_completed_embed(user, embed_builder, word_config, note, *position_parameters)
+    output = build_action_completed_embed(user, guild_id, embed_builder, word_config, note, *position_parameters)
     vampytest.assert_instance(output, Embed)
     return output

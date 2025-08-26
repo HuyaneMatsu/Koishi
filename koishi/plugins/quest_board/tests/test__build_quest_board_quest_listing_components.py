@@ -38,7 +38,7 @@ def _iter_options():
         guild_id,
         'Orin\'s dance house',
         Icon(IconType.static, 2),
-        1 << 7,
+        1 << 6,
         0,
         QuestBatch(
             123,
@@ -125,14 +125,14 @@ def _iter_options():
             ),
         ],
     )
-
+    
     guild_id = 202505260000
     
     yield (
         guild_id,
         'Orin\'s dance house',
         None,
-        1 << 7,
+        1 << 6,
         0,
         QuestBatch(
             123,

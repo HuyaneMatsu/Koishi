@@ -93,6 +93,6 @@ async def kick_command(
         allowed_mentions = None,
         components = None,
         embed = build_action_completed_embed(
-            user, build_kick_embed, WORD_CONFIG__KICK, notify_note, reason, notify_user, orin_mode
+            user, guild.id, build_kick_embed, WORD_CONFIG__KICK, notify_note, reason, notify_user, orin_mode
         )
     )

@@ -2,9 +2,9 @@ __all__ = ()
 
 from random import random
 
-from hata import ClientUserBase, DiscordException, Embed, Emoji, ERROR_CODES
+from hata import ClientUserBase, DiscordException, Embed, Emoji, ERROR_CODES, KOKORO
 from hata.ext.slash import abort
-from scarletio import RichAttributeErrorBaseType
+from scarletio import RichAttributeErrorBaseType, Task
 
 from ..embed_image_refresh import schedule_image_refresh
 from ..image_handling_core import add_embed_provider
@@ -233,10 +233,15 @@ async def send_action_response_with_interaction_event(client, event, content, em
         # No internet access
         return False
     
-    except DiscordException as err:
-        if err.code in (
-            ERROR_CODES.unknown_interaction, # Interaction expired.
-            ERROR_CODES.missing_permissions, # Random error I got from `interaction_response_message_edit` dunno how.
+    except DiscordException as exception:
+        if (
+            (exception.status >= 500) or
+            (
+                exception.code in (
+                    ERROR_CODES.unknown_interaction, # Interaction expired.
+                    ERROR_CODES.missing_permissions, # Random error I got from `interaction_response_message_edit` dunno how.
+                )
+            )
         ):
             return False
         
@@ -248,8 +253,11 @@ async def send_action_response_with_interaction_event(client, event, content, em
     except ConnectionError:
         pass
     
-    except DiscordException as err:
-        if err.code != ERROR_CODES.unknown_interaction:
+    except DiscordException as exception:
+        if (
+            (exception.status < 500) and
+            (exception.code != ERROR_CODES.unknown_interaction)
+        ):
             raise
     
     else:
@@ -395,8 +403,8 @@ def create_response_embed(client, guild_id, source_user, targets, client_in_user
         Target entities.
     client_in_users : `bool`
         Whether the client is in the mentioned users.
-    allowed_mentions : `list<ClientUserBase>`
-        The allowed mentions.
+    image_detail : ``None | ImageDetailBase``
+        The image detail to use.
     
     Returns
     -------
@@ -706,19 +714,45 @@ async def create_response_content_and_embed(
             if (image_detail is not None):
                 break
         
-        if handler.supports_weight_mapping():
-            weight_map = await get_preferred_image_source_weight_map(
-                [*source_user.id, *(target.id for target in target_users)]
-            )
-            if is_preferred_image_source_weight_map_valuable(weight_map):
-                image_detail = await handler.get_image_weighted(
-                    client, event, content = content, allowed_mentions = allowed_mentions, silent = True,
+        while True:
+            if handler.supports_weight_mapping():
+                weight_map = await get_preferred_image_source_weight_map(
+                    [*source_user.id, *(target.id for target in target_users)]
                 )
-                break
+                if is_preferred_image_source_weight_map_valuable(weight_map):
+                    cg_get_image = handler.cg_get_image_weighted(weight_map)
+                    break
+            
+            cg_get_image = handler.cg_get_image()
+            break
         
-        image_detail = await handler.get_image(
-            client, event, content = content, allowed_mentions = allowed_mentions, silent = True,
-        )
+        try:
+            image_detail = await cg_get_image.asend(None)
+            if (image_detail is None):
+                acknowledge_task = Task(
+                    KOKORO,
+                    client.interaction_response_message_create(
+                        event,
+                        allowed_mentions = allowed_mentions,
+                        content = content,
+                        silent = True,
+                    ),
+                )
+                
+                try:
+                    image_detail = await cg_get_image.asend(None)
+                except:
+                    acknowledge_task.cancel()
+                    raise
+                
+                await acknowledge_task
+        
+        except StopAsyncIteration:
+            image_detail = None
+        
+        finally:
+            cg_get_image.aclose().close()
+        
         break
     
     embed = create_response_embed(client, guild_id, source_user, targets, client_in_users, image_detail)

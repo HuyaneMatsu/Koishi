@@ -74,7 +74,8 @@ def build_vocaloid_embed(character, image_detail):
     ----------
     character : `str`
         The vocaloid character's system name.
-    image_detail : ``ImageDetailBase``
+    
+    image_detail : ``None | ImageDetailBase``
         The image detail to work from.
     
     Returns
@@ -104,6 +105,7 @@ class NewVocaloid:
     ----------
     character : `str`
         The respective vocaloid character.
+    
     handler : ``ImageHandlerBase``
         The handler to use.
     """
@@ -136,13 +138,26 @@ class NewVocaloid:
         ----------
         client : ``Client``
             The client who received the event.
+        
         event : ``InteractionEvent``
             The received interaction event.
         """
         if event.user is not event.message.interaction.user:
             return
         
-        image_detail = await self.handler.get_image(client, event)
+        cg_get_image = self.handler.cg_get_image()
+        
+        try:
+            image_detail = await cg_get_image.asend(None)
+            if (image_detail is None):
+                await client.interaction_component_acknowledge(event, False)
+                image_detail = await cg_get_image.asend(None)
+        
+        except StopAsyncIteration:
+            image_detail = None
+        
+        finally:
+            cg_get_image.aclose().close()
         
         embed = build_vocaloid_embed(self.character, image_detail)
         

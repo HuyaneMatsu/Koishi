@@ -41,11 +41,11 @@ ITEM_PEACH = ITEMS[ITEM_ID_PEACH] = Item(
         'One of the most popular temperate fruits. Has yellow flesh and beautiful yellow to orange skin with a cute '
         'red blush towards the sun.\n'
         '\n'
-        'Can be found at the gardens of **Hakugyokurou**. '
+        'Can be found at the gardens of **Hakugyokurou mansion**. '
         'Not sure if they were planted intentionally, or someone just mistake their pink blossom to cherry trees\''
     ),
     ITEM_FLAG_EDIBLE,
-    21, # value (hearts)
+    30, # value (hearts)
     216, # weight (grams)
     None,
 )
@@ -96,8 +96,8 @@ ITEM_FLYKILLER_AMANATA = ITEMS[ITEM_ID_FLYKILLER_AMANATA] = Item(
         'Can be found in any forest.'
     ),
     ITEM_FLAG_EDIBLE,
-    239, # value (hearts) # Note: in irl markets it can be 100x - 400x more
-    456, # weight (grams)
+    179, # value (hearts) # Note: in irl markets it can be 100x - 400x more
+    342, # weight (grams)
     None,
 )
 
@@ -157,7 +157,7 @@ ITEM_CARROT = ITEMS[ITEM_ID_CARROT] = Item(
         'They can be found in the **Human Village** and at the outskirts of the **Eientei mansion**.'
     ),
     ITEM_FLAG_EDIBLE,
-    18, # value (hearts)
+    27, # value (hearts)
     240, # weight (grams)
     None,
 )
@@ -194,7 +194,7 @@ ITEM_SCARLET_ONION = ITEMS[ITEM_ID_SCARLET_ONION] = Item(
         'Can be found in the **Human Village**.'
     ),
     ITEM_FLAG_EDIBLE,
-    9, # value (hearts)
+    14, # value (hearts)
     170, # weight (grams)
     None,
 )
@@ -234,6 +234,7 @@ ITEM_MARISA = ITEMS[ITEM_ID_MARISA] = Item(
     0, # weight (grams)
     None,
 )
+
 
 
 # Some ideas:

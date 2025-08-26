@@ -3,11 +3,8 @@ __all__ = ()
 from hata import Embed, KOKORO, create_button, create_row
 from scarletio import LOOP_TIME
 
-from ..image_handling_core import ImageHandlerBooru, add_embed_provider
-from ..image_handling_core.constants import (
-    NSFW_BOORU_ENDPOINT, NSFW_BOORU_PROVIDER, NSFW_TAGS_BANNED, SAFE_BOORU_ENDPOINT, SAFE_BOORU_PROVIDER,
-    SAFE_TAGS_BANNED
-)
+from ..image_handling_core import ImageHandlerDanBooru, ImageHandlerSafeBooru, add_embed_provider
+from ..image_handling_core.constants import NSFW_TAGS_BANNED, SAFE_TAGS_BANNED
 
 from .constants import (
     BUTTON_CLOSE, CACHES, CLEANUP_AFTER, CLEANUP_INTERVAL, CUSTOM_ID_NEW_DISABLED, CUSTOM_ID_TAGS_DISABLED, EMBED_COLOR,
@@ -46,7 +43,7 @@ def build_booru_embed(image_detail):
     
     Parameters
     ----------
-    image_detail : ``ImageDetailBase``
+    image_detail : ``None | ImageDetailBase``
         The image detail to work from.
     
     Returns
@@ -213,10 +210,13 @@ class ImageCache:
     ----------
     cache_id : `int`
         The identifier of the cache.
-    handler : ``ImageHandlerBooru``
+    
+    handler : ``ImageHandlerSafeBooru``
         Handler used to request images.
-    last : `None`, ``ImageDetailBase``
+    
+    last : ``None | ImageDetailBase``
         The last show image detail.
+    
     last_call : `float`
         When was the handler last called.
     """
@@ -231,21 +231,17 @@ class ImageCache:
         
         Parameters
         ----------
-        requested_tags : `set` of `str`
+        requested_tags : `set<(bool, str)>`
             The requested tags.
+        
         safe : `bool`
             Whether we want safe images.
         """
         if safe:
-            endpoint = SAFE_BOORU_ENDPOINT
-            provider = SAFE_BOORU_PROVIDER
-            banned_tags = SAFE_TAGS_BANNED
+            handler = ImageHandlerSafeBooru(None, SAFE_TAGS_BANNED, requested_tags, False)
         else:
-            endpoint = NSFW_BOORU_ENDPOINT
-            provider = NSFW_BOORU_PROVIDER
-            banned_tags = NSFW_TAGS_BANNED
+            handler = ImageHandlerDanBooru(None, NSFW_TAGS_BANNED, requested_tags, False)
         
-        handler = ImageHandlerBooru(provider, endpoint, None, banned_tags, requested_tags, False)
         
         cache_id = cls.CACHE_ID_COUNTER
         cls.CACHE_ID_COUNTER = cache_id + 1
@@ -268,6 +264,7 @@ class ImageCache:
         ----------
         client : ``Client``
             The respective client instance who received the event.
+        
         event : ``InteractionEvent``
             The received event.
         
@@ -276,7 +273,18 @@ class ImageCache:
         success : `bool`
             Whether we ended up with great success.
         """
-        image_detail = await self.handler.get_image(client, event)
+        cg_get_image = self.handler.cg_get_image()
+        try:
+            image_detail = await cg_get_image.asend(None)
+            if image_detail is None:
+                await client.interaction_application_command_acknowledge(event, False)
+                image_detail = await cg_get_image.asend(None)
+        
+        except StopAsyncIteration:
+            image_detail = None
+        
+        finally:
+            cg_get_image.aclose().close()
         
         embed = build_booru_embed(image_detail)
         
@@ -316,6 +324,7 @@ class ImageCache:
         ----------
         client : ``Client``
             The respective client instance who received the event.
+        
         event : ``InteractionEvent``
             The received event.
         
@@ -324,7 +333,19 @@ class ImageCache:
         success : `bool`
             Whether we ended up with great success.
         """
-        image_detail = await self.handler.get_image(client, event)
+        cg_get_image = self.handler.cg_get_image()
+        
+        try:
+            image_detail = await cg_get_image.asend(None)
+            if (image_detail is None):
+                await client.interaction_component_acknowledge(event, False)
+                image_detail = await cg_get_image.asend(None)
+        
+        except StopAsyncIteration:
+            image_detail = None
+        
+        finally:
+            cg_get_image.aclose().close()
         
         embed = build_booru_embed(image_detail)
         

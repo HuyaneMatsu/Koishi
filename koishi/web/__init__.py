@@ -4,6 +4,7 @@ from flask import Flask, make_response, redirect, request, send_from_directory
 
 
 from ..bot_utils.constants import PATH__KOISHI
+from ..bot_utils.ip_filtering import IPFilterRule, build_ip_matcher_structure, match_ip_to_structure, parse_ip 
 
 from .patches import *
 
@@ -101,7 +102,10 @@ BOT_NAMES = [
     'sindresorhus',
     
     # Content management system checker? huh
-    'cms-Checker'
+    'cms-checker'
+    
+    # amazon
+    "Mozilla/5.0 AppleWebKit/605.1.15 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/605.1.15",
 ]
 
 
@@ -117,221 +121,179 @@ def check_is_user_agent_banned():
     return True
 
 
-BLOCKED_IPS = {
+IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     # Someone trying to break the site from hongkong.
     # They try to request various urls getting always 404 lol,
     # I dont use any shitty js framework that they could get into.
-    '118.193.44.32',
-    '152.32.192.176',
+    IPFilterRule(*parse_ip('118.193.44.0'), 8), # Hongkong - UCLOUD INFORMATION TECHNOLOGY (HK) LIMITED
+    IPFilterRule(*parse_ip('152.32.192.0'), 8), # Hongkong - UCLOUD INFORMATION TECHNOLOGY (HK) LIMITED
     
     # Tries to request Wordpress Blog login page (and then login), for real its not a wordpress site
-    '34.64.218.102',
-    '144.91.119.115',
+    IPFilterRule(*parse_ip('34.64.208.0'), 12), # Seoul - Google Asia Pacific Pte. Ltd.
+    IPFilterRule(*parse_ip('144.91.118.0'), 9), # Frankfurt - Contabo GmbH
     
     # Tries to request env variable file & redirect to google???
-    '79.110.62.123',
+    IPFilterRule(*parse_ip('79.110.62.0'), 8), # Frankfurt - Vecna Hosting Limited
     
     # Tries to request env variable file
-    '78.153.140.223',
-    '78.153.140.222',
-    '45.148.10.235',
-    
-    # This its php, lol
-    '78.153.140.222',
+    IPFilterRule(*parse_ip('78.153.140.0'), 8), # London - HOSTGLOBAL.PLUS LTD
+    IPFilterRule(*parse_ip('45.148.10.0'), 8), # Amsterdam - TECHOFF SRV LIMITED
     
     # Tries to access git
-    '196.251.83.148',
+    IPFilterRule(*parse_ip('196.251.83.0'), 8), # Amsterdam - internet-security-cheapyhost
     
-    # Random bot
-    '171.244.43.14',
-    '3.228.138.194',
-    
-    # spams | https://coder.social | "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43" 
-    '47.82.8.101',
-    '47.82.8.112',
-    '47.82.8.127',
-    '47.82.8.128',
-    '47.82.8.130',
-    '47.82.8.133',
-    '47.82.8.27',
-    '47.82.8.29',
-    '47.82.8.30',
-    '47.82.8.42',
-    '47.82.8.48',
-    '47.82.8.49',
-    '47.82.8.65',
-    '47.82.8.72',
-    '47.82.8.82',
-    '47.82.8.89',
-    '47.82.9.114',
-    '47.82.9.126',
-    '47.82.9.133',
-    '47.82.9.135',
-    '47.82.9.147',
-    '47.82.9.175',
-    '47.82.9.179',
-    '47.82.9.183',
-    '47.82.9.193',
-    '47.82.9.228',
-    '47.82.9.230',
-    '47.82.9.249',
-    '47.82.9.28',
-    '47.82.9.29',
-    '47.82.9.31',
-    '47.82.9.35',
-    '47.82.9.50',
-    '47.82.9.68',
-    '47.82.9.81',
-    '47.82.9.82',
-    '47.82.9.85',
-    '47.82.10.105',
-    '47.82.10.115',
-    '47.82.10.122',
-    '47.82.10.130',
-    '47.82.10.133',
-    '47.82.10.136',
-    '47.82.10.152',
-    '47.82.10.162',
-    '47.82.10.166',
-    '47.82.10.182',
-    '47.82.10.19',
-    '47.82.10.200',
-    '47.82.10.204',
-    '47.82.10.224',
-    '47.82.10.234',
-    '47.82.10.245',
-    '47.82.10.26',
-    '47.82.10.45',
-    '47.82.10.54',
-    '47.82.10.6',
-    '47.82.10.60',
-    '47.82.10.63',
-    '47.82.10.65',
-    '47.82.10.73',
-    '47.82.10.75',
-    '47.82.10.77',
-    '47.82.10.82',
-    '47.82.11.104',
-    '47.82.11.107',
-    '47.82.11.109',
-    '47.82.11.11',
-    '47.82.11.115',
-    '47.82.11.119',
-    '47.82.11.130',
-    '47.82.11.152',
-    '47.82.11.156',
-    '47.82.11.173',
-    '47.82.11.189',
-    '47.82.11.192',
-    '47.82.11.200',
-    '47.82.11.208',
-    '47.82.11.210',
-    '47.82.11.216',
-    '47.82.11.220',
-    '47.82.11.38',
-    '47.82.11.4',
-    '47.82.11.43',
-    '47.82.11.44',
-    '47.82.11.45',
-    '47.82.11.46',
-    '47.82.11.52',
-    '47.82.11.58',
-    '47.82.11.69',
-    '47.82.11.75',
-    '47.82.11.86',
-    '47.82.11.9',
-    '47.82.11.90',
-    '47.82.11.92',
     
     # Scraper "Mozilla/5.0 (compatible) Ai2Bot-Dolma (+https://www.allenai.org/crawl)"
-    '104.238.140.158',
-    '144.202.84.81',
-    '207.148.6.129',
-    '45.76.6.132',
-    '45.77.164.21',
-    '50.28.107.56',
-    '50.28.107.59',
-    '50.28.40.163',
-    '67.225.188.31',
-    '67.227.250.168',
-    '72.52.132.18',
-    '72.52.196.79',
+    IPFilterRule(*parse_ip('104.238.140.0'), 10), # Losangeles - Vultr Holdings, LLC
+    IPFilterRule(*parse_ip('144.202.80.0'), 12), # Kent - Vultr Holdings, LLC
+    IPFilterRule(*parse_ip('207.148.0.0'), 11), # Dallas - Vultr Holdings, LLC
+    IPFilterRule(*parse_ip('45.76.0.0'), 12), # Piscataway - Vultr Holdings, LLC
     
-    # Scraper "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
-    '47.238.13.0',
-    '47.238.13.1',
-    '47.238.13.10',
-    '47.238.13.11',
-    '47.238.13.12',
-    '47.238.13.13',
-    '47.238.13.14',
-    '47.238.13.15',
-    '47.238.13.16',
-    '47.238.13.17',
-    '47.238.13.18'
-    '47.238.13.2',
-    '47.238.13.3',
-    '47.238.13.4',
-    '47.238.13.6',
-    '47.238.13.7',
-    '47.238.13.8',
-    '47.238.13.9',
-    '47.238.14.12',
-    '47.242.200.220',
-    '47.242.230.146'
-    '47.242.77.69',
-    '47.243.161.234'
-    '47.243.56.196',
-    '8.210.10.143',
-    '8.210.108.0',
-    '8.210.11.248',
-    '8.210.146.98',
-    '8.210.15.252',
-    '8.210.152.184',
-    '8.210.218.201',
-    '8.210.230.104',
-    '8.210.8.206',
-                                                                                                          
-    # Search engine "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36"
-    '157.55.39.202',
-    '207.46.13.18',
-    '207.46.13.150',
-    '40.77.167.247',
-    '40.77.167.61',
-    '40.77.167.68',
-    '40.77.188.140',
-    '40.77.188.64',
-    '40.77.189.243',
-    '52.167.144.159',
-    '52.167.144.16',
-    '52.167.144.183',
-    '52.167.144.19'
+    IPFilterRule(*parse_ip('50.28.96.0'), 13), # Phoenix - Liquid Web Inc
+    IPFilterRule(*parse_ip('50.28.0.0'), 14), # Lansing - Liquid Web Inc
+    IPFilterRule(*parse_ip('67.225.128.0'), 15), # Lansing - Liquid Web Inc
+    IPFilterRule(*parse_ip('72.52.128.0'), 15), # Lansing - Liquid Web Inc
     
-    # Bot sindresorhus
-    '100.28.128.3',
-    '18.234.64.190',
-    '98.81.123.187',
+    # spams | https://coder.social | "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43"
+    # "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+    IPFilterRule(*parse_ip('47.82.8.0'), 10), # Sanmateo - Alibaba (US) Technology Co., Ltd. 
+    IPFilterRule(*parse_ip('47.238.0.0'), 16), # HonKong - Alibaba (US) Technology Co., Ltd. 
+    IPFilterRule(*parse_ip('47.242.0.0'), 16), # HonKong - Alibaba (US) Technology Co., Ltd. 
+    IPFilterRule(*parse_ip('47.243.0.0'), 16), # HonKong - Alibaba (US) Technology Co., Ltd.
+    IPFilterRule(*parse_ip('8.210.0.0'), 15), # HonKong - Alibaba (US) Technology Co., Ltd.
+                                                                                        
+    # Bingbot
+    # "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36"
+    IPFilterRule(*parse_ip('157.55.0.0'), 16), # Moseslake - Microsoft Corporation
+    IPFilterRule(*parse_ip('207.46.0.0'), 13), # Moseslake - Microsoft Corporation
+    IPFilterRule(*parse_ip('40.76.0.0'), 18), # Boydton - Microsoft Corporation
+    IPFilterRule(*parse_ip('52.160.0.0'), 21), # Boydton - Microsoft Corporation
     
-    # cms-checker "Mozilla/5.0 (compatible; CMS-Checker/1.0; +https://example.com)"
-    '34.125.200.116',
+    # Random bot
+    IPFilterRule(*parse_ip('171.244.0.0'), 16), # Hochiminh - Viettel Group
+    
+    # CMS-Checker
+    # "Mozilla/5.0 (compatible; CMS-Checker/1.0; +https://example.com)"
+    IPFilterRule(*parse_ip('34.125.192.0'), 12), # Lasvegas - Google LLC
+    IPFilterRule(*parse_ip('34.46.0.0'), 16), # Councilbluffs - Google LLC
+    
+    # Google bot
+    # "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.7204.183 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+    IPFilterRule(*parse_ip('66.249.64.0'), 12), # Oklahoma - Google LLC
+    
     
     # Scraper openai
-    #  "114.119.147.181" response-time=0.018
     # "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36; compatible; OAI-SearchBot/1.0; +https://openai.com/searchbot"
-    '104.210.140.138',
-    '20.171.207.180',
-    '4.227.36.18',
-}
+    # GPTBot
+    # "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; GPTBot/1.2; +https://openai.com/gptbot)"
+    IPFilterRule(*parse_ip('104.208.0.0'), 19), # Sanantonio - Microsoft Corporation
+    IPFilterRule(*parse_ip('20.160.0.0'), 20), # Phoenix - Microsoft Corporation
+    IPFilterRule(*parse_ip('20.160.0.0'), 20), # Phoenix - Microsoft Corporation
+    IPFilterRule(*parse_ip('4.224.0.0'), 20), # Phoenix - Microsoft Corporation
+    
+    # sindresorhus # others
+    # "Mozilla/5.0 AppleWebKit/605.1.15 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/605.1.15
+    # "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Amazonbot/0.1; +https://developer.amazon.com/support/amazonbot) Chrome/119.0.6045.214 Safari/537.36"
+    IPFilterRule(*parse_ip('100.24.0.0'), 19), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('3.224.0.0'), 20), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('18.232.0.0'), 18), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('98.80.0.0'), 19), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('18.208.0.0'), 21), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('107.20.0.0'), 16), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('13.216.0.0'), 19), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('174.129.0.0'), 16), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('18.204.0.0'), 20), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('18.208.0.0'), 21), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('18.232.0.0'), 20), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('184.72.128.0'), 15), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('184.72.96.0'), 13), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('204.236.224.0'), 13), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('23.20.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('23.22.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('3.208.0.0'), 20), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('3.80.0.0'), 20), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('34.192.0.0'), 20), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('34.224.0.0'), 20), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('35.168.0.0'), 19), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('44.192.0.0'), 21), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('50.16.0.0'), 16), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('50.17.0.0'), 16), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('50.19.128.0'), 15), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('52.0.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('52.2.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('52.20.0.0'), 18), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('52.20.0.0'), 18), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('52.200.0.0'), 19), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('52.20.0.0'), 20), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('52.44.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('52.4.0.0'), 20), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('52.54.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('52.70.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('52.72.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('52.86.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.144.0.0'), 20), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.152.0.0'), 16), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.156.0.0'), 20), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.160.0.0'), 20), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.164.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.166.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.172.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.174.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.196.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.204.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.208.0.0'), 19), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.210.0.0'), 16), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.211.0.0'), 16), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.224.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.226.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.234.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.236.128.0'), 15), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.236.64.0'), 14), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.242.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.80.0.0'), 20), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.84.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.86.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.88.0.0'), 16), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.90.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.92.128.0'), 15), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('75.101.128.0'), 15), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('75.101.128.0'), 15), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('98.80.0.0'), 19), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.90.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.90.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('54.90.0.0'), 17), # Ashburn - Amazon Technologies Inc.
+    IPFilterRule(*parse_ip('43.166.224.0'), 13), # Ashburn - Amazon Technologies Inc.
+    
+    # Petalbot
+    # "Mozilla/5.0 (Linux; Android 7.0;) AppleWebKit/537.36 (KHTML, like Gecko) Mobile Safari/537.36 (compatible; PetalBot;+https://webmaster.petalsearch.com/site/petalbot)"
+    IPFilterRule(*parse_ip('114.119.128.0'), 13), # Singapore - HUAWEI CLOUDS
+    
+    # Yandex
+    # "Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)"
+    IPFilterRule(*parse_ip('95.108.128.0'), 15), # Moscow - YANDEX LLC
+    
+    # Facebook
+    # "meta-externalagent/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/crawler)"
+    IPFilterRule(*parse_ip('57.141.0.0'), 8), # Sterling - Facebook, Inc.
+    
+    # tries to login with php
+    # "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_6_1; rv:120.0) Gecko/20100101 Firefox/120.0"
+    IPFilterRule(*parse_ip('141.98.11.0'), 8), # Vilnius - UAB Host Baltic
+    IPFilterRule(*parse_ip('91.224.92.0'), 8), # Vilnius - UAB Host Baltic
+])
 
 
 def check_is_ip_banned():
-    return request.remote_addr in BLOCKED_IPS
+    return match_ip_to_structure(IP_MATCHER_STRUCTURE, *parse_ip(request.remote_addr))
 
 
 @WEBAPP.before_request
 def block_bots():
-    if check_is_user_agent_banned() or check_is_ip_banned():
+    if check_is_user_agent_banned():
         return make_response('I am a teapot', 418)
+    
+    if check_is_ip_banned():
+        return make_response('You are a teapot', 419)
 
 
 @WEBAPP.route('/assets/<path:file_name>', endpoint = 'assets')

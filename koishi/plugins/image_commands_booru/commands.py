@@ -52,7 +52,7 @@ async def safe_booru(
 ):
     """Some safe images?"""
     if not event.guild_id:
-        abort(f'Guild only command.')
+        abort('Guild only command.')
     
     tags = split_tags(
         [
@@ -62,7 +62,7 @@ async def safe_booru(
         ],
         True,
     )
-    cache = ImageCache(tags, True)
+    cache = ImageCache({(True, tag) for tag in tags}, True)
     await cache.invoke_initial(client, event)
 
 
@@ -98,7 +98,7 @@ async def nsfw_booru(
 ):
     """Some not so safe images? You perv!"""
     if not event.guild_id:
-        abort(f'Guild only command.')
+        abort('Guild only command.')
     
     tags = split_tags(
         [
@@ -109,6 +109,9 @@ async def nsfw_booru(
         False,
     )
     
+    if len(tags) > 2:
+        abort('Tag count limited to 2.')
+    
     if (not event.channel.nsfw):
         if any('koishi' in tag.casefold() for tag in tags):
             description = 'I love you too\~,\nbut this is not the right place to lewd.'
@@ -117,9 +120,8 @@ async def nsfw_booru(
         
         abort(description)
     
-    cache = ImageCache(tags, False)
+    cache = ImageCache({(True, tag) for tag in tags}, False)
     await cache.invoke_initial(client, event)
-
 
 
 async def autocomplete_input(client, event, input_value, safe):
@@ -131,11 +133,14 @@ async def autocomplete_input(client, event, input_value, safe):
     Parameters
     ----------
     client : ``Client``
-        The client to use to request the tags.
+        The client who received the event.
+    
     event : ``InteractionEvent``
         The received event.
+    
     query : `str`
         The value to autocomplete.
+    
     safe : `bool`
         Whether we are using safe-booru.
     
@@ -154,7 +159,7 @@ async def autocomplete_input(client, event, input_value, safe):
     if (full_tags is not None):
         excluded_tags.update((iter_split_tags_safe_booru if safe else iter_split_tags_gel_booru)(full_tags))
     
-    suggestions = await get_tag_auto_completion(client, input_tag, safe, excluded_tags)
+    suggestions = await get_tag_auto_completion(input_tag, safe, excluded_tags)
     if (suggestions is None) or (not suggestions):
         return None
     

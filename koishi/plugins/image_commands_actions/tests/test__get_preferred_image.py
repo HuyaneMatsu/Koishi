@@ -43,7 +43,6 @@ def _iter_options():
     
     image_handler = ImageHandlerStatic(
         PREFERRED_IMAGE_SOURCE_TOUHOU,
-    ).with_images(
         [
             image_detail_0,
             image_detail_1,

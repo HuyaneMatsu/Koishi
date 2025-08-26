@@ -23,18 +23,18 @@ def build_user_settings_notification_change_description(option, value, changed):
     -------
     description : `str`
     """
-    long_name = option.long_name
+    display_name = option.display_name
     
     if changed:
         if value:
-            description = f'From now on, you will receive {long_name} notifications.'
+            description = f'From now on, you will receive {display_name} notifications.'
         else:
-            description = f'From now, you will **not** receive {long_name} notifications.'
+            description = f'From now, you will **not** receive {display_name} notifications.'
     else:
         if value:
-            description = f'You were already receiving {long_name} notifications.'
+            description = f'You were already receiving {display_name} notifications.'
         else:
-            description = f'You were already **not** receiving {long_name} notifications.'
+            description = f'You were already **not** receiving {display_name} notifications.'
         
     return description
 
@@ -211,7 +211,7 @@ def build_notification_settings_embed(user, user_settings):
         value = option.get(user_settings)
         
         embed.add_field(
-            option.long_name.capitalize(),
+            option.display_name.capitalize(),
             (
                 f'```\n'
                 f'{"true" if value else "false"!s}\n'

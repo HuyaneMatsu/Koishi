@@ -18,7 +18,7 @@ def _assert_fields_set(location):
     vampytest.assert_instance(location.target_ids, tuple)
 
 
-def tets__Location__new():
+def test__Location__new():
     """
     Tests whether ``Location.__new__`` works as intended.
     """
@@ -42,7 +42,7 @@ def tets__Location__new():
     vampytest.assert_eq(location.target_ids, target_ids)
 
 
-def tets__Location__repr():
+def test__Location__repr():
     """
     Tests whether ``Location.__new__`` works as intended.
     """

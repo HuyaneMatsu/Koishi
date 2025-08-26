@@ -43,7 +43,20 @@ async def touhou_character(
         return build_no_match_embed(name)
     
     handler = TouhouHandlerKey(touhou_character, solo = True).get_handler()
-    image_detail = await handler.get_image(client, event)
+    
+    cg_get_image = handler.cg_get_image()
+    try:
+        image_detail = await cg_get_image.asend(None)
+        if image_detail is None:
+            await client.interaction_application_command_acknowledge(event, False)
+            image_detail = await cg_get_image.asend(None)
+    
+    except StopAsyncIteration:
+        image_detail = None
+    
+    finally:
+        cg_get_image.aclose().close()
+    
     
     embed = build_touhou_character_embed(touhou_character, image_detail)
     

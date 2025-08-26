@@ -20,62 +20,68 @@ class ImageHandlerBase(RichAttributeErrorBaseType):
     
     
     def __eq__(self, other):
-        """Returns whether the two image handlers are equal."""
+        """Returns self == other."""
         if type(self) is not type(other):
             return NotImplemented
         
         return True
     
     
-    async def get_image(self, client, event, **acknowledge_parameters):
+    def __repr__(self):
+        """Returns repr(self)."""
+        return ''.join(['<', type(self).__name__, *self._produce_representation_middle(), '>'])
+    
+    
+    def _produce_representation_middle(self):
+        """
+        Helper function for generating representation of the image handler.
+        
+        This function is an iterable generator.
+        
+        Yields
+        ------
+        part : `str`
+        """
+        return
+        yield
+    
+    
+    async def cg_get_image(self):
         """
         Gets an image's details from the handler.
         
-        This method is a coroutine.
-        
-        Parameters
-        ----------
-        client : ``Client``
-            The respective client who received the event.
-        event : ``None | InteractionEvent``
-            The respective interaction event.
-        **acknowledge_parameters : Keyword parameters
-            Additional parameter used when acknowledging.
+        This method is a coroutine generator.
         
         Returns
         -------
-        image_detail : `None`, ``ImageDetailBase``
+        image_detail : `None | ImageDetailBase``
         """
-        return None
+        return
+        yield
     
     
-    async def get_image_weighted(self, client, event, weight_map, **acknowledge_parameters):
+    async def cg_get_image_weighted(self, weight_map):
         """
         Gets an image's details from the handler.
         
-        This method is a coroutine.
+        This method is a coroutine generator.
         
         Returns
         -------
-        client : ``Client``
-            The respective client who received the event.
-        event : ``None | InteractionEvent``
-            The respective interaction event.
-        weight_map : `dict<int, int>`
+        weight_map : `dict<int, float>`
             Weight map to prefer an image source over an other.
-        **acknowledge_parameters : Keyword parameters
-            Additional parameter used when acknowledging.
         
         Returns
         -------
-        image_detail : `None`, ``ImageDetailBase``
+        image_detail : ``None | ImageDetailBase``
         """
-        return await self.get_image(client, event, **acknowledge_parameters)
+        async for image_detail in self.cg_get_image():
+            yield image_detail
     
     
     def get_weight(self):
         """
-        Returns the wight of the handler. Weights are used when randomly selecting from handlers.
+        Returns the weight of the handler. Weights are used when randomly selecting from handlers.
         
         Returns
         -------

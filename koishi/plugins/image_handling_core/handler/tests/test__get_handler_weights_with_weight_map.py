@@ -12,7 +12,7 @@ def test__get_handler_weights_with_weight_map():
     Tests whether ``get_handler_weights_with_weight_map`` works as intended.
     """
     image_handler_0 = ImageHandlerBase()
-    image_handler_1 = ImageHandlerWaifuPics('awoo', False)
+    image_handler_1 = ImageHandlerWaifuPics('awoo', True)
     
     weight_map = {
         image_handler_0.get_image_source(): 1.0,

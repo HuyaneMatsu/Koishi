@@ -2,13 +2,10 @@ __all__ = ()
 
 from collections import OrderedDict
 
-from ..image_handling_core.constants import (
-    NSFW_BOORU_AUTOCOMPLETE_ENDPOINT, NSFW_BOORU_AUTOCOMPLETE_PARAMETERS, NSFW_BOORU_AUTOCOMPLETE_QUERY_KEY,
-    NSFW_TAGS_BANNED, SAFE_BOORU_AUTOCOMPLETE_ENDPOINT, SAFE_BOORU_AUTOCOMPLETE_PARAMETERS,
-    SAFE_BOORU_AUTOCOMPLETE_QUERY_KEY, SAFE_TAGS_BANNED
+from ..image_handling_core import (
+    get_autocompletion_suggestions_safe_booru, get_autocompletion_suggestions_dan_booru,
+    NSFW_TAGS_BANNED, SAFE_TAGS_BANNED,
 )
-
-from .helpers import build_tag_gel_booru, build_tag_safe_booru
 
 
 CACHE_MAX_SIZE = 1000
@@ -17,7 +14,7 @@ SAFE_BOORU_TAG_CACHE = OrderedDict()
 NSFW_BOORU_TAG_CACHE = OrderedDict()
 
 
-async def get_tag_auto_completion(client, query, safe, excluded_tags):
+async def get_tag_auto_completion(query, safe, excluded_tags):
     """
     Gets the auto completion suggestions for the given query.
     
@@ -25,13 +22,13 @@ async def get_tag_auto_completion(client, query, safe, excluded_tags):
     
     Parameters
     ----------
-    client : ``Client``
-        The client to use to request the tags.
     query : `str`
         The value to autocomplete.
+    
     safe : `bool`
         Whether we are using safe-booru.
-    excluded_tags : `set` of `str`
+    
+    excluded_tags : `set<str>`
         Additionally excluded tags.
     
     Returns
@@ -47,7 +44,7 @@ async def get_tag_auto_completion(client, query, safe, excluded_tags):
     try:
         tag_name_value_pairs = cache[query]
     except KeyError:
-        tag_name_value_pairs = await request_tag_auto_completion(client, query, safe)
+        tag_name_value_pairs = await request_tag_auto_completion(query, safe)
         if tag_name_value_pairs is None:
             return None
         
@@ -65,45 +62,28 @@ async def get_tag_auto_completion(client, query, safe, excluded_tags):
     ]
 
 
-async def request_tag_auto_completion(client, query, safe):
+async def request_tag_auto_completion(query, safe):
     """
     Requests the auto completion suggestions for the given query.
     
     Parameters
     ----------
-    client : ``Client``
-        The client to use to request the tags.
     query : `str`
         The value to autocomplete.
+        
     safe : `bool`
         Whether we are using safe-booru.
     
     Returns
     -------
-    tag_name_value_pairs : `None`, `list` of `tuple` (`str`, `str`)
+    tag_name_value_pairs : `None | list<(str, str)>`
         Autocomplete suggestions.
     """
     if safe:
-        tag_builder = build_tag_safe_booru
-        tags_banned = SAFE_TAGS_BANNED
-        endpoint = SAFE_BOORU_AUTOCOMPLETE_ENDPOINT
-        query_parameters = SAFE_BOORU_AUTOCOMPLETE_PARAMETERS.copy()
-        query_key = SAFE_BOORU_AUTOCOMPLETE_QUERY_KEY
+        function = get_autocompletion_suggestions_safe_booru
+        banned_tags = SAFE_TAGS_BANNED
     else:
-        tag_builder = build_tag_gel_booru
-        tags_banned = NSFW_TAGS_BANNED
-        endpoint = NSFW_BOORU_AUTOCOMPLETE_ENDPOINT
-        query_parameters = NSFW_BOORU_AUTOCOMPLETE_PARAMETERS.copy()
-        query_key = NSFW_BOORU_AUTOCOMPLETE_QUERY_KEY
+        function = get_autocompletion_suggestions_dan_booru
+        banned_tags = NSFW_TAGS_BANNED
     
-    query_parameters[query_key] = query
-    
-    async with client.http.get(endpoint, query = query_parameters) as response:
-        if response.status != 200:
-            return
-        
-        # Pass `content_type` as empty string to disable its check.
-        # safebooru returns `text/html; charset=UTF-8` header value which fails content type check.
-        tag_datas = await response.json(content_type = '')
-    
-    return [tag_builder(tag_data) for tag_data in tag_datas if tag_data['value'] not in tags_banned]
+    return await function(query, banned_tags)

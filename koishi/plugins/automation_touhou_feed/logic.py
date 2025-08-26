@@ -484,21 +484,37 @@ class Feeder:
         try:
             # Skip images if there are too many characters on it. Do 5 retries.
             retries = 5
+            last_skipped_image_detail = None
+            
             while True:
-                image_detail = await choice(self.handler_keys).get_handler().get_image(client, None)
-                if (image_detail is None):
-                    return
+                cg_get_image = choice(self.handler_keys).get_handler().cg_get_image()
+                try:
+                    image_detail = await cg_get_image.asend(None)
+                    if (image_detail is None):
+                        image_detail = await cg_get_image.asend(None)
                 
-                touhou_characters = parse_touhou_characters_from_tags(image_detail)
+                except StopAsyncIteration:
+                    image_detail = None
                 
+                finally:
+                    cg_get_image.aclose().close()
+                
+                if (image_detail is not None):
+                    touhou_characters = parse_touhou_characters_from_tags(image_detail)
+                    if len(touhou_characters) <= 12 or random() > 0.8:
+                        break
+                    
+                    last_skipped_image_detail = image_detail
+                    
                 retries -= 1
-                if retries <= 0:
-                    break
-                
-                if len(touhou_characters) > 12 and random() > 0.2:
+                if retries > 0:
                     continue
                 
-                break
+                if (last_skipped_image_detail is not None):
+                    image_detail = last_skipped_image_detail
+                    break
+                
+                return
             
             title = join_names_of_touhou_characters(touhou_characters, ', ')
             

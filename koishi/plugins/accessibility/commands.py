@@ -312,7 +312,7 @@ async def character_preference_remove(
     user = interaction_event.user
     await remove_touhou_character_from_preference(user.id, character)
     
-    await client.interaction_followup_message_edit(
+    await client.interaction_response_message_edit(
         interaction_event,
         embed = build_character_preference_change_embed(user, character, False),
     )

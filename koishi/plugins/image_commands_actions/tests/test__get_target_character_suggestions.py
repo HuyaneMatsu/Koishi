@@ -4,11 +4,10 @@ from hata import (
     InteractionOption, InteractionType
 )
 
-from ...touhou_core import KAENBYOU_RIN, REIUJI_UTSUHO
+from ...touhou_core import KAENBYOU_RIN, KOMEIJI_KOISHI, NAZRIN, REIUJI_UTSUHO
 
 from ..action_filtering import (
-    ACTION_NAME_TO_TAG, PARAMETER_NAME_ACTION_TAG, PARAMETER_NAME_SOURCE, PARAMETER_NAME_TARGET, PARAMETER_WILD_CARD,
-    autocomplete_action_tag
+    PARAMETER_NAME_ACTION_TAG, PARAMETER_NAME_SOURCE, PARAMETER_NAME_TARGET, PARAMETER_WILD_CARD, get_target_character_suggestions
 )
 
 
@@ -21,14 +20,14 @@ def _iter_options():
                     InteractionOption(
                         focused = True,
                         option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_ACTION_TAG,
+                        name = PARAMETER_NAME_TARGET,
                         value = None,
                     ),
                 ],
             )
         ),
         None,
-        [PARAMETER_WILD_CARD, *sorted(ACTION_NAME_TO_TAG.keys())],
+        [PARAMETER_WILD_CARD, 'Aki Minoriko', 'Aki Shizuha', 'Chen', 'Chiruno'],
     )
     
     yield (
@@ -39,26 +38,14 @@ def _iter_options():
                     InteractionOption(
                         focused = True,
                         option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_ACTION_TAG,
-                        value = 'f',
-                    ),
-                ],
-            )
-        ),
-        'f',
-        ['feed', 'fluff'],
-    )
-    
-    yield (
-        InteractionEvent(
-            interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_ACTION_TAG,
+                        name = PARAMETER_NAME_TARGET,
                         value = None,
+                    ),
+                    InteractionOption(
+                        focused = False,
+                        option_type = ApplicationCommandOptionType.string,
+                        name = PARAMETER_NAME_ACTION_TAG,
+                        value = 'hug',
                     ),
                     InteractionOption(
                         focused = False,
@@ -66,17 +53,11 @@ def _iter_options():
                         name = PARAMETER_NAME_SOURCE,
                         value = KAENBYOU_RIN.name,
                     ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
-                        value = REIUJI_UTSUHO.name,
-                    ),
                 ],
             )
         ),
         None,
-        [PARAMETER_WILD_CARD, 'hug'],
+        [PARAMETER_WILD_CARD, NAZRIN.name, REIUJI_UTSUHO.name],
     )
     
     yield (
@@ -87,8 +68,32 @@ def _iter_options():
                     InteractionOption(
                         focused = True,
                         option_type = ApplicationCommandOptionType.string,
+                        name = PARAMETER_NAME_TARGET,
+                        value = 'ran',
+                    ),
+                ],
+            )
+        ),
+        'ran',
+        ['ran', 'seiran', 'rin'],
+    )
+    
+    yield (
+        InteractionEvent(
+            interaction_type = InteractionType.application_command_autocomplete,
+            interaction = InteractionMetadataApplicationCommandAutocomplete(
+                options = [
+                    InteractionOption(
+                        focused = True,
+                        option_type = ApplicationCommandOptionType.string,
+                        name = PARAMETER_NAME_TARGET,
+                        value = 'rei',
+                    ),
+                    InteractionOption(
+                        focused = False,
+                        option_type = ApplicationCommandOptionType.string,
                         name = PARAMETER_NAME_ACTION_TAG,
-                        value = 'h',
+                        value = 'hug',
                     ),
                     InteractionOption(
                         focused = False,
@@ -96,31 +101,54 @@ def _iter_options():
                         name = PARAMETER_NAME_SOURCE,
                         value = KAENBYOU_RIN.name,
                     ),
+                ],
+            )
+        ),
+        'rei',
+        ['reiuji utsuho'],
+    )
+    
+    # Allow duplication only if source == target
+    yield (
+        InteractionEvent(
+            interaction_type = InteractionType.application_command_autocomplete,
+            interaction = InteractionMetadataApplicationCommandAutocomplete(
+                options = [
+                    InteractionOption(
+                        focused = True,
+                        option_type = ApplicationCommandOptionType.string,
+                        name = PARAMETER_NAME_TARGET,
+                        value = 'koi',
+                    ),
                     InteractionOption(
                         focused = False,
                         option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
-                        value = REIUJI_UTSUHO.name,
+                        name = PARAMETER_NAME_ACTION_TAG,
+                        value = 'hug',
+                    ),
+                    InteractionOption(
+                        focused = False,
+                        option_type = ApplicationCommandOptionType.string,
+                        name = PARAMETER_NAME_SOURCE,
+                        value = KOMEIJI_KOISHI.name,
                     ),
                 ],
             )
         ),
-        'h',
-        ['hug'],
+        'koi',
+        ['koishi'],
     )
-    
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-async def test__autocomplete_action_tag(event, input_value):
+def test__get_target_character_suggestions(event, input_value):
     """
-    Tests whether ``autocomplete_action_tag`` works as intended.
-    
-    This function is a coroutine.
+    Tests whether ``get_target_character_suggestions`` works as intended.
     
     Parameters
     ----------
     event : ``InteractionEvent``
         The received event.
+    
     input_value : `None`, `str`
         The value to autocomplete.
     
@@ -128,9 +156,11 @@ async def test__autocomplete_action_tag(event, input_value):
     -------
     output : `None | list<str>`
     """
-    output = await autocomplete_action_tag(event, input_value)
+    output = get_target_character_suggestions(event, input_value)
     vampytest.assert_instance(output, list, nullable = True)
     if (output is not None):
         for element in output:
             vampytest.assert_instance(element, str)
+    
+    del output[5:]
     return output

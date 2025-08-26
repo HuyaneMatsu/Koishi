@@ -2,12 +2,13 @@ __all__ = (
     'AKI_MINORIKO', 'AKI_SHIZUHA', 'AKIYO', 'ANABERAL_KANA', 'ASAKURA_RIKAKO', 'CHEN', 'CHIRIZUKA_UBAME', 'CHIRUNO',
     'CLOWNPIECE',
     'DAIYOUSEI', 'DOREMY_SWEET', 'EBISU_EIKA', 'ELIS', 'ELLEN', 'ELLY', 'ETERNITY_LARVA', 'FUJIWARA_NO_MOKOU',
-    'FUTATSUIWA_MAMIZOU', 'GENGETSU', 'GENJII', 'GOLIATH', 'HAKUREI_MIKO', 'HAKUREI_REIMU', 'HARURU',
+    'FUTATSUIWA_MAMIZOU', 'GENGETSU', 'GENJII', 'GOLIATH', 'GOUTOKUJI_MIKE', 'HAKUREI_MIKO', 'HAKUREI_REIMU', 'HARURU',
     'HANIYASUSHIN_KEIKI',
     'HATA_NO_KOKORO', 'HEARN_MARIBEL', 'HECATIA_LAPISLAZULI', 'HEI_MEILING', 'HIEDA_NO_AKYUU', 'HIJIRI_BYAKUREN',
     'HIMEKAIDOU_HATATE', 'HIMEMUSHI_MOMOYO', 'HINANAWI_TENSHI', 'HONG_MEILING', 'HORIKAWA_RAIKO', 'HOSHIGUMA_YUUGI',
     'HOUJUU_CHIMI', 'HOUJUU_NUE', 'HOURAI', 'HOURAISAN_KAGUYA', 'IBARAKI_KASEN', 'IBUKI_SUIKA', 'IIZUNAMARU_MEGUMU',
-    'IMAIZUMI_KAGEROU', 'INABA_TEWI', 'INUBASHIRI_MOMIJI', 'IZAYOI_SAKUYA', 'JACKET', 'JOUTOUGUU_MAYUMI', 'JUNKO',
+    'IMAIZUMI_KAGEROU', 'INABA_TEWI', 'INUBASHIRI_MOMIJI', 'IWANAGA_ARIYA',
+    'IZAYOI_SAKUYA', 'JACKET', 'JOUTOUGUU_MAYUMI', 'JUNKO',
     'KAENBYOU_RIN', 'KAGIYAMA_HINA', 'KAKU_SEIGA', 'KAMISHIRASAWA_KEINE', 'KASODANI_KYOUKO', 'KAWASHIRO_NITORI',
     'KAZAMI_YUUKA', 'KICCHOU_YACHIE', 'KIJIN_SEIJA', 'KIKURI', 'KIRISAME_MARISA', 'KISHIN_SAGUME', 'KISUME',
     'KITASHIRAKAWA_CHIYURI', 'KOAKUMA', 'KOCHIYA_SANAE', 'KOKUU_HARUTO', 'KOMAKUSA_SANNYO', 'KOMANO_AUNN',
@@ -27,9 +28,11 @@ __all__ = (
     'TAMATSUKURI_MISUMARU', 'TATARA_KOGASA', 'TEIREIDA_MAI', 'TENKAJIN_CHIYARI', 'TENKYUU_CHIMATA', 'TOKIKO', 'TOMOMI',
     'TORAMARU_SHOU', 'TOUTETSU_YUUMA', 'TOYOSATOMIMI_NO_MIKO', 'TSUBAME', 'TSUKUMO_BENBEN', 'TSUKUMO_YATSUHASHI',
     'UNNAMED_EXOTIC_GIRL_20000_HIT_GIRL', 'UNNAMED_EXOTIC_GIRL_CLEANING_MAID', 'USAMI_RENKO', 'USAMI_SUMIREKO',
-    'USHIZAKI_URUMI', 'VIVIT', 'WAKASAGIHIME', 'WATATSUKI_NO_TOYOHIME', 'WATATSUKI_NO_YORIHIME', 'WAYOUSEI',
+    'USHIZAKI_URUMI', 'VIVIT', 'WAKASAGIHIME', 'WATARI_NINA', 'WATATSUKI_NO_TOYOHIME', 'WATATSUKI_NO_YORIHIME',
+    'WAYOUSEI',
     'WRIGGLE_NIGHTBUG', 'YAGOKORO_EIRIN', 'YAKUMO_RAN', 'YAKUMO_YUKARI', 'YAMASHIRO_TAKANE', 'YASAKA_KANAKO',
-    'YATADERA_NARUMI', 'YOMOTSU_HISAMI', 'YORIGAMI_JOON', 'YORIGAMI_SHION', 'YORUMI', 'YUKI', 'YUMEKO', 'YUUGEN_MAGAN'
+    'YATADERA_NARUMI', 'YOMOTSU_HISAMI', 'YORIGAMI_JOON', 'YORIGAMI_SHION', 'YORUMI', 'YUIMAN_ASAMA',
+    'YUKI', 'YUMEKO', 'YUUGEN_MAGAN'
 )
 
 from .character import TouhouCharacter
@@ -224,6 +227,16 @@ GOLIATH = TouhouCharacter(
         'ゴリアテ人形',
         'ごりあてにんぎょう',
         'Goriate Ningyou',
+    ),
+)
+
+GOUTOKUJI_MIKE = TouhouCharacter(
+    'goutokuji_mike',
+    'Goutokuji Mike',
+    (
+        'Mike Goutokuji',
+        '豪徳寺 ミケ',
+        'ミケ',
     ),
 )
 
@@ -559,6 +572,17 @@ INUBASHIRI_MOMIJI = TouhouCharacter(
     ),
 )
 
+IWANAGA_ARIYA = TouhouCharacter(
+    'iwanaga_ariya',
+    'Iwanaga Ariya',
+    (
+        '磐永 阿梨夜',
+        '阿梨夜',
+        'Ariya',
+        'Ariya Iwanaga',
+    ),
+)
+
 IZAYOI_SAKUYA = TouhouCharacter(
     'izayoi_sakuya',
     'Izayoi Sakuya',
@@ -566,6 +590,7 @@ IZAYOI_SAKUYA = TouhouCharacter(
         '十六夜 咲夜',
         'Sakuya',
         'Sakuya Izayoi',
+        '咲夜',
     ),
 )
 
@@ -1683,6 +1708,17 @@ WAKASAGIHIME = TouhouCharacter(
     ),
 )
 
+WATARI_NINA = TouhouCharacter(
+    'watari_nina',
+    'Watari Nina',
+    (
+        '渡里 ニナ',
+        'ニナ',
+        'Nina Watari',
+        'Nina',
+    ),
+)
+
 WATATSUKI_NO_TOYOHIME = TouhouCharacter(
     'watatsuki_no_toyohime',
     'Watatsuki no Toyohime',
@@ -1815,6 +1851,17 @@ YORUMI = TouhouCharacter(
     'Yorumi',
     (
         'Moonlight\'s Anti-Soul',
+    ),
+)
+
+YUIMAN_ASAMA = TouhouCharacter(
+    'yuiman_asama',
+    'Yuiman Asama',
+    (
+        'Asama',
+        'Asama Yuiman',
+        'ユイマン 浅間',
+        '浅間',
     ),
 )
 
