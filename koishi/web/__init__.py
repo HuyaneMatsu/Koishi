@@ -4,7 +4,7 @@ from flask import Flask, make_response, redirect, request, send_from_directory
 
 
 from ..bot_utils.constants import PATH__KOISHI
-from ..bot_utils.ip_filtering import IPFilterRule, build_ip_matcher_structure, match_ip_to_structure, parse_ip 
+from ..bot_utils.ip_filtering import IPFilterRule, build_ip_matcher_structure, match_ip_to_structure, parse_ip
 
 from .patches import *
 
@@ -102,10 +102,13 @@ BOT_NAMES = [
     'sindresorhus',
     
     # Content management system checker? huh
-    'cms-checker'
+    'cms-checker',
     
     # amazon
-    "Mozilla/5.0 AppleWebKit/605.1.15 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/605.1.15",
+    'mozilla/5.0 applewebkit/605.1.15 (khtml, like gecko) chrome/139.0.0.0 safari/605.1.15',
+    
+    # blex
+    'mozilla/5.0 (compatible; blexbot/1.0; +https://help.seranking.com/en/blex-crawler)',
 ]
 
 
@@ -192,7 +195,7 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('4.224.0.0'), 20), # Phoenix - Microsoft Corporation
     
     # sindresorhus # others
-    # "Mozilla/5.0 AppleWebKit/605.1.15 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/605.1.15
+    # "Mozilla/5.0 AppleWebKit/605.1.15 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/605.1.15"
     # "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Amazonbot/0.1; +https://developer.amazon.com/support/amazonbot) Chrome/119.0.6045.214 Safari/537.36"
     IPFilterRule(*parse_ip('100.24.0.0'), 19), # Ashburn - Amazon Technologies Inc.
     IPFilterRule(*parse_ip('3.224.0.0'), 20), # Ashburn - Amazon Technologies Inc.
@@ -280,20 +283,33 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     # "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_6_1; rv:120.0) Gecko/20100101 Firefox/120.0"
     IPFilterRule(*parse_ip('141.98.11.0'), 8), # Vilnius - UAB Host Baltic
     IPFilterRule(*parse_ip('91.224.92.0'), 8), # Vilnius - UAB Host Baltic
+    
+    # blex
+    # "Mozilla/5.0 (compatible; BLEXBot/1.0; +https://help.seranking.com/en/blex-crawler)"
+    IPFilterRule(*parse_ip('37.27.0.0'), 16), # Helsinki - Hetzner Online GmbH
+    
+    # Trying to hack python with php
+    IPFilterRule(*parse_ip('185.177.72.0'), 8), # Paris - FBW NETWORKS SAS
 ])
 
 
 def check_is_ip_banned():
-    return match_ip_to_structure(IP_MATCHER_STRUCTURE, *parse_ip(request.remote_addr))
+    address = request.environ.get('HTTP_X_FORWARDED_FOR', None)
+    if address is None:
+        address = request.environ.get('REMOTE_ADDR', None)
+        if address is None:
+            return
+    
+    return match_ip_to_structure(IP_MATCHER_STRUCTURE, *parse_ip(address))
 
 
 @WEBAPP.before_request
 def block_bots():
-    if check_is_user_agent_banned():
-        return make_response('I am a teapot', 418)
-    
     if check_is_ip_banned():
         return make_response('You are a teapot', 419)
+    
+    if check_is_user_agent_banned():
+        return make_response('I am a teapot', 418)
 
 
 @WEBAPP.route('/assets/<path:file_name>', endpoint = 'assets')
