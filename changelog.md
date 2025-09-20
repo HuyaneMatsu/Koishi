@@ -1,4 +1,4 @@
-### 2025-08-20
+### 2025-09-20
 
 - Fix `status` command failed to respond (since last update).
 - Fix `status` used the user's global name instead of the local.
