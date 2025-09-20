@@ -183,7 +183,7 @@ async def heart_event(
             pass
         return
     
-    if component_event.interaction == EVENT_ABORT_BUTTON:
+    if component_event.component % EVENT_ABORT_BUTTON:
         try:
             await client.interaction_component_message_edit(component_event, 'Heart event cancelled.',
                 components = None)
@@ -446,7 +446,7 @@ async def daily_event(
             pass
         return
     
-    if component_event.interaction == EVENT_ABORT_BUTTON:
+    if component_event.component % EVENT_ABORT_BUTTON:
         try:
             await client.interaction_component_message_edit(component_event, 'Daily event cancelled.',
                 components = None)

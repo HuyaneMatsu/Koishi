@@ -1051,7 +1051,7 @@ class KanakoRunner:
             return
         
         try:
-            custom_id_index = CUSTOM_ID_TO_INDEX[event.interaction.custom_id]
+            custom_id_index = CUSTOM_ID_TO_INDEX[event.custom_id]
         except KeyError:
             return
         

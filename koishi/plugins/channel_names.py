@@ -344,7 +344,7 @@ async def add_bot_channel_name(client, message, weight : int, name):
             event = None
             cancelled = False
         else:
-            cancelled = (event.interaction == ADD_BUTTON_CANCEL)
+            cancelled = (event.component % ADD_BUTTON_CANCEL)
         
         if cancelled:
             footer = 'Name adding cancelled.'

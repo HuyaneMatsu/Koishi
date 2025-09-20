@@ -1,5 +1,7 @@
 __all__ = ()
 
+from datetime import timedelta as TimeDelta
+
 from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import (
     ButtonStyle, DATETIME_FORMAT_CODE, create_button, create_row, create_section, create_separator, create_text_display,
@@ -332,6 +334,31 @@ def produce_adventure_return_notification_header(adventure):
     """
     yield '### You have returned from adventure at '
     yield from _produce_adventure_location_for_headers(adventure)
+
+
+def produce_adventure_return_notification_description(adventure):
+    """
+    Produces an adventure return notification description.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    adventure : ``Adventure``
+        Adventure to produce description for.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    duration = get_duration_till_recovery_end(adventure)
+    until = adventure.updated_at + TimeDelta(seconds = duration)
+    
+    yield 'You are recovering for '
+    yield elapsed_time(RelativeDelta(seconds = duration))
+    yield ', until '
+    yield format_datetime(until, 'T')
+    yield '.'
 
 
 def produce_adventure_action_listing_view_header(adventure, page_index):
@@ -1390,9 +1417,30 @@ def build_adventure_return_notification_components(adventure):
     -------
     components : ``list<Component>``
     """
-    return [
+    components = []
+    
+    # ---- Header ----
+    
+    components.append(
         create_text_display(''.join([*produce_adventure_return_notification_header(adventure)])),
+    )
+    
+    # ---- description ----
+    
+    if adventure.health_exhausted or adventure.energy_exhausted:
+        components.append(
+            create_separator(),
+        )
+        components.append(
+            create_text_display(''.join([*produce_adventure_return_notification_description(adventure)])),
+        )
+    
+    # ---- Control ----
+    
+    components.append(
         create_separator(),
+    )
+    components.append(
         create_row(
             create_button(
                 'View adventure',
@@ -1404,4 +1452,31 @@ def build_adventure_return_notification_components(adventure):
                 ),
             ),
         ),
-    ]
+    )
+    
+    return components
+
+
+def produce_adventure_depart_failure_recovery_description(recovering_until, now):
+    """
+    Produces adventure depart failure message for the case when the user is recovering.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    recovering_until : `DateTine`
+        Until when the user is recovering.
+    
+    now : `DateTime`
+        The current time.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    yield 'You are currently recovering for '
+    yield elapsed_time(RelativeDelta(recovering_until, now))
+    yield ', until '
+    yield format_datetime(recovering_until, 'T')
+    yield '.\nYou cannot go on an adventure in the meantime.'

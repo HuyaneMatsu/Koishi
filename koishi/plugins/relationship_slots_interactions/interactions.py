@@ -12,8 +12,9 @@ from ...bots import FEATURE_CLIENTS
 
 from ..gift_common import check_can_gift
 from ..relationship_slots_core import (
-    CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CANCEL_OTHER_PATTERN, CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CANCEL_SELF,
-    CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CONFIRM_OTHER_PATTERN, CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CONFIRM_SELF,
+    CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CANCEL_OTHER_PATTERN, CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CANCEL_SELF_PATTERN,
+    CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CONFIRM_OTHER_PATTERN,
+    CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CONFIRM_SELF_PATTERN,
     CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_INVOKE_OTHER_PATTERN, CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_INVOKE_SELF,
     build_component_question_relationship_slot_purchase_other, build_component_question_relationship_slot_purchase_self
 )
@@ -88,7 +89,7 @@ async def relationship_slot_increment_invoke_other(client, event, target_user_id
     await relationship_slot_increment_invoke_other_question(client, event, target_user, relationship_to_deepen)
 
 
-async def relationship_slot_increment_invoke_self_question(client, event):
+async def relationship_slot_increment_invoke_self_question(client, interaction_event):
     """
     Questions whether the user really wanna increment their relationship slot count.
     
@@ -99,13 +100,15 @@ async def relationship_slot_increment_invoke_self_question(client, event):
     client : ``Client``
         The client who received the interaction.
     
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     """
-    if event.type is InteractionType.application_command:
-        await client.interaction_application_command_acknowledge(event, False, show_for_invoking_user_only = True)
+    if interaction_event.type is InteractionType.application_command:
+        await client.interaction_application_command_acknowledge(
+            interaction_event, False, show_for_invoking_user_only = True
+        )
     
-    user_id = event.user.id
+    user_id = interaction_event.user_id
     
     user_balance = await get_user_balance(user_id)
     relationship_slots = user_balance.relationship_slots
@@ -118,14 +121,19 @@ async def relationship_slot_increment_invoke_self_question(client, event):
     
     check_sufficient_balance_self(required_balance, available_balance, new_relationship_slot_count)
     
-    await client.interaction_response_message_edit(
-        event,
+    await client.interaction_response_message_edit(interaction_event, '-# _ _ ')
+    await client.interaction_response_message_delete(interaction_event)
+    
+    await client.interaction_followup_message_create(
+        interaction_event,
         embed = build_question_embed_purchase_confirmation_self(required_balance, new_relationship_slot_count),
-        components = build_component_question_relationship_slot_purchase_self(),
+        components = build_component_question_relationship_slot_purchase_self(user_id),
     )
 
 
-async def relationship_slot_increment_invoke_other_question(client, event, target_user, relationship_to_deepen):
+async def relationship_slot_increment_invoke_other_question(
+    client, interaction_event, target_user, relationship_to_deepen
+):
     """
     Questions whether the user really wanna increment someone else's relationship slot count.
     
@@ -136,7 +144,7 @@ async def relationship_slot_increment_invoke_other_question(client, event, targe
     client : ``Client``
         The client who received the interaction.
     
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
     target_user : ``ClientUserBase``
@@ -145,16 +153,18 @@ async def relationship_slot_increment_invoke_other_question(client, event, targe
     relationship_to_deepen : `None | Relationship`
         The relationship to deepen by the purchase.
     """
-    if event.type is InteractionType.application_command:
-        await client.interaction_application_command_acknowledge(event, False, show_for_invoking_user_only = True)
+    if interaction_event.type is InteractionType.application_command:
+        await client.interaction_application_command_acknowledge(
+            interaction_event, False, show_for_invoking_user_only = True
+        )
     
-    source_user = event.user
+    source_user = interaction_event.user
     check_can_gift(source_user, relationship_to_deepen)
     
     target_user_balance = await get_user_balance(target_user.id)
     relationship_slots = target_user_balance.relationship_slots
     
-    check_max_relationship_slots_other(relationship_slots, target_user, event.guild_id)
+    check_max_relationship_slots_other(relationship_slots, target_user, interaction_event.guild_id)
     
     source_user_balance = await get_user_balance(source_user.id)
     new_relationship_slot_count = relationship_slots + 1
@@ -162,25 +172,28 @@ async def relationship_slot_increment_invoke_other_question(client, event, targe
     available_balance = source_user_balance.balance - source_user_balance.allocated
     
     check_sufficient_balance_other(
-        required_balance, available_balance, new_relationship_slot_count, target_user, event.guild_id
+        required_balance, available_balance, new_relationship_slot_count, target_user, interaction_event.guild_id
     )
     
-    await client.interaction_response_message_edit(
-        event,
+    await client.interaction_response_message_edit(interaction_event, '-# _ _ ')
+    await client.interaction_response_message_delete(interaction_event)
+    
+    await client.interaction_followup_message_create(
+        interaction_event,
         embed = build_question_embed_purchase_confirmation_other(
-            required_balance, new_relationship_slot_count, target_user, event.guild_id,
+            required_balance, new_relationship_slot_count, target_user, interaction_event.guild_id,
         ),
-        components = build_component_question_relationship_slot_purchase_other(target_user.id),
+        components = build_component_question_relationship_slot_purchase_other(source_user.id, target_user.id),
     )
 
 
 @FEATURE_CLIENTS.interactions(
     custom_id = [
-        CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CANCEL_SELF,
+        CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CANCEL_SELF_PATTERN,
         CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CANCEL_OTHER_PATTERN,
     ],
 )
-async def relationship_slot_increment_cancel(event):
+async def relationship_slot_increment_cancel(interaction_event, source_user_id):
     """
     Cancels buying the relationship slot.
     
@@ -188,14 +201,22 @@ async def relationship_slot_increment_cancel(event):
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
+    
+    source_user_id : `str`
+        The source user's identifier as hexadecimal integer. Later converted to integer.
     
     Returns
     -------
     response : `None | InteractionEvent`
     """
-    if event.message.interaction.user_id != event.user_id:
+    try:
+        source_user_id = int(source_user_id, 16)
+    except ValueError:
+        pass
+    
+    if interaction_event.user_id != source_user_id:
         return
     
     return InteractionResponse(
@@ -204,8 +225,8 @@ async def relationship_slot_increment_cancel(event):
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CONFIRM_SELF)
-async def relationship_slot_increment_confirm_self(event):
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CONFIRM_SELF_PATTERN)
+async def relationship_slot_increment_confirm_self(interaction_event, source_user_id):
     """
     Confirms a relationship slot increment purchase for yourself.
     
@@ -213,20 +234,27 @@ async def relationship_slot_increment_confirm_self(event):
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
+    
+    source_user_id : `str`
+        The source user's identifier as hexadecimal integer. Later converted to integer.
     
     Yields
     -------
     acknowledge / response : `None | InteractionEvent`
     """
-    interaction = event.message.interaction
-    if (interaction is not None) and (interaction.user_id != event.user_id):
+    try:
+        source_user_id = int(source_user_id, 16)
+    except ValueError:
+        return
+    
+    if interaction_event.user_id != source_user_id:
         return
     
     yield
     
-    user_balance = await get_user_balance(event.user_id)
+    user_balance = await get_user_balance(interaction_event.user_id)
     relationship_slots = user_balance.relationship_slots
     
     try:
@@ -258,7 +286,7 @@ async def relationship_slot_increment_confirm_self(event):
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_SLOT_PURCHASE_CONFIRM_OTHER_PATTERN)
-async def relationship_slot_increment_confirm_other(client, event, target_user_id):
+async def relationship_slot_increment_confirm_other(client, interaction_event, source_user_id, target_user_id):
     """
     Confirms a relationship slot increment purchase for someone else.
     
@@ -269,24 +297,26 @@ async def relationship_slot_increment_confirm_other(client, event, target_user_i
     client : ``Client``
         The client who received the event.
     
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
+    source_user_id : `str`
+        The source user's identifier as hexadecimal integer. Later converted to integer.
+    
     target_user_id : `str`
-        The targeted user's identifier encoded as base 16.
+        The target user's identifier as hexadecimal integer. Later converted to integer.
     
     Yields
     -------
     acknowledge / response : `None | InteractionEvent`
     """
-    source_user = event.user
-    interaction = event.message.interaction
-    if (interaction is not None) and (interaction.user_id != source_user.id):
-        return
-    
     try:
+        source_user_id = int(source_user_id, base = 16)
         target_user_id = int(target_user_id, base = 16)
     except ValueError:
+        return
+    
+    if interaction_event.user_id != source_user_id:
         return
     
     yield
@@ -294,22 +324,22 @@ async def relationship_slot_increment_confirm_other(client, event, target_user_i
     target_user = await get_user(target_user_id)
     
     # Get relationship to increment its value if any.
-    relationship_to_deepen = await get_relationship_to_deepen(source_user.id, target_user_id)
+    relationship_to_deepen = await get_relationship_to_deepen(source_user_id, target_user_id)
     
     try:
-        check_can_gift(source_user, relationship_to_deepen)
+        check_can_gift(interaction_event.user, relationship_to_deepen)
     except InteractionAbortedError as exception:
         exception.response.abort = False
         raise
     
-    user_balances = await get_user_balances((source_user.id, target_user_id))
-    source_user_balance = user_balances[source_user.id]
+    user_balances = await get_user_balances((source_user_id, target_user_id))
+    source_user_balance = user_balances[source_user_id]
     target_user_balance = user_balances[target_user_id]
     
     relationship_slots = target_user_balance.relationship_slots
     
     try:
-        check_max_relationship_slots_other(relationship_slots, target_user, event.guild_id)
+        check_max_relationship_slots_other(relationship_slots, target_user, interaction_event.guild_id)
     except InteractionAbortedError as exception:
         exception.response.abort = False
         raise
@@ -320,7 +350,7 @@ async def relationship_slot_increment_confirm_other(client, event, target_user_i
     
     try:
         check_sufficient_balance_other(
-            required_balance, available_balance, new_relationship_slot_count, target_user, event.guild_id
+            required_balance, available_balance, new_relationship_slot_count, target_user, interaction_event.guild_id
         )
     except InteractionAbortedError as exception:
         exception.response.abort = False
@@ -340,7 +370,7 @@ async def relationship_slot_increment_confirm_other(client, event, target_user_i
     
     yield InteractionResponse(
         embed = build_success_embed_purchase_completed_other(
-            required_balance, new_relationship_slot_count, target_user, event.guild_id
+            required_balance, new_relationship_slot_count, target_user, interaction_event.guild_id
         ),
         components = None,
     )
@@ -351,5 +381,7 @@ async def relationship_slot_increment_confirm_other(client, event, target_user_i
             await send_embed_to(
                 get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
                 target_user,
-                build_notification_embed_other(new_relationship_slot_count, source_user, event.guild_id),
+                build_notification_embed_other(
+                    new_relationship_slot_count, interaction_event.user, interaction_event.guild_id
+                ),
             )

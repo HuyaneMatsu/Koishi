@@ -26,7 +26,7 @@ def _iter_options():
         100,
     )
     adventure.energy_exhausted = 10
-    adventure.created_at = DateTime(2016, 5, 13, tzinfo = TimeZone.utc)
+    adventure.created_at = adventure.updated_at = DateTime(2016, 5, 13, tzinfo = TimeZone.utc)
     adventure.state = ADVENTURE_STATE_FINALIZED
     adventure.action_count = 2
     adventure.entry_id = adventure_entry_id
@@ -37,6 +37,10 @@ def _iter_options():
             create_text_display(
                 f'### You have returned from adventure at {LOCATIONS[LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS].name} for '
                 f'{TARGETS[TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION].name}'
+            ),
+            create_separator(),
+            create_text_display(
+                f'You are recovering for 20 minutes, until <t:{adventure.updated_at.timestamp() + 1200:.0f}:T>.'
             ),
             create_separator(),
             create_row(

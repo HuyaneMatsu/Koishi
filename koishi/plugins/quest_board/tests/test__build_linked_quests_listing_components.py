@@ -23,7 +23,7 @@ def _iter_options():
     quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_CARROT
     quest_template_0 = get_quest_template(quest_template_id_0)
     assert quest_template_0 is not None
-    quest_amount_0 = 36
+    quest_amount_0 = 3600
     
     quest_template_id_1 = QUEST_TEMPLATE_ID_MYSTIA_PEACH
     quest_template_1 = get_quest_template(quest_template_id_1)
@@ -60,6 +60,7 @@ def _iter_options():
     linked_quest_entry_id_1 = 124
     linked_quest_1.entry_id = linked_quest_entry_id_1
     
+    page_index = 0
     
     yield (
         user_id,
@@ -73,7 +74,7 @@ def _iter_options():
             linked_quest_0,
             linked_quest_1,
         ],
-        0,
+        page_index,
         [
             create_section(
                 create_text_display(
@@ -90,21 +91,21 @@ def _iter_options():
             create_section(
                 create_text_display(
                     f'Time left: 59 minutes, 59 seconds\n'
-                    f'Submit 0 / {quest_amount_0} Carrot {BUILTIN_EMOJIS["carrot"]} to Mystia.'
+                    f'Submit 0.00 / {quest_amount_0/1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.'
                 ),
                 thumbnail = create_button(
                     'Details',
-                    custom_id = f'linked_quest.details.{linked_quest_entry_id_0:x}',
+                    custom_id = f'linked_quest.details.{user_id:x}.{page_index:x}.{linked_quest_entry_id_0:x}',
                 ),
             ),
             create_section(
                 create_text_display(
                     f'Time left: 59 minutes, 59 seconds\n'
-                    f'Submit 0 / {quest_amount_1} Peach {BUILTIN_EMOJIS["peach"]} to Mystia.'
+                    f'Submit 0 / {quest_amount_1} {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
                 ),
                 thumbnail = create_button(
                     'Details',
-                    custom_id = f'linked_quest.details.{linked_quest_entry_id_1:x}',
+                    custom_id = f'linked_quest.details.{user_id:x}.{page_index:x}.{linked_quest_entry_id_1:x}',
                 ),
             ),
             create_separator(),

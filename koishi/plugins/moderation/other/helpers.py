@@ -323,7 +323,7 @@ async def confirm_action(client, event, guild, user, embed_builder, word_config,
         
         return None
     
-    if component_interaction.interaction == COMPONENT__CANCEL:
+    if component_interaction.component % COMPONENT__CANCEL:
         # Edit the source message with the component interaction
         await client.interaction_component_message_edit(
             component_interaction,

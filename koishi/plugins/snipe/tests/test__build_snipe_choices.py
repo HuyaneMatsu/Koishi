@@ -94,6 +94,25 @@ def _iter_options():
             Choice(emoji_2, ChoiceTypeReaction),
         ],
     )
+    
+    message = Message.precreate(
+        202509200000,
+        snapshots = [
+            MessageSnapshot(
+                stickers = [sticker_0, sticker_1, sticker_2],
+            ),
+        ],
+    )
+    
+    yield (
+        'snapshot stickers',
+        message,
+        [
+            Choice(sticker_0, ChoiceTypeSticker),
+            Choice(sticker_1, ChoiceTypeSticker),
+            Choice(sticker_2, ChoiceTypeSticker),
+        ],
+    )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).named_first().returning_last())

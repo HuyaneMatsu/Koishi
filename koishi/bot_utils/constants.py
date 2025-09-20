@@ -79,7 +79,7 @@ URL__HATA_GIT = 'https://github.com/HuyaneMatsu/hata'
 URL__HATA_DOCS = 'https://www.astil.dev/project/hata/docs/hata'
 URL__PASTE = 'https://hastebin.com/'
 URL__HATA_SLASH = 'https://github.com/HuyaneMatsu/hata/blob/master/docs/topics/slash.md'
-URL__KOISHI_TOP_GG = f'https://discordbots.org/bot/{config.KOISHI_ID}'
+URL__KOISHI_TOP_GG = f'https://discordbots.org/bot/{config.KOISHI_ID}/vote'
 
 USER__EST = User.precreate(277393805601275910)
 

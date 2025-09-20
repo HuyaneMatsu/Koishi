@@ -21,7 +21,7 @@ async def build_initial_response_parts(client, event, target, choices, show_for_
         The client who received the event.
     event : ``InteractionEvent``
         The received interaction event.
-    target : `None`, ``Message``
+    target : ``None | Message``
         The target message type.
     choices : ``list<ChoiceBase>``
         Entities in context.
@@ -103,7 +103,7 @@ async def build_initial_response(client, event, target, choices, show_for_invoki
         The client who received the interaction event.
     event : ``InteractionEvent``
         The received interaction event.
-    target : `None`, ``Message``
+    target : ``None | Message``
         The target message type.
     choices : ``list<ChoiceBase>``
         The choices in context.

@@ -182,7 +182,7 @@ async def xox_multi_player(client, event):
             break
         
         if not click(
-            array, event.interaction.custom_id, user_settings[player_index].identifier
+            array, event.custom_id, user_settings[player_index].identifier
         ):
             await client.interaction_component_acknowledge(event)
             continue

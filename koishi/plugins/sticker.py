@@ -485,7 +485,7 @@ async def autocomplete_sticker_name(value):
 async def get_autocomplete_sticker_names_except(event, actual_value):
     stickers_except = set()
     
-    for value in event.interaction.get_non_focused_values().values():
+    for value in event.get_non_focused_values().values():
         if value is not None:
             sticker = GUILD__SUPPORT.get_sticker_like(value)
             if (sticker is not None):

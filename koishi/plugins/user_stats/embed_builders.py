@@ -57,11 +57,12 @@ def get_user_chart_color(stats):
     color : ``Color``
     """
     user_id = stats.user_id
-    stat_housewife = stats.stat_housewife
-    stat_cuteness = stats.stat_cuteness
-    stat_bedroom = stats.stat_bedroom
-    stat_charm = stats.stat_charm
-    stat_loyalty = stats.stat_loyalty
+    stats_calculated = stats.stats_calculated
+    stat_housewife = stats_calculated.stat_housewife
+    stat_cuteness = stats_calculated.stat_cuteness
+    stat_bedroom = stats_calculated.stat_bedroom
+    stat_charm = stats_calculated.stat_charm
+    stat_loyalty = stats_calculated.stat_loyalty
     
     stat_max = max(stat_housewife, stat_cuteness, stat_bedroom, stat_charm, stat_loyalty)
     if stat_max == 0:

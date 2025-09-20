@@ -16,7 +16,7 @@ from ..quest_core import (
 from .constants import BROKEN_QUEST_DESCRIPTION
 
 
-def _produce_quest_board_header_description(guild, adventurer_info, quest_count):
+def produce_quest_board_header_description(guild, adventurer_info, quest_count):
     """
     Produces a guild's quest board's header component's content.
     
@@ -51,32 +51,7 @@ def _produce_quest_board_header_description(guild, adventurer_info, quest_count)
     yield str(quest_limit)
 
 
-def build_quest_board_header_description(guild, adventurer_info, quest_count):
-    """
-    Builds a guild's quest board's header component's content.
-    
-    Parameters
-    ----------
-    guild : ``Guild``
-        The respective guild the quest board is bound to.
-    
-    adventurer_info : ``AdventurerRankInfo``
-        Information about the guild's adventurer rank.
-    
-    quest_count : `int`
-        The amount of quests the guild currently has.
-    
-    Returns
-    -------
-    description : `str`
-    """
-    return ''.join([*_produce_quest_board_header_description(
-        guild, adventurer_info, quest_count,
-    )])
-
-
-
-def _produce_linked_quest_header_description(user, guild_id, adventurer_info, quest_count):
+def produce_linked_quest_header_description(user, guild_id, adventurer_info, quest_count):
     """
     Produces a user's linked quest listing's header component's content.
     
@@ -111,33 +86,6 @@ def _produce_linked_quest_header_description(user, guild_id, adventurer_info, qu
     yield str(adventurer_info.quest_limit)
 
 
-def build_linked_quest_header_description(user, guild_id, adventurer_info, quest_count):
-    """
-    Builds a user's linked quest listing's header component's content.
-    
-    Parameters
-    ----------
-    user : ``ClientUserBase``
-        The respective user.
-    
-    guild_id : `int`
-        The respective guild's identifier the command is used.
-    
-    adventurer_info : ``AdventurerRankInfo``
-        Information about the guild's adventurer rank.
-    
-    quest_count : `int`
-        The amount of quests the user currently has.
-    
-    Returns
-    -------
-    description : `str`
-    """
-    return ''.join([*_produce_linked_quest_header_description(
-        user, guild_id, adventurer_info, quest_count
-    )])
-
-
 def _produce_nullable_item_parts(item):
     """
     Produces a nullable item's part.
@@ -157,12 +105,12 @@ def _produce_nullable_item_parts(item):
         yield ITEM_NAME_DEFAULT
     
     else:
-        yield item.name
-        
         emoji = item.emoji
         if (emoji is not None):
-            yield ' '
             yield emoji.as_emoji
+            yield ' '
+        
+        yield item.name
 
 
 def _produce_amount_kg(amount):
@@ -325,9 +273,9 @@ def _produce_quest_summary_line(quest_template, amount_required, amount_submitte
         yield '.'
 
 
-def _produce_quest_short_description(quest_template, amount_required):
+def produce_quest_short_description(quest_template, amount_required):
     """
-    Produces a quest's short description for listing it.
+    Produces a linked quest's short description for listing it.
     
     This function is an iterable generator.
     
@@ -353,26 +301,7 @@ def _produce_quest_short_description(quest_template, amount_required):
     yield from _produce_quest_summary_line(quest_template, amount_required, -1)
 
 
-def build_quest_short_description(quest, quest_template):
-    """
-    Builds a quest's short description used when listing it.
-    
-    Parameters
-    ----------
-    quest : ``Quest``
-        The quest in context.
-    
-    quest_template : ``QuestTemplate``
-        The quest's template.
-    
-    Returns
-    -------
-    description : `str`
-    """
-    return ''.join([*_produce_quest_short_description(quest_template, quest.amount)])
-
-
-def _produce_linked_quest_short_description(quest_template, amount_required, amount_submitted, expires_at):
+def produce_linked_quest_short_description(quest_template, amount_required, amount_submitted, expires_at):
     """
     Produces a linked quest's short description for listing it.
     
@@ -408,27 +337,6 @@ def _produce_linked_quest_short_description(quest_template, amount_required, amo
         yield 'expired'
     yield '\n'
     yield from _produce_quest_summary_line(quest_template, amount_required, amount_submitted)
-
-
-def build_linked_quest_short_description(linked_quest, quest_template):
-    """
-    Builds a linked quest's short description used when listing it.
-    
-    Parameters
-    ----------
-    linked_quest : ``LinkedQuest``
-        The linked quest in context.
-    
-    quest_template : ``QuestTemplate``
-        The quest's template.
-    
-    Returns
-    -------
-    description : `str`
-    """
-    return ''.join([*_produce_linked_quest_short_description(
-        quest_template, linked_quest.amount_required, linked_quest.amount_submitted, linked_quest.expires_at
-    )])
 
 
 def _produce_quest_details_base_section(
@@ -529,7 +437,7 @@ def _produce_time_left(expires_at):
     yield '**'
 
 
-def _produce_quest_detailed_description(quest, quest_template, user_level):
+def produce_quest_detailed_description(quest, quest_template, user_level):
     """
     Produces a quest's detailed description.
     
@@ -566,29 +474,7 @@ def _produce_quest_detailed_description(quest, quest_template, user_level):
     yield from _produce_time_available(RelativeDelta(seconds = quest.duration))
 
 
-def build_quest_detailed_description(quest, quest_template, user_level):
-    """
-    Builds a quest's detailed description.
-    
-    Parameters
-    ----------
-    quest : ``Quest``
-        The quest in context.
-    
-    quest_template : ``QuestTemplate``
-        The quest's template.
-    
-    user_level : `int`
-        The user's adventurer rank.
-    
-    Returns
-    ------
-    description : `str`
-    """
-    return ''.join([*_produce_quest_detailed_description(quest, quest_template, user_level)])
-
-
-def _produce_linked_quest_detailed_description(linked_quest, quest_template, user_level):
+def produce_linked_quest_detailed_description(linked_quest, quest_template, user_level):
     """
     Produces a linked quest's detailed description.
     
@@ -627,29 +513,7 @@ def _produce_linked_quest_detailed_description(linked_quest, quest_template, use
     yield from _produce_time_left(linked_quest.expires_at)
 
 
-def build_linked_quest_detailed_description(linked_quest, quest_template, user_level):
-    """
-    Builds a linked quest's detailed description.
-    
-    Parameters
-    ----------
-    linked_quest : ``LinkedQuest``
-        The linked quest in context.
-    
-    quest_template : ``QuestTemplate``
-        The quest's template.
-    
-    user_level : `int`
-        The user's adventurer rank.
-    
-    Returns
-    ------
-    description : `str`
-    """
-    return ''.join([*_produce_linked_quest_detailed_description(linked_quest, quest_template, user_level)])
-
-
-def _produce_nullable_item_description(item):
+def produce_nullable_item_description(item):
     """
     Produces a nullable item's description.
     
@@ -676,22 +540,6 @@ def _produce_nullable_item_description(item):
         yield '*no description*'
     else:
         yield item.description
-
-
-def build_nullable_item_description(item):
-    """
-    Builds a nullable item's description.
-    
-    Parameters
-    ----------
-    item : ``None | Item``
-        The item to build its description of.
-    
-    Returns
-    -------
-    description : `str`
-    """
-    return ''.join([*_produce_nullable_item_description(item)])
 
 
 def _produce_amount_typed_bold(amount_type, amount):
@@ -761,7 +609,7 @@ def _produce_you_have_submitted_section(item, amount_type, amount_used):
     yield '.'
 
 
-def _produce_linked_quest_submit_success_n_left_description(
+def produce_linked_quest_submit_success_n_left_description(
     item, amount_type, amount_submitted, amount_required, amount_used
 ):
     """
@@ -796,39 +644,7 @@ def _produce_linked_quest_submit_success_n_left_description(
     yield ' more to submit.'
 
 
-def build_linked_quest_submit_success_n_left_description(
-    item, amount_type, amount_submitted, amount_required, amount_used,
-):
-    """
-    Builds response description when the user successfully submitted `n` amount of items.
-    
-    Parameters
-    ----------
-    item : ``None | Item``
-        The submitted item.
-    
-    amount_type : `int`
-        The amount's type.
-    
-    amount_submitted : `int`
-        Already submitted amount.
-    
-    amount_required : `int`
-        The amount of required items.
-    
-    amount_used : `int`
-        The used up amount.
-    
-    Returns
-    -------
-    description : `str`
-    """
-    return ''.join([*_produce_linked_quest_submit_success_n_left_description(
-        item, amount_type, amount_submitted, amount_required, amount_used,
-    )])
-
-
-def _produce_linked_quest_submit_success_completed_description(
+def produce_linked_quest_submit_success_completed_description(
     item, amount_type, amount_required, amount_used, reward_balance, reward_credibility
 ):
     """
@@ -872,38 +688,3 @@ def _produce_linked_quest_submit_success_completed_description(
         yield '\n- **'
         yield str(reward_credibility)
         yield '** credibility'
-
-
-def build_linked_quest_submit_success_completed_description(
-    item, amount_type, amount_required, amount_used, reward_balance, reward_credibility,
-):
-    """
-    Builds response description when the user successfully submits all the remaining items.
-    
-    Parameters
-    ----------
-    item : ``None | Item``
-        The submitted item.
-    
-    amount_type : `int`
-        The amount's type.
-    
-    amount_required : `int`
-        The amount of required items.
-    
-    amount_used : `int`
-        The used up amount.
-    
-    reward_balance : `int`
-        The amount of balance the user receives.
-    
-    reward_credibility : `int`
-        The amount of credibility the user receives.
-    
-    Returns
-    -------
-    description : `str`
-    """
-    return ''.join([*_produce_linked_quest_submit_success_completed_description(
-        item, amount_type, amount_required, amount_used, reward_balance, reward_credibility,
-    )])

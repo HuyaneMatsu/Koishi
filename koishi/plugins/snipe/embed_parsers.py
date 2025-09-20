@@ -176,7 +176,7 @@ def get_emoji_from_event(event):
     
     Returns
     -------
-    emoji : `None`, ``Emoji``
+    emoji : ``None | Emoji``
     """
     message = event.message
     if message is None:

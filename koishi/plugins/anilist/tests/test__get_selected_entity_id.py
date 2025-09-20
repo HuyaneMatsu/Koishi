@@ -1,5 +1,5 @@
 import vampytest
-from hata import InteractionEvent, InteractionMetadataMessageComponent, InteractionType
+from hata import ComponentType, InteractionComponent, InteractionEvent, InteractionType
 
 from ..helpers import get_selected_entity_id
 
@@ -7,28 +7,35 @@ from ..helpers import get_selected_entity_id
 def _iter_options():
     yield (
         InteractionEvent(
-            interaction = InteractionMetadataMessageComponent(
-                values = None,
-            ),
             interaction_type = InteractionType.message_component,
+            component = InteractionComponent(
+                ComponentType.string_select,
+                custom_id = 'select',
+            ),
         ),
         -1,
     )
+    
     yield (
         InteractionEvent(
-            interaction = InteractionMetadataMessageComponent(
+            interaction_type = InteractionType.message_component,
+            component = InteractionComponent(
+                ComponentType.string_select,
+                custom_id = 'select',
                 values = ['pepe'],
             ),
-            interaction_type = InteractionType.message_component,
         ),
         -1,
     )
+    
     yield (
         InteractionEvent(
-            interaction = InteractionMetadataMessageComponent(
+            interaction_type = InteractionType.message_component,
+            component = InteractionComponent(
+                ComponentType.string_select,
+                custom_id = 'select',
                 values = ['12'],
             ),
-            interaction_type = InteractionType.message_component,
         ),
         12,
     )
@@ -48,4 +55,6 @@ def test__get_selected_entity_id(event):
     -------
     entity_id : `int`
     """
-    return get_selected_entity_id(event)
+    output = get_selected_entity_id(event)
+    vampytest.assert_instance(output, int)
+    return output

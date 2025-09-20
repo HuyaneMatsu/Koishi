@@ -55,7 +55,7 @@ async def xox_single_player(client, event):
             event, timeout = 300.0, check = partial_func(check_event_user, event.user)
         ):
             
-            if not click(array, component_interaction_event.interaction.custom_id, player_settings_user.identifier):
+            if not click(array, component_interaction_event.custom_id, player_settings_user.identifier):
                 await client.interaction_component_acknowledge(component_interaction_event)
                 continue
             

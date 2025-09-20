@@ -116,11 +116,16 @@ def _build_snipe_choices(message):
     snapshot = message.snapshot
     if (snapshot is None):
         content = message.content
+        stickers = message.stickers
     else:
         content = snapshot.content
+        stickers = snapshot.stickers
     
     return [
-        *(Choice(sticker, ChoiceTypeSticker) for sticker in message.iter_stickers()),
+        *(
+            () if stickers is None else
+            (Choice(sticker, ChoiceTypeSticker) for sticker in stickers)
+         ),
         *(Choice(emoji, ChoiceTypeEmoji) for emoji in parse_custom_emojis_ordered(content)),
         *(Choice(emoji, ChoiceTypeReaction) for emoji in _iter_custom_message_reactions(message)),
     ]

@@ -17,17 +17,14 @@ def get_selected_entity_id(event):
     entity_id : `int`
         Returns `-1` on failure.
     """
-    values = event.values
-    if values is None:
-        return -1
+    for custom_id, component_type, values_or_values in event.iter_custom_ids_and_values():
+        if component_type.layout_flags.holds_value_multiple and (values_or_values is not None):
+            try:
+                return int(values_or_values[0])
+            except ValueError:
+                pass
     
-    value = values[0]
-    try:
-        entity_id = int(value)
-    except ValueError:
-        entity_id = - 1
-    
-    return entity_id
+    return -1
 
 
 def is_event_user_same(event):

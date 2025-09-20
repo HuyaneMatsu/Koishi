@@ -1,8 +1,5 @@
 import vampytest
-from hata import (
-    ApplicationCommandOptionType, InteractionEvent, InteractionMetadataApplicationCommandAutocomplete,
-    InteractionOption, InteractionType
-)
+from hata import ApplicationCommandOptionType, InteractionEvent, InteractionOption, InteractionType
 
 from ...touhou_core import CHEN, KAENBYOU_RIN, KOMEIJI_KOISHI, REIUJI_UTSUHO
 
@@ -15,16 +12,14 @@ def _iter_options():
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_SOURCE,
-                        value = None,
-                    ),
-                ],
-            )
+            options = [
+                InteractionOption(
+                    focused = True,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_SOURCE,
+                    value = None,
+                ),
+            ],
         ),
         None,
         [PARAMETER_WILD_CARD, 'Aki Minoriko', 'Aki Shizuha', 'Chen', 'Chiruno'],
@@ -33,46 +28,42 @@ def _iter_options():
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_SOURCE,
-                        value = None,
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_ACTION_TAG,
-                        value = 'hug',
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
-                        value = KAENBYOU_RIN.name,
-                    ),
-                ],
-            )
+            options = [
+                InteractionOption(
+                    focused = True,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_SOURCE,
+                    value = None,
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_ACTION_TAG,
+                    value = 'hug',
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_TARGET,
+                    value = KAENBYOU_RIN.name,
+                ),
+            ],
         ),
         None,
-        [PARAMETER_WILD_CARD, CHEN.name, KOMEIJI_KOISHI.name, REIUJI_UTSUHO.name],
+        [PARAMETER_WILD_CARD, CHEN.name, KAENBYOU_RIN.name, KOMEIJI_KOISHI.name, REIUJI_UTSUHO.name],
     )
     
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_SOURCE,
-                        value = 'ran',
-                    ),
-                ],
-            )
+            options = [
+                InteractionOption(
+                    focused = True,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_SOURCE,
+                    value = 'ran',
+                ),
+            ],
         ),
         'ran',
         ['ran', 'seiran', 'rin'],
@@ -81,59 +72,55 @@ def _iter_options():
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_SOURCE,
-                        value = 'rei',
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_ACTION_TAG,
-                        value = 'hug',
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
-                        value = KAENBYOU_RIN.name,
-                    ),
-                ],
-            )
+            options = [
+                InteractionOption(
+                    focused = True,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_SOURCE,
+                    value = 'rei',
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_ACTION_TAG,
+                    value = 'hug',
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_TARGET,
+                    value = KAENBYOU_RIN.name,
+                ),
+            ],
         ),
         'rei',
-        [REIUJI_UTSUHO.name.casefold()],
+        [REIUJI_UTSUHO.name.casefold(), 'rin'],
     )
     
     # Allow duplication only if source == target
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_SOURCE,
-                        value = 'koi',
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_ACTION_TAG,
-                        value = 'hug',
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
-                        value = KOMEIJI_KOISHI.name,
-                    ),
-                ],
-            )
+            options = [
+                InteractionOption(
+                    focused = True,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_SOURCE,
+                    value = 'koi',
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_ACTION_TAG,
+                    value = 'hug',
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_TARGET,
+                    value = KOMEIJI_KOISHI.name,
+                ),
+            ],
         ),
         'koi',
         ['koishi'],

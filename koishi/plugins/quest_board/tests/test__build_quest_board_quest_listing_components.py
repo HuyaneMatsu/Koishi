@@ -21,7 +21,7 @@ def _iter_options():
     quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_CARROT
     quest_template_0 = get_quest_template(quest_template_id_0)
     assert quest_template_0 is not None
-    quest_amount_0 = 36
+    quest_amount_0 = 3600
     
     quest_template_id_1 = QUEST_TEMPLATE_ID_MYSTIA_PEACH
     quest_template_1 = get_quest_template(quest_template_id_1)
@@ -33,12 +33,14 @@ def _iter_options():
     assert quest_template_2 is not None
     quest_amount_2 = 174000
     
+    user_id = 202509160000
     
     yield (
         guild_id,
         'Orin\'s dance house',
         Icon(IconType.static, 2),
         1 << 6,
+        user_id,
         0,
         QuestBatch(
             123,
@@ -83,31 +85,31 @@ def _iter_options():
             create_section(
                 create_text_display(
                     f'Required rank: H\n'
-                    f'Submit {quest_amount_0} Carrot {BUILTIN_EMOJIS["carrot"]} to Mystia.'
+                    f'Submit {quest_amount_0/1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.'
                 ),
                 thumbnail = create_button(
                     'Details',
-                    custom_id = f'quest_board.details.{quest_template_id_0:x}',
+                    custom_id = f'quest_board.details.{user_id:x}.{0:x}.{quest_template_id_0:x}',
                 ),
             ),
             create_section(
                 create_text_display(
                     f'Required rank: G\n'
-                    f'Submit {quest_amount_1} Peach {BUILTIN_EMOJIS["peach"]} to Mystia.'
+                    f'Submit {quest_amount_1} {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
                 ),
                 thumbnail = create_button(
                     'Details',
-                    custom_id = f'quest_board.details.{quest_template_id_1:x}',
+                    custom_id = f'quest_board.details.{user_id:x}.{0:x}.{quest_template_id_1:x}',
                 ),
             ),
             create_section(
                 create_text_display(
-                    f'Required rank: G\n'
-                    f'Submit {quest_amount_2 // 1000} kg Bluefrankish {BUILTIN_EMOJIS["grapes"]} to Sakuya.'
+                    f'Required rank: F\n'
+                    f'Submit {quest_amount_2 // 1000} kg {BUILTIN_EMOJIS["grapes"]} Bluefrankish to Sakuya.'
                 ),
                 thumbnail = create_button(
                     'Details',
-                    custom_id = f'quest_board.details.{quest_template_id_2:x}',
+                    custom_id = f'quest_board.details.{user_id:x}.{0:x}.{quest_template_id_2:x}',
                 ),
             ),
             create_separator(),
@@ -133,6 +135,7 @@ def _iter_options():
         'Orin\'s dance house',
         None,
         1 << 6,
+        user_id,
         0,
         QuestBatch(
             123,
@@ -164,7 +167,7 @@ def _iter_options():
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__build_quest_board_quest_listing_components(
-    guild_id, guild_name, guild_icon, credibility, page_index, quest_batch
+    guild_id, guild_name, guild_icon, credibility, user_id, page_index, quest_batch
 ):
     """
     Tests whether ``build_quest_board_quest_listing_components`` works as intended.
@@ -182,6 +185,9 @@ def test__build_quest_board_quest_listing_components(
     
     credibility : `int`
         The guild's  credibility.
+    
+    user_id : `int`
+        The invoking user's identifier.
     
     page_index : `int`
         The page's index to show.
@@ -206,7 +212,7 @@ def test__build_quest_board_quest_listing_components(
     get_quest_batch_original = type(guild_stats).get_quest_batch
     type(guild_stats).get_quest_batch = _patched_get_quest_batch
     try:
-        output = build_quest_board_quest_listing_components(guild, guild_stats, page_index)
+        output = build_quest_board_quest_listing_components(guild, guild_stats, user_id, page_index)
     finally:
         type(guild_stats).get_quest_batch = get_quest_batch_original
     

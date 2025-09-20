@@ -671,7 +671,7 @@ class GameState:
         The options allowed for the users to select from.
     event : ``InteractionEvent``
         The user who invoked the game.
-    message : `None`, ``Message``
+    message : ``None | Message``
         The message with what the game is operating with.
     client : ``Client``
         The client with who the event operates with.

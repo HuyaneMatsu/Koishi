@@ -1,8 +1,5 @@
 import vampytest
-from hata import (
-    ApplicationCommandOptionType, InteractionEvent, InteractionMetadataApplicationCommandAutocomplete,
-    InteractionOption, InteractionType
-)
+from hata import ApplicationCommandOptionType, InteractionEvent, InteractionOption, InteractionType
 
 from ...touhou_core import KAENBYOU_RIN, REIUJI_UTSUHO
 
@@ -16,16 +13,14 @@ def _iter_options():
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_NAME,
-                        value = None,
-                    ),
-                ],
-            )
+            options = [
+                InteractionOption(
+                    focused = True,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_NAME,
+                    value = None,
+                ),
+            ],
         ),
         None,
         [
@@ -40,34 +35,32 @@ def _iter_options():
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_NAME,
-                        value = None,
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_ACTION_TAG,
-                        value = 'hug',
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_SOURCE,
-                        value = KAENBYOU_RIN.name,
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
-                        value = REIUJI_UTSUHO.name,
-                    ),
-                ],
-            )
+            options = [
+                InteractionOption(
+                    focused = True,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_NAME,
+                    value = None,
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_ACTION_TAG,
+                    value = 'hug',
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_SOURCE,
+                    value = KAENBYOU_RIN.name,
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_TARGET,
+                    value = REIUJI_UTSUHO.name,
+                ),
+            ],
         ),
         None,
         [
@@ -81,16 +74,14 @@ def _iter_options():
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_NAME,
-                        value = 'ran',
-                    ),
-                ],
-            )
+            options = [
+                InteractionOption(
+                    focused = True,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_NAME,
+                    value = 'ran',
+                ),
+            ],
         ),
         'ran',
         ['ran-kon-0000', 'ran-kon-0001', 'ran-kon-0002', 'ran-kon-0003', 'ran-kon-0004'],
@@ -99,34 +90,32 @@ def _iter_options():
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_NAME,
-                        value = 'ok',
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_ACTION_TAG,
-                        value = 'hug',
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_SOURCE,
-                        value = KAENBYOU_RIN.name,
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
-                        value = REIUJI_UTSUHO.name,
-                    ),
-                ],
-            )
+            options = [
+                InteractionOption(
+                    focused = True,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_NAME,
+                    value = 'ok',
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_ACTION_TAG,
+                    value = 'hug',
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_SOURCE,
+                    value = KAENBYOU_RIN.name,
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_TARGET,
+                    value = REIUJI_UTSUHO.name,
+                ),
+            ],
         ),
         'okuu-orin-hug-0002',
         ['okuu-orin-hug-0002'],

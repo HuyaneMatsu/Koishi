@@ -1,8 +1,5 @@
 import vampytest
-from hata import (
-    ApplicationCommandOptionType, InteractionEvent, InteractionMetadataApplicationCommandAutocomplete,
-    InteractionOption, InteractionType
-)
+from hata import ApplicationCommandOptionType, InteractionEvent, InteractionOption, InteractionType
 
 from ...touhou_core import KAENBYOU_RIN, REIUJI_UTSUHO
 
@@ -16,16 +13,14 @@ def _iter_options():
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_ACTION_TAG,
-                        value = None,
-                    ),
-                ],
-            )
+            options = [
+                InteractionOption(
+                    focused = True,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_ACTION_TAG,
+                    value = None,
+                ),
+            ],
         ),
         None,
         [PARAMETER_WILD_CARD, *sorted(ACTION_NAME_TO_TAG.keys())],
@@ -34,16 +29,14 @@ def _iter_options():
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_ACTION_TAG,
-                        value = 'f',
-                    ),
-                ],
-            )
+            options = [
+                InteractionOption(
+                    focused = True,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_ACTION_TAG,
+                    value = 'f',
+                ),
+            ],
         ),
         'f',
         ['feed', 'fluff'],
@@ -52,28 +45,26 @@ def _iter_options():
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_ACTION_TAG,
-                        value = None,
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_SOURCE,
-                        value = KAENBYOU_RIN.name,
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
-                        value = REIUJI_UTSUHO.name,
-                    ),
-                ],
-            )
+            options = [
+                InteractionOption(
+                    focused = True,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_ACTION_TAG,
+                    value = None,
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_SOURCE,
+                    value = KAENBYOU_RIN.name,
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_TARGET,
+                    value = REIUJI_UTSUHO.name,
+                ),
+            ],
         ),
         None,
         [PARAMETER_WILD_CARD, 'hug'],
@@ -82,28 +73,26 @@ def _iter_options():
     yield (
         InteractionEvent(
             interaction_type = InteractionType.application_command_autocomplete,
-            interaction = InteractionMetadataApplicationCommandAutocomplete(
-                options = [
-                    InteractionOption(
-                        focused = True,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_ACTION_TAG,
-                        value = 'h',
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_SOURCE,
-                        value = KAENBYOU_RIN.name,
-                    ),
-                    InteractionOption(
-                        focused = False,
-                        option_type = ApplicationCommandOptionType.string,
-                        name = PARAMETER_NAME_TARGET,
-                        value = REIUJI_UTSUHO.name,
-                    ),
-                ],
-            )
+            options = [
+                InteractionOption(
+                    focused = True,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_ACTION_TAG,
+                    value = 'h',
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_SOURCE,
+                    value = KAENBYOU_RIN.name,
+                ),
+                InteractionOption(
+                    focused = False,
+                    option_type = ApplicationCommandOptionType.string,
+                    name = PARAMETER_NAME_TARGET,
+                    value = REIUJI_UTSUHO.name,
+                ),
+            ],
         ),
         'h',
         ['hug'],

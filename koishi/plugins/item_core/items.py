@@ -3,17 +3,19 @@ __all__ = ()
 from hata import BUILTIN_EMOJIS
 
 from ..item_modifier_core import (
-    MODIFIER_ID__FISHING, MODIFIER_ID__STAT_BEDROOM, MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_ID__STAT_LOYALTY,
-    MODIFIER_KIND__FLAT, Modifier, construct_modifier_type
+    MODIFIER_ID__BUTCHERING, MODIFIER_ID__FISHING, MODIFIER_ID__FORAGING, MODIFIER_ID__GARDENING,
+    MODIFIER_ID__STAT_BEDROOM, MODIFIER_ID__STAT_CHARM, MODIFIER_ID__STAT_CUTENESS, MODIFIER_ID__STAT_HOUSEWIFE,
+    MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT, MODIFIER_KIND__PERCENT, Modifier, construct_modifier_type
 )
 
 from .constants import ITEMS
 from .flags import ITEM_FLAG_EDIBLE, ITEM_FLAG_NPC, ITEM_FLAG_WEAPON
 from .item import Item
 from .item_ids import (
-    ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FISHING_ROD,
-    ITEM_ID_FLYKILLER_AMANATA, ITEM_ID_GARLIC, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_PEACH, ITEM_ID_SAKUYA,
-    ITEM_ID_SCARLET_ONION, ITEM_ID_STRAWBERRY
+    ITEM_ID_ALICE, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_CHIRUNO, ITEM_ID_DEVILCART_OYSTER,
+    ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_KOISHI, ITEM_ID_MARISA,
+    ITEM_ID_MYSTIA, ITEM_ID_ORIN, ITEM_ID_PEACH, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS,
+    ITEM_ID_STRAWBERRY
 )
 
 
@@ -27,8 +29,8 @@ ITEM_STRAWBERRY = ITEMS[ITEM_ID_STRAWBERRY] = Item(
         'Although they are not native to Gensoukyou, they can be found around the **Ruins**.'
     ),
     ITEM_FLAG_EDIBLE,
-    28, # value (hearts)
-    32, # weight (grams)
+    21, # value (hearts)
+    24, # weight (grams)
     None,
 )
 
@@ -85,9 +87,9 @@ ITEM_DEVILCART_OYSTER = ITEMS[ITEM_ID_DEVILCART_OYSTER] = Item(
 )
 
 
-ITEM_FLYKILLER_AMANATA = ITEMS[ITEM_ID_FLYKILLER_AMANATA] = Item(
-    ITEM_ID_FLYKILLER_AMANATA,
-    'Flykiller amanata',
+ITEM_FLYKILLER_AMANITA = ITEMS[ITEM_ID_FLYKILLER_AMANITA] = Item(
+    ITEM_ID_FLYKILLER_AMANITA,
+    'Flykiller amanita',
     BUILTIN_EMOJIS['mushroom'],
     (
         'A toxic mushroom mainly noted for its hallucinogenic properties. '
@@ -150,11 +152,11 @@ ITEM_CARROT = ITEMS[ITEM_ID_CARROT] = Item(
     'Carrot',
     BUILTIN_EMOJIS['carrot'],
     (
-        'A root vegetable cultivated in many colors from yellow through red till purple. '
+        'A root vegetable cultivated in many colours from yellow through red till purple. '
         'It is sweet and a significant source of vitamins. '
         'Its a biennial plant, first year it stores its energy in its taproot enabling itself to flower in the second.\n'
         '\n'
-        'They can be found in the **Human Village** and at the outskirts of the **Eientei mansion**.'
+        'They can be found in the outskirts of **Human Village** and around the **Eientei mansion**.'
     ),
     ITEM_FLAG_EDIBLE,
     27, # value (hearts)
@@ -235,6 +237,104 @@ ITEM_MARISA = ITEMS[ITEM_ID_MARISA] = Item(
     None,
 )
 
+
+ITEM_ALICE = ITEMS[ITEM_ID_ALICE] = Item(
+    ITEM_ID_ALICE,
+    'Alice',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_KOISHI = ITEMS[ITEM_ID_KOISHI] = Item(
+    ITEM_ID_KOISHI,
+    'Koishi',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_ORIN = ITEMS[ITEM_ID_ORIN] = Item(
+    ITEM_ID_ORIN,
+    'Orin',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_SCISSORS = ITEMS[ITEM_ID_SCISSORS] = Item(
+    ITEM_ID_SCISSORS,
+    'Scissors',
+    BUILTIN_EMOJIS['scissors'],
+    (
+        'A hand operation shearing tool.\n'
+        'It has blades pivoted in a way that when the handles are pulled into each other, '
+        'the sharpened edges on the other end of the tool slide into each other.\n'
+        'They are meant to be used for cutting various thin materials. '
+        'There are also many specialized ones as well, for example for cutting hair, metal, meat or branches.'
+    ),
+    ITEM_FLAG_WEAPON,
+    8000, # value (hearts)
+    70, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +3),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__BUTCHERING, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__GARDENING, MODIFIER_KIND__PERCENT), +10),
+        Modifier(construct_modifier_type(MODIFIER_ID__FORAGING, MODIFIER_KIND__PERCENT), +20),
+    ),
+)
+
+
+ITEM_FROG = ITEMS[ITEM_ID_FROG] = Item(
+    ITEM_ID_FROG,
+    'Frog',
+    BUILTIN_EMOJIS['frog'],
+    (
+        'Tailless amphibians with flattened body, protruding eyes and with weak front, but long muscular back legs '
+        'specialized in jumping.\n'
+        'They have a carnivorous diet which mainly consist of insects. '
+        'They look defenseless, but they are admissible in camouflage, and can flee dexterously by leaping with their '
+        'strong back legs.'
+        'The skin of many frogs contains mild toxin, the ones with more potent ones usually advertise it with bright '
+        'colours.\n'
+        'Frogs usually spawn their eggs in water bodies. These eggs hatch into fully aquatic tadpoles which have '
+        'tails and internal grills.'
+        'Their life cycle is completed when they metamorphose into their semiaquatic adult form.\n'
+        '\n'
+        'They can be most commonly found around wetlands, like the **Misty Lake**.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    46, # value (hearts)
+    24, # weight (grams)
+    None,
+)
+
+
+ITEM_CHIRUNO = ITEMS[ITEM_ID_CHIRUNO] = Item(
+    ITEM_ID_CHIRUNO,
+    'Chiruno',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
 
 
 # Some ideas:

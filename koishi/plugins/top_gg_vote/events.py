@@ -6,7 +6,7 @@ from ...bot_utils.external_event_types import EXTERNAL_EVENT_TYPE_TOP_GG_VOTE
 
 from ..external_events import add_handler, remove_handler
 
-from . top_gg_vote import handle_top_gg_vote
+from .top_gg_vote import handle_top_gg_vote
 
 
 def setup(module):

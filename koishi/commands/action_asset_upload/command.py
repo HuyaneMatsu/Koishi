@@ -14,7 +14,7 @@ from ..action_asset_format_converter.grouping import read_asset_entries
 from .filtering import (
     classify_asset_entry_parts, filter_new_asset_entries, get_image_detail_names, get_image_detail_tags
 )
-from .rendering import get_renderer_for
+from .rendering import get_producer_for
 
 
 async def upload(client, asset_entry, channel_id):
@@ -73,9 +73,9 @@ def upload_action_assets(
             characters, action_tags, unidentified = classify_asset_entry_parts(
                 asset_entry, registered_action_tags, get_touhou_character_like
             )
-            renderer = get_renderer_for(characters, action_tags, unidentified)
+            producer = get_producer_for(characters, action_tags, unidentified)
             url = parse_signed_url(attachment.url).url
-            sys.stdout.write(renderer(characters, action_tags, unidentified, creator, url))
+            sys.stdout.write(''.join([*producer(characters, action_tags, unidentified, creator, url)]))
     
     finally:
         KOKORO.stop()

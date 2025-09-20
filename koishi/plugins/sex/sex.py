@@ -5,6 +5,7 @@ from random import random
 from hata import DiscordException, ERROR_CODES, Embed, Permission
 from hata.ext.slash import abort
 
+from ...bot_utils.constants import ROLE__SUPPORT__NSFW_ACCESS
 from ...bots import FEATURE_CLIENTS
 
 from .constants import SEX_IMAGES
@@ -41,6 +42,11 @@ async def sex(client, event):
         abort('Cannot execute this command without `embed links` permission.')
     
     value = random()
+    
+    # If the user has nsfw role increase their chance by 25%
+    if event.user.has_role(ROLE__SUPPORT__NSFW_ACCESS):
+        value *= 0.80
+    
     if value > 0.150: # no sex
         level = 0
     

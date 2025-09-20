@@ -301,7 +301,7 @@ async def handle_user_settings_set_preferred_client(client, interaction_event, v
     else:
         await client.interaction_component_acknowledge(interaction_event)
     
-    hit, client = get_user_settings_preferred_client(interaction_event, value)
+    hit, chosen_client = get_user_settings_preferred_client(interaction_event, value)
     if not hit:
         changed = False
     
@@ -310,10 +310,11 @@ async def handle_user_settings_set_preferred_client(client, interaction_event, v
         changed = await set_user_settings_option(
             user_settings,
             OPTION_PREFERRED_CLIENT_ID,
-            0 if client is None else client.id,
+            0 if chosen_client is None else chosen_client.id,
         )
     
-    embed = build_user_settings_preferred_client_change_embed(interaction_event.user, client, hit, changed)
+    embed = build_user_settings_preferred_client_change_embed(interaction_event.user, chosen_client, hit, changed)
+    
     
     if interaction_event.type is InteractionType.application_command:
         await client.interaction_response_message_edit(

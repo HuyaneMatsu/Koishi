@@ -18,10 +18,11 @@ An adventure flow is the following:
     - return
 
 The adventure is stepped till:
-    - The adventure is cancelled.
-    - Time limit is hit.
-    - Health is less or equal to 0. (Battles are not implemented yet, so this is not added.)
-    - Cancellation condition says so.
+
+- The adventure is cancelled.
+- Time limit is hit.
+- Health is less or equal to 0. (Battles are not implemented yet, so this is not added.)
+- Cancellation condition says so.
 
 
 # Adventure locations
@@ -65,7 +66,8 @@ Each action offers their own cost, battles and loot.
     - Foraging
         - Foraging
             - Devilcart oyster (common)
-            - Flykiller amanata (common)
+            - Flykiller amanita (common)
+            - Scissors (epic)
         - Trapped
 
 - Hakugyokurou mansion
@@ -78,3 +80,9 @@ Each action offers their own cost, battles and loot.
     - Foraging
         - Foraging
             - BlueBerry (common)
+
+- Misty lake
+    - Foraging
+        - Foraging
+            - Frog (common)
+            - Fishing rod (rare)

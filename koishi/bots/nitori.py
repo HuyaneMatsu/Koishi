@@ -8,9 +8,9 @@ from time import perf_counter
 from hata import (
     BUILTIN_EMOJIS, ButtonStyle, Channel, Client, Color, DATETIME_FORMAT_CODE, DiscordException, ERROR_CODES, Embed,
     Emoji, InteractionForm, Permission, Role, SeparatorSpacingSize, StringSelectOption, TextInputStyle,
-    create_attachment_media, create_button, create_container, create_media_gallery, create_row, create_section,
-    create_separator, create_string_select, create_text_display, create_text_input, create_thumbnail_media,
-    elapsed_time, id_to_datetime, parse_emoji
+    create_attachment_media, create_button, create_container, create_label, create_media_gallery, create_row,
+    create_section, create_separator, create_string_select, create_text_display, create_text_input,
+    create_thumbnail_media, create_user_select, elapsed_time, id_to_datetime, parse_emoji
 )
 from hata.ext.slash import (
     InteractionResponse, P, abort, configure_parameter, iter_component_interactions, wait_for_component_interaction
@@ -598,26 +598,26 @@ async def voice_channel_name_length(
 # command start slash character-popularity
 
 MOST_POPULAR_TOUHOU_CHARACTERS = [
-    'Konpaku Youmu',
+    'Komeiji Koishi',
     'Kirisame Marisa',
     'Hakurei Reimu',
-    'Komeiji Koishi',
     'Scarlet Flandre',
     'Izayoi Sakuya',
     'Scarlet Remilia',
-    'Fujiwara no Mokou',
+    'Konpaku Youmu',
     'Komeiji Satori',
-    'Saigyouji Yuyuko',
-    'Shameimaru Aya',
-    'Margatroid Alice',
-    'Kochiya Sanae',
-    'Reisen Udongein Inaba',
-    'Hinanawi Tenshi',
-    'Yakumo Yukari',
-    'Hata no Kokoro',
+    'Fujiwara no Mokou',
     'Chiruno',
+    'Shameimaru Aya',
+    'Saigyouji Yuyuko',
+    'Kochiya Sanae',
+    'Margatroid Alice',
+    'Reisen Udongein Inaba',
+    'Yakumo Yukari',
+    'Hong Meiling',
     'Patchouli Knowledge',
-    'Tatara Kogasa',
+    'Rumia',
+    'Hata no Kokoro',
 ]
 
 @Nitori.interactions(guild = TEST_GUILD)
@@ -773,7 +773,7 @@ async def pick_cake(
 async def exclusive_autocomplete_cake_name(event, actual_cake_name):
     excluded_cake_names = set()
     
-    for cake_name in event.interaction.get_non_focused_values().values():
+    for cake_name in event.get_non_focused_values().values():
         if cake_name is not None:
             cake_name = get_cake_name_like(cake_name)
             if cake_name is not None:
@@ -834,7 +834,7 @@ async def shop(
 
 @shop.autocomplete('type_')
 async def autocomplete_product_type(event, value):
-    product = event.interaction.get_value_of('product')
+    product = event.get_value_of('product')
     if product is None:
         return
     
@@ -1147,7 +1147,7 @@ async def choose_your_poison():
 
 @Nitori.interactions(custom_id = [CUSTOM_ID_CAKE, CUSTOM_ID_CAT, CUSTOM_ID_SNAKE, CUSTOM_ID_EGGPLANT])
 async def poison_edit_cake(event):
-    emoji = CHOOSE_YOUR_POISON_CUSTOM_ID_TO_EMOJI.get(event.interaction.custom_id, None)
+    emoji = CHOOSE_YOUR_POISON_CUSTOM_ID_TO_EMOJI.get(event.custom_id, None)
     if (emoji is not None):
         return emoji.as_emoji
 
@@ -1205,7 +1205,7 @@ async def add_emoji(
         component_interaction = None
         cancelled = True
     else:
-        if component_interaction.interaction == ADD_EMOJI_BUTTON_CANCEL:
+        if component_interaction.component % ADD_EMOJI_BUTTON_CANCEL:
             cancelled = True
         else:
             cancelled = False
@@ -1338,14 +1338,11 @@ async def waifu():
 
 
 @Nitori.interactions(custom_id = WAIFU_CUSTOM_ID)
-async def handle_waifu_select(client, event):
+async def handle_waifu_select(client, event, *, selected_waifu_types):
     # We filter out 3rd party users based on original and current invoking user.
     if event.message.interaction.user_id != event.user_id:
         return
     
-    # Second we filter out incorrect selected values.
-    # You can change the command over time and the can return bad option as well.
-    selected_waifu_types = event.values
     if (selected_waifu_types is None):
         return
     
@@ -1403,7 +1400,13 @@ async def handle_waifu_select(client, event):
     
     # We re-build the select again with one difference, we mark the used one as default.
     select = create_string_select(
-        [StringSelectOption(waifu_type, waifu_type, default = (waifu_type == selected_waifu_type)) for waifu_type in WAIFU_TYPES],
+        [
+            StringSelectOption(
+                waifu_type,
+                waifu_type,
+                default = (waifu_type == selected_waifu_type)
+            ) for waifu_type in WAIFU_TYPES
+        ],
         custom_id = WAIFU_CUSTOM_ID,
     )
     
@@ -1465,22 +1468,24 @@ async def zoo(event):
     except TimeoutError:
         content = 'You didn\'t decide which animals to visit and the zoo closed, see ya tomorrow!'
         component_interaction = None
+    
     else:
-        selected_animals = component_interaction.values
-        if selected_animals is None:
-            content = 'Going to zoo only to buy icecream?'
-        else:
-            content_parts = ['Visiting animals in the zoo!']
-            
-            for selected_animal in selected_animals:
-                try:
-                    description = ANIMAL_IDENTIFIER_TO_DESCRIPTION[selected_animal]
-                except KeyError:
-                    continue
+        for custom_id, component_type, value_or_values in component_interaction.iter_custom_ids_and_values():
+            if value_or_values is None:
+                content = 'Going to zoo only to buy icecream?'
+            else:
+                content_parts = ['Visiting animals in the zoo!']
                 
-                content_parts.append(description)
-            
-            content = '\n\n'.join(content_parts)
+                for selected_animal in value_or_values:
+                    try:
+                        description = ANIMAL_IDENTIFIER_TO_DESCRIPTION[selected_animal]
+                    except KeyError:
+                        continue
+                    
+                    content_parts.append(description)
+                
+                content = '\n\n'.join(content_parts)
+            break
     
     yield InteractionResponse(content, components = None, message = message, event = component_interaction)
 
@@ -1592,18 +1597,22 @@ async def party(client, event):
 INTRODUCTION_FORM = InteractionForm(
     'Introduce yourself',
     [
-        create_text_input(
+        create_label(
             'What is your name?',
-            min_length = 2,
-            max_length = 128,
-            custom_id = 'name',
+            component = create_text_input(
+                min_length = 2,
+                max_length = 128,
+                custom_id = 'name',
+            ),
         ),
-        create_text_input(
+        create_label(
             'Something about you?',
-            style = TextInputStyle.paragraph,
-            min_length = 64,
-            max_length = 1024,
-            custom_id = 'bio',
+            component = create_text_input(
+                style = TextInputStyle.paragraph,
+                min_length = 64,
+                max_length = 1024,
+                custom_id = 'bio',
+            ),
         ),
     ],
     custom_id = 'introduction',
@@ -1633,11 +1642,13 @@ async def introduction_form_submit(event, *, name, bio):
 ADD_ROLE_FORM = InteractionForm(
     'Add role', # Any dummy title does it
     [
-        create_text_input(
+        create_label(
             'Additional message to send?',
-            style = TextInputStyle.paragraph,
-            max_length = 512,
-            custom_id = 'message',
+            component = create_text_input(
+                style = TextInputStyle.paragraph,
+                max_length = 512,
+                custom_id = 'message',
+            ),
         ),
     ],
 )
@@ -1762,41 +1773,49 @@ class Waifu:
 
 # We will need these 3 in an example later
 
-TEXT_INPUT_WAIFU_BIO = create_text_input(
+FIELD_INPUT_WAIFU_BIO = create_label(
     'Bio',
-    style = TextInputStyle.paragraph,
-    min_length = 64,
-    max_length = 1024,
-    custom_id = CUSTOM_ID_WAIFU_BIO,
+    component = create_text_input(
+        style = TextInputStyle.paragraph,
+        min_length = 64,
+        max_length = 1024,
+        custom_id = CUSTOM_ID_WAIFU_BIO,
+    ),
 )
 
-TEXT_INPUT_WAIFU_AGE = create_text_input(
+FIELD_INPUT_WAIFU_AGE = create_label(
     'Age',
-    min_length = 1,
-    max_length = 1024,
-    custom_id = CUSTOM_ID_WAIFU_AGE,
+    component = create_text_input(
+        min_length = 1,
+        max_length = 1024,
+        custom_id = CUSTOM_ID_WAIFU_AGE,
+    ),
 )
 
-TEXT_INPUT_WAIFU_HAIR = create_text_input(
+FIELD_INPUT_WAIFU_HAIR = create_label(
     'hair',
-    min_length = 1,
-    max_length = 1024,
-    custom_id = CUSTOM_ID_WAIFU_HAIR,
+    component = create_text_input(
+        min_length = 1,
+        max_length = 1024,
+        custom_id = CUSTOM_ID_WAIFU_HAIR,
+    ),
 )
 
 
 WAIFU_FORM = InteractionForm(
     'Describe your waifu',
     [
-        create_text_input(
+        create_label(
             'Name',
-            min_length = 2,
-            max_length = 64,
-            custom_id = CUSTOM_ID_WAIFU_NAME,
+            component = create_text_input(
+                min_length = 2,
+                max_length = 64,
+                custom_id = CUSTOM_ID_WAIFU_NAME,
+            ),
         ),
-        TEXT_INPUT_WAIFU_BIO,
-        TEXT_INPUT_WAIFU_AGE,
-        TEXT_INPUT_WAIFU_HAIR,
+        FIELD_INPUT_WAIFU_BIO,
+        FIELD_INPUT_WAIFU_AGE,
+        FIELD_INPUT_WAIFU_HAIR,
     ],
     custom_id = CUSTOM_ID_WAIFU_FORM,
 )
@@ -1857,10 +1876,10 @@ CUSTOM_ID_WAIFU_EDIT_BASE = 'waifu.edit.'
 CUSTOM_ID_WAIFU_EDIT_REGEX = re.compile('waifu\\.edit\\.(.*)')
 CUSTOM_ID_WAIFU_FIELD_ALL = re.compile('waifu\\.(?P<field>age|bio|hair)')
 
-FIELD_TO_TEXT_INPUT = {
-    'age': TEXT_INPUT_WAIFU_AGE,
-    'bio': TEXT_INPUT_WAIFU_BIO,
-    'hair': TEXT_INPUT_WAIFU_HAIR,
+FIELD_INPUTS = {
+    'age': FIELD_INPUT_WAIFU_AGE,
+    'bio': FIELD_INPUT_WAIFU_BIO,
+    'hair': FIELD_INPUT_WAIFU_HAIR,
 }
 
 FIELD_TO_ATTRIBUTE = {
@@ -1886,14 +1905,14 @@ async def edit_waifu(
     if waifu.user is not event.user:
         abort('You can only edit waifus added by yourself.')
     
-    text_input = FIELD_TO_TEXT_INPUT[field]
+    field_input = FIELD_INPUTS[field]
     
     # We auto-fill the current value
-    text_input = text_input.copy_with(value = FIELD_TO_ATTRIBUTE[field].__get__(waifu, Waifu))
+    field_input = field_input.copy_with(value = FIELD_TO_ATTRIBUTE[field].__get__(waifu, Waifu))
     
     return InteractionForm(
         f'Editing {waifu.name}',
-        [text_input],
+        [field_input],
         custom_id = f'{CUSTOM_ID_WAIFU_EDIT_BASE}{key}',
     )
 
@@ -1980,6 +1999,85 @@ async def rate_cake_form_submit(
         embed.add_field(cake, rating)
     
     return embed
+
+# command end
+# command start forms award
+
+CUSTOM_ID_AWARD = 'award'
+
+REWARD_FORM = InteractionForm(
+    'Reward',
+    [
+        create_text_display(
+            '**Who** and with **what** would like to reward them?\n'
+            'What about telling them **why** as well?'
+        ),
+        create_label(
+            'Who you want to reward?',
+            'Select up to 10 users.',
+            component = create_user_select(
+                custom_id = 'users',
+                min_values = 1,
+                max_values = 10,
+            ),
+        ),
+        create_label(
+            'With what would you like to reward them?',
+            component = create_string_select(
+                [
+                    StringSelectOption('Cake',),
+                    StringSelectOption('Cookie',),
+                    StringSelectOption('Pudding',),
+                    StringSelectOption('Chocomilk',),
+                ],
+                custom_id = 'items',
+                min_values = 1,
+                max_values = 4,
+            ),
+        ),
+        create_label(
+            'Why would you like to reward them?',
+            component = create_text_input(
+                custom_id = 'reason',
+                min_length = 1,
+                max_length = 1000,
+                style = TextInputStyle.paragraph,
+            )
+        ),
+    ],
+    custom_id = CUSTOM_ID_AWARD,
+)
+
+
+@Nitori.interactions(guild = TEST_GUILD)
+async def reward():
+    """Reward people with sweets."""
+    return REWARD_FORM
+
+
+@Nitori.interactions(custom_id = CUSTOM_ID_AWARD, target = 'form')
+async def handle(event, *, users, items, reason):
+    content_parts = []
+    for user in users:
+        content_parts.append(user.mention)
+        content_parts.append(' ')
+    content_parts.append('!!!\n\n')
+    
+    content_parts.append(event.user.mention)
+    content_parts.append(' awarded you with:')
+    for item in items:
+        content_parts.append('\n- ')
+        content_parts.append(item)
+    content_parts.append('\n\n')
+
+    content_parts.append('They say:\n')
+    content_parts.append(reason)
+
+    return InteractionResponse(
+        allowed_mentions = None,
+        content = ''.join(content_parts),
+    )
+
 
 # command end
 # command start typing-interactions show-emoji

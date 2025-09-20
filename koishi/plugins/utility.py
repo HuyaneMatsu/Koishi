@@ -9,8 +9,8 @@ from math import ceil
 from PIL import Image as PIL
 from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import (
-    BUILTIN_EMOJIS, Color, DATETIME_FORMAT_CODE, Embed, ICON_TYPE_NONE, InviteTargetType, KOKORO, Permission, Status,
-    cchunkify, elapsed_time, escape_markdown, parse_color
+    BUILTIN_EMOJIS, Color, DATETIME_FORMAT_CODE, DiscordException, Embed, ERROR_CODES, ICON_TYPE_NONE,
+    InviteTargetType, KOKORO, Permission, Status, cchunkify, elapsed_time, escape_markdown, parse_color
 )
 from hata.discord.application.application.constants import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
 from hata.ext.slash import InteractionResponse, abort
@@ -117,7 +117,11 @@ async def raw(client, event):
     if not event.user_permissions.manage_messages:
         abort('You must have manage messages permission to invoke this command.')
     
-    data = await client.api.message_get(event.channel_id, event.interaction.target_id)
+    if not event.application_permissions.view_channel:
+        abort('I must have application permissions to execute this command.')
+    
+    data = await client.api.message_get(event.channel_id, event.target_id)
+    
     chunks = cchunkify(json.dumps(data, indent = 4, sort_keys = True).splitlines())
     
     pages = [Embed(description = chunk) for chunk in chunks]
@@ -401,11 +405,11 @@ async def in_role(
 
 
 @FEATURE_CLIENTS.interactions(is_global = True, target = 'user')
-async def status_(user):
+async def status_(event, user):
     status = user.status
     emoji = STATUS_VALUE_TO_HEART_EMOJI.get(status.value, EMOJI_HEART_BLACK)
     
-    embed = Embed(f'{user.full_name}\'s status', f'{emoji} {status.name}').add_thumbnail(user.avatar_url)
+    embed = Embed(f'{user.name_at(event.guild_id)}\'s status', f'{emoji} {status.name}').add_thumbnail(user.avatar_url)
     
     status_by_platform = user.status_by_platform
     if (status_by_platform is not None):
@@ -417,7 +421,7 @@ async def status_(user):
             if field_value_parts:
                 field_value_parts.append('\n')
             
-            field_value_parts.append(platform)
+            field_value_parts.append(platform.name)
             field_value_parts.append(': ')
             field_value_parts.append(emoji.as_emoji)
             field_value_parts.append(' ')

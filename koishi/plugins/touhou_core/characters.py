@@ -123,6 +123,7 @@ DAIYOUSEI = TouhouCharacter(
     'Daiyousei',
     (
         '大妖精',
+        'Dai',
     ),
 )
 
@@ -969,6 +970,7 @@ MEDICINE_MELANCHOLY = TouhouCharacter(
     (
         'メディスン メランコリー',
         'Merankorii Medisun',
+        'Medi',
     ),
 )
 

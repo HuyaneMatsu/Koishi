@@ -266,7 +266,7 @@ async def add_guild_boosters_field(client, guild, embed, even_if_empty):
         )
         
         if count:
-            for user in boosters[:21]:
+            for user in boosters[:20]:
                 embed.add_field(
                     user.full_name,
                     f'since: {elapsed_time(user.get_guild_profile_for(guild).boosts_since)}',

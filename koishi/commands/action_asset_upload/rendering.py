@@ -3,83 +3,76 @@ __all__ = ()
 
 ACTION_TAGS_SINGLE_SOURCE = ('cry', 'happy', 'kon', 'stare', 'wave', 'wink')
 ACTION_TAGS_SELF_TARGET = ('pocky_self', 'feed_self')
+ACTION_TAGS_CROSS_TARGET = ('handhold',)
 
 
-def _render_url_into(into, url):
+def _produce_url(url):
     """
-    Renders an url section.
+    Produces an url section.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
-    into : `list<str>`
-        Container render into.
-    
     url : `str`
-        The url to render.
+        The url to produce.
     
-    Returns
-    -------
-    into : `list<str>`
+    Yields
+    ------
+    part : `str`
     """
-    into.append('TOUHOU_ACTION_ALL.add(\n    ')
-    into.append(repr(url))
-    into.append(',\n)')
-    return into
+    yield 'TOUHOU_ACTION_ALL.add(\n    '
+    yield repr(url)
+    yield ',\n)'
 
 
-def _render_action_internal_into(into, action_tag, source_character, target_character):
+def _produce_action_internal(action_tag, source_character, target_character):
     """
-    Renders an internal action part.
+    produces an internal action part.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
-    into : `list<str>`
-        Container render into.
-    
-    action_tag : `str`
-        The action tag to render.
-    
     source_character : `None | TouhouCharacter`
         Source touhou character.
     
     target_character : `None | TouhouCharacter`
         Target touhou character.
     
-    Returns
-    -------
-    into : `list<str>`
+    Yields
+    ------
+    part : `str`
     """
-    into.append('ACTION_TAG_')
-    into.append(action_tag.upper())
-    into.append(', ')
+    yield 'ACTION_TAG_'
+    yield action_tag.upper()
+    yield ', '
     
     if source_character is None:
         character_variable_name = 'None'
     else:
         character_variable_name = source_character.system_name.upper()
-    into.append(character_variable_name)
+    yield character_variable_name
     
-    into.append(', ')
+    yield ', '
     
     if target_character is None:
         character_variable_name = 'None'
     else:
         character_variable_name = target_character.system_name.upper()
-    into.append(character_variable_name)
-    return into
+    yield character_variable_name
 
 
-def _render_single_action_into(into, action_tag, source_character, target_character):
+def _produce_single_action(action_tag, source_character, target_character):
     """
-    Renders a single action tags section.
+    Produces a single action tags section.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
-    into : `list<str>`
-        Container render into.
-    
     action_tag : `str`
-        The action tag to render.
+        The action tag to produce.
     
     source_character : `None | TouhouCharacter`
         Source touhou character.
@@ -87,135 +80,147 @@ def _render_single_action_into(into, action_tag, source_character, target_charac
     target_character : `None | TouhouCharacter`
         Target touhou character.
     
-    Returns
-    -------
-    into : `list<str>`
+    Yields
+    ------
+    part : `str`
     """
-    into.append('.with_action(\n    ')
-    into = _render_action_internal_into(into, action_tag, source_character, target_character)
-    into.append(',\n)')
-    return into
+    yield '.with_action(\n    '
+    yield from _produce_action_internal(action_tag, source_character, target_character)
+    yield ',\n)'
 
 
-def _render_empty_action_tags_into(into, action_tags):
+def _produce_multiple_action(*items):
+    """
+    Produces a multiple action tags section.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    *items : `(str, None | TouhouCharacter, None | TouhouCharacter)`
+        Action items to produce.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    yield '.with_actions(\n'
+    for item in items:
+        yield '    ('
+        yield from _produce_action_internal(*item)
+        yield '),\n'
+    yield ')'
+
+
+def _produce_empty_action_tags(action_tags):
     """
     Renders an action tags section.
     
+    This function is an iterable generator.
+    
     Parameters
     ----------
-    into : `list<str>`
-        Container render into.
-    
     action_tags : `None | set<str>`
-        Action tags to render.
+        Action tags to produce.
     
-    Returns
-    -------
-    into : `list<str>`
+    Yields
+    ------
+    part : `str`
     """
     if (action_tags is not None):
         if len(action_tags) == 1:
-            into = _render_single_action_into(into, next(iter(action_tags)), None, None)
+            yield from _produce_single_action(next(iter(action_tags)), None, None)
         else:
-            into.append('.with_actions(\n')
+            yield '.with_actions(\n'
             
             for action_tag in sorted(action_tags):
-                into.append('    (')
-                into = _render_action_internal_into(into, action_tag, None, None)
-                into.append('),\n')
+                yield '    ('
+                yield from _produce_action_internal(action_tag, None, None)
+                yield '),\n'
             
-            into.append(')')
-    
-    return into
+            yield ')'
 
 
-def _render_characters_into(into, characters):
+def _produce_characters(characters):
     """
     Renders a characters section.
     
+    This function is an iterable generator.
+    
     Parameters
     ----------
-    into : `list<str>`
-        Container render into.
-    
     characters : `None | set<TouhouCharacter>`
-        The characters to render.
+        The characters to produce.
     
-    Returns
-    -------
-    into : `list<str>`
+    Yields
+    ------
+    part : `str`
     """
     if (characters is not None):
-        into.append('.with_character')
+        yield '.with_character'
         if len(characters) > 1:
-            into.append('s')
-        into.append('(\n')
+            yield 's'
+        yield '(\n'
         
         for character_name in sorted(character.system_name for character in characters):
-            into.append('    ')
-            into.append(character_name.upper())
-            into.append(',\n')
+            yield '    '
+            yield character_name.upper()
+            yield ',\n'
         
-        into.append(')')
-    
-    return into
+        yield ')'
 
 
-def _render_creator_into(into, creator):
+def _produce_creator(creator):
     """
     Renders a creator section.
     
+    This function is an iterable generator.
+    
     Parameters
     ----------
-    into : `list<str>`
-        Container render into.
-    
     creator : `None | str`
         Image creator.
     
-    Returns
-    -------
-    into : `list<str>`
+    Yields
+    ------
+    part : `str`
     """
     if (creator is not None):
-        into.append('.with_creator(\n    ')
-        into.append(repr(creator))
-        into.append(',\n)')
-    
-    return into
+        yield '.with_creator(\n    '
+        yield repr(creator)
+        yield ',\n)'
 
 
-def _render_to_do_into(into, unidentified):
+def _produce_to_do(unidentified):
     """
     Renders a to-do section.
     
+    This function is an iterable generator.
+    
     Parameters
     ----------
-    into : `list<str>`
-        Container render into.
-    
     unidentified : `None | set<str>`
         Unidentified name parts.
     
-    Returns
-    -------
-    into : `list<str>`
+    Yields
+    ------
+    part : `str`
     """
-    into.append('# TODO')
+    yield '# TODO'
     
     if (unidentified is not None):
         for value in sorted(unidentified):
-            into.append(' ')
-            into.append(value)
+            yield ' '
+            yield value
     
-    into.append('\n')
-    
-    return into
+    yield '\n'
 
 
-def renderer_single_source(characters, action_tags, unidentified, creator, url):
+def producer_single_source(characters, action_tags, unidentified, creator, url):
     """
-    Renderer to render a single source action.
+    Produces a single source action.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
@@ -233,19 +238,23 @@ def renderer_single_source(characters, action_tags, unidentified, creator, url):
     
     url : `str`
         Url to the image.
+    
+    Yields
+    ------
+    part : `str`
     """
-    into = []
-    into = _render_url_into(into, url)
+    yield from _produce_url(url)
     character = next(iter(characters))
-    into = _render_single_action_into(into, next(iter(action_tags)), character, None)
-    into = _render_creator_into(into, creator)
-    into.append('\n\n')
-    return ''.join(into)
+    yield from _produce_single_action(next(iter(action_tags)), character, None)
+    yield from _produce_creator(creator)
+    yield '\n\n'
 
 
-def renderer_self_target(characters, action_tags, unidentified, creator, url):
+def producer_self_target(characters, action_tags, unidentified, creator, url):
     """
-    Renderer to render a self targeting action.
+    Produces a self targeting action.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
@@ -263,21 +272,68 @@ def renderer_self_target(characters, action_tags, unidentified, creator, url):
     
     url : `str`
         Url to the image.
+    
+    Yields
+    ------
+    part : `str`
     """
-    into = []
-    into = _render_url_into(into, url)
+    yield from _produce_url(url)
     character = next(iter(characters))
-    into = _render_single_action_into(into, next(iter(action_tags)), character, character)
-    into = _render_creator_into(into, creator)
-    into.append('\n\n')
-    return ''.join(into)
+    yield from _produce_single_action(next(iter(action_tags)), character, character)
+    yield from _produce_creator(creator)
+    yield '\n\n'
 
 
-def renderer_default(characters, action_tags, unidentified, creator, url):
+def producer_cross_target(characters, action_tags, unidentified, creator, url):
     """
-    Renderer to render a default action.
+    Produces a cross targeting action.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    characters : `None | set<TouhouCharacter>`
+        Touhou characters.
+    
+    action_tags : `None | set<str>`
+        Action tags.
+    
+    unidentified : `None | set<str>`
+        Unidentified name parts.
+    
+    creator : `None | str`
+        The image's creator.
+    
+    url : `str`
+        Url to the image.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    yield from _produce_url( url)
+    
+    character_0, character_1 = characters
+    if character_0.system_name > character_1.system_name:
+        character_0, character_1 = character_1, character_0
+    
+    tag, = action_tags
+        
+    yield from _produce_multiple_action(
+        (tag, character_0, character_1),
+        (tag, character_1, character_0),
+    )
+    yield from _produce_creator(creator)
+    yield '\n\n'
+
+
+def producer_default(characters, action_tags, unidentified, creator, url):
+    """
+    Produces a default action.
     Adds a `TODO` at the start to identify that it needs manual adjustment.
     
+    This function is an iterable generator.
+    
     Parameters
     ----------
     characters : `None | set<TouhouCharacter>`
@@ -294,20 +350,22 @@ def renderer_default(characters, action_tags, unidentified, creator, url):
     
     url : `str`
         Url to the image.
+    
+    Yields
+    ------
+    part : `str`
     """
-    into = []
-    into = _render_to_do_into(into, unidentified)
-    into = _render_url_into(into, url)
-    into = _render_empty_action_tags_into(into, action_tags)
-    into = _render_characters_into(into, characters)
-    into = _render_creator_into(into, creator)
-    into.append('\n\n')
-    return ''.join(into)
+    yield from _produce_to_do(unidentified)
+    yield from _produce_url(url)
+    yield from _produce_empty_action_tags(action_tags)
+    yield from _produce_characters(characters)
+    yield from _produce_creator(creator)
+    yield '\n\n'
 
 
 def is_single_source(characters, action_tags, unidentified):
     """
-    Returns whether the given field combination can be used with a single source no target renderer.
+    Returns whether the given field combination can be used with a single source no target producer.
     
     Parameters
     ----------
@@ -338,7 +396,7 @@ def is_single_source(characters, action_tags, unidentified):
 
 def is_self_target(characters, action_tags, unidentified):
     """
-    Returns whether the given field combination can be used with self targeting renderer.
+    Returns whether the given field combination can be used with self targeting producer.
     
     Parameters
     ----------
@@ -367,9 +425,9 @@ def is_self_target(characters, action_tags, unidentified):
     return True
 
 
-def get_renderer_for(characters, action_tags, unidentified):
+def is_cross_target(characters, action_tags, unidentified):
     """
-    Gets the correct renderer for the given fields.
+    Returns whether the given field combination can be used with cross targeting producer.
     
     Parameters
     ----------
@@ -384,12 +442,46 @@ def get_renderer_for(characters, action_tags, unidentified):
     
     Returns
     -------
-    renderer : `FunctionType`
+    is_cross_target : `bool`
+    """
+    if (characters is None) or (action_tags is None) or (unidentified is not None):
+        return False
+    
+    if len(characters) != 2 or len(action_tags) != 1:
+        return False
+    
+    if next(iter(action_tags)) not in ACTION_TAGS_CROSS_TARGET:
+        return False
+        
+    return True
+
+
+def get_producer_for(characters, action_tags, unidentified):
+    """
+    Gets the correct producer for the given fields.
+    
+    Parameters
+    ----------
+    characters : `None | set<TouhouCharacter>`
+        Touhou characters.
+    
+    action_tags : `None | set<str>`
+        Action tags.
+    
+    unidentified : `None | set<str>`
+        Unidentified name parts.
+    
+    Returns
+    -------
+    producer : `GeneratorFunctionType`
     """
     if is_single_source(characters, action_tags, unidentified):
-        return renderer_single_source
+        return producer_single_source
     
     if is_self_target(characters, action_tags, unidentified):
-        return renderer_self_target
+        return producer_self_target
     
-    return renderer_default
+    if is_cross_target(characters, action_tags, unidentified):
+        return producer_cross_target
+    
+    return producer_default

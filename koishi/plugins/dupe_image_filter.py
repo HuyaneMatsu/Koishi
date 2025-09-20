@@ -486,7 +486,7 @@ class DupeImageFilter:
                     embed = None
                     return
                 
-                if event.interaction == BUTTON_CANCEL:
+                if event.component % BUTTON_CANCEL:
                     embed = self.get_embed()
                     embed.add_footer('Edit cancelled')
                     await client.interaction_component_message_edit(event, embed = embed, components = BUTTON_CLOSE)

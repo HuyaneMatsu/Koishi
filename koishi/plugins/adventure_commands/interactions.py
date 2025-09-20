@@ -19,7 +19,7 @@ from .component_builders import (
     build_adventure_cancellation_components, build_adventure_create_cancel_components,
     build_adventure_create_confirm_components, build_adventure_create_confirmation_components,
     build_adventure_listing_view_components, build_adventure_view_active_components,
-    build_adventure_view_finalized_components
+    build_adventure_view_finalized_components, produce_adventure_depart_failure_recovery_description
 )
 from .custom_ids import (
     ADVENTURE_ACTION_BATTLE_LOGS_RP, ADVENTURE_ACTION_VIEW_DEPART, ADVENTURE_ACTION_VIEW_RETURN,
@@ -99,8 +99,9 @@ async def depart(
         
         user_stats = await get_user_stats(interaction_event.user_id)
         recovering_until = user_stats.recovering_until
-        if (recovering_until is not None) and (recovering_until > DateTime.now(tz = TimeZone.utc)):
-            error_message = 'You are currently recovering, cannot go on an adventure.'
+        now = DateTime.now(tz = TimeZone.utc)
+        if (recovering_until is not None) and (recovering_until > now):
+            error_message = ''.join([*produce_adventure_depart_failure_recovery_description(recovering_until, now)])
             break
         
         # Check whether the inventory weight is greater than the available.
@@ -232,7 +233,7 @@ async def autocomplete_depart_target(interaction_event, target_name):
     -------
     suggestions : `None | list<(str, str)>`
     """
-    location_name = interaction_event.interaction.get_value_of('depart', 'location')
+    location_name = interaction_event.get_value_of('depart', 'location')
     if location_name is None:
         return
     
@@ -269,7 +270,7 @@ async def autocomplete_depart_duration(interaction_event, duration_string):
                 (build_duration_suggestion(duration), format(duration, 'x')),
             ]
     
-    location_name = interaction_event.interaction.get_value_of('depart', 'location')
+    location_name = interaction_event.get_value_of('depart', 'location')
     if location_name is None:
         return
     
@@ -277,7 +278,7 @@ async def autocomplete_depart_duration(interaction_event, duration_string):
     if location is None:
         return
     
-    target_name = interaction_event.interaction.get_value_of('depart', 'target')
+    target_name = interaction_event.get_value_of('depart', 'target')
     target = get_best_matching_target(location.target_ids, target_name)
     if target is None:
         return

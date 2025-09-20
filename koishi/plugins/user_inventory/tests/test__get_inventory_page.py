@@ -1,7 +1,7 @@
 import vampytest
 
 from ...item_core import (
-    ITEM_ID_BLUEBERRY, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FLYKILLER_AMANATA, ITEM_ID_PEACH, ITEM_ID_STRAWBERRY, get_item
+    ITEM_ID_BLUEBERRY, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_PEACH, ITEM_ID_STRAWBERRY, get_item
 )
 from ...inventory_core import Inventory, ItemEntry
 
@@ -11,7 +11,7 @@ from ..paging import get_inventory_page
 def _iter_options():
     item_blueberry = get_item(ITEM_ID_BLUEBERRY)
     item_devilcart_oyster = get_item(ITEM_ID_DEVILCART_OYSTER)
-    item_flykiller_amanata = get_item(ITEM_ID_FLYKILLER_AMANATA)
+    item_flykiller_amanita = get_item(ITEM_ID_FLYKILLER_AMANITA)
     item_peach = get_item(ITEM_ID_PEACH)
     item_strawberry = get_item(ITEM_ID_STRAWBERRY)
     
@@ -32,7 +32,7 @@ def _iter_options():
         [
             (item_blueberry, 4),
             (item_devilcart_oyster, 5),
-            (item_flykiller_amanata, 6),
+            (item_flykiller_amanita, 6),
             (item_peach, 7),
             (item_strawberry, 8),
         ],
@@ -41,7 +41,7 @@ def _iter_options():
         1,
         (
             [
-                ItemEntry(item_flykiller_amanata, 6),
+                ItemEntry(item_flykiller_amanita, 6),
                 ItemEntry(item_peach, 7),
             ],
             3,

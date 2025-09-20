@@ -1,3 +1,52 @@
+### 2025-08-20
+
+- Fix `status` command failed to respond (since last update).
+- Fix `status` used the user's global name instead of the local.
+- `/shop buy-relationship-slot ` responses are now shown to everyone.
+- Fix `/guild info field: all` failed to respond if the guild had over 20 boosters.
+- Update default auto cancellation rule to cancel if left inventory is < 1kg instead of < 10%.
+- Improve adventure return notification to include until when the user is recovering. (2vio2vieevie)
+- Improve adventure depart failure message if the user is currently on recovery to include until when the user is
+    recovering. (2vio2vieevie)
+- Fix `/user inventory`'s arrows were not arrows.
+- Fix `/user quests` and `/guild quest-board` showing items emoji & name is different order than other commands.
+- Fix `/guild quest-board` failed to render if there was over 1 page to show.
+- Fix `/user quests` failed to render if there was over 1 page to show.
+- Update the `/guild quest-board` and `/user quests` commands' outputs with navigation components.
+- Add `cross target` renderer for `upload-action-assets` cli command.
+- Add `Medi` alias to `Medicine Melancholy`.
+- Add `Dai` alias to `Daiyousei`.
+- Add touhou pool to `/handhold` with **70** images. (cursedflandre)
+- Add **46** images to `/hug`.
+- Add **5** images to `/lap-sleep`.
+- Add **3** images to `/pat`.
+- Add **19** images to `/kiss`.
+- Add **1** images to `/pocky-kiss`.
+- Add **2** images to `/lick`.
+- Add **2** images to `/feed`.
+- Add **13** images to `/stare`.
+- Fix typo in `Flykiller amanita` item's name.
+- Fix typo in `/format-time now` command's description. (14.3thprojectshrinemaiden.)
+- Fix `/accessibility preference-settings set-preferred-client` failing to respond. (Since 2 updates ago.)
+- Fix `snipe` failing to snipe stickers part of the snapshot.
+- Fix `Carrot` item description not accurately telling where it can be found. (pichu0357)
+- `/sex` now has `25%` increased rarity chance if the user has a specific role, wink wink.
+- Fix `/raw` does not handing when it has no permissions to re-request the targeted message.
+- When Koishi suggests the user to vote, they should send the user to vote page. (chaos3326)
+- Balance quests:
+    - Marisa flykiller amanita: 0.5 -> 8 kg; 0 -> 2 credibility, 1.25 -> 1.5x hearts.
+- Balance items:
+    - Strawberry -> decrease weight & value by around 25%.
+- Balance adventures:
+    - All foraging action now uses less flat energy.
+    - Locations with mushrooms now may drop scissors as an epic loot.
+- Add new quests:
+    - Alice flykiller amanita
+    - Chiruno frog
+    - Sakuya fishing rod
+- Add new locations & targets:
+    - Misty lake - foraging: frog (common) & fishing rod (rare)
+
 ### 2025-08-26
 
 - Fix `/accessibility character-preference remove` failed to respond (since last update).
@@ -31,7 +80,7 @@
 - Add `Iwanaga Ariya` touhou character.
 - Add `Watari Nina` touhou character.
 - Balance items & quests for:
-    - flykiller amanata: decrease item value & weight
+    - flykiller amanita: decrease item value & weight
     - onion: increase item value, follow with quest reward
     - carrot: increase item value, follow with quest reward, make quest require weight instead of amount for variance.
     - bluefrankish: increase quest rank to F.

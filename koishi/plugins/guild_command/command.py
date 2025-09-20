@@ -130,4 +130,4 @@ if GUILD_QUEST_BOARD_AVAILABLE:
             return
         
         yield
-        yield (await build_guild_quest_board_response(guild))
+        yield (await build_guild_quest_board_response(guild, event.user_id))

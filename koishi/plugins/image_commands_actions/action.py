@@ -636,7 +636,7 @@ def create_action_command_function(action):
         expire_after = COOLDOWN_HANDLER.get_cooldown(event, len(targets))
         if expire_after > 0.0:
             abort(
-                f'{client.name_at(event.guild_id)} got bored of enacting your {event.interaction.name} try again in '
+                f'{client.name_at(event.guild_id)} got bored of enacting your {event.name} try again in '
                 f'{expire_after:.2f} seconds.'
             )
         

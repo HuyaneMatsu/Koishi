@@ -113,7 +113,7 @@ async def autocomplete_time_zone(value):
 @FORMAT_TIME_COMMANDS.interactions(name = 'now')
 async def format_now():
     """
-    Formats he current time.
+    Formats the current time.
     
     This function is a coroutine.
     

@@ -162,7 +162,7 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
             await try_acknowledge(client, interaction_event, player, session, self.single_player)
             return
         
-        custom_id = interaction_event.interaction.custom_id
+        custom_id = interaction_event.custom_id
         if (custom_id == GAME_21_CUSTOM_ID_NEW):
             player.hand.pull_card(session.deck)
             game_ended = player.hand.is_finished()

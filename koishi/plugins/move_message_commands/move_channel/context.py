@@ -67,7 +67,7 @@ class ChannelMoverContext:
         When message moving was started in unix time.
     last_message_id : `int`
         The last moved message's identifier.
-    status_message : `None`, ``Message``
+    status_message : ``None | Message``
         The message notifying the user in dm about the move's state.
     move_channel_task : `None`, ``Task`` of ``.move_channel_loop``
         Move channel loop task.
@@ -148,7 +148,7 @@ class ChannelMoverContext:
         
         Returns
         -------
-        message : `None`, ``Message``
+        message : ``None | Message``
         """
         message_cache = self.message_cache
         if (message_cache is not None) and message_cache:

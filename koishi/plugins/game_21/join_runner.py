@@ -128,7 +128,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
         interaction_event : ``InteractionEvent``
             The received interaction event.
         """
-        custom_id = interaction_event.interaction.custom_id
+        custom_id = interaction_event.custom_id
         
         if custom_id == GAME_21_CUSTOM_ID_ENTER:
             await self._enter_user(interaction_event)

@@ -411,7 +411,7 @@ if USER_EQUIP_AVAILABLE:
         -------
         suggestions : `None | list<(str, int)>`
         """
-        item_slot = event.interaction.get_value_of('equip', 'item-slot')
+        item_slot = event.get_value_of('equip', 'item-slot')
         if item_slot is None:
             return
         
