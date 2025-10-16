@@ -3,6 +3,7 @@ from .adventurer_rank_info_generation import *
 from .amount_types import *
 from .constants import *
 from .linked_quest import *
+from .linked_quest_completion_states import *
 from .queries import *
 from .quest import *
 from .quest_batch import *
@@ -20,6 +21,7 @@ __all__ = (
     *amount_types.__all__,
     *constants.__all__,
     *linked_quest.__all__,
+    *linked_quest_completion_states.__all__,
     *queries.__all__,
     *quest.__all__,
     *quest_batch.__all__,

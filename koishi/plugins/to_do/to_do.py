@@ -118,18 +118,6 @@ class ToDo(EntryProxy):
     @classmethod
     @copy_docs(EntryProxy.from_entry)
     def from_entry(cls, entry):
-        """
-        Creates an to-do from the given entry.
-        
-        Parameters
-        ----------
-        entry : `sqlalchemy.engine.result.RowProxy`
-            The entry to create the instance based on.
-        
-        Returns
-        -------
-        self : `instance<cls>`
-        """
         entry_id = entry['id']
         
         try:

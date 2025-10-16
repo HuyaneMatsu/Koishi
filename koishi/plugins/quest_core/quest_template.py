@@ -53,6 +53,9 @@ class QuestTemplate(RichAttributeErrorBaseType):
     level : `int`
         The quest's level.
     
+    repeat_count : `int`
+        The amount of times this quest can be repeated.
+    
     requester_id : `int`
         Who requested the action.
     
@@ -78,7 +81,7 @@ class QuestTemplate(RichAttributeErrorBaseType):
         'amount_base', 'amount_require_multiple_of', 'amount_type', 'amount_variance_percentage_lower_threshold',
         'amount_variance_percentage_upper_threshold', 'description', 'duration_base', 'duration_require_multiple_of',
         'duration_variance_percentage_lower_threshold', 'duration_variance_percentage_upper_threshold', 'id',
-        'item_id', 'level', 'requester_id', 'reward_balance_base', 'reward_balance_require_multiple_of',
+        'item_id', 'level', 'repeat_count', 'requester_id', 'reward_balance_base', 'reward_balance_require_multiple_of',
         'reward_balance_variance_percentage_lower_threshold', 'reward_balance_variance_percentage_upper_threshold',
         'reward_credibility', 'type'
     )
@@ -89,6 +92,7 @@ class QuestTemplate(RichAttributeErrorBaseType):
         description,
         quest_type,
         level,
+        repeat_count,
         item_id,
         requester_id,
         amount_base,
@@ -122,6 +126,9 @@ class QuestTemplate(RichAttributeErrorBaseType):
         
         level : `int`
             The quest's level.
+    
+        repeat_count : `int`
+            The amount of times this quest can be repeated.
         
         item_id : `int`
             The item identifier to deliver.
@@ -185,6 +192,7 @@ class QuestTemplate(RichAttributeErrorBaseType):
         self.id = quest_template_id
         self.item_id = item_id
         self.level = level
+        self.repeat_count = repeat_count
         self.requester_id = requester_id
         self.reward_balance_base = reward_balance_base
         self.reward_balance_require_multiple_of = reward_balance_require_multiple_of
@@ -256,6 +264,10 @@ class QuestTemplate(RichAttributeErrorBaseType):
         # level
         repr_parts.append(', level = ')
         repr_parts.append(repr(self.level))
+        
+        # repeat_count
+        repr_parts.append(', repeat_count = ')
+        repr_parts.append(repr(self.repeat_count))
         
         # requester_id
         repr_parts.append(', requester = ')

@@ -8,6 +8,7 @@ from scarletio import RichAttributeErrorBaseType
 from ..item_core import get_item_name
 
 from .amount_types import get_amount_type_name
+from .linked_quest_completion_states import LINKED_QUEST_COMPLETION_STATE_ACTIVE
 from .quest_types import get_quest_type_name
 from .utils import get_quest_template
 
@@ -26,6 +27,12 @@ class LinkedQuest(RichAttributeErrorBaseType):
     
     batch_id : `int`
         The identifier of the match. Used for deduplication.
+    
+    completion_count : `int`
+        How much times this quest was completed.
+    
+    completion_state : `int`
+        How much times this quest was completed.
     
     entry_id : `int`
         The database entry identifier of the quest.
@@ -52,8 +59,8 @@ class LinkedQuest(RichAttributeErrorBaseType):
         The owner user identifier.
     """
     __slots__ = (
-        'amount_required', 'amount_submitted', 'batch_id', 'entry_id', 'expires_at', 'guild_id', 'reward_balance',
-        'reward_credibility', 'taken_at', 'template_id', 'user_id'
+        'amount_required', 'amount_submitted', 'batch_id', 'completion_count', 'completion_state', 'entry_id',
+        'expires_at', 'guild_id', 'reward_balance', 'reward_credibility', 'taken_at', 'template_id', 'user_id'
     )
     
     def __new__(cls, user_id, guild_id, batch_id, quest):
@@ -80,6 +87,8 @@ class LinkedQuest(RichAttributeErrorBaseType):
         self.amount_submitted = 0
         self.amount_required = quest.amount
         self.batch_id = batch_id
+        self.completion_count = 0
+        self.completion_state = LINKED_QUEST_COMPLETION_STATE_ACTIVE
         self.entry_id = 0
         self.expires_at = now + TimeDelta(seconds = quest.duration)
         self.guild_id = guild_id
@@ -123,6 +132,14 @@ class LinkedQuest(RichAttributeErrorBaseType):
         # amount_submitted
         repr_parts.append(', amount_submitted = ')
         repr_parts.append(repr(self.amount_submitted))
+        
+        # completion_count
+        repr_parts.append(', completion_count = ')
+        repr_parts.append(repr(self.completion_count))
+        
+        # completion_state
+        repr_parts.append(', completion_state = ')
+        repr_parts.append(repr(self.completion_state))
         
         # quest_template / amount_type
         if (quest_template is None):
@@ -214,6 +231,8 @@ class LinkedQuest(RichAttributeErrorBaseType):
         self = object.__new__(cls)
         self.amount_required = entry['amount_required']
         self.amount_submitted = entry['amount_submitted']
+        self.completion_count = entry['completion_count']
+        self.completion_state = entry['completion_state']
         self.batch_id = entry['batch_id']
         self.entry_id = entry['id']
         self.expires_at = entry['expires_at'].replace(tzinfo = TimeZone.utc)
@@ -224,3 +243,16 @@ class LinkedQuest(RichAttributeErrorBaseType):
         self.template_id = entry['template_id']
         self.user_id = entry['user_id']
         return self
+    
+    
+    def reset(self):
+        """
+        Resets the linked quest as it would be started just now.
+        """
+        now = DateTime.now(TimeZone.utc)
+        duration = self.expires_at - self.taken_at
+        
+        self.amount_submitted = 0
+        self.completion_state = LINKED_QUEST_COMPLETION_STATE_ACTIVE
+        self.expires_at = now + duration
+        self.taken_at = now

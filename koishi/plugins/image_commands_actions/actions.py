@@ -69,7 +69,7 @@ ACTIONS = [
     ),
     Action(
         'glomp',
-        'You can run, but you cant hide!',
+        'You can run, but you can\'t hide!',
         IMAGE_HANDLER_GLOMP,
         'glomps',
     ),
@@ -162,7 +162,7 @@ ACTIONS = [
     ),
     Action(
         'pocky-kiss',
-        'Will they bale?',
+        'Will they bail?',
         IMAGE_HANDLER_POCKY_KISS,
         'pocky kisses',
         aliases = ('pocky',),

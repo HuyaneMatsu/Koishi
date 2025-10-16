@@ -384,6 +384,7 @@ def _iter_options__build_user_status_description():
     user_0.status = Status.idle
     user_0.status_by_platform = StatusByPlatform(
         desktop = Status.dnd,
+        embedded = Status.offline,
         mobile = Status.idle,
         web = Status.online,
     )
@@ -394,6 +395,7 @@ def _iter_options__build_user_status_description():
         (
             f'Status: idle\n'
             f'- Desktop: dnd\n'
+            f'- Embedded: offline\n'
             f'- Mobile: idle\n'
             f'- Web: online'
         ),

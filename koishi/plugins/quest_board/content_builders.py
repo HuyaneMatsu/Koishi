@@ -9,8 +9,10 @@ from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ..item_core import ITEM_NAME_DEFAULT, get_item_name, get_item_nullable
 from ..quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_NAME_DEFAULT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT, QUEST_TYPE_ITEM_SUBMISSION,
-    QUEST_TYPE_MONSTER_SUBJUGATION_LOCATED, QUEST_TYPE_MONSTER_SUBJUGATION_SELECTED, get_adventurer_level_name
+    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_NAME_DEFAULT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT,
+    LINKED_QUEST_COMPLETION_STATE_ACTIVE, QUEST_TYPE_ITEM_SUBMISSION, QUEST_TYPE_MONSTER_SUBJUGATION_LOCATED,
+    QUEST_TYPE_MONSTER_SUBJUGATION_SELECTED, calculate_received_reward_credibility, get_adventurer_level_name,
+    get_quest_board_resets_at
 )
 
 from .constants import BROKEN_QUEST_DESCRIPTION
@@ -79,7 +81,7 @@ def produce_linked_quest_header_description(user, guild_id, adventurer_info, que
     yield user.name_at(guild_id)
     yield '\'s quests\n\nUser rank: '
     yield get_adventurer_level_name(adventurer_info.level)
-    yield '\nQuest count: '
+    yield '\nActive quest count: '
     
     yield str(quest_count)
     yield ' / '
@@ -273,7 +275,7 @@ def _produce_quest_summary_line(quest_template, amount_required, amount_submitte
         yield '.'
 
 
-def produce_quest_short_description(quest_template, amount_required):
+def produce_quest_short_description(linked_quest, quest_template, amount_required):
     """
     Produces a linked quest's short description for listing it.
     
@@ -281,6 +283,9 @@ def produce_quest_short_description(quest_template, amount_required):
     
     Parameters
     ----------
+    linked_quest : ``None | LinkedQuest``
+        The user's linked quest for this entry.
+    
     quest_template : ``QuestTemplate``
         The quest's template.
     
@@ -297,11 +302,23 @@ def produce_quest_short_description(quest_template, amount_required):
     
     yield 'Required rank: '
     yield get_adventurer_level_name(quest_template.level)
+    
+    if (linked_quest is not None):
+        yield '      Completed: '
+        yield str(linked_quest.completion_count)
+        
+        repeat_count = quest_template.repeat_count
+        if repeat_count:
+            yield ' / '
+            yield str(repeat_count)
+        
+        yield ' times'
+    
     yield '\n'
     yield from _produce_quest_summary_line(quest_template, amount_required, -1)
 
 
-def produce_linked_quest_short_description(quest_template, amount_required, amount_submitted, expires_at):
+def produce_linked_quest_short_description(linked_quest, quest_template):
     """
     Produces a linked quest's short description for listing it.
     
@@ -309,17 +326,11 @@ def produce_linked_quest_short_description(quest_template, amount_required, amou
     
     Parameters
     ----------
+    linked_quest : ``LinkedQuest``
+        The linked quest being rendered.
+    
     quest_template : ``QuestTemplate``
         The quest's template.
-    
-    amount_required : ``QuestTemplate``
-        The required amount of items to submit.
-    
-    amount_submitted : `int`
-        The already submitted amount.
-    
-    expires_at : `DateTime`
-        When the quest expires.
     
     Yields
     ------
@@ -329,18 +340,47 @@ def produce_linked_quest_short_description(quest_template, amount_required, amou
         yield BROKEN_QUEST_DESCRIPTION
         return
     
-    yield 'Time left: '
     now = DateTime.now(tz = TimeZone.utc)
-    if expires_at > now:
-        yield elapsed_time(RelativeDelta(expires_at, now))
+    
+    completion_state = linked_quest.completion_state
+    if completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE:
+        if linked_quest.expires_at <= now:
+            yield 'Expired'
+        
+        else:
+            yield 'Time left: '
+            yield elapsed_time(RelativeDelta(linked_quest.expires_at, now))
+        
+        amount_submitted = linked_quest.amount_submitted
+    
     else:
-        yield 'expired'
+        repeat_count = quest_template.repeat_count
+        completion_count = linked_quest.completion_count
+        
+        yield 'Completed: '
+        yield str(completion_count)
+        
+        if repeat_count:
+            yield ' / '
+            yield str(repeat_count)
+        
+        yield ' times, '
+        
+        if (not repeat_count) or (repeat_count > completion_count):
+            yield 're-acceptable for '
+            yield elapsed_time(RelativeDelta(get_quest_board_resets_at(), now))
+        
+        else:
+            yield 'cannot be re-accepted anymore'
+        
+        amount_submitted = -1
+    
     yield '\n'
-    yield from _produce_quest_summary_line(quest_template, amount_required, amount_submitted)
+    yield from _produce_quest_summary_line(quest_template, linked_quest.amount_required, amount_submitted)
 
 
 def _produce_quest_details_base_section(
-    quest_template, amount_required, amount_submitted, reward_balance, reward_credibility, user_level
+    quest_template, amount_required, amount_submitted, reward_balance, reward_credibility
 ):
     """
     Builds the base of a quest's details section.
@@ -364,9 +404,6 @@ def _produce_quest_details_base_section(
     reward_credibility : `int`
         Reward credibility.
     
-    user_level : `int`
-        The user's adventurer rank.
-    
     Yields
     ------
     part : `str`
@@ -387,9 +424,9 @@ def _produce_quest_details_base_section(
     yield EMOJI__HEART_CURRENCY.as_emoji
     
     reward_credibility = reward_credibility
-    if reward_credibility > user_level:
+    if reward_credibility:
         yield '\n- **'
-        yield str(reward_credibility - user_level)
+        yield str(reward_credibility)
         yield '** credibility'
 
 
@@ -448,7 +485,7 @@ def produce_quest_detailed_description(quest, quest_template, user_level):
     quest : ``Quest``
         The quest in context.
     
-    quest_template : ``QuestTemplate``
+    quest_template : ``None | QuestTemplate``
         The quest's template.
     
     user_level : `int`
@@ -462,13 +499,18 @@ def produce_quest_detailed_description(quest, quest_template, user_level):
         yield BROKEN_QUEST_DESCRIPTION
         return
     
+    reward_credibility = quest.reward_credibility
+    if reward_credibility:
+        reward_credibility = calculate_received_reward_credibility(
+            reward_credibility, quest_template.level, user_level
+        )
+    
     yield from _produce_quest_details_base_section(
         quest_template,
         quest.amount,
         -1,
         quest.reward_balance,
-        quest.reward_credibility,
-        user_level,
+        reward_credibility,
     )
     yield '\n'
     yield from _produce_time_available(RelativeDelta(seconds = quest.duration))
@@ -485,7 +527,7 @@ def produce_linked_quest_detailed_description(linked_quest, quest_template, user
     linked_quest : ``LinkedQuest``
         The linked quest in context.
     
-    quest_template : ``QuestTemplate``
+    quest_template : ``None | QuestTemplate``
         The quest's template.
     
     user_level : `int`
@@ -499,13 +541,18 @@ def produce_linked_quest_detailed_description(linked_quest, quest_template, user
         yield BROKEN_QUEST_DESCRIPTION
         return
     
+    reward_credibility = linked_quest.reward_credibility
+    if reward_credibility:
+        reward_credibility = calculate_received_reward_credibility(
+            reward_credibility, quest_template.level, user_level
+        )
+    
     yield from _produce_quest_details_base_section(
         quest_template,
         linked_quest.amount_required,
         linked_quest.amount_submitted,
         linked_quest.reward_balance,
-        linked_quest.reward_credibility,
-        user_level,
+        reward_credibility,
     )
     yield '\n'
     yield from _produce_time_available(RelativeDelta(linked_quest.expires_at, linked_quest.taken_at))
@@ -645,7 +692,14 @@ def produce_linked_quest_submit_success_n_left_description(
 
 
 def produce_linked_quest_submit_success_completed_description(
-    item, amount_type, amount_required, amount_used, reward_balance, reward_credibility
+    item,
+    amount_type,
+    amount_required,
+    amount_used,
+    reward_balance,
+    reward_credibility,
+    user_level_old,
+    user_level_new,
 ):
     """
     Produces response parts when the user successfully submits all the remaining items.
@@ -672,6 +726,12 @@ def produce_linked_quest_submit_success_completed_description(
     reward_credibility : `int`
         The amount of credibility the user receives.
     
+    user_level_old : `int`
+        The user's adventurer rank before completing the quest.
+    
+    user_level_new : `int`
+        The user's adventurer rank after completing the quest.
+    
     Yields
     ------
     part : `str`
@@ -684,7 +744,18 @@ def produce_linked_quest_submit_success_completed_description(
     yield '** '
     yield EMOJI__HEART_CURRENCY.as_emoji
     
-    if reward_credibility:
-        yield '\n- **'
-        yield str(reward_credibility)
-        yield '** credibility'
+    if not reward_credibility:
+        return
+    
+    yield '\n- **'
+    yield str(reward_credibility)
+    yield '** credibility'
+    
+    if user_level_old == user_level_new:
+        return
+    
+    yield '\n\nBy completing this quest you have ranked up from **'
+    yield get_adventurer_level_name(user_level_old)
+    yield '** to **'
+    yield get_adventurer_level_name(user_level_new)
+    yield '** rank; congratulation.'

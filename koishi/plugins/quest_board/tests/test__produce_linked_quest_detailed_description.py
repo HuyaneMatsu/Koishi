@@ -26,7 +26,7 @@ def _iter_options():
                 quest_template_id,
                 20,
                 3600 * 24,
-                2,
+                10,
                 1000,
             ),
         ),
@@ -39,7 +39,7 @@ def _iter_options():
             f'\n'
             f'**Reward:**\n'
             f'- **1000** {EMOJI__HEART_CURRENCY}\n'
-            f'- **1** credibility\n'
+            f'- **10** credibility\n'
             f'**Time available:**\n'
             f'- **1 day**\n'
             f'**Time left:**\n'

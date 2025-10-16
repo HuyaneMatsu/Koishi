@@ -20,8 +20,9 @@ def get_option_amount(option, seed):
     -------
     amount : `int`
     """
-    chance_byte_size = option.chance_byte_size
-    if (seed & 255) > chance_byte_size:
+    chance_in = option.chance_in
+    chance_out = option.chance_out
+    if (chance_in != chance_out) and (seed % chance_out >= chance_in):
         amount = 0
     else:
         amount = option.amount_base + (seed % (option.amount_interval + 1))

@@ -4,8 +4,8 @@ from warnings import warn
 user_balance_model = None
 USER_BALANCE_TABLE = None
 
-auto_react_role_model = None
-AUTO_REACT_ROLE_TABLE = None
+automation_reaction_role_model = None
+AUTOMATION_REACTION_ROLE_TABLE = None
 
 emoji_counter_model = None
 EMOJI_COUNTER_TABLE = None
@@ -116,17 +116,20 @@ if (DB_ENGINE is not None):
     USER_BALANCE_TABLE = user_balance_model.__table__
     
     
-    class auto_react_role_model(BASE):
-        __tablename__   = 'AUTO_REACT_ROLE'
+    class automation_reaction_role_model(BASE):
+        __tablename__   = 'AUTOMATION_REACTION_ROLE'
         id              = Column(Int64, primary_key = True)
-        message_id      = Column(Int64, unique = True)
-        channel_id      = Column(Int64)
-        data            = Column(Binary(320))
-        behaviour       = Column(Int32)
-        client_id       = Column(Int64)
+        
+        guild_id        = Column(Int64, nullable = False)
+        message_id      = Column(Int64, nullable = False, unique = True)
+        channel_id      = Column(Int64, nullable = True)
+        
+        flags           = Column(Int64)
+        data            = Column(Binary(), nullable = True)
+        data_version    = Column(Int16, nullable = False)
     
-    AUTO_REACT_ROLE_TABLE = auto_react_role_model.__table__
-
+    AUTOMATION_REACTION_ROLE_TABLE = automation_reaction_role_model.__table__
+    
     
     class emoji_counter_model(BASE):
         __tablename__   = 'EMOJI_COUNTER'
@@ -382,6 +385,8 @@ if (DB_ENGINE is not None):
         taken_at           = Column(DateTime, nullable = False)
         template_id        = Column(Int64, default = 0, nullable = False)
         user_id            = Column(Int64, default = 0, nullable = False)
+        completion_state   = Column(Int16, default = 1, nullable = False)
+        completion_count   = Column(Int32, default = 0, nullable = False)
     
     LINKED_QUEST_TABLE = linked_quest_model.__table__
     

@@ -18,7 +18,7 @@ def _iter_options():
             '# Fons\'s quests\n'
             '\n'
             'User rank: G\n'
-            'Quest count: 1 / 1'
+            'Active quest count: 1 / 1'
         ),
     )
     
@@ -33,7 +33,7 @@ def _iter_options():
             '# Fonsered\'s quests\n'
             '\n'
             'User rank: G\n'
-            'Quest count: 0 / 1'
+            'Active quest count: 0 / 1'
         ),
     )
 

@@ -71,6 +71,7 @@ async def test__delete_linked_quest__in_cache():
             ],
         )
         vampytest.assert_true(query_called)
+        vampytest.assert_eq(linked_quest_0.entry_id, 0)
     
     finally:
         LINKED_QUEST_LISTING_CACHE.clear()

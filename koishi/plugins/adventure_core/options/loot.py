@@ -17,9 +17,11 @@ class OptionLoot(OptionBase):
     amount_interval : `int`
         The interval between the base amount and the maximal amount that can be given.
     
-    chance_byte_size : `int`
-        The chance of this loot option to be selected.
-        Is between `0` and `255`
+    chance_in : `int`
+        The chance to be chosen in.
+    
+    chance_out : `int`
+        The chance to be chosen out of.
     
     duration_cost_flat : `int`
         The required  duration to execute this action.
@@ -42,7 +44,8 @@ class OptionLoot(OptionBase):
     
     def __new__(
         cls,
-        chance,
+        chance_in,
+        chance_out,
         amount_min,
         amount_max,
         item_id,
@@ -56,9 +59,11 @@ class OptionLoot(OptionBase):
         
         Parameters
         ----------
-        chance : `float`
-            The chance of this loot option to be selected.
-            Value from `0.0` to `1.0`.
+        chance_in : `int`
+            The chance to be chosen in.
+        
+        chance_out : `int`
+            The chance to be chosen out of.
         
         amount_min : `int`
             The minimal amount.
@@ -81,7 +86,7 @@ class OptionLoot(OptionBase):
         energy_cost_scaling : `int`
             The required energy for each item given.
         """
-        self = OptionBase.__new__(cls, chance, amount_min, amount_max)
+        self = OptionBase.__new__(cls, chance_in, chance_out, amount_min, amount_max)
         self.duration_cost_flat = duration_cost_flat
         self.duration_cost_scaling = duration_cost_scaling
         self.energy_cost_flat = energy_cost_flat

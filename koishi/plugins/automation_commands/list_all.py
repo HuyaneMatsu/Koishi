@@ -3,11 +3,23 @@ __all__ = ()
 from hata import Embed
 from hata.ext.slash import InteractionResponse
 
+from config import MARISA_MODE
+
 from ..automation_core import (
     COMMUNITY_MESSAGE_MODERATION_AVAILABILITY_DURATION_DEFAULT, COMMUNITY_MESSAGE_MODERATION_DOWN_VOTE_EMOJI_ID_DEFAULT,
     COMMUNITY_MESSAGE_MODERATION_VOTE_THRESHOLD_DEFAULT
 )
-from ..automation_reaction_copy import get_reaction_copy_flag_parse_names
+
+
+try:
+    from ..automation_reaction_copy import get_reaction_copy_flag_parse_names
+
+except ImportError:
+    if not MARISA_MODE:
+        raise
+    
+    get_reaction_copy_flag_parse_names = lambda flags : '*none*'
+
 
 from .constants import LOG_SATORI_ALLOWED_IDS
 from .representation_getters import (

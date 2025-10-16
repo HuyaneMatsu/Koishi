@@ -304,16 +304,12 @@ def render_user_status_description_into(into, field_added, user):
     """
     status = user.status
     into, field_added = render_string_field_into(into, field_added, status.name, optional = False, title = 'Status')
-    if status is not Status.offline:
-        into, field_added = render_string_field_into(
-            into, field_added, user.get_status_by_platform('desktop').name, optional = False, title = '- Desktop'
-        )
-        into, field_added = render_string_field_into(
-            into, field_added, user.get_status_by_platform('mobile').name, optional = False, title = '- Mobile'
-        )
-        into, field_added = render_string_field_into(
-            into, field_added, user.get_status_by_platform('web').name, optional = False, title = '- Web'
-        )
+    status_by_platform = user.status_by_platform
+    if (status_by_platform is not None):
+        for platform, status in status_by_platform.iter_status_by_platform():
+            into, field_added = render_string_field_into(
+                into, field_added, status.name, optional = False, title = f'- {platform.name.capitalize()}'
+            )
     
     return into, field_added
 

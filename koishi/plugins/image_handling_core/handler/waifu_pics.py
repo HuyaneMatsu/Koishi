@@ -30,6 +30,7 @@ BLACKLIST = {
     'https://i.waifu.pics/jFOkv3O.gif',
     'https://i.waifu.pics/GNw8eK7.gif',
     'https://i.waifu.pics/PCTp3I3.gif',
+    'https://i.waifu.pics/6ymHeV~.gif',
     
     # Bully looking sus
     'https://i.waifu.pics/MjULOe4.gif',

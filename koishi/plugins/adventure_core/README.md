@@ -25,6 +25,18 @@ The adventure is stepped till:
 - Cancellation condition says so.
 
 
+# Adventure drop rarity tears
+
+The user goes to an adventure to collect items. These items come in different tiers:
+
+- Certain : guaranteed 100%
+- Basic : under 100 - 40%
+- Common : under 40 - 20%
+- Uncommon : under 20 - 4%
+- Rare : under 4 - 0.8%
+- Epic : under 0.8 - 0.1%
+- Mythical : Under 0.1%
+
 # Adventure locations
 
 In adventures the user can select different locations to adventure to. These locations offer different "target"-s.
@@ -34,39 +46,45 @@ Each action offers their own cost, battles and loot.
 - Human village outskirts
     - Gardening (Scarlet onions)
         - Gardening
-            - Scarlet onion (guaranteed)
+            - Scarlet onion (certain)
             - Scarlet onion (rare)
+            - Frog (epic)
     - Gardening (Carrots)
         - Gardening
-            - Carrot (guaranteed)
+            - Carrot (certain)
             - Carrot (rare)
+            - Frog (epic)
     - Gardening (Garlic)
         - Gardening
-            - Garlic (guaranteed)
+            - Garlic (certain)
             - Garlic (rare)
+            - Frog (epic)
 
 - Human village vineyards
     - Vine growing
         - Gardening
-            - Bluefrankish (guaranteed)
+            - Bluefrankish (certain)
             - Bluefrankish (rare)
 
 - Ruins
     - Foraging
         - Foraging
-            - Strawberry (common)
+            - Strawberry (basic)
+            - Bishophat (rare)
 
 - Eientei mansion
     - Gardening
         - Gardening
-            - Carrot (guaranteed)
+            - Carrot (certain)
+            - Frog (epic)
         - Trapped
 
 - Bamboo Forest
     - Foraging
         - Foraging
-            - Devilcart oyster (common)
-            - Flykiller amanita (common)
+            - Devilcart oyster (basic)
+            - Flykiller amanita (uncommon)
+            - Bishophat (rare)
             - Scissors (epic)
         - Trapped
 
@@ -84,5 +102,6 @@ Each action offers their own cost, battles and loot.
 - Misty lake
     - Foraging
         - Foraging
-            - Frog (common)
+            - Frog (basic)
+            - Angelroot (basic)
             - Fishing rod (rare)

@@ -20,13 +20,17 @@ def _iter_options():
         12,
         900,
         3,
+        1,
+        2,
         (
             f'You have submitted **12** {item.emoji} {item.name}.\n'
             f'For a total of **50** and finished the quest.\n'
             f'\n'
             f'**You received:**\n'
             f'- **900** {EMOJI__HEART_CURRENCY}\n'
-            f'- **3** credibility'
+            f'- **3** credibility\n'
+            f'\n'
+            f'By completing this quest you have ranked up from **G** to **F** rank; congratulation.'
         ),
     )
     
@@ -39,6 +43,8 @@ def _iter_options():
         12,
         900,
         0,
+        1,
+        1,
         (
             f'You have submitted **12** {item.emoji} {item.name}.\n'
             f'For a total of **50** and finished the quest.\n'
@@ -51,7 +57,7 @@ def _iter_options():
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__produce_linked_quest_submit_success_completed_description(
-    item, amount_type, amount_required, amount_used, reward_balance, reward_credibility,
+    item, amount_type, amount_required, amount_used, reward_balance, reward_credibility, user_level_old, user_level_new
 ):
     """
     Tests whether ``produce_linked_quest_submit_success_completed_description`` works as intended.
@@ -76,12 +82,25 @@ def test__produce_linked_quest_submit_success_completed_description(
     reward_credibility : `int`
         The amount of credibility the user receives.
     
+    user_level_old : `int`
+        The user's adventurer rank before completing the quest.
+    
+    user_level_new : `int`
+        The user's adventurer rank after completing the quest.
+    
     Returns
     -------
     output : `str`
     """
     output = ''.join([*produce_linked_quest_submit_success_completed_description(
-        item, amount_type, amount_required, amount_used, reward_balance, reward_credibility,
+        item,
+        amount_type,
+        amount_required,
+        amount_used,
+        reward_balance,
+        reward_credibility,
+        user_level_old,
+        user_level_new,
     )])
     
     for element in output:

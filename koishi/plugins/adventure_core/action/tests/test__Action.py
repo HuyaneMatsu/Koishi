@@ -32,12 +32,12 @@ def test__Action__new():
     duration = 10000
     weight = 2
     battle = (
-        OptionBattle(1.0, 1, 1, 120, None),
-        OptionBattle(0.5, 0, 7, 126, None),
+        OptionBattle(1, 1, 1, 1, 120, None),
+        OptionBattle(1, 2, 0, 7, 126, None),
     )
     loot = (
-        OptionLoot(1.0, 1, 1, 130, 22, 2, 20, 1),
-        OptionLoot(0.5, 2, 4, 132, 22, 2, 20, 1),
+        OptionLoot(1, 1, 1, 1, 130, 22, 2, 20, 1),
+        OptionLoot(1, 2, 2, 4, 132, 22, 2, 20, 1),
     )
     
     action = Action(
@@ -68,12 +68,12 @@ def test__Action__repr():
     duration = 10000
     weight = 2
     battle = (
-        OptionBattle(1.0, 1, 1, 120, None),
-        OptionBattle(0.5, 0, 7, 126, None),
+        OptionBattle(1, 1, 1, 1, 120, None),
+        OptionBattle(1, 2, 0, 7, 126, None),
     )
     loot = (
-        OptionLoot(1.0, 1, 1, 130, 22, 2, 20, 1),
-        OptionLoot(0.5, 2, 4, 132, 22, 2, 20, 1),
+        OptionLoot(1, 1, 1, 1, 130, 22, 2, 20, 1),
+        OptionLoot(1, 2, 2, 4, 132, 22, 2, 20, 1),
     )
     
     action = Action(

@@ -6,7 +6,10 @@ from .multi_player import xox_multi_player
 from .single_player import xox_single_player
 
 
-@FEATURE_CLIENTS.interactions(is_global = True)
+@FEATURE_CLIENTS.interactions(
+    integration_types = ['guild_install', 'user_install'],
+    is_global = True,
+)
 async def xox(
     client,
     event,

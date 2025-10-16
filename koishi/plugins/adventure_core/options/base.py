@@ -1,7 +1,5 @@
 __all__ = ('OptionBase',)
 
-from math import floor
-
 from scarletio import RichAttributeErrorBaseType
 
 
@@ -17,21 +15,25 @@ class OptionBase(RichAttributeErrorBaseType):
     amount_interval : `int`
         The interval between the base amount and the maximal amount that can be given.
     
-    chance_byte_size : `int`
-        The chance of this loot option to be selected.
-        Is between `0` and `255`
-    """
-    __slots__ = ('amount_base', 'amount_interval', 'chance_byte_size')
+    chance_in : `int`
+        The chance to be chosen in.
     
-    def __new__(cls, chance, amount_min, amount_max):
+    chance_out : `int`
+        The chance to be chosen out of.
+    """
+    __slots__ = ('amount_base', 'amount_interval', 'chance_in', 'chance_out')
+    
+    def __new__(cls, chance_in, chance_out, amount_min, amount_max):
         """
         Creates a new enemy option.
         
         Parameters
         ----------
-        chance : `float`
-            The chance of this loot option to be selected.
-            Value from `0.0` to `1.0`.
+        chance_in : `int`
+            The chance to be chosen in.
+        
+        chance_out : `int`
+            The chance to be chosen out of.
         
         amount_min : `int`
             The minimal amount.
@@ -42,7 +44,8 @@ class OptionBase(RichAttributeErrorBaseType):
         self = object.__new__(cls)
         self.amount_base = amount_min
         self.amount_interval = amount_max - amount_min
-        self.chance_byte_size = floor(255.0 * chance)
+        self.chance_in = chance_in
+        self.chance_out = chance_out
         return self
     
     
@@ -69,9 +72,13 @@ class OptionBase(RichAttributeErrorBaseType):
         yield ', amount_interval = '
         yield repr(self.amount_interval)
         
-        # chance_byte_size
-        yield ', chance_byte_size = '
-        yield repr(self.chance_byte_size)
+        # chance_in
+        yield ', chance_in = '
+        yield repr(self.chance_in)
+        
+        # chance_out
+        yield ', chance_out = '
+        yield repr(self.chance_out)
     
     
     def __eq__(self, other):
@@ -103,8 +110,12 @@ class OptionBase(RichAttributeErrorBaseType):
         if self.amount_interval != other.amount_interval:
             return False
         
-        # chance_byte_size
-        if self.chance_byte_size != other.chance_byte_size:
+        # chance_in
+        if self.chance_in != other.chance_in:
+            return False
+        
+        # chance_out
+        if self.chance_out != other.chance_out:
             return False
         
         return True
@@ -120,7 +131,10 @@ class OptionBase(RichAttributeErrorBaseType):
         # amount_interval
         hash_value ^= self.amount_interval << 8
         
-        # chance_byte_size
-        hash_value ^= self.chance_byte_size << 24
+        # chance_in
+        hash_value ^= self.chance_in << 24
+        
+        # chance_out
+        hash_value ^= self.chance_out << 0
         
         return hash_value

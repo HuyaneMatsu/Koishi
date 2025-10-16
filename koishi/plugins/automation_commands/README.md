@@ -36,6 +36,9 @@ Contains control commands for other automation features.
         - `list-channels`
         - `parse (name-unicode : bool, topic-custom : bool, topic-unicode : bool)`
         - `state (state : Choice<str>)`
+    - `reaction-role`
+        - `new (message : str)`
+        - `list`
     - `touhou-feed`
         - `about`
         - `list-channels (page : int<min = 1, max = 100> = 1)`

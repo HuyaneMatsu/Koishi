@@ -274,7 +274,7 @@ async def reaction_delete_emoji(client, message, emoji, removed_reactions):
     emoji : ``Emoji``
         The emoji the reactions were removed for.
     
-    removed_reactions : `None | dict<Reaction, ReactionMappingLine>`
+    removed_reactions : ``None | dict<Reaction, ReactionMappingLine>``
         The removed reactions if known.
     """
     if not emoji.is_custom_emoji():

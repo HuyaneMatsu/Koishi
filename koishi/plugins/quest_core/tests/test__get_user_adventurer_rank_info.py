@@ -6,19 +6,13 @@ from ..adventurer_rank_info_generation import get_user_adventurer_rank_info
 
 def _iter_options():
     yield 0, (0, 1)
-    yield 15, (0, 1)
+    yield 255, (0, 1)
     
-    yield 16, (1, 1)
-    yield 31, (1, 1)
+    yield 256, (1, 1)
+    yield 511, (1, 1)
     
-    yield 32, (2, 2)
-    yield 63, (2, 2)
-    
-    yield 64, (3, 2)
-    yield 127, (3, 2)
-    
-    yield 128, (4, 3)
-    yield 255, (4, 3)
+    yield 512, (2, 2)
+    yield 1023, (2, 2)
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())

@@ -1,248 +1,284 @@
-__all__ = ('build_notification_settings_embed', 'build_preference_settings_embed')
+__all__ = ('build_notification_settings_components', 'build_preference_settings_components')
 
-from hata import CLIENTS, Embed
+from hata import CLIENTS, create_text_display
 
 from .constants import PREFERRED_IMAGE_SOURCE_NAME_DEFAULT, PREFERRED_IMAGE_SOURCE_NAMES, PREFERRED_CLIENT_NAME_DEFAULT
 from .options import NOTIFICATION_SETTINGS_SORTED
 
 
-def build_user_settings_notification_change_description(option, value, changed):
+def produce_user_settings_notification_change_description(option, value, changed):
     """
     Builds notification change description.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
     option : ``NotificationOption``
         Option representing the changed notification setting.
+    
     value : `bool`
         The new value to set.
+    
     changed : `bool`
         Whether value was changed.
     
-    Returns
-    -------
-    description : `str`
+    Yields
+    ------
+    part : `str`
     """
     display_name = option.display_name
     
     if changed:
-        if value:
-            description = f'From now on, you will receive {display_name} notifications.'
-        else:
-            description = f'From now, you will **not** receive {display_name} notifications.'
-    else:
-        if value:
-            description = f'You were already receiving {display_name} notifications.'
-        else:
-            description = f'You were already **not** receiving {display_name} notifications.'
+        yield 'From now'
         
-    return description
+        if value:
+            yield ' on'
+        
+        yield ', you will'
+        
+        if not value:
+            yield ' **not**'
+        
+        yield ' receive '
+    
+    else:
+        yield 'You were already'
+        
+        if not value:
+            yield ' **not**'
+        
+        yield ' receiving '
+    
+    yield display_name
+    yield ' notifications.'
 
 
-def build_user_settings_notification_change_embed(user, option, value, changed):
+def build_user_settings_notification_change_components(option, value, changed):
     """
-    Builds notification change embed.
+    Builds notification change components.
     
     Parameters
     ----------
-    user : ``ClientUserBase``
-        The user who's user settings are changed.
     option : ``NotificationOption``
         Option representing the changed notification setting.
+    
     value : `bool`
         The new value to set.
+    
     changed : `bool`
         Whether value was changed.
     
     Returns
     -------
-    embed : ``Embed``
+    components : ``list<Component>``
     """
-    return Embed(
-        ('Great success!' if changed else 'Uoh'),
-        build_user_settings_notification_change_description(option, value, changed),
-    ).add_thumbnail(
-        user.avatar_url,
-    )
+    return [
+        create_text_display(
+            ''.join([*produce_user_settings_notification_change_description(option, value, changed)]),
+        ),
+    ]
 
 
-def build_user_settings_preferred_client_change_description(client, hit, changed):
+def produce_user_settings_preferred_client_change_description(client, guild_id, hit, changed):
     """
-    Builds user settings preferred client change description.
+    Produces user settings preferred client change description.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
-    client : `None | ClientUserBase`
+    client : ``None | ClientUserBase``
         The preferred client that were set.
+    
+    guild_id : `int`
+        The local guild's name.
+    
     hit : `bool`
         Whether a client option was hit by the user's input.
+    
     changed : `bool`
         Whether value was changed.
     
-    Returns
-    -------
-    description : `str`
+    Yields
+    ------
+    part : `str`
     """
     if not hit:
-        description = 'Could not match any available clients.'
+        yield 'Could not match any available clients.'
+        return
     
+    yield 'Preferred client '
+    
+    yield ('set to' if changed else 'was already')
+    
+    if client is None:
+        client_name = PREFERRED_CLIENT_NAME_DEFAULT
     else:
-        if client is None:
-            client_name = PREFERRED_CLIENT_NAME_DEFAULT
-        else:
-            client_name = client.full_name
-        
-        if changed:
-            description = f'Preferred client set to `{client_name!s}`.'
-        else:
-            description = f'Preferred client was already `{client_name!s}`.'
+        client_name = client.name_at(guild_id)
     
-    return description
+    yield ' `'
+    yield client_name
+    yield '`.'
 
 
-def build_user_settings_preferred_client_change_embed(user, client, hit, changed):
+def build_user_settings_preferred_client_change_components(client, guild_id, hit, changed):
     """
-    Builds a user settings preferred client change embed.
+    Builds a user settings preferred client change components.
     
     Parameters
     ----------
-    user : ``ClientUserBase``
-        The user who's user settings are changed.
-    client : `None | ClientUserBase`
-        The client who were set as preferred client.
+    client : ``None | ClientUserBase`
+        The client who were set as prefer`red client.
+    
+    guild_id : `int`
+        The local guild's name.
+    
     hit : `bool`
         Whether a client option was hit by the user's input.
+    
     changed : `bool`
         Whether value was changed.
     
     Returns
     -------
-    embed : ``Embed``
+    components : ``list<Component>``
     """
-    return Embed(
-        ('Great success!' if changed else 'Uoh'),
-        build_user_settings_preferred_client_change_description(client, hit, changed),
-    ).add_thumbnail(
-        user.avatar_url,
-    )
+    return [
+        create_text_display(
+            ''.join([*produce_user_settings_preferred_client_change_description(client, guild_id, hit, changed)])
+        ),
+    ]
 
 
-def build_user_settings_preferred_image_source_change_description(preferred_image_source, hit, changed):
+def produce_user_settings_preferred_image_source_change_description(preferred_image_source, hit, changed):
     """
-    Builds user settings preferred image source change description.
+    Produces user settings preferred image source change description.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
     preferred_image_source : `int`
         The preferred image source that were set.
+    
     hit : `bool`
         Whether a client option was hit by the user's input.
+    
+    changed : `bool`
+        Whether value was changed.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    if not hit:
+        yield 'Could not match any preferred image source.'
+        return
+    
+    yield 'Preferred image source '
+    
+    yield ('set to' if changed else 'was already')
+    
+    yield ' `'
+    yield PREFERRED_IMAGE_SOURCE_NAMES.get(preferred_image_source, PREFERRED_IMAGE_SOURCE_NAME_DEFAULT)
+    yield '`.'
+
+
+def build_user_settings_preferred_image_source_change_components(preferred_image_source, hit, changed):
+    """
+    Builds a user settings preferred image source change components.
+    
+    Parameters
+    ----------
+    preferred_image_source : `int`
+        The preferred image source that were set.
+    
+    hit : `bool`
+        Whether a client option was hit by the user's input.
+    
     changed : `bool`
         Whether value was changed.
     
     Returns
     -------
-    description : `str`
+    components : ``list<Component>``
     """
-    if not hit:
-        description = 'Could not match any preferred image source.'
-    
-    else:
-        preferred_image_source_name = PREFERRED_IMAGE_SOURCE_NAMES.get(
-            preferred_image_source, PREFERRED_IMAGE_SOURCE_NAME_DEFAULT
+    return [
+        create_text_display(
+            ''.join([*produce_user_settings_preferred_image_source_change_description(
+                preferred_image_source, hit, changed
+            )]),
         )
-        if changed:
-            description = f'Preferred image source set to `{preferred_image_source_name!s}`.'
-        else:
-            description = f'Preferred image source was already `{preferred_image_source_name!s}`.'
-    
-    return description
+    ]
 
 
-def build_user_settings_preferred_image_source_change_embed(user, preferred_image_source, hit, changed):
+def produce_notification_settings_description(user_settings):
     """
-    Builds a user settings preferred image source change embed.
+    Produces notification settings descriptions.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
-    user : ``ClientUserBase``
-        The user who's user settings are changed.
-    preferred_image_source : `int`
-        The preferred image source that were set.
-    hit : `bool`
-        Whether a client option was hit by the user's input.
-    changed : `bool`
-        Whether value was changed.
-    
-    Returns
-    -------
-    embed : ``Embed``
-    """
-    return Embed(
-        ('Great success!' if changed else 'Uoh'),
-        build_user_settings_preferred_image_source_change_description(preferred_image_source, hit, changed),
-    ).add_thumbnail(
-        user.avatar_url,
-    )
-
-
-def build_notification_settings_embed(user, user_settings):
-    """
-    Builds user settings embed.
-    
-    Parameters
-    ----------
-    user : ``ClientUserBase``
-        The respective user.
     user_settings : ``UserSettings``
         The user's settings.
     
-    Returns
-    -------
-    embed : ``Embed``
+    Yields
+    ------
+    part : `str`
     """
-    embed = Embed(
-        'Notification settings',
-    ).add_thumbnail(
-        user.avatar_url,
-    )
+    field_added = False
     
     for option in NOTIFICATION_SETTINGS_SORTED:
-        value = option.get(user_settings)
+        if field_added:
+            yield '\n'
+        else:
+            field_added = True
         
-        embed.add_field(
-            option.display_name.capitalize(),
-            (
-                f'```\n'
-                f'{"true" if value else "false"!s}\n'
-                f'```'
-            )
-        )
-    
-    return embed
+        value = option.get(user_settings)
+        yield '- '
+        yield option.display_name.capitalize()
+        yield ': '
+        yield ('true' if value else 'false')
 
 
-def build_preference_settings_embed(user, user_settings):
+def build_notification_settings_components(user_settings):
     """
-    Builds preference settings embed.
+    Builds user settings components.
     
     Parameters
     ----------
-    user : ``ClientUserBase``
-        The respective user.
     user_settings : ``UserSettings``
         The user's settings.
     
     Returns
     -------
-    embed : ``Embed``
+    components : ``list<Component>``
     """
-    embed = Embed(
-        'Preference settings',
-    ).add_thumbnail(
-        user.avatar_url,
-    )
+    return [
+        create_text_display(''.join([*produce_notification_settings_description(user_settings)])),
+    ]
+
+
+def produce_preference_settings_description(user_settings, guild_id):
+    """
+    Produces preference settings descriptions.
     
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    user_settings : ``UserSettings``
+        The user's settings.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
+    Yields
+    ------
+    part : `str`
+    """
     # preferred_client_id
     preferred_client_id = user_settings.preferred_client_id
     if preferred_client_id:
@@ -250,26 +286,29 @@ def build_preference_settings_embed(user, user_settings):
     else:
         preferred_client = None
     
-    embed.add_field(
-        'Preferred client',
-        (
-            f'```\n'
-            f'{PREFERRED_CLIENT_NAME_DEFAULT if preferred_client is None else preferred_client.full_name!s}\n'
-            f'```'
-        )
-    )
+    yield '- Preferred client: '
+    yield (PREFERRED_CLIENT_NAME_DEFAULT if preferred_client is None else preferred_client.name_at(guild_id))
     
-    # preferred_image_source
-    preferred_image_source_name = PREFERRED_IMAGE_SOURCE_NAMES.get(
-        user_settings.preferred_image_source, PREFERRED_IMAGE_SOURCE_NAME_DEFAULT
-    )
-    embed.add_field(
-        'Preferred image source',
-        (
-            f'```\n'
-            f'{preferred_image_source_name!s}\n'
-            f'```'
-        )
-    )
+    yield '\n- Preferred image source: '
+    yield PREFERRED_IMAGE_SOURCE_NAMES.get(user_settings.preferred_image_source, PREFERRED_IMAGE_SOURCE_NAME_DEFAULT)
+
+
+def build_preference_settings_components(user_settings, guild_id):
+    """
+    Builds preference settings components.
     
-    return embed
+    Parameters
+    ----------
+    user_settings : ``UserSettings``
+        The user's settings.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
+    Returns
+    -------
+    components : ``list<Component>``
+    """
+    return [
+        create_text_display(''.join([*produce_preference_settings_description(user_settings, guild_id)])),
+    ]

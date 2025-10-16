@@ -20,32 +20,39 @@ EMOJI_FLUSHED = Emoji.precreate(965960651853926480)
 COOLDOWN_HANDLER = CooldownHandler('user', 1800, 20)
 
 
-def get_allowed_users(client, event, input_targets):
+def get_allowed_users(client, source_user, input_targets):
     """
+    Gets the allowed users of an action.
+    
     Parameters
     ----------
-    client : ``Client``
+    client : ``ClientUserBase``
         The client who received the event.
-    event : ``InteractionEvent``
-        The received interaction event.
-    input_targets : `tuple` of ``ClientUserBase``
+    
+    source_user : ``ClientUserBase``
+        The user invoking the interaction.
+    
+    input_targets : ``tuple<None | ClientUserBase | Role>``
         The input users to the command.
     
     Returns
     -------
-    targets : `set<Role | ClientUserBase>`
+    targets : ``set<ClientUserBase | Role>``
         The mentioned users and roles by the event.
+    
     client_in_users : `bool`
         Whether the client is in the mentioned users.
+    
     user_in_users : `bool`
         Whether the user in in the mentioned users as well.
-    allowed_mentions : `list<ClientUserBase>`
+    
+    allowed_mentions : ``list<ClientUserBase>``
         Allowed mentions.
     """
     targets = {target for target in input_targets if target is not None}
     
     try:
-        targets.remove(event.user)
+        targets.remove(source_user)
     except KeyError:
         user_in_users = False
     else:
@@ -60,21 +67,23 @@ def get_allowed_users(client, event, input_targets):
     
     # Add back `event.user` and `client`, so discord client wont derp out by not showing them up as intended.
     allowed_mentions = [
-        event.user,
         client,
+        source_user,
         *(target for target in targets if isinstance(target, ClientUserBase)),
     ]
     
     return targets, client_in_users, user_in_users, allowed_mentions
 
 
-def build_response(client, starter_text, verb, source_user, targets, client_in_targets):
+def produce_header(client, starter_text, verb, source_user, targets, client_in_targets):
     """
     Builds action response text and allowed mentions.
     
+    This function is an iterable generator.
+    
     Parameters
     ----------
-    client : ``Client``
+    client : ``ClientUserBase``
         The client who received the event.
     
     starter_text : `None | str`
@@ -86,67 +95,65 @@ def build_response(client, starter_text, verb, source_user, targets, client_in_t
     source_user : ``ClientUserBase``
         The user source user who invoked the event.
     
-    targets : `set<Role | ClientUserBase>`
+    targets : ``list<ClientUserBase | Role>``
         The mentioned users and roles by the event.
     
     client_in_targets : `bool`
         Whether the client is in the mentioned targets.
     
-    Returns
-    -------
-    response : `str`
+    Yields
+    ------
+    part : `str`
     """
-    targets = [*targets]
-    
-    response_parts = ['> ']
+    yield '> '
     
     if (starter_text is not None):
-        response_parts.append(starter_text)
-        response_parts.append('; ')
+        yield starter_text
+        yield '; '
     
-    response_parts.append(source_user.mention)
+    yield source_user.mention
     
-    response_parts.append(' ')
-    response_parts.append(verb)
-    response_parts.append(' ')
+    yield ' '
+    yield verb
+    yield ' '
     
     user_count = len(targets)
     if user_count == 0:
         if client_in_targets:
             if random() > 0.5:
-                response_parts.append('me ')
-                response_parts.append(EMOJI_FLUSHED.as_emoji)
+                yield 'me '
+                yield EMOJI_FLUSHED.as_emoji
             else:
-                response_parts.append(client.mention)
+                yield client.mention
         else:
-            response_parts.append(source_user.mention)
+            yield source_user.mention
     
     elif user_count == 1 and not client_in_targets:
-        response_parts.append(targets[0].mention)
+        yield targets[0].mention
     
     else:
         for user in targets[: - (2 - client_in_targets)]:
-            response_parts.append(user.mention)
-            response_parts.append(', ')
+            yield user.mention
+            yield ', '
         
-        response_parts.append(targets[- (2 - client_in_targets)].mention)
-        response_parts.append(' and ')
+        yield targets[- (2 - client_in_targets)].mention
+        yield ' and '
         
         if client_in_targets:
             if random() > 0.5:
-                response_parts.append('me ')
-                response_parts.append(EMOJI_FLUSHED.as_emoji)
+                yield 'me '
+                yield EMOJI_FLUSHED.as_emoji
             else:
-                response_parts.append(client.mention)
+                yield client.mention
         else:
-            response_parts.append(targets[-1].mention)
-    
-    return ''.join(response_parts)
+            yield targets[-1].mention
 
 
-def build_response_self(starter_text, verb, source_user):
+def produce_header_self(starter_text, verb, source_user):
     """
     Builds action response text and allowed mentions.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
@@ -159,27 +166,27 @@ def build_response_self(starter_text, verb, source_user):
     source_user : ``ClientUserBase``
         The user source user who invoked the event.
     
-    Returns
-    -------
-    response : `str`
+    Yields
+    ------
+    part : `str`
     """
-    response_parts = ['> ']
+    yield '> '
     
     if (starter_text is not None):
-        response_parts.append(starter_text)
-        response_parts.append('; ')
+        yield starter_text
+        yield '; '
     
-    response_parts.append(source_user.mention)
-    response_parts.append(' ')
-    response_parts.append(verb)
-    response_parts.append(' ')
+    yield source_user.mention
+    yield ' '
+    yield verb
+    yield ' '
     
     if random() < 0.2:
         target_word = 'herself'
     else:
         target_word = 'themselves'
-    response_parts.append(target_word)
-    response_parts.append(' ')
+    yield target_word
+    yield ' '
     
     sign_chance = random()
     if sign_chance < 0.1:
@@ -188,8 +195,7 @@ def build_response_self(starter_text, verb, source_user):
         end_sign = '!?'
     else:
         end_sign = '?!'
-    response_parts.append(end_sign)
-    return ''.join(response_parts)
+    yield end_sign
 
 
 async def send_action_response_with_interaction_event(client, event, content, embed, allowed_mentions):
@@ -625,7 +631,7 @@ def create_action_command_function(action):
         
         targets, client_in_users, user_in_users, allowed_mentions = get_allowed_users(
             client,
-            event,
+            event.user,
             (
                 target_00, target_01, target_02, target_03, target_04, target_05, target_06, target_07, target_08,
                 target_09, target_10, target_11, target_12, target_13, target_14, target_15, target_16, target_17,
@@ -636,8 +642,8 @@ def create_action_command_function(action):
         expire_after = COOLDOWN_HANDLER.get_cooldown(event, len(targets))
         if expire_after > 0.0:
             abort(
-                f'{client.name_at(event.guild_id)} got bored of enacting your {event.name} try again in '
-                f'{expire_after:.2f} seconds.'
+                f'{client.name_at(event.guild_id)} got bored of enacting your {event.application_command_name} try '
+                f'again in {expire_after:.2f} seconds.'
             )
         
         # Reverse the users when there are no target.
@@ -695,15 +701,17 @@ async def create_response_content_and_embed(
     if (
         user_in_users and
         (not targets) and
-        (action.handler_self is not None)
-        and ((random() < 0.5) if client_in_users else True)
+        (action.handler_self is not None) and
+        ((random() < 0.5) if client_in_users else True)
     ):
-        content = build_response_self(action.starter_text, action.verb, source_user)
+        producer = produce_header_self(action.starter_text, action.verb, source_user)
         handler = action.handler_self
         
     else:
-        content = build_response(client, action.starter_text, action.verb, source_user, targets, client_in_users)
+        producer = produce_header(client, action.starter_text, action.verb, source_user, [*targets], client_in_users)
         handler = action.handler
+    
+    content = ''.join([*producer])
     
     target_users = [target for target in targets if isinstance(target, ClientUserBase)]
     

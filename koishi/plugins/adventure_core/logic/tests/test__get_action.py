@@ -22,7 +22,7 @@ def _iter_options():
         2,
         None,
         (
-            OptionLoot(1.0, 10, 20, 888, 10, 5, 40, 25),
+            OptionLoot(1, 1, 10, 20, 888, 10, 5, 40, 25),
         ),
     )
     
@@ -33,7 +33,7 @@ def _iter_options():
         2,
         None,
         (
-            OptionLoot(1.0, 10, 10, 888, 10_000, 10, 40, 25),
+            OptionLoot(1, 1, 10, 10, 888, 10_000, 10, 40, 25),
         ),
     )
     

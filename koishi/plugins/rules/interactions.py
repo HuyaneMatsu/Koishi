@@ -147,7 +147,7 @@ async def claim_polls_role(client, event):
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_CLAIM_ROLE_BOT_ACCESS)
-async def claim_bot_access_role(client, event):
+async def claim_bot_access_role(client, event, *, selected_bot_ids):
     """
     Assigns a bot access role.
     
@@ -160,15 +160,17 @@ async def claim_bot_access_role(client, event):
     
     event : ``InteractionEvent``
         The received interaction event.
+    
+    selected_bot_ids : `None | tuple<str>`
+        The selected bot identifiers.
     """
     await client.interaction_component_acknowledge(event)
     
-    values = event.values
-    if (values is None):
+    if selected_bot_ids is None:
         return
     
     try:
-        selected_bot_id = int(values[0])
+        selected_bot_id = int(selected_bot_ids[0])
     except ValueError:
         return
     

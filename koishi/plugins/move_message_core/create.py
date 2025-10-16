@@ -40,7 +40,7 @@ async def create_webhook_message(client, webhook, message, thread_id, files):
     else:
         content = snapshot.content
         embeds = snapshot.embeds
-        poll = snapshot.poll
+        poll = None
     
     if (content is None) and (embeds is None) and (poll is None) and (files is None):
         return

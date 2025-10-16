@@ -6,13 +6,13 @@ from ...bots import FEATURE_CLIENTS
 
 from ..user_settings import (
     NOTIFICATION_SETTINGS_CHOICES, NOTIFICATION_SETTING_RESOLUTION, PREFERRED_IMAGE_SOURCE_NAMES,
-    autocomplete_user_settings_preferred_client, build_notification_settings_embed, build_preference_settings_embed,
-    get_one_user_settings, handle_user_settings_change, handle_user_settings_set_preferred_client,
-    handle_user_settings_set_preferred_image_source
+    autocomplete_user_settings_preferred_client, build_notification_settings_components,
+    build_preference_settings_components, get_one_user_settings, handle_user_settings_change,
+    handle_user_settings_set_preferred_client, handle_user_settings_set_preferred_image_source
 )
 from ..touhou_character_preference import (
-    PREFERRED_CHARACTER_MAX, add_touhou_character_to_preference, build_character_preference_change_embed,
-    build_character_preference_embed, get_one_touhou_character_preference, remove_touhou_character_from_preference
+    PREFERRED_CHARACTER_MAX, add_touhou_character_to_preference, build_character_preference_change_components,
+    build_character_preference_components, get_one_touhou_character_preference, remove_touhou_character_from_preference
 )
 from ..touhou_core import (
     auto_complete_touhou_character_name, get_touhou_character_like, get_touhou_character_names_like_from
@@ -58,7 +58,7 @@ async def notification_settings_show(client, interaction_event):
     
     await client.interaction_response_message_edit(
         interaction_event,
-        embed = build_notification_settings_embed(interaction_event.user, user_settings),
+        components = build_notification_settings_components(user_settings),
     )
 
 
@@ -124,7 +124,7 @@ async def preference_settings_show(client, interaction_event):
     
     await client.interaction_response_message_edit(
         interaction_event,
-        embed = build_preference_settings_embed(interaction_event.user, user_settings),
+        components = build_preference_settings_components(user_settings, interaction_event.guild_id),
     )
 
 
@@ -204,18 +204,16 @@ async def character_preference_show(client, interaction_event):
     interaction_event : ``InteractionEvent``
         The received interaction event.
     """
-    user = interaction_event.user
-    
     await client.interaction_application_command_acknowledge(
         interaction_event,
         False,
     )
     
-    character_preferences = await get_one_touhou_character_preference(user.id)
+    character_preferences = await get_one_touhou_character_preference(interaction_event.user_id)
     
     await client.interaction_response_message_edit(
         interaction_event,
-        embed = build_character_preference_embed(user, character_preferences),
+        components = build_character_preference_components(character_preferences),
     )
 
 
@@ -250,8 +248,7 @@ async def character_preference_add(
         )
         return
     
-    user = interaction_event.user
-    character_preferences = await get_one_touhou_character_preference(user.id)
+    character_preferences = await get_one_touhou_character_preference(interaction_event.user_id)
     if (character_preferences is not None) and (len(character_preferences) >= PREFERRED_CHARACTER_MAX):
         await client.interaction_response_message_create(
             interaction_event,
@@ -265,11 +262,11 @@ async def character_preference_add(
         False,
     )
     
-    await add_touhou_character_to_preference(user.id, character)
+    await add_touhou_character_to_preference(interaction_event.user_id, character)
     
     await client.interaction_response_message_edit(
         interaction_event,
-        embed = build_character_preference_change_embed(user, character, True),
+        components = build_character_preference_change_components(character, True),
     )
 
 
@@ -309,12 +306,11 @@ async def character_preference_remove(
         False,
     )
     
-    user = interaction_event.user
-    await remove_touhou_character_from_preference(user.id, character)
+    await remove_touhou_character_from_preference(interaction_event.user_id, character)
     
     await client.interaction_response_message_edit(
         interaction_event,
-        embed = build_character_preference_change_embed(user, character, False),
+        components = build_character_preference_change_components(character, False),
     )
 
 

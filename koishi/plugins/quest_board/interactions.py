@@ -11,26 +11,23 @@ from ..guild_stats import get_guild_stats
 from ..inventory_core import get_inventory, save_inventory
 from ..item_core import get_item_nullable
 from ..quest_core import (
-    LinkedQuest, add_linked_quest, delete_linked_quest, get_guild_adventurer_rank_info, get_linked_quest_listing,
-    get_quest_template, get_user_adventurer_rank_info, modify_linked_quest_amount_submitted
+    LINKED_QUEST_COMPLETION_STATE_ACTIVE, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest,
+    calculate_received_reward_credibility, add_linked_quest, delete_linked_quest, get_current_batch_id,
+    get_guild_adventurer_rank_info, get_linked_quest_listing, get_quest_template, get_user_adventurer_rank_info,
+    update_linked_quest
 )
 from ..user_balance import get_user_balance
 from ..user_stats_core import get_user_stats
 
 from .component_building import (
     build_linked_quest_abandon_success_components, build_linked_quest_details_components,
-    build_linked_quest_failure_broken_quest_components, build_linked_quest_failure_expired_quest_components,
-    build_linked_quest_failure_no_such_quest_components, build_linked_quest_failure_on_adventure_components,
-    build_linked_quest_item_components, build_linked_quest_submit_failure_no_items_to_submit_components,
-    build_linked_quest_submit_success_completed_components, build_linked_quest_submit_success_n_left_components,
-    build_linked_quests_listing_components, build_quest_accept_failure_duplicate_components,
-    build_quest_accept_failure_quest_limit_components, build_quest_accept_failure_user_level_low_components,
-    build_quest_accept_success_components, build_quest_board_failure_guild_only_components,
-    build_quest_board_item_components, build_quest_board_quest_listing_components, build_quest_details_components,
-    build_quest_failure_no_such_quest_components, build_quest_failure_on_adventure_components
+    build_linked_quest_item_components, build_linked_quest_submit_success_completed_components,
+    build_linked_quest_submit_success_n_left_components, build_linked_quests_listing_components,
+    build_quest_accept_success_components, build_quest_board_item_components,
+    build_quest_board_quest_listing_components, build_quest_details_components,
 )
 from .constants import (
-    CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN, CUSTOM_ID_LINKED_QUEST_DETAILS_PATTERN,
+    BROKEN_QUEST_DESCRIPTION, CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN, CUSTOM_ID_LINKED_QUEST_DETAILS_PATTERN,
     CUSTOM_ID_LINKED_QUEST_ITEM_DISABLED, CUSTOM_ID_LINKED_QUEST_ITEM_PATTERN,
     CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_DECREMENT_DISABLED, CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_INCREMENT_DISABLED,
     CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_NAVIGATE_PATTERN, CUSTOM_ID_LINKED_QUEST_SUBMIT_DISABLED,
@@ -63,9 +60,13 @@ async def build_guild_quest_board_response(guild, user_id):
     response : ``InteractionResponse``
     """
     guild_stats = await get_guild_stats(guild.id)
+    user_stats = await get_user_stats(user_id)
+    linked_quest_listing = await get_linked_quest_listing(user_id)
     
     return InteractionResponse(
-        components = build_quest_board_quest_listing_components(guild, guild_stats, user_id, 0)
+        components = build_quest_board_quest_listing_components(
+            guild, guild_stats, user_stats, linked_quest_listing, 0
+        ),
     )
 
 
@@ -150,13 +151,15 @@ async def quest_board_quest_details(client, event, user_id, page_index, quest_te
     if user_id != event.user_id:
         return
     
-    await client.interaction_component_acknowledge(event)
+    await client.interaction_component_acknowledge(
+        event,
+        False,
+    )
     
     while True:
         guild = event.guild
         if guild is None:
-            components = build_quest_board_failure_guild_only_components()
-            new_message = True
+            error_message = 'Only guilds have quest board.'
             break
         
         guild_stats = await get_guild_stats(guild.id)
@@ -165,8 +168,7 @@ async def quest_board_quest_details(client, event, user_id, page_index, quest_te
         quest = get_quest_with_template_id(quest_batch, quest_template_id)
         
         if (quest is None):
-            components = build_quest_failure_no_such_quest_components()
-            new_message = True
+            error_message = 'This quest is no longer available.'
             break
         
         user_stats = await get_user_stats(user_id)
@@ -176,26 +178,22 @@ async def quest_board_quest_details(client, event, user_id, page_index, quest_te
         linked_quest = get_linked_quest_for_deduplication(
             linked_quest_listing, guild.id, quest_batch.id, quest_template_id
         )
-        if (linked_quest is not None):
+        if (linked_quest is not None) and (linked_quest.completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE):
             components = build_linked_quest_details_components(linked_quest, user_stats, 0)
-            new_message = False
-            break
+        else:
+            components = build_quest_details_components(user_id, page_index, quest, linked_quest, user_stats)
         
-        components = build_quest_details_components(user_id, page_index, quest, user_stats)
-        new_message = False
-        break
-    
-    if new_message:
-        await client.interaction_followup_message_create(
-            event,
-            components = components,
-            show_for_invoking_user_only = True,
-        )
-    else:
         await client.interaction_response_message_edit(
             event,
             components = components,
         )
+        return
+    
+    await client.interaction_followup_message_create(
+        event,
+        content = error_message,
+        show_for_invoking_user_only = True,
+    )
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_PATTERN)
@@ -233,26 +231,26 @@ async def quest_board_quest_listing_page_index_navigate(client, event, user_id, 
     while True:
         guild = event.guild
         if guild is None:
-            components = build_quest_board_failure_guild_only_components()
-            new_message = True
+            error_message = 'Only guilds have quest board.'
             break
         
         guild_stats = await get_guild_stats(guild.id)
-        components = build_quest_board_quest_listing_components(guild, guild_stats, user_id, page_index)
-        new_message = False
-        break
-    
-    if new_message:
-        await client.interaction_followup_message_create(
-            event,
-            components = components,
-            show_for_invoking_user_only = True,
-        )
-    else:
+        user_stats = await get_user_stats(user_id)
+        linked_quest_listing = await get_linked_quest_listing(user_id)
+        
         await client.interaction_response_message_edit(
             event,
-            components = components,
+            components = build_quest_board_quest_listing_components(
+                guild, guild_stats, user_stats, linked_quest_listing, page_index
+            ),
         )
+        return
+    
+    await client.interaction_followup_message_create(
+        event,
+        content = error_message,
+        show_for_invoking_user_only = True,
+    )
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_ACCEPT_PATTERN)
@@ -294,14 +292,12 @@ async def quest_accept(client, event, user_id, page_index, quest_template_id):
     while True:
         adventure = await get_active_adventure(user_id)
         if (adventure is not None):
-            components = build_quest_failure_on_adventure_components()
-            new_message = True
+            error_message = 'You cannot accept quests while adventuring.'
             break
         
         guild = event.guild
         if guild is None:
-            components = build_quest_board_failure_guild_only_components()
-            new_message = True
+            error_message = 'Only guilds have quest board.'
             break
         
         # Get the quest from the board.
@@ -312,8 +308,7 @@ async def quest_accept(client, event, user_id, page_index, quest_template_id):
         
         # Check whether there is such a quest.
         if (quest is None):
-            components = build_quest_failure_no_such_quest_components()
-            new_message = True
+            error_message = 'This quest is no longer available.'
             break
         
         # Check whether the user already has a quest like this.
@@ -321,51 +316,59 @@ async def quest_accept(client, event, user_id, page_index, quest_template_id):
         linked_quest = get_linked_quest_for_deduplication(
             linked_quest_listing, guild.id, quest_batch.id, quest_template_id
         )
-        if (linked_quest is not None):
-            components = build_quest_accept_failure_duplicate_components()
-            new_message = True
+        if (linked_quest is not None) and (linked_quest.completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE):
+            error_message = 'You already have this quest currently accepted.'
             break
         
         # Check whether the user has enough slots.
         user_stats = await get_user_stats(user_id)
         user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
-        if (linked_quest_listing is not None):
-            if len(linked_quest_listing) >= user_adventurer_rank_info.quest_limit:
-                components = build_quest_accept_failure_quest_limit_components()
-                new_message = True
-                break
+        if (
+            (linked_quest_listing is not None) and
+            sum(
+                looped_linked_quest.completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE
+                for looped_linked_quest in linked_quest_listing
+            ) >= user_adventurer_rank_info.quest_limit
+        ):
+            error_message = 'You cannot accept more quests.'
+            break
         
         # Check whether the user's level is sufficient.
         quest_template = get_quest_template(quest_template_id)
         if quest_template is None:
-            components = build_linked_quest_failure_broken_quest_components()
-            new_message = False
+            error_message = BROKEN_QUEST_DESCRIPTION
             break
         
         if quest_template.level > user_adventurer_rank_info.level:
-            components = build_quest_accept_failure_user_level_low_components()
-            new_message = False
+            error_message = 'Your rank is too low to accept this quest.'
             break
         
-        # Add quest.
-        linked_quest = LinkedQuest(user_id, guild.id, quest_batch.id, quest)
-        await add_linked_quest(linked_quest)
+        # Check whether the user can repeat this quest anymore.
+        if (linked_quest is not None):
+            repeat_count = quest_template.repeat_count
+            if repeat_count and (linked_quest.completion_count >= repeat_count):
+                error_message = 'You already completed this quest the maximal amount of times.'
+                break
         
-        components = build_quest_accept_success_components(user_id, page_index, linked_quest.entry_id)
-        new_message = False
-        break
-    
-    if new_message:
-        await client.interaction_followup_message_create(
-            event,
-            components = components,
-            show_for_invoking_user_only = True,
-        )
-    else:
+        # Add quest.
+        if linked_quest is None:
+            linked_quest = LinkedQuest(user_id, guild.id, quest_batch.id, quest)
+            await add_linked_quest(linked_quest)
+        else:
+            linked_quest.reset()
+            await update_linked_quest(linked_quest)
+        
         await client.interaction_response_message_edit(
             event,
-            components = components,
+            components = build_quest_accept_success_components(user_id, page_index, linked_quest.entry_id),
         )
+        return
+    
+    await client.interaction_followup_message_create(
+        event,
+        content = error_message,
+        show_for_invoking_user_only = True,
+    )
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_NAVIGATE_PATTERN)
@@ -454,27 +457,23 @@ async def linked_quest_details(client, event, user_id, page_index, linked_quest_
         linked_quest = get_linked_quest_with_entry_id(linked_quest_listing, linked_quest_entry_id)
         
         if (linked_quest is None):
-            components = build_linked_quest_failure_no_such_quest_components()
-            new_message = True
+            error_message = 'You do not have such a quest.'
             break
         
         user_stats = await get_user_stats(user_id)
-        components = build_linked_quest_details_components(linked_quest, user_stats, page_index)
-        new_message = False
-        break
-    
-    
-    if new_message:
-        await client.interaction_followup_message_create(
-            event,
-            components = components,
-            show_for_invoking_user_only = True,
-        )
-    else:
+        
         await client.interaction_response_message_edit(
             event,
-            components = components,
+            components = build_linked_quest_details_components(linked_quest, user_stats, page_index),
         )
+        return
+    
+    
+    await client.interaction_followup_message_create(
+        event,
+        content = error_message,
+        show_for_invoking_user_only = True,
+    )
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_PATTERN)
@@ -516,40 +515,34 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
     while True:
         adventure = await get_active_adventure(user_id)
         if (adventure is not None):
-            components = build_linked_quest_failure_on_adventure_components()
-            new_message = False
+            error_message = 'You cannot submit items while on adventure.'
             break
         
         linked_quest_listing = await get_linked_quest_listing(user_id)
         linked_quest = get_linked_quest_with_entry_id(linked_quest_listing, linked_quest_entry_id)
         
         if (linked_quest is None):
-            components = build_linked_quest_failure_no_such_quest_components()
-            new_message = False
+            error_message = 'You do not have such a quest.'
             break
         
         if linked_quest.expires_at < DateTime.now(TimeZone.utc):
-            components = build_linked_quest_failure_expired_quest_components()
-            new_message = False
+            error_message = 'The quest expired, you cannot interact with it anymore.'
             break
         
         quest_template = get_quest_template(linked_quest.template_id)
         if (quest_template is None):
-            components = build_linked_quest_failure_broken_quest_components()
-            new_message = False
+            error_message = BROKEN_QUEST_DESCRIPTION
             break
         
         item = get_item_nullable(quest_template.item_id)
         if (item is None):
-            components = build_linked_quest_failure_broken_quest_components()
-            new_message = False
+            error_message = BROKEN_QUEST_DESCRIPTION
             break
         
         inventory = await get_inventory(user_id)
         current_amount_count = inventory.get_item_amount(item)
         if not current_amount_count:
-            components = build_linked_quest_submit_failure_no_items_to_submit_components()
-            new_message = True
+            error_message = 'You do not have any item to submit.'
             break
         
         amount_type = quest_template.amount_type
@@ -559,7 +552,8 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
         amount_used, amount_used_count = get_submit_amount(item, amount_type, amount_to_be_used, current_amount_count)
         
         if amount_to_be_used > amount_used:
-            await modify_linked_quest_amount_submitted(linked_quest, amount_submitted + amount_used)
+            linked_quest.amount_submitted = amount_submitted + amount_used
+            await update_linked_quest(linked_quest)
             
             inventory.modify_item_amount(item, -amount_used_count)
             await save_inventory(inventory)
@@ -574,60 +568,70 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
                 amount_required,
                 amount_used,
             )
-            new_message = False
-            break
         
-        user_balance = await get_user_balance(user_id)
-        user_balance.set('balance', user_balance.balance + linked_quest.reward_balance)
-        await user_balance.save()
+        else:
+            user_balance = await get_user_balance(user_id)
+            user_balance.set('balance', user_balance.balance + linked_quest.reward_balance)
+            await user_balance.save()
+            
+            reward_credibility = linked_quest.reward_credibility
+            
+            user_stats = await get_user_stats(user_id)
+            user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
+            
+            if not reward_credibility:
+                user_reward_credibility = 0
+            else:
+                user_reward_credibility = calculate_received_reward_credibility(
+                    reward_credibility, quest_template.level, user_adventurer_rank_info.level
+                )
+                user_stats.set('credibility', user_stats.credibility + user_reward_credibility)
+                await user_stats.save()
+                
+                guild_stats = await get_guild_stats(event.guild_id)
+                guild_adventurer_rank_info = get_guild_adventurer_rank_info(guild_stats.credibility)
+                guild_reward_credibility = calculate_received_reward_credibility(
+                    reward_credibility, quest_template.level, guild_adventurer_rank_info.level
+                )
+                guild_stats.set('credibility', guild_stats.credibility + guild_reward_credibility)
+                await guild_stats.save()
+            
+            inventory.modify_item_amount(item, -amount_used_count)
+            await save_inventory(inventory)
+            
+            if linked_quest.batch_id != get_current_batch_id():
+                await delete_linked_quest(linked_quest)
+            else:
+                linked_quest.completion_count += 1
+                linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
+            
+            components = build_linked_quest_submit_success_completed_components(
+                user_id,
+                page_index,
+                event.guild_id,
+                linked_quest,
+                quest_template,
+                user_stats,
+                user_adventurer_rank_info.level,
+                item,
+                amount_type,
+                amount_required,
+                amount_used,
+                user_reward_credibility,
+            )
         
-        reward_credibility = linked_quest.reward_credibility
-        
-        user_stats = await get_user_stats(user_id)
-        user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
-        user_reward_credibility = max(reward_credibility - user_adventurer_rank_info.level, 0)
-        if user_reward_credibility:
-            user_stats.set('credibility', user_stats.credibility + user_reward_credibility)
-            await user_stats.save()
-        
-        guild_stats = await get_guild_stats(event.guild_id)
-        guild_adventurer_rank_info = get_guild_adventurer_rank_info(guild_stats.credibility)
-        guild_reward_credibility = max(reward_credibility - guild_adventurer_rank_info.level, 0)
-        if guild_reward_credibility:
-            guild_stats.set('credibility', guild_stats.credibility + guild_reward_credibility)
-            await guild_stats.save()
-        
-        inventory.modify_item_amount(item, -amount_used_count)
-        await save_inventory(inventory)
-        
-        await delete_linked_quest(linked_quest)
-        
-        components = build_linked_quest_submit_success_completed_components(
-            user_id,
-            page_index,
-            event.guild_id,
-            item,
-            amount_type,
-            amount_required,
-            amount_used,
-            linked_quest.reward_balance,
-            user_reward_credibility,
-        )
-        new_message = False
-        break
-    
-    
-    if new_message:
-        await client.interaction_followup_message_create(
-            event,
-            components = components,
-            show_for_invoking_user_only = True,
-        )
-    else:
         await client.interaction_response_message_edit(
             event,
             components = components,
         )
+        return
+    
+    
+    await client.interaction_followup_message_create(
+        event,
+        content = error_message,
+        show_for_invoking_user_only = True,
+    )
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN)
@@ -671,35 +675,43 @@ async def linked_quest_abandon(client, event, user_id, page_index, linked_quest_
         linked_quest = get_linked_quest_with_entry_id(linked_quest_listing, linked_quest_entry_id)
         
         if (linked_quest is None):
-            components = build_linked_quest_failure_no_such_quest_components()
-            new_message = True
+            error_message = 'You do not have such a quest.'
             break
         
-        await delete_linked_quest(linked_quest)
+        if linked_quest.batch_id != get_current_batch_id():
+            await delete_linked_quest(linked_quest)
+        else:
+            linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
         
         user_stats = await get_user_stats(user_id)
-        user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
-        user_reward_credibility = linked_quest.reward_credibility + user_adventurer_rank_info.level
-        if user_reward_credibility:
-            user_stats.set('credibility', max(user_stats.credibility - user_reward_credibility, 0))
+        reward_credibility = linked_quest.reward_credibility
+        if reward_credibility:
+            quest_template = get_quest_template(linked_quest.template_id)
+            user_reward_credibility = (
+                (
+                    calculate_received_reward_credibility(
+                        reward_credibility,
+                        (0 if quest_template is None else quest_template.level),
+                        get_user_adventurer_rank_info(user_stats.credibility).level,
+                    ) << 1
+                ) - (
+                    reward_credibility << 2
+                )
+            )
+            user_stats.set('credibility', max(user_stats.credibility + user_reward_credibility, 0))
             await user_stats.save()
-            
-        components = build_linked_quest_abandon_success_components(user_id, page_index, event.guild_id)
-        new_message = False
-        break
-    
-    
-    if new_message:
-        await client.interaction_followup_message_create(
-            event,
-            components = components,
-            show_for_invoking_user_only = True,
-        )
-    else:
+        
         await client.interaction_response_message_edit(
             event,
-            components = components,
+            components = build_linked_quest_abandon_success_components(user_id, page_index, event.guild_id),
         )
+        return
+    
+    await client.interaction_followup_message_create(
+        event,
+        content = error_message,
+        show_for_invoking_user_only = True,
+    )
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_BOARD_ITEM_PATTERN)
@@ -740,11 +752,9 @@ async def quest_board_item(client, event, user_id, page_index, quest_template_id
     if user_id != event.user_id:
         return
     
-    components = build_quest_board_item_components(user_id, page_index, quest_template_id, item_id)
-    
     await client.interaction_component_message_edit(
         event,
-        components = components,
+        components = build_quest_board_item_components(user_id, page_index, quest_template_id, item_id),
     )
 
 

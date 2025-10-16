@@ -1,5 +1,3 @@
-from math import floor
-
 import vampytest
 
 from ..loot import OptionLoot
@@ -16,7 +14,8 @@ def _assert_fields_set(option_loot):
     vampytest.assert_instance(option_loot, OptionLoot)
     vampytest.assert_instance(option_loot.amount_base, int)
     vampytest.assert_instance(option_loot.amount_interval, int)
-    vampytest.assert_instance(option_loot.chance_byte_size, int)
+    vampytest.assert_instance(option_loot.chance_in, int)
+    vampytest.assert_instance(option_loot.chance_out, int)
     vampytest.assert_instance(option_loot.duration_cost_flat, int)
     vampytest.assert_instance(option_loot.duration_cost_scaling, int)
     vampytest.assert_instance(option_loot.energy_cost_flat, int)
@@ -28,7 +27,8 @@ def test__OptionLoot__new():
     """
     Tests whether ``OptionLoot.__new__`` works as intended.
     """
-    chance = 0.4
+    chance_in = 2
+    chance_out = 100
     amount_min = 31
     amount_max = 6
     item_id = 5333
@@ -38,7 +38,8 @@ def test__OptionLoot__new():
     energy_cost_scaling = 1
     
     option_loot = OptionLoot(
-        chance,
+        chance_in,
+        chance_out,
         amount_min,
         amount_max,
         item_id,
@@ -52,7 +53,8 @@ def test__OptionLoot__new():
     
     vampytest.assert_eq(option_loot.amount_base, amount_min)
     vampytest.assert_eq(option_loot.amount_interval, amount_max - amount_min)
-    vampytest.assert_eq(option_loot.chance_byte_size, floor(chance * 255))
+    vampytest.assert_eq(option_loot.chance_in, chance_in)
+    vampytest.assert_eq(option_loot.chance_out, chance_out)
     vampytest.assert_eq(option_loot.item_id, item_id)
     vampytest.assert_eq(option_loot.duration_cost_flat, duration_cost_flat)
     vampytest.assert_eq(option_loot.duration_cost_scaling, duration_cost_scaling)
@@ -64,7 +66,8 @@ def test__OptionLoot__repr():
     """
     Tests whether ``OptionLoot.__repr__`` works as intended.
     """
-    chance = 0.4
+    chance_in = 2
+    chance_out = 100
     amount_min = 31
     amount_max = 6
     item_id = 5333
@@ -74,7 +77,8 @@ def test__OptionLoot__repr():
     energy_cost_scaling = 1
     
     option_loot = OptionLoot(
-        chance,
+        chance_in,
+        chance_out,
         amount_min,
         amount_max,
         item_id,
@@ -89,7 +93,8 @@ def test__OptionLoot__repr():
 
 
 def _iter_options__eq():
-    chance = 0.4
+    chance_in = 2
+    chance_out = 100
     amount_min = 31
     amount_max = 6
     item_id = 5333
@@ -99,7 +104,8 @@ def _iter_options__eq():
     energy_cost_scaling = 1
     
     keyword_parameters = {
-        'chance': chance,
+        'chance_in': chance_in,
+        'chance_out': chance_out,
         'amount_min': amount_min,
         'amount_max': amount_max,
         'item_id': item_id,
@@ -114,11 +120,21 @@ def _iter_options__eq():
         keyword_parameters,
         True,
     )
+    
     yield (
         keyword_parameters,
         {
             **keyword_parameters,
-            'chance': 0.6,
+            'chance_in': 5,
+        },
+        False,
+    )
+    
+    yield (
+        keyword_parameters,
+        {
+            **keyword_parameters,
+            'chance_out': 5,
         },
         False,
     )
@@ -234,7 +250,8 @@ def test__OptionLoot__hash():
     """
     Tests whether ``OptionLoot.__hash__`` works as intended.
     """
-    chance = 0.4
+    chance_in = 2
+    chance_out = 100
     amount_min = 31
     amount_max = 6
     item_id = 5333
@@ -244,7 +261,8 @@ def test__OptionLoot__hash():
     energy_cost_scaling = 1
     
     option_loot = OptionLoot(
-        chance,
+        chance_in,
+        chance_out,
         amount_min,
         amount_max,
         item_id,

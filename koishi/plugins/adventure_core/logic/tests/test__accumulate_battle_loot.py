@@ -21,7 +21,8 @@ def _iter_options():
     yield (
         (
             OptionBattle(
-                1.0,
+                1,
+                1,
                 1,
                 2,
                 999,
@@ -39,12 +40,13 @@ def _iter_options():
     yield (
         (
             OptionBattle(
-                1.0,
+                1,
+                1,
                 1,
                 2,
                 999,
                 (
-                    OptionLoot(1.0, 10, 20, 9999, 100, 20, 10, 2),
+                    OptionLoot(1, 1, 10, 20, 9999, 100, 20, 10, 2),
                 ),
             ),
         ),
@@ -61,7 +63,8 @@ def _iter_options():
     yield (
         (
             OptionBattle(
-                1.0,
+                1,
+                1,
                 1,
                 2,
                 999,

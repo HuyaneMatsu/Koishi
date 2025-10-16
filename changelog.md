@@ -1,3 +1,81 @@
+### 2025-10-16
+
+- Make xox available when user installed. (2vio2vieevie)
+- Remove client switching when using `/action`.
+- Fix a typo in ruin strawberry adventure. (chaos3326)
+- Modify how optional random loots are chosen to be given out to be more aligned with the predetermined chances.
+- Include `embedded` status in satori logging.
+- Update `/accessibility character-preference` commands outputs.
+- Fix a typo in Sakuya - Fishing rod quest. (huhbuh)
+- Fix wording in Chiruno - frog quest. (superior_mac)
+- Fix a typo in `/pocky-kiss`'s description. (huhbuh)
+- Fix a typo in `/glomp`'s description. (huhbuh)
+- Fix `Hecatia`'s name was not ordered as intended. (aspecialguest)
+- Add a new `/imaginary-friend text-wall` command. (chaos3326)
+- Fix reaction copying snapshots failed.
+
+- Add new `/automation reaction-role new` and `/automation reaction-role list` commands.
+    This automation allows the administrators of the guild to give out roles to users who react on
+    selected messages with selected emojis.
+    Each reaction emoji can be configured to give up to 25 and take up to 25 roles.
+    If the reaction emoji is removed the process is reversed.
+    A role cannot be taken and given by the same automation.
+
+- Revamp how quests work under the hood:
+    - Quests practically now give out at least 10 times the credibility as previously.
+        Harder long term quests give more.
+    - When completing a lower ranked quest apply a diminishing returns formula instead of a flat reduction.
+    - Require 16 times more credibility to rank up.
+    - Each quest has a limit how much times they can be completed. This amount in shown at various places.
+
+- Revamp `/guild quest-board`:
+    - Use gray button for quests higher rank than what the user can accept.
+    - Use gray buttons for quests that the user finished completion count times (so can no longer accept).
+    - Use green buttons for quests that the user currently has accepted.
+    - Show how much times a user completed the quest.
+    - Accept button in quest details is now disabled if the user cannot accept the quest because it is either higher
+        rank or if it cannot be repeated anymore.
+
+- Revamp `/user quests`:
+    - Also show the already completed quests before quest reset.
+    - Use green buttons for active quests, blue for repeatable ones and gray for the ones that cannot be repeated.
+          (The quest be from the current guild.)
+    - Prompt the user to repeat the quest upon completion. (The quest be from the current guild.)
+    - Display level up on quest completion. (\_goobootor\_)
+
+- Balance items:
+    - Fishing rod -> use percent fishing instead of flat
+    - Strawberry -> reduce size and value by around 20%.
+    - Garlic -> reduce size and value by around 20%.
+    - Peach -> increase value by around 33%.
+    - Carrot -> increase value by around 33%.
+    - Scarlet onion -> increase value by around 33%.
+    - Blueberries -> increase value by around 33%.
+
+- Balance adventure locations & targets:
+    - Moriya shrine - foraging -> reduce blueberries yield by around 20%.
+    - Bamboo forest - foraging -> reduce likeliness of Scissors from 1 in 200 to 1 in 800.
+    - Misty lake - foraging -> reduce likeliness of fishing rod from 1 in 100 to 1 in 400.
+    - Misty lake - foraging -> reduce likeliness of frog from 4 in 5 to 3 in 5.
+    - Human village outskirts - gardening (all) -> add a new rare frog loot.
+    - Eientei mansion - gardening (all) -> add a new rare frog loot.
+    - Bamboo forest - foraging -> now may drop bishophat (uncommon).
+    - Ruins - foraging -> now may drop bishophat (uncommon).
+    - Misty lake - foraging -> now may drop angelroot (uncommon).
+
+- Balance quests:
+    - Sakuya - Bluefrankish -> Reduce requirement range 100-400 -> 100-250%. Increase reward balance scaling 1x -> 1.5x.
+    - Sakuya - Blueberries -> increase reward balance by around 33%.
+    - Mystia - Garlic -> change base from requiring 10 amount to 1 kg. Increase reward balance 17%.
+    - Mystia - Peach -> increase reward balance by around 33%.
+    - Mystia - Carrot -> increase reward balance by around 33%.
+    - Mystia - Scarlet onion -> increase reward balance by around 33%.
+
+- Add new quests:
+    - Dai - Frog
+    - Junko - Angelroot
+    - Tewi - Bishophat
+
 ### 2025-09-20
 
 - Fix `status` command failed to respond (since last update).
@@ -30,7 +108,7 @@
 - Fix `/accessibility preference-settings set-preferred-client` failing to respond. (Since 2 updates ago.)
 - Fix `snipe` failing to snipe stickers part of the snapshot.
 - Fix `Carrot` item description not accurately telling where it can be found. (pichu0357)
-- `/sex` now has `25%` increased rarity chance if the user has a specific role, wink wink.
+- `/sex` now has `25%` increased rarity chance if the user has a specific role, wink wink. (aishasan19)
 - Fix `/raw` does not handing when it has no permissions to re-request the targeted message.
 - When Koishi suggests the user to vote, they should send the user to vote page. (chaos3326)
 - Balance quests:

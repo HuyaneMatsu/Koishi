@@ -1,6 +1,9 @@
-__all__ = ('get_adventurer_level_name', 'get_current_batch_id', 'get_quest_template')
+__all__ = (
+    'calculate_received_reward_credibility', 'get_adventurer_level_name', 'get_current_batch_id',
+    'get_quest_board_resets_at', 'get_quest_template'
+)
 
-from datetime import datetime as DateTime, timezone as TimeZone
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from math import floor
 
 from .constants import QUEST_TEMPLATES, UNIX_EPOCH
@@ -56,3 +59,39 @@ def get_adventurer_level_name(level):
         name = 'S+'
     
     return name
+
+
+def calculate_received_reward_credibility(reward_credibility, quest_rank, entity_rank):
+    """
+    Calculates the reward credibility.
+    
+    Parameters
+    ----------
+    reward_credibility : `int`
+        The amount of credibility to be rewarded.
+    
+    quest_rank : `int`
+        The quest's rank.
+    
+    entity_rank : `int`
+        The entity's rank to be rewarded.
+    
+    Returns
+    -------
+    received_reward_credibility : `int`
+    """
+    if quest_rank >= entity_rank:
+        return reward_credibility
+    
+    return max(floor(reward_credibility * 3 / (3 + entity_rank - quest_rank)), 1)
+
+
+def get_quest_board_resets_at():
+    """
+    Gets the time when the quest board will reset at.
+    
+    returns
+    -------
+    quest_board_resets_at : ``DateTime``
+    """
+    return DateTime.now(TimeZone.utc).replace(hour = 0, minute = 0, second = 0, microsecond = 0) + TimeDelta(days = 1)

@@ -20,7 +20,7 @@ def _iter_options():
     # 1 loot with hit -> increase duration & step seed
     yield (
         (
-            OptionLoot(1.0, 10, 20, 9999, 100, 20, 10, 2),
+            OptionLoot(1, 1, 10, 20, 9999, 100, 20, 10, 2),
         ),
         ((255 << 42) | (123 << 0)),
         (
@@ -34,7 +34,7 @@ def _iter_options():
     # 1 loot with miss -> duration stay, step seed
     yield (
         (
-            OptionLoot(0.0, 10, 20, 9999, 100, 20, 10, 2),
+            OptionLoot(0, 1, 10, 20, 9999, 100, 20, 10, 2),
         ),
         ((255 << 42) | (123 << 0)),
         (

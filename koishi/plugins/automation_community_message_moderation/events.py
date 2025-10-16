@@ -78,7 +78,7 @@ async def reaction_delete_emoji(client, message, emoji, removed_reactions):
         The message from which the reactions were removed from.
     emoji : ``Emoji``
         The emoji of which the reactions were removed.
-    removed_reactions : `None | dict<Reaction, ReactionMappingLine>`
+    removed_reactions : ``None | dict<Reaction, ReactionMappingLine>``
         The removed reactions.
     """
     await handle_reaction_event(client, message, emoji, None, False)

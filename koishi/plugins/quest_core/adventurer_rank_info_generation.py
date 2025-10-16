@@ -17,7 +17,7 @@ def get_user_adventurer_rank_info(credibility):
     adventurer_rank_info : ``AdventurerRankInfo``
     """
     rank = 0
-    credibility >>= 4
+    credibility >>= 8
     
     while True:
         if not credibility:
@@ -44,7 +44,7 @@ def get_guild_adventurer_rank_info(credibility):
     adventurer_rank_info : ``AdventurerRankInfo``
     """
     rank = 0
-    credibility >>= 6
+    credibility >>= 10
     
     while True:
         if not credibility:

@@ -1,83 +1,96 @@
-__all__ = ('build_character_preference_change_embed', 'build_character_preference_embed',)
+__all__ = ('build_character_preference_change_components', 'build_character_preference_components',)
 
-from hata import Embed
+from hata import Embed, create_text_display
 
 
-def build_character_listing(character_preferences):
+def produce_character_listing(character_preferences):
     """
-    Builds character listing parts.
+    Produces character listing parts.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
-    character_preferences : `None | list<CharacterPreference>`
+    character_preferences : ``None | list<CharacterPreference>``
         The user's character preferences if any.
     
-    Returns
+    Yields
     -------
-    character_listing : `str`
+    part : `str`
     """
-    character_listing_parts = ['```\n']
-    
     character_added = False
     
     if (character_preferences is not None):
         for character_preference in character_preferences:
             character = character_preference.get_character()
-            if (character is not None):
-                character_listing_parts.append(character.name)
-                character_listing_parts.append('\n')
+            if (character is None):
+                continue
+            
+            if character_added:
+                yield '\n'
+            else:
                 character_added = True
+            
+            yield character.name
     
     if not character_added:
-        character_listing_parts.append('*none*\n')
-    
-    character_listing_parts.append('```')
-    return ''.join(character_listing_parts)
+        yield '*none*'
 
 
-def build_character_preference_embed(user, character_preferences):
+def build_character_preference_components(character_preferences):
     """
     Builds character preference embed for the given user.
     
     Parameters
     ----------
-    user : ``ClientUserBase``
-        The user to build the character preference for.
-    character_preferences : `None | list<CharacterPreference>`
+    character_preferences : ``None | list<CharacterPreference>``
         The user's character preferences if any.
+    
+    Returns
+    -------
+    components : ``list<Component>``
     """
-    return Embed(
-        'Character preferences',
-        build_character_listing(character_preferences),
-    ).add_thumbnail(
-        user.avatar_url,
-    )
+    return [
+        create_text_display(
+            ''.join([*produce_character_listing(character_preferences)]),
+        ),
+    ]
 
 
-def build_character_preference_change_description(character, added):
+def produce_character_preference_change_description(character, added):
     """
-    Builds character preference change description.
+    Produces character preference change description.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
     character : ``TouhouCharacter``
         The touhou character added / removed.
+    
     added : `bool`
         Whether the character preference was added / removed.
     
     Returns
     -------
-    description : `str`
+    part : `str`
     """
-    if added:
-        description = f'From now on {character.name} is associate with you.'
-    else:
-        description = f'From now on wont associate {character.name} with you.'
+    yield 'From now on '
     
-    return description
+    if not added:
+        yield 'wont associate '
+    
+    yield '**'
+    yield character.name
+    yield '**'
+    
+    if added:
+        yield ' is associate'
+    
+    yield ' with you.'
 
 
-def build_character_preference_change_embed(user, character, added):
+def build_character_preference_change_components(character, added):
     """
     Builds character preference change embed.
     
@@ -85,18 +98,19 @@ def build_character_preference_change_embed(user, character, added):
     ----------
     user : ``ClientUserBase``
         The user who's character preference were changed.
+    
     character : ``TouhouCharacter``
         The touhou character added / removed.
+    
     added : `bool`
         Whether the character preference was added / removed.
     
     Returns
     -------
-    embed : ``Embed``
+    components : ``list<Component>``
     """
-    return Embed(
-        'Great success!',
-        build_character_preference_change_description(character, added),
-    ).add_thumbnail(
-        user.avatar_url,
-    )
+    return [
+        create_text_display(
+            ''.join([*produce_character_preference_change_description(character, added)]),
+        ),
+    ]

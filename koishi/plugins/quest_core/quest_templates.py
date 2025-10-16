@@ -1,21 +1,22 @@
 __all__ = ()
 
 from ..item_core import (
-    ITEM_ID_ALICE, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_CHIRUNO, ITEM_ID_DEVILCART_OYSTER,
-    ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_MARISA, ITEM_ID_MYSTIA,
-    ITEM_ID_PEACH, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION, ITEM_ID_STRAWBERRY
+    ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT,
+    ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA,
+    ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_PEACH, ITEM_ID_SAKUYA,
+    ITEM_ID_SCARLET_ONION, ITEM_ID_STRAWBERRY, ITEM_ID_TEWI
 )
 
 from .amount_types import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT
 from .constants import DAY_IN_SECONDS, HOUR_IN_SECONDS, QUEST_TEMPLATES
 from .quest_template import QuestTemplate
 from .quest_template_ids import (
-    QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_CHIRUNO_FROG,
-    QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_MYSTIA_CARROT,
+    QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_CHIRUNO_FROG, QUEST_TEMPLATE_ID_DAI_FROG,
+    QUEST_TEMPLATE_ID_JUNKO_ANGELROOT, QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_MYSTIA_CARROT,
     QUEST_TEMPLATE_ID_MYSTIA_DEVILCART_OYSTER, QUEST_TEMPLATE_ID_MYSTIA_GARLIC, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
     QUEST_TEMPLATE_ID_MYSTIA_SCARLET_ONION, QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH,
     QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER, QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD,
-    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
+    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QUEST_TEMPLATE_ID_TEWI_BISHOPHAT
 )
 from .quest_types import QUEST_TYPE_ITEM_SUBMISSION
 
@@ -32,6 +33,7 @@ QUEST_SAKUYA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY] =
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
     2,
+    1,
     ITEM_ID_STRAWBERRY,
     ITEM_ID_SAKUYA,
     1000,
@@ -43,7 +45,7 @@ QUEST_SAKUYA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY] =
     HOUR_IN_SECONDS,
     70,
     120,
-    3,
+    10,
     2500,
     100,
     80,
@@ -62,6 +64,7 @@ QUEST_TEMPLATE_MYSTIA_PEACH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_PEACH] = 
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
     1,
+    3,
     ITEM_ID_PEACH,
     ITEM_ID_MYSTIA,
     20,
@@ -73,8 +76,8 @@ QUEST_TEMPLATE_MYSTIA_PEACH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_PEACH] = 
     HOUR_IN_SECONDS,
     70,
     100,
-    2,
-    600,
+    10,
+    800,
     50,
     80,
     120,
@@ -93,6 +96,7 @@ QUEST_TEMPLATE_SAKUYA_BLUEBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BLUEB
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
     2,
+    1,
     ITEM_ID_BLUEBERRY,
     ITEM_ID_SAKUYA,
     400,
@@ -104,8 +108,8 @@ QUEST_TEMPLATE_SAKUYA_BLUEBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BLUEB
     HOUR_IN_SECONDS,
     70,
     120,
-    3,
-    800,
+    10,
+    1050,
     50,
     90,
     120,
@@ -123,6 +127,7 @@ QUEST_TEMPLATE_MYSTIA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTI
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
     1,
+    3,
     ITEM_ID_DEVILCART_OYSTER,
     ITEM_ID_MYSTIA,
     2000,
@@ -134,7 +139,7 @@ QUEST_TEMPLATE_MYSTIA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTI
     HOUR_IN_SECONDS,
     70,
     140,
-    2,
+    10,
     4600,
     100,
     90,
@@ -156,6 +161,7 @@ QUEST_TEMPLATE_SAKUYA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUY
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
     2,
+    1,
     ITEM_ID_DEVILCART_OYSTER,
     ITEM_ID_SAKUYA,
     1400,
@@ -167,7 +173,7 @@ QUEST_TEMPLATE_SAKUYA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUY
     HOUR_IN_SECONDS,
     50,
     100,
-    3,
+    10,
     4000,
     100,
     80,
@@ -187,6 +193,7 @@ QUEST_TEMPLATE_MARISA_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARI
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
     3,
+    0,
     ITEM_ID_FLYKILLER_AMANITA,
     ITEM_ID_MARISA,
     8000,
@@ -198,7 +205,7 @@ QUEST_TEMPLATE_MARISA_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARI
     HOUR_IN_SECONDS,
     100,
     130,
-    5,
+    20,
     6300,
     100,
     90,
@@ -208,7 +215,7 @@ QUEST_TEMPLATE_MARISA_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARI
 
 # - Sakuya +1 level
 # - long term quest +1 level
-# Reward is around 1.0x of the value
+# Reward is around 1.5x of the value
 #
 # This quest requires a lot of grapes, making it great. 
 # Compared to the delivery it is not worth much tho.
@@ -222,19 +229,20 @@ QUEST_TEMPLATE_SAKUYA_BLUEFRANKISH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BL
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
     2,
+    0,
     ITEM_ID_BLUEFRANKISH,
     ITEM_ID_SAKUYA,
     100000,
     1000,
     100,
-    400,
+    250,
     AMOUNT_TYPE_WEIGHT,
     DAY_IN_SECONDS * 6,
     HOUR_IN_SECONDS,
     90,
     110,
-    3,
-    10000,
+    20,
+    15000,
     100,
     100,
     120,
@@ -253,6 +261,7 @@ QUEST_TEMPLATE_MYSTIA_CARROT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_CARROT] 
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
     0,
+    3,
     ITEM_ID_CARROT,
     ITEM_ID_MYSTIA,
     9000,
@@ -264,8 +273,8 @@ QUEST_TEMPLATE_MYSTIA_CARROT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_CARROT] 
     HOUR_IN_SECONDS,
     90,
     110,
-    1,
-    600,
+    10,
+    800,
     50,
     90,
     110,
@@ -282,19 +291,20 @@ QUEST_TEMPLATE_MYSTIA_GARLIC = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_GARLIC] 
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
     0,
+    3,
     ITEM_ID_GARLIC,
     ITEM_ID_MYSTIA,
-    10,
-    1,
+    1000,
+    100,
     75,
     125,
-    AMOUNT_TYPE_COUNT,
+    AMOUNT_TYPE_WEIGHT,
     DAY_IN_SECONDS * 2,
     HOUR_IN_SECONDS,
     100,
     120,
-    1,
-    900,
+    10,
+    1050,
     100,
     90,
     110,
@@ -311,6 +321,7 @@ QUEST_TEMPLATE_MYSTIA_SCARLET_ONION = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_S
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
     0,
+    3,
     ITEM_ID_SCARLET_ONION,
     ITEM_ID_MYSTIA,
     40,
@@ -322,8 +333,8 @@ QUEST_TEMPLATE_MYSTIA_SCARLET_ONION = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_S
     HOUR_IN_SECONDS,
     100,
     120,
-    1,
-    1300,
+    10,
+    1700,
     100,
     90,
     110,
@@ -342,6 +353,7 @@ QUEST_TEMPLATE_ALICE_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
     4,
+    1,
     ITEM_ID_FLYKILLER_AMANITA,
     ITEM_ID_ALICE,
     700,
@@ -353,7 +365,7 @@ QUEST_TEMPLATE_ALICE_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE
     HOUR_IN_SECONDS,
     100,
     130,
-    5,
+    10,
     1000,
     50,
     90,
@@ -369,12 +381,13 @@ QUEST_TEMPLATE_SAKUYA_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_FIS
     QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD,
     (
         'Recently I was accompanying Koishi for a fishing trip to the Misty lake. '
-        'I though I packed everything up, but when I got home I noticed my fishing rod is nowhere.\n'
+        'I thought I packed everything up, but when I got home I noticed my fishing rod is nowhere.\n'
         '\n'
         'Could you please find me my missing fishing rod?'
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
     4,
+    1,
     ITEM_ID_FISHING_ROD,
     ITEM_ID_SAKUYA,
     1,
@@ -386,7 +399,7 @@ QUEST_TEMPLATE_SAKUYA_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_FIS
     DAY_IN_SECONDS,
     100,
     120,
-    5,
+    10,
     6000,
     1000,
     100,
@@ -400,13 +413,14 @@ QUEST_TEMPLATE_SAKUYA_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_FIS
 QUEST_TEMPLATE_CHIRUNO_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_CHIRUNO_FROG] = QuestTemplate(
     QUEST_TEMPLATE_ID_CHIRUNO_FROG,
     (
-        'The coward frogs are hiding from me. '
+        'The cowardly frogs are hiding from me. '
         'How could I maintain my superiority image like this, '
         'if I cannot show them how inferior they are in front of my chilling powers?\n'
         '\n'
         'If you do not bring me some, you will be the one I state order through!'
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
+    3,
     3,
     ITEM_ID_FROG,
     ITEM_ID_CHIRUNO,
@@ -419,9 +433,109 @@ QUEST_TEMPLATE_CHIRUNO_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_CHIRUNO_FROG] = 
     HOUR_IN_SECONDS,
     100,
     140,
-    4,
+    10,
     1150,
     50,
     80,
     120,
+)
+
+# - Dai +3 level
+# - misty lake +2 level
+# Reward is around 2.0x of the value
+QUEST_TEMPLATE_DAI_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_DAI_FROG] = QuestTemplate(
+    QUEST_TEMPLATE_ID_DAI_FROG,
+    (
+        'That stupid ice fairy is freezing the frogs.'
+        'Even tho they are hiding frozen in fear, quite literally, '
+        'Chiruno is still getting her hands on them due to requests. '
+        'Please don\'t accept her quest.\n'
+        '\n'
+        'What are you waiting for? Help save the frogs!'
+    ),
+    QUEST_TYPE_ITEM_SUBMISSION,
+    5,
+    0,
+    ITEM_ID_FROG,
+    ITEM_ID_DAI,
+    40,
+    10,
+    100,
+    250,
+    AMOUNT_TYPE_COUNT,
+    DAY_IN_SECONDS * 7,
+    HOUR_IN_SECONDS,
+    80,
+    120,
+    20,
+    3700,
+    100,
+    80,
+    120,
+)
+
+
+# - Junko +3 level
+# - misty lake +2 level
+# Reward is around 2.5x of the value
+QUEST_TEMPLATE_JUNKO_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_JUNKO_ANGELROOT] = QuestTemplate(
+    QUEST_TEMPLATE_ID_JUNKO_ANGELROOT,
+    (
+        '\-No details included\-\n'
+        '\n'
+        'Please deliver angelroots.'
+    ),
+    QUEST_TYPE_ITEM_SUBMISSION,
+    5,
+    1,
+    ITEM_ID_ANGELROOT,
+    ITEM_ID_JUNKO,
+    1000,
+    1000,
+    100,
+    100,
+    AMOUNT_TYPE_WEIGHT,
+    DAY_IN_SECONDS * 2 + HOUR_IN_SECONDS * 12,
+    HOUR_IN_SECONDS,
+    70,
+    130,
+    10,
+    3050,
+    50,
+    90,
+    110,
+)
+
+
+# - Junko +2 level
+# - misty lake +1 level
+# Reward is around 1.5x of the value
+QUEST_TEMPLATE_TEWI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_BISHOPHAT] = QuestTemplate(
+    QUEST_TEMPLATE_ID_TEWI_BISHOPHAT,
+    (
+        'In our establishment, at the tower of eternity, we wish for all of our customers good fortune. '
+        'Unfortunately some of our customers are not blessed with such, but as there is no too deep hole to dig, '
+        'there is neither anybody that cannot be granted good fortune.\n'
+        '\n'
+        'Please bring us a delivery of bishophats, not to be confused with the pesky horny goat weed.'
+    ),
+    QUEST_TYPE_ITEM_SUBMISSION,
+    3,
+    9,
+    ITEM_ID_BISHOPHAT,
+    ITEM_ID_TEWI,
+    2000,
+    100,
+    70,
+    120,
+    AMOUNT_TYPE_WEIGHT,
+    DAY_IN_SECONDS * 10,
+    HOUR_IN_SECONDS,
+    70,
+    150,
+    10,
+    8600,
+    100,
+    80,
+    130,
 )

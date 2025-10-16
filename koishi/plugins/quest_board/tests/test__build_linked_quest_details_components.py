@@ -29,7 +29,7 @@ def _iter_options():
             quest_template_id_0,
             quest_amount_0,
             3600,
-            2,
+            10,
             1000,
         ),
     )
@@ -41,7 +41,7 @@ def _iter_options():
     yield (
         linked_quest_0,
         user_id,
-        1 << 6,
+        1 << 10,
         page_index,
         [
             create_text_display(
@@ -52,6 +52,7 @@ def _iter_options():
                 f'\n'
                 f'**Reward:**\n'
                 f'- **1000** {EMOJI__HEART_CURRENCY}\n'
+                f'- **5** credibility\n'
                 f'**Time available:**\n'
                 f'- **1 hour**\n'
                 f'**Time left:**\n'

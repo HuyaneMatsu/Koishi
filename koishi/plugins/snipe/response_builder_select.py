@@ -63,8 +63,11 @@ async def choice_parser(client, event):
     -------
     choice : `None`, ``Choice``
     """
-    selected_values = event.values
-    if (selected_values is None):
+    for custom_id, component_type, values_or_values in event.iter_custom_ids_and_values():
+        if (values_or_values is None):
+            selected_values = values_or_values
+            break
+    else:
         return None
     
     match = CHOICE_RP.fullmatch(selected_values[0])

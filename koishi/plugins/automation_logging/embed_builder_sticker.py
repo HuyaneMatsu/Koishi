@@ -87,7 +87,7 @@ def build_sticker_create_embeds(sticker):
     
     Returns
     -------
-    embed : ``list<Embed>``
+    embeds : ``list<Embed>``
     """
     embed = Embed(
         f'Sticker created: {sticker.name} ({sticker.id})',

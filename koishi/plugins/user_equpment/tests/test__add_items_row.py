@@ -40,7 +40,7 @@ def _iter_options():
                 f'+1 Housewife capabilities\n'
                 f'+1 Bedroom skills\n'
                 f'+1 Loyalty\n'
-                f'-2 Fishing\n'
+                f'-20% Fishing\n'
                 f'```'
             ),
             True,

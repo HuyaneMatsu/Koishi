@@ -1,5 +1,3 @@
-from math import floor
-
 import vampytest
 
 from ..base import OptionBase
@@ -16,19 +14,22 @@ def _assert_fields_set(option_base):
     vampytest.assert_instance(option_base, OptionBase)
     vampytest.assert_instance(option_base.amount_base, int)
     vampytest.assert_instance(option_base.amount_interval, int)
-    vampytest.assert_instance(option_base.chance_byte_size, int)
+    vampytest.assert_instance(option_base.chance_in, int)
+    vampytest.assert_instance(option_base.chance_out, int)
 
 
 def test__OptionBase__new():
     """
     Tests whether ``OptionBase.__new__`` works as intended.
     """
-    chance = 0.4
+    chance_in = 2
+    chance_out = 100
     amount_min = 31
     amount_max = 6
     
     option_base = OptionBase(
-        chance,
+        chance_in,
+        chance_out,
         amount_min,
         amount_max,
     )
@@ -37,19 +38,22 @@ def test__OptionBase__new():
     
     vampytest.assert_eq(option_base.amount_base, amount_min)
     vampytest.assert_eq(option_base.amount_interval, amount_max - amount_min)
-    vampytest.assert_eq(option_base.chance_byte_size, floor(chance * 255))
+    vampytest.assert_eq(option_base.chance_in, chance_in)
+    vampytest.assert_eq(option_base.chance_out, chance_out)
 
 
 def test__OptionBase__repr():
     """
     Tests whether ``OptionBase.__repr__`` works as intended.
     """
-    chance = 0.4
+    chance_in = 2
+    chance_out = 100
     amount_min = 31
     amount_max = 6
     
     option_base = OptionBase(
-        chance,
+        chance_in,
+        chance_out,
         amount_min,
         amount_max,
     )
@@ -59,12 +63,14 @@ def test__OptionBase__repr():
 
 
 def _iter_options__eq():
-    chance = 0.4
+    chance_in = 2
+    chance_out = 100
     amount_min = 31
     amount_max = 6
     
     keyword_parameters = {
-        'chance': chance,
+        'chance_in': chance_in,
+        'chance_out': chance_out,
         'amount_min': amount_min,
         'amount_max': amount_max,
     }
@@ -79,7 +85,16 @@ def _iter_options__eq():
         keyword_parameters,
         {
             **keyword_parameters,
-            'chance': 0.6,
+            'chance_in': 5,
+        },
+        False,
+    )
+    
+    yield (
+        keyword_parameters,
+        {
+            **keyword_parameters,
+            'chance_out': 5,
         },
         False,
     )
@@ -132,12 +147,14 @@ def test__OptionBase__hash():
     """
     Tests whether ``OptionBase.__hash__`` works as intended.
     """
-    chance = 0.4
+    chance_in = 2
+    chance_out = 100
     amount_min = 31
     amount_max = 6
     
     option_base = OptionBase(
-        chance,
+        chance_in,
+        chance_out,
         amount_min,
         amount_max,
     )

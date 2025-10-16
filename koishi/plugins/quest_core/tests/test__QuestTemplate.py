@@ -30,6 +30,7 @@ def _assert_fields_set(quest_template):
     vampytest.assert_instance(quest_template.id, int)
     vampytest.assert_instance(quest_template.item_id, int)
     vampytest.assert_instance(quest_template.level, int)
+    vampytest.assert_instance(quest_template.repeat_count, int)
     vampytest.assert_instance(quest_template.requester_id, int)
     vampytest.assert_instance(quest_template.reward_balance_base, int)
     vampytest.assert_instance(quest_template.reward_balance_require_multiple_of, int)
@@ -56,6 +57,7 @@ def test__QuestTemplate__new():
     quest_template_id = 9999
     item_id = ITEM_ID_GARLIC
     level = 2
+    repeat_count = 3
     requester_id = ITEM_ID_MYSTIA
     reward_balance_base = 2000
     reward_balance_require_multiple_of = 50
@@ -69,6 +71,7 @@ def test__QuestTemplate__new():
         description,
         quest_type,
         level,
+        repeat_count,
         item_id,
         requester_id,
         amount_base,
@@ -109,6 +112,7 @@ def test__QuestTemplate__new():
     vampytest.assert_eq(quest_template.id, quest_template_id)
     vampytest.assert_eq(quest_template.item_id, item_id)
     vampytest.assert_eq(quest_template.level, level)
+    vampytest.assert_eq(quest_template.repeat_count, repeat_count)
     vampytest.assert_eq(quest_template.requester_id, requester_id)
     vampytest.assert_eq(quest_template.reward_balance_base, reward_balance_base)
     vampytest.assert_eq(quest_template.reward_balance_require_multiple_of, reward_balance_require_multiple_of)
@@ -141,6 +145,7 @@ def test__QuestTemplate__repr():
     quest_template_id = 9999
     item_id = ITEM_ID_GARLIC
     level = 2
+    repeat_count = 3
     requester_id = ITEM_ID_MYSTIA
     reward_balance_base = 2000
     reward_balance_require_multiple_of = 50
@@ -154,6 +159,7 @@ def test__QuestTemplate__repr():
         description,
         quest_type,
         level,
+        repeat_count,
         item_id,
         requester_id,
         amount_base,

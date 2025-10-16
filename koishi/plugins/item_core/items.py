@@ -12,10 +12,10 @@ from .constants import ITEMS
 from .flags import ITEM_FLAG_EDIBLE, ITEM_FLAG_NPC, ITEM_FLAG_WEAPON
 from .item import Item
 from .item_ids import (
-    ITEM_ID_ALICE, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_CHIRUNO, ITEM_ID_DEVILCART_OYSTER,
-    ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_KOISHI, ITEM_ID_MARISA,
-    ITEM_ID_MYSTIA, ITEM_ID_ORIN, ITEM_ID_PEACH, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS,
-    ITEM_ID_STRAWBERRY
+    ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT,
+    ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA,
+    ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_KOISHI, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_ORIN,
+    ITEM_ID_PEACH, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAWBERRY, ITEM_ID_TEWI
 )
 
 
@@ -29,8 +29,8 @@ ITEM_STRAWBERRY = ITEMS[ITEM_ID_STRAWBERRY] = Item(
         'Although they are not native to Gensoukyou, they can be found around the **Ruins**.'
     ),
     ITEM_FLAG_EDIBLE,
-    21, # value (hearts)
-    24, # weight (grams)
+    16, # value (hearts)
+    18, # weight (grams)
     None,
 )
 
@@ -47,7 +47,7 @@ ITEM_PEACH = ITEMS[ITEM_ID_PEACH] = Item(
         'Not sure if they were planted intentionally, or someone just mistake their pink blossom to cherry trees\''
     ),
     ITEM_FLAG_EDIBLE,
-    30, # value (hearts)
+    40, # value (hearts)
     216, # weight (grams)
     None,
 )
@@ -64,7 +64,7 @@ ITEM_BLUEBERRY = ITEMS[ITEM_ID_BLUEBERRY] = Item(
         'They can be found on the barren hillsides of the **Moriya Shrine**.'
     ),
     ITEM_FLAG_EDIBLE,
-    3, # value (hearts)
+    4, # value (hearts)
     3, # weight (grams)
     None,
 )
@@ -121,7 +121,7 @@ ITEM_FISHING_ROD = ITEMS[ITEM_ID_FISHING_ROD] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +1),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +1),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +1),
-        Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__FLAT), -2),
+        Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__PERCENT), -20),
     ),
 )
 
@@ -159,7 +159,7 @@ ITEM_CARROT = ITEMS[ITEM_ID_CARROT] = Item(
         'They can be found in the outskirts of **Human Village** and around the **Eientei mansion**.'
     ),
     ITEM_FLAG_EDIBLE,
-    27, # value (hearts)
+    36, # value (hearts)
     240, # weight (grams)
     None,
 )
@@ -178,8 +178,8 @@ ITEM_GARLIC = ITEMS[ITEM_ID_GARLIC] = Item(
         'Can be found in the **Human Village**.'
     ),
     ITEM_FLAG_EDIBLE,
-    47, # value (hearts)
-    85, # weight (grams)
+    33, # value (hearts)
+    60, # weight (grams)
     None,
 )
 
@@ -196,7 +196,7 @@ ITEM_SCARLET_ONION = ITEMS[ITEM_ID_SCARLET_ONION] = Item(
         'Can be found in the **Human Village**.'
     ),
     ITEM_FLAG_EDIBLE,
-    14, # value (hearts)
+    19, # value (hearts)
     170, # weight (grams)
     None,
 )
@@ -306,12 +306,12 @@ ITEM_FROG = ITEMS[ITEM_ID_FROG] = Item(
     BUILTIN_EMOJIS['frog'],
     (
         'Tailless amphibians with flattened body, protruding eyes and with weak front, but long muscular back legs '
-        'specialized in jumping.\n'
+        'specialized in jumping. '
         'They have a carnivorous diet which mainly consist of insects. '
         'They look defenseless, but they are admissible in camouflage, and can flee dexterously by leaping with their '
-        'strong back legs.'
+        'strong back legs. '
         'The skin of many frogs contains mild toxin, the ones with more potent ones usually advertise it with bright '
-        'colours.\n'
+        'colours. '
         'Frogs usually spawn their eggs in water bodies. These eggs hatch into fully aquatic tadpoles which have '
         'tails and internal grills.'
         'Their life cycle is completed when they metamorphose into their semiaquatic adult form.\n'
@@ -328,6 +328,85 @@ ITEM_FROG = ITEMS[ITEM_ID_FROG] = Item(
 ITEM_CHIRUNO = ITEMS[ITEM_ID_CHIRUNO] = Item(
     ITEM_ID_CHIRUNO,
     'Chiruno',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_DAI = ITEMS[ITEM_ID_DAI] = Item(
+    ITEM_ID_DAI,
+    'Dai',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_ANGELROOT = ITEMS[ITEM_ID_ANGELROOT] = Item(
+    ITEM_ID_ANGELROOT,
+    'Angelroot',
+    BUILTIN_EMOJIS['herb'],
+    (
+        'An aromatic herb with hollow stems and large round clusters of white or greenish flowers. '
+        'Its roots and seeds are prized for their sweet, musky scent and bittersweet flavor. '
+        'Its a biennial, sometimes perennial plant. '
+        'Used to spice liqueurs, foods, and due to its pleasant odor perfumes as well. '
+        'As medicine it is used to treat numerous medical issues, '
+        'viewed to be suitable to treat any gynecological complaint.'
+        '\n'
+        'It prefers moist and shady environments, preferably near water bodies, like the **Misty Lake**.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    160, # value (hearts)
+    130, # weight (grams)
+    None,
+)
+
+
+ITEM_BISHOPHAT = ITEMS[ITEM_ID_BISHOPHAT] = Item(
+    ITEM_ID_BISHOPHAT,
+    'Bishophat',
+    BUILTIN_EMOJIS['seedling'],
+    (
+        'A perennial herb with delicate, heart-shaped leaves '
+        'and small flowers that come in shades of yellow and white. '
+        'Its leaves are harvested and dried for use as medicine or tonic. '
+        'Called either as bishop\'s hat due to its flower\'s shape, '
+        'or as horny goat weed due to goats being observed unusually frisky after consuming it. '
+        'Used as a dietary supplement for improving blood flow and men\'s vigor. '
+        'It prefers to grow in shaded areas.\n'
+        '\n'
+        'Can be found in any forest.'
+    ),
+    0,
+    63, # value (hearts)
+    22, # weight (grams)
+    None,
+)
+
+
+ITEM_JUNKO = ITEMS[ITEM_ID_JUNKO] = Item(
+    ITEM_ID_JUNKO,
+    'Junko',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_TEWI = ITEMS[ITEM_ID_TEWI] = Item(
+    ITEM_ID_TEWI,
+    'Tewi',
     None,
     None,
     ITEM_FLAG_NPC,

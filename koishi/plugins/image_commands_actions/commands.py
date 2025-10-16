@@ -5,11 +5,9 @@ from hata.ext.slash import P, abort
 
 from ...bots import FEATURE_CLIENTS
 
-from ..user_settings import get_one_user_settings, get_preferred_client_in_channel
-
 from .action import (
-    COOLDOWN_HANDLER, build_response, create_action_command_function, create_response_embed, get_allowed_users,
-    send_action_response, send_action_response_to
+    COOLDOWN_HANDLER, create_action_command_function, create_response_embed, get_allowed_users, produce_header,
+    send_action_response
 )
 from .action_filtering import (
     PARAMETER_NAME_ACTION_TAG, PARAMETER_NAME_NAME, PARAMETER_NAME_SOURCE, PARAMETER_NAME_TARGET,
@@ -17,7 +15,6 @@ from .action_filtering import (
     get_target_character_suggestions, get_action_and_image_detail
 )
 from .actions import ACTIONS
-from .events import PERMISSION_IMAGES
 
 
 # Register action commands.
@@ -34,37 +31,6 @@ for action in ACTIONS:
 
 # cleanup
 del action
-
-
-async def get_should_use_default_response_method(client, event):
-    """
-    Returns whether we should use the default response method and the client to execute the responding with.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The client who received the event.
-    event : ``InteractionEvent``
-        The received interaction event.
-    
-    Returns
-    -------
-    should_use_default_response_method : `bool`
-    client : ``Client``
-    """
-    if event.user_permissions.use_external_application_commands:
-        return True, client
-    
-    guild = event.guild
-    if (guild is None) or (client not in guild.clients):
-        return True, client
-    
-    # Select client based on user settings if available.
-    user_settings = await get_one_user_settings(event.user.id)
-    preferred_client = get_preferred_client_in_channel(
-        event.channel, user_settings.preferred_client_id, client, PERMISSION_IMAGES
-    )
-    return False, preferred_client
 
 
 @FEATURE_CLIENTS.interactions(
@@ -115,7 +81,7 @@ async def wild_card_action(
     """
     targets, client_in_users, user_in_users, allowed_mentions = get_allowed_users(
         client,
-        event,
+        event.user,
         (
             target_00, target_01, target_02, target_03, target_04, target_05, target_06, target_07, target_08,
             target_09,
@@ -125,8 +91,8 @@ async def wild_card_action(
     expire_after = COOLDOWN_HANDLER.get_cooldown(event, len(targets))
     if expire_after > 0.0:
         abort(
-            f'{client.name_at(event.guild_id)} got bored of enacting your {event.name} try again in '
-            f'{expire_after:.2f} seconds.'
+            f'{client.name_at(event.guild_id)} got bored of enacting your {event.application_command_name} try again '
+            f'in {expire_after:.2f} seconds.'
         )
     action, image_detail = get_action_and_image_detail(
         action_tag_name, source_character_name, target_character_name, image_name
@@ -144,31 +110,12 @@ async def wild_card_action(
     else:
         source_user = event.user
     
-    content = build_response(client, action.starter_text, action.verb, source_user, targets, client_in_users)
+    content = ''.join([*produce_header(
+        client, action.starter_text, action.verb, source_user, [*targets], client_in_users
+    )])
     embed = create_response_embed(client, event.guild_id, event.user, targets, client_in_users, image_detail)
     
-    
-    should_use_default_response_method, client = await get_should_use_default_response_method(client, event)
-    if should_use_default_response_method:
-        await send_action_response(client, event, content, embed, allowed_mentions)
-        return
-    
-    try:
-        await client.interaction_response_message_create(
-            event, 'Reality is subjective and all is mental.', show_for_invoking_user_only = True
-        )
-    except ConnectionError:
-        return
-    
-    except DiscordException as exception:
-        if exception.status >= 500:
-            return
-        
-        if exception.code != ERROR_CODES.unknown_interaction:
-            raise
-    
-    await send_action_response_to(client, event.channel, content, embed, allowed_mentions)
-    return
+    await send_action_response(client, event, content, embed, allowed_mentions)
 
 
 @wild_card_action.autocomplete('action_tag_name')
