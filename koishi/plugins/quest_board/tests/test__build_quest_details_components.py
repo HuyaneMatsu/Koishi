@@ -16,7 +16,8 @@ from ..component_building import build_quest_details_components
 
 def _iter_options():
     user_id = 202505240000
-    guild_id = 202510120003
+    guild_id_0 = 202510120003
+    guild_id_1 = 202510260000
     batch_id = 1566
     
     page_index = 5
@@ -36,7 +37,7 @@ def _iter_options():
     
     linked_quest = LinkedQuest(
         user_id,
-        guild_id,
+        guild_id_0,
         batch_id,
         quest,
     )
@@ -58,6 +59,8 @@ def _iter_options():
     
     yield (
         user_id,
+        guild_id_0,
+        guild_id_0,
         page_index,
         quest,
         None,
@@ -69,17 +72,18 @@ def _iter_options():
                 create_button(
                     'View quest board',
                     custom_id = f'quest_board.page.{user_id:x}.{page_index:x}',
+                    enabled = True,
                 ),
                 create_button(
                     'Accept',
-                    custom_id = f'quest_board.accept.{user_id:x}.{page_index:x}.{quest_template_id_0:x}',
+                    custom_id = f'quest_board.accept.{user_id:x}.{guild_id_0:x}.{page_index:x}.{quest_template_id_0:x}',
                     enabled = True,
                     style = ButtonStyle.green,
                 ),
                 create_button(
                     'Item information',
                     custom_id = (
-                        f'quest_board.item.{user_id:x}.{page_index:x}.{quest_template_id_0:x}.'
+                        f'quest_board.item.{user_id:x}.{guild_id_0:x}.{page_index:x}.{quest_template_id_0:x}.'
                         f'{quest_template_0.item_id:x}'
                     ),
                 ),
@@ -89,6 +93,8 @@ def _iter_options():
     
     yield (
         user_id,
+        guild_id_0,
+        guild_id_1,
         page_index,
         quest,
         linked_quest,
@@ -100,17 +106,18 @@ def _iter_options():
                 create_button(
                     'View quest board',
                     custom_id = f'quest_board.page.{user_id:x}.{page_index:x}',
+                    enabled = False,
                 ),
                 create_button(
                     'Accept',
-                    custom_id = f'quest_board.accept.{user_id:x}.{page_index:x}.{quest_template_id_0:x}',
+                    custom_id = f'quest_board.accept.{user_id:x}.{guild_id_0:x}.{page_index:x}.{quest_template_id_0:x}',
                     enabled = False,
                     style = ButtonStyle.gray,
                 ),
                 create_button(
                     'Item information',
                     custom_id = (
-                        f'quest_board.item.{user_id:x}.{page_index:x}.{quest_template_id_0:x}.'
+                        f'quest_board.item.{user_id:x}.{guild_id_0:x}.{page_index:x}.{quest_template_id_0:x}.'
                         f'{quest_template_0.item_id:x}'
                     ),
                 ),
@@ -120,7 +127,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_quest_details_components(user_id, page_index, quest, linked_quest, credibility):
+def test__build_quest_details_components(
+    user_id, guild_id, local_guild_id, page_index, quest, linked_quest, credibility
+):
     """
     Tests whether ``build_quest_details_components`` works as intended.
     
@@ -128,6 +137,12 @@ def test__build_quest_details_components(user_id, page_index, quest, linked_ques
     ----------
     user_id : `int`
         The invoking user's identifier.
+    
+    guild_id : `int`
+        The parent quest's guild's identifier.
+    
+    local_guild_id : `int`
+        The local guild's identifier.
     
     page_index : `int`
         The quest board's current page's index.
@@ -151,7 +166,9 @@ def test__build_quest_details_components(user_id, page_index, quest, linked_ques
     user_stats = UserStats(user_id)
     user_stats.set('credibility', credibility)
 
-    output = build_quest_details_components(user_id, page_index, quest, linked_quest, user_stats)
+    output = build_quest_details_components(
+        user_id, guild_id, local_guild_id, page_index, quest, linked_quest, user_stats
+    )
     
     vampytest.assert_instance(output, list)
     for element in output:

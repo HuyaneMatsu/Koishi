@@ -205,7 +205,7 @@ QUEST_TEMPLATE_MARISA_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARI
     HOUR_IN_SECONDS,
     100,
     130,
-    20,
+    30,
     6300,
     100,
     90,
@@ -241,7 +241,7 @@ QUEST_TEMPLATE_SAKUYA_BLUEFRANKISH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BL
     HOUR_IN_SECONDS,
     90,
     110,
-    20,
+    40,
     15000,
     100,
     100,
@@ -446,7 +446,7 @@ QUEST_TEMPLATE_CHIRUNO_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_CHIRUNO_FROG] = 
 QUEST_TEMPLATE_DAI_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_DAI_FROG] = QuestTemplate(
     QUEST_TEMPLATE_ID_DAI_FROG,
     (
-        'That stupid ice fairy is freezing the frogs.'
+        'That stupid ice fairy is freezing the frogs. '
         'Even tho they are hiding frozen in fear, quite literally, '
         'Chiruno is still getting her hands on them due to requests. '
         'Please don\'t accept her quest.\n'
@@ -524,7 +524,7 @@ QUEST_TEMPLATE_TEWI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_BISHOPHAT
     9,
     ITEM_ID_BISHOPHAT,
     ITEM_ID_TEWI,
-    2000,
+    1000,
     100,
     70,
     120,
@@ -533,8 +533,8 @@ QUEST_TEMPLATE_TEWI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_BISHOPHAT
     HOUR_IN_SECONDS,
     70,
     150,
-    10,
-    8600,
+    20,
+    4300,
     100,
     80,
     130,

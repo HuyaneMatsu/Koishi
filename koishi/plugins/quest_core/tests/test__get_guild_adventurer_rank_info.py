@@ -11,8 +11,8 @@ def _iter_options():
     yield 1024, (1, 3)
     yield 2047, (1, 3)
     
-    yield 2048, (2, 4)
-    yield 4095, (2, 4)
+    yield 2048, (2, 5)
+    yield 4095, (2, 5)
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())

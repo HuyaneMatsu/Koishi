@@ -40,6 +40,7 @@ EMOJI_MAGIC_WAND = BUILTIN_EMOJIS['magic_wand']
 EMOJI_PILL = BUILTIN_EMOJIS['pill']
 EMOJI_MASKS = BUILTIN_EMOJIS['performing_arts']
 
+
 CATEGORIES = (
     (
         'Administration',
@@ -72,8 +73,8 @@ CATEGORIES = (
         'Fun',
         EMOJI_PAPER_DRAGON,
         (
-            '9ball', 'ascii', 'choose', 'meme', 'minesweeper', 'oj', 'paranoia', 'random', 'rate', 'roll',
-            'sex', 'trivia', 'urban', 'yuno'
+            '9ball', 'ascii', 'choose', 'imaginary-friend', 'meme', 'minesweeper', 'oj', 'paranoia', 'random', 'rate',
+            'roll', 'sex', 'trivia', 'urban', 'yuno'
         ),
         (),
     ), (

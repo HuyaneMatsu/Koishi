@@ -16,9 +16,13 @@ def _iter_options():
     assert item is not None
     
     user_id = 202509160001
+    guild_id_0 = 202510250002
+    guild_id_1 = 202510260001
     
     yield (
         user_id,
+        guild_id_0,
+        guild_id_1,
         page_index,
         quest_template_id,
         item_id,
@@ -33,10 +37,11 @@ def _iter_options():
                 create_button(
                     'View quest board',
                     custom_id = f'quest_board.page.{user_id:x}.{page_index:x}',
+                    enabled = False,
                 ),
                 create_button(
                     'Back to the quest',
-                    custom_id = f'quest_board.details.{user_id:x}.{page_index:x}.{quest_template_id:x}',
+                    custom_id = f'quest_board.details.{user_id:x}.{guild_id_0:x}.{page_index:x}.{quest_template_id:x}',
                 ),
             ),
         ],
@@ -44,7 +49,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_quest_board_item_components(user_id, page_index, quest_template_id, item_id):
+def test__build_quest_board_item_components(user_id, guild_id, local_guild_id, page_index, quest_template_id, item_id):
     """
     Tests whether ``build_quest_board_item_components`` works as intended.
     
@@ -52,6 +57,12 @@ def test__build_quest_board_item_components(user_id, page_index, quest_template_
     ----------
     user_id : `int`
         The invoking user's identifier.
+    
+    guild_id : `int`
+        The quest's source guild's identifier.
+    
+    local_guild_id : `int`
+        The local guild's identifier.
     
     page_index : `int`
         The quest board's current page's index.
@@ -66,7 +77,9 @@ def test__build_quest_board_item_components(user_id, page_index, quest_template_
     -------
     output : ``list<Component>``
     """
-    output = build_quest_board_item_components(user_id, page_index, quest_template_id, item_id)
+    output = build_quest_board_item_components(
+        user_id, guild_id, local_guild_id, page_index, quest_template_id, item_id
+    )
     
     vampytest.assert_instance(output, list)
     for element in output:

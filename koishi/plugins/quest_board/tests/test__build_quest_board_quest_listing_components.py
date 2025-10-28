@@ -110,7 +110,7 @@ def _iter_options():
                 ),
                 thumbnail = create_button(
                     'Details',
-                    custom_id = f'quest_board.details.{user_id:x}.{0:x}.{quest_template_id_0:x}',
+                    custom_id = f'quest_board.details.{user_id:x}.{guild_id:x}.{0:x}.{quest_template_id_0:x}',
                 ),
             ),
             create_section(
@@ -131,7 +131,7 @@ def _iter_options():
                 ),
                 thumbnail = create_button(
                     'Details',
-                    custom_id = f'quest_board.details.{user_id:x}.{0:x}.{quest_template_id_2:x}',
+                    custom_id = f'quest_board.details.{user_id:x}.{guild_id:x}.{0:x}.{quest_template_id_2:x}',
                     style = ButtonStyle.gray,
                 ),
             ),

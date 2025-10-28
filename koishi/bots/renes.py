@@ -1,6 +1,6 @@
 __all__ = ('Renes',)
 
-from hata import ActivityType, Client, Embed, InviteTargetType
+from hata import APPLICATIONS, ActivityType, Client, Embed, InviteTargetType, is_media_url
 from scarletio import LOOP_TIME
 
 import config
@@ -64,7 +64,7 @@ class STREAM_DETAILS:
     DISCORD_STREAM_ENDED = -STREAM_PING_DIFFERENCE
 
 
-async def send_stream_notification(activity, join_url, image_url, source):
+async def send_stream_notification(title, description, join_url, image_url, source):
     """
     Sends stream notification.
     
@@ -72,8 +72,11 @@ async def send_stream_notification(activity, join_url, image_url, source):
     
     Parameters
     ----------
-    activity : `None`, ``Activity``
-        Est's activity.
+    title : `None | str`
+        Notification title.
+    
+    description : `None | str`
+        Notification description.
     
     join_url : `str`
         Activity to join the activity.
@@ -84,13 +87,6 @@ async def send_stream_notification(activity, join_url, image_url, source):
     source : `str`
         Where did est go live.
     """
-    if activity is None:
-        title = None
-        description = None
-    else:
-        title = activity.state
-        description = activity.details
-    
     embed = Embed(
         title,
         description,
@@ -105,6 +101,8 @@ async def send_stream_notification(activity, join_url, image_url, source):
     if (image_url is None):
         file = None
         image_url = EST_DEFAULT_IMAGE_URL
+    elif is_media_url(image_url):
+        file = None
     else:
         file = ('image.png', create_http_stream_resource(Renes.http, image_url))
         image_url = 'attachment://image.png'
@@ -139,7 +137,58 @@ async def discord_stream_started(channel):
         channel, max_age = INVITE_MAX_AGE, target_type = InviteTargetType.stream, target_user = USER__EST
     )
     
-    await send_stream_notification(USER__EST.activity, invite.url, None, 'discord')
+    for activity in USER__EST.iter_activities():
+        if activity.type is ActivityType.playing or activity.type is ActivityType.competing:
+            break
+    else:
+        activity = None
+    
+    # Title & Image
+    while True:
+        if activity is None:
+            title = None
+            image_url = None
+            break
+        
+        application_id = activity.application_id
+        if not application_id:
+            title = activity.name
+            image_url = None
+            break
+        
+        applications = await Renes.application_get_all_detectable()
+        try:
+            application = APPLICATIONS[application_id]
+        except KeyError:
+            title = activity.name
+            image_url = None
+            break
+        
+        title = application.name
+        image_url = application.icon_url_as(size = 1024)
+        break
+    
+    # Description
+    state = activity.state
+    details = activity.details
+    if state is None:
+        if details is None:
+            description = None
+        else:
+            description = details
+    else:
+        if details is None:
+            description = state
+        else:
+            description = f'{state} | {details}'
+    
+    await send_stream_notification(
+        title,
+        description,
+        invite.url,
+        image_url,
+        'discord',
+    )
 
 
 async def discord_stream_ended():
@@ -165,7 +214,13 @@ async def twitch_stream_started(activity):
     if LOOP_TIME() < STREAM_DETAILS.TWITCH_STREAM_ENDED + STREAM_PING_DIFFERENCE:
         return
     
-    await send_stream_notification(activity, activity.url, activity.twitch_preview_image_url, 'twitch')
+    await send_stream_notification(
+        activity.state,
+        activity.details,
+        activity.url,
+        activity.twitch_preview_image_url,
+        'twitch',
+    )
 
 
 async def twitch_stream_ended():

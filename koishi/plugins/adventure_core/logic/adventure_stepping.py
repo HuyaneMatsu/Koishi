@@ -1,6 +1,7 @@
 __all__ = ('adventure_cancel', 'scheduled_adventure_arrival', 'set_adventure_return_notifier')
 
 from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
+from random import Random
 
 from scarletio import Task, get_event_loop
 
@@ -105,7 +106,8 @@ async def adventure_arrival(adventure):
         The adventure to update.
     """
     initial_seed = step_seed_initial(adventure.seed, adventure.action_count)
-    action = get_action(adventure, initial_seed)
+    random = Random(initial_seed)
+    action = get_action(adventure, random)
     if action is None:
         await adventure_unknown(adventure)
         return
@@ -113,8 +115,8 @@ async def adventure_arrival(adventure):
     user_stats = await get_user_stats(adventure.user_id)
     multiplier = get_action_type_multiplier(action.type, user_stats)
     travel_duration = get_location_distance_travel_duration(adventure, user_stats)
-    loot_accumulations, seed = accumulate_action_loot(action, initial_seed)
-    duration = get_duration_till_action_occurrence(action.duration, initial_seed, loot_accumulations, multiplier)
+    loot_accumulations = accumulate_action_loot(action, random)
+    duration = get_duration_till_action_occurrence(action.duration, random, loot_accumulations, multiplier)
     
     arrival_date = adventure.updated_at + TimeDelta(seconds = travel_duration)
     
@@ -157,15 +159,16 @@ async def schedule_adventure_action(adventure):
         The adventure to update.
     """
     initial_seed = step_seed_initial(adventure.seed, adventure.action_count)
-    action = get_action(adventure, initial_seed)
+    random = Random(initial_seed)
+    action = get_action(adventure, random)
     if action is None:
         await adventure_unknown(adventure)
         return
     
     user_stats = await get_user_stats(adventure.user_id)
     multiplier = get_action_type_multiplier(action.type, user_stats)
-    loot_accumulations, seed = accumulate_action_loot(action, initial_seed)
-    duration = get_duration_till_action_occurrence(action.duration, initial_seed, loot_accumulations, multiplier)
+    loot_accumulations = accumulate_action_loot(action, random)
+    duration = get_duration_till_action_occurrence(action.duration, random, loot_accumulations, multiplier)
     
     # Schedule new handle.
     adventure.handle = LOOP.call_after(
@@ -199,7 +202,8 @@ async def adventure_action_step(adventure):
         The adventure to update.
     """
     initial_seed = step_seed_initial(adventure.seed, adventure.action_count)
-    action = get_action(adventure, initial_seed)
+    random = Random(initial_seed)
+    action = get_action(adventure, random)
     if action is None:
         await adventure_unknown(adventure)
         return
@@ -211,9 +215,9 @@ async def adventure_action_step(adventure):
     health_exhausted = 0
     
     # Accumulate loot.
-    loot_accumulations, seed = accumulate_action_loot(action, initial_seed)
+    loot_accumulations = accumulate_action_loot(action, random)
     multiplier = get_action_type_multiplier(action.type, user_stats)
-    duration = get_duration_till_action_occurrence(action.duration, initial_seed, loot_accumulations, multiplier)
+    duration = get_duration_till_action_occurrence(action.duration, random, loot_accumulations, multiplier)
     
     looted_items, energy_exhausted = accumulate_looted_items(
         adventure, user_stats, inventory, loot_accumulations, multiplier
@@ -234,7 +238,8 @@ async def adventure_action_step(adventure):
     travel_duration = get_location_distance_travel_duration(adventure, user_stats)
     
     next_initial_seed = step_seed(initial_seed)
-    next_action = get_action(adventure, next_initial_seed)
+    next_random = Random(next_initial_seed)
+    next_action = get_action(adventure, next_random)
     
     if next_action is None:
         should_return = True
@@ -242,10 +247,10 @@ async def adventure_action_step(adventure):
         callback = invoke_adventure_return
     
     else:
-        next_loot_accumulations, next_seed = accumulate_action_loot(next_action, next_initial_seed)
+        next_loot_accumulations = accumulate_action_loot(next_action, next_random)
         next_multiplier = get_action_type_multiplier(next_action.type, user_stats)
         next_duration = get_duration_till_action_occurrence(
-            next_action.duration, next_initial_seed, next_loot_accumulations, next_multiplier
+            next_action.duration, next_random, next_loot_accumulations, next_multiplier
         )
         
         should_return = get_should_cancel_adventure(

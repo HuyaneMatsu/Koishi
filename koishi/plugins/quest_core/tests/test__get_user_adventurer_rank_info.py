@@ -8,8 +8,8 @@ def _iter_options():
     yield 0, (0, 1)
     yield 255, (0, 1)
     
-    yield 256, (1, 1)
-    yield 511, (1, 1)
+    yield 256, (1, 2)
+    yield 511, (1, 2)
     
     yield 512, (2, 2)
     yield 1023, (2, 2)

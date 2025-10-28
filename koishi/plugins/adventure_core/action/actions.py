@@ -186,9 +186,9 @@ ACTIONS[ACTION_ID_BAMBOO_FOREST_FORAGING_CATEGORY_MUSHROOM] = Action(
     19,
     None,
     (
-        OptionLoot(4, 5, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
-        OptionLoot(1, 10, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
-        OptionLoot(1, 40, 1, 3, ITEM_ID_BISHOPHAT, 200, 300, 1, 5),
+        OptionLoot(3, 5, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
+        OptionLoot(1, 5, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
+        OptionLoot(1, 20, 1, 3, ITEM_ID_BISHOPHAT, 200, 300, 1, 5),
         OptionLoot(1, 800, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
 )

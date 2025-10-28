@@ -91,13 +91,13 @@ Each action offers their own cost, battles and loot.
 - Hakugyokurou mansion
     - Gardening
         - Gardening
-            - Peach (common)
+            - Peach (basic)
             - Peach (rare)
 
 - Moriya shrine
     - Foraging
         - Foraging
-            - BlueBerry (common)
+            - BlueBerry (basic)
 
 - Misty lake
     - Foraging

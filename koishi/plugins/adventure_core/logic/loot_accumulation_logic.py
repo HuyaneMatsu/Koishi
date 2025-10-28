@@ -1,20 +1,21 @@
 __all__ = ()
 
+from math import floor
+
 from .loot_accumulation import LootAccumulation
-from .seed_stepping import step_seed
 
 
-def get_option_amount(option, seed):
+def get_option_amount(option, random):
     """
-    Generates an amount of the given option with the given seed.
+    Generates an amount of the given option with the given random number generator.
     
     Parameters
     ----------
     option : ``OptionBase``
         Option to use.
     
-    seed : `int`
-        Seed used for randomization.
+    random : `random.Random`
+        Random number generator to use.
     
     Returns
     -------
@@ -22,15 +23,15 @@ def get_option_amount(option, seed):
     """
     chance_in = option.chance_in
     chance_out = option.chance_out
-    if (chance_in != chance_out) and (seed % chance_out >= chance_in):
+    if (chance_in != chance_out) and (random.random() * chance_out >= chance_in):
         amount = 0
     else:
-        amount = option.amount_base + (seed % (option.amount_interval + 1))
+        amount = option.amount_base + floor(random.random() * (option.amount_interval + 1))
     
     return amount
 
 
-def accumulate_loot_loot(loot, accumulations, seed):
+def accumulate_loot_loot(loot, accumulations, random):
     """
     Sums the durations of looting, adding the result the accumulated one.
     
@@ -42,17 +43,12 @@ def accumulate_loot_loot(loot, accumulations, seed):
     accumulations : ``dict<int, LootAccumulation>``
         Loot accumulations by `item_id`.
     
-    seed : `int`
-        Seed used for randomization.
-    
-    Returns
-    -------
-    seed : `int`
+    random : `random.Random`
+        Random number generator to use.
     """
     if (loot is not None):
         for option in loot:
-            amount = get_option_amount(option, seed)
-            seed = step_seed(seed)
+            amount = get_option_amount(option, random)
             if not amount:
                 continue
             
@@ -70,11 +66,9 @@ def accumulate_loot_loot(loot, accumulations, seed):
                 accumulation.duration_cost += duration_cost
                 accumulation.energy_cost += energy_cost
             continue
-    
-    return seed
 
 
-def accumulate_battle_loot(battle, accumulations, seed):
+def accumulate_battle_loot(battle, accumulations, random):
     """
     Sums the durations of the battles, adding the result the accumulated one.
     
@@ -86,28 +80,38 @@ def accumulate_battle_loot(battle, accumulations, seed):
     accumulations : ``dict<int, LootAccumulation>``
         Loot accumulations by `item_id`.
     
-    seed : `int`
-        Seed used for randomization.
-    
-    Returns
-    -------
-    seed : `int`
+    random : `random.Random`
+        Random number generator to use.
     """
     if (battle is not None):
         for option in battle:
-            amount = get_option_amount(option, seed)
-            seed = step_seed(seed)
+            amount = get_option_amount(option, random)
             if not amount:
                 continue
             
             for _ in range(amount):
-                seed = accumulate_loot_loot(option.loot, accumulations, seed)
+                 accumulate_loot_loot(option.loot, accumulations, random)
+
+
+def accumulate_action_loot(action, random):
+    """
+    Accumulates the loot for the given action.
     
-    return seed
-
-
-def accumulate_action_loot(action, seed):
+    Parameters
+    ----------
+    action : ``Action``
+        Action to accumulate loot for.
+    
+    random : `random.Random`
+        Random number generator to use.
+    
+    
+    Returns
+    -------
+    loot_accumulations : ``dict<int, LootAccumulation>``
+        Loot accumulations by `item_id`.
+    """
     loot_accumulations = {}
-    seed = accumulate_battle_loot(action.battle, loot_accumulations, seed)
-    seed = accumulate_loot_loot(action.loot, loot_accumulations, seed)
-    return loot_accumulations, seed
+    accumulate_battle_loot(action.battle, loot_accumulations, random)
+    accumulate_loot_loot(action.loot, loot_accumulations, random)
+    return loot_accumulations

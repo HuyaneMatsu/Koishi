@@ -4,8 +4,8 @@ from datetime import timedelta as TimeDelta
 
 from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import (
-    ButtonStyle, DATETIME_FORMAT_CODE, create_button, create_row, create_section, create_separator, create_text_display,
-    elapsed_time, format_datetime
+    DATETIME_FORMAT_CODE, InteractionForm, create_button, create_row, create_section, create_separator,
+    create_text_display, elapsed_time, format_datetime
 )
 
 from ..adventure_core import (
@@ -22,8 +22,7 @@ from ..item_core import get_item, produce_weight
 from .custom_ids import (
     ADVENTURE_ACTION_BATTLE_LOGS_BUILDER, ADVENTURE_ACTION_LISTING_VIEW_BUILDER, ADVENTURE_ACTION_VIEW_BUILDER,
     ADVENTURE_ACTION_VIEW_DEPART, ADVENTURE_ACTION_VIEW_RETURN, ADVENTURE_CANCEL_BUILDER,
-    ADVENTURE_CREATE_CANCEL_BUILDER, ADVENTURE_CREATE_CONFIRM_BUILDER, ADVENTURE_LISTING_VIEW_BUILDER,
-    ADVENTURE_VIEW_BUILDER
+    ADVENTURE_CREATE_CONFIRM_BUILDER, ADVENTURE_LISTING_VIEW_BUILDER, ADVENTURE_VIEW_BUILDER
 )
 
 
@@ -99,7 +98,7 @@ def produce_adventure_initial_representation(location, target, duration, return_
     yield ')'
 
 
-def build_adventure_create_confirmation_components(
+def build_adventure_create_confirmation_form(
     user_id, location, target, duration, return_, auto_cancellation, enable_interactive_components,
 ):
     """
@@ -130,34 +129,19 @@ def build_adventure_create_confirmation_components(
     
     Returns
     -------
-    components : ``list<Component>``
+    form : ``InteractionForm``
     """
-    return [
-        create_text_display('### Confirm your adventure'),
-        create_separator(),
-        create_text_display(''.join([*
-            produce_adventure_initial_representation(location, target, duration, return_, auto_cancellation),
-        ])),
-        create_separator(),
-        create_row(
-            create_button(
-                'Confirm',
-                custom_id = ADVENTURE_CREATE_CONFIRM_BUILDER(
-                    user_id, location.id, target.id, duration, return_.id, auto_cancellation.id
-                ),
-                enabled = enable_interactive_components,
-                style = ButtonStyle.green,
-            ),
-            create_button(
-                'Cancel',
-                custom_id = ADVENTURE_CREATE_CANCEL_BUILDER(
-                    user_id, location.id, target.id, duration, return_.id, auto_cancellation.id
-                ),
-                enabled = enable_interactive_components,
-                style = ButtonStyle.red,
-            ),
+    return InteractionForm(
+        'Confirm your adventure',
+        [
+            create_text_display(''.join([*
+                produce_adventure_initial_representation(location, target, duration, return_, auto_cancellation),
+            ])),
+        ],
+        ADVENTURE_CREATE_CONFIRM_BUILDER(
+            user_id, location.id, target.id, duration, return_.id, auto_cancellation.id
         ),
-    ]
+    )
 
 
 def build_adventure_create_confirm_components(
@@ -214,40 +198,46 @@ def build_adventure_create_confirm_components(
     ]
 
 
-def build_adventure_create_cancel_components(
-    location, target, duration, return_, auto_cancellation
-):
+def produce_adventure_cancellation_confirmation_description(adventure):
     """
-    Builds adventure create cancellation components.
+    Produces an adventure cancellation confirmation description.
+    
+    This function is an iterable generator.
     
     Parameters
     ----------
-    location : ``Location``
-        Target duration.
+    adventure : ``Adventure``
+        Adventure to produce description for.
     
-    target : ``Target``
-        Target action set.
+    Yields
+    ------
+    part : `str`
+    """
+    yield 'Are you sure to cancel your adventure towards '
+    yield from _produce_adventure_location_for_headers(adventure)
+    yield '?'
+
+
+def build_adventure_cancellation_confirmation_form(adventure):
+    """
+    Builds adventure cancellation confirmation form.
     
-    duration : `int`
-        Duration.
-    
-    return_ : ``Return``
-        Return logic identifier.
-    
-    auto_cancellation : ``AutoCancellation``
-        Auto cancellation.
+    Parameters
+    ----------
+    adventure : ``Adventure``
+        Adventure to build for.
     
     Returns
     -------
-    components : ``list<Component>``
+    form : ``InteractionForm``
     """
-    return [
-        create_text_display('### You have cancelled departing, stay safe wise adventurer!'),
-        create_separator(),
-        create_text_display(''.join([*
-            produce_adventure_initial_representation(location, target, duration, return_, auto_cancellation),
-        ])),
-    ]
+    return InteractionForm(
+        'Confirm adventure cancellation',
+        [
+            create_text_display(''.join([*produce_adventure_cancellation_confirmation_description(adventure)]))
+        ],
+        ADVENTURE_CANCEL_BUILDER(adventure.user_id, adventure.entry_id),
+    )
 
 
 def build_adventure_cancellation_components():

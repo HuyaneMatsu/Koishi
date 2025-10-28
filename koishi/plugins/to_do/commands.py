@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import InteractionForm, create_row
+from hata import InteractionForm, create_label, create_row
 from hata.ext.slash import InteractionResponse, P, abort
 
 from ...bot_utils.constants import GUILD__SUPPORT
@@ -163,8 +163,14 @@ async def edit(
     return InteractionForm(
         f'Editing todo entry #{to_do.entry_id}',
         [
-            TEXT_INPUT_NAME.copy_with(value = to_do.name),
-            TEXT_INPUT_DESCRIPTION.copy_with(value = to_do.description),
+            create_label(
+                'name',
+                component = TEXT_INPUT_NAME.copy_with(value = to_do.name),
+            ),
+            create_label(
+                'description',
+                component = TEXT_INPUT_DESCRIPTION.copy_with(value = to_do.description),
+            ),
         ],
         custom_id = f'{CUSTOM_ID_TO_DO_EDIT_BASE}.{to_do.entry_id}.form',
     )

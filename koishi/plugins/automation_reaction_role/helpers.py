@@ -325,7 +325,7 @@ def get_highest_client_with_role(guild):
 
 def get_automation_reaction_role_item_with_emoji_id(automation_reaction_role_entry, emoji_id):
     """
-    Gets the auto react role item with teh given emoji identifier.
+    Gets the auto react role item with the given emoji identifier.
     
     Parameters
     ----------

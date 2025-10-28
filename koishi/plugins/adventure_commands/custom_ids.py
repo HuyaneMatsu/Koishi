@@ -12,15 +12,6 @@ ADVENTURE_CREATE_CONFIRM_BUILDER = (
 )
 
 
-ADVENTURE_CREATE_CANCEL_RP = re_compile(
-    'adventure\\.create\\.0\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)'
-)
-ADVENTURE_CREATE_CANCEL_BUILDER = (
-    lambda user_id, location_id, target_id, duration, return_id, auto_cancellation_id :
-    f'adventure.create.0.{user_id:x}.{location_id:x}.{target_id:x}.{duration:x}.{return_id:x}.{auto_cancellation_id:x}'
-)
-
-
 ADVENTURE_ACTION_VIEW_RP = re_compile(
     'adventure\\.action\\.view\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)'
 )

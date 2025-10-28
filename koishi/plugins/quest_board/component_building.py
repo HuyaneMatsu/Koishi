@@ -3,7 +3,7 @@ __all__ = ()
 from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import (
-    ButtonStyle, create_button, create_row, create_section, create_separator, create_text_display,
+    ButtonStyle, InteractionForm, create_button, create_row, create_section, create_separator, create_text_display,
     create_thumbnail_media
 )
 
@@ -13,7 +13,14 @@ from ..quest_core import (
     get_guild_adventurer_rank_info, get_quest_template, get_user_adventurer_rank_info
 )
 
-from .constants import (
+from .constants import EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS, PAGE_SIZE
+from .content_builders import (
+    produce_linked_quest_detailed_description, produce_linked_quest_header_description,
+    produce_linked_quest_short_description, produce_linked_quest_submit_success_completed_description,
+    produce_linked_quest_submit_success_n_left_description, produce_nullable_item_description,
+    produce_quest_board_header_description, produce_quest_detailed_description, produce_quest_short_description
+)
+from .custom_ids import (
     CUSTOM_ID_LINKED_QUEST_ABANDON_FACTORY, CUSTOM_ID_LINKED_QUEST_DETAILS_FACTORY,
     CUSTOM_ID_LINKED_QUEST_ITEM_DISABLED, CUSTOM_ID_LINKED_QUEST_ITEM_FACTORY,
     CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_DECREMENT_DISABLED, CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_INCREMENT_DISABLED,
@@ -21,14 +28,7 @@ from .constants import (
     CUSTOM_ID_LINKED_QUEST_SUBMIT_FACTORY, CUSTOM_ID_QUEST_ACCEPT_DISABLED, CUSTOM_ID_QUEST_ACCEPT_FACTORY,
     CUSTOM_ID_QUEST_BOARD_ITEM_DISABLED, CUSTOM_ID_QUEST_BOARD_ITEM_FACTORY,
     CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_DECREMENT_DISABLED, CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_INCREMENT_DISABLED,
-    CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_FACTORY, CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_FACTORY, EMOJI_PAGE_NEXT,
-    EMOJI_PAGE_PREVIOUS, PAGE_SIZE
-)
-from .content_builders import (
-    produce_linked_quest_detailed_description, produce_linked_quest_header_description,
-    produce_linked_quest_short_description, produce_linked_quest_submit_success_completed_description,
-    produce_linked_quest_submit_success_n_left_description, produce_nullable_item_description,
-    produce_quest_board_header_description, produce_quest_detailed_description, produce_quest_short_description
+    CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_FACTORY, CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_FACTORY,
 )
 from .helpers import get_linked_quest_for_deduplication
 
@@ -109,7 +109,7 @@ def build_quest_board_quest_listing_components(guild, guild_stats, user_stats, l
                         style = ButtonStyle.blue
                 
                 custom_id = CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_FACTORY(
-                    user_stats.user_id, page_index, (0 if quest_template is None else quest_template.id),
+                    user_stats.user_id, guild.id, page_index, (0 if quest_template is None else quest_template.id),
                 )
             
             
@@ -171,7 +171,7 @@ def build_quest_board_quest_listing_components(guild, guild_stats, user_stats, l
     return components
 
 
-def build_quest_details_components(user_id, page_index, quest, linked_quest, user_stats):
+def build_quest_details_components(user_id, guild_id, local_guild_id, page_index, quest, linked_quest, user_stats):
     """
     Builds quest details components describing a quest of a quest board with more details.
     
@@ -179,6 +179,12 @@ def build_quest_details_components(user_id, page_index, quest, linked_quest, use
     ----------
     user_id : `int`
         The invoking user's identifier.
+    
+    guild_id : `int`
+        The parent quest's guild's identifier.
+    
+    local_guild_id : `int`
+        The local guild's identifier.
     
     page_index : `int`
         The quest board's current page's index.
@@ -230,13 +236,14 @@ def build_quest_details_components(user_id, page_index, quest, linked_quest, use
             create_button(
                 'View quest board',
                 custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_FACTORY(user_id, page_index),
+                enabled = (guild_id == local_guild_id),
             ),
             create_button(
                 'Accept',
                 custom_id = (
                     CUSTOM_ID_QUEST_ACCEPT_DISABLED
                     if quest_template is None else
-                    CUSTOM_ID_QUEST_ACCEPT_FACTORY(user_id, page_index, quest_template.id)
+                    CUSTOM_ID_QUEST_ACCEPT_FACTORY(user_id, guild_id, page_index, quest_template.id)
                 ),
                 enabled = accept_enabled,
                 style = (ButtonStyle.green if accept_enabled else ButtonStyle.gray),
@@ -246,7 +253,9 @@ def build_quest_details_components(user_id, page_index, quest, linked_quest, use
                 custom_id = (
                     CUSTOM_ID_QUEST_BOARD_ITEM_DISABLED
                     if quest_template is None else
-                    CUSTOM_ID_QUEST_BOARD_ITEM_FACTORY(user_id, page_index, quest_template.id, quest_template.item_id)
+                    CUSTOM_ID_QUEST_BOARD_ITEM_FACTORY(
+                        user_id, guild_id, page_index, quest_template.id, quest_template.item_id
+                    )
                 ),
                 enabled = (quest_template is not None),
             ),
@@ -406,32 +415,43 @@ def build_linked_quests_listing_components(user, guild_id, user_stats, linked_qu
     if (linked_quest_listing is not None):
         linked_quest_slice = linked_quest_listing_sorted[page_index * PAGE_SIZE : (page_index + 1) * PAGE_SIZE]
         if linked_quest_slice:
+            now = DateTime.now(tz = TimeZone.utc)
+            
             for linked_quest in linked_quest_slice:
                 quest_template = get_quest_template(linked_quest.template_id)
                 
-                if linked_quest.completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE:
-                    style = ButtonStyle.green
-                    custom_id = CUSTOM_ID_LINKED_QUEST_DETAILS_FACTORY(
-                        user.id, page_index, linked_quest.entry_id
-                    )
-                    enabled = True
-                
-                else:
+                while True:
+                    if linked_quest.expires_at <= now:
+                        style = ButtonStyle.red
+                        break
+                    
+                    if linked_quest.completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE:
+                        style = ButtonStyle.green
+                        break
+                    
                     if (
                         (quest_template is None) or
                         (quest_template.level > user_adventurer_rank_info.level)
                     ):
                         style = ButtonStyle.gray
-                    else:
-                        repeat_count = quest_template.repeat_count
-                        if repeat_count and (linked_quest.completion_count >= repeat_count):
-                            style = ButtonStyle.gray
-                        else:
-                            style = ButtonStyle.blue
+                        break
                     
-                    enabled = guild_id == linked_quest.guild_id
+                    repeat_count = quest_template.repeat_count
+                    if repeat_count and (linked_quest.completion_count >= repeat_count):
+                        style = ButtonStyle.gray
+                        break
+                    
+                    style = ButtonStyle.blue
+                    break
+                
+                
+                if linked_quest.completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE:
+                    custom_id = CUSTOM_ID_LINKED_QUEST_DETAILS_FACTORY(
+                        user.id, page_index, linked_quest.entry_id
+                    )
+                else:
                     custom_id = CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_FACTORY(
-                        user.id, 0, (0 if quest_template is None else quest_template.id),
+                        user.id, linked_quest.guild_id, 0, (0 if quest_template is None else quest_template.id),
                     )
                 
                 components.append(
@@ -442,7 +462,7 @@ def build_linked_quests_listing_components(user, guild_id, user_stats, linked_qu
                         thumbnail = create_button(
                             'Details',
                             custom_id = custom_id,
-                            enabled = enabled,
+                            enabled = True,
                             style = style,
                         ),
                     )
@@ -529,14 +549,12 @@ def build_linked_quest_details_components(linked_quest, user_stats, page_index):
     components.append(create_separator())
     
     # Add interactive components.
-    if (quest_template is None) or (linked_quest.expires_at < DateTime.now(tz = TimeZone.utc)):
+    if (quest_template is None) or (linked_quest.expires_at <= DateTime.now(tz = TimeZone.utc)):
         submit_button_enabled = False
         submit_button_style = ButtonStyle.gray
-        abandon_quest_style = ButtonStyle.blue
     else:
         submit_button_enabled = (quest_template.type == QUEST_TYPE_ITEM_SUBMISSION)
         submit_button_style = ButtonStyle.green
-        abandon_quest_style = ButtonStyle.red
     
     components.append(
         create_row(
@@ -555,11 +573,11 @@ def build_linked_quest_details_components(linked_quest, user_stats, page_index):
                 style = submit_button_style,
             ),
             create_button(
-                'Abandon quest',
+                'Abandon',
                 custom_id = CUSTOM_ID_LINKED_QUEST_ABANDON_FACTORY(
                     user_stats.user_id, page_index, linked_quest.entry_id
                 ),
-                style = abandon_quest_style,
+                style = ButtonStyle.red,
             ),
             create_button(
                 'Item information',
@@ -576,6 +594,43 @@ def build_linked_quest_details_components(linked_quest, user_stats, page_index):
     )
     
     return components
+
+
+def build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_index):
+    """
+    Builds quest abandon confirmation form.
+    
+    Parameters
+    ----------
+    linked_quest : ``LinkedQuest``
+        The linked quest to abandon.
+    
+    user_stats : ``UserStats``
+        The user's stats.
+    
+    page_index : `int`
+        The linked quests' current page's index.
+    
+    Returns
+    -------
+    form : ``InteractionForm``
+    """
+    quest_template = get_quest_template(linked_quest.template_id)
+    user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
+    
+    return InteractionForm(
+        'Please confirm abandoning',
+        [
+            create_text_display(
+                ''.join([*produce_linked_quest_detailed_description(
+                    linked_quest, quest_template, user_adventurer_rank_info.level
+                )]),
+            ),
+        ],
+        CUSTOM_ID_LINKED_QUEST_ABANDON_FACTORY(
+            user_stats.user_id, page_index, linked_quest.entry_id
+        ),
+    )
 
 
 def build_linked_quest_abandon_success_components(user_id, page_index, guild_id):
@@ -673,7 +728,7 @@ def build_linked_quest_submit_success_n_left_components(
 def build_linked_quest_submit_success_completed_components(
     user_id,
     page_index,
-    guild_id,
+    local_guild_id,
     linked_quest,
     quest_template,
     user_stats,
@@ -695,7 +750,7 @@ def build_linked_quest_submit_success_completed_components(
     page_index : `int`
         The linked quests' current page's index.
     
-    guild_id : `int`
+    local_guild_id : `int`
         The local guild's identifier.
     
     linked_quest : : ``LinkedQuest``
@@ -768,7 +823,7 @@ def build_linked_quest_submit_success_completed_components(
             break
         
         repeat_enabled = True
-        repeat_style = (ButtonStyle.green if linked_quest.guild_id == guild_id else ButtonStyle.gray)
+        repeat_style = ButtonStyle.green
         break
     
     components.append(
@@ -776,7 +831,7 @@ def build_linked_quest_submit_success_completed_components(
             create_button(
                 'View quest board',
                 custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_FACTORY(user_id, 0),
-                enabled = (True if guild_id else False),
+                enabled = (linked_quest.guild_id  == local_guild_id),
             ),
             create_button(
                 'View my quests',
@@ -787,7 +842,7 @@ def build_linked_quest_submit_success_completed_components(
                 custom_id = (
                     CUSTOM_ID_QUEST_ACCEPT_DISABLED
                     if quest_template is None else
-                    CUSTOM_ID_QUEST_ACCEPT_FACTORY(user_id, 0, quest_template.id)
+                    CUSTOM_ID_QUEST_ACCEPT_FACTORY(user_id, linked_quest.guild_id, 0, quest_template.id)
                 ),
                 enabled = repeat_enabled,
                 style = repeat_style,
@@ -798,7 +853,7 @@ def build_linked_quest_submit_success_completed_components(
     return components
 
 
-def build_quest_board_item_components(user_id, page_index, quest_template_id, item_id):
+def build_quest_board_item_components(user_id, guild_id, local_guild_id, page_index, quest_template_id, item_id):
     """
     Builds components describing the given item by identifier.
     
@@ -806,6 +861,12 @@ def build_quest_board_item_components(user_id, page_index, quest_template_id, it
     ----------
     user_id : `int`
         The invoking user's identifier.
+    
+    guild_id : `int`
+        The quest's source guild's identifier.
+    
+    local_guild_id : `int`
+        The local guild's identifier.
     
     page_index : `int`
         The quest board's current page's index.
@@ -827,10 +888,13 @@ def build_quest_board_item_components(user_id, page_index, quest_template_id, it
             create_button(
                 'View quest board',
                 custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_FACTORY(user_id, page_index),
+                enabled = (guild_id == local_guild_id),
             ),
             create_button(
                 'Back to the quest',
-                custom_id = CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_FACTORY(user_id, page_index, quest_template_id),
+                custom_id = CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_FACTORY(
+                    user_id, guild_id, page_index, quest_template_id
+                ),
             ),
         ),
     ]

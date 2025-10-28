@@ -10,9 +10,9 @@ def test__filter_quest_templates():
     Tests whether ``filter_quest_templates`` works as intended.
     """
     level_limit = 2
-    exclude = {QUEST_TEMPLATE_MYSTIA_PEACH.id}
+    excluded_quest_template_ids = {QUEST_TEMPLATE_MYSTIA_PEACH.id}
     
-    output = filter_quest_templates(level_limit, exclude)
+    output = filter_quest_templates(excluded_quest_template_ids, level_limit)
     
     vampytest.assert_instance(output, list)
     for element in output:
@@ -20,4 +20,4 @@ def test__filter_quest_templates():
     
     for element in output:
         vampytest.assert_true(element.level <= level_limit)
-        vampytest.assert_not_in(element.id, exclude)
+        vampytest.assert_not_in(element.id, excluded_quest_template_ids)

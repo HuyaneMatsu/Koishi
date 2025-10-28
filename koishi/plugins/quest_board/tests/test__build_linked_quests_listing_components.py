@@ -124,6 +124,23 @@ def _iter_options():
     linked_quest_3.completion_count = 3
     linked_quest_3.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
     
+    linked_quest_4 = LinkedQuest(
+        user_id,
+        guild_id_0,
+        57125,
+        Quest(
+            quest_template_id_1,
+            quest_amount_1,
+            3600,
+            3,
+            1000,
+        ),
+    )
+    linked_quest_entry_id_4 = 149
+    linked_quest_4.entry_id = linked_quest_entry_id_4
+    linked_quest_4.taken_at = now - TimeDelta(seconds = 20)
+    linked_quest_4.expires_at = now
+    
     page_index = 0
     
     yield (
@@ -139,6 +156,7 @@ def _iter_options():
             linked_quest_2,
             linked_quest_0,
             linked_quest_1,
+            linked_quest_4,
         ],
         page_index,
         now,
@@ -148,7 +166,7 @@ def _iter_options():
                     f'# {user_nick}\'s quests\n'
                     f'\n'
                     f'User rank: D\n'
-                    f'Active quest count: 2 / 3'
+                    f'Active quest count: 3 / 3'
                 ),
                 thumbnail = create_thumbnail_media(
                     f'{CDN_ENDPOINT}/guilds/{guild_id_0}/users/{user_id}/avatars/00000000000000000000000000000003.png',
@@ -162,7 +180,9 @@ def _iter_options():
                 ),
                 thumbnail = create_button(
                     'Details',
-                    custom_id = f'linked_quest.details.{user_id:x}.{page_index:x}.{linked_quest_entry_id_0:x}',
+                    custom_id = (
+                        f'linked_quest.details.{user_id:x}.{page_index:x}.{linked_quest_entry_id_0:x}'
+                    ),
                     enabled = True,
                     style = ButtonStyle.green,
                 ),
@@ -174,9 +194,25 @@ def _iter_options():
                 ),
                 thumbnail = create_button(
                     'Details',
-                    custom_id = f'linked_quest.details.{user_id:x}.{page_index:x}.{linked_quest_entry_id_1:x}',
+                    custom_id = (
+                        f'linked_quest.details.{user_id:x}.{page_index:x}.{linked_quest_entry_id_1:x}'
+                    ),
                     enabled = True,
                     style = ButtonStyle.green,
+                ),
+            ),
+            create_section(
+                create_text_display(
+                    f'Expired\n'
+                    f'Submit 0 / {quest_amount_1} {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
+                ),
+                thumbnail = create_button(
+                    'Details',
+                    custom_id = (
+                        f'linked_quest.details.{user_id:x}.{page_index:x}.{linked_quest_entry_id_4:x}'
+                    ),
+                    enabled = True,
+                    style = ButtonStyle.red,
                 ),
             ),
             create_section(
@@ -186,8 +222,8 @@ def _iter_options():
                 ),
                 thumbnail = create_button(
                     'Details',
-                    custom_id = f'quest_board.details.{user_id:x}.{0:x}.{quest_template_id_1:x}',
-                    enabled = False,
+                    custom_id = f'quest_board.details.{user_id:x}.{guild_id_1:x}.{0:x}.{quest_template_id_1:x}',
+                    enabled = True,
                     style = ButtonStyle.blue,
                 ),
             ),
@@ -198,7 +234,7 @@ def _iter_options():
                 ),
                 thumbnail = create_button(
                     'Details',
-                    custom_id = f'quest_board.details.{user_id:x}.{0:x}.{quest_template_id_1:x}',
+                    custom_id = f'quest_board.details.{user_id:x}.{guild_id_0:x}.{0:x}.{quest_template_id_1:x}',
                     enabled = True,
                     style = ButtonStyle.gray,
                 ),

@@ -20,14 +20,15 @@ from ..user_balance import get_user_balance
 from ..user_stats_core import get_user_stats
 
 from .component_building import (
-    build_linked_quest_abandon_success_components, build_linked_quest_details_components,
-    build_linked_quest_item_components, build_linked_quest_submit_success_completed_components,
-    build_linked_quest_submit_success_n_left_components, build_linked_quests_listing_components,
-    build_quest_accept_success_components, build_quest_board_item_components,
+    build_linked_quest_abandon_confirmation_form, build_linked_quest_abandon_success_components,
+    build_linked_quest_details_components, build_linked_quest_item_components,
+    build_linked_quest_submit_success_completed_components, build_linked_quest_submit_success_n_left_components,
+    build_linked_quests_listing_components, build_quest_accept_success_components, build_quest_board_item_components,
     build_quest_board_quest_listing_components, build_quest_details_components,
 )
-from .constants import (
-    BROKEN_QUEST_DESCRIPTION, CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN, CUSTOM_ID_LINKED_QUEST_DETAILS_PATTERN,
+from .constants import BROKEN_QUEST_DESCRIPTION
+from .custom_ids import (
+    CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN, CUSTOM_ID_LINKED_QUEST_DETAILS_PATTERN,
     CUSTOM_ID_LINKED_QUEST_ITEM_DISABLED, CUSTOM_ID_LINKED_QUEST_ITEM_PATTERN,
     CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_DECREMENT_DISABLED, CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_INCREMENT_DISABLED,
     CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_NAVIGATE_PATTERN, CUSTOM_ID_LINKED_QUEST_SUBMIT_DISABLED,
@@ -118,7 +119,7 @@ async def quest_action_disabled():
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_PATTERN)
-async def quest_board_quest_details(client, event, user_id, page_index, quest_template_id):
+async def quest_board_quest_details(client, interaction_event, user_id, guild_id, page_index, quest_template_id):
     """
     Handles a quest board quest details component interaction.
     
@@ -129,11 +130,14 @@ async def quest_board_quest_details(client, event, user_id, page_index, quest_te
     client : ``Client``
         The client who received the interaction.
     
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
     user_id : `str`
         The invoking user's identifier as hexadecimal number.
+    
+    guild_id : `str`
+        The guild's identifier from where the quest is from as hexadecimal number.
     
     page_index : `str`
         The quest board's current page's index as hexadecimal number.
@@ -143,26 +147,22 @@ async def quest_board_quest_details(client, event, user_id, page_index, quest_te
     """
     try:
         user_id = int(user_id, 16)
+        guild_id = int(guild_id, 16)
         page_index = int(page_index, 16)
         quest_template_id = int(quest_template_id, 16)
     except ValueError:
         return
     
-    if user_id != event.user_id:
+    if user_id != interaction_event.user_id:
         return
     
     await client.interaction_component_acknowledge(
-        event,
+        interaction_event,
         False,
     )
     
     while True:
-        guild = event.guild
-        if guild is None:
-            error_message = 'Only guilds have quest board.'
-            break
-        
-        guild_stats = await get_guild_stats(guild.id)
+        guild_stats = await get_guild_stats(guild_id)
         quest_batch = guild_stats.get_quest_batch()
         
         quest = get_quest_with_template_id(quest_batch, quest_template_id)
@@ -176,21 +176,23 @@ async def quest_board_quest_details(client, event, user_id, page_index, quest_te
         # Check whether the user already has a quest like this. If yes then redirect them to it.
         linked_quest_listing = await get_linked_quest_listing(user_id)
         linked_quest = get_linked_quest_for_deduplication(
-            linked_quest_listing, guild.id, quest_batch.id, quest_template_id
+            linked_quest_listing, guild_id, quest_batch.id, quest_template_id
         )
         if (linked_quest is not None) and (linked_quest.completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE):
             components = build_linked_quest_details_components(linked_quest, user_stats, 0)
         else:
-            components = build_quest_details_components(user_id, page_index, quest, linked_quest, user_stats)
+            components = build_quest_details_components(
+                user_id, guild_id, interaction_event.guild_id, page_index, quest, linked_quest, user_stats
+            )
         
         await client.interaction_response_message_edit(
-            event,
+            interaction_event,
             components = components,
         )
         return
     
     await client.interaction_followup_message_create(
-        event,
+        interaction_event,
         content = error_message,
         show_for_invoking_user_only = True,
     )
@@ -254,7 +256,7 @@ async def quest_board_quest_listing_page_index_navigate(client, event, user_id, 
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_ACCEPT_PATTERN)
-async def quest_accept(client, event, user_id, page_index, quest_template_id):
+async def quest_accept(client, event, user_id, guild_id, page_index, quest_template_id):
     """
     Handles a quest accept component interaction.
     
@@ -271,6 +273,9 @@ async def quest_accept(client, event, user_id, page_index, quest_template_id):
     user_id : `str`
         The invoking user's identifier as hexadecimal number.
     
+    guild_id : `int`
+        The guild's identifier where the quest belongs to as hexadecimal number.
+    
     page_index : `int`
         The current page's index in hexadecimal number.
     
@@ -279,6 +284,7 @@ async def quest_accept(client, event, user_id, page_index, quest_template_id):
     """
     try:
         user_id = int(user_id, 16)
+        guild_id = int(guild_id, 16)
         page_index = int(page_index, 16)
         quest_template_id = int(quest_template_id, 16)
     except ValueError:
@@ -295,13 +301,8 @@ async def quest_accept(client, event, user_id, page_index, quest_template_id):
             error_message = 'You cannot accept quests while adventuring.'
             break
         
-        guild = event.guild
-        if guild is None:
-            error_message = 'Only guilds have quest board.'
-            break
-        
         # Get the quest from the board.
-        guild_stats = await get_guild_stats(guild.id)
+        guild_stats = await get_guild_stats(guild_id)
         quest_batch = guild_stats.get_quest_batch()
         
         quest = get_quest_with_template_id(quest_batch, quest_template_id)
@@ -314,7 +315,7 @@ async def quest_accept(client, event, user_id, page_index, quest_template_id):
         # Check whether the user already has a quest like this.
         linked_quest_listing = await get_linked_quest_listing(user_id)
         linked_quest = get_linked_quest_for_deduplication(
-            linked_quest_listing, guild.id, quest_batch.id, quest_template_id
+            linked_quest_listing, guild_id, quest_batch.id, quest_template_id
         )
         if (linked_quest is not None) and (linked_quest.completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE):
             error_message = 'You already have this quest currently accepted.'
@@ -352,7 +353,7 @@ async def quest_accept(client, event, user_id, page_index, quest_template_id):
         
         # Add quest.
         if linked_quest is None:
-            linked_quest = LinkedQuest(user_id, guild.id, quest_batch.id, quest)
+            linked_quest = LinkedQuest(user_id, guild_id, quest_batch.id, quest)
             await add_linked_quest(linked_quest)
         else:
             linked_quest.reset()
@@ -588,7 +589,7 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
                 user_stats.set('credibility', user_stats.credibility + user_reward_credibility)
                 await user_stats.save()
                 
-                guild_stats = await get_guild_stats(event.guild_id)
+                guild_stats = await get_guild_stats(linked_quest.guild_id)
                 guild_adventurer_rank_info = get_guild_adventurer_rank_info(guild_stats.credibility)
                 guild_reward_credibility = calculate_received_reward_credibility(
                     reward_credibility, quest_template.level, guild_adventurer_rank_info.level
@@ -604,6 +605,7 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
             else:
                 linked_quest.completion_count += 1
                 linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
+                await update_linked_quest(linked_quest)
             
             components = build_linked_quest_submit_success_completed_components(
                 user_id,
@@ -634,8 +636,46 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
     )
 
 
+async def _linked_quest_abandon(linked_quest):
+    """
+    Abandons the linked quest.
+    Reduces the user's credibility count for the amount.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    linked_quest : ``LinkedQuest``
+        The linked quest to abandon.
+    """
+    if linked_quest.batch_id != get_current_batch_id():
+        await delete_linked_quest(linked_quest)
+    else:
+        linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
+        await update_linked_quest(linked_quest)
+    
+    user_stats = await get_user_stats(linked_quest.user_id)
+    reward_credibility = linked_quest.reward_credibility
+    if reward_credibility:
+        quest_template = get_quest_template(linked_quest.template_id)
+        user_reward_credibility = (
+            (
+                calculate_received_reward_credibility(
+                    reward_credibility,
+                    (0 if quest_template is None else quest_template.level),
+                    get_user_adventurer_rank_info(user_stats.credibility).level,
+                ) << 1
+            ) - (
+                reward_credibility << 2
+            )
+        )
+        user_stats.set('credibility', max(user_stats.credibility + user_reward_credibility, 0))
+        await user_stats.save()
+    
+
+
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN)
-async def linked_quest_abandon(client, event, user_id, page_index, linked_quest_entry_id):
+async def linked_quest_abandon_invoke(client, interaction_event, user_id, page_index, linked_quest_entry_id):
     """
     Handles a user linked quest's abandoning component interaction.
     
@@ -646,7 +686,7 @@ async def linked_quest_abandon(client, event, user_id, page_index, linked_quest_
     client : ``Client``
         The client who received the interaction.
     
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
     user_id : `str`
@@ -665,10 +705,8 @@ async def linked_quest_abandon(client, event, user_id, page_index, linked_quest_
     except ValueError:
         return
     
-    if user_id != event.user_id:
+    if user_id != interaction_event.user_id:
         return
-    
-    await client.interaction_component_acknowledge(event)
     
     while True:
         linked_quest_listing = await get_linked_quest_listing(user_id)
@@ -678,44 +716,100 @@ async def linked_quest_abandon(client, event, user_id, page_index, linked_quest_
             error_message = 'You do not have such a quest.'
             break
         
-        if linked_quest.batch_id != get_current_batch_id():
-            await delete_linked_quest(linked_quest)
-        else:
-            linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
-        
-        user_stats = await get_user_stats(user_id)
-        reward_credibility = linked_quest.reward_credibility
-        if reward_credibility:
-            quest_template = get_quest_template(linked_quest.template_id)
-            user_reward_credibility = (
-                (
-                    calculate_received_reward_credibility(
-                        reward_credibility,
-                        (0 if quest_template is None else quest_template.level),
-                        get_user_adventurer_rank_info(user_stats.credibility).level,
-                    ) << 1
-                ) - (
-                    reward_credibility << 2
-                )
+        # Ask the user for confirmation if the quest is still alive.
+        if (linked_quest.expires_at > DateTime.now(tz = TimeZone.utc)):
+            user_stats = await get_user_stats(linked_quest.user_id)
+            await client.interaction_form_send(
+                interaction_event,
+                build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_index),
             )
-            user_stats.set('credibility', max(user_stats.credibility + user_reward_credibility, 0))
-            await user_stats.save()
+            return
         
+        # Otherwise delete it.
+        await client.interaction_component_acknowledge(
+            interaction_event,
+            False,
+        )
+        await _linked_quest_abandon(linked_quest)
         await client.interaction_response_message_edit(
-            event,
-            components = build_linked_quest_abandon_success_components(user_id, page_index, event.guild_id),
+            interaction_event,
+            components = build_linked_quest_abandon_success_components(user_id, page_index, interaction_event.guild_id),
+        )
+        return
+    
+    
+    await client.interaction_component_acknowledge(
+        interaction_event,
+    )
+    await client.interaction_followup_message_create(
+        interaction_event,
+        content = error_message,
+        show_for_invoking_user_only = True,
+    )
+
+
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN, target = 'form')
+async def linked_quest_abandon_confirm(client, interaction_event, user_id, page_index, linked_quest_entry_id):
+    """
+    Handles a user linked quest's abandoning component interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The invoking user's identifier as hexadecimal number.
+    
+    page_index : `str`
+        The page's identifier as hexadecimal number.
+    
+    linked_quest_entry_id : `int`
+        The linked quest's entries identifier in the database.
+    """
+    try:
+        user_id = int(user_id, 16)
+        page_index = int(page_index, 16)
+        linked_quest_entry_id = int(linked_quest_entry_id, 16)
+    except ValueError:
+        return
+    
+    if user_id != interaction_event.user_id:
+        return
+    
+    await client.interaction_component_acknowledge(
+        interaction_event,
+    )
+    
+    while True:
+        linked_quest_listing = await get_linked_quest_listing(user_id)
+        linked_quest = get_linked_quest_with_entry_id(linked_quest_listing, linked_quest_entry_id)
+        
+        if (linked_quest is None):
+            error_message = 'You do not have such a quest.'
+            break
+        
+        await _linked_quest_abandon(linked_quest)
+        await client.interaction_response_message_edit(
+            interaction_event,
+            components = build_linked_quest_abandon_success_components(user_id, page_index, interaction_event.guild_id),
         )
         return
     
     await client.interaction_followup_message_create(
-        event,
+        interaction_event,
         content = error_message,
         show_for_invoking_user_only = True,
     )
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_BOARD_ITEM_PATTERN)
-async def quest_board_item(client, event, user_id, page_index, quest_template_id, item_id):
+async def quest_board_item(client, interaction_event, user_id, guild_id, page_index, quest_template_id, item_id):
     """
     Handles a quest board item component interaction.
     
@@ -726,11 +820,14 @@ async def quest_board_item(client, event, user_id, page_index, quest_template_id
     client : ``Client``
         The client who received the interaction.
     
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
     user_id : `str`
         The invoking user's identifier as hexadecimal number.
+    
+    user_id : `str`
+        The parent quest's guild's identifier as hexadecimal number.
     
     page_index : `str`
         The quest board's current page's index as hexadecimal number.
@@ -743,18 +840,21 @@ async def quest_board_item(client, event, user_id, page_index, quest_template_id
     """
     try:
         user_id = int(user_id, 16)
+        guild_id = int(guild_id, 16)
         page_index = int(page_index, 16)
         quest_template_id = int(quest_template_id, 16)
         item_id = int(item_id, 16)
     except ValueError:
         return
     
-    if user_id != event.user_id:
+    if user_id != interaction_event.user_id:
         return
     
     await client.interaction_component_message_edit(
-        event,
-        components = build_quest_board_item_components(user_id, page_index, quest_template_id, item_id),
+        interaction_event,
+        components = build_quest_board_item_components(
+            user_id, guild_id, interaction_event.guild_id, page_index, quest_template_id, item_id
+        ),
     )
 
 

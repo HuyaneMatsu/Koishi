@@ -70,7 +70,7 @@ def _iter_options():
                     style = ButtonStyle.green,
                 ),
                 create_button(
-                    'Abandon quest',
+                    'Abandon',
                     custom_id = f'linked_quest.abandon.{user_id:x}.{page_index:x}.{linked_quest_entry_id_0:x}',
                     style = ButtonStyle.red,
                 ),

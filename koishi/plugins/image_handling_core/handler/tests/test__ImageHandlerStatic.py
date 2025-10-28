@@ -130,7 +130,7 @@ async def test__ImageHandlerStatic__cg_get_image(keyword_parameters, attributes_
         Keyword parameters to create instance with.
     
     attributes_to_set : `None | list<(str, object)>`
-        Additional attributes to set of teh created instance.
+        Additional attributes to set of the created instance.
     
     Returns
     -------
@@ -183,7 +183,7 @@ def test__ImageHandlerStatic__get_weight(keyword_parameters, attributes_to_set):
         Keyword parameters to create instance with.
     
     attributes_to_set : `None | list<(str, object)>`
-        Additional attributes to set of teh created instance.
+        Additional attributes to set of the created instance.
     
     Returns
     -------
@@ -225,7 +225,7 @@ def test__ImageHandlerStatic__is_character_filterable(keyword_parameters, attrib
         Keyword parameters to create instance with.
     
     attributes_to_set : `None | list<(str, object)>`
-        Additional attributes to set of teh created instance.
+        Additional attributes to set of the created instance.
     
     Returns
     -------
@@ -276,7 +276,7 @@ def test__ImageHandlerStatic__iter_character_filterable(keyword_parameters, attr
         Keyword parameters to create instance with.
     
     attributes_to_set : `None | list<(str, object)>`
-        Additional attributes to set of teh created instance.
+        Additional attributes to set of the created instance.
     
     Returns
     -------
@@ -329,7 +329,7 @@ def test__ImageHandlerStatic__get_image_source(keyword_parameters, attributes_to
         Keyword parameters to create instance with.
     
     attributes_to_set : `None | list<(str, object)>`
-        Additional attributes to set of teh created instance.
+        Additional attributes to set of the created instance.
     
     Returns
     -------

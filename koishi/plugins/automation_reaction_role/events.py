@@ -306,7 +306,7 @@ async def role_delete(client, role):
     role : ``Role``
         The deleted role.
     """
-    # Check whether we are teh first client who should be receiving this event.
+    # Check whether we are the first client who should be receiving this event.
     guild = role.guild
     if (guild is not None):
         clients = guild.clients

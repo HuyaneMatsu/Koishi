@@ -2,7 +2,9 @@ __all__ = ()
 
 from re import compile as re_compile
 
-from hata import BUILTIN_EMOJIS, ButtonStyle, InteractionForm, TextInputStyle, create_button, create_text_input
+from hata import (
+    BUILTIN_EMOJIS, ButtonStyle, InteractionForm, TextInputStyle, create_button, create_label, create_text_input
+)
 
 
 TO_DOS = {}
@@ -28,14 +30,12 @@ CUSTOM_ID_TO_DO_CHANGE_PAGE_RP = re_compile('to-do\\.page\\.([A-Za-z0-9\\+\\/\\=
 
 
 TEXT_INPUT_NAME = create_text_input(
-    'Name',
     min_length = 2,
     max_length = 128,
     custom_id = 'name',
 )
 
 TEXT_INPUT_DESCRIPTION = create_text_input(
-    'Description',
     style = TextInputStyle.paragraph,
     min_length = 2,
     max_length = 1000,
@@ -46,8 +46,14 @@ TEXT_INPUT_DESCRIPTION = create_text_input(
 ADD_TO_DO_FORM = InteractionForm(
     'Add todo entry',
     [
-        TEXT_INPUT_NAME,
-        TEXT_INPUT_DESCRIPTION,
+        create_label(
+            'Name',
+            component = TEXT_INPUT_NAME,
+        ),
+        create_label(
+            'description',
+            component = TEXT_INPUT_DESCRIPTION,
+        ),
     ],
     custom_id = CUSTOM_ID_TO_DO_ADD,
 )

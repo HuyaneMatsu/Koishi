@@ -1,3 +1,5 @@
+from random import Random
+
 import vampytest
 
 from ...options import OptionBattle, OptionLoot
@@ -10,14 +12,11 @@ def _iter_options():
     # no loot
     yield (
         None,
-        ((255 << 42) | (123 << 0)),
-        (
-            ((255 << 42) | (123 << 0)),
-            {},
-        ),
+        Random(255),
+        {},
     )
     
-    # 1 battle that is always selected (x2 enemy), but no loot -> duration stays, seed changes
+    # 1 battle that is always selected (x2 enemy), but no loot -> duration stays
     yield (
         (
             OptionBattle(
@@ -29,14 +28,12 @@ def _iter_options():
                 None,
             ),
         ),
-        ((255 << 42) | (123 << 0)),
-        (
-            ((255 << 0) | (123 << 22)),
-            {},
-        ),
+        Random(23),
+        {},
     )
     
-    # 1 battle that is always selected (x2 enemy), with always loot -> duration changes, seed changes x3
+    # 1 battle that is always selected (x2 enemy), with always loot -> duration changes
+    
     yield (
         (
             OptionBattle(
@@ -50,37 +47,14 @@ def _iter_options():
                 ),
             ),
         ),
-        ((255 << 42) | (123 << 0)),
-        (
-            ((255 << 44) | (123 << 2)),
-            {
-                9999 : LootAccumulation(37, 940, 94)
-            },
-        ),
+        Random(27),
+        {
+            9999 : LootAccumulation(37, 940, 94)
+        },
     )
-    
-    # 1 battle that is never selected -> duration stays, seed changes
-    yield (
-        (
-            OptionBattle(
-                1,
-                1,
-                1,
-                2,
-                999,
-                None,
-            ),
-        ),
-        ((255 << 42) | (123 << 0)),
-        (
-            ((255 << 0) | (123 << 22)),
-            {},
-        ),
-    )
-
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__accumulate_battle_loot(loot, seed):
+def test__accumulate_battle_loot(loot, random):
     """
     tests whether ``accumulate_battle_loot`` works as intended.
     
@@ -89,14 +63,13 @@ def test__accumulate_battle_loot(loot, seed):
     loot : ``None | tuple<OptionBattle>``
         Loot options.
     
-    seed : `int`
-        Seed used for randomization.
+    random : `random.Random`
+        Random number generator to use.
     
     Returns
     -------
-    output : ``(int, dict<int, LootAccumulation>)``
+    output : ``dict<int, LootAccumulation>``
     """
     accumulations = {}
-    seed = accumulate_battle_loot(loot, accumulations, seed)
-    vampytest.assert_instance(seed, int)
-    return seed, accumulations
+    accumulate_battle_loot(loot, accumulations, random)
+    return accumulations

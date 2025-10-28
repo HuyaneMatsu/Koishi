@@ -53,7 +53,7 @@ def get_location_distance_travel_duration(adventure, user_stats):
     return distance * 1000 // user_stats.stats_calculated.extra_movement
 
 
-def get_duration_till_action_occurrence(base_duration, initial_seed, loot_accumulations, multiplier):
+def get_duration_till_action_occurrence(base_duration, random, loot_accumulations, multiplier):
     """
     Gets duration till action occurrence.
     
@@ -62,8 +62,8 @@ def get_duration_till_action_occurrence(base_duration, initial_seed, loot_accumu
     base_duration : `int`
         The action's base duration.
     
-    initial_seed : `int`
-        Initial seed calculated before collecting loot items.
+    random : `random.Random`
+        Random number generator to use.
     
     loot_accumulations : ``dict<int, LootAccumulation>``
         Accumulated loot from the action.
@@ -76,7 +76,7 @@ def get_duration_till_action_occurrence(base_duration, initial_seed, loot_accumu
     duration : `int`
     """
     # Set the required duration between 0.5 - 1.5 times of the action's duration.
-    duration = (base_duration >> 1) + (initial_seed % (base_duration + 1))
+    duration = (base_duration >> 1) + (random.random() * (base_duration + 1))
     duration = floor(duration / multiplier)
     
     duration = sum((loot_accumulation.duration_cost for loot_accumulation in loot_accumulations.values()), duration)
@@ -128,7 +128,7 @@ def get_action_type_multiplier(action_type, user_stats):
     return log(stat) / 2.302585092994046
 
 
-def get_action(adventure, seed):
+def get_action(adventure, random):
     """
     Gets action for adventure stepping.
     
@@ -137,8 +137,8 @@ def get_action(adventure, seed):
     adventure : ``Adventure``
         The adventure to update.
     
-    seed : `int`
-        Seed used for randomization.
+    random : `random.Random`
+        Random number generator to use.
     
     Returns
     -------
@@ -171,7 +171,7 @@ def get_action(adventure, seed):
             
             actions.append(action)
         
-        action_location = seed % sum(action.weight for action in actions)
+        action_location = floor(random.random() % sum(action.weight for action in actions))
         for action in actions:
             action_location -= action.weight
             if action_location < 0:
@@ -484,9 +484,9 @@ if MARISA_MODE and ('vampytest' not in modules):
     _get_duration_till_action_occurrence = get_duration_till_action_occurrence
     
     @copy_docs(get_duration_till_action_occurrence)
-    def get_duration_till_action_occurrence(base_duration, initial_seed, loot_accumulations, multiplier):
+    def get_duration_till_action_occurrence(base_duration, random, loot_accumulations, multiplier):
         return _get_duration_till_action_occurrence(
-            base_duration, initial_seed, loot_accumulations, multiplier
+            base_duration, random, loot_accumulations, multiplier
         ) // TEST_MODE_DURATION_DIVIDER
     
     

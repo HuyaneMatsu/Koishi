@@ -71,7 +71,7 @@ async def get_guild_info_response(client, event, field):
 
 
 @FEATURE_CLIENTS.interactions(custom_id = GUILD_INFO_SELECT_CUSTOM_ID)
-async def guild_info_component_command(client, event, *, value):
+async def guild_info_component_command(client, event, *, values):
     """
     Handles a guild info select interaction.
     
@@ -85,7 +85,7 @@ async def guild_info_component_command(client, event, *, value):
     event : ``InteractionEvent``
         The received event.
     
-    value : `None | str`
+    values : `None | tuple<str>`
         the selected value.
     
     Returns
@@ -95,7 +95,7 @@ async def guild_info_component_command(client, event, *, value):
     if event.message.interaction.user_id != event.user_id:
         return
     
-    if value is None:
+    if values is None:
         return
     
-    return await get_guild_info_response(client, event, value)
+    return await get_guild_info_response(client, event, values[0])

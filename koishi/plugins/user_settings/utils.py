@@ -307,6 +307,7 @@ async def handle_user_settings_set_preferred_client(client, interaction_event, v
     else:
         function = Client.interaction_followup_message_create
     await function(
+        client,
         interaction_event,
         components = build_user_settings_preferred_client_change_components(
             chosen_client, interaction_event.guild_id, hit, changed
@@ -356,6 +357,7 @@ async def handle_user_settings_set_preferred_image_source(client, interaction_ev
     else:
         function = Client.interaction_followup_message_create
     await function(
+        client,
         interaction_event,
         components = build_user_settings_preferred_image_source_change_components(value, hit, changed),
     )

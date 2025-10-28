@@ -1,3 +1,34 @@
+### 2025-10-28
+
+- Fix credibility was rewarded at the location were the quest was completed at instead of where the quest was from.
+- Fix setting preferred image source and preferred client could fail to respond (since last update).
+- Fix `/todo edit` not responding. (Since September).
+- When abandoning a `linked quest` and the quest is still alive, prompt confirmation form. (superior_mac)
+- Make `/user quests` display expires quests with a red `Details` button.
+- Make `/adventure depart` confirmation is now a form, so they do not forget to confirm it.
+- Make `linked quest details`'s abandon button always red (2vio2vieevie).
+- When cancelling an `ädventure`, prompt a confirmation form.
+- Fix `/user quests` producing components with same `custom_id`,
+    when displaying the "same" completed quests belonging to different guilds. (chaos3326)
+- Make `/user quests` allow repeating quests of other guilds.
+- Fix naming inconsistency in `Hakugyokurou mansion`. (huhbuh)
+- Use equal distribution random number generation for action choosing and for loot generation.
+- Users get an additional quest slot 1 rank earlier.
+- Guilds get an additional quest slot every 2nd rank (excluding 0).
+- `/guild quest-board` now generates a quest for each level as available.
+- Fix a typo in Dai - Frog quest. (huhbuh)
+- Improve Renes discord stream notification. (AH only)
+- Add new `filter-ip-logs` cli command.
+
+- Balance adventure locations & targets:
+    - Bamboo forest - foraging -> Decrease Devilcart chance (80% - 60%). Increase Flykiller chance (10% - 20%),
+        Increase Bishophat chance (2.5% -> 5%).
+
+- Balance quests:
+    - Tewi - Bishophat -> Increase given credibility (10 -> 20). Decrease requirements (2000g -> 1000g).
+    - Sakuya - Bluefrankish -> Increase given credibility (20 -> 40).
+    - Marisa - Flykiller -> Increase given credibility (20 -> 30).
+
 ### 2025-10-16
 
 - Make xox available when user installed. (2vio2vieevie)

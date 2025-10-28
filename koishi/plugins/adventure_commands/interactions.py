@@ -2,6 +2,8 @@ __all__ = ()
 
 from datetime import datetime as DateTime, timezone as TimeZone
 
+from hata import InteractionType, Client
+
 from ...bots import FEATURE_CLIENTS
 
 from ..adventure_core import (
@@ -16,15 +18,15 @@ from ..user_stats_core import get_user_stats
 
 from .component_builders import (
     ADVENTURE_LISTING_PAGE_SIZE, build_adventure_action_listing_view_components, build_adventure_action_view_components,
-    build_adventure_cancellation_components, build_adventure_create_cancel_components,
-    build_adventure_create_confirm_components, build_adventure_create_confirmation_components,
+    build_adventure_cancellation_components, build_adventure_cancellation_confirmation_form,
+    build_adventure_create_confirm_components, build_adventure_create_confirmation_form,
     build_adventure_listing_view_components, build_adventure_view_active_components,
     build_adventure_view_finalized_components, produce_adventure_depart_failure_recovery_description
 )
 from .custom_ids import (
     ADVENTURE_ACTION_BATTLE_LOGS_RP, ADVENTURE_ACTION_VIEW_DEPART, ADVENTURE_ACTION_VIEW_RETURN,
-    ADVENTURE_ACTION_LISTING_VIEW_RP, ADVENTURE_ACTION_VIEW_RP, ADVENTURE_CANCEL_RP, ADVENTURE_CREATE_CANCEL_RP,
-    ADVENTURE_CREATE_CONFIRM_RP, ADVENTURE_LISTING_VIEW_RP, ADVENTURE_VIEW_RP
+    ADVENTURE_ACTION_LISTING_VIEW_RP, ADVENTURE_ACTION_VIEW_RP, ADVENTURE_CANCEL_RP, ADVENTURE_CREATE_CONFIRM_RP,
+    ADVENTURE_LISTING_VIEW_RP, ADVENTURE_VIEW_RP
 )
 from .duration_suggesting import get_duration_suggestions
 from .location_suggesting import get_best_matching_location, get_location_suggestions
@@ -85,12 +87,6 @@ async def depart(
     auto_cancellation_id_hexadecimal : `None | str`
         The auto-cancellation logic's identifier in hexadecimal.
     """
-    await client.interaction_application_command_acknowledge(
-        interaction_event,
-        False,
-        show_for_invoking_user_only = True
-    )
-    
     while True:
         adventure = await get_active_adventure(interaction_event.user_id)
         if (adventure is not None):
@@ -177,21 +173,19 @@ async def depart(
             error_message = f'Unknown auto-cancellation: {auto_cancellation_id_hexadecimal}.'
             break
         
-        await client.interaction_response_message_edit(interaction_event, '-# _ _ ')
-        await client.interaction_response_message_delete(interaction_event)
-        
-        await client.interaction_followup_message_create(
+        await client.interaction_form_send(
             interaction_event,
-            components = build_adventure_create_confirmation_components(
+            build_adventure_create_confirmation_form(
                 interaction_event.user_id, location, target, duration, return_, auto_cancellation, True
             ),
         )
         return
     
-    await client.interaction_response_message_edit(
+    await client.interaction_response_message_create(
         interaction_event,
-        content = error_message,
         allowed_mentions = None,
+        content = error_message,
+        show_for_invoking_user_only = True
     )
 
 
@@ -290,7 +284,7 @@ async def autocomplete_depart_duration(interaction_event, duration_string):
     return get_duration_suggestions(duration_suggestion_set.durations, duration_string)
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CREATE_CONFIRM_RP)
+@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CREATE_CONFIRM_RP, target = 'form')
 async def handle_adventure_create_confirm(
     client,
     interaction_event,
@@ -339,9 +333,10 @@ async def handle_adventure_create_confirm(
     return_id = int(return_id, 16)
     auto_cancellation_id = int(auto_cancellation_id, 16)
     
-    await client.interaction_component_acknowledge(
+    await client.interaction_application_command_acknowledge(
         interaction_event,
         False,
+        show_for_invoking_user_only = True,
     )
     
     # Leave if the invoking user is different.
@@ -355,20 +350,17 @@ async def handle_adventure_create_confirm(
             return_ = RETURNS[return_id]
             auto_cancellation = AUTO_CANCELLATIONS[auto_cancellation_id]
         except KeyError:
-            delete_original = True
             error_message = 'Could not restore the adventure data. Please depart to a new one.'
             break
         
         adventure = await get_active_adventure(user_id)
         if (adventure is not None):
-            delete_original = False
             error_message = 'You are already on an adventure.'
             break
         
         user_stats = await get_user_stats(user_id)
         recovering_until = user_stats.recovering_until
         if (recovering_until is not None) and (recovering_until > DateTime.now(tz = TimeZone.utc)):
-            delete_original = False
             error_message = 'You are currently recovering, cannot go on an adventure.'
             break
         
@@ -395,7 +387,11 @@ async def handle_adventure_create_confirm(
         await store_adventure(adventure)
         await scheduled_adventure_arrival(adventure)
         
-        await client.interaction_response_message_edit(
+        # Respond
+        await client.interaction_response_message_edit(interaction_event, '-# _ _ ')
+        await client.interaction_response_message_delete(interaction_event)
+        
+        await client.interaction_followup_message_create(
             interaction_event,
             components = build_adventure_create_confirm_components(
                 interaction_event.user_id, adventure.entry_id, location, target, duration, return_, auto_cancellation,
@@ -403,193 +399,11 @@ async def handle_adventure_create_confirm(
         )
         return
     
-    await client.interaction_followup_memssage_create(
+    await client.interaction_response_message_edit(
         interaction_event,
         content = error_message,
         allowed_mentions = None,
-        show_for_invoking_user_only = True,
     )
-    
-    if delete_original:
-        await client.interaction_response_message_delete(interaction_event)
-    
-    else:
-        await client.interaction_response_message_edit(
-            interaction_event,
-            components = build_adventure_create_confirmation_components(
-                user_id, location, target, duration, return_, auto_cancellation, False
-            ),
-        )
-
-
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CREATE_CANCEL_RP)
-async def handle_adventure_create_cancel(
-    client,
-    interaction_event,
-    user_id,
-    location_id,
-    target_id,
-    duration,
-    return_id,
-    auto_cancellation_id,
-):
-    """
-    Handles an adventure create cancel interaction.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The client who received this interaction.
-    
-    interaction_event : ``InteractionEvent``
-        The received interaction.
-    
-    user_id : `str`
-        The invoking user's identifier in hexadecimal. Later converted to int.
-    
-    location_id : `str`
-        The selected location's identifier in hexadecimal. Later converted to int.
-    
-    target_id : `str`
-        The selected target's identifier in hexadecimal. Later converted to int.
-    
-    duration : `str`
-        The duration in hexadecimal. Later converted to int.
-    
-    return_id : `str`
-        The selected return_'s identifier in hexadecimal. Later converted to int.
-    
-    auto_cancellation_id : `str`
-        The selected auto-cancellation's identifier in hexadecimal. Later converted to int.
-    """
-    user_id = int(user_id, 16)
-    location_id = int(location_id, 16)
-    target_id = int(target_id, 16)
-    duration = int(duration, 16)
-    return_id = int(return_id, 16)
-    auto_cancellation_id = int(auto_cancellation_id, 16)
-    
-    await client.interaction_component_acknowledge(
-        interaction_event,
-        False,
-    )
-    
-    # Leave if the invoking user is different.
-    if user_id != interaction_event.user_id:
-        return
-    
-    while True:
-        try:
-            location = LOCATIONS[location_id]
-            target = TARGETS[target_id]
-            return_ = RETURNS[return_id]
-            auto_cancellation = AUTO_CANCELLATIONS[auto_cancellation_id]
-        except KeyError:
-            error_message = 'Could not restore the adventure data. Please depart to a new one.'
-            break
-        
-        await client.interaction_response_message_edit(
-            interaction_event,
-            components = build_adventure_create_cancel_components(
-                location, target, duration, return_, auto_cancellation,
-            ),
-        )
-        return
-    
-    await client.interaction_followup_memssage_create(
-        interaction_event,
-        content = error_message,
-        allowed_mentions = None,
-        show_for_invoking_user_only = True,
-    )
-    await client.interaction_response_message_delete(interaction_event)
-
-
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CREATE_CANCEL_RP)
-async def handle_adventure_create_cancel(
-    client,
-    interaction_event,
-    user_id,
-    location_id,
-    target_id,
-    duration,
-    return_id,
-    auto_cancellation_id,
-):
-    """
-    Handles an adventure create cancel interaction.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The client who received this interaction.
-    
-    interaction_event : ``InteractionEvent``
-        The received interaction.
-    
-    user_id : `str`
-        The invoking user's identifier in hexadecimal. Later converted to int.
-    
-    location_id : `str`
-        The selected location's identifier in hexadecimal. Later converted to int.
-    
-    target_id : `str`
-        The selected target's identifier in hexadecimal. Later converted to int.
-    
-    duration : `str`
-        The duration in hexadecimal. Later converted to int.
-    
-    return_id : `str`
-        The selected return_'s identifier in hexadecimal. Later converted to int.
-    
-    auto_cancellation_id : `str`
-        The selected auto-cancellation's identifier in hexadecimal. Later converted to int.
-    """
-    user_id = int(user_id, 16)
-    location_id = int(location_id, 16)
-    target_id = int(target_id, 16)
-    duration = int(duration, 16)
-    return_id = int(return_id, 16)
-    auto_cancellation_id = int(auto_cancellation_id, 16)
-    
-    await client.interaction_component_acknowledge(
-        interaction_event,
-        False,
-    )
-    
-    # Leave if the invoking user is different.
-    if user_id != interaction_event.user_id:
-        return
-    
-    while True:
-        try:
-            location = LOCATIONS[location_id]
-            target = TARGETS[target_id]
-            return_ = RETURNS[return_id]
-            auto_cancellation = AUTO_CANCELLATIONS[auto_cancellation_id]
-        except KeyError:
-            error_message = 'Could not restore the adventure data. Please depart to a new one.'
-            break
-        
-        await client.interaction_response_message_edit(
-            interaction_event,
-            components = build_adventure_create_cancel_components(
-                location, target, duration, return_, auto_cancellation,
-            ),
-        )
-        return
-    
-    await client.interaction_followup_memssage_create(
-        interaction_event,
-        content = error_message,
-        allowed_mentions = None,
-        show_for_invoking_user_only = True,
-    )
-    await client.interaction_response_message_delete(interaction_event)
 
 
 @ADVENTURE_COMMANDS.interactions
@@ -610,12 +424,6 @@ async def cancel(
     interaction_event : ``InteractionEvent``
         The received interaction event.
     """
-    await client.interaction_application_command_acknowledge(
-        interaction_event,
-        False,
-        show_for_invoking_user_only = True
-    )
-    
     while True:
         adventure = await get_active_adventure(interaction_event.user_id)
         if (adventure is None):
@@ -626,19 +434,13 @@ async def cancel(
             error_message = 'You are heading back home already.'
             break
         
-        
-        await adventure_cancel(adventure)
-        
-        await client.interaction_response_message_edit(interaction_event, '-# _ _ ')
-        await client.interaction_response_message_delete(interaction_event)
-        
-        await client.interaction_followup_message_create(
+        await client.interaction_form_send(
             interaction_event,
-            components = build_adventure_cancellation_components(),
+            build_adventure_cancellation_confirmation_form(adventure),
         )
         return
     
-    await client.interaction_response_message_edit(
+    await client.interaction_response_message_create(
         interaction_event,
         content = error_message,
         allowed_mentions = None,
@@ -704,7 +506,7 @@ async def view(
 
 
 @FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CANCEL_RP)
-async def handle_active_adventure_cancellation(
+async def handle_active_adventure_cancellation_invoke(
     client,
     interaction_event,
     user_id,
@@ -732,10 +534,71 @@ async def handle_active_adventure_cancellation(
     user_id = int(user_id, 16)
     adventure_entry_id = int(adventure_entry_id, 16)
     
+    
+    if interaction_event.user_id != user_id:
+        return
+    
+    while True:
+        adventure = await get_adventure(adventure_entry_id)
+        if (adventure is None):
+            error_message = 'Could not resolve adventure.'
+            break
+        
+        if not can_cancel_adventure(adventure):
+            error_message = 'You are heading back home already or the adventure already finished.'
+            break
+        
+        await client.interaction_form_send(
+            interaction_event,
+            build_adventure_cancellation_confirmation_form(adventure),
+        )
+        return
+    
     await client.interaction_component_acknowledge(
         interaction_event,
-        False,
     )
+    await client.interaction_followup_message_create(
+        interaction_event,
+        content = error_message,
+        allowed_mentions = None,
+        show_for_invoking_user_only = True,
+    )
+
+
+@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CANCEL_RP, target = 'form')
+async def handle_active_adventure_cancellation_confirmation(
+    client,
+    interaction_event,
+    user_id,
+    adventure_entry_id,
+):
+    """
+    Handles an active adventure cancellation confirmation.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The owner user's identifier as hexadecimal. Later converted back to integer.
+    
+    adventure_entry_id : `str`
+        The adventure's entry's identifier as hexadecimal. Later converted back to integer.
+    """
+    user_id = int(user_id, 16)
+    adventure_entry_id = int(adventure_entry_id, 16)
+    
+    if interaction_event.type is InteractionType.application_command:
+        function = Client.interaction_application_command_acknowledge
+    else:
+        function = Client.interaction_component_acknowledge
+    await function(client, interaction_event, False)
     
     if interaction_event.user_id != user_id:
         return
@@ -752,13 +615,22 @@ async def handle_active_adventure_cancellation(
         
         await adventure_cancel(adventure)
         
+        if interaction_event.type is InteractionType.application_command:
+            await client.interaction_response_message_edit(interaction_event, '-# _ _')
+            await client.interaction_response_message_delete(interaction_event)
+        
         await client.interaction_followup_message_create(
             interaction_event,
             components = build_adventure_cancellation_components(),
         )
         return
     
-    await client.interaction_followup_message_create(
+    if interaction_event.type is InteractionType.application_command:
+        function = Client.interaction_response_message_edit
+    else:
+        function = Client.interaction_followup_message_create
+    await function(
+        client,
         interaction_event,
         content = error_message,
         allowed_mentions = None,

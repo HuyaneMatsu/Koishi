@@ -1,5 +1,7 @@
 import vampytest
 
+from random import Random
+
 from ...options import OptionBase
 
 from ..loot_accumulation_logic import get_option_amount
@@ -14,8 +16,8 @@ def _iter_options():
             10,
             20,
         ),
-        255,
-        12,
+        Random(255),
+        10,
     )
     
     # 90% chance miss
@@ -26,7 +28,7 @@ def _iter_options():
             10,
             20,
         ),
-        209,
+        Random(23),
         0,
     )
     
@@ -38,7 +40,7 @@ def _iter_options():
             10,
             20,
         ),
-        201,
+        Random(48),
         0,
     )
     
@@ -50,13 +52,13 @@ def _iter_options():
             10,
             20,
         ),
-        116,
-        16,
+        Random(49),
+        14,
     )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__get_option_amount(option, seed):
+def test__get_option_amount(option, Random):
     """
     tests whether ``get_option_amount`` works as intended.
     
@@ -65,13 +67,13 @@ def test__get_option_amount(option, seed):
     option : ``OptionBase``
         Option to use.
     
-    seed : `int`
-        Seed used for randomization.
+    random : `random.Random`
+        Random number generator to use.
     
     Returns
     -------
     output : `int`
     """
-    output = get_option_amount(option, seed)
+    output = get_option_amount(option, Random)
     vampytest.assert_instance(output, int)
     return output

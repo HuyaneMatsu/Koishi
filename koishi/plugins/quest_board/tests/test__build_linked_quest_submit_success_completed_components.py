@@ -23,7 +23,8 @@ def _iter_options():
     quest_template_0 = get_quest_template(quest_template_id_0)
     
     user_id = 202510140000
-    guild_id = 202510140001
+    guild_id_0 = 202510140001
+    guild_id_1 = 202510260003
     batch_id = 5997
     
     duration = 3600 * 24 * 3
@@ -41,7 +42,7 @@ def _iter_options():
     
     linked_quest_0 = LinkedQuest(
         user_id,
-        guild_id,
+        guild_id_0,
         batch_id,
         quest_0,
     )
@@ -55,7 +56,7 @@ def _iter_options():
     yield (
         user_id,
         1,
-        guild_id,
+        guild_id_0,
         linked_quest_0,
         quest_template_0,
         1 << 12,
@@ -86,7 +87,7 @@ def _iter_options():
                 ),
                 create_button(
                     'Repeat',
-                    custom_id = f'quest_board.accept.{user_id:x}.{0:x}.{quest_template_id_0}',
+                    custom_id = f'quest_board.accept.{user_id:x}.{guild_id_0:x}.{0:x}.{quest_template_id_0}',
                     enabled = True,
                     style = ButtonStyle.green,
                 ),
@@ -97,7 +98,7 @@ def _iter_options():
     yield (
         user_id,
         1,
-        0,
+        guild_id_1,
         linked_quest_0,
         quest_template_0,
         1 << 0,
@@ -128,7 +129,7 @@ def _iter_options():
                 ),
                 create_button(
                     'Repeat',
-                    custom_id = f'quest_board.accept.{user_id:x}.{0:x}.{quest_template_id_0}',
+                    custom_id = f'quest_board.accept.{user_id:x}.{guild_id_0:x}.{0:x}.{quest_template_id_0}',
                     enabled = False,
                     style = ButtonStyle.gray,
                 ),
@@ -141,7 +142,7 @@ def _iter_options():
 def test__build_linked_quest_submit_success_completed_components(
     user_id,
     page_index,
-    guild_id,
+    local_guild_id,
     linked_quest,
     quest_template,
     user_credibility,
@@ -160,7 +161,7 @@ def test__build_linked_quest_submit_success_completed_components(
     page_index : `int`
         The linked quests' current page's index.
     
-    guild_id : `int`
+    local_guild_id : `int`
         The local guild's identifier.
     
     linked_quest : : ``LinkedQuest``
@@ -200,7 +201,7 @@ def test__build_linked_quest_submit_success_completed_components(
     output = build_linked_quest_submit_success_completed_components(
         user_id,
         page_index,
-        guild_id,
+        local_guild_id,
         linked_quest,
         quest_template,
         user_stats,

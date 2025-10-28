@@ -55,6 +55,7 @@ Although here is a "short" description for all of her commands by category:
     - `log-sticker` - Log sticker creation, modification and deletions.
     - `log-user` - Log joining and leaving users.
     - `reaction-copy` - Allow messages to be copied to other channels using reactions.
+    - `reaction-role`- Assign or remove roles from users when they react on selected messages with selected emojis.
     - `touhou-feed` - Send touhou images to specific channels based on configuration.
     - `welcome` - Send welcome messages fot joining users.
 - `/clear` - Delete a batch of messages.
@@ -84,6 +85,7 @@ Although here is a "short" description for all of her commands by category:
 - `/9ball` - Ask our all knowing 9ball to share their wisdom.
 - `/ascii` - Ascii art your avatar or the guild's icon.
 - `/choose` - Chooses one of your given options.
+- `/imaginary-friend` - A collection of commands that an imaginary friend would have.
 - `/memme` - A curated list of touhou memes.
 - `/oj` - Lookup commands related the 100% Orange Juice video game.
 - `/paranoia` - Pa-pa-pa-pa-paranoia.

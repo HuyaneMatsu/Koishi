@@ -1,3 +1,5 @@
+from random import Random
+
 import vampytest
 
 from ...action import ACTION_TYPE_FORAGING, Action
@@ -59,7 +61,6 @@ def _iter_options():
         0,
     )
     adventure_0.action_count = 3
-    adventure_0.seed = (123 << 42) | (142 << 0)
     
     
     adventure_1 = Adventure(
@@ -73,12 +74,11 @@ def _iter_options():
         0,
     )
     adventure_1.action_count = 3
-    adventure_1.seed = (123 << 42) | (142 << 0)
-    
+
     # generic hit
     yield (
         adventure_0,
-        (123 << 22) | (142 << 44),
+        Random(12),
         {
             target_id_0 : target_0,
         },
@@ -92,7 +92,7 @@ def _iter_options():
     # miss target
     yield (
         adventure_0,
-        (123 << 22) | (142 << 44),
+        Random(12),
         {},
         {
             action_id_0 : action_0,
@@ -104,7 +104,7 @@ def _iter_options():
     # miss adventure.
     yield (
         adventure_0,
-        (123 << 22) | (142 << 44),
+        Random(12),
         {
             target_id_0 : target_0,
         },
@@ -114,7 +114,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__get_action(adventure, seed, targets, actions):
+def test__get_action(adventure, random, targets, actions):
     """
     Tests whether ``get_action`` works as intended.
     
@@ -123,8 +123,8 @@ def test__get_action(adventure, seed, targets, actions):
     adventure : ``Adventure``
         The adventure to update.
     
-    seed : `int`
-        Seed used for randomization.
+    random : `random.Random`
+        Random number generator to use.
     
     targets : ``dict<int, Target>``
         Mock targets.
@@ -134,7 +134,7 @@ def test__get_action(adventure, seed, targets, actions):
     
     Returns
     -------
-    action_and_seed : ``None | (Action, int)``
+    action : ``None | Action``
     """
     mocked = vampytest.mock_globals(
         get_action,
@@ -142,6 +142,6 @@ def test__get_action(adventure, seed, targets, actions):
         ACTIONS = actions,
     )
     
-    output = mocked(adventure, seed)
+    output = mocked(adventure, random)
     vampytest.assert_instance(output, Action, nullable = True)
     return output
