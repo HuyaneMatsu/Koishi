@@ -9,13 +9,15 @@ from ..item_modifier_core import (
 )
 
 from .constants import ITEMS
-from .flags import ITEM_FLAG_EDIBLE, ITEM_FLAG_NPC, ITEM_FLAG_WEAPON
+from .flags import ITEM_FLAG_EDIBLE, ITEM_FLAG_HEAD, ITEM_FLAG_NPC, ITEM_FLAG_WEAPON
 from .item import Item
 from .item_ids import (
-    ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT,
-    ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA,
-    ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_KOISHI, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_ORIN,
-    ITEM_ID_PEACH, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAWBERRY, ITEM_ID_TEWI
+    ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH,
+    ITEM_ID_CARROT, ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FISHING_ROD,
+    ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_KOISHI, ITEM_ID_KOKORO,
+    ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_ORIN, ITEM_ID_PEACH, ITEM_ID_RIBBON_BOW, ITEM_ID_RULER, ITEM_ID_SAKUYA,
+    ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAW_HAT, ITEM_ID_STRAWBERRY, ITEM_ID_TEWI, ITEM_ID_YUKARI,
+    ITEM_ID_YUUKA
 )
 
 
@@ -196,7 +198,7 @@ ITEM_SCARLET_ONION = ITEMS[ITEM_ID_SCARLET_ONION] = Item(
         'Can be found in the **Human Village**.'
     ),
     ITEM_FLAG_EDIBLE,
-    19, # value (hearts)
+    23, # value (hearts)
     170, # weight (grams)
     None,
 )
@@ -319,8 +321,8 @@ ITEM_FROG = ITEMS[ITEM_ID_FROG] = Item(
         'They can be most commonly found around wetlands, like the **Misty Lake**.'
     ),
     ITEM_FLAG_EDIBLE,
-    46, # value (hearts)
-    24, # weight (grams)
+    69, # value (hearts)
+    48, # weight (grams)
     None,
 )
 
@@ -412,6 +414,129 @@ ITEM_TEWI = ITEMS[ITEM_ID_TEWI] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
+)
+
+
+ITEM_KOKORO = ITEMS[ITEM_ID_KOKORO] = Item(
+    ITEM_ID_KOKORO,
+    'Kokoro',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_RIBBON_BOW = ITEMS[ITEM_ID_RIBBON_BOW] = Item(
+    ITEM_ID_RIBBON_BOW,
+    'Ribbon bow',
+    BUILTIN_EMOJIS['ribbon'],
+    (
+        'An accessory made out of a ribbon. '
+        'The ribbon may be from various materials, like textile, plastic or metal.\n'
+        'Can be used to tie ponytail, braids or just used it as a general accessory anywhere.'
+    ),
+    ITEM_FLAG_HEAD,
+    50, # value (hearts)
+    10, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +5),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +3),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +1),
+    ),
+)
+
+
+ITEM_STRAW_HAT = ITEMS[ITEM_ID_STRAW_HAT] = Item(
+    ITEM_ID_STRAW_HAT,
+    'Straw hat',
+    BUILTIN_EMOJIS['womans_hat'],
+    (
+        'A wide brimmed spun hat made out of straw or reed.\n'
+        'It is engineered to protect head from the heat of the sun.'
+    ),
+    ITEM_FLAG_HEAD,
+    700, # value (hearts)
+    135, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +2),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__GARDENING, MODIFIER_KIND__PERCENT), +25),
+        Modifier(construct_modifier_type(MODIFIER_ID__FORAGING, MODIFIER_KIND__PERCENT), +10),
+    ),
+)
+
+ITEM_RULER = ITEMS[ITEM_ID_RULER] = Item(
+    ITEM_ID_RULER,
+    'Ruler',
+    BUILTIN_EMOJIS['straight_ruler'],
+    (
+        'A tool used to draw straight lines, furthermore to measure length. '
+        'In the past they were made out of wood, but nowadays mostly from translucent plastic, or from metal. '
+        'It usually contains millimeter scale, its length is variable, most commonly is between 20 and 50 cm-s.'
+    ),
+    ITEM_FLAG_WEAPON,
+    300, # value (hearts)
+    60, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +3),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +1),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_ID__BUTCHERING), +10),
+        Modifier(construct_modifier_type(MODIFIER_ID__GARDENING, MODIFIER_KIND__PERCENT), +5),
+        Modifier(construct_modifier_type(MODIFIER_ID__FORAGING, MODIFIER_KIND__PERCENT), +25),
+        Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__PERCENT), +15),
+    ),
+)
+
+
+ITEM_YUKARI = ITEMS[ITEM_ID_YUKARI] = Item(
+    ITEM_ID_YUKARI,
+    'Yukari',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_YUUKA = ITEMS[ITEM_ID_YUUKA] = Item(
+    ITEM_ID_YUUKA,
+    'Yuuka',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_BAMBOO_SHOOT = ITEMS[ITEM_ID_BAMBOO_SHOOT] = Item(
+    ITEM_ID_BAMBOO_SHOOT,
+    'Bamboo shoot',
+    BUILTIN_EMOJIS['bamboo'],
+    (
+        'Bamboo shoots are the young sprouts of bamboo coming out from the ground. '
+        'At the case of many species they are edible and they are used to make various dishes and broth. '
+        'Raw bamboo shoots contain natural toxin, cyanogenic-glycosides, '
+        'therefore they have to be heat treated for a long duration with frequent water change.\n'
+        '\n'
+        'Can be found in the **Bamboo forest**.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    107, # value (hearts)
+    640, # weight (grams)
     None,
 )
 

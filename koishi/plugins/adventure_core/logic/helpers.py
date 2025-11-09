@@ -171,7 +171,7 @@ def get_action(adventure, random):
             
             actions.append(action)
         
-        action_location = floor(random.random() % sum(action.weight for action in actions))
+        action_location = floor(random.random() * sum(action.weight for action in actions))
         for action in actions:
             action_location -= action.weight
             if action_location < 0:

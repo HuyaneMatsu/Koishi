@@ -149,7 +149,6 @@ async def edit(
     Returns
     -------
     form : ``InteractionForm``
-    
     """
     check_permission(event)
     await request_to_dos()

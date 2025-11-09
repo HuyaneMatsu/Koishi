@@ -12,6 +12,7 @@ def _iter_options():
         user_id,
         1,
         6556655656,
+        0,
         [
             create_text_display('You successfully abandoned the quest.'),
             create_separator(),
@@ -33,8 +34,9 @@ def _iter_options():
         user_id,
         1,
         0,
+        20,
         [
-            create_text_display('You successfully abandoned the quest.'),
+            create_text_display('You successfully abandoned the quest, losing 20 credibility.'),
             create_separator(),
             create_row(
                 create_button(
@@ -52,7 +54,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_linked_quest_abandon_success_components(user_id, page_index, guild_id):
+def test__build_linked_quest_abandon_success_components(user_id, page_index, guild_id, credibility_penalty):
     """
     Tests whether ``build_linked_quest_abandon_success_components`` works as intended.
     
@@ -67,11 +69,14 @@ def test__build_linked_quest_abandon_success_components(user_id, page_index, gui
     guild_id : `int`
         The local guild's identifier.
     
+    credibility_penalty : `int`
+        Abandon credibility penalty.
+    
     Returns
     -------
     output : ``list<Component>``
     """
-    output = build_linked_quest_abandon_success_components(user_id, page_index, guild_id)
+    output = build_linked_quest_abandon_success_components(user_id, page_index, guild_id, credibility_penalty)
     
     vampytest.assert_instance(output, list)
     for element in output:

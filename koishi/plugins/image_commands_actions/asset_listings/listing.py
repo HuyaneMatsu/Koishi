@@ -2392,9 +2392,10 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1232771079823687680/chen-orin-lick-0000.png',
-).with_action(
-    ACTION_TAG_LICK, CHEN, KAENBYOU_RIN,
+    'https://cdn.discordapp.com/attachments/568837922288173058/1437020485765435484/chen-orin-handhold-lick-0000.png',
+).with_actions(
+    (ACTION_TAG_HANDHOLD, CHEN, KAENBYOU_RIN),
+    (ACTION_TAG_LICK, CHEN, KAENBYOU_RIN),
 ).with_creator(
     'masanaga (tsukasa)',
 )
@@ -11991,10 +11992,11 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1417921842169254068/chiruno-remilia-feed_self-lick-0000.png',
-).with_actions(
-    (ACTION_TAG_FEED_SELF, CHIRUNO, CHIRUNO),
-    (ACTION_TAG_LICK, SCARLET_REMILIA, CHIRUNO),
+    'https://cdn.discordapp.com/attachments/568837922288173058/1437020874388537365/chiruno-remilia-feed_self-0000.png',
+).with_action(
+    ACTION_TAG_FEED_SELF, CHIRUNO, CHIRUNO,
+).with_character(
+    SCARLET_REMILIA,
 ).with_creator(
     'Matsu',
 )

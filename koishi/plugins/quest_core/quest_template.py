@@ -29,6 +29,12 @@ class QuestTemplate(RichAttributeErrorBaseType):
     amount_variance_percentage_upper_threshold : `int`
         Upper threshold of for amount variance in percentage.
     
+    chance_in : `int`
+        The chance to be chosen in.
+    
+    chance_out : `int`
+        The chance to be chosen out of.
+    
     description : `None | str`
         Flavour text.
     
@@ -52,6 +58,9 @@ class QuestTemplate(RichAttributeErrorBaseType):
     
     level : `int`
         The quest's level.
+    
+    mutually_exclusive_with_ids : `None | tuple<int>`
+        Other quest template's identifiers
     
     repeat_count : `int`
         The amount of times this quest can be repeated.
@@ -79,9 +88,10 @@ class QuestTemplate(RichAttributeErrorBaseType):
     """
     __slots__ = (
         'amount_base', 'amount_require_multiple_of', 'amount_type', 'amount_variance_percentage_lower_threshold',
-        'amount_variance_percentage_upper_threshold', 'description', 'duration_base', 'duration_require_multiple_of',
-        'duration_variance_percentage_lower_threshold', 'duration_variance_percentage_upper_threshold', 'id',
-        'item_id', 'level', 'repeat_count', 'requester_id', 'reward_balance_base', 'reward_balance_require_multiple_of',
+        'amount_variance_percentage_upper_threshold', 'chance_in', 'chance_out', 'description', 'duration_base',
+        'duration_require_multiple_of', 'duration_variance_percentage_lower_threshold',
+        'duration_variance_percentage_upper_threshold', 'id', 'item_id', 'level', 'mutually_exclusive_with_ids',
+        'repeat_count', 'requester_id', 'reward_balance_base', 'reward_balance_require_multiple_of',
         'reward_balance_variance_percentage_lower_threshold', 'reward_balance_variance_percentage_upper_threshold',
         'reward_credibility', 'type'
     )
@@ -89,6 +99,9 @@ class QuestTemplate(RichAttributeErrorBaseType):
     def __new__(
         cls,
         quest_template_id,
+        mutually_exclusive_with_ids,
+        chance_in,
+        chance_out,
         description,
         quest_type,
         level,
@@ -117,6 +130,15 @@ class QuestTemplate(RichAttributeErrorBaseType):
         ----------
         quest_template_id : `int`
             The quest template's identifier.
+        
+        mutually_exclusive_with_ids : `None | tuple<int>`
+            An tuple of quest template identifiers that this one is mutually exclusive with.
+        
+        chance_in : `int`
+            The chance to be chosen in.
+        
+        chance_out : `int`
+            The chance to be chosen out of.
         
         description : `None | str`
             Flavour text.
@@ -163,6 +185,9 @@ class QuestTemplate(RichAttributeErrorBaseType):
         duration_variance_percentage_upper_threshold : `int`
             Upper threshold of for duration variance in percentage.
         
+        reward_credibility : `int`
+            The amount of credibility to be rewarded.
+        
         reward_balance_base : `int`
             The amount of balance to be rewarded.
         
@@ -174,9 +199,6 @@ class QuestTemplate(RichAttributeErrorBaseType):
         
         reward_balance_variance_percentage_upper_threshold : `int`
             Upper threshold of for reward balance variance in percentage.
-        
-        reward_credibility : `int`
-            The amount of credibility to be rewarded.
         """
         self = object.__new__(cls)
         self.amount_base = amount_base
@@ -184,6 +206,8 @@ class QuestTemplate(RichAttributeErrorBaseType):
         self.amount_type = amount_type
         self.amount_variance_percentage_lower_threshold = amount_variance_percentage_lower_threshold
         self.amount_variance_percentage_upper_threshold = amount_variance_percentage_upper_threshold
+        self.chance_in = chance_in
+        self.chance_out = chance_out
         self.description = description
         self.duration_base = duration_base
         self.duration_require_multiple_of = duration_require_multiple_of
@@ -192,6 +216,7 @@ class QuestTemplate(RichAttributeErrorBaseType):
         self.id = quest_template_id
         self.item_id = item_id
         self.level = level
+        self.mutually_exclusive_with_ids = mutually_exclusive_with_ids
         self.repeat_count = repeat_count
         self.requester_id = requester_id
         self.reward_balance_base = reward_balance_base
@@ -210,6 +235,10 @@ class QuestTemplate(RichAttributeErrorBaseType):
         # id
         repr_parts.append(' id = ')
         repr_parts.append(repr(self.id))
+        
+        # mutually_exclusive_with_ids
+        repr_parts.append(', mutually_exclusive_with_ids = ')
+        repr_parts.append(repr(self.mutually_exclusive_with_ids))
         
         # amount_base
         repr_parts.append(', amount_base = ')
@@ -233,6 +262,14 @@ class QuestTemplate(RichAttributeErrorBaseType):
         # amount_variance_percentage_upper_threshold
         repr_parts.append(', amount_variance_percentage_upper_threshold = ')
         repr_parts.append(repr(self.amount_variance_percentage_upper_threshold))
+        
+        # chance_in
+        repr_parts.append(', chance_in = ')
+        repr_parts.append(repr(self.chance_in))
+        
+        # chance_out
+        repr_parts.append(', chance_out = ')
+        repr_parts.append(repr(self.chance_out))
         
         # description
         repr_parts.append(', description = ')

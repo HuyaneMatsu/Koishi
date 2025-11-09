@@ -1,7 +1,7 @@
 __all__ = ()
 
 from hata import StringSelectOption, create_row
-from hata.discord.component.component_metadata.constants import LABEL_LENGTH_MAX
+from hata.discord.component.component_metadata.constants import LABEL_LENGTH_MAX__BUTTON
 
 from .constants import (
     COMPONENT_LEFT_ANIME, COMPONENT_LEFT_CHARACTER, COMPONENT_LEFT_DISABLED, COMPONENT_LEFT_MANGA,
@@ -36,7 +36,7 @@ def parse_option_base(entity_data, key_id, name_parser):
     else:
         entity_id_str = str(entity_id)
     
-    entity_name = limit_string_length(name_parser(entity_data), LABEL_LENGTH_MAX)
+    entity_name = limit_string_length(name_parser(entity_data), LABEL_LENGTH_MAX__BUTTON)
     return StringSelectOption(entity_id_str, entity_name)
 
 

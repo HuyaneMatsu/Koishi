@@ -163,7 +163,7 @@ def build_quest_board_quest_listing_components(guild, guild_stats, user_stats, l
             button_page_index_increment,
             create_button(
                 'View my quests',
-                custom_id = CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_NAVIGATE_FACTORY(user_stats.user_id, page_index),
+                custom_id = CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_NAVIGATE_FACTORY(user_stats.user_id, 0),
             ),
         ),
     )
@@ -208,9 +208,13 @@ def build_quest_details_components(user_id, guild_id, local_guild_id, page_index
     quest_template = get_quest_template(quest.template_id)
     user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
     
+    completion_count = (0 if linked_quest is None else linked_quest.completion_count)
+    
     components.append(
         create_text_display(
-            ''.join([*produce_quest_detailed_description(quest, quest_template, user_adventurer_rank_info.level)]),
+            ''.join([*produce_quest_detailed_description(
+                quest, quest_template, user_adventurer_rank_info.level, completion_count
+            )]),
         ),
     )
     components.append(create_separator())
@@ -221,14 +225,11 @@ def build_quest_details_components(user_id, guild_id, local_guild_id, page_index
     ):
         accept_enabled = False
     else:
-        if (linked_quest is None):
-            accept_enabled = True
+        repeat_count = quest_template.repeat_count
+        if repeat_count and (completion_count >= repeat_count):
+            accept_enabled = False
         else:
-            repeat_count = quest_template.repeat_count
-            if repeat_count and (linked_quest.completion_count >= repeat_count):
-                accept_enabled = False
-            else:
-                accept_enabled = True
+            accept_enabled = True
     
     # Add interactive components.
     components.append(
@@ -596,7 +597,7 @@ def build_linked_quest_details_components(linked_quest, user_stats, page_index):
     return components
 
 
-def build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_index):
+def build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_index, credibility_penalty):
     """
     Builds quest abandon confirmation form.
     
@@ -611,6 +612,9 @@ def build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_
     page_index : `int`
         The linked quests' current page's index.
     
+    credibility_penalty : `int`
+        Abandon credibility penalty.
+    
     Returns
     -------
     form : ``InteractionForm``
@@ -618,22 +622,37 @@ def build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_
     quest_template = get_quest_template(linked_quest.template_id)
     user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
     
+    # Build components
+    components = []
+    
+    # Description
+    components.append(
+        create_text_display(
+            ''.join([*produce_linked_quest_detailed_description(
+                linked_quest, quest_template, user_adventurer_rank_info.level
+            )]),
+        ),
+    )
+    
+    # Credibility enalty
+    if credibility_penalty:
+        components.append(
+            create_text_display(
+                f'-# You will lose {credibility_penalty!s} credibility upon abandoning this quest.'
+            ),
+        )
+    
+    # Build form
     return InteractionForm(
         'Please confirm abandoning',
-        [
-            create_text_display(
-                ''.join([*produce_linked_quest_detailed_description(
-                    linked_quest, quest_template, user_adventurer_rank_info.level
-                )]),
-            ),
-        ],
+        components,
         CUSTOM_ID_LINKED_QUEST_ABANDON_FACTORY(
             user_stats.user_id, page_index, linked_quest.entry_id
         ),
     )
 
 
-def build_linked_quest_abandon_success_components(user_id, page_index, guild_id):
+def build_linked_quest_abandon_success_components(user_id, page_index, guild_id, credibility_penalty):
     """
     Builds successfully abandoning response components.
     
@@ -648,12 +667,20 @@ def build_linked_quest_abandon_success_components(user_id, page_index, guild_id)
     guild_id : `int`
         The local guild's identifier.
     
+    credibility_penalty : `int`
+        Abandon credibility penalty.
+    
     Returns
     -------
     components : ``list<Component>``
     """
+    if credibility_penalty:
+        description = f'You successfully abandoned the quest, losing {credibility_penalty!s} credibility.'
+    else:
+        description = 'You successfully abandoned the quest.'
+    
     return [
-        create_text_display('You successfully abandoned the quest.'),
+        create_text_display(description),
         create_separator(),
         create_row(
             create_button(

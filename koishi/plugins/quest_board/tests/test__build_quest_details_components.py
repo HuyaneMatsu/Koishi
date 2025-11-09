@@ -44,19 +44,6 @@ def _iter_options():
     linked_quest.completion_count = 3
     linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
     
-    quest_description = (
-        f'**Task: Submit {quest_amount_0/1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.**\n'
-        f'\n'
-        f'I am running low on some vegetables for soups.\n'
-        f'\nRequesting a basketful of Carrot.\n'
-        f'\n'
-        f'**Reward:**\n'
-        f'- **1000** {EMOJI__HEART_CURRENCY}\n'
-        f'- **5** credibility\n'
-        f'**Time available:**\n'
-        f'- **1 hour**'
-    )
-    
     yield (
         user_id,
         guild_id_0,
@@ -66,7 +53,20 @@ def _iter_options():
         None,
         1 << 10,
         [
-            create_text_display(quest_description),
+            create_text_display(
+                f'**Task: Submit {quest_amount_0 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.**\n'
+                f'\n'
+                f'I am running low on some vegetables for soups.\n'
+                f'\nRequesting a basketful of Carrot.\n'
+                f'\n'
+                f'**Reward:**\n'
+                f'- **1000** {EMOJI__HEART_CURRENCY}\n'
+                f'- **5** credibility\n'
+                f'**Time available:**\n'
+                f'- **1 hour**\n'
+                f'**Repeatable:**\n'
+                f'- **3** times'
+            ),
             create_separator(),
             create_row(
                 create_button(
@@ -100,7 +100,20 @@ def _iter_options():
         linked_quest,
         1 << 10,
         [
-            create_text_display(quest_description),
+            create_text_display(
+                f'**Task: Submit {quest_amount_0 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.**\n'
+                f'\n'
+                f'I am running low on some vegetables for soups.\n'
+                f'\nRequesting a basketful of Carrot.\n'
+                f'\n'
+                f'**Reward:**\n'
+                f'- **1000** {EMOJI__HEART_CURRENCY}\n'
+                f'- **5** credibility\n'
+                f'**Time available:**\n'
+                f'- **1 hour**\n'
+                f'**Repeatable:**\n'
+                f'- **3** times (0 left)'
+            ),
             create_separator(),
             create_row(
                 create_button(

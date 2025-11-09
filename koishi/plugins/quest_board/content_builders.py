@@ -474,7 +474,7 @@ def _produce_time_left(expires_at):
     yield '**'
 
 
-def produce_quest_detailed_description(quest, quest_template, user_level):
+def produce_quest_detailed_description(quest, quest_template, user_level, completion_count):
     """
     Produces a quest's detailed description.
     
@@ -490,6 +490,9 @@ def produce_quest_detailed_description(quest, quest_template, user_level):
     
     user_level : `int`
         The user's adventurer rank.
+    
+    completion_count : `int`
+        HHow much times was the quest already completed.
     
     Yields
     ------
@@ -514,6 +517,20 @@ def produce_quest_detailed_description(quest, quest_template, user_level):
     )
     yield '\n'
     yield from _produce_time_available(RelativeDelta(seconds = quest.duration))
+    
+    yield '\n**Repeatable:**\n- '
+    repeat_count = quest_template.repeat_count
+    if not repeat_count:
+        yield '**unlimited** times'
+    else:
+        yield '**'
+        yield str(repeat_count)
+        yield '** times'
+        
+        if completion_count:
+            yield ' ('
+            yield str(max(repeat_count - completion_count, 0))
+            yield ' left)'
 
 
 def produce_linked_quest_detailed_description(linked_quest, quest_template, user_level):

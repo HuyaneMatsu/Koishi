@@ -150,22 +150,27 @@ async def discord_stream_started(channel):
             image_url = None
             break
         
-        application_id = activity.application_id
-        if not application_id:
-            title = activity.name
-            image_url = None
+        while True:
+            application_id = activity.application_id
+            if not application_id:
+                title = activity.name
+                image_url = None
+                break
+            
+            applications = await Renes.application_get_all_detectable()
+            try:
+                application = APPLICATIONS[application_id]
+            except KeyError:
+                title = activity.name
+                image_url = None
+                break
+            
+            title = application.name
+            image_url = application.icon_url_as(size = 1024)
             break
         
-        applications = await Renes.application_get_all_detectable()
-        try:
-            application = APPLICATIONS[application_id]
-        except KeyError:
-            title = activity.name
-            image_url = None
-            break
-        
-        title = application.name
-        image_url = application.icon_url_as(size = 1024)
+        if (image_url is None):
+            image_url = activity.image_large_url_as(size = 1024)
         break
     
     # Description

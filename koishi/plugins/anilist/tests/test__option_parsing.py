@@ -1,6 +1,6 @@
 import vampytest
 from hata import StringSelectOption
-from hata.discord.component.component_metadata.constants import LABEL_LENGTH_MAX
+from hata.discord.component.component_metadata.constants import LABEL_LENGTH_MAX__BUTTON
 
 from ..keys import (
     KEY_CHARACTER_ID, KEY_CHARACTER_NAME, KEY_CHARACTER_NAME_FIRST, KEY_MEDIA_ID, KEY_MEDIA_NAME, KEY_MEDIA_NAME_ROMAJI
@@ -91,12 +91,12 @@ def _iter_options__parse_option_character():
     yield (
         {
             KEY_CHARACTER_NAME: {
-                KEY_CHARACTER_NAME_FIRST: 'a' * (LABEL_LENGTH_MAX + 1),
+                KEY_CHARACTER_NAME_FIRST: 'a' * (LABEL_LENGTH_MAX__BUTTON + 1),
             },
         },
         StringSelectOption(
             '-1',
-            'a' * (LABEL_LENGTH_MAX - 4) + ' ...',
+            'a' * (LABEL_LENGTH_MAX__BUTTON - 4) + ' ...',
         )
     )
 
@@ -140,12 +140,12 @@ def _iter_options__parse_option_media():
     yield (
         {
             KEY_MEDIA_NAME: {
-                KEY_MEDIA_NAME_ROMAJI: 'a' * (LABEL_LENGTH_MAX + 1),
+                KEY_MEDIA_NAME_ROMAJI: 'a' * (LABEL_LENGTH_MAX__BUTTON + 1),
             },
         },
         StringSelectOption(
             '-1',
-            'a' * (LABEL_LENGTH_MAX - 4) + ' ...',
+            'a' * (LABEL_LENGTH_MAX__BUTTON - 4) + ' ...',
         )
     )
 

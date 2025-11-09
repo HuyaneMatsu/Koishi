@@ -5,7 +5,6 @@ from math import floor
 
 from .constants import QUEST_TEMPLATES
 from .quest_batch import QuestBatch
-from .quest_types import QUEST_TYPE_ITEM_SUBMISSION
 from .quest import Quest
 from .utils import get_quest_template
 
@@ -130,50 +129,6 @@ def create_quest_from_template(random_number_generator, quest_template):
     )
 
 
-def filter_quest_templates_for_level(excluded_quest_template_ids, level):
-    """
-    Filters the quest templates for the given level.
-    
-    Parameters
-    ----------
-    excluded_quest_template_ids : `set<int>`
-        Quest template identifiers to exclude.
-    
-    level : `int`
-        Level to filter for.
-    
-    Returns
-    -------
-    quest_templates : ``list<QuestTemplate>``
-    """
-    return [
-        quest_template for quest_template in QUEST_TEMPLATES.values()
-        if quest_template.level == level and quest_template.id not in excluded_quest_template_ids
-    ]
-
-
-def filter_quest_templates(excluded_quest_template_ids, level_limit):
-    """
-    Filters the quest templates for the given condition.
-    
-    Parameters
-    ----------
-    excluded_quest_template_ids : `set<int>`
-        Quest template identifiers to exclude.
-    
-    level_limit : `int`
-        Level threshold to for selection.
-    
-    Returns
-    -------
-    quest_templates : ``list<QuestTemplate>``
-    """
-    return [
-        quest_template for quest_template in QUEST_TEMPLATES.values()
-        if quest_template.level <= level_limit and quest_template.id not in excluded_quest_template_ids
-    ]
-
-
 def select_random_quest_template(random_number_generator, quest_templates):
     """
     Selects a random quest template.
@@ -191,11 +146,44 @@ def select_random_quest_template(random_number_generator, quest_templates):
     return quest_templates[floor(random_number_generator.random() * len(quest_templates))]
 
 
+def _exclude_from_quest_template_pool(quest_template_pool, quest_template):
+    """
+    Excludes from the quest template pool.
+    
+    Parameters
+    ----------
+    quest_template_pool : `dict<str, QuestTemplate``
+        Quest template pool.
+    
+    quest_template : ``QuestTemplate``
+        Quest template and its mutually exclude quests to exclude.
+    """
+    try:
+        del quest_template_pool[quest_template.id]
+    except KeyError:
+        pass
+    
+    mutually_exclusive_with_ids = quest_template.mutually_exclusive_with_ids
+    if (mutually_exclusive_with_ids is not None):
+        for quest_template_id in mutually_exclusive_with_ids:
+            try:
+                del quest_template_pool[quest_template_id]
+            except KeyError:
+                pass
+
+
 def _quest_sort_key_getter(quest):
     """
     Gets query sort key for the given quest.
     
     Parameters
+    ----------
+    quest : ``Quest``
+        Quest to get sort key of.
+    
+    Returns
+    -------
+    sort_key : `(int, int, int)`
     """
     quest_template = get_quest_template(quest.template_id)
     if quest_template is None:
@@ -227,29 +215,42 @@ def create_quest_batch(guild_id, batch_id, level_limit, amount):
     quest_batch : ``QuestBatch``
     """
     random_number_generator = Random(guild_id ^ batch_id)
+    
+    # Collect available templates.
+    quest_template_pool = {}
+    
+    for quest_template in QUEST_TEMPLATES.values():
+        if quest_template.level > level_limit:
+            continue
+        
+        chance_in = quest_template.chance_in
+        chance_out = quest_template.chance_out
+        if (chance_in != chance_out) and (random_number_generator.random() * chance_out >= chance_in):
+            continue
+        
+        quest_template_pool[quest_template.id] = quest_template
+        continue
+    
     quests = []
-    excluded_quest_template_ids = set()
     
     level = 0
-    while level <= level_limit and len(quests) < amount:
-        quest_templates = filter_quest_templates_for_level(excluded_quest_template_ids, level)
+    while (level <= level_limit) and (len(quests) < amount):
+        quest_templates = [
+            quest_template for quest_template in quest_template_pool.values() if quest_template.level == level
+        ]
         level += 1
         if not quest_templates:
             continue
         
         quest_template = select_random_quest_template(random_number_generator, quest_templates)
-        excluded_quest_template_ids.add(quest_template.id)
+        _exclude_from_quest_template_pool(quest_template_pool, quest_template)
         quests.append(create_quest_from_template(random_number_generator, quest_template))
-        
     
     
-    while len(quests) < amount:
-        quest_templates = filter_quest_templates(excluded_quest_template_ids, level_limit)
-        if not quest_templates:
-            break
-        
+    while quest_template_pool and (len(quests) < amount):
+        quest_templates = [quest_template for quest_template in quest_template_pool.values()]
         quest_template = select_random_quest_template(random_number_generator, quest_templates)
-        excluded_quest_template_ids.add(quest_template.id)
+        _exclude_from_quest_template_pool(quest_template_pool, quest_template)
         quests.append(create_quest_from_template(random_number_generator, quest_template))
     
     

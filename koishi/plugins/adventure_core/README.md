@@ -49,22 +49,26 @@ Each action offers their own cost, battles and loot.
             - Scarlet onion (certain)
             - Scarlet onion (rare)
             - Frog (epic)
+            - Straw hat (mythical)
     - Gardening (Carrots)
         - Gardening
             - Carrot (certain)
             - Carrot (rare)
             - Frog (epic)
+            - Straw hat (mythical)
     - Gardening (Garlic)
         - Gardening
             - Garlic (certain)
             - Garlic (rare)
             - Frog (epic)
+            - Straw hat (mythical)
 
 - Human village vineyards
     - Vine growing
         - Gardening
             - Bluefrankish (certain)
             - Bluefrankish (rare)
+            - Straw hat (epic)
 
 - Ruins
     - Foraging
@@ -81,11 +85,15 @@ Each action offers their own cost, battles and loot.
 
 - Bamboo Forest
     - Foraging
-        - Foraging
+        - Foraging (bamboo)
+            - Bamboo shoot (certain)
+            - Bishophat (uncommon)
+            - Scissors (epic)
+        - Foraging (mushroom)
             - Devilcart oyster (basic)
             - Flykiller amanita (uncommon)
-            - Bishophat (rare)
-            - Scissors (epic)
+            - Bishophat (uncommon)
+            - Scissors (mythical)
         - Trapped
 
 - Hakugyokurou mansion
@@ -105,3 +113,12 @@ Each action offers their own cost, battles and loot.
             - Frog (basic)
             - Angelroot (basic)
             - Fishing rod (rare)
+
+- Magic forest
+    - Foraging
+        - Foraging
+            - Devilcart oyster (basic)
+            - Flykiller amanita (common)
+            - Bishophat (uncommon)
+            - Ruler (epic)
+            - Scissors (mythical)

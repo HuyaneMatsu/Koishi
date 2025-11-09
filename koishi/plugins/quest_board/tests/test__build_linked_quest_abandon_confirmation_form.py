@@ -41,6 +41,7 @@ def _iter_options():
         user_id,
         1 << 10,
         page_index,
+        20,
         InteractionForm(
             'Please confirm abandoning',
             [
@@ -58,6 +59,9 @@ def _iter_options():
                     f'**Time left:**\n'
                     f'- **59 minutes, 59 seconds**'
                 ),
+                create_text_display(
+                    '-# You will lose 20 credibility upon abandoning this quest.'
+                ),
             ],
             f'linked_quest.abandon.{user_id:x}.{page_index:x}.{linked_quest_entry_id_0:x}',
         ),
@@ -65,7 +69,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_linked_quest_abandon_confirmation_form(linked_quest, user_id, credibility, page_index):
+def test__build_linked_quest_abandon_confirmation_form(
+    linked_quest, user_id, credibility, page_index, credibility_penalty
+):
     """
     Tests whether ``build_linked_quest_abandon_confirmation_form`` works as intended.
     
@@ -80,6 +86,9 @@ def test__build_linked_quest_abandon_confirmation_form(linked_quest, user_id, cr
     credibility : `int`
         The user's  credibility.
     
+    credibility_penalty : `int`
+        Abandon credibility penalty.
+    
     Returns
     -------
     output : ``InteractionForm``
@@ -87,7 +96,7 @@ def test__build_linked_quest_abandon_confirmation_form(linked_quest, user_id, cr
     user_stats = UserStats(user_id)
     user_stats.set('credibility', credibility)
 
-    output = build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_index)
+    output = build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_index, credibility_penalty)
     
     vampytest.assert_instance(output, InteractionForm)
     

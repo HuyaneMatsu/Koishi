@@ -5,6 +5,8 @@ SHARED_TAGS_BANNED = (
     'huge_filesize',
     'ai-generated',
     'smoking',
+    'halloween',
+    'trick-or-treating',
 )
 
 SAFE_TAGS_BANNED = frozenset((

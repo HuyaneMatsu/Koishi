@@ -22,6 +22,8 @@ def _assert_fields_set(quest_template):
     vampytest.assert_instance(quest_template.amount_type, int)
     vampytest.assert_instance(quest_template.amount_variance_percentage_lower_threshold, int)
     vampytest.assert_instance(quest_template.amount_variance_percentage_upper_threshold, int)
+    vampytest.assert_instance(quest_template.chance_in, int)
+    vampytest.assert_instance(quest_template.chance_out, int)
     vampytest.assert_instance(quest_template.description, str, nullable = True)
     vampytest.assert_instance(quest_template.duration_base, int)
     vampytest.assert_instance(quest_template.duration_require_multiple_of, int)
@@ -30,6 +32,7 @@ def _assert_fields_set(quest_template):
     vampytest.assert_instance(quest_template.id, int)
     vampytest.assert_instance(quest_template.item_id, int)
     vampytest.assert_instance(quest_template.level, int)
+    vampytest.assert_instance(quest_template.mutually_exclusive_with_ids, tuple, nullable = True)
     vampytest.assert_instance(quest_template.repeat_count, int)
     vampytest.assert_instance(quest_template.requester_id, int)
     vampytest.assert_instance(quest_template.reward_balance_base, int)
@@ -49,6 +52,8 @@ def test__QuestTemplate__new():
     amount_type = AMOUNT_TYPE_COUNT
     amount_variance_percentage_lower_threshold = 75
     amount_variance_percentage_upper_threshold = 125
+    chance_in = 1
+    chance_out = 2
     description = 'Orin carted.'
     duration_base = 3600
     duration_require_multiple_of = 60
@@ -57,6 +62,10 @@ def test__QuestTemplate__new():
     quest_template_id = 9999
     item_id = ITEM_ID_GARLIC
     level = 2
+    mutually_exclusive_with_ids = (
+        9998,
+        9997,
+    )
     repeat_count = 3
     requester_id = ITEM_ID_MYSTIA
     reward_balance_base = 2000
@@ -68,6 +77,9 @@ def test__QuestTemplate__new():
 
     quest_template = QuestTemplate(
         quest_template_id,
+        mutually_exclusive_with_ids,
+        chance_in,
+        chance_out,
         description,
         quest_type,
         level,
@@ -100,6 +112,8 @@ def test__QuestTemplate__new():
     vampytest.assert_eq(
         quest_template.amount_variance_percentage_upper_threshold, amount_variance_percentage_upper_threshold
     )
+    vampytest.assert_eq(quest_template.chance_in, chance_in)
+    vampytest.assert_eq(quest_template.chance_out, chance_out)
     vampytest.assert_eq(quest_template.description, description)
     vampytest.assert_eq(quest_template.duration_base, duration_base)
     vampytest.assert_eq(quest_template.duration_require_multiple_of, duration_require_multiple_of)
@@ -112,6 +126,7 @@ def test__QuestTemplate__new():
     vampytest.assert_eq(quest_template.id, quest_template_id)
     vampytest.assert_eq(quest_template.item_id, item_id)
     vampytest.assert_eq(quest_template.level, level)
+    vampytest.assert_eq(quest_template.mutually_exclusive_with_ids, mutually_exclusive_with_ids)
     vampytest.assert_eq(quest_template.repeat_count, repeat_count)
     vampytest.assert_eq(quest_template.requester_id, requester_id)
     vampytest.assert_eq(quest_template.reward_balance_base, reward_balance_base)
@@ -137,6 +152,8 @@ def test__QuestTemplate__repr():
     amount_type = AMOUNT_TYPE_COUNT
     amount_variance_percentage_lower_threshold = 75
     amount_variance_percentage_upper_threshold = 125
+    chance_in = 1
+    chance_out = 2
     description = 'Orin carted.'
     duration_base = 3600
     duration_require_multiple_of = 60
@@ -145,6 +162,10 @@ def test__QuestTemplate__repr():
     quest_template_id = 9999
     item_id = ITEM_ID_GARLIC
     level = 2
+    mutually_exclusive_with_ids = (
+        9998,
+        9997,
+    )
     repeat_count = 3
     requester_id = ITEM_ID_MYSTIA
     reward_balance_base = 2000
@@ -156,6 +177,9 @@ def test__QuestTemplate__repr():
 
     quest_template = QuestTemplate(
         quest_template_id,
+        mutually_exclusive_with_ids,
+        chance_in,
+        chance_out,
         description,
         quest_type,
         level,

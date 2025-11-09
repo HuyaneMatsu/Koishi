@@ -459,6 +459,10 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('43.173.128.0'), 14), # Singapore - Tencent Building, Kejizhongyi Avenue
     IPFilterRule(*parse_ip('43.153.192.0'), 14), # Singapore - Asia Pacific Network Information Center, Pty. Ltd.
     IPFilterRule(*parse_ip('49.51.46.0'), 9), # Santaclara - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('43.155.128.0'), 14), # Seoul - Asia Pacific Network Information Center, Pty. Ltd.
+    IPFilterRule(*parse_ip('43.166.128.0'), 14), # Ashburn - ACEVILLE PTE.LTD.
+    IPFilterRule(*parse_ip('60.188.56.0'), 10), # Hangzhou - CHINANET-ZJ Taizhou node network
+    IPFilterRule(*parse_ip('220.181.80.0'), 12), # Beijing - CHINANET Beijing province network
     
     
     # The Lewin Group
@@ -505,36 +509,21 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('190.92.224.0'), 13), # Hongkong - HUAWEI CLOUDS
     IPFilterRule(*parse_ip('166.108.224.0'), 12), # Singapore - HUAWEI CLOUDS
     
-    # AT&T Enterprises, LLC
+    # robots.txt
+    IPFilterRule(*parse_ip('76.16.0.0'), 20), # Concord - Comcast Cable Communications, LLC
+    IPFilterRule(*parse_ip('70.63.64.0'), 14), # Charlotte - Charter Communications Inc
+    IPFilterRule(*parse_ip('138.246.0.0'), 16), # Munich - Leibniz-Rechenzentrum
+    IPFilterRule(*parse_ip('87.128.0.0'), 22), # Altenburg - Deutsche Telekom AG
+    IPFilterRule(*parse_ip('69.55.192.0'), 22), # Stanton - Wes-Tex Telecommunications LTD
+    IPFilterRule(*parse_ip('173.2.0.0'), 17), # Bridgeport - Optimum Online (Cablevision Systems)
     IPFilterRule(*parse_ip('71.136.128.0'), 15), # Arlington - AT&T Enterprises,
     IPFilterRule(*parse_ip('99.96.0.0'), 19), # Royalpalmbeach - AT&T Enterprises, LLC
-    
-    # Comcast Cable Communications, LLC 
-    IPFilterRule(*parse_ip('76.16.0.0'), 20), # Concord - Comcast Cable Communications, LLC
-    
-    # Charter Communications Inc
-    IPFilterRule(*parse_ip('70.63.64.0'), 14), # Charlotte - Charter Communications Inc
-    
-    # Leibniz-Rechenzentrum 
-    # "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36"
-    IPFilterRule(*parse_ip('138.246.0.0'), 16), # Munich - Leibniz-Rechenzentrum
-    
-    # Deutsche Telekom AG 
-    # "Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.4281.1601 Mobile Safari/537.36"
-    IPFilterRule(*parse_ip('87.128.0.0'), 22), # Altenburg - Deutsche Telekom AG
-    
-    # Wes-Tex Telecommunications LTD
-    IPFilterRule(*parse_ip('69.55.192.0'), 22), # Stanton - Wes-Tex Telecommunications LTD
     
     # TruffleHog
     IPFilterRule(*parse_ip('35.168.0.0'), 19), # Ashburn - Amazon.com, Inc.
     
     # wpbot
     IPFilterRule(*parse_ip('44.224.0.0'), 21), # Boardman - Amazon.com, Inc.
-    
-    # Claro NXT Telecomunicacoes Ltda 
-    # "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_3) AppleWebKit/537.36 (KHTML, like Gecko, Mediapartners-Google) Chrome/77.0.3865.99 Safari/537.36""
-    IPFilterRule(*parse_ip('186.207.240.0'), 12), # Agudos - Claro NXT Telecomunicacoes Ltda
     
     # Endless spam
     IPFilterRule(*parse_ip('177.121.208.0'), 12), # Sãopaulo - TIM S/A
@@ -670,8 +659,97 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('45.237.72.0'), 9), # Riodejaneiro - WESTLINK TECNOLOGIA E COMUNICACAO LTDA. - ME
     IPFilterRule(*parse_ip('45.235.208.0'), 9), # Gravataí - schossler e silva ltda - me
     IPFilterRule(*parse_ip('45.235.164.0'), 8), # Delta - MATHEUS SCANDIUZE NEHME
-    
-    
+    IPFilterRule(*parse_ip('45.236.106.0'), 8), # Quito - Eliana Vanessa Morocho Oña
+    IPFilterRule(*parse_ip('186.207.240.0'), 12), # Agudos - Claro NXT Telecomunicacoes Ltda
+    IPFilterRule(*parse_ip('181.51.34.0'), 9), # Villavicencio - Telmex Colombia S.A.
+    IPFilterRule(*parse_ip('212.1.64.0'), 14), # Zvenihorodka - Infocom's partner in Uman
+    IPFilterRule(*parse_ip('38.3.231.0'), 8), # Baghdad - Cogent Communications, LLC
+    IPFilterRule(*parse_ip('170.83.144.0'), 8), # Francisco Morato - ACESSANET TELECON LTDA
+    IPFilterRule(*parse_ip('113.176.107.0'), 8), # Danang - Vietnam Posts and Telecommunications Group
+    IPFilterRule(*parse_ip('123.18.208.0'), 12), # Hàgiang - Vietnam Posts and Telecommunications Group
+    IPFilterRule(*parse_ip('123.20.160.0'), 12), # Hochiminhcity - Vietnam Posts and Telecommunications Group
+    IPFilterRule(*parse_ip('14.191.136.0'), 11), # Bắcgiang - Vietnam Posts and Telecommunications Group
+    IPFilterRule(*parse_ip('14.235.96.0'), 12), # Caobằng - Vietnam Posts and Telecommunications Group
+    IPFilterRule(*parse_ip('169.0.0.0'), 17), # Capetown - AFRIHOST SP (PTY) LTD
+    IPFilterRule(*parse_ip('220.247.129.0'), 8), # Dhaka - Techno Asia Infotech Limited
+    IPFilterRule(*parse_ip('94.154.39.0'), 8), # Slobozhans'ke - Individual entrepreneur Dyachenko Valentina Ivanovna
+    IPFilterRule(*parse_ip('91.218.102.0'), 8), # Lys’va - Lukyanov Evgeniy Vladimirovich PE
+    IPFilterRule(*parse_ip('90.156.166.0'), 8), # Tashkent - Uzbektelekom Joint Stock Company
+    IPFilterRule(*parse_ip('84.54.84.0'), 9), # Tashkent - Uzbektelekom Joint Stock Company
+    IPFilterRule(*parse_ip('84.240.192.0'), 10), # Taraz - JSC Kazakhtelecom
+    IPFilterRule(*parse_ip('5.59.105.10'), 8), # Makinsk - TOO Telco Construction
+    IPFilterRule(*parse_ip('49.7.64.0'), 14), # Beijing - ChinaTelecom Group Beijing Ltd,Co
+    IPFilterRule(*parse_ip('49.7.0.0'), 14), # Beijing - ChinaTelecom Group Beijing Ltd,Co
+    IPFilterRule(*parse_ip('49.7.192.0'), 14), # Beijing - ChinaTelecom Group Beijing Ltd,Co
+    IPFilterRule(*parse_ip('49.7.128.0'), 14), # Beijing - ChinaTelecom Group Beijing Ltd,Co
+    IPFilterRule(*parse_ip('47.92.0.0'), 17), # Beijing - Aliyun Computing Co., LTD
+    IPFilterRule(*parse_ip('45.234.212.0'), 10), # Niterói - PRIME TELECOM BP LTDA
+    IPFilterRule(*parse_ip('45.234.136.0'), 10), # Palmas - PRONTO FIBRA LTDA
+    IPFilterRule(*parse_ip('45.233.76.0'), 10), # Novaiguaçu - Lopez Santos Sat Nit Telecomunicacoes LTDA
+    IPFilterRule(*parse_ip('45.233.39.0'), 8), # Sãobernardodocampo - satynet telecom ltda -me
+    IPFilterRule(*parse_ip('45.233.196.0'), 10), # Brasília - ALLREDE TELECOM LTDA
+    IPFilterRule(*parse_ip('1.52.190.0'), 8), # Haiphong - FPT Telecom
+    IPFilterRule(*parse_ip('109.161.180.0'), 9), # Arrifā‘ - ZAIN BAHRAIN B.S.C.
+    IPFilterRule(*parse_ip('106.38.176.0'), 12), # Beijing - CHINANET BEIJING PROVINCE NETWORK
+    IPFilterRule(*parse_ip('111.13.0.0'), 16), # Beijing - China Mobile Communications Corporation
+    IPFilterRule(*parse_ip('114.250.0.0'), 14), # Beijing - China Unicom Beijing province network
+    IPFilterRule(*parse_ip('113.173.96.0'), 12), # Hochiminhcity - Vietnam Posts and Telecommunications Group
+    IPFilterRule(*parse_ip('39.156.128.0'), 14), # Beijing - China Mobile Communications Corporation
+    IPFilterRule(*parse_ip('45.233.115.0'), 8), # Santoandré - NKM RAMOS INFORMATICA LTDA
+    IPFilterRule(*parse_ip('45.230.96.0'), 9), # Recife - JARDIMNET SERVICOS DE INFORMATICA E REDES
+    IPFilterRule(*parse_ip('45.230.8.0'), 8), # Recife - Gimenez Pedro Santiago (Clorindaconectada)
+    IPFilterRule(*parse_ip('45.229.6.0'), 8), # Celica - MENA CORNEJO HECTOR ELIAS (TECMESH)
+    IPFilterRule(*parse_ip('45.229.153.0'), 8), # Araçuaí - IBNET TELECOM LTDA
+    IPFilterRule(*parse_ip('45.228.47.0'), 8), # Cumaru - PROVEDORES SERVICO EQUIPAMENTO NIVE NET EIRELI
+    IPFilterRule(*parse_ip('45.228.188.0'), 9), # Oberá - OBERCOM S.R.L.
+    IPFilterRule(*parse_ip('45.228.165.0'), 8), # Santoantôniodoslopes - FLASHNET EMPREENDIMENTOS LTDA
+    IPFilterRule(*parse_ip('45.227.216.0'), 10), # Pilar - ZE.NET WISP SRL
+    IPFilterRule(*parse_ip('45.227.115.0'), 8), # São josédonorte - ULTRANET RS
+    IPFilterRule(*parse_ip('45.226.216.0'), 9), # Gaspar - Ideal Network Informatica Ltda ME
+    IPFilterRule(*parse_ip('45.225.168.0'), 9), # Ribeirãopreto - Nicnet S.A.
+    IPFilterRule(*parse_ip('45.221.12.0'), 10), # Bethlehem - BETHNET cc
+    IPFilterRule(*parse_ip('45.188.88.0'), 9), # Manaus - IMPERTECH Telecom
+    IPFilterRule(*parse_ip('45.186.215.0'), 8), # Vilavelha - Brasil Telecom LTDA
+    IPFilterRule(*parse_ip('45.184.78.0'), 8), # Jequié - RONILSON SILVA SANTANA
+    IPFilterRule(*parse_ip('45.183.88.0'), 10), # Simões - JECONIAS ARAUJO SILVA - EPP
+    IPFilterRule(*parse_ip('45.182.42.0'), 8), # Capeladesantana - FIBERLINK NETWORK
+    IPFilterRule(*parse_ip('45.181.38.0'), 9), # Sãojosédospinhais - STALKER ENGENHARIA EIRELI
+    IPFilterRule(*parse_ip('45.181.134.0'), 9), # Balneáriopinhal - LUC FIBRA
+    IPFilterRule(*parse_ip('45.180.91.0'), 8), # Balneáriopinhal - OPTIMUS FIBER TELECOM LTDA
+    IPFilterRule(*parse_ip('45.179.132.0'), 10), # Vilavelha - SUPERNETMAIS TELECOMUNICAÇÕES LTDA
+    IPFilterRule(*parse_ip('45.177.210.0'), 8), # Sant'anadolivramento - Fronteira Internet
+    IPFilterRule(*parse_ip('45.177.204.0'), 10), # Katueté - RODRIGUEZ PAEZ HUGO HERNAN (TELNET PARAGUAY)
+    IPFilterRule(*parse_ip('45.175.143.0'), 8), # Formosa - BOCA ROJA S.A.
+    IPFilterRule(*parse_ip('45.172.182.0'), 9), # Embu-Guaçu - MUVNET TELECOM
+    IPFilterRule(*parse_ip('45.170.113.0'), 8), # Sãogonçalo - S.P. TELECOM LTDA
+    IPFilterRule(*parse_ip('45.169.219.0'), 8), # Manoelvitorino - Imbuira Telecom Rubens G Sampaio
+    IPFilterRule(*parse_ip('45.168.236.0'), 8), # Sanjuandelrío - Wantelco SAS de CV
+    IPFilterRule(*parse_ip('45.168.168.0'), 9), # Joaíma - WEBLINK TECNOLOGIA LTDA
+    IPFilterRule(*parse_ip('45.168.157.0'), 8), # Tavares - MIO TELECOM LTDA
+    IPFilterRule(*parse_ip('45.167.222.0'), 8), # Chascomús - MAGDALENA VIRTUAL S.A.
+    IPFilterRule(*parse_ip('45.167.188.0'), 10), # Barradoribeiro - CENTRO SUL TELECOM INFORMATICAEIRELIME
+    IPFilterRule(*parse_ip('45.166.244.0'), 8), # Trêslagoas - NIPPON FIBRA OTICA
+    IPFilterRule(*parse_ip('45.166.188.0'), 9), # Novogama - Falcon Net
+    IPFilterRule(*parse_ip('45.163.200.0'), 9), # Ibirité - Turbonet Telecom Ltda ME
+    IPFilterRule(*parse_ip('45.163.174.0'), 8), # Sãojosédoriopreto - RG Correa Telecomunicaçoes
+    IPFilterRule(*parse_ip('45.162.57.0'), 8), # Caxias - L.L Informatica LTDA - ME
+    IPFilterRule(*parse_ip('45.160.192.0'), 9), # Paço dolumiar - Estrelas Internet Ltda
+    IPFilterRule(*parse_ip('45.143.30.0'), 8), # Mosul - SOFTLINK LTD
+    IPFilterRule(*parse_ip('43.246.220.0'), 8), # Karachi - Ebone Network (PVT.) Limited
+    IPFilterRule(*parse_ip('41.56.192.0'), 14), # Capetown - RAIN GROUP HOLDINGS (PTY) LTD
+    IPFilterRule(*parse_ip('41.237.64.0'), 13), # Cairo - TE-AS
+    IPFilterRule(*parse_ip('41.214.0.0'), 15), # Dakar - SONATEL Societe Nationale Des Telecommunications Du Senegal
+    IPFilterRule(*parse_ip('41.193.244.0'), 8), # Durban - Vox Telecommunications PTY Ltd
+    IPFilterRule(*parse_ip('41.132.0.0'), 14), # Durban - Dimensiondata Broadband Delegated to WebAfrica
+    IPFilterRule(*parse_ip('41.109.0.0'), 14), # Blida - Telecom Algeria
+    IPFilterRule(*parse_ip('39.45.128.0'), 14), # Lahore - Pakistan Telecommuication company limited
+    IPFilterRule(*parse_ip('38.92.20.0'), 9), # Güigüe - INVERSIONES ABDO 77, C.A.
+    IPFilterRule(*parse_ip('38.56.81.0'), 8), # Goiânia - SOMOS FIBRA
+    IPFilterRule(*parse_ip('38.41.22.0'), 9), # Caracas - MDS Telecom LLC
+    IPFilterRule(*parse_ip('95.32.64.0'), 12), # Voronezh - PJSC Rostelecom
+    IPFilterRule(*parse_ip('95.27.32.0'), 9), # Perm - PJSC Vimpelcom
+    IPFilterRule(*parse_ip('95.26.120.0'), 10), # Saratov - PJSC Vimpelcom
+
 ])
 
 

@@ -2353,7 +2353,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### chen-orin-lick-0000
+### chen-orin-handhold-lick-0000
 
 - Creator: **masanaga (tsukasa)**
 - Editor: *none*
@@ -2969,7 +2969,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **ori (yellow duckling)**
 - Editor: *none*
-- Characters: **Clownpiece**, **Hecatia Lapislazuli**
+- Characters: **Clownpiece**, **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -4859,7 +4859,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **neold**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**, **Junko**
+- Characters: **Junko**, **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -5012,7 +5012,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **nekolina**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**, **Junko**
+- Characters: **Junko**, **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -5066,7 +5066,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **nekolina**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**, **Junko**
+- Characters: **Junko**, **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -5192,7 +5192,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **frogsnake**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**, **Junko**
+- Characters: **Junko**, **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -5237,7 +5237,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **springarashi02**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**, **Junko**
+- Characters: **Junko**, **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -6659,7 +6659,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **makuwauri**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**, **Junko**
+- Characters: **Junko**, **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -7163,7 +7163,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **himuhino**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**
+- Characters: **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -8216,7 +8216,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **ichirugi**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**
+- Characters: **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -9152,7 +9152,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **ichirugi**
 - Editor: *none*
-- Characters: **Clownpiece**, **Hecatia Lapislazuli**, **Junko**
+- Characters: **Clownpiece**, **Junko**, **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -9791,7 +9791,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **ichirugi**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**
+- Characters: **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -9800,7 +9800,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **ichirugi**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**
+- Characters: **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -10025,7 +10025,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **ichirugi**
 - Editor: *none*
-- Characters: **Clownpiece**, **Hecatia Lapislazuli**
+- Characters: **Clownpiece**, **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -10295,7 +10295,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **ichirugi**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**, **Junko**
+- Characters: **Junko**, **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -10466,7 +10466,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **ichirugi**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**, **Junko**
+- Characters: **Junko**, **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -10583,7 +10583,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **ichirugi**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**
+- Characters: **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -11105,7 +11105,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **ichirugi**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**
+- Characters: **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -12428,7 +12428,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 - Creator: **Unya**
 - Editor: *none*
-- Characters: **Hecatia Lapislazuli**, **Himekaidou Hatate**
+- Characters: **Himekaidou Hatate**, **Lapislazuli Hecatia**
 - Source: **Touhou**
 
 ---
@@ -12757,7 +12757,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### chiruno-remilia-feed_self-lick-0000
+### chiruno-remilia-feed_self-0000
 
 - Creator: **Matsu**
 - Editor: *none*

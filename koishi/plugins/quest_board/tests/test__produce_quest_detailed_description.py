@@ -23,6 +23,7 @@ def _iter_options():
         ),
         quest_template,
         1,
+        2,
         (
             f'**Task: Submit 20 {BUILTIN_EMOJIS["peach"]} Peach to Mystia.**\n'
             f'\n'
@@ -32,13 +33,15 @@ def _iter_options():
             f'- **1000** {EMOJI__HEART_CURRENCY}\n'
             f'- **10** credibility\n'
             f'**Time available:**\n'
-            f'- **1 day**'
+            f'- **1 day**\n'
+            f'**Repeatable:**\n'
+            f'- **3** times (1 left)'
         ),
     )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__produce_quest_detailed_description(quest, quest_template, user_level):
+def test__produce_quest_detailed_description(quest, quest_template, user_level, completion_count):
     """
     Tests whether ``produce_quest_detailed_description`` works as intended.
     
@@ -53,11 +56,14 @@ def test__produce_quest_detailed_description(quest, quest_template, user_level):
     user_level : `int`
         The user's adventurer rank.
     
+    completion_count : `int`
+        HHow much times was the quest already completed.
+    
     Returns
     -------
     output : `str`
     """
-    output = [*produce_quest_detailed_description(quest, quest_template, user_level)]
+    output = [*produce_quest_detailed_description(quest, quest_template, user_level, completion_count)]
     
     for element in output:
         vampytest.assert_instance(element, str)

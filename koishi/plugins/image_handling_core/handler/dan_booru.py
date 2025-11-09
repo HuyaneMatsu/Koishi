@@ -384,20 +384,30 @@ async def get_autocompletion_suggestions_dan_booru(query, tags_banned):
     suggestions = None
     
     for element in response_json:
-        tag_suggestion = element['tag']
+        element_type = element['type']
         
-        value = tag_suggestion['name']
-        if value in BLACKLISTED_TAGS:
+        if element_type == 'tag-word':
+            tag_suggestion = element['tag']
+            
+            value = tag_suggestion['name']
+            if value in BLACKLISTED_TAGS:
+                continue
+            
+            if (tags_banned is not None) and (value in tags_banned):
+                continue
+            
+            count = tag_suggestion['post_count']
+            name = f'{value} ({count})'
+        
+        elif element_type == 'static':
+            name = value = element['value']
+        
+        else:
             continue
-        
-        if (tags_banned is not None) and (value in tags_banned):
-            continue
-        
-        count = tag_suggestion['post_count']
         
         if suggestions is None:
             suggestions = []
         
-        suggestions.append((f'{value} ({count})', value))
+        suggestions.append((name, value))
     
     return suggestions

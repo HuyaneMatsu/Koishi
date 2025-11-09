@@ -1,13 +1,73 @@
+### 2025-11-09
+
+- Fix `Junko - Angleroot` quest not showing up.
+- Fix `/guild quest-board`'s `View my quests` redirected to the same page index instead of `0`. (2vio2vieevie)
+- Fix `/danbooru` did not handle static tags. (chaos3326)
+- Include abandon penalty in abandon confirmation form. (chaos3326)
+- Include abandon penalty in abandon success response. (2vio2vieevie)
+- Decrease abandon penalty depending on quest completion state. (chaos3326)
+- Include repeatability in quest details view. (pichu0357)
+- Some quests are now mutually exclusive, and will not show up in the same quest board.
+- Some quests are now not guaranteed to be part of the quest board generation.
+- Improve Renes discord stream notification by also considering the activity's own large icon in selection. (AH only)
+- Add `orange-juice-achievement-parse` message context command. (KW only)  
+- The snipe commands have been completely reworked. Now it allows adding emojis, stickers, soundboard sounds to other
+    guilds, and to remove ones from other guilds as well. Add a new `/snipe add` sub-command.
+
+- Add new items:
+    - Ribbon bow
+    - Straw hat
+    - Ruler
+    - Bamboo shoot (chaos3326)
+
+- Add new quests:
+    - Koishi - Angelroot
+    - Kokoro - Scissors
+    - Koishi - Bishophat
+    - Koishi - Ruler
+    - Yukari - Ruler
+    - Yuuka - Straw hat
+    - Koishi - Garlic
+    - Mystia - Bamboo shoot
+
+- Add new location & target:
+    - Magic forest - Foraging. (chaos3326)
+
+- Balance adventure locations & targets:
+    - Bamboo forest - foraging -> Increase Bishophat chance (5% -> 10%). Decrease bishophat scale time from 300s -> 20s.
+        Mushroom pool now has 15% to be selected. Add a new bamboo shoot pool with 85% chance.
+    - Human village outskirts - gardening (all) -> Add straw hat as mythical loot.
+    - Human village vineyards - gardening (all) -> Add straw hat as epic loot.
+
+- balance items:
+    - Frog -> Value 46 -> 69, weight 24 -> 48 grams.
+    - Scarlet onion -> Value 19 -> 23.
+
+- Balance quests:
+    - Sakuya - Strawberry -> Reward balance 2500 -> 2300.
+    - Mystia - Peach -> Required items 20 -> 30. Reward balance 800 -> 2400.
+    - Sakuya - Blueberry -> Reward balance 1050 -> 1350, credibility 10 -> 20.
+    - Mystia - Devilcart -> Reward balance 4600 -> 2300.
+    - Sakuya - Devilcart -> Reward balance 4000 -> 2000.
+    - Sakuya - Bluefrankish -> Reward balance 15000 -> 16000, duration 7 -> 10 days, credibility 40 -> 50.
+    - Mystia - Carrot -> Reward balance 800 -> 2700.
+    - Chiruno - Frog -> Required amount 10 -> 20 (but decrease range), reward balance 1150 -> 3400.
+    - Dai - Frog -> Required amount 40 -> 50 (but decrease range), reward balance 3700 -> 6900.
+    - Tewi - Bishophat -> Level 3 -> 4, duration 10 -> 14 days.
+    - Mystia - Garlic -> Repeatability 3 -> 1.
+    - Mystia - Scarlet onion -> Reward balance 1700 -> 1800.
+
+
 ### 2025-10-28
 
 - Fix credibility was rewarded at the location were the quest was completed at instead of where the quest was from.
 - Fix setting preferred image source and preferred client could fail to respond (since last update).
-- Fix `/todo edit` not responding. (Since September).
+- Fix `/todo edit` not responding. (Since september).
 - When abandoning a `linked quest` and the quest is still alive, prompt confirmation form. (superior_mac)
 - Make `/user quests` display expires quests with a red `Details` button.
-- Make `/adventure depart` confirmation is now a form, so they do not forget to confirm it.
-- Make `linked quest details`'s abandon button always red (2vio2vieevie).
-- When cancelling an `ädventure`, prompt a confirmation form.
+- Make `/adventure depart` confirmation a form, so people do not forget to confirm it.
+- Make `linked quest details`'s abandon button always red. (2vio2vieevie)
+- When cancelling an `adventure`, prompt a confirmation form.
 - Fix `/user quests` producing components with same `custom_id`,
     when displaying the "same" completed quests belonging to different guilds. (chaos3326)
 - Make `/user quests` allow repeating quests of other guilds.
@@ -19,6 +79,7 @@
 - Fix a typo in Dai - Frog quest. (huhbuh)
 - Improve Renes discord stream notification. (AH only)
 - Add new `filter-ip-logs` cli command.
+- When completing a quest, it was not updated in the database.
 
 - Balance adventure locations & targets:
     - Bamboo forest - foraging -> Decrease Devilcart chance (80% - 60%). Increase Flykiller chance (10% - 20%),

@@ -13,8 +13,8 @@ from ..item_core import get_item_nullable
 from ..quest_core import (
     LINKED_QUEST_COMPLETION_STATE_ACTIVE, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest,
     calculate_received_reward_credibility, add_linked_quest, delete_linked_quest, get_current_batch_id,
-    get_guild_adventurer_rank_info, get_linked_quest_listing, get_quest_template, get_user_adventurer_rank_info,
-    update_linked_quest
+    get_guild_adventurer_rank_info, get_linked_quest_abandon_credibility_penalty, get_linked_quest_completion_ratio,
+    get_linked_quest_listing, get_quest_template, get_user_adventurer_rank_info, update_linked_quest
 )
 from ..user_balance import get_user_balance
 from ..user_stats_core import get_user_stats
@@ -636,7 +636,7 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
     )
 
 
-async def _linked_quest_abandon(linked_quest):
+async def _linked_quest_abandon(linked_quest, user_stats, credibility_penalty):
     """
     Abandons the linked quest.
     Reduces the user's credibility count for the amount.
@@ -647,6 +647,12 @@ async def _linked_quest_abandon(linked_quest):
     ----------
     linked_quest : ``LinkedQuest``
         The linked quest to abandon.
+    
+    user_stats : ``UserStats``
+        The user's stats.
+    
+    credibility_penalty : `int`
+        Abandon credibility penalty.
     """
     if linked_quest.batch_id != get_current_batch_id():
         await delete_linked_quest(linked_quest)
@@ -654,24 +660,9 @@ async def _linked_quest_abandon(linked_quest):
         linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
         await update_linked_quest(linked_quest)
     
-    user_stats = await get_user_stats(linked_quest.user_id)
-    reward_credibility = linked_quest.reward_credibility
-    if reward_credibility:
-        quest_template = get_quest_template(linked_quest.template_id)
-        user_reward_credibility = (
-            (
-                calculate_received_reward_credibility(
-                    reward_credibility,
-                    (0 if quest_template is None else quest_template.level),
-                    get_user_adventurer_rank_info(user_stats.credibility).level,
-                ) << 1
-            ) - (
-                reward_credibility << 2
-            )
-        )
-        user_stats.set('credibility', max(user_stats.credibility + user_reward_credibility, 0))
+    if credibility_penalty:
+        user_stats.set('credibility', max(user_stats.credibility - credibility_penalty, 0))
         await user_stats.save()
-    
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN)
@@ -716,12 +707,22 @@ async def linked_quest_abandon_invoke(client, interaction_event, user_id, page_i
             error_message = 'You do not have such a quest.'
             break
         
+        user_stats = await get_user_stats(user_id)
+        
+        quest_completion_ratio = get_linked_quest_completion_ratio(linked_quest)
+        quest_template = get_quest_template(linked_quest.template_id)
+        credibility_penalty = get_linked_quest_abandon_credibility_penalty(
+            linked_quest.reward_credibility,
+            (0 if quest_template is None else quest_template.level),
+            get_user_adventurer_rank_info(user_stats.credibility).level,
+            quest_completion_ratio,
+        )
+        
         # Ask the user for confirmation if the quest is still alive.
         if (linked_quest.expires_at > DateTime.now(tz = TimeZone.utc)):
-            user_stats = await get_user_stats(linked_quest.user_id)
             await client.interaction_form_send(
                 interaction_event,
-                build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_index),
+                build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_index, credibility_penalty),
             )
             return
         
@@ -730,10 +731,12 @@ async def linked_quest_abandon_invoke(client, interaction_event, user_id, page_i
             interaction_event,
             False,
         )
-        await _linked_quest_abandon(linked_quest)
+        await _linked_quest_abandon(linked_quest, user_stats, credibility_penalty)
         await client.interaction_response_message_edit(
             interaction_event,
-            components = build_linked_quest_abandon_success_components(user_id, page_index, interaction_event.guild_id),
+            components = build_linked_quest_abandon_success_components(
+                user_id, page_index, interaction_event.guild_id, credibility_penalty
+            ),
         )
         return
     
@@ -794,10 +797,23 @@ async def linked_quest_abandon_confirm(client, interaction_event, user_id, page_
             error_message = 'You do not have such a quest.'
             break
         
-        await _linked_quest_abandon(linked_quest)
+        user_stats = await get_user_stats(user_id)
+        
+        quest_completion_ratio = get_linked_quest_completion_ratio(linked_quest)
+        quest_template = get_quest_template(linked_quest.template_id)
+        credibility_penalty = get_linked_quest_abandon_credibility_penalty(
+            linked_quest.reward_credibility,
+            (0 if quest_template is None else quest_template.level),
+            get_user_adventurer_rank_info(user_stats.credibility).level,
+            quest_completion_ratio,
+        )
+        
+        await _linked_quest_abandon(linked_quest, user_stats, credibility_penalty)
         await client.interaction_response_message_edit(
             interaction_event,
-            components = build_linked_quest_abandon_success_components(user_id, page_index, interaction_event.guild_id),
+            components = build_linked_quest_abandon_success_components(
+                user_id, page_index, interaction_event.guild_id, credibility_penalty
+            ),
         )
         return
     

@@ -547,7 +547,7 @@ async def message_pin(client, message):
     return await bypass_request(
         client,
         METHOD_PUT,
-        f'{API_ENDPOINT}/channels/{channel_id}/pins/{message_id}',
+        f'{API_ENDPOINT}/channels/{channel_id}/messages/pins/{message_id}',
     )
 
 
@@ -557,7 +557,7 @@ async def message_unpin(client, message):
     return await bypass_request(
         client,
         METHOD_DELETE,
-        f'{API_ENDPOINT}/channels/{channel_id}/pins/{message_id}',
+        f'{API_ENDPOINT}/channels/{channel_id}/messages/pins/{message_id}',
     )
 
 
@@ -566,7 +566,7 @@ async def message_pinneds(client, channel):
     return await bypass_request(
         client,
         METHOD_GET,
-        f'{API_ENDPOINT}/channels/{channel_id}/pins',
+        f'{API_ENDPOINT}/channels/{channel_id}/messages/pins',
     )
 
 
@@ -8855,3 +8855,78 @@ async def rate_limit_test_0236(client, message):
             await RLT.send('I need admin permission to complete this command.')
         
         await Task(KOKORO, guild_activity_overview_edit(client, guild.id, 'Flandre\'s basement')).wait_for_completion()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0237(client, message):
+    """
+    Pins a message.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0237') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        message = await client.message_create(message.channel, 'hey')
+        await message_pin(client, message)
+        await client.message_delete(message)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0238(client, message):
+    """
+    Unpins a message.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0238') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        message = await client.message_create(message.channel, 'hey')
+        await message_unpin(client, message)
+        await client.message_delete(message)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0239(client, message):
+    """
+    Pins and unpins a message.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0238') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        message = await client.message_create(message.channel, 'hey')
+        await message_pin(client, message)
+        await message_unpin(client, message)
+        await client.message_delete(message)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0240(client, message):
+    """
+    Gets the pinned messages.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0241') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        await message_pinneds(client, message.channel)
