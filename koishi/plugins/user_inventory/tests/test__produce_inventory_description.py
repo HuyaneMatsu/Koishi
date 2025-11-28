@@ -3,7 +3,7 @@ import vampytest
 from ...inventory_core import ItemEntry
 from ...item_core import ITEM_ID_PEACH, ITEM_ID_STRAWBERRY, get_item
 
-from ..embed_builders import produce_inventory_description
+from ..content_building import produce_inventory_description
 
 
 def _iter_options():

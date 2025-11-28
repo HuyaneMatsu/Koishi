@@ -1,8 +1,54 @@
+### 2025-11-28
+
+- Fix `Kokoro - Scissor` quest could require more items than intended. (huhbuh)
+- Fix wording `Mystia - Bamboo shoot`. (huhbuh)
+- Fix wording in `Scissors` description. (huhbuh)
+- Fix `Ruler` item giving stats wrongly.
+- Fix `/snipe message` failing if the message has nothing to snipe in it. (Since last update)
+- Fix bamboo foraging bamboo action was not foraging type. (chaos3326)
+- Fix adventure cancellation while departing returned the user instantly.
+- Add a new `ip_range_detector` cli command.
+- Fix `/guild info` did not use the user's local names.
+- Fix `/heart-event` and `/daily-event` commands.
+- Rewrite `/guild info` command & add a new `boost perks` option.
+- Add new `/user allocations` command.
+- Allow the user to participate in multiple games at once.
+- Rewrite `/user inventory` command & now it includes a `refresh button`.
+- Rewrite `/user discard-item` command & now it includes the item's emoji if available.
+
+- Add new items:
+    - Plushie bear (2vio2vieevie)
+    - King's new clothes (remi495)
+    - Maid dress (remi495)
+    - Elegant dress of the Chief maid
+    - Torn out wing of the Unknown oven
+    - Bunny suit (remi495)
+    - Electrostatical discharge protective coat (remi495)
+    - Big braids of the Hell cat
+    - Fiery chariot of the Red eyed kasha
+    - Roguish dress of the Corpse voyager
+
+
+- Balance quests:
+    - Koishi - Garlic -> Reward Balance 22000 -> 6500.
+    - Alice - Flykiller Amanita -> Reward balance 1000 - 1300, requirement 700 grams -> 3 count. (remi495)
+    - Yuuka - Straw hat -> Duration 14 days -> 28 days.
+    - Koishi - Ruler -> Duration 14 days -> 28 days.
+    - Kokoro - Scissor -> Duration 14 days -> 28 days.
+    - Sakuya - Fishing rod -> Duration 7 days -> 14 days.
+    - Yukari - Ruler -> Duration 7 days -> 14 days.
+
+- Balance adventure locations & targets:
+    - Human village vineyards - gardening (all) -> Add straw hat as mythical loot.
+    - Ruins - foraging -> Increase bishophat chance 1 in 80 -> 1 in 40.
+    - Ruins - foraging -> Add ribbon bow mythical loot.
+    - Ruins - foraging -> Add plushie bear mythical loot.
+
 ### 2025-11-09
 
 - Fix `Junko - Angleroot` quest not showing up.
 - Fix `/guild quest-board`'s `View my quests` redirected to the same page index instead of `0`. (2vio2vieevie)
-- Fix `/danbooru` did not handle static tags. (chaos3326)
+- Fix `/nsfwbooru` did not handle static tags. (chaos3326)
 - Include abandon penalty in abandon confirmation form. (chaos3326)
 - Include abandon penalty in abandon success response. (2vio2vieevie)
 - Decrease abandon penalty depending on quest completion state. (chaos3326)
@@ -39,7 +85,7 @@
     - Human village outskirts - gardening (all) -> Add straw hat as mythical loot.
     - Human village vineyards - gardening (all) -> Add straw hat as epic loot.
 
-- balance items:
+- Balance items:
     - Frog -> Value 46 -> 69, weight 24 -> 48 grams.
     - Scarlet onion -> Value 19 -> 23.
 

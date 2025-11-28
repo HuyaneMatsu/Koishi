@@ -1,55 +1,17 @@
-__all__ = ('get_inventory_page_response',)
+__all__ = ()
 
-from hata.ext.slash import InteractionResponse
 
 from ...bots import FEATURE_CLIENTS
 
 from ..inventory_core import get_inventory
 from ..user_stats_core import get_user_stats
 
-from .component_builders import build_component_switch_page
+from .component_building import build_inventory_view_components
 from .constants import (
     CUSTOM_ID_INVENTORY_PAGE_CLOSE, CUSTOM_ID_INVENTORY_PAGE_DISABLED_DECREMENT,
     CUSTOM_ID_INVENTORY_PAGE_DISABLED_INCREMENT, CUSTOM_ID_INVENTORY_PAGE_N_PATTERN,
 )
-from .embed_builders import build_inventory_embed
 from .paging import get_inventory_page
-
-
-async def get_inventory_page_response(user_id, sort_by, sort_order, page_index):
-    """
-    Gets inventory page response for the given parameters.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    user_id : `int`
-        The respective user's identifier.
-    
-    sort_by : `int`
-        Identifier to determine how item entries should be sorted.
-    
-    sort_order : `int`
-        Identifier to determine sorting order.
-    
-    page_index : `int`
-        The current page's index.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
-    """
-    stats = await get_user_stats(user_id)
-    inventory = await get_inventory(user_id)
-    item_entries, page_count = get_inventory_page(inventory, sort_by, sort_order, page_index)
-    
-    return InteractionResponse(
-        components = build_component_switch_page(sort_by, sort_order, page_index, page_count),
-        embed = build_inventory_embed(
-            item_entries, page_index, sort_by, sort_order, inventory.weight, stats.stats_calculated.extra_inventory
-        ),
-    )
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_INVENTORY_PAGE_CLOSE)
@@ -88,7 +50,7 @@ async def inventory_disabled():
 @FEATURE_CLIENTS.interactions(
     custom_id = CUSTOM_ID_INVENTORY_PAGE_N_PATTERN,
 )
-async def inventory_page_n(event, sort_by, sort_order, page_index):
+async def inventory_page_n(client, interaction_event, user_id, sort_by, sort_order, page_index):
     """
     Handles disabled inventory components.
     
@@ -96,8 +58,14 @@ async def inventory_page_n(event, sort_by, sort_order, page_index):
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    client : ``Client``
+        Client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
         The received interaction event.
+    
+    user_id : `str`
+        The user's identifier as a hexadecimal integer.
     
     sort_by : `str`
         Identifier to determine how item entries should be sorted.
@@ -115,15 +83,38 @@ async def inventory_page_n(event, sort_by, sort_order, page_index):
     ------
     acknowledge / response : `None` / ``InteractionResponse``
     """
-    if (event.user is not event.message.interaction.user):
-        return
-    
     try:
+        user_id = int(user_id, 16)
         sort_by = int(sort_by, 16)
         sort_order = int(sort_order, 16)
         page_index = int(page_index, 16)
     except ValueError:
         return
     
-    yield
-    yield await get_inventory_page_response(event.user_id, sort_by, sort_order, page_index)
+    user = interaction_event.user
+    if user.id != user_id:
+        return
+    
+    await client.interaction_component_acknowledge(
+        interaction_event,
+        False,
+    )
+    
+    stats = await get_user_stats(user_id)
+    inventory = await get_inventory(user_id)
+    item_entries, page_count = get_inventory_page(inventory, sort_by, sort_order, page_index)
+    
+    await client.interaction_response_message_edit(
+        interaction_event,
+        components = build_inventory_view_components(
+            user,
+            interaction_event.guild_id,
+            item_entries,
+            sort_by,
+            sort_order,
+            page_index,
+            page_count,
+            inventory.weight,
+            stats.stats_calculated.extra_inventory,
+        ),
+    )

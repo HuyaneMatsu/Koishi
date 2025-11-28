@@ -1,0 +1,18 @@
+__all__ = ()
+
+from datetime import timedelta as TimeDelta
+
+
+EVENT_MAX_DURATION = TimeDelta(hours = 24)
+EVENT_MIN_DURATION = TimeDelta(minutes = 30)
+EVENT_HEART_MIN_AMOUNT = 50
+EVENT_HEART_MAX_AMOUNT = 3000
+EVENT_DAILY_MIN_AMOUNT = 1
+EVENT_DAILY_MAX_AMOUNT = 7
+
+EVENT_MODE_HEART = 1
+EVENT_MODE_STREAK = 2
+
+STEP_INTERVAL = 60.0
+
+SESSIONS = {}

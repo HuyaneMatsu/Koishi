@@ -16,7 +16,7 @@ else:
 
 
 try:
-    from ..guild_info import GUILD_INFO_FIELD_DEFAULT, GUILD_INFO_FIELDS, get_guild_info_response 
+    from ..guild_info import command_guild_info
 except ImportError:
     if not MARISA_MODE:
         raise
@@ -27,7 +27,7 @@ else:
 
 
 try:
-    from ..quest_board import build_guild_quest_board_response
+    from ..quest_board import command_guild_quest_board
 except ImportError:
     if not MARISA_MODE:
         raise
@@ -47,33 +47,7 @@ GUILD_COMMANDS = FEATURE_CLIENTS.interactions(
 
 
 if GUILD_INFO_AVAILABLE:
-    @GUILD_COMMANDS.interactions(name = 'info')
-    async def guild_info_slash_command(
-        client,
-        event,
-        field: (GUILD_INFO_FIELDS, 'Which fields should I show?') = GUILD_INFO_FIELD_DEFAULT,
-    ):
-        """
-        Shows some information about the guild.
-        
-        This function is a coroutine.
-        
-        Parameters
-        ----------
-        client : ``Client``
-            The client who received the event.
-        
-        event : ``InteractionEvent``
-            The received event.
-        
-        field : `str` = `GUILD_INFO_FIELD_DEFAULT`, Optional
-            The field's name to show.
-        
-        Returns
-        -------
-        response : ``InteractionResponse``
-        """
-        return await get_guild_info_response(client, event, field)
+    GUILD_COMMANDS.interactions(command_guild_info, name = 'info')
 
 
 if GUILD_ICON_AVAILABLE:
@@ -107,27 +81,4 @@ if GUILD_ICON_AVAILABLE:
 
 
 if GUILD_QUEST_BOARD_AVAILABLE:
-    @GUILD_COMMANDS.interactions(name = 'quest-board')
-    async def guild_quest_board_command(
-        event,
-    ):
-        """
-        Shows the guild's quest board.
-        
-        This function is a coroutine generator.
-        
-        Parameters
-        ----------
-        event : ``InteractionEvent``
-            The received event.
-        
-        Yields
-        -------
-        acknowledge / response : `None` / ``InteractionResponse``
-        """
-        guild = event.guild
-        if (guild is None):
-            return
-        
-        yield
-        yield (await build_guild_quest_board_response(guild, event.user_id))
+    GUILD_COMMANDS.interactions(command_guild_quest_board, name = 'quest-board')

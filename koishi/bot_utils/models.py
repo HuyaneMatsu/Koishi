@@ -93,7 +93,7 @@ if (DB_ENGINE is not None):
         
         # Balance
         balance = Column(Int64, default = 0, nullable = False)
-        allocated = Column(Int64, default = 0, nullable = False)
+        allocations = Column(Binary(), nullable = True)
         
         # Streak
         streak = Column(Int32, default = 0, nullable = False)

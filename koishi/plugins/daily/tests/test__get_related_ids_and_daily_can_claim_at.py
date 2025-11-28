@@ -27,10 +27,10 @@ def _iter_options():
     user_2 = User.precreate(user_id_2, name = 'remilia')
     
     user_balance_1 = UserBalance(user_id_1)
-    user_balance_1.set('daily_can_claim_at', related_daily_can_claim_at_1)
+    user_balance_1.set_daily_can_claim_at(related_daily_can_claim_at_1)
     
     user_balance_2 = UserBalance(user_id_2)
-    user_balance_2.set('daily_can_claim_at', related_daily_can_claim_at_2)
+    user_balance_2.set_daily_can_claim_at(related_daily_can_claim_at_2)
     
     
     yield (

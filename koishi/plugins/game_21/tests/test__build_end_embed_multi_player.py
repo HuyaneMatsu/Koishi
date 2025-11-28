@@ -6,10 +6,11 @@ from ....bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY
 from ..constants import CARD_NUMBERS, CARD_TYPES
 from ..player import Player
 from ..rendering import build_end_embed_multi_player
-from ..session import Session
+from ..session import Game21Session
 
 
 def _iter_options():
+    session_id = 13333
     user_0 = User.precreate(202408060003, name = 'Remilia')
     user_1 = User.precreate(202408060004, name = 'Sakuya')
     guild = Guild.precreate(202408060005)
@@ -21,7 +22,7 @@ def _iter_options():
     player_1 = Player(user_1, InteractionEvent.precreate(202408060007))
     player_1.hand.add_card(6)
     
-    session = Session(guild, 1000, InteractionEvent.precreate(202408060008))
+    session = Game21Session(session_id, guild, 1000, InteractionEvent.precreate(202408060008))
     
     yield (
         session,
@@ -95,7 +96,7 @@ def test__build_end_embed_multi_player(session, players, winners, losers):
 
     Parameters
     ----------
-    session : ``Session``
+    session : ``Game21Session``
         Game session.
     players : `list<Player>`
         All player.

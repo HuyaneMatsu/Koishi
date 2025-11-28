@@ -69,12 +69,15 @@ Each action offers their own cost, battles and loot.
             - Bluefrankish (certain)
             - Bluefrankish (rare)
             - Straw hat (epic)
+            - Scissors (mythical)
 
 - Ruins
     - Foraging
         - Foraging
             - Strawberry (basic)
             - Bishophat (rare)
+            - Ribbon bow (mythical)
+            - Plushie bear (mythical)
 
 - Eientei mansion
     - Gardening

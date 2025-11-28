@@ -37,7 +37,7 @@ RULES = [
             'Most ideals are inherently not wrong, but there are people who like to push them too far. '
             'Children should be the smith of their fate, but they are the core target of propaganda and of social '
             'pressuring. Therefore we do not allow tools used for these (neither in chat and in visible user profiles) '
-            'which are: flags or idols, icons, parades, identifiable clothings, '
+            'which are: flags or idols, icons, keywords, parades, identifiable clothings, '
             'ideals that give abusive rights to a group of people over others.'
         )
     ), (
@@ -46,5 +46,8 @@ RULES = [
     ), (
         'Deep frying fumos',
         lambda: 'Fumo frying and other related unethical actions are bannable offenses.',
+    ), (
+        'Orin abuse',
+        lambda: 'You will be fed to Rumia.',
     ),
 ]

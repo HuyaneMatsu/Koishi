@@ -22,10 +22,10 @@ def _iter_options():
         [player_0, player_1, player_2, player_3],
         1000,
         [
-            (user_id_0, 1000, 0.0, True), 
-            (user_id_1, 1000, 0.0, True), 
-            (user_id_2, 1000, 0.0, True),
-            (user_id_3, 1000, 0.0, True),
+            (user_id_0, 1000, 0.0),
+            (user_id_1, 1000, 0.0),
+            (user_id_2, 1000, 0.0),
+            (user_id_3, 1000, 0.0),
         ],
     )
 
@@ -34,10 +34,10 @@ def _iter_options():
         [player_2, player_3],
         1000,
         [
-            (user_id_0, 1000,  1.0, True), 
-            (user_id_1, 1000,  1.0, True), 
-            (user_id_2, 1000, -1.0, True),
-            (user_id_3, 1000, -1.0, True),
+            (user_id_0, 1000,  1.0),
+            (user_id_1, 1000,  1.0),
+            (user_id_2, 1000, -1.0),
+            (user_id_3, 1000, -1.0),
         ],
     )
 
@@ -46,10 +46,10 @@ def _iter_options():
         [player_0, player_2, player_3],
         1000,
         [
-            (user_id_1, 1000,  3.0, True), 
-            (user_id_0, 1000, -1.0, True), 
-            (user_id_2, 1000, -1.0, True),
-            (user_id_3, 1000, -1.0, True),
+            (user_id_1, 1000,  3.0),
+            (user_id_0, 1000, -1.0),
+            (user_id_2, 1000, -1.0),
+            (user_id_3, 1000, -1.0),
         ],
     )
 
@@ -70,7 +70,7 @@ def test__get_balance_distribution(winners, losers, amount):
     
     Returns
     -------
-    output : `list<(int, int, int, bool)>`
+    output : `list<(int, int, int)>`
     """
     output = get_balance_distribution(winners, losers, amount)
     vampytest.assert_instance(output, list)

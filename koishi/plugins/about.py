@@ -95,7 +95,7 @@ def iter_about_components(client):
     )
     
     yield create_button(
-        'Support server',
+        'Support guild',
          url = INVITE__SUPPORT.url,
     )
     

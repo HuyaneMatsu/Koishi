@@ -3,21 +3,28 @@ __all__ = ()
 from hata import BUILTIN_EMOJIS
 
 from ..item_modifier_core import (
-    MODIFIER_ID__BUTCHERING, MODIFIER_ID__FISHING, MODIFIER_ID__FORAGING, MODIFIER_ID__GARDENING,
-    MODIFIER_ID__STAT_BEDROOM, MODIFIER_ID__STAT_CHARM, MODIFIER_ID__STAT_CUTENESS, MODIFIER_ID__STAT_HOUSEWIFE,
-    MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT, MODIFIER_KIND__PERCENT, Modifier, construct_modifier_type
+    MODIFIER_ID__BUTCHERING, MODIFIER_ID__ENERGY, MODIFIER_ID__FISHING, MODIFIER_ID__FORAGING, MODIFIER_ID__GARDENING,
+    MODIFIER_ID__HEALTH, MODIFIER_ID__HUNTING,
+    MODIFIER_ID__INVENTORY, MODIFIER_ID__MOVEMENT, MODIFIER_ID__STAT_BEDROOM, MODIFIER_ID__STAT_CHARM,
+    MODIFIER_ID__STAT_CUTENESS, MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT,
+    MODIFIER_KIND__PERCENT, Modifier, construct_modifier_type
 )
 
 from .constants import ITEMS
-from .flags import ITEM_FLAG_EDIBLE, ITEM_FLAG_HEAD, ITEM_FLAG_NPC, ITEM_FLAG_WEAPON
+from .flags import ITEM_FLAG_COSTUME, ITEM_FLAG_EDIBLE, ITEM_FLAG_HEAD, ITEM_FLAG_NPC, ITEM_FLAG_WEAPON
 from .item import Item
 from .item_ids import (
-    ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH,
-    ITEM_ID_CARROT, ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FISHING_ROD,
-    ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_KOISHI, ITEM_ID_KOKORO,
-    ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_ORIN, ITEM_ID_PEACH, ITEM_ID_RIBBON_BOW, ITEM_ID_RULER, ITEM_ID_SAKUYA,
-    ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAW_HAT, ITEM_ID_STRAWBERRY, ITEM_ID_TEWI, ITEM_ID_YUKARI,
-    ITEM_ID_YUUKA
+    ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BIG_BRAIDS_OF_THE_HELL_CAT, ITEM_ID_BISHOPHAT,
+    ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH,
+    ITEM_ID_BUNNY_SUIT,
+    ITEM_ID_CARROT, ITEM_ID_ROGUISH_DRESS_OF_THE_CORPSE_VOYAGER, ITEM_ID_ELEGANT_DRESS_OF_THE_CHIEF_MAID,
+    ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DEVILCART_OYSTER,
+    ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT, ITEM_ID_FIERY_CHARIOT_OF_THE_RED_EYED_KASHA, ITEM_ID_FISHING_ROD,
+    ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_KINGS_NEW_CLOTHES, ITEM_ID_KOISHI,
+    ITEM_ID_KOKORO, ITEM_ID_MAID_DRESS, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_ORIN, ITEM_ID_PEACH,
+    ITEM_ID_RIBBON_BOW, ITEM_ID_RULER,
+    ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAW_HAT, ITEM_ID_STRAWBERRY,
+    ITEM_ID_PLUSHIE_BEAR, ITEM_ID_TORN_OUT_WING_OF_THE_UNKNOWN_OVEN, ITEM_ID_TEWI, ITEM_ID_YUKARI, ITEM_ID_YUUKA
 )
 
 
@@ -123,6 +130,7 @@ ITEM_FISHING_ROD = ITEMS[ITEM_ID_FISHING_ROD] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +1),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +1),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +1),
+        
         Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__PERCENT), -20),
     ),
 )
@@ -281,7 +289,7 @@ ITEM_SCISSORS = ITEMS[ITEM_ID_SCISSORS] = Item(
     'Scissors',
     BUILTIN_EMOJIS['scissors'],
     (
-        'A hand operation shearing tool.\n'
+        'A hand operated shearing tool.\n'
         'It has blades pivoted in a way that when the handles are pulled into each other, '
         'the sharpened edges on the other end of the tool slide into each other.\n'
         'They are meant to be used for cutting various thin materials. '
@@ -490,10 +498,9 @@ ITEM_RULER = ITEMS[ITEM_ID_RULER] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +3),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +1),
         
-        Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_ID__BUTCHERING), +10),
+        Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__PERCENT), +10),
         Modifier(construct_modifier_type(MODIFIER_ID__GARDENING, MODIFIER_KIND__PERCENT), +5),
         Modifier(construct_modifier_type(MODIFIER_ID__FORAGING, MODIFIER_KIND__PERCENT), +25),
-        Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__PERCENT), +15),
     ),
 )
 
@@ -541,28 +548,233 @@ ITEM_BAMBOO_SHOOT = ITEMS[ITEM_ID_BAMBOO_SHOOT] = Item(
 )
 
 
-# Some ideas:
-"""
-Big braids of the hell cat
+ITEM_PLUSHIE_BEAR = ITEMS[ITEM_ID_PLUSHIE_BEAR] = Item(
+    ITEM_ID_PLUSHIE_BEAR,
+    'Plushie bear',
+    BUILTIN_EMOJIS['teddy_bear'],
+    (
+        'A stuffed toy made out of fabric, which embodies a friendly bear. '
+        'It is an interesting duality that while plushie bears are a cute and popular creature, '
+        'real bears are highly dangerous.'
+    ),
+    ITEM_FLAG_WEAPON,
+    875, # value (hearts)
+    125, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +5),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +3),
+    ),
+)
 
-A pair of fiery red braids with the length of a tail.
-They appear irresistible not only to the men, but the women and children too
-Experts state that they are the key to eternal happiness.
 
-Charm +2
-Cuteness skills +2
-Cuteness + 10%
-Loyalty +2
+ITEM_KINGS_NEW_CLOTHES = ITEMS[ITEM_ID_KINGS_NEW_CLOTHES] = Item(
+    ITEM_ID_KINGS_NEW_CLOTHES,
+    'King\'s new clothes',
+    BUILTIN_EMOJIS['crown'],
+    (
+        'The new clothes of the kings, who is not willing to appear in front of his people twice in the same clothes. '
+        'Made out of truth-seering fabric, that can be visible only by honest and blameless people. '
+        'Stupid, liar or evil cannot see it.'
+    ),
+    ITEM_FLAG_COSTUME,
+    400, # value (hearts)
+    0, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +1),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__MOVEMENT, MODIFIER_KIND__PERCENT), +4),
+    ),
+)
 
-Fiery chariot
 
-A burning cart that kashas travel the world with.
-They are borrowing corpses that were not yet buried, or of who have lived a sinful live.
-Carrying their soul to hell.
+ITEM_MAID_DRESS = ITEMS[ITEM_ID_MAID_DRESS] = Item(
+    ITEM_ID_MAID_DRESS,
+    'Maid dress',
+    BUILTIN_EMOJIS['stopwatch'],
+    (
+        'A servants\'s dress, that may be either conservative or revealing depending on the purpose. '
+        'It is usually a black dress with white trim and a skirt above knee length. Worn with an apron, '
+        'dark stockings and black shoes.'
+    ),
+    ITEM_FLAG_COSTUME,
+    3500, # value (hearts)
+    2400, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__PERCENT), +7),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__PERCENT), +7),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__BUTCHERING, MODIFIER_KIND__PERCENT), +10),
+    ),
+)
 
-Housewife +2
-Bedroom skills +2
-Inventory +5300
-Inventory +200%
 
-"""
+ITEM_ELEGANT_DRESS_OF_THE_CHIEF_MAID = ITEMS[ITEM_ID_ELEGANT_DRESS_OF_THE_CHIEF_MAID] = Item(
+    ITEM_ID_ELEGANT_DRESS_OF_THE_CHIEF_MAID,
+    'Elegant dress of the Chief maid',
+    BUILTIN_EMOJIS['stopwatch'],
+    (
+        'Perfect fit for a mansion\'s senior maid who directorly reports to her mistress. '
+        'A blue dress with white trim and a laced skirt above knee length. Worn with an ruffled apron, '
+        'dark stockings and black shoes. '
+        'Always keeping knifes in reach within the garter ... who knows when they may be needed.'
+    ),
+    ITEM_FLAG_COSTUME,
+    104000, # value (hearts)
+    3200, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__PERCENT), +10),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__PERCENT), +10),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__INVENTORY, MODIFIER_KIND__FLAT), +800),
+        Modifier(construct_modifier_type(MODIFIER_ID__MOVEMENT, MODIFIER_KIND__FLAT), +50),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__PERCENT), +10),
+        Modifier(construct_modifier_type(MODIFIER_ID__BUTCHERING, MODIFIER_KIND__PERCENT), +10),
+        Modifier(construct_modifier_type(MODIFIER_ID__HUNTING, MODIFIER_KIND__PERCENT), +20),
+    ),
+)
+
+
+ITEM_TORN_OUT_WING_OF_THE_UNKNOWN_OVEN = ITEMS[ITEM_ID_TORN_OUT_WING_OF_THE_UNKNOWN_OVEN] = Item(
+    ITEM_ID_TORN_OUT_WING_OF_THE_UNKNOWN_OVEN,
+    'Torn out wing of the Unknown oven',
+    BUILTIN_EMOJIS['fishing_pole_and_fish'],
+    (
+        'A single wing, appearing to made out of some kind of metal, with 8 prims attached to it along. '
+        'Its shape may be interpreted as a fishing rod, only a cord and a hook is missing.'
+    ),
+    ITEM_FLAG_WEAPON,
+    1380000, # value (hearts)
+    3650, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__PERCENT), +4),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__PERCENT), +9),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__PERCENT), +5),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__PERCENT), -40),
+    ),
+)
+
+
+ITEM_BUNNY_SUIT = ITEMS[ITEM_ID_BUNNY_SUIT] = Item(
+    ITEM_ID_BUNNY_SUIT,
+    'Bunny suit',
+    BUILTIN_EMOJIS['necktie'],
+    (
+        'A one piece swimsuit like tightly laced corsets cinching in the waist with its legs cut higher on the hips. '
+        'Wearing stockings or fishnets on the legs connecting with the corset, '
+        'and a white puff tail at the back as a cherry on the cake.'
+    ),
+    ITEM_FLAG_COSTUME,
+    2500, # value (hearts)
+    1600, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +5),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), -2),
+    ),
+)
+
+
+ITEM_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT = ITEMS[ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT] = Item(
+    ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT,
+    'Electrostatical discharge protective coat',
+    BUILTIN_EMOJIS['lab_coat'],
+    (
+        'A white coat and a glove in which everyone can look like a scientist or as a math teacher. '
+        'Made out of a fabric that does not allow static energy to be accumulated, '
+        'preventing it to be discharged onto electrical components when contact is made.'
+    ),
+    ITEM_FLAG_COSTUME,
+    3200, # value (hearts)
+    400, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +3),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +3),
+    ),
+)
+
+
+ITEM_BIG_BRAIDS_OF_THE_HELL_CAT = ITEMS[ITEM_ID_BIG_BRAIDS_OF_THE_HELL_CAT] = Item(
+    ITEM_ID_BIG_BRAIDS_OF_THE_HELL_CAT,
+    'Big braids of the Hell cat',
+    BUILTIN_EMOJIS['black_cat'],
+    (
+        'A pair of fiery red braids with the length of a tail. '
+        'Tied by black bows which fit perfectly with black cat ears. '
+        'They appear irresistible for both humans and the youkais too. '
+        'Some say they are the key for eternal happiness.'
+    ),
+    ITEM_FLAG_HEAD,
+    187000, # value (hearts)
+    4600, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__PERCENT), +20),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__PERCENT), +20),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +3),
+    ),
+)
+
+
+ITEM_FIERY_CHARIOT_OF_THE_RED_EYED_KASHA = ITEMS[ITEM_ID_FIERY_CHARIOT_OF_THE_RED_EYED_KASHA] = Item(
+    ITEM_ID_FIERY_CHARIOT_OF_THE_RED_EYED_KASHA,
+    'Fiery chariot of the Red eyed kasha',
+    BUILTIN_EMOJIS['shopping_cart'],
+    (
+        'A wheelbarrow with burning wheels that kashas travel the world with. '
+        'They are borrowing corpses that were not yet buried, '
+        'or even digging up the ones of who have lived a sinful live. '
+        'Carrying their soul to hell, torturing the sinful bodies on the way.'
+    ),
+    ITEM_FLAG_WEAPON,
+    124000, # value (hearts)
+    28000, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +4),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__PERCENT), +10),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__INVENTORY, MODIFIER_KIND__FLAT), +56000),
+        Modifier(construct_modifier_type(MODIFIER_ID__INVENTORY, MODIFIER_KIND__PERCENT), +70),
+    ),
+)
+
+
+ITEM_ROGUISH_DRESS_OF_THE_CORPSE_VOYAGER = ITEMS[ITEM_ID_ROGUISH_DRESS_OF_THE_CORPSE_VOYAGER] = Item(
+    ITEM_ID_ROGUISH_DRESS_OF_THE_CORPSE_VOYAGER,
+    'Roguish dress of the Corpse voyager',
+    BUILTIN_EMOJIS['black_cat'],
+    (
+        'A dark dress with green frills, red ribbons tying it at the sleeve and at the neck. '
+        'With an additional corset making sure that the body posture is correct in long travels. '
+        'The overall composition is perfect to give the impression of a stormy night.'
+    ),
+    ITEM_FLAG_COSTUME,
+    164000, # value (hearts)
+    3200, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__PERCENT), +5),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__PERCENT), +10),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__MOVEMENT, MODIFIER_KIND__FLAT), +20),
+        Modifier(construct_modifier_type(MODIFIER_ID__MOVEMENT, MODIFIER_KIND__PERCENT), +6),
+        Modifier(construct_modifier_type(MODIFIER_ID__HEALTH, MODIFIER_KIND__PERCENT), +10),
+        Modifier(construct_modifier_type(MODIFIER_ID__ENERGY, MODIFIER_KIND__PERCENT), +10),
+    ),
+)

@@ -73,11 +73,11 @@ async def claim_daily_for_yourself(client, interaction_event):
     streak_new += 1
     balance_new = user_balance.balance + received
     
-    user_balance.set('balance', balance_new)
-    user_balance.set('streak', streak_new)
-    user_balance.set('daily_can_claim_at', now + DAILY_INTERVAL)
-    user_balance.set('count_daily_self', user_balance.count_daily_self + 1)
-    user_balance.set('daily_reminded', False)
+    user_balance.modify_balance_by(received)
+    user_balance.set_streak(streak_new)
+    user_balance.set_daily_can_claim_at(now + DAILY_INTERVAL)
+    user_balance.increment_count_daily_self()
+    user_balance.set_daily_reminded(False)
     
     send_response_task = Task(
         KOKORO,
@@ -181,13 +181,13 @@ async def claim_daily_for_other(client, interaction_event, extender_relationship
     streak_new += 1
     relationship_value_increase = 1 + floor(received * 0.01)
     
-    source_user_balance.set('count_daily_for_related', source_user_balance.count_daily_for_related + 1)
+    source_user_balance.increment_count_daily_for_related()
     
-    target_user_balance.set('balance', balance_new)
-    target_user_balance.set('daily_can_claim_at', now + DAILY_INTERVAL)
-    target_user_balance.set('streak', streak_new)
-    target_user_balance.set('count_daily_by_related', target_user_balance.count_daily_by_related + 1)
-    target_user_balance.set('daily_reminded', False)
+    target_user_balance.modify_balance_by(received)
+    target_user_balance.set_streak(streak_new)
+    target_user_balance.set_daily_can_claim_at(now + DAILY_INTERVAL)
+    target_user_balance.increment_count_daily_by_related()
+    target_user_balance.set_daily_reminded(False)
     
     send_response_task = Task(
         KOKORO,

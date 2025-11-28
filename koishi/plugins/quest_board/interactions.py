@@ -1,8 +1,6 @@
-__all__ = ('build_guild_quest_board_response', 'build_user_quests_response')
+__all__ = ()
 
 from datetime import datetime as DateTime, timezone as TimeZone
-
-from hata.ext.slash import InteractionResponse
 
 from ...bots import FEATURE_CLIENTS
 
@@ -16,7 +14,7 @@ from ..quest_core import (
     get_guild_adventurer_rank_info, get_linked_quest_abandon_credibility_penalty, get_linked_quest_completion_ratio,
     get_linked_quest_listing, get_quest_template, get_user_adventurer_rank_info, update_linked_quest
 )
-from ..user_balance import get_user_balance
+from ..user_balance import get_user_balance, save_user_balance
 from ..user_stats_core import get_user_stats
 
 from .component_building import (
@@ -41,60 +39,6 @@ from .helpers import (
     get_linked_quest_for_deduplication, get_linked_quest_with_entry_id, get_quest_with_template_id, get_submit_amount
 )
 
-
-async def build_guild_quest_board_response(guild, user_id):
-    """
-    Builds guild quest board response.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    guild : ``Guild``
-        Respective guild.
-    
-    user_id : `int`
-        The user who invoked the interaction.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
-    """
-    guild_stats = await get_guild_stats(guild.id)
-    user_stats = await get_user_stats(user_id)
-    linked_quest_listing = await get_linked_quest_listing(user_id)
-    
-    return InteractionResponse(
-        components = build_quest_board_quest_listing_components(
-            guild, guild_stats, user_stats, linked_quest_listing, 0
-        ),
-    )
-
-
-async def build_user_quests_response(user, guild_id):
-    """
-    Builds guild quest board response.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    user : ``ClientUserbase``
-        The respective user.
-    
-    guild_id : `int`
-        The guild identifier the command is called from.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
-    """
-    linked_quest_listing = await get_linked_quest_listing(user.id)
-    user_stats = await get_user_stats(user.id)
-    
-    return InteractionResponse(
-        components = build_linked_quests_listing_components(user, guild_id, user_stats, linked_quest_listing, 0)
-    )
 
 
 @FEATURE_CLIENTS.interactions(
@@ -572,8 +516,8 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
         
         else:
             user_balance = await get_user_balance(user_id)
-            user_balance.set('balance', user_balance.balance + linked_quest.reward_balance)
-            await user_balance.save()
+            user_balance.modify_relationship_value_by(linked_quest.reward_balance)
+            await save_user_balance(user_balance)
             
             reward_credibility = linked_quest.reward_credibility
             

@@ -1,4 +1,3 @@
-from .checks import *
 from .commands import *
 from .constants import *
 from .deck import *
@@ -10,10 +9,10 @@ from .player_runner import *
 from .queries import *
 from .rendering import *
 from .session import *
+from .user_balance_allocation_hook import *
 
 
 __all__ = (
-    *checks.__all__,
     *commands.__all__,
     *constants.__all__,
     *deck.__all__,
@@ -25,4 +24,5 @@ __all__ = (
     *queries.__all__,
     *rendering.__all__,
     *session.__all__,
+    *user_balance_allocation_hook.__all__,
 )

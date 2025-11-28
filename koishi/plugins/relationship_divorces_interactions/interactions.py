@@ -93,7 +93,7 @@ async def relationship_divorces_decrement_invoke_other(client, event, target_use
     
     yield
     target_user = await get_user(target_user_id)
-    yield await relationship_divorces_decrement_invoke_other_question(client, event, target_user)
+    yield await relationship_divorces_decrement_invoke_other_question(client, event, target_user, None)
 
 
 async def relationship_divorces_decrement_invoke_self_question(client, event):
@@ -120,7 +120,7 @@ async def relationship_divorces_decrement_invoke_self_question(client, event):
     check_no_relationship_divorces_self(relationship_divorces)
     
     required_balance = get_relationship_divorce_reduction_required_balance(user_id, relationship_divorces)
-    available_balance = user_balance.balance - user_balance.allocated
+    available_balance = user_balance.balance - user_balance.get_cumulative_allocated_balance()
     
     check_sufficient_balance_self(required_balance, available_balance, relationship_divorces)
     
@@ -164,7 +164,7 @@ async def relationship_divorces_decrement_invoke_other_question(client, event, t
     source_user_balance = await get_user_balance(source_user.id)
     
     required_balance = get_relationship_divorce_reduction_required_balance(target_user.id, relationship_divorces)
-    available_balance = source_user_balance.balance - source_user_balance.allocated
+    available_balance = source_user_balance.balance - source_user_balance.get_cumulative_allocated_balance()
     
     check_sufficient_balance_other(
         required_balance, available_balance, relationship_divorces, target_user, event.guild_id
@@ -241,7 +241,7 @@ async def relationship_divorces_decrement_confirm_self(event):
         raise
     
     required_balance = get_relationship_divorce_reduction_required_balance(user_id, relationship_divorces)
-    available_balance = user_balance.balance - user_balance.allocated
+    available_balance = user_balance.balance - user_balance.get_cumulative_allocated_balance()
     
     
     try:
@@ -250,8 +250,8 @@ async def relationship_divorces_decrement_confirm_self(event):
         exception.response.abort = False
         raise
     
-    user_balance.set('balance', user_balance.balance - required_balance)
-    user_balance.set('relationship_divorces', relationship_divorces -1)
+    user_balance.modify_balance_by(-required_balance)
+    user_balance.decrement_relationship_divorces()
     
     await deepen_and_boost_relationship(user_balance, None, None, required_balance, save_source_user_balance = 2)
     
@@ -318,7 +318,7 @@ async def relationship_divorces_decrement_confirm_other(client, event, target_us
         raise
     
     required_balance = get_relationship_divorce_reduction_required_balance(target_user.id, relationship_divorces)
-    available_balance = source_user_balance.balance - source_user_balance.allocated
+    available_balance = source_user_balance.balance - source_user_balance.get_cumulative_allocated_balance()
     
     try:
         check_sufficient_balance_other(
@@ -328,8 +328,8 @@ async def relationship_divorces_decrement_confirm_other(client, event, target_us
         exception.response.abort = False
         raise
     
-    source_user_balance.set('balance', source_user_balance.balance - required_balance)
-    target_user_balance.set('relationship_divorces', relationship_divorces - 1)
+    source_user_balance.modify_balance_by(-required_balance)
+    target_user_balance.decrement_relationship_divorces()
     
     await deepen_and_boost_relationship(
         source_user_balance,

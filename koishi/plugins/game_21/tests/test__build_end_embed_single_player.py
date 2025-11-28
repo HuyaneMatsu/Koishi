@@ -6,11 +6,12 @@ from ....bot_utils.constants import COLOR__GAMBLING
 
 from ..player import Player
 from ..rendering import build_end_embed_single_player
-from ..session import Session
+from ..session import Game21Session
 
 
 def _iter_options():
-    session = Session(None, 1000, InteractionEvent.precreate(202408040050))
+    session_id = 12333
+    session = Game21Session(session_id, None, 1000, InteractionEvent.precreate(202408040050))
     player_user = Player(User.precreate(202408040051, name = 'Remilia'), InteractionEvent.precreate(202408040052))
     player_bot = Player(User.precreate(202408040053, name = 'Chiruno'), InteractionEvent.precreate(202408040054))
     player_win = 0
@@ -49,7 +50,7 @@ def test__build_end_embed_single_player(session, player_user, player_bot, player
     
     Parameters
     ----------
-    session : ``Session``
+    session : ``Game21Session``
         Game session.
     player_user : ``Player``
         The user's player.

@@ -5,7 +5,7 @@ from hata import Permission, ClientUserBase
 from ...bot_utils.constants import GUILD__SUPPORT
 from ...bots import FEATURE_CLIENTS
 
-from ..user_balance import get_user_balance
+from ..user_balance import get_user_balance, save_user_balance
 
 from .embed_builders import build_success_embed
 
@@ -63,11 +63,11 @@ async def take(
     user_balance = await get_user_balance(target_user.id)
     
     balance = target_user.balance
-    amount = min(balance - user_balance.allocated, amount)
+    amount = min(balance - user_balance.get_cumulative_allocated_balance(), amount)
     
     if amount:
-        user_balance.set('balance', balance - amount)
-        await user_balance.save()
+        user_balance.modify_balance_by(-amount)
+        await save_user_balance(user_balance)
     
     await client.interaction_response_message_edit(
         interaction_event,

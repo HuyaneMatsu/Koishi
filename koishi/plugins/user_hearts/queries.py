@@ -27,10 +27,6 @@ async def get_generic_heart_fields(target_user_id):
     """
     user_balance = await get_user_balance(target_user_id)
     
-    if user_balance.allocated and (target_user_id not in IN_GAME_IDS):
-        user_balance.set('allocated', 0)
-        await user_balance.save()
-    
     now = DateTime.now(TimeZone.utc)
     streak, daily_can_claim_at = calculate_daily_new(user_balance.streak, user_balance.daily_can_claim_at, now)
     ready_to_claim = daily_can_claim_at <= DateTime.now(TimeZone.utc)
@@ -56,10 +52,6 @@ async def get_generic_vote_fields(target_user_id):
     ready_to_vote : `bool`
     """
     user_balance = await get_user_balance(target_user_id)
-    
-    if user_balance.allocated and (target_user_id not in IN_GAME_IDS):
-        user_balance.set('allocated', 0)
-        await user_balance.save()
     
     now = DateTime.now(TimeZone.utc)
     streak = refresh_streak(user_balance.streak, user_balance.daily_can_claim_at, now)
@@ -88,10 +80,6 @@ async def get_stat_fields(target_user_id):
     count_top_gg_vote : `int`
     """
     user_balance = await get_user_balance(target_user_id)
-    
-    if user_balance.allocated and (target_user_id not in IN_GAME_IDS):
-        user_balance.set('allocated', 0)
-        await user_balance.save()
     
     now = DateTime.now(TimeZone.utc)
     streak = refresh_streak(user_balance.streak, user_balance.daily_can_claim_at, now)

@@ -24,7 +24,7 @@ class Item(RichAttributeErrorBaseType):
     name : `str`
         The name of the item.
     
-    modifiers : `tuple<StatModifier>`
+    modifiers : ``None | tuple<StatModifier>``
         Modifiers of the item.
     
     value : `int`
@@ -62,7 +62,7 @@ class Item(RichAttributeErrorBaseType):
         weight : `int`
             The weight of the item in grams.
         
-        modifiers : `None`
+        modifiers : ``None | tuple<StatModifier>``
             Effects of the item.
         """
         self = object.__new__(cls)

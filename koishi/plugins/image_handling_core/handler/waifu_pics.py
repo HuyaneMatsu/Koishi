@@ -43,6 +43,9 @@ BLACKLIST = {
     
     # not well formed url
     'https://i.waifu.pics/OXM9FcR. - Episode 4 - Eurynome Disgusted Look.gif',
+    
+    # not well formed file name
+    'https://i.waifu.pics/VR8n91T.GIF',
 }
 
 

@@ -8,7 +8,7 @@ from ...bots import MAIN_CLIENT
 
 from ..gift_common import check_can_gift
 from ..relationships_core import deepen_and_boost_relationship
-from ..user_balance import get_user_balance, get_user_balances
+from ..user_balance import get_user_balance, get_user_balances, save_user_balance
 from ..user_settings import get_one_user_settings, get_preferred_client_for_user
 
 from .checks import (
@@ -89,7 +89,7 @@ async def purchase_role_self(client, event, role, required_balance):
     await client.interaction_application_command_acknowledge(event, False, show_for_invoking_user_only = True)
     
     user_balance = await get_user_balance(event.user_id)
-    available_balance = user_balance.balance - max(user_balance.allocated, 0)
+    available_balance = user_balance.balance - user_balance.get_cumulative_allocated_balance()
     
     check_insufficient_available_balance(role, available_balance, required_balance)
     success = await _add_role(target_user, role)
@@ -99,7 +99,7 @@ async def purchase_role_self(client, event, role, required_balance):
         )
     
     balance = user_balance.balance
-    user_balance.set('balance', balance - required_balance)
+    user_balance.modify_balance_by(-required_balance)
     
     await deepen_and_boost_relationship(user_balance, None, None, required_balance, save_source_user_balance = 2)
     
@@ -150,7 +150,7 @@ async def purchase_role_other(client, event, role, required_balance, target_user
     source_user_balance = user_balances[source_user.id]
     target_user_balance = user_balances[target_user.id]
     
-    available_balance = source_user_balance.balance - max(source_user_balance.allocated, 0)
+    available_balance = source_user_balance.balance - source_user_balance.get_cumulative_allocated_balance()
     
     check_insufficient_available_balance(role, available_balance, required_balance)
     success = await _add_role(target_user, role)
@@ -160,8 +160,8 @@ async def purchase_role_other(client, event, role, required_balance, target_user
         )
     
     balance = source_user_balance.balance
-    source_user_balance.set('balance', balance - required_balance)
-    await source_user_balance.save()
+    source_user_balance.modify_relationship_value_by(-required_balance)
+    await save_user_balance(source_user_balance)
     
     await deepen_and_boost_relationship(
         source_user_balance,

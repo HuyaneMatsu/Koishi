@@ -60,7 +60,10 @@ async def stat_upgrade_invoke_self_question(client, event, stat_index):
         stat_value_after,
     )
     check_sufficient_available_balance_self(
-        required_balance, user_balance.balance - user_balance.allocated, stat_index, stat_value_after
+        required_balance,
+        (user_balance.balance - user_balance.get_cumulative_allocated_balance()),
+        stat_index,
+        stat_value_after,
     )
     
     await client.interaction_response_message_edit(
@@ -109,7 +112,7 @@ async def stat_upgrade_invoke_other_question(client, event, target_user, relatio
     )
     check_sufficient_available_balance_other(
         required_balance,
-        source_user_balance.balance - source_user_balance.allocated,
+        (source_user_balance.balance - source_user_balance.get_cumulative_allocated_balance()),
         stat_index,
         stat_value_after,
         target_user,
@@ -198,8 +201,9 @@ async def stat_upgrade_confirm_self(event, stat_index):
     try:
         check_sufficient_available_balance_self(
             required_balance,
-            balance - user_balance.allocated,
-            stat_index, stat_value_after,
+            (balance - user_balance.get_cumulative_allocated_balance()),
+            stat_index,
+            stat_value_after,
         )
     except InteractionAbortedError as exception:
         exception.response.abort = False
@@ -208,7 +212,7 @@ async def stat_upgrade_confirm_self(event, stat_index):
     set_user_stat_value_for_index(stats, stat_index, stat_value_after)
     await stats.save()
     
-    user_balance.set('balance', balance - required_balance)
+    user_balance.modify_balance_by(-required_balance)
     await deepen_and_boost_relationship(user_balance, None, None, required_balance, save_source_user_balance = 2)
     
     yield InteractionResponse(
@@ -282,7 +286,7 @@ async def stat_upgrade_confirm_other(client, event, target_user_id, stat_index):
     try:
         check_sufficient_available_balance_other(
             required_balance,
-            balance - source_user_balance.allocated,
+            (balance - source_user_balance.get_cumulative_allocated_balance()),
             stat_index,
             stat_value_after,
             target_user,
@@ -295,7 +299,7 @@ async def stat_upgrade_confirm_other(client, event, target_user_id, stat_index):
     set_user_stat_value_for_index(stats, stat_index, stat_value_after)
     await stats.save()
     
-    source_user_balance.set('balance', balance - required_balance)
+    source_user_balance.modify_balance_by(-required_balance)
 
     await deepen_and_boost_relationship(
         source_user_balance,

@@ -4,7 +4,7 @@ import vampytest
 from hata import KOKORO
 from scarletio import Future, Task, skip_ready_cycle
 
-from ..constants import USER_BALANCE_CACHE, USER_BALANCE_QUERY_TASKS
+from ..constants import USER_BALANCE_CACHE, USER_BALANCE_QUERY_TASKS, USER_BALANCES
 from ..queries import get_user_balance
 from ..user_balance import UserBalance
 
@@ -32,6 +32,9 @@ async def test__get_user_balance__cached():
         user_balance_0 = UserBalance(user_id_0)
         user_balance_1 = UserBalance(user_id_1)
         
+        USER_BALANCES[user_id_0] = user_balance_0
+        USER_BALANCES[user_id_1] = user_balance_1
+        
         USER_BALANCE_CACHE[user_id_0] = user_balance_0
         USER_BALANCE_CACHE[user_id_1] = user_balance_1
         
@@ -50,6 +53,7 @@ async def test__get_user_balance__cached():
         )
         
     finally:
+        USER_BALANCES.clear()
         USER_BALANCE_CACHE.clear()
 
 
@@ -59,7 +63,7 @@ async def test__get_user_balance__request():
     
     Case: requesting.
     """
-    allocated = 50
+    allocations = None
     balance = 51
     count_daily_by_related = 52
     count_daily_for_related = 53
@@ -78,7 +82,7 @@ async def test__get_user_balance__request():
     user_balance = None
     
     entry = {
-        'allocated': allocated,
+        'allocations': allocations,
         'balance': balance,
         'count_daily_by_related': count_daily_by_related,
         'count_daily_for_related': count_daily_for_related,
@@ -107,6 +111,10 @@ async def test__get_user_balance__request():
                 vampytest.assert_instance(element, Future)
             
             user_balance = UserBalance.from_entry(entry)
+            
+            USER_BALANCES[user_id] = user_balance
+            USER_BALANCE_CACHE[user_id] = user_balance
+            
             for waiter in waiters:
                 waiter.set_result_if_pending(user_balance)
         finally:
@@ -136,6 +144,11 @@ async def test__get_user_balance__request():
             [],
         )
         
+        vampytest.assert_eq(
+            {*USER_BALANCES.keys()},
+            set(),
+        )
+        
         vampytest.assert_false(USER_BALANCE_QUERY_TASKS)
         
         await skip_ready_cycle()
@@ -150,12 +163,19 @@ async def test__get_user_balance__request():
         vampytest.assert_is(user_balance, output_1)
         
         vampytest.assert_eq(
+            {*USER_BALANCES.keys()},
+            {user_id},
+        )
+        
+        vampytest.assert_eq(
             [*USER_BALANCE_CACHE.keys()],
             [user_id],
         )
+        
         vampytest.assert_false(USER_BALANCE_QUERY_TASKS)
         
     finally:
+        USER_BALANCES.clear()
         USER_BALANCE_CACHE.clear()
         USER_BALANCE_QUERY_TASKS.clear()
         

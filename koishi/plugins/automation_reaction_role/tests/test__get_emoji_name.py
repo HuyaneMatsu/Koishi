@@ -1,5 +1,5 @@
 import vampytest
-from hata import BUILTIN_EMOJIS, Emoji, GuildProfile, User
+from hata import BUILTIN_EMOJIS, Emoji, Guild, GuildProfile, User
 
 from ..content_builders import get_emoji_name
 
@@ -27,31 +27,36 @@ def _iter_options():
     user = User.precreate(user_id,)
     user.guild_profiles[guild_id] = GuildProfile()
     
+    guild = Guild.precreate(
+        guild_id,
+        emojis = [emoji_0, emoji_1, emoji_2],
+    )
+    
     yield (
         user,
         emoji_0.id,
-        [emoji_0],
+        [guild, emoji_0],
         f'{emoji_0} {emoji_0.name}',
     )
     
     yield (
         user,
         emoji_1.id,
-        [emoji_1],
+        [guild, emoji_1],
         f'{emoji_1.name}',
     )
     
     yield (
         user,
         emoji_2.id,
-        [emoji_2],
+        [guild, emoji_2],
         f'{emoji_2} {emoji_2.name}',
     )
     
     yield (
         user,
         999999,
-        [],
+        [guild],
         'unknown',
     )
 

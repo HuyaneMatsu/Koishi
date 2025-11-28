@@ -30,7 +30,7 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
         Message to operate on.
     player : ``Player``
         User player.
-    session : ``Session``
+    session : ``Game21Session``
         Game session.
     single_player : `bool`
         Whether its a player runner for single player mode.
@@ -49,7 +49,7 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
         ----------
         client : ``Client``
             the respective client.
-        session : ``Session``
+        session : ``Game21Session``
             Game session.
         player : ``Player``
             User player.
@@ -114,6 +114,9 @@ class Game21PlayerRunner(RichAttributeErrorBaseType):
                 message = None
                 game_ended = True
         
+        # Set message to session for reverse resolution.
+        if single_player and (message is not None):
+            session.message = message
         
         self = object.__new__(cls)
         self._ui_state = UI_STATE_SWITCHING_CONTEXT if game_ended else UI_STATE_READY

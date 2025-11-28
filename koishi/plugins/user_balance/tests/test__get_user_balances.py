@@ -1,6 +1,6 @@
 import vampytest
 
-from ..constants import USER_BALANCE_CACHE
+from ..constants import USER_BALANCE_CACHE, USER_BALANCES
 from ..queries import get_user_balances
 from ..user_balance import UserBalance
 
@@ -28,6 +28,9 @@ async def test__get_user_balances__cached():
         user_balance_0 = UserBalance(user_id_0)
         user_balance_1 = UserBalance(user_id_1)
         
+        USER_BALANCES[user_id_0] = user_balance_0
+        USER_BALANCES[user_id_1] = user_balance_1
+        
         USER_BALANCE_CACHE[user_id_0] = user_balance_0
         USER_BALANCE_CACHE[user_id_1] = user_balance_1
         
@@ -41,9 +44,15 @@ async def test__get_user_balances__cached():
         vampytest.assert_eq(output, {user_id_0: user_balance_0, user_id_1: user_balance_1})
         
         vampytest.assert_eq(
+            {*USER_BALANCES.keys()},
+            {user_id_0, user_id_1},
+        )
+        
+        vampytest.assert_eq(
             [*USER_BALANCE_CACHE.keys()],
             [user_id_0, user_id_1],
         )
         
     finally:
+        USER_BALANCES.clear()
         USER_BALANCE_CACHE.clear()

@@ -6,7 +6,7 @@ from hata import Embed
 
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY, COLOR__GAMBLING
 
-from .constants import BET_MIN, CARD_NUMBERS, CARD_TYPES, GAME_21_EMOJI_ENTER, PLAYERS_MAX
+from .constants import CARD_NUMBERS, CARD_TYPES, GAME_21_EMOJI_ENTER, PLAYERS_MAX
 from .helpers import is_draw
 
 
@@ -337,123 +337,6 @@ def add_done_field(embed, user, guild, hand):
     )
 
 
-def build_join_succeeded_embed():
-    """
-    Builds a game join embed.
-    
-    Returns
-    -------
-    embed : ``Embed``
-    """
-    return Embed(
-        '21 multi-player game joined.',
-        color = COLOR__GAMBLING,
-    )
-
-
-def build_join_failed_embed_max_players():
-    """
-    Builds a failed to join game embed for the case when the game is full.
-    
-    Returns
-    -------
-    embed : ``Embed``
-    """
-    return Embed(
-        'Ohoho',
-        f'Max {PLAYERS_MAX!s} players are allowed.',
-        color = COLOR__GAMBLING,
-    )
-
-
-def build_join_failed_embed_not_enough_hearts(expected, available, me):
-    """
-    Builds a failed to join game embed for the case when the user does not have enough hearts.
-    
-    Parameters
-    ----------
-    expected : `int`
-        The expected hearts to have.
-    
-    available : `int`
-        The available hearts of a user.
-    
-    me : `bool`
-        Whether the client is checking itself.
-    
-    Returns
-    -------
-    embed : ``Embed``
-    """
-    return Embed(
-        ('Oh snap!' if me else 'Ohoho'),
-        (
-            f'{"I" if me else "You"} must have at least {expected!s} available {EMOJI__HEART_CURRENCY} to join.\n'
-            f'{"I" if me else "You"} have {available!s} {EMOJI__HEART_CURRENCY}.'
-        ),
-        color = COLOR__GAMBLING,
-    )
-
-
-def build_join_failed_embed_already_in_game():
-    """
-    Builds a failed to join game embed for the case when the user is already in a game.
-    
-    Returns
-    -------
-    embed : ``Embed``
-    """
-    return Embed(
-        'Ohoho',
-        'You are already in a game.',
-        color = COLOR__GAMBLING,
-    )
-
-
-def build_join_failed_embed_bet_too_low():
-    """
-    Builds a failed to join game embed for the case when the bet is too low.
-    
-    Returns
-    -------
-    embed : ``Embed``
-    """
-    return Embed(
-        'Ohoho',
-        f'You must bet at least {BET_MIN!s} {EMOJI__HEART_CURRENCY}',
-        color = COLOR__GAMBLING,
-    )
-
-
-def build_join_failed_embed_not_enough_users_to_start():
-    """
-    Builds a join game embed for the case when there are not enough joined users to start it.
-    
-    Returns
-    -------
-    embed : ``Embed``
-    """
-    return Embed(
-        'Ohoho',
-        'There must be at least 1 other user in game to start it.',
-        color = COLOR__GAMBLING,
-    )
-
-
-def build_leave_succeeded_embed():
-    """
-    Builds a game leave embed.
-    
-    Returns
-    -------
-    embed : ``Embed``
-    """
-    return Embed(
-        '21 multi-player game left.',
-        color = COLOR__GAMBLING,
-    )
-
-
 def build_end_embed_single_player_title(player_win, amount):
     """
     Builds end embed title for single player.
@@ -495,7 +378,7 @@ def build_end_embed_single_player(session, player_user, player_bot, player_win):
     
     Parameters
     ----------
-    session : ``Session``
+    session : ``Game21Session``
         Game session.
     player_user : ``Player``
         The user's player.
@@ -546,7 +429,7 @@ def build_end_embed_multi_player(session, players, winners, losers):
     
     Parameters
     ----------
-    session : ``Session``
+    session : ``Game21Session``
         Game session.
     players : `list<Player>`
         All player.

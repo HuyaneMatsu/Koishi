@@ -358,7 +358,7 @@ async def adventure_cancel(adventure):
     duration = get_location_distance_travel_duration(adventure, user_stats)
     if adventure_state != ADVENTURE_STATE_ACTIONING:
         # Take the lowest in case we accumulated offset.
-        duration = min(duration, (adventure.created_at - now).total_seconds())
+        duration = min(duration, (now - adventure.created_at).total_seconds())
     
     adventure.handle = LOOP.call_after(
         duration,

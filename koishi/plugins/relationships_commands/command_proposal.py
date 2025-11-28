@@ -17,7 +17,7 @@ from ..relationships_core import (
     calculate_relationship_value, get_affinity_multiplier, get_relationship_listing,
     get_relationship_request_and_user_like_at, get_relationship_request, get_relationship_request_listing,
 )
-from ..user_balance import get_user_balance, get_user_balances
+from ..user_balance import get_user_balance, get_user_balances, save_user_balance
 from ..user_settings import (
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_PROPOSAL_DISABLE, get_one_user_settings, get_preferred_client_for_user
 )
@@ -119,7 +119,9 @@ async def create(
     relationship_value = floor(relationship_value * get_affinity_multiplier(source_user.id, target_user.id))
     
     check_insufficient_investment(relationship_value, investment)
-    check_insufficient_available_balance(source_user_balance.balance - source_user_balance.allocated, investment)
+    check_insufficient_available_balance(
+        source_user_balance.balance - source_user_balance.get_cumulative_allocated_balance(), investment
+    )
     
     # Edge cases
     await async_check_source_already_has_waifu(
@@ -149,8 +151,8 @@ async def create(
     
     # Everything is good
     if target_user.bot:
-        target_user_balance.set('balance', target_user_balance.balance + (investment >> 1))
-        await target_user_balance.save()
+        target_user_balance.modify_balance_by(investment >> 1)
+        await save_user_balance(target_user_balance)
         
         relationship = Relationship(
             source_user.id, target_user.id, relationship_type, investment, DateTime.now(tz = TimeZone.utc)
@@ -161,8 +163,8 @@ async def create(
         relationship_request = RelationshipRequest(source_user.id, target_user.id, relationship_type, investment)
         await relationship_request.save()
     
-    source_user_balance.set('balance', source_user_balance.balance - investment)
-    await source_user_balance.save()
+    source_user_balance.modify_balance_by(-investment)
+    await save_user_balance(source_user_balance)
     
     await client.interaction_response_message_edit(
         event,
@@ -333,8 +335,8 @@ async def cancel(
     
     relationship_request.delete()
     
-    source_user_balance.set('balance', source_user_balance.balance + relationship_request.investment)
-    await source_user_balance.save()
+    source_user_balance.modify_balance_by(relationship_request.investment)
+    await save_user_balance(source_user_balance)
     
     relationship_type = relationship_request.relationship_type
     investment = relationship_request.investment
@@ -475,8 +477,8 @@ async def _handle_relationship_proposal_reject(client, event, source_user, targe
     
     relationship_request.delete()
     
-    source_user_balance.set('balance', source_user_balance.balance + investment)
-    await source_user_balance.save()
+    source_user_balance.modify_balance_by(investment)
+    await save_user_balance(source_user_balance)
     
     await client.interaction_response_message_edit(
         event,
@@ -648,8 +650,8 @@ async def _handle_relationship_proposal_accept(client, event, source_user, targe
     # Everything is good
     relationship_request.delete()
     
-    target_user_balance.set('balance', target_user_balance.balance + (relationship_request.investment >> 1))
-    await target_user_balance.save()
+    target_user_balance.modify_relationship_value_by(relationship_request.investment >> 1)
+    await save_user_balance(target_user_balance)
     
     relationship = Relationship(
         source_user.id, target_user.id, relationship_type, investment >> 1, DateTime.now(tz = TimeZone.utc)

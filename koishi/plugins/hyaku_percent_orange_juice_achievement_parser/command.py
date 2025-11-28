@@ -1,12 +1,12 @@
 __all__ = ()
 
 from ...bot_utils.constants import GUILD__SUPPORT
-from ...bots import FEATURE_CLIENTS
+from ...bots import COMMAND_CLIENT
 
 from .logic import build_output, parse_input
 
 
-@FEATURE_CLIENTS.interactions(
+@COMMAND_CLIENT.interactions(
     guild = GUILD__SUPPORT,
     target = 'message',
 )

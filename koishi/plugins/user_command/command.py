@@ -1,7 +1,5 @@
 __all__ = ()
 
-from math import floor, inf, isnan as is_nan
-
 from hata import ClientUserBase, Embed
 from hata.ext.slash import InteractionResponse, abort
 
@@ -87,9 +85,7 @@ else:
         USER_EQUIP_AVAILABLE = True
     
     try:
-        from ..user_inventory import (
-            SORT_BY_DEFAULT, SORT_BYES, SORT_ORDER_DEFAULT, SORT_ORDERS, get_inventory_page_response
-        )
+        from ..user_inventory import user_inventory_command
     except ImportError:
         if not MARISA_MODE:
             raise
@@ -100,11 +96,7 @@ else:
         USER_INVENTORY_AVAILABLE = True
     
     try:
-        from ..user_discard_item import (
-            build_failure_embed_cannot_discard_less_than_one, build_failure_embed_no_item_discarded,
-            build_failure_embed_no_item_like, build_success_embed_item_discarded, discard_item,
-            get_discard_item_suggestions
-        )
+        from ..user_discard_item import user_discard_item_command
     except ImportError:
         if not MARISA_MODE:
             raise
@@ -116,7 +108,7 @@ else:
     
     
     try:
-        from ..quest_board import build_user_quests_response
+        from ..quest_board import command_user_quests
     except ImportError:
         if not MARISA_MODE:
             raise
@@ -125,6 +117,18 @@ else:
     
     else:
         USER_QUESTS_AVAILABLE = True
+
+
+try:
+    from ..user_allocations import command_user_allocations
+except ImportError:
+    if not MARISA_MODE:
+        raise
+    
+    USER_ALLOCATIONS_AVAILABLE = False
+
+else:
+    USER_ALLOCATIONS_AVAILABLE = True
 
 
 USER_COMMANDS = FEATURE_CLIENTS.interactions(
@@ -469,157 +473,16 @@ if USER_EQUIP_AVAILABLE:
 
 
 if USER_INVENTORY_AVAILABLE:
-    @USER_COMMANDS.interactions(name = 'inventory')
-    async def user_inventory_command(
-        event,
-        sort_by : (SORT_BYES, 'How to sort the items.') = SORT_BY_DEFAULT,
-        sort_order : (SORT_ORDERS, 'Sort ordering') = SORT_ORDER_DEFAULT,
-    ):
-        """
-        Displays your inventory.
-        
-        This function is a coroutine generator.
-        
-        Parameters
-        ----------
-        event : ``InteractionEvent``
-            The received interaction event.
-        
-        sort_by : `int` = `SORT_BY_DEFAULT`, Optional
-            How to sort the items.
-        
-        sort_order : `int` = `SORT_ORDER_DEFAULT`, Optional
-            Sort ordering.
-        
-        Returns
-        -------
-        response : ``InteractionResponse``
-        """
-        yield
-        yield await get_inventory_page_response(event.user_id, sort_by, sort_order, 0)
+    USER_COMMANDS.interactions(user_inventory_command, name = 'inventory')
 
 
 if USER_DISCARD_ITEM_AVAILABLE:
-    @USER_COMMANDS.interactions(name = 'discard-item')
-    async def user_discard_command(
-        client,
-        interaction_event,
-        item_name : (str, 'The item\'s name', 'item'),
-        amount : ('expression', 'The amount of items to discard.'),
-    ):
-        """
-        Discard items from your inventory.
-        
-        This function is a coroutine.
-        
-        Parameters
-        ----------
-        client : ``Client``
-            The client who received the interaction.
-        
-        interaction_event : ``InteractionEvent``
-            The received interaction event.
-        
-        item_slot : `int`
-            The selected user.
-        
-        item_name : `str`
-            The give item name.
-        
-        amount : `int | float`
-        
-        Returns
-        -------
-        response : ``Embed``
-        """
-        if isinstance(amount, float):
-            if is_nan(amount):
-                amount = 0
-            
-            elif amount == inf:
-                amount = (1 << 64) - 1
-            
-            elif amount == -inf:
-                amount = -1
-            
-            else:
-                amount = floor(amount)
-        
-        if amount <= 0:
-            await client.interaction_response_message_create(
-                interaction_event,
-                embed = build_failure_embed_cannot_discard_less_than_one()
-            )
-            return
-        
-        await client.interaction_application_command_acknowledge(
-            interaction_event,
-            False,
-            show_for_invoking_user_only = True
-        )
-        
-        item, discarded_amount, new_amount = await discard_item(interaction_event.user_id, item_name, amount)
-        if item is None:
-            await client.interaction_response_message_edit(
-                interaction_event,
-                embed = build_failure_embed_no_item_like(item_name)
-            )
-            return
-        
-        if not discarded_amount:
-            await client.interaction_response_message_edit(
-                interaction_event,
-                embed = build_failure_embed_no_item_discarded(item, new_amount)
-            )
-            return
-        
-        await client.interaction_response_message_edit(interaction_event, '-# _ _')
-        await client.interaction_response_message_delete(interaction_event)
-        
-        await client.interaction_followup_message_create(
-            interaction_event,
-            embed = build_success_embed_item_discarded(item, discarded_amount, new_amount),
-        )
-    
-    
-    @user_discard_command.autocomplete('item')
-    async def autocomplete_item(event, value):
-        """
-        Autocompletes the item to discard.
-        
-        Parameters
-        ----------
-        event : ``InteractionEvent``
-            The received interaction event.
-        
-        value : `None | str`
-            The typed in value.
-        
-        Returns
-        -------
-        suggestions : `None | list<(str, int)>`
-        """
-        return await get_discard_item_suggestions(event.user_id, value)
+    USER_COMMANDS.interactions(user_discard_item_command, name = 'discard-item')
 
 
 if USER_QUESTS_AVAILABLE:
-    @USER_COMMANDS.interactions(name = 'quests')
-    async def user_quests(
-        event,
-    ):
-        """
-        Lists your accepted quests.
-        
-        This function is a coroutine generator.
-        
-        Parameters
-        ----------
-        event : ``InteractionEvent``
-            The received interaction event.
-        
-        Returns
-        -------
-        acknowledge / response : `None` / ``InteractionResponse``
-        """
-        yield
-        yield (await build_user_quests_response(event.user, event.guild_id))
+    USER_COMMANDS.interactions(command_user_quests, name = 'quests')
+
+
+if USER_ALLOCATIONS_AVAILABLE:
+    USER_COMMANDS.interactions(command_user_allocations, name = 'allocations')

@@ -1,12 +1,19 @@
-__all__ = ('get_user_balance', 'get_user_balances')
+__all__ = ('get_user_balance', 'get_user_balances', 'save_user_balance')
+
+from itertools import count
 
 from hata import KOKORO
-from scarletio import Future, Task, TaskGroup, copy_docs
+from scarletio import Future, Task, TaskGroup, copy_docs, shield
 
 from ...bot_utils.models import DB_ENGINE, USER_BALANCE_TABLE, user_balance_model
 
-from .constants import USER_BALANCE_CACHE, USER_BALANCE_QUERY_TASKS
+from .constants import (
+    USER_BALANCE_ALLOCATION_HOOKS, USER_BALANCE_CACHE, USER_BALANCE_QUERY_TASKS, USER_BALANCE_SAVE_TASKS, USER_BALANCES
+)
 from .user_balance import UserBalance
+
+
+COUNTER = iter(count(1))
 
 
 async def get_user_balance(user_id):
@@ -48,7 +55,7 @@ async def get_user_balances(user_ids):
     
     Returns
     -------
-    user_balances : `dict<int, UserBalance>`
+    user_balances : ``dict<int, UserBalance>``
     """
     user_balances = {}
     waiters = None
@@ -104,11 +111,15 @@ def _get_user_balance_from_cache(user_id):
     user_balance : `None | UserBalance`
     """
     try:
-        user_balance = USER_BALANCE_CACHE[user_id]
+        user_balance = USER_BALANCES[user_id]
     except KeyError:
         return None
     
-    USER_BALANCE_CACHE.move_to_end(user_id)
+    try:
+        USER_BALANCE_CACHE.move_to_end(user_id)
+    except KeyError:
+        USER_BALANCE_CACHE[user_id] = user_balance
+    
     return user_balance
 
 
@@ -208,7 +219,11 @@ async def query_user_balance(user_id, waiters):
                 user_balance = UserBalance(user_id)
             else:
                 user_balance = UserBalance.from_entry(result)
-        
+                await remove_dead_allocations(user_balance)
+            
+            USER_BALANCES[user_id] = user_balance
+            USER_BALANCE_CACHE[user_id] = user_balance
+            
     except BaseException as exception:
         for waiter in waiters:
             waiter.set_exception_if_pending(exception)
@@ -233,6 +248,9 @@ if (DB_ENGINE is None):
             
             for waiter in waiters:
                 waiter.set_result_if_pending(user_balance)
+        
+            USER_BALANCES[user_id] = user_balance
+            USER_BALANCE_CACHE[user_id] = user_balance
         
         finally:
             try:
@@ -281,6 +299,11 @@ async def query_user_balances(items):
                 user_balance = user_balances[user_id]
             except KeyError:
                 user_balance = UserBalance(user_id)
+            else:
+                await remove_dead_allocations(user_balance)
+            
+            USER_BALANCES[user_id] = user_balance
+            USER_BALANCE_CACHE[user_id] = user_balance
             
             for waiter in waiters:
                 waiter.set_result_if_pending(user_balance)
@@ -301,6 +324,9 @@ if (DB_ENGINE is None):
             for user_id, waiters in items:
                 user_balance = UserBalance(user_id)
                 
+                USER_BALANCES[user_id] = user_balance
+                USER_BALANCE_CACHE[user_id] = user_balance
+                
                 for waiter in waiters:
                     waiter.set_result_if_pending(user_balance)
         
@@ -311,3 +337,144 @@ if (DB_ENGINE is None):
                     del USER_BALANCE_QUERY_TASKS[user_id]
                 except KeyError:
                     pass
+
+
+async def remove_dead_allocations(user_balance):
+    """
+    Removes the dead allocations hooks from the given user balance.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    user_balance : ``UserBalance``
+        User balance to check.
+    """
+    to_remove = None
+    
+    for allocation_feature_id, allocation_session_id, amount in user_balance.iter_allocations():
+        while True:
+            try:
+                user_balance_allocation_hook = USER_BALANCE_ALLOCATION_HOOKS[allocation_feature_id]
+            except KeyError:
+                do_remove = True
+                break
+            
+            is_allocation_alive_sync = user_balance_allocation_hook.is_allocation_alive_sync
+            if is_allocation_alive_sync is None:
+                do_remove = True
+                break
+            
+            if not is_allocation_alive_sync(allocation_session_id):
+                do_remove = True
+                break
+            
+            do_remove = False
+            break
+        
+        if not do_remove:
+            continue
+        
+        if to_remove is None:
+            to_remove = []
+        
+        to_remove.append((allocation_feature_id, allocation_session_id))
+        continue
+    
+    if to_remove is None:
+        return
+    
+    for allocation_feature_id, allocation_session_id in reversed(to_remove):
+        user_balance.remove_allocation(allocation_feature_id, allocation_session_id)
+    
+    await save_user_balance(user_balance)
+    return
+
+
+async def save_user_balance(user_balance):
+    """
+    Saves the user balance.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    user_balance : ``UserBalance``
+        User balance to save.
+    """
+    try:
+        task = USER_BALANCE_SAVE_TASKS[user_balance.user_id]
+    except KeyError:
+        USER_BALANCE_SAVE_TASKS[user_balance.user_id] = task = Task(KOKORO, query_save_user_balance_loop(user_balance))
+    
+    await shield(task, KOKORO)
+
+
+async def query_save_user_balance_loop(user_balance):
+    """
+    Runs the entry proxy saver.
+    
+    This method is a coroutine.
+    
+    Parameters
+    ----------
+    user_balance : ``UserBalance``
+        User balance to save.
+    """
+    try:
+        async with DB_ENGINE.connect() as connector:
+            entry_id = user_balance.entry_id
+            # Entry new that is all
+            if (entry_id == 0):
+                user_balance.modified_fields = None
+                response = await connector.execute(
+                    USER_BALANCE_TABLE.insert().values(
+                        user_id = user_balance.user_id,
+                        allocations = user_balance.allocations,
+                        balance = user_balance.balance,
+                        count_daily_self = user_balance.count_daily_self,
+                        count_daily_by_related = user_balance.count_daily_by_related,
+                        count_daily_for_related = user_balance.count_daily_for_related,
+                        count_top_gg_vote = user_balance.count_top_gg_vote,
+                        top_gg_voted_at = user_balance.top_gg_voted_at,
+                        daily_can_claim_at = user_balance.daily_can_claim_at,
+                        daily_reminded = user_balance.daily_reminded,
+                        streak = user_balance.streak,
+                        relationship_value = user_balance.relationship_value,
+                        relationship_divorces = user_balance.relationship_divorces,
+                        relationship_slots = user_balance.relationship_slots,
+                    ).returning(
+                        user_balance_model.id,
+                    )
+                )
+                
+                result = await response.fetchone()
+                user_balance.entry_id = result[0]
+            
+            modified_fields = user_balance.modified_fields
+            while (modified_fields is not None):
+                user_balance.modified_fields = None
+                
+                await connector.execute(
+                    USER_BALANCE_TABLE.update(
+                        user_balance_model.id == entry_id,
+                    ).values(
+                        **modified_fields
+                    )
+                )
+                modified_fields = user_balance.modified_fields
+                continue
+        
+    finally:
+        try:
+            del USER_BALANCE_SAVE_TASKS[user_balance.user_id]
+        except KeyError:
+            pass
+
+
+if (DB_ENGINE is None):
+    @copy_docs(query_save_user_balance_loop)
+    async def query_save_user_balance_loop(user_balance):
+        user_balance.modified_fields = None
+        if not user_balance.entry_id:
+            user_balance.entry_id = next(COUNTER)

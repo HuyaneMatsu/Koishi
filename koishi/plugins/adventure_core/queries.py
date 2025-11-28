@@ -690,7 +690,7 @@ async def query_get_adventure_listing_page(user_id, page_index, page_size):
         if entry_count == 0:
             return 1, []
         
-        page_count = (entry_count + page_size -1) // page_size
+        page_count = (entry_count + page_size - 1) // page_size
         
         if page_index >= page_count:
             return page_count, []

@@ -15,7 +15,7 @@ from ..relationships_core import (
     get_relationship_and_user_like_at, get_relationship_listing, get_relationship_listing_with_extend,
     get_relationship_request_listing, get_relationship_unset_outgoing_and_user_like_at, get_root, get_square
 )
-from ..user_balance import get_user_balance, get_user_balances
+from ..user_balance import get_user_balance, get_user_balances, save_user_balance
 from ..user_settings import get_one_user_settings, get_preferred_client_for_user
 
 from .checks import (
@@ -313,24 +313,25 @@ async def divorce_confirm(
     source_user_balance = user_balances[source_user_id]
     target_user_balance = user_balances[target_user_id]
     
-    source_user_balance.set('balance', source_user_balance.balance + max(source_receives, 0))
-    target_user_balance.set('balance', target_user_balance.balance + max(target_receives, 0))
     
-    source_user_balance.set(
-        'relationship_value',
+    if source_receives > 0:
+        source_user_balance.modify_relationship_value_by(source_receives)
+    if target_receives > 0:
+        target_user_balance.modify_relationship_value_by(target_receives)
+    
+    source_user_balance.set_relationship_value(
         get_root(get_square(source_user_balance.relationship_value) + get_square(source_receives // 3)),
     )
-    source_user_balance.set('relationship_divorces', source_user_balance.relationship_divorces + 1)
-    target_user_balance.set(
-        'relationship_value',
+    source_user_balance.increment_relationship_divorces()
+    target_user_balance.set_relationship_value(
         get_root(get_square(target_user_balance.relationship_value) + get_square(target_receives // 3)),
     )
     
     # Save
     
     relationship.delete()
-    await source_user_balance.save()
-    await target_user_balance.save()
+    await save_user_balance(source_user_balance)
+    await save_user_balance(target_user_balance)
     
     await client.interaction_response_message_edit(
         event,

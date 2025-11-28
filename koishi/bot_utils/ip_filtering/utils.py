@@ -1,4 +1,4 @@
-__all__ = ('build_ip_matcher_structure', 'match_ip_to_structure', 'parse_ip',)
+__all__ = ('build_ip_matcher_structure', 'match_ip_to_structure', 'parse_ip', 'produce_ip_representation')
 
 from re import compile as re_compile
 
@@ -81,10 +81,51 @@ def produce_ip_as_bits(ip_type, ip):
         yield 'unknown'
         return
     
-    for shift in range(ip_size - 8, -8, -8):
+    for shift in range(ip_size -8, -8, -8):
         yield format(((ip >> shift) & 0xff), '0>8b')
         if shift:
             yield '-'
+
+
+def produce_ip_representation(ip_type, ip):
+    """
+    Produces the ip's representation.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    ip_type : `int`
+        The ip's type.
+    
+    ip : `int`
+        Ip value.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    if ip_type == IP_TYPE_IP_V4:
+        ip_size = 32
+        unit_size = 8
+        mode = 'd'
+        separator = '.'
+    
+    elif ip_type == IP_TYPE_IP_V6:
+        ip_size = 128
+        unit_size = 16
+        mode = 'x'
+        separator = ':'
+    
+    else:
+        yield 'unknown'
+        return
+    
+    mask = (1 << unit_size) - 1
+    for shift in range(ip_size -unit_size, -unit_size, -unit_size):
+        yield format((ip >> shift) & mask, mode)
+        if shift:
+            yield separator
 
 
 def build_ip_matcher_structure(rules):

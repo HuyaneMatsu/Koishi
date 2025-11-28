@@ -10,7 +10,7 @@ from ...bots import FEATURE_CLIENTS
 
 from ..gift_common import check_can_gift, identify_targeted_user
 from ..relationships_core import autocomplete_relationship_extended_user_name
-from ..user_balance import get_user_balance
+from ..user_balance import get_user_balance, save_user_balance
 from ..user_settings import (
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_GIFT_DISABLE, get_one_user_settings, get_preferred_client_for_user
 )
@@ -105,7 +105,7 @@ async def gift(
     source_user_balance = await get_user_balance(source_user.id)
     
     source_balance =  source_user_balance.balance
-    source_allocated = max(source_user_balance.allocated, 0)
+    source_allocated = source_user_balance.get_cumulative_allocated_balance()
     
     check_is_balance_sufficient(source_balance, source_allocated)
     
@@ -118,11 +118,11 @@ async def gift(
     else:
         amount = min(source_available_balance, amount)
     
-    source_user_balance.set('balance', source_balance - amount)
-    await source_user_balance.save()
+    source_user_balance.modify_balance_by(-amount)
+    await save_user_balance(source_user_balance)
     
-    target_user_balance.set('balance', target_balance + amount)
-    await target_user_balance.save()
+    target_user_balance.modify_balance_by(amount)
+    await save_user_balance(target_user_balance)
     
     await client.interaction_response_message_edit(interaction_event, '-# _ _')
     await client.interaction_response_message_delete(interaction_event)

@@ -1,7 +1,7 @@
 import vampytest
 from hata import Embed, User, GuildProfile
 
-from ....bot_utils.constants import COLOR__GAMBLING
+from ....bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY
 
 from ...balance_rendering import COLOR_CODE_GREEN, COLOR_CODE_RESET
 
@@ -18,14 +18,13 @@ def _iter_options():
         guild_id,
         1000,
         100,
-        'streak',
         'Love you!',
         Embed(
             'Amazing, Awesome, Superb!!',
-            'You have been awarded by Sato with 100 streak.',
+            f'You have been awarded by Sato with 100 {EMOJI__HEART_CURRENCY}.',
             color = COLOR__GAMBLING,
         ).add_field(
-            'Your streak',
+            f'Your {EMOJI__HEART_CURRENCY}',
             (
                 f'```ansi\n'
                 f'1000 {COLOR_CODE_GREEN}->{COLOR_CODE_RESET} 1100\n'
@@ -40,7 +39,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_notification_embed(source_user, guild_id, up_from, amount, awarded_with, message):
+def test__build_notification_embed(source_user, guild_id, up_from, amount, message):
     """
     Tests whether ``build_notification_embed`` works as intended.
     
@@ -55,9 +54,6 @@ def test__build_notification_embed(source_user, guild_id, up_from, amount, award
     up_from : `int`
         From what amount the user is up from.
     
-    awarded_with : `str`
-        With what the user is awarded with.
-    
     message : `None | str`
         Additional message.
     
@@ -65,6 +61,6 @@ def test__build_notification_embed(source_user, guild_id, up_from, amount, award
     -------
     output : ``Embed``
     """
-    output = build_notification_embed(source_user, guild_id, up_from, amount, awarded_with, message)
+    output = build_notification_embed(source_user, guild_id, up_from, amount, message)
     vampytest.assert_instance(output, Embed)
     return output

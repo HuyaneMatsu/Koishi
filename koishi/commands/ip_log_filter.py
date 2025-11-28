@@ -5,6 +5,8 @@ from os.path import isfile as is_file
 
 from hata.main import register
 
+from ..bot_utils.ip_filtering import IP_TYPE_NONE, match_ip_to_structure, parse_ip
+
 
 @register
 def filter_ip_logs(
@@ -13,7 +15,6 @@ def filter_ip_logs(
     """
     Goes through all the entries in the given file and removes the ones that are already blacklisted.
     """
-    from ..bot_utils.ip_filtering import IP_TYPE_NONE, match_ip_to_structure, parse_ip
     from ..web import IP_MATCHER_STRUCTURE
     
     if not is_file(input_file_path):
@@ -32,7 +33,7 @@ def filter_ip_logs(
         
         while True:
             split = line.split(maxsplit = 1)
-            if len(split) < 2:
+            if len(split) < 1:
                 matched = False
                 break
             

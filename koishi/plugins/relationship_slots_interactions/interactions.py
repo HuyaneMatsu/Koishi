@@ -117,7 +117,7 @@ async def relationship_slot_increment_invoke_self_question(client, interaction_e
     
     new_relationship_slot_count = relationship_slots + 1
     required_balance = WAIFU_SLOT_COSTS.get(new_relationship_slot_count, WAIFU_SLOT_COST_DEFAULT)
-    available_balance = user_balance.balance - user_balance.allocated
+    available_balance = user_balance.balance - user_balance.get_cumulative_allocated_balance()
     
     check_sufficient_balance_self(required_balance, available_balance, new_relationship_slot_count)
     
@@ -169,7 +169,7 @@ async def relationship_slot_increment_invoke_other_question(
     source_user_balance = await get_user_balance(source_user.id)
     new_relationship_slot_count = relationship_slots + 1
     required_balance = WAIFU_SLOT_COSTS.get(new_relationship_slot_count, WAIFU_SLOT_COST_DEFAULT)
-    available_balance = source_user_balance.balance - source_user_balance.allocated
+    available_balance = source_user_balance.balance - source_user_balance.get_cumulative_allocated_balance()
     
     check_sufficient_balance_other(
         required_balance, available_balance, new_relationship_slot_count, target_user, interaction_event.guild_id
@@ -265,7 +265,7 @@ async def relationship_slot_increment_confirm_self(interaction_event, source_use
     
     new_relationship_slot_count = relationship_slots + 1
     required_balance = WAIFU_SLOT_COSTS.get(new_relationship_slot_count, WAIFU_SLOT_COST_DEFAULT)
-    available_balance = user_balance.balance - user_balance.allocated
+    available_balance = user_balance.balance - user_balance.get_cumulative_allocated_balance()
     
     
     try:
@@ -274,8 +274,8 @@ async def relationship_slot_increment_confirm_self(interaction_event, source_use
         exception.response.abort = False
         raise
     
-    user_balance.set('balance', user_balance.balance - required_balance)
-    user_balance.set('relationship_slots', new_relationship_slot_count)
+    user_balance.modify_balance_by(-required_balance)
+    user_balance.increment_relationship_slots()
     
     await deepen_and_boost_relationship(user_balance, None, None, required_balance, save_source_user_balance = 2)
     
@@ -346,7 +346,7 @@ async def relationship_slot_increment_confirm_other(client, interaction_event, s
     
     new_relationship_slot_count = relationship_slots + 1
     required_balance = WAIFU_SLOT_COSTS.get(new_relationship_slot_count, WAIFU_SLOT_COST_DEFAULT)
-    available_balance = source_user_balance.balance - source_user_balance.allocated
+    available_balance = source_user_balance.balance - source_user_balance.get_cumulative_allocated_balance()
     
     try:
         check_sufficient_balance_other(
@@ -356,8 +356,8 @@ async def relationship_slot_increment_confirm_other(client, interaction_event, s
         exception.response.abort = False
         raise
     
-    source_user_balance.set('balance', source_user_balance.balance - required_balance)
-    target_user_balance.set('relationship_slots', new_relationship_slot_count)
+    source_user_balance.modify_balance_by(-required_balance)
+    target_user_balance.increment_relationship_slots()
 
     await deepen_and_boost_relationship(
         source_user_balance,

@@ -43,16 +43,16 @@ async def respond_snipe_whole_message(client, interaction_event, message, reveal
     
     if entity is None:
         if interaction_event.is_unanswered():
-            function = Client.interaction_response_message_create
+            await client.interaction_response_message_create(
+                interaction_event,
+                'The message has nothing to snipe.',
+                show_for_invoking_user_only = True,
+            )
         else:
-            function = Client.interaction_response_message_edit
-        
-        await function(
-            client,
-            interaction_event,
-            'The message has nothing to snipe.',
-            show_for_invoking_user_only = True,
-        )
+            await client.interaction_response_message_edit(
+                interaction_event,
+                'The message has nothing to snipe.',
+            )
         return
     
     

@@ -1,4 +1,4 @@
-__all__ = ('SORT_BY_DEFAULT', 'SORT_BYES', 'SORT_ORDER_DEFAULT', 'SORT_ORDERS')
+__all__ = ()
 
 from re import compile as re_compile, escape as re_escape
 
@@ -54,11 +54,11 @@ PAGE_SIZE = 20
 CUSTOM_ID_INVENTORY_PAGE_BASE = 'inventory.page'
 
 CUSTOM_ID_INVENTORY_PAGE_N_PATTERN = re_compile(
-    f'{re_escape(CUSTOM_ID_INVENTORY_PAGE_BASE)}\\.([0-9a-z]+)\\.([0-9a-z]+)\\.([0-9a-z]+)'
+    f'{re_escape(CUSTOM_ID_INVENTORY_PAGE_BASE)}\\.([0-9a-z]+)\\.([0-9a-z]+)\\.([0-9a-z]+)\\.([0-9a-z]+)'
 )
 CUSTOM_ID_INVENTORY_PAGE_N_BUILDER = (
-    lambda sort_by, sort_order, page_index :
-    f'{CUSTOM_ID_INVENTORY_PAGE_BASE}.{sort_by:x}.{sort_order:x}.{page_index:x}'
+    lambda user_id, sort_by, sort_order, page_index :
+    f'{CUSTOM_ID_INVENTORY_PAGE_BASE}.{user_id:x}.{sort_by:x}.{sort_order:x}.{page_index:x}'
 )
 
 CUSTOM_ID_INVENTORY_PAGE_DISABLED_DECREMENT = f'{CUSTOM_ID_INVENTORY_PAGE_BASE}.D'
@@ -66,6 +66,7 @@ CUSTOM_ID_INVENTORY_PAGE_DISABLED_INCREMENT = f'{CUSTOM_ID_INVENTORY_PAGE_BASE}.
 CUSTOM_ID_INVENTORY_PAGE_CLOSE = f'{CUSTOM_ID_INVENTORY_PAGE_BASE}.close'
 
 
+EMOJI_REFRESH = BUILTIN_EMOJIS['arrows_counterclockwise']
 EMOJI_LEFT = BUILTIN_EMOJIS['arrow_left']
 EMOJI_RIGHT = BUILTIN_EMOJIS['arrow_right']
 EMOJI_CLOSE = BUILTIN_EMOJIS['x']

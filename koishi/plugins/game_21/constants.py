@@ -1,6 +1,14 @@
 __all__ = ()
 
+from itertools import count
+from math import floor
+from time import time
+
 from hata import BUILTIN_EMOJIS, create_button, create_row
+
+COUNTER_MASK = (1 << 32) - 1
+STARTUP_IDENTIFIER = (floor(time()) & COUNTER_MASK) << 32
+COUNTER = iter(count(0))
 
 
 CARD_TYPES = (
@@ -139,3 +147,6 @@ UI_STATE_EDITING = 2
 UI_STATE_CANCELLING = 3
 UI_STATE_CANCELLED = 4
 UI_STATE_SWITCHING_CONTEXT = 5
+
+
+SESSIONS = {}

@@ -19,9 +19,9 @@ def _iter_options():
         [player_0, player_1, player_2],
         1000,
         [
-            (user_id_0, 1000, 0.0, True),
-            (user_id_1, 1000, 0.0, True),
-            (user_id_2, 1000, 0.0, True),
+            (user_id_0, 1000, 0.0),
+            (user_id_1, 1000, 0.0),
+            (user_id_2, 1000, 0.0),
         ],
     )
 
@@ -40,7 +40,7 @@ def test__get_refund_distribution(players, amount):
     
     Returns
     -------
-    output : `list<(int, int, int, bool)>`
+    output : `list<(int, int, int)>`
     """
     output = get_refund_distribution(players, amount)
     vampytest.assert_instance(output, list)

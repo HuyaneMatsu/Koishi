@@ -1,10 +1,11 @@
 __all__ = ()
 
+from itertools import islice
 from random import random
 
 from hata import DiscordException, ERROR_CODES
 
-from .constants import PLAYER_STATE_FINISH
+from .constants import COUNTER, COUNTER_MASK, PLAYER_STATE_FINISH, SESSIONS, STARTUP_IDENTIFIER
 from .player import Player
 
 
@@ -86,7 +87,7 @@ def store_event(player, session, single_player, interaction_event):
     ----------
     player : `None | Player`
         The respective player.
-    session : ``Session``
+    session : ``Game21Session``
         The respective session.
     single_player : `bool`
         Whether the game mode is single player.
@@ -233,7 +234,7 @@ def get_refund_distribution(players, amount):
     -------
     distribution : `list<(int, int, int, bool)>`
     """
-    return [(player.user.id, amount, 0.0, True) for player in players]
+    return [(player.user.id, amount, 0.0) for player in players]
 
 
 def get_balance_distribution(winners, losers, amount):
@@ -260,10 +261,10 @@ def get_balance_distribution(winners, losers, amount):
     multiplier = (len(winners) + len(losers)) / len(winners) - 1.0
     
     for player in winners:
-        distribution.append((player.user.id, amount, multiplier, True))
+        distribution.append((player.user.id, amount, multiplier))
     
     for player in losers:
-        distribution.append((player.user.id, amount, -1.0, True))
+        distribution.append((player.user.id, amount, -1.0))
     
     return distribution
 
@@ -280,7 +281,7 @@ async def try_acknowledge(client, interaction_event, player, session, single_pla
         The received interaction event.
     player : `None | Player`
         The respective player.
-    session : ``Session``
+    session : ``Game21Session``
         The respective session.
     single_player : `bool`
         Whether the game mode is single player.
@@ -331,7 +332,7 @@ async def try_edit_response(
     player : ``Player``
         The respective player.
     
-    session : ``Session``
+    session : ``Game21Session``
         The respective session.
     
     single_player : `bool`
@@ -487,3 +488,94 @@ def create_player_bot(client, deck, difficulty):
     
     player_bot_1.hand.restore(deck)
     return player_bot_0
+
+
+def create_session_identifier():
+    """
+    Creates a session identifier.
+    
+    Returns
+    -------
+    session_id : `int`
+    """
+    return STARTUP_IDENTIFIER | (next(COUNTER) & COUNTER_MASK)
+
+
+def add_user_id_to_session(session, user_id):
+    """
+    Adds the user identifier to the session.
+    
+    Parameters
+    ----------
+    session : ``Game21Session``
+        Session to add to.
+    
+    user_id : `int`
+        User identifier to add.
+    """
+    user_ids = session.user_ids
+    if user_ids is None:
+        SESSIONS[session.id] = session
+        user_ids = (user_id,)
+    elif user_id not in user_ids:
+        user_ids = (*user_ids, user_id)
+    else:
+        return
+    
+    session.user_ids = user_ids
+    return
+
+
+def remove_user_id_from_session(session, user_id):
+    """
+    Removes the user identifier to the session.
+    
+    Parameters
+    ----------
+    session : ``Game21Session``
+        Session to add to.
+    
+    user_id : `int`
+        User identifier to add.
+    """
+    user_ids = session.user_ids
+    if (user_ids is None):
+        return
+    
+    if (len(user_ids) == 1):
+        if (user_ids[0] != user_id):
+            return
+        
+        session.user_ids = None
+        try:
+            del SESSIONS[session.id]
+        except KeyError:
+            pass
+        return
+    
+    try:
+        index = user_ids.index(user_id)
+    except ValueError:
+        return
+    
+    session.user_ids = (*islice(user_ids, 0, index), *islice(user_ids, index + 1, None),)
+    return
+
+
+def remove_user_ids_from_session(session):
+    """
+    Removes all the user identifiers from the session.
+    
+    session : ``Game21Session``
+        Session to add to.
+    """
+    user_ids = session.user_ids
+    if (user_ids is None):
+        return
+    
+    session.user_ids = None
+    
+    try:
+        del SESSIONS[session.id]
+    except KeyError:
+        pass

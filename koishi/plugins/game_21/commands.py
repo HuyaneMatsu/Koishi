@@ -3,23 +3,22 @@ __all__ = ()
 from hata import DiscordException, ERROR_CODES, create_button
 from scarletio import Future, Task, TaskGroup, get_event_loop
 
-from ...bot_utils.constants import IN_GAME_IDS
+from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 from ...bots import FEATURE_CLIENTS
 
-from ..user_balance import get_user_balance
+from ..user_balance import ALLOCATION_FEATURE_ID_GAME_21, save_user_balance, get_user_balance
 
-from .checks import check_bet_too_low, check_has_enough_balance, check_in_game
-from .constants import GAME_21_JOIN_ROW_DISABLED, GAME_21_ROW_DISABLED
+from .constants import BET_MIN, GAME_21_JOIN_ROW_DISABLED, GAME_21_ROW_DISABLED
 from .helpers import (
-    create_player_bot, decide_winners, get_balance_distribution, get_refund_distribution, is_draw,
-    try_deliver_end_notification, try_edit_response
+    add_user_id_to_session, create_player_bot, create_session_identifier, decide_winners, get_balance_distribution,
+    get_refund_distribution, is_draw, remove_user_ids_from_session, try_deliver_end_notification, try_edit_response
 )
 from .join_runner import Game21JoinRunner
 from .player import Player
 from .player_runner import Game21PlayerRunner
 from .queries import batch_modify_user_hearts
 from .rendering import build_end_embed_multi_player, build_end_embed_single_player
-from .session import Session
+from .session import Game21Session
 
 
 EVENT_LOOP = get_event_loop()
@@ -65,36 +64,59 @@ async def game_21(
             raise
         return
     
-    check_in_game(interaction_event)
-    check_bet_too_low(amount)
+    while True:
+        if amount < BET_MIN:
+            error_message = f'You must bet at least {BET_MIN!s} {EMOJI__HEART_CURRENCY}',
+            break
+        
+        source_user_balance = await get_user_balance(interaction_event.user_id)
+        
+        available = source_user_balance.balance - source_user_balance.get_cumulative_allocated_balance()
+        
+        if amount > available:
+            error_message = (
+                f'You must have at least {amount!s} available {EMOJI__HEART_CURRENCY} to join.\n'
+                f'You have {available!s} {EMOJI__HEART_CURRENCY} available.'
+            )
+            break
+        
+        single_player_mode = (mode == 'single')
+        
+        if single_player_mode:
+            target_user_balance = await get_user_balance(client.id)
+            available = target_user_balance.balance - target_user_balance.get_cumulative_allocated_balance()
+            if amount > available:
+                error_message = (
+                    f'I must have at least {amount!s} available {EMOJI__HEART_CURRENCY} to join.\n'
+                    f'I have {available!s} {EMOJI__HEART_CURRENCY} available.'
+                )
+                break
+        
+        session_id = create_session_identifier()
+        
+        source_user_balance.add_allocation(ALLOCATION_FEATURE_ID_GAME_21, session_id, amount)
+        await save_user_balance(source_user_balance)
+        
+        if single_player_mode:
+            target_user_balance.add_allocation(ALLOCATION_FEATURE_ID_GAME_21, session_id, amount)
+            await save_user_balance(target_user_balance)
+        
+        
+        if single_player_mode:
+            coroutine_function = game_21_single_player
+        else:
+            coroutine_function = game_21_multi_player
+        
+        await coroutine_function(client, interaction_event, amount, session_id)
+        return
     
-    source_user_balance = await get_user_balance(interaction_event.user_id)
-    check_has_enough_balance(amount, source_user_balance.balance - source_user_balance.allocated, False)
-    
-    single_player_mode = (mode == 'single')
-    
-    if single_player_mode:
-        target_user_balance = await get_user_balance(client.id)
-        check_has_enough_balance(amount, target_user_balance.balance - target_user_balance.allocated, True)
-    
-    
-    source_user_balance.set('allocated', max(source_user_balance.allocated + amount, 0))
-    await source_user_balance.save()
-    
-    if single_player_mode:
-        target_user_balance.set('allocated', max(target_user_balance.allocated + amount, 0))
-        await target_user_balance.save()
-    
-    
-    if single_player_mode:
-        coroutine_function = game_21_single_player
-    else:
-        coroutine_function = game_21_multi_player
-    
-    await coroutine_function(client, interaction_event, amount)
+    await client.interaction_response_message_edit(
+        interaction_event,
+        content = error_message,
+    )
 
 
-async def game_21_single_player(client, event, amount):
+async def game_21_single_player(client, event, amount, session_id):
     """
     Runs a single player game.
     
@@ -108,8 +130,11 @@ async def game_21_single_player(client, event, amount):
     
     amount : `int`
         Bet amount.
+    
+    session_id : `int`
+        Session identifier to use.
     """
-    session = Session(event.guild, amount, event)
+    session = Game21Session(session_id, event.guild, amount, event)
     
     player_user = Player(event.user, event)
     player_user.hand.auto_pull_starting_cards(session.deck)
@@ -118,7 +143,9 @@ async def game_21_single_player(client, event, amount):
     
     waiter = Future(EVENT_LOOP)
     
-    IN_GAME_IDS.add(event.user_id)
+    add_user_id_to_session(session, event.user_id)
+    add_user_id_to_session(session, client.id)
+    
     try:
         await Game21PlayerRunner(client, session, player_user, True, waiter)
         success = await waiter
@@ -126,19 +153,19 @@ async def game_21_single_player(client, event, amount):
         raise
     
     except:
-        await batch_modify_user_hearts(get_refund_distribution([player_user, player_bot], amount))
+        await batch_modify_user_hearts(get_refund_distribution([player_user, player_bot], amount), session.id)
         raise
     
     finally:
-        IN_GAME_IDS.discard(event.user_id)
+        remove_user_ids_from_session(session)
     
     if not success:
-        await batch_modify_user_hearts(get_refund_distribution([player_user, player_bot], amount))
+        await batch_modify_user_hearts(get_refund_distribution([player_user, player_bot], amount), session.id)
         return
     
     
     winners, losers = decide_winners([player_user, player_bot])
-    await batch_modify_user_hearts(get_balance_distribution(winners, losers, amount))
+    await batch_modify_user_hearts(get_balance_distribution(winners, losers, amount), session.id)
     
     if is_draw(winners, losers):
         player_win = 0
@@ -160,7 +187,7 @@ async def game_21_single_player(client, event, amount):
     )
 
 
-async def game_21_multi_player(client, event, amount):
+async def game_21_multi_player(client, event, amount, session_id):
     """
     Runs a multi player game.
     
@@ -174,15 +201,17 @@ async def game_21_multi_player(client, event, amount):
     
     amount : `int`
         Bet amount.
+    
+    session_id : `int`
+        Session identifier to use.
     """
-    session = Session(event.guild, amount, event)
+    session = Game21Session(session_id, event.guild, amount, event)
     
     players = [Player(event.user, event)]
     
     waiter = Future(EVENT_LOOP)
     
-    IN_GAME_IDS.add(event.user_id)
-    
+    add_user_id_to_session(session, event.user_id)
     try:
         try:
             await Game21JoinRunner(client, session, players, waiter)
@@ -191,11 +220,11 @@ async def game_21_multi_player(client, event, amount):
             raise
         
         except:
-            await batch_modify_user_hearts(get_refund_distribution(players, amount))
+            await batch_modify_user_hearts(get_refund_distribution(players, amount), session.id)
             raise
         
         if not success:
-            await batch_modify_user_hearts(get_refund_distribution(players, amount))
+            await batch_modify_user_hearts(get_refund_distribution(players, amount), session.id)
             return
         
         
@@ -213,8 +242,7 @@ async def game_21_multi_player(client, event, amount):
             raise
     
     finally:
-        IN_GAME_IDS.difference_update(player.user.id for player in players)
-        
+        remove_user_ids_from_session(session)
     
     # Do we wanna do this?
     '''
@@ -239,7 +267,7 @@ async def game_21_multi_player(client, event, amount):
     
     # Refund failed to initialize players
     if failed_to_initialize_players:
-        await batch_modify_user_hearts(get_refund_distribution(players, amount))
+        await batch_modify_user_hearts(get_refund_distribution(players, amount), session.id)
         
         for player in failed_to_initialize_players:
             try:
@@ -249,7 +277,7 @@ async def game_21_multi_player(client, event, amount):
     '''
     
     winners, losers = decide_winners(players)
-    await batch_modify_user_hearts(get_balance_distribution(winners, losers, amount))
+    await batch_modify_user_hearts(get_balance_distribution(winners, losers, amount), session.id)
     
     await try_edit_response(
         client,

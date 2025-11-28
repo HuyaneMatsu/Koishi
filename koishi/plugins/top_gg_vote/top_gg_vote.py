@@ -10,7 +10,7 @@ from ...bot_utils.user_getter import get_user
 from ...bot_utils.utils import send_embed_to
 from ...bots import MAIN_CLIENT
 
-from ..user_balance import get_user_balance
+from ..user_balance import get_user_balance, save_user_balance
 from ..user_settings import (
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_VOTE_DISABLE, get_one_user_settings, get_preferred_client_for_user
 )
@@ -40,14 +40,14 @@ async def handle_top_gg_vote(external_event):
     streak_new, daily_can_claim_at = calculate_daily_new(user_balance.streak, user_balance.daily_can_claim_at, now)
     received = calculate_vote_for(user, streak_new)
     streak_new += 1
-    balance = user_balance.balance + received
+    balance_new = user_balance.balance + received
     
-    user_balance.set('balance', balance)
-    user_balance.set('streak', streak_new)
-    user_balance.set('daily_can_claim_at', max(daily_can_claim_at, now))
-    user_balance.set('count_top_gg_vote', user_balance.count_top_gg_vote + 1)
-    user_balance.set('top_gg_voted_at', now)
-    await user_balance.save()
+    user_balance.modify_balance_by(received)
+    user_balance.set_streak(streak_new)
+    user_balance.set_daily_can_claim_at(max(daily_can_claim_at, now))
+    user_balance.increment_count_top_gg_vote()
+    user_balance.set_top_gg_voted_at(now)
+    await save_user_balance(user_balance)
     
 
     target_user_settings = await get_one_user_settings(external_event.user_id)
@@ -59,7 +59,7 @@ async def handle_top_gg_vote(external_event):
                 f'You voted for me, Its so embarrassing. *blushes*',
                 (
                     f'You received {received} {EMOJI__HEART_CURRENCY} and now you have '
-                    f'{balance} {EMOJI__HEART_CURRENCY}\n'
+                    f'{balance_new} {EMOJI__HEART_CURRENCY}\n'
                     f'You are on a {streak_new} day streak.'
                 ),
                 color = COLOR__GAMBLING,

@@ -4,15 +4,16 @@ from hata import InteractionEvent, User
 
 from ..helpers import store_event
 from ..player import Player
-from ..session import Session
+from ..session import Game21Session
 
 
 def _iter_options():
+    session_id = 13333
     interaction_event_0 = InteractionEvent.precreate(202408040002)
     interaction_event_1 = InteractionEvent.precreate(202408040003)
     interaction_event_2 = InteractionEvent.precreate(202408040004)
     player = Player(User.precreate(202408040005), interaction_event_0)
-    session = Session(None, 1000, interaction_event_1)
+    session = Game21Session(session_id, None, 1000, interaction_event_1)
     
     yield (
         player,
@@ -23,11 +24,12 @@ def _iter_options():
     )
     
     
+    session_id = 13333
     interaction_event_0 = InteractionEvent.precreate(202408040006)
     interaction_event_1 = InteractionEvent.precreate(202408040007)
     interaction_event_2 = InteractionEvent.precreate(202408040008)
     player = Player(User.precreate(202408040009), interaction_event_0)
-    session = Session(None, 1000, interaction_event_1)
+    session = Game21Session(session_id, None, 1000, interaction_event_1)
     
     yield (
         player,
@@ -38,11 +40,12 @@ def _iter_options():
     )
     
     
+    session_id = 13333
     interaction_event_0 = InteractionEvent.precreate(202408040010)
     interaction_event_1 = InteractionEvent.precreate(202408040011)
     interaction_event_2 = InteractionEvent.precreate(202408040012)
     player = Player(User.precreate(202408040013), interaction_event_1)
-    session = Session(None, 1000, interaction_event_2)
+    session = Game21Session(session_id, None, 1000, interaction_event_2)
     
     yield (
         player,
@@ -53,10 +56,11 @@ def _iter_options():
     )
     
     
+    session_id = 13333
     interaction_event_0 = InteractionEvent.precreate(202408040062)
     interaction_event_1 = InteractionEvent.precreate(202408040063)
     player = None
-    session = Session(None, 1000, interaction_event_1)
+    session = Game21Session(session_id, None, 1000, interaction_event_1)
     
     yield (
         player,
@@ -76,7 +80,7 @@ def test__store_event(player, session, single_player, interaction_event):
     ----------
     player : `None | Player`
         The respective player.
-    session : ``Session``
+    session : ``Game21Session``
         The respective session.
     single_player : `bool`
         Whether the game mode is single player.

@@ -1,11 +1,10 @@
 import vampytest
 from hata import (
-    BUILTIN_EMOJIS, Emoji, GuildProfile, InteractionForm, Message, Reaction, ReactionMapping, ReactionMappingLine,
-    StringSelectOption, User, create_label, create_role_select, create_string_select
+    BUILTIN_EMOJIS, Emoji, Guild, GuildProfile, InteractionForm, Message, Reaction, ReactionMapping,
+    ReactionMappingLine, StringSelectOption, User, create_label, create_role_select, create_string_select
 )
 
 from ..automation_reaction_role_entry import AutomationReactionRoleEntry
-from ..automation_reaction_role_item import AutomationReactionRoleItem
 from ..component_builders import build_automation_reaction_role_item_add_form
 from ..custom_ids import CUSTOM_ID_ADD_ROLES, CUSTOM_ID_EMOJI, CUSTOM_ID_REMOVE_ROLES
 
@@ -108,6 +107,10 @@ def _iter_options():
     )
     automation_reaction_role_entry_2.entry_id = entry_id_2
     
+    guild_0 = Guild.precreate(
+        guild_id_0,
+        emojis = [emoji_3, emoji_1],
+    )
     
     yield (
         user,
@@ -210,7 +213,7 @@ def _iter_options():
         user,
         1,
         automation_reaction_role_entry_2,
-        [emoji_3, emoji_4, emoji_5],
+        [guild_0, emoji_3, emoji_4, emoji_5],
         InteractionForm(
             'Add new emoji',
             [

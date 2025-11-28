@@ -1,24 +1,23 @@
 __all__ = ()
 
-from hata.ext.slash import InteractionAbortedError
 from scarletio import Lock, RichAttributeErrorBaseType, Task, get_event_loop
 
-from ...bot_utils.constants import IN_GAME_IDS
+from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ..user_balance import get_user_balance
+from ..user_balance import ALLOCATION_FEATURE_ID_GAME_21, get_user_balance, save_user_balance
 
-from .checks import check_has_enough_balance, check_in_game, check_max_players
 from .constants import (
     GAME_21_CUSTOM_ID_CANCEL, GAME_21_CUSTOM_ID_ENTER, GAME_21_CUSTOM_ID_START, GAME_21_JOINER_TIMEOUT,
-    GAME_21_JOIN_ROW_DISABLED, GAME_21_JOIN_ROW_ENABLED, UI_STATE_CANCELLED, UI_STATE_CANCELLING, UI_STATE_EDITING,
-    UI_STATE_READY, UI_STATE_SWITCHING_CONTEXT
+    GAME_21_JOIN_ROW_DISABLED, GAME_21_JOIN_ROW_ENABLED, PLAYERS_MAX, UI_STATE_CANCELLED, UI_STATE_CANCELLING,
+    UI_STATE_EDITING, UI_STATE_READY, UI_STATE_SWITCHING_CONTEXT
 )
-from .helpers import should_render_exception, try_acknowledge, try_edit_response
+from .helpers import (
+    add_user_id_to_session, remove_user_id_from_session, should_render_exception, try_acknowledge, try_edit_response
+)
 from .player import Player
 from .queries import modify_user_hearts
 from .rendering import (
     build_join_embed, build_join_embed_cancelled, build_join_embed_game_started, build_join_embed_timed_out,
-    build_join_failed_embed_not_enough_users_to_start, build_leave_succeeded_embed
 )
 
 
@@ -36,7 +35,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
     _previous_player : ``list<Player>``
         The previously rendered players.
         Stored so we do not render the same message after each other in case we have a backlog.
-    _timeout_handle : `None | TimerHandle`
+    _timeout_handle : ``None | TimerHandle``
         handle to timeout the runner.
     _update_lock : ``Lock``
         Lock used to synchronise message updates.
@@ -44,13 +43,13 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
         the respective client.
     message : ``None | Message``
         Message to operate on.
-    players : `list<Player>`
+    players : ``list<Player>``
         The joined players. The 0th element is always the creator who cannot leave.
-    session : ``Session``
+    session : ``Game21Session``
         Game session.
     single_player : `bool`
         Whether its a player runner for single player mode.
-    waiter : `Future<bool>`
+    waiter : ``Future<bool>``
         A future that has its result set when the runner is finished.
     """
     __slots__ = (
@@ -68,7 +67,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
         ----------
         client : ``Client``
             the respective client.
-        session : ``Session``
+        session : ``Game21Session``
             Game session.
         players : `list<Player>`
             The joined players.
@@ -91,6 +90,9 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
                 await client.events.error(client, f'{cls.__name__}.__new__', exception)
             
             message = None
+        
+        else:
+            session.message = message
         
         self = object.__new__(cls)
         self._ui_state = UI_STATE_SWITCHING_CONTEXT if message is None else UI_STATE_READY
@@ -169,14 +171,14 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
         # Is the user leaving?
         if (player is not None):
             players.remove(player)
-            IN_GAME_IDS.discard(interaction_event.user_id)
+            remove_user_id_from_session(session, interaction_event.user_id)
             await try_acknowledge(client, interaction_event, player, session, True)
-            await modify_user_hearts(player.user.id, session.amount, 0.0, True)
+            await modify_user_hearts(player.user.id, session.amount, 0.0, session.id)
             
             try:
                 await client.interaction_followup_message_create(
                     interaction_event,
-                    embed = build_leave_succeeded_embed(),
+                    content = '21 multi-player game left.',
                     show_for_invoking_user_only = True,
                 )
             except GeneratorExit:
@@ -191,36 +193,44 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
                     
         # The user must be joining
         
-        try:
-            check_max_players(players)
-            check_in_game(interaction_event)
+        while True:
+            if len(players) >= PLAYERS_MAX:
+                error_message = f'Max {PLAYERS_MAX!s} players are allowed.'
+                break
             
             user_balance = await get_user_balance(interaction_event.user_id)
-            check_has_enough_balance(session.amount, user_balance.balance - user_balance.allocated, False)
-            user_balance.set('allocated', max(user_balance.allocated + session.amount, 0))
-            await user_balance.save()
-        except InteractionAbortedError as exception:
-            await try_acknowledge(client, interaction_event, player, session, True)
             
-            try:
-                await client.interaction_followup_message_create(
-                    interaction_event,
-                    exception.response,
+            amount = session.amount
+            available = user_balance.balance - user_balance.get_cumulative_allocated_balance()
+            if amount > available:
+                error_message = (
+                    f'I must have at least {amount!s} available {EMOJI__HEART_CURRENCY} to join.\n'
+                    f'I have {available!s} {EMOJI__HEART_CURRENCY} available.'
                 )
-            except GeneratorExit:
-                raise
+                break
             
-            except BaseException as exception:
-                if should_render_exception(exception):
-                    await client.events.error(client, f'{type(self).__name__}._enter_user', exception)
+            user_balance.add_allocation(ALLOCATION_FEATURE_ID_GAME_21, session.id, amount)
+            await save_user_balance(user_balance)
             
+            player = Player(interaction_event.user, interaction_event)
+            players.append(player)
+            add_user_id_to_session(session, interaction_event.user_id)
+            await self._update_message(interaction_event, player, False)
             return
         
-        player = Player(interaction_event.user, interaction_event)
-        players.append(player)
-        IN_GAME_IDS.add(interaction_event.user_id)
         
-        await self._update_message(interaction_event, player, False)
+        await try_acknowledge(client, interaction_event, player, session, True)
+        try:
+            await client.interaction_followup_message_create(
+                interaction_event,
+                content = error_message,
+            )
+        except GeneratorExit:
+            raise
+        
+        except BaseException as exception:
+            if should_render_exception(exception):
+                await client.events.error(client, f'{type(self).__name__}._enter_user', exception)
     
     
     async def _start(self, interaction_event):
@@ -242,34 +252,38 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
             await try_acknowledge(self.client, interaction_event, None, session, True)
             return
         
-        # Can start only if user count >= 2
-        if len(self.players) < 2:
-            await try_acknowledge(client, interaction_event, players[0], session, True)
+        while True:
+            # Can start only if user count >= 2
+            if len(self.players) < 2:
+                error_message = 'There must be at least 1 other user in game to start it.'
+                break
+            
+            # start
+            self._ui_state = UI_STATE_SWITCHING_CONTEXT
             
             try:
-                await client.interaction_followup_message_create(
-                    interaction_event,
-                    embed = build_join_failed_embed_not_enough_users_to_start(),
-                    show_for_invoking_user_only = True,
-                )
-            except GeneratorExit:
-                raise
-            
-            except BaseException as exception:
-                if should_render_exception(exception):
-                    await client.events.error(client, f'{type(self).__name__}._start', exception)
-            
+                await self._update_message(interaction_event, players[0], True)
+            finally:
+                self.waiter.set_result_if_pending(True)
+                self._invoke_cancellation(False)
             return
         
-        # start
-        self._ui_state = UI_STATE_SWITCHING_CONTEXT
-        
+            
+        await try_acknowledge(client, interaction_event, players[0], session, True)
         try:
-            await self._update_message(interaction_event, players[0], True)
-        finally:
-            self.waiter.set_result_if_pending(True)
-            self._invoke_cancellation(False)
-    
+            await client.interaction_followup_message_create(
+                interaction_event,
+                content = error_message,
+                show_for_invoking_user_only = True,
+            )
+        except GeneratorExit:
+            raise
+        
+        except BaseException as exception:
+            if should_render_exception(exception):
+                await client.events.error(client, f'{type(self).__name__}._start', exception)
+        
+        return
     
     async def _cancel(self, interaction_event):
         """

@@ -1,4 +1,4 @@
-__all__ = ('discard_item', 'get_discard_item_suggestions')
+__all__ = ()
 
 from ..inventory_core import create_item_suggestions, get_inventory, save_inventory, select_item
 
