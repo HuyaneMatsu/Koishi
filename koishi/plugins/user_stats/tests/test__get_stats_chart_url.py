@@ -23,9 +23,9 @@ def _iter_options():
             'type': 'radar',
             'data': {
                 'labels': [
-                    'Housewife capabilities',
+                    'Housewife-capabilities',
                     'Cuteness',
-                    'Bedroom skills',
+                    'Bedroom-skills',
                     'Charm',
                     'Loyalty',
                 ],

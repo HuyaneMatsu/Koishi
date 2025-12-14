@@ -220,11 +220,14 @@ def create_quest_batch(guild_id, batch_id, level_limit, amount):
     quest_template_pool = {}
     
     for quest_template in QUEST_TEMPLATES.values():
-        if quest_template.level > level_limit:
-            continue
-        
         chance_in = quest_template.chance_in
         chance_out = quest_template.chance_out
+        
+        quest_template_level = quest_template.level
+        if quest_template_level > level_limit:
+            level_difference = quest_template_level - level_limit
+            chance_out <<= level_difference
+        
         if (chance_in != chance_out) and (random_number_generator.random() * chance_out >= chance_in):
             continue
         

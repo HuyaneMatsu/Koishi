@@ -59,7 +59,7 @@ else:
         USER_STATS_AVAILABLE = True
     
     try:
-        from ..user_equpment import build_equipment_embed
+        from ..user_equipment import build_equipment_embed
     except ImportError:
         if not MARISA_MODE:
             raise

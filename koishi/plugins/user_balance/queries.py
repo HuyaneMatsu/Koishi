@@ -8,12 +8,14 @@ from scarletio import Future, Task, TaskGroup, copy_docs, shield
 from ...bot_utils.models import DB_ENGINE, USER_BALANCE_TABLE, user_balance_model
 
 from .constants import (
-    USER_BALANCE_ALLOCATION_HOOKS, USER_BALANCE_CACHE, USER_BALANCE_QUERY_TASKS, USER_BALANCE_SAVE_TASKS, USER_BALANCES
+    USER_BALANCE_ALLOCATION_HOOKS, USER_BALANCE_CACHE, USER_BALANCE_CACHE_SIZE, USER_BALANCE_QUERY_TASKS,
+    USER_BALANCE_SAVE_TASKS, USER_BALANCES
 )
 from .user_balance import UserBalance
 
 
-COUNTER = iter(count(1))
+if (DB_ENGINE is None):
+    COUNTER = iter(count(1))
 
 
 async def get_user_balance(user_id):
@@ -119,6 +121,8 @@ def _get_user_balance_from_cache(user_id):
         USER_BALANCE_CACHE.move_to_end(user_id)
     except KeyError:
         USER_BALANCE_CACHE[user_id] = user_balance
+        if len(USER_BALANCE_CACHE) > USER_BALANCE_CACHE_SIZE:
+            del USER_BALANCE_CACHE[next(iter(USER_BALANCE_CACHE))]
     
     return user_balance
 
@@ -223,6 +227,8 @@ async def query_user_balance(user_id, waiters):
             
             USER_BALANCES[user_id] = user_balance
             USER_BALANCE_CACHE[user_id] = user_balance
+            if len(USER_BALANCE_CACHE) > USER_BALANCE_CACHE_SIZE:
+                del USER_BALANCE_CACHE[next(iter(USER_BALANCE_CACHE))]
             
     except BaseException as exception:
         for waiter in waiters:
@@ -304,6 +310,8 @@ async def query_user_balances(items):
             
             USER_BALANCES[user_id] = user_balance
             USER_BALANCE_CACHE[user_id] = user_balance
+            if len(USER_BALANCE_CACHE) > USER_BALANCE_CACHE_SIZE:
+                del USER_BALANCE_CACHE[next(iter(USER_BALANCE_CACHE))]
             
             for waiter in waiters:
                 waiter.set_result_if_pending(user_balance)

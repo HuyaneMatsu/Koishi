@@ -41,4 +41,4 @@ async def heart_generator(client, event):
     KOKORO.call_after(HEART_GENERATOR_COOLDOWN, set.discard, HEART_GENERATOR_COOLDOWNS, user_id)
     user_balance = await get_user_balance(user_id)
     user_balance.modify_balance_by(HEART_GENERATION_AMOUNT)
-    await save_user_balance(user_id)
+    await save_user_balance(user_balance)

@@ -2,7 +2,7 @@ __all__ = ('can_cancel_adventure', 'get_duration_till_recovery_end', 'get_locati
 
 
 from datetime import datetime as DateTime
-from math import floor, log
+from math import ceil, floor, log
 from sys import modules
 
 from scarletio import copy_docs
@@ -77,9 +77,8 @@ def get_duration_till_action_occurrence(base_duration, random, loot_accumulation
     """
     # Set the required duration between 0.5 - 1.5 times of the action's duration.
     duration = (base_duration >> 1) + (random.random() * (base_duration + 1))
-    duration = floor(duration / multiplier)
-    
     duration = sum((loot_accumulation.duration_cost for loot_accumulation in loot_accumulations.values()), duration)
+    duration = ceil(duration / multiplier)
     return duration
 
 

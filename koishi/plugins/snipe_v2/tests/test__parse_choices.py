@@ -84,7 +84,7 @@ def test__parse_choices(interaction_event, user_id, feature_flags, entity_cache)
         The original invoking user's identifier as hexadecimal integer.
     
     feature_flags : `int`
-        The current feature flags of the snipe as hexadecimal string.
+        The current feature flags of the snipe as hexadecimal integer.
     
     entity_cache : `list<object>`
         Additional entities to keep cached.

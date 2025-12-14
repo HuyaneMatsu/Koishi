@@ -9,7 +9,7 @@ def _iter_options():
     yield (
         create_button(
             'I want some More! More!',
-            custom_id = 'user_balance.relationship_slots.increment.invoke.self'
+            custom_id = 'user.buy_relationship_slots.invoke.0'
         ),
     )
 

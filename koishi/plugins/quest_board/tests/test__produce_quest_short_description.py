@@ -60,7 +60,7 @@ def _iter_options():
         quest_template_0,
         20,
         (
-            f'Required rank: G\n'
+            f'Required rank: E\n'
             f'Submit 20 {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
         ),
     )
@@ -70,7 +70,7 @@ def _iter_options():
         quest_template_1,
         500,
         (
-            f'Required rank: F      Completed: 1 / 1 times\n'
+            f'Required rank: E      Completed: 1 / 1 times\n'
             f'Submit 0.5 kg {BUILTIN_EMOJIS["strawberry"]} Strawberry to Sakuya.'
         ),
     )

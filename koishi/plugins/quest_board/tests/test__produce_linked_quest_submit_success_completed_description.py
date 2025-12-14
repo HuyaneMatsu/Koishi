@@ -1,5 +1,7 @@
 import vampytest
 
+from config import ORIN_ID
+
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ...item_core import ITEM_ID_PEACH, get_item_nullable
@@ -14,6 +16,7 @@ def _iter_options():
     assert item is not None
     
     yield (
+        0,
         item,
         AMOUNT_TYPE_COUNT,
         50,
@@ -30,13 +33,38 @@ def _iter_options():
             f'- **900** {EMOJI__HEART_CURRENCY}\n'
             f'- **3** credibility\n'
             f'\n'
-            f'By completing this quest you have ranked up from **G** to **F** rank; congratulation.'
+            f'By completing this quest you have ranked up from **G** to **F** rank.\n'
+            f'Orin! Bring the buffet chariot! Let the party begin!'
+        ),
+    )
+    
+    yield (
+        ORIN_ID,
+        item,
+        AMOUNT_TYPE_COUNT,
+        50,
+        12,
+        900,
+        3,
+        1,
+        2,
+        (
+            f'You have submitted **12** {item.emoji} {item.name}.\n'
+            f'For a total of **50** and finished the quest.\n'
+            f'\n'
+            f'**You received:**\n'
+            f'- **900** {EMOJI__HEART_CURRENCY}\n'
+            f'- **3** credibility\n'
+            f'\n'
+            f'By completing this quest you have ranked up from **G** to **F** rank.\n'
+            f'Maids! Bring my buffet chariot! Let the party begin!'
         ),
     )
     
     # Credibility is optional.
     # If you accept a lower rank quest it is possible you receive 0.
     yield (
+        0,
         item,
         AMOUNT_TYPE_COUNT,
         50,
@@ -57,13 +85,24 @@ def _iter_options():
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__produce_linked_quest_submit_success_completed_description(
-    item, amount_type, amount_required, amount_used, reward_balance, reward_credibility, user_level_old, user_level_new
+    client_id,
+    item,
+    amount_type,
+    amount_required,
+    amount_used,
+    reward_balance,
+    reward_credibility,
+    user_level_old,
+    user_level_new,
 ):
     """
     Tests whether ``produce_linked_quest_submit_success_completed_description`` works as intended.
     
     Parameters
     ----------
+    client_id : `int`
+        The client's identifier who is rendering this message.
+    
     item : ``None | Item``
         The submitted item.
     
@@ -93,6 +132,7 @@ def test__produce_linked_quest_submit_success_completed_description(
     output : `str`
     """
     output = ''.join([*produce_linked_quest_submit_success_completed_description(
+        client_id,
         item,
         amount_type,
         amount_required,

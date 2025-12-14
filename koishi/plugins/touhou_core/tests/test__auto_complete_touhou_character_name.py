@@ -48,7 +48,7 @@ def _iter_options():
             'yachie',
             'youki konpaku',
             'youmu',
-            'yamame kurodani',
+            'yamame',
             'yoshika',
             'yumemi okazaki',
             'yuyuko',

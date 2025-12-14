@@ -7,6 +7,7 @@ SHARED_TAGS_BANNED = (
     'smoking',
     'halloween',
     'trick-or-treating',
+    'cross_necklace',
 )
 
 SAFE_TAGS_BANNED = frozenset((

@@ -107,7 +107,7 @@ def test__build_linked_quest_details_components(linked_quest, user_id, credibili
     output : ``list<Component>``
     """
     user_stats = UserStats(user_id)
-    user_stats.set('credibility', credibility)
+    user_stats.modify_credibility_by(credibility)
 
     output = build_linked_quest_details_components(linked_quest, user_stats, page_index)
     

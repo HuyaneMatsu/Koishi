@@ -4,17 +4,20 @@ __all__ = (
 )
 
 from collections import OrderedDict
+from scarletio import WeakValueDictionary
+
+USER_STATS = WeakValueDictionary()
+USER_STATS_CACHE = OrderedDict()
+USER_STATS_CACHE_SIZE = 100
+USER_STATS_SAVE_TASKS = {}
+USER_STATS_QUERY_TASKS = {}
 
 
-STATS_CACHE = OrderedDict()
-STATS_CACHE_SIZE_MAX = 100
-
-
-USER_STAT_NAME_FULL_HOUSEWIFE = 'Housewife capabilities'
-USER_STAT_NAME_FULL_CUTENESS = 'cuteness'
-USER_STAT_NAME_FULL_BEDROOM = 'bedroom skills'
-USER_STAT_NAME_FULL_CHARM = 'charm'
-USER_STAT_NAME_FULL_LOYALTY = 'loyalty'
+USER_STAT_NAME_FULL_HOUSEWIFE = 'Housewife-capabilities'
+USER_STAT_NAME_FULL_CUTENESS = 'Cuteness'
+USER_STAT_NAME_FULL_BEDROOM = 'Bedroom-skills'
+USER_STAT_NAME_FULL_CHARM = 'Charm'
+USER_STAT_NAME_FULL_LOYALTY = 'Loyalty'
 
 USER_STAT_NAME_SHORT_HOUSEWIFE = 'housewife'
 USER_STAT_NAME_SHORT_CUTENESS = 'cuteness'

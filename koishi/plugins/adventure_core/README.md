@@ -43,7 +43,7 @@ In adventures the user can select different locations to adventure to. These loc
 Interpret them as tasks to do. These targets have their own possible actions to be chosen on each step.
 Each action offers their own cost, battles and loot.
 
-- Human village outskirts
+- Human village outskirts (level 0)
     - Gardening (Scarlet onions)
         - Gardening
             - Scarlet onion (certain)
@@ -63,30 +63,7 @@ Each action offers their own cost, battles and loot.
             - Frog (epic)
             - Straw hat (mythical)
 
-- Human village vineyards
-    - Vine growing
-        - Gardening
-            - Bluefrankish (certain)
-            - Bluefrankish (rare)
-            - Straw hat (epic)
-            - Scissors (mythical)
-
-- Ruins
-    - Foraging
-        - Foraging
-            - Strawberry (basic)
-            - Bishophat (rare)
-            - Ribbon bow (mythical)
-            - Plushie bear (mythical)
-
-- Eientei mansion
-    - Gardening
-        - Gardening
-            - Carrot (certain)
-            - Frog (epic)
-        - Trapped
-
-- Bamboo Forest
+- Bamboo Forest (level 0)
     - Foraging
         - Foraging (bamboo)
             - Bamboo shoot (certain)
@@ -99,25 +76,30 @@ Each action offers their own cost, battles and loot.
             - Scissors (mythical)
         - Trapped
 
-- Hakugyokurou mansion
+- Human village vineyards (level 0)
+    - Vine growing
+        - Gardening
+            - Bluefrankish (certain)
+            - Bluefrankish (rare)
+            - Straw hat (epic)
+            - Scissors (mythical)
+
+- Ruins (level 1)
+    - Foraging
+        - Foraging
+            - Strawberry (basic)
+            - Bishophat (rare)
+            - Ribbon bow (mythical)
+            - Plushie bear (mythical)
+
+- Eientei mansion (level 1)
     - Gardening
         - Gardening
-            - Peach (basic)
-            - Peach (rare)
+            - Carrot (certain)
+            - Frog (epic)
+        - Trapped
 
-- Moriya shrine
-    - Foraging
-        - Foraging
-            - BlueBerry (basic)
-
-- Misty lake
-    - Foraging
-        - Foraging
-            - Frog (basic)
-            - Angelroot (basic)
-            - Fishing rod (rare)
-
-- Magic forest
+- Magic forest (level 1)
     - Foraging
         - Foraging
             - Devilcart oyster (basic)
@@ -125,3 +107,23 @@ Each action offers their own cost, battles and loot.
             - Bishophat (uncommon)
             - Ruler (epic)
             - Scissors (mythical)
+
+- Hakugyokurou mansion (level 2)
+    - Gardening
+        - Gardening
+            - Peach (basic)
+            - Peach (rare)
+
+- Moriya shrine (level 2)
+    - Foraging
+        - Foraging
+            - BlueBerry (basic)
+            - Kitchen knife (mythical)
+            - Poking knife (mythical)
+
+- Misty lake
+    - Foraging
+        - Foraging
+            - Frog (basic)
+            - Angelroot (basic)
+            - Fishing rod (rare)

@@ -12,7 +12,7 @@ def _iter_options():
         user_id,
         create_button(
             'Buy one relationship slot for them <3',
-            custom_id = 'user_balance.relationship_slots.increment.invoke.other.2f260402e0'
+            custom_id = f'user.buy_relationship_slots.invoke.{user_id:x}'
         ),
     )
 

@@ -38,16 +38,16 @@ async def handle_event_creation(
         The received interaction event.
     
     event_mode : `int`
-        the event's mode as hexadecimal string
+        the event's mode as hexadecimal integer
     
     duration : `int`
-        Event duration as hexadecimal string
+        Event duration as hexadecimal integer
     
     amount : `int`
-        Reward amount as hexadecimal string.
+        Reward amount as hexadecimal integer.
     
     user_limit : `int`
-        The maximal amount of users allowed to receive reward as hexadecimal string.
+        The maximal amount of users allowed to receive reward as hexadecimal integer.
     """
     try:
         event_mode = int(event_mode, 16)
@@ -108,17 +108,15 @@ async def handle_click(
         return
     
     # Add user id & exit if already used
-    user_limit = session.user_limit
     user_id = interaction_event.user.id
     
-    if user_limit:
-        user_ids = session.user_ids
-        if (user_ids is None):
-            session.user_ids = user_ids = set()
-        elif user_id in user_ids:
-            return
-        
-        user_ids.add(user_id)
+    user_ids = session.user_ids
+    if (user_ids is None):
+        session.user_ids = user_ids = set()
+    elif user_id in user_ids:
+        return
+    
+    user_ids.add(user_id)
     
     # Step the session
     await step_session(session, interaction_event)

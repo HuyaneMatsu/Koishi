@@ -77,7 +77,7 @@ def _iter_options():
         Icon(IconType.static, 2),
         1 << 10,
         user_id,
-        1 << 8,
+        1 << 7,
         [
             linked_quest_0,
         ],
@@ -96,7 +96,7 @@ def _iter_options():
                     f'# Orin\'s dance house\'s quest board\n'
                     f'\n'
                     f'Guild rank: G\n'
-                    f'Quest count: 3'
+                    f'Quest count: 3 / 4'
                 ),
                 thumbnail = create_thumbnail_media(
                     f'{CDN_ENDPOINT}/icons/{guild_id}/00000000000000000000000000000002.png',
@@ -115,7 +115,7 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'Required rank: G      Completed: 1 / 3 times\n'
+                    f'Required rank: E      Completed: 1 / 3 times\n'
                     f'Submit {quest_amount_1} {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
                 ),
                 thumbnail = create_button(
@@ -138,12 +138,14 @@ def _iter_options():
             create_separator(),
             create_row(
                 create_button(
-                    emoji = EMOJI_PAGE_PREVIOUS,
+                    'Page 0',
+                    EMOJI_PAGE_PREVIOUS,
                     custom_id = 'quest_board.page_decrement_disabled',
                     enabled = False,
                 ),
                 create_button(
-                    emoji = EMOJI_PAGE_NEXT,
+                    'Page 2',
+                    EMOJI_PAGE_NEXT,
                     custom_id = 'quest_board.page_increment_disabled',
                     enabled = False,
                 ),
@@ -175,17 +177,19 @@ def _iter_options():
                 f'# Orin\'s dance house\'s quest board\n'
                 f'\n'
                 f'Guild rank: G\n'
-                f'Quest count: 0 / 3'
+                f'Quest count: 0 / 4'
             ),
             create_separator(),
             create_row(
                 create_button(
-                    emoji = EMOJI_PAGE_PREVIOUS,
+                    'Page 0',
+                    EMOJI_PAGE_PREVIOUS,
                     custom_id = 'quest_board.page_decrement_disabled',
                     enabled = False,
                 ),
                 create_button(
-                    emoji = EMOJI_PAGE_NEXT,
+                    'Page 2',
+                    EMOJI_PAGE_NEXT,
                     custom_id = 'quest_board.page_increment_disabled',
                     enabled = False,
                 ),
@@ -251,7 +255,7 @@ def test__build_quest_board_quest_listing_components(
     guild_stats.set('credibility', guild_credibility)
     
     user_stats = UserStats(user_id)
-    user_stats.set('credibility', user_credibility)
+    user_stats.modify_credibility_by(user_credibility)
     
     def _patched_get_quest_batch(self):
         nonlocal quest_batch

@@ -46,9 +46,7 @@ async def message_create(client, message):
     
     stickers = message.stickers
     if (stickers is not None):
-        stickers = {sticker for sticker in stickers if sticker.type is StickerType.guild}
-        if not stickers:
-            stickers = None
+        stickers = {*stickers}
     
     if (custom_emojis is None) and (stickers is None):
         return

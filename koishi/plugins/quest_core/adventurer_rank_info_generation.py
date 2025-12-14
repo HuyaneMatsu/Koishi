@@ -54,4 +54,4 @@ def get_guild_adventurer_rank_info(credibility):
         credibility >>= 1
         continue
     
-    return AdventurerRankInfo(rank, rank + ((rank + 4 ) >> 1))
+    return AdventurerRankInfo(rank, rank + ((rank + 6) >> 1))

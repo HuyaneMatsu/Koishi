@@ -15,7 +15,8 @@ from .constants import ENTRY_DATA_VERSION, AUTOMATION_REACTION_ROLE_BY_GUILD_ID,
 from .items import pack_items
 
 
-COUNTER = iter(count(1))
+if (DB_ENGINE is None):
+    COUNTER = iter(count(1))
 
 
 async def query_save_automation_reaction_role_entry(automation_reaction_role_entry):

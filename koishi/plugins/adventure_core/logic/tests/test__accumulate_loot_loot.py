@@ -13,15 +13,17 @@ def _iter_options():
     yield (
         None,
         Random(255),
+        1.0,
         {},
     )
     
     # 1 loot with hit -> increase duration
     yield (
         (
-            OptionLoot(1, 1, 10, 20, 9999, 100, 20, 10, 2),
+            OptionLoot(False, 1, 1, False, 10, 20, 9999, 100, 20, 10, 2),
         ),
         Random(23),
+        1.0,
         {
             9999 : LootAccumulation(20, 500, 50)
         },
@@ -29,7 +31,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__accumulate_loot_loot(loot, random):
+def test__accumulate_loot_loot(loot, random, multiplier):
     """
     tests whether ``accumulate_loot_loot`` works as intended.
     
@@ -41,10 +43,13 @@ def test__accumulate_loot_loot(loot, random):
     random : `random.Random`
         Random number generator to use.
     
+    multiplier : `float`
+        Multiplier of the user for this given action.
+    
     Returns
     -------
     output : ``dict<int, LootAccumulation>``
     """
     accumulations = {}
-    accumulate_loot_loot(loot, accumulations, random)
+    accumulate_loot_loot(loot, accumulations, random, multiplier)
     return accumulations

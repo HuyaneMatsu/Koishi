@@ -14,22 +14,28 @@ def _assert_fields_set(option_base):
     vampytest.assert_instance(option_base, OptionBase)
     vampytest.assert_instance(option_base.amount_base, int)
     vampytest.assert_instance(option_base.amount_interval, int)
+    vampytest.assert_instance(option_base.amount_scaling_enabled, bool)
     vampytest.assert_instance(option_base.chance_in, int)
     vampytest.assert_instance(option_base.chance_out, int)
+    vampytest.assert_instance(option_base.chance_scaling_enabled, bool)
 
 
 def test__OptionBase__new():
     """
     Tests whether ``OptionBase.__new__`` works as intended.
     """
+    chance_scaling_enabled = False
     chance_in = 2
     chance_out = 100
+    amount_scaling_enabled = True
     amount_min = 31
     amount_max = 6
     
     option_base = OptionBase(
+        chance_scaling_enabled,
         chance_in,
         chance_out,
+        amount_scaling_enabled,
         amount_min,
         amount_max,
     )
@@ -38,22 +44,28 @@ def test__OptionBase__new():
     
     vampytest.assert_eq(option_base.amount_base, amount_min)
     vampytest.assert_eq(option_base.amount_interval, amount_max - amount_min)
+    vampytest.assert_eq(option_base.amount_scaling_enabled, amount_scaling_enabled)
     vampytest.assert_eq(option_base.chance_in, chance_in)
     vampytest.assert_eq(option_base.chance_out, chance_out)
+    vampytest.assert_eq(option_base.chance_scaling_enabled, chance_scaling_enabled)
 
 
 def test__OptionBase__repr():
     """
     Tests whether ``OptionBase.__repr__`` works as intended.
     """
+    chance_scaling_enabled = False
     chance_in = 2
     chance_out = 100
+    amount_scaling_enabled = True
     amount_min = 31
     amount_max = 6
     
     option_base = OptionBase(
+        chance_scaling_enabled,
         chance_in,
         chance_out,
+        amount_scaling_enabled,
         amount_min,
         amount_max,
     )
@@ -63,14 +75,18 @@ def test__OptionBase__repr():
 
 
 def _iter_options__eq():
+    chance_scaling_enabled = False
     chance_in = 2
     chance_out = 100
+    amount_scaling_enabled = True
     amount_min = 31
     amount_max = 6
     
     keyword_parameters = {
+        'chance_scaling_enabled': chance_scaling_enabled,
         'chance_in': chance_in,
         'chance_out': chance_out,
+        'amount_scaling_enabled': amount_scaling_enabled,
         'amount_min': amount_min,
         'amount_max': amount_max,
     }
@@ -79,6 +95,15 @@ def _iter_options__eq():
         keyword_parameters,
         keyword_parameters,
         True,
+    )
+    
+    yield (
+        keyword_parameters,
+        {
+            **keyword_parameters,
+            'chance_scaling_enabled': True,
+        },
+        False,
     )
     
     yield (
@@ -95,6 +120,15 @@ def _iter_options__eq():
         {
             **keyword_parameters,
             'chance_out': 5,
+        },
+        False,
+    )
+    
+    yield (
+        keyword_parameters,
+        {
+            **keyword_parameters,
+            'amount_scaling_enabled': False,
         },
         False,
     )
@@ -147,14 +181,18 @@ def test__OptionBase__hash():
     """
     Tests whether ``OptionBase.__hash__`` works as intended.
     """
+    chance_scaling_enabled = False
     chance_in = 2
     chance_out = 100
+    amount_scaling_enabled = True
     amount_min = 31
     amount_max = 6
     
     option_base = OptionBase(
+        chance_scaling_enabled,
         chance_in,
         chance_out,
+        amount_scaling_enabled,
         amount_min,
         amount_max,
     )

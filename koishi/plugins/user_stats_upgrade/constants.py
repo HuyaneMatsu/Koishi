@@ -1,0 +1,5 @@
+__all__ = ()
+
+
+STAT_UPGRADE_MIN = 0
+STAT_UPGRADE_MAX = 10

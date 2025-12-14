@@ -14,6 +14,7 @@ from ..adventure_core import (
     scheduled_adventure_arrival, store_adventure
 )
 from ..inventory_core import get_inventory
+from ..quest_core import get_user_adventurer_rank_info
 from ..user_stats_core import get_user_stats
 
 from .component_builders import (
@@ -51,7 +52,7 @@ async def depart(
     return_id_hexadecimal : (
         [(return_.name, format(return_.id, 'x')) for return_ in RETURNS_ALLOWED],
         'How do you want to arrive back?',
-        'return_',
+        'return',
     ) = None,
     auto_cancellation_id_hexadecimal : (
         [(auto_cancellation.name, format(auto_cancellation.id, 'x')) for auto_cancellation in AUTO_CANCELLATIONS_ALLOWED],
@@ -106,7 +107,11 @@ async def depart(
             error_message = f'Your inventory is overloaded, cannot go on an adventure like this.'
             break
         
-        location = get_best_matching_location(location_name)
+         
+        location = get_best_matching_location(
+            location_name,
+            get_user_adventurer_rank_info(user_stats.credibility).level,
+        )
         if location is None:
             error_message = f'Unknown location: {location_name}.'
             break    
@@ -190,7 +195,7 @@ async def depart(
 
 
 @depart.autocomplete('location')
-async def autocomplete_depart_location(location_name):
+async def autocomplete_depart_location(interaction_event, location_name):
     """
     Auto completes depart location.
     
@@ -198,6 +203,9 @@ async def autocomplete_depart_location(location_name):
     
     Parameters
     ----------
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
     location_name : `None | str`
         The value to autocomplete.
     
@@ -205,7 +213,11 @@ async def autocomplete_depart_location(location_name):
     -------
     suggestions : `list<(str, str)>`
     """
-    return get_location_suggestions(location_name)
+    user_stats = await get_user_stats(interaction_event.user_id)
+    return get_location_suggestions(
+        location_name,
+        get_user_adventurer_rank_info(user_stats.credibility).level,
+    )
 
 
 @depart.autocomplete('target')
@@ -231,7 +243,11 @@ async def autocomplete_depart_target(interaction_event, target_name):
     if location_name is None:
         return
     
-    location = get_best_matching_location(location_name)
+    user_stats = await get_user_stats(interaction_event.user_id)
+    location = get_best_matching_location(
+        location_name,
+        get_user_adventurer_rank_info(user_stats.credibility).level,
+    )
     if location is None:
         return
     
@@ -268,7 +284,11 @@ async def autocomplete_depart_duration(interaction_event, duration_string):
     if location_name is None:
         return
     
-    location = get_best_matching_location(location_name)
+    user_stats = await get_user_stats(interaction_event.user_id)
+    location = get_best_matching_location(
+        location_name,
+        get_user_adventurer_rank_info(user_stats.credibility).level,
+    )
     if location is None:
         return
     

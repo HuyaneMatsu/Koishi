@@ -4,9 +4,9 @@ from hata import ButtonStyle, Component, create_button, create_row, create_separ
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...item_core import ITEM_ID_PEACH, get_item_nullable
+from ...item_core import ITEM_ID_BISHOPHAT, get_item_nullable
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_PEACH, Quest,
+    AMOUNT_TYPE_COUNT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest, QUEST_TEMPLATE_ID_CHIRUNO_FROG, Quest,
     get_quest_template
 )
 from ...user_stats_core import UserStats
@@ -15,11 +15,11 @@ from ..component_building import build_linked_quest_submit_success_completed_com
 
 
 def _iter_options():
-    item_id = ITEM_ID_PEACH
+    item_id = ITEM_ID_BISHOPHAT
     item = get_item_nullable(item_id)
     assert item is not None
     
-    quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_PEACH
+    quest_template_id_0 = QUEST_TEMPLATE_ID_CHIRUNO_FROG
     quest_template_0 = get_quest_template(quest_template_id_0)
     
     user_id = 202510140000
@@ -51,9 +51,8 @@ def _iter_options():
     linked_quest_0.completion_count = 1
     
     
-    user_id = 202509160003
-    
     yield (
+        0,
         user_id,
         1,
         guild_id_0,
@@ -87,7 +86,7 @@ def _iter_options():
                 ),
                 create_button(
                     'Repeat',
-                    custom_id = f'quest_board.accept.{user_id:x}.{guild_id_0:x}.{0:x}.{quest_template_id_0}',
+                    custom_id = f'quest_board.accept.{user_id:x}.{guild_id_0:x}.{0:x}.{quest_template_id_0:x}',
                     enabled = True,
                     style = ButtonStyle.green,
                 ),
@@ -96,6 +95,7 @@ def _iter_options():
     )
     
     yield (
+        0,
         user_id,
         1,
         guild_id_1,
@@ -129,7 +129,7 @@ def _iter_options():
                 ),
                 create_button(
                     'Repeat',
-                    custom_id = f'quest_board.accept.{user_id:x}.{guild_id_0:x}.{0:x}.{quest_template_id_0}',
+                    custom_id = f'quest_board.accept.{user_id:x}.{guild_id_0:x}.{0:x}.{quest_template_id_0:x}',
                     enabled = False,
                     style = ButtonStyle.gray,
                 ),
@@ -140,6 +140,7 @@ def _iter_options():
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__build_linked_quest_submit_success_completed_components(
+    client_id,
     user_id,
     page_index,
     local_guild_id,
@@ -158,6 +159,9 @@ def test__build_linked_quest_submit_success_completed_components(
     
     Parameters
     ----------
+    client_id : `int`
+        The client's identifier who is rendering this message.
+    
     page_index : `int`
         The linked quests' current page's index.
     
@@ -196,9 +200,10 @@ def test__build_linked_quest_submit_success_completed_components(
     output : ``list<Component>``
     """
     user_stats = UserStats(user_id)
-    user_stats.set('credibility', user_credibility)
+    user_stats.modify_credibility_by(user_credibility)
     
     output = build_linked_quest_submit_success_completed_components(
+        client_id,
         user_id,
         page_index,
         local_guild_id,

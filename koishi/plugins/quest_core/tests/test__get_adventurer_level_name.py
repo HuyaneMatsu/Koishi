@@ -14,7 +14,8 @@ def _iter_options():
     yield b'H'[0] - b'A'[0], 'A'
     yield b'I'[0] - b'A'[0], 'S'
     yield b'J'[0] - b'A'[0], 'S+'
-    yield b'K'[0] - b'A'[0], 'S+'
+    yield b'K'[0] - b'A'[0], 'S++'
+    yield b'L'[0] - b'A'[0], 'S+++'
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())

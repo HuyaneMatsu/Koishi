@@ -15,7 +15,7 @@ from ..quest_core import (
     get_linked_quest_listing, get_quest_template, get_user_adventurer_rank_info, update_linked_quest
 )
 from ..user_balance import get_user_balance, save_user_balance
-from ..user_stats_core import get_user_stats
+from ..user_stats_core import get_user_stats, save_user_stats
 
 from .component_building import (
     build_linked_quest_abandon_confirmation_form, build_linked_quest_abandon_success_components,
@@ -284,7 +284,7 @@ async def quest_accept(client, event, user_id, guild_id, page_index, quest_templ
             error_message = BROKEN_QUEST_DESCRIPTION
             break
         
-        if quest_template.level > user_adventurer_rank_info.level:
+        if quest_template.level > user_adventurer_rank_info.level + 1:
             error_message = 'Your rank is too low to accept this quest.'
             break
         
@@ -516,7 +516,7 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
         
         else:
             user_balance = await get_user_balance(user_id)
-            user_balance.modify_relationship_value_by(linked_quest.reward_balance)
+            user_balance.modify_balance_by(linked_quest.reward_balance)
             await save_user_balance(user_balance)
             
             reward_credibility = linked_quest.reward_credibility
@@ -530,8 +530,8 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
                 user_reward_credibility = calculate_received_reward_credibility(
                     reward_credibility, quest_template.level, user_adventurer_rank_info.level
                 )
-                user_stats.set('credibility', user_stats.credibility + user_reward_credibility)
-                await user_stats.save()
+                user_stats.modify_credibility_by(user_reward_credibility)
+                await save_user_stats(user_stats)
                 
                 guild_stats = await get_guild_stats(linked_quest.guild_id)
                 guild_adventurer_rank_info = get_guild_adventurer_rank_info(guild_stats.credibility)
@@ -552,6 +552,7 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
                 await update_linked_quest(linked_quest)
             
             components = build_linked_quest_submit_success_completed_components(
+                client.id,
                 user_id,
                 page_index,
                 event.guild_id,
@@ -605,8 +606,8 @@ async def _linked_quest_abandon(linked_quest, user_stats, credibility_penalty):
         await update_linked_quest(linked_quest)
     
     if credibility_penalty:
-        user_stats.set('credibility', max(user_stats.credibility - credibility_penalty, 0))
-        await user_stats.save()
+        user_stats.modify_credibility_by(- credibility_penalty)
+        await save_user_stats(user_stats)
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN)

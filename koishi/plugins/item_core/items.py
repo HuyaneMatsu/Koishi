@@ -14,17 +14,19 @@ from .constants import ITEMS
 from .flags import ITEM_FLAG_COSTUME, ITEM_FLAG_EDIBLE, ITEM_FLAG_HEAD, ITEM_FLAG_NPC, ITEM_FLAG_WEAPON
 from .item import Item
 from .item_ids import (
-    ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BIG_BRAIDS_OF_THE_HELL_CAT, ITEM_ID_BISHOPHAT,
+    ITEM_ID_ACHING_AFFECTION_S_HEART_PIERCER, ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT,
+    ITEM_ID_HELL_CAT_S_BIG_BRAIDS, ITEM_ID_BISHOPHAT,
     ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH,
     ITEM_ID_BUNNY_SUIT,
-    ITEM_ID_CARROT, ITEM_ID_ROGUISH_DRESS_OF_THE_CORPSE_VOYAGER, ITEM_ID_ELEGANT_DRESS_OF_THE_CHIEF_MAID,
+    ITEM_ID_CARROT, ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRESS, ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS,
     ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DEVILCART_OYSTER,
-    ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT, ITEM_ID_FIERY_CHARIOT_OF_THE_RED_EYED_KASHA, ITEM_ID_FISHING_ROD,
-    ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_KINGS_NEW_CLOTHES, ITEM_ID_KOISHI,
-    ITEM_ID_KOKORO, ITEM_ID_MAID_DRESS, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_ORIN, ITEM_ID_PEACH,
+    ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT, ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT, ITEM_ID_FISHING_ROD,
+    ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_KINGS_NEW_CLOTHES, ITEM_ID_KITCHEN_KNIFE,
+    ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_MAID_DRESS, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_ORIN, ITEM_ID_PEACH,
     ITEM_ID_RIBBON_BOW, ITEM_ID_RULER,
     ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAW_HAT, ITEM_ID_STRAWBERRY,
-    ITEM_ID_PLUSHIE_BEAR, ITEM_ID_TORN_OUT_WING_OF_THE_UNKNOWN_OVEN, ITEM_ID_TEWI, ITEM_ID_YUKARI, ITEM_ID_YUUKA
+    ITEM_ID_PLUSHIE_BEAR, ITEM_ID_POKING_KNIFE, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_TEWI,
+    ITEM_ID_YUKARI, ITEM_ID_YUUKA
 )
 
 
@@ -614,9 +616,9 @@ ITEM_MAID_DRESS = ITEMS[ITEM_ID_MAID_DRESS] = Item(
 )
 
 
-ITEM_ELEGANT_DRESS_OF_THE_CHIEF_MAID = ITEMS[ITEM_ID_ELEGANT_DRESS_OF_THE_CHIEF_MAID] = Item(
-    ITEM_ID_ELEGANT_DRESS_OF_THE_CHIEF_MAID,
-    'Elegant dress of the Chief maid',
+ITEM_CHIEF_MAID_S_ELEGANT_DRESS = ITEMS[ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS] = Item(
+    ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS,
+    'Chief maid\'s Elegant dress',
     BUILTIN_EMOJIS['stopwatch'],
     (
         'Perfect fit for a mansion\'s senior maid who directorly reports to her mistress. '
@@ -645,9 +647,9 @@ ITEM_ELEGANT_DRESS_OF_THE_CHIEF_MAID = ITEMS[ITEM_ID_ELEGANT_DRESS_OF_THE_CHIEF_
 )
 
 
-ITEM_TORN_OUT_WING_OF_THE_UNKNOWN_OVEN = ITEMS[ITEM_ID_TORN_OUT_WING_OF_THE_UNKNOWN_OVEN] = Item(
-    ITEM_ID_TORN_OUT_WING_OF_THE_UNKNOWN_OVEN,
-    'Torn out wing of the Unknown oven',
+ITEM_UNKNOWN_OVEN_S_TORN_OUT_WING = ITEMS[ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING] = Item(
+    ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING,
+    'Unknown Owen\'s Torn out wing',
     BUILTIN_EMOJIS['fishing_pole_and_fish'],
     (
         'A single wing, appearing to made out of some kind of metal, with 8 prims attached to it along. '
@@ -706,9 +708,9 @@ ITEM_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT = ITEMS[ITEM_ID_ELECTROSTATIC_DISCH
 )
 
 
-ITEM_BIG_BRAIDS_OF_THE_HELL_CAT = ITEMS[ITEM_ID_BIG_BRAIDS_OF_THE_HELL_CAT] = Item(
-    ITEM_ID_BIG_BRAIDS_OF_THE_HELL_CAT,
-    'Big braids of the Hell cat',
+ITEM_HELL_CAT_S_BIG_BRAIDS = ITEMS[ITEM_ID_HELL_CAT_S_BIG_BRAIDS] = Item(
+    ITEM_ID_HELL_CAT_S_BIG_BRAIDS,
+    'Hell cat\'s Big braids',
     BUILTIN_EMOJIS['black_cat'],
     (
         'A pair of fiery red braids with the length of a tail. '
@@ -729,9 +731,9 @@ ITEM_BIG_BRAIDS_OF_THE_HELL_CAT = ITEMS[ITEM_ID_BIG_BRAIDS_OF_THE_HELL_CAT] = It
 )
 
 
-ITEM_FIERY_CHARIOT_OF_THE_RED_EYED_KASHA = ITEMS[ITEM_ID_FIERY_CHARIOT_OF_THE_RED_EYED_KASHA] = Item(
-    ITEM_ID_FIERY_CHARIOT_OF_THE_RED_EYED_KASHA,
-    'Fiery chariot of the Red eyed kasha',
+ITEM_RED_EYED_KASHA_S_FIERY_CHARIOT = ITEMS[ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT] = Item(
+    ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT,
+    'Red eyed kasha\'s Fiery chariot',
     BUILTIN_EMOJIS['shopping_cart'],
     (
         'A wheelbarrow with burning wheels that kashas travel the world with. '
@@ -753,9 +755,9 @@ ITEM_FIERY_CHARIOT_OF_THE_RED_EYED_KASHA = ITEMS[ITEM_ID_FIERY_CHARIOT_OF_THE_RE
 )
 
 
-ITEM_ROGUISH_DRESS_OF_THE_CORPSE_VOYAGER = ITEMS[ITEM_ID_ROGUISH_DRESS_OF_THE_CORPSE_VOYAGER] = Item(
-    ITEM_ID_ROGUISH_DRESS_OF_THE_CORPSE_VOYAGER,
-    'Roguish dress of the Corpse voyager',
+ITEM_CORPSE_VOYAGER_S_ROGUISH_DRESS = ITEMS[ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRESS] = Item(
+    ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRESS,
+    'Corpse voyager\'s Roguish dress',
     BUILTIN_EMOJIS['black_cat'],
     (
         'A dark dress with green frills, red ribbons tying it at the sleeve and at the neck. '
@@ -766,15 +768,98 @@ ITEM_ROGUISH_DRESS_OF_THE_CORPSE_VOYAGER = ITEMS[ITEM_ID_ROGUISH_DRESS_OF_THE_CO
     164000, # value (hearts)
     3200, # weight (grams)
     (
-        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +1),
-        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__PERCENT), +5),
-        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +1),
-        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +1),
-        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__PERCENT), +10),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__PERCENT), +10),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__PERCENT), +20),
         
         Modifier(construct_modifier_type(MODIFIER_ID__MOVEMENT, MODIFIER_KIND__FLAT), +20),
         Modifier(construct_modifier_type(MODIFIER_ID__MOVEMENT, MODIFIER_KIND__PERCENT), +6),
         Modifier(construct_modifier_type(MODIFIER_ID__HEALTH, MODIFIER_KIND__PERCENT), +10),
         Modifier(construct_modifier_type(MODIFIER_ID__ENERGY, MODIFIER_KIND__PERCENT), +10),
+    ),
+)
+
+
+
+ITEM_KITCHEN_KNIFE = ITEMS[ITEM_ID_KITCHEN_KNIFE] = Item(
+    ITEM_ID_KITCHEN_KNIFE,
+    'Kitchen knife',
+    BUILTIN_EMOJIS['knife'],
+    (
+        'A tool for every day use, It may have 2 main usa cases, both to cut and to poke.'
+        'It consists out of 2 parts, the blade and the handle.\n'
+        'The blade is made out of steel in almost every case. '
+        'Its flat edge is curved, but its tip for stabbing is imprecise.'
+        'The tall blade allows the equipping hand to not hit the cutting board while using it.'
+        'For every day usage it has one of the best shape and great durability.\n'
+        'The handle may be made of various materials. '
+        'Most common are: any metal, varnished wood, antler or bone, hide, rubber or plastic.'
+    ),
+    ITEM_FLAG_WEAPON,
+    8400, # value (hearts)
+    410, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +5),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +1),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__BUTCHERING, MODIFIER_KIND__PERCENT), +15),
+    ),
+)
+
+
+ITEM_POKING_KNIFE = ITEMS[ITEM_ID_POKING_KNIFE] = Item(
+    ITEM_ID_POKING_KNIFE,
+    'Poking knife',
+    BUILTIN_EMOJIS['knife'],
+    (
+        'A tool for every day use, It may have 2 main usa cases, both to cut and to stab.'
+        'It consists out of 2 parts, the blade and the handle.\n'
+        'The blade is made out of steel in almost every case. '
+        'Its spine is stiff, so it can have flat edge on both sides. It is better for fighting than for work.'
+        'Its tip is located on its longitudinal axis, making it perfect for stabbing. '
+        'Compared to single edge cutting knifes, it has either lower durability or dulls faster, '
+        'For every day usage it has one of the best shape and it has great durability.\n'
+        'The handle may be made of various materials. '
+        'Most common are: any metal, varnished wood, antler or bone, hide, rubber or plastic.'
+    ),
+    ITEM_FLAG_WEAPON,
+    4800, # value (hearts)
+    280, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +4),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__BUTCHERING, MODIFIER_KIND__PERCENT), +15),
+        Modifier(construct_modifier_type(MODIFIER_ID__HUNTING, MODIFIER_KIND__FLAT), 4),
+        Modifier(construct_modifier_type(MODIFIER_ID__HUNTING, MODIFIER_KIND__PERCENT), +10),
+    ),
+)
+
+
+ITEM_ACHING_AFFECTION_S_HEART_PIERCER = ITEMS[ITEM_ID_ACHING_AFFECTION_S_HEART_PIERCER] = Item(
+    ITEM_ID_ACHING_AFFECTION_S_HEART_PIERCER,
+    'Aching affection\'s Heart-piercer',
+    BUILTIN_EMOJIS['knife'],
+    (
+        'A silver colored kitchen knife that can cut everything in the right hands. '
+        'The spine of its back is curving forward, making it less top heavy, reducing its height. '
+        'This allows it to better piercing compared to its regular counterparts.'
+    ),
+    ITEM_FLAG_WEAPON,
+    82000, # value (hearts)
+    380, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +5),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +4),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__BUTCHERING, MODIFIER_KIND__FLAT), 2),
+        Modifier(construct_modifier_type(MODIFIER_ID__BUTCHERING, MODIFIER_KIND__PERCENT), +15),
+        Modifier(construct_modifier_type(MODIFIER_ID__HUNTING, MODIFIER_KIND__PERCENT), +10),
     ),
 )

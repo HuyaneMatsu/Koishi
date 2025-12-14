@@ -197,7 +197,7 @@ async def handle_snipe_choice(client, interaction_event, user_id, feature_flags,
         The original invoking user's identifier as hexadecimal integer.
     
     feature_flags : `str`
-        The current feature flags of the snipe as hexadecimal string.
+        The current feature flags of the snipe as hexadecimal integer.
     
     selected : `None | tuple<str>`, (Keyword only)
         The selected entity.
@@ -242,7 +242,7 @@ async def handle_snipe_action(client, interaction_event, user_id, feature_flags,
         The original invoking user's identifier as hexadecimal integer.
     
     feature_flags : `str`
-        The current feature flags of the snipe as hexadecimal string.
+        The current feature flags of the snipe as hexadecimal integer.
     
     current_entity_packed : `str`
         The current entity packed.
@@ -307,6 +307,9 @@ async def handle_snipe_action(client, interaction_event, user_id, feature_flags,
         return
     
     if action == ACTION_CLOSE:
+        await client.interaction_component_acknowledge(
+            interaction_event,
+        )
         await client.interaction_response_message_delete(
             interaction_event,
         )
@@ -346,7 +349,7 @@ async def handle_snipe_add(
         The packed entity or entity type.
     
     guild_ids : `None | tuple<str>` = `None`, (Keyword only)
-        The targeted guilds' identifiers as hexadecimal strings.
+        The targeted guilds' identifiers as hexadecimal integers.
     
     name : `None | str` = `None`, Optional (Keyword only)
         Inputted name.

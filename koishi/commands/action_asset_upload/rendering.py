@@ -1,7 +1,7 @@
 __all__ = ()
 
 
-ACTION_TAGS_SINGLE_SOURCE = ('cry', 'happy', 'kon', 'stare', 'wave', 'wink')
+ACTION_TAGS_SINGLE_SOURCE = ('awoo', 'blush', 'cry', 'happy', 'kon', 'moon', 'murder', 'rawr', 'stare', 'wave', 'wink')
 ACTION_TAGS_SELF_TARGET = ('pocky_self', 'feed_self')
 ACTION_TAGS_CROSS_TARGET = ('handhold',)
 

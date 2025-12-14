@@ -26,6 +26,18 @@ def _iter_options():
     
     yield (
         source_user,
+        -1000,
+        0,
+        Embed(
+            'You have been broke up with',
+            (
+                'Satori broke up with you.'
+            ),
+        )
+    )
+    
+    yield (
+        source_user,
         0,
         guild_id,
         Embed(

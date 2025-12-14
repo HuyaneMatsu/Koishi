@@ -1,6 +1,6 @@
 __all__ = (
     'add_modification_embed_field', 'add_other_balance_modification_embed_field',
-    'add_self_balance_modification_embed_field'
+    'add_self_balance_modification_embed_field', 'produce_modification_description'
 )
 
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
@@ -52,6 +52,46 @@ def add_other_balance_modification_embed_field(embed, balance, modification):
     return add_modification_embed_field(embed, f'Their {EMOJI__HEART_CURRENCY}', balance, modification)
 
 
+def produce_modification_description(current, modification):
+    """
+    Produces modification description.
+    
+    This function is an iterable generator.
+    
+    current : `int`
+        Current value.
+    
+    modification : `int`
+        The modification.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    yield '```ansi\n'
+    yield str(current)
+    yield ' '
+    
+    if modification > 0:
+        highlight = COLOR_CODE_GREEN
+    elif modification < 0:
+        highlight = COLOR_CODE_RED
+    else:
+        highlight = None
+    
+    if (highlight is not None):
+        yield highlight
+    
+    yield '->'
+    
+    if (highlight is not None):
+        yield COLOR_CODE_RESET
+    
+    yield ' '
+    yield str(current + modification)
+    yield '\n```'
+    
+
 def add_modification_embed_field(embed, title, balance, modification):
     """
     Adds a balance modification filed to the given embed.
@@ -74,27 +114,4 @@ def add_modification_embed_field(embed, title, balance, modification):
     -------
     embed : ``Embed``
     """
-    description_parts = ['```ansi\n']
-    description_parts.append(str(balance))
-    description_parts.append(' ')
-    
-    if modification > 0:
-        highlight = COLOR_CODE_GREEN
-    elif modification < 0:
-        highlight = COLOR_CODE_RED
-    else:
-        highlight = None
-    
-    if (highlight is not None):
-        description_parts.append(highlight)
-    
-    description_parts.append('->')
-    
-    if (highlight is not None):
-        description_parts.append(COLOR_CODE_RESET)
-    
-    description_parts.append(' ')
-    description_parts.append(str(balance + modification))
-    description_parts.append('\n```')
-    
-    return embed.add_field(title, ''.join(description_parts), True)
+    return embed.add_field(title, ''.join([*produce_modification_description(balance, modification)]), True)

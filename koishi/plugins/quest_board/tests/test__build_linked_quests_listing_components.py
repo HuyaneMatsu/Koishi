@@ -319,7 +319,7 @@ def test__build_linked_quests_listing_components(
         user.guild_profiles[guild_id_0] = GuildProfile(avatar = user_guild_avatar, nick = user_nick)
     
     user_stats = UserStats(user_id)
-    user_stats.set('credibility', user_credibility)
+    user_stats.modify_credibility_by(user_credibility)
     
     DateTimeMock.set_current(current_date_time)
     

@@ -86,7 +86,7 @@ Although here is a "short" description for all of her commands by category:
 - `/ascii` - Ascii art your avatar or the guild's icon.
 - `/choose` - Chooses one of your given options.
 - `/imaginary-friend` - A collection of commands that an imaginary friend would have.
-- `/memme` - A curated list of touhou memes.
+- `/meme` - A curated list of touhou memes.
 - `/oj` - Lookup commands related the 100% Orange Juice video game.
 - `/paranoia` - Pa-pa-pa-pa-paranoia.
 - `/random` - Chooses a random number in the given range.
@@ -155,9 +155,9 @@ Although here is a "short" description for all of her commands by category:
     Support guild only commands
 </h3>
 
-`add-to-move-group`, `/all-users`, `/award`, `bozosort`, `/daily-event`, `delete-from`, `delete-till`, `/docs-search`,
-`/events`, `/github-profile`, `/heart-event`, `/in-role`, `/latest-users`, `/markdown`, `raw`, `/rules`, `/take`,
-`todo`, `/move-channel`, `/move-message`, `/move-messages`, `/plugins` 
+`add-to-move-group`, `/all-users`, `/award`, `bozosort`, `delete-from`, `delete-till`, `/docs-search`, `/events`,
+`/github-profile`, `/heart-event`, `/in-role`, `/latest-users`, `/markdown`, `raw`, `/rules`, `/take`, `todo`,
+`/move-channel`, `/move-message`, `/move-messages`, `/plugins` 
 
 <h1></h1>
 

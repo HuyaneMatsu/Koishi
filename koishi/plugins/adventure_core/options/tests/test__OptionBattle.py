@@ -15,8 +15,10 @@ def _assert_fields_set(option_battle):
     vampytest.assert_instance(option_battle, OptionBattle)
     vampytest.assert_instance(option_battle.amount_base, int)
     vampytest.assert_instance(option_battle.amount_interval, int)
+    vampytest.assert_instance(option_battle.amount_scaling_enabled, bool)
     vampytest.assert_instance(option_battle.chance_in, int)
     vampytest.assert_instance(option_battle.chance_out, int)
+    vampytest.assert_instance(option_battle.chance_scaling_enabled, bool)
     vampytest.assert_instance(option_battle.enemy_id, int)
     vampytest.assert_instance(option_battle.loot, tuple, nullable = True)
 
@@ -25,19 +27,23 @@ def test__OptionBattle__new():
     """
     Tests whether ``OptionBattle.__new__`` works as intended.
     """
+    chance_scaling_enabled = False
     chance_in = 2
     chance_out = 100
+    amount_scaling_enabled = True
     amount_min = 31
     amount_max = 6
     enemy_id = 5333
     loot = (
-        OptionLoot(1, 1, 1, 1, 130, 22, 2, 20, 1),
-        OptionLoot(1, 2, 2, 4, 132, 22, 2, 20, 1),
+        OptionLoot(False, 1, 1, False, 1, 1, 130, 22, 2, 20, 1),
+        OptionLoot(False, 1, 2, False, 2, 4, 132, 22, 2, 20, 1),
     )
     
     option_battle = OptionBattle(
+        chance_scaling_enabled,
         chance_in,
         chance_out,
+        amount_scaling_enabled,
         amount_min,
         amount_max,
         enemy_id,
@@ -48,8 +54,10 @@ def test__OptionBattle__new():
     
     vampytest.assert_eq(option_battle.amount_base, amount_min)
     vampytest.assert_eq(option_battle.amount_interval, amount_max - amount_min)
+    vampytest.assert_eq(option_battle.amount_scaling_enabled, amount_scaling_enabled)
     vampytest.assert_eq(option_battle.chance_in, chance_in)
     vampytest.assert_eq(option_battle.chance_out, chance_out)
+    vampytest.assert_eq(option_battle.chance_scaling_enabled, chance_scaling_enabled)
     vampytest.assert_eq(option_battle.enemy_id, enemy_id)
     vampytest.assert_eq(option_battle.loot, loot)
 
@@ -58,19 +66,23 @@ def test__OptionBattle__repr():
     """
     Tests whether ``OptionBattle.__repr__`` works as intended.
     """
+    chance_scaling_enabled = False
     chance_in = 2
     chance_out = 100
+    amount_scaling_enabled = True
     amount_min = 31
     amount_max = 6
     enemy_id = 5333
     loot = (
-        OptionLoot(1, 1, 1, 1, 130, 22, 2, 20, 1),
-        OptionLoot(1, 2, 2, 4, 132, 22, 2, 20, 1),
+        OptionLoot(False, 1, 1, False, 1, 1, 130, 22, 2, 20, 1),
+        OptionLoot(False, 1, 2, False, 2, 4, 132, 22, 2, 20, 1),
     )
     
     option_battle = OptionBattle(
+        chance_scaling_enabled,
         chance_in,
         chance_out,
+        amount_scaling_enabled,
         amount_min,
         amount_max,
         enemy_id,
@@ -82,19 +94,23 @@ def test__OptionBattle__repr():
 
 
 def _iter_options__eq():
+    chance_scaling_enabled = False
     chance_in = 2
     chance_out = 100
+    amount_scaling_enabled = True
     amount_min = 31
     amount_max = 6
     enemy_id = 5333
     loot = (
-        OptionLoot(1, 1, 1, 1, 130, 22, 2, 20, 1),
-        OptionLoot(1, 2, 2, 4, 132, 22, 2, 20, 1),
+        OptionLoot(False, 1, 1, False, 1, 1, 130, 22, 2, 20, 1),
+        OptionLoot(False, 1, 2, False, 2, 4, 132, 22, 2, 20, 1),
     )
     
     keyword_parameters = {
+        'chance_scaling_enabled': chance_scaling_enabled,
         'chance_in': chance_in,
         'chance_out': chance_out,
+        'amount_scaling_enabled': amount_scaling_enabled,
         'amount_min': amount_min,
         'amount_max': amount_max,
         'enemy_id': enemy_id,
@@ -111,6 +127,15 @@ def _iter_options__eq():
         keyword_parameters,
         {
             **keyword_parameters,
+            'chance_scaling_enabled': True,
+        },
+        False,
+    )
+    
+    yield (
+        keyword_parameters,
+        {
+            **keyword_parameters,
             'chance_in': 5,
         },
         False,
@@ -121,6 +146,15 @@ def _iter_options__eq():
         {
             **keyword_parameters,
             'chance_out': 5,
+        },
+        False,
+    )
+    
+    yield (
+        keyword_parameters,
+        {
+            **keyword_parameters,
+            'amount_scaling_enabled': False,
         },
         False,
     )
@@ -191,19 +225,23 @@ def test__OptionBattle__hash():
     """
     Tests whether ``OptionBattle.__hash__`` works as intended.
     """
+    chance_scaling_enabled = False
     chance_in = 2
     chance_out = 100
+    amount_scaling_enabled = True
     amount_min = 31
     amount_max = 6
     enemy_id = 5333
     loot = (
-        OptionLoot(1, 1, 1, 1, 130, 22, 2, 20, 1),
-        OptionLoot(1, 2, 2, 4, 132, 22, 2, 20, 1),
+        OptionLoot(False, 1, 1, False, 1, 1, 130, 22, 2, 20, 1),
+        OptionLoot(False, 1, 2, False, 2, 4, 132, 22, 2, 20, 1),
     )
     
     option_battle = OptionBattle(
+        chance_scaling_enabled,
         chance_in,
         chance_out,
+        amount_scaling_enabled,
         amount_min,
         amount_max,
         enemy_id,

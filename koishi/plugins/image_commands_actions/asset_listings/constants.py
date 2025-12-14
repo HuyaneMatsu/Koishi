@@ -1,5 +1,7 @@
 __all__ = ()
 
+ACTION_TAG_AWOO = 'awoo'
+ACTION_TAG_BITE = 'bite'
 ACTION_TAG_BLUSH = 'blush'
 ACTION_TAG_BULLY = 'bully'
 ACTION_TAG_CARRY = 'carry'
@@ -18,8 +20,9 @@ ACTION_TAG_KON = 'kon'
 ACTION_TAG_LAP_SLEEP = 'lap_sleep'
 ACTION_TAG_LICK = 'lick'
 ACTION_TAG_LIKE = 'like'
-ACTION_TAG_NOM = 'nom'
+ACTION_TAG_MOON = 'moon'
 ACTION_TAG_MURDER = 'murder'
+ACTION_TAG_NOM = 'nom'
 ACTION_TAG_PAT = 'pat'
 ACTION_TAG_PEG = 'peg'
 ACTION_TAG_POCKY = 'pocky_kiss'

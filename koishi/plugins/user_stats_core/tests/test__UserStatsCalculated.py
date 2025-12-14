@@ -4,7 +4,6 @@ import vampytest
 
 from ...item_core import Item
 
-from ..constants import STATS_CACHE
 from ..user_stats import UserStats
 from ..user_stats_calculated import UserStatsCalculated
 
@@ -83,36 +82,31 @@ def test__UserStatsCalculated__new():
         'item_id_weapon': item_id_weapon,
     }
     
-    try:
-        
-        stats = UserStats.from_entry(entry)
-        
-        user_stats_calculated = UserStatsCalculated(stats)
-        _assert_fields_set(user_stats_calculated)
-        
-        vampytest.assert_eq(user_stats_calculated.extra_butchering, 21)
-        vampytest.assert_eq(user_stats_calculated.extra_fishing, 23)
-        vampytest.assert_eq(user_stats_calculated.extra_foraging, 22)
-        vampytest.assert_eq(user_stats_calculated.extra_gardening, 22)
-        vampytest.assert_eq(user_stats_calculated.extra_hunting, 24)
-        
-        vampytest.assert_eq(user_stats_calculated.extra_inventory, 56250)
-        vampytest.assert_eq(user_stats_calculated.extra_movement, 1304)
-        vampytest.assert_eq(user_stats_calculated.extra_health, 236)
-        vampytest.assert_eq(user_stats_calculated.extra_energy, 226)
-        
-        vampytest.assert_is(user_stats_calculated.item_costume, None)
-        vampytest.assert_is(user_stats_calculated.item_head, None)
-        vampytest.assert_is(user_stats_calculated.item_species, None)
-        vampytest.assert_is(user_stats_calculated.item_weapon, None)
-        vampytest.assert_eq(user_stats_calculated.stat_bedroom, stat_bedroom)
-        vampytest.assert_eq(user_stats_calculated.stat_charm, stat_charm)
-        vampytest.assert_eq(user_stats_calculated.stat_cuteness, stat_cuteness)
-        vampytest.assert_eq(user_stats_calculated.stat_housewife, stat_housewife)
-        vampytest.assert_eq(user_stats_calculated.stat_loyalty, stat_loyalty)
-        
-    finally:
-        STATS_CACHE.clear()
+    stats = UserStats.from_entry(entry)
+    
+    user_stats_calculated = UserStatsCalculated(stats)
+    _assert_fields_set(user_stats_calculated)
+    
+    vampytest.assert_eq(user_stats_calculated.extra_butchering, 21)
+    vampytest.assert_eq(user_stats_calculated.extra_fishing, 23)
+    vampytest.assert_eq(user_stats_calculated.extra_foraging, 22)
+    vampytest.assert_eq(user_stats_calculated.extra_gardening, 22)
+    vampytest.assert_eq(user_stats_calculated.extra_hunting, 24)
+    
+    vampytest.assert_eq(user_stats_calculated.extra_inventory, 56250)
+    vampytest.assert_eq(user_stats_calculated.extra_movement, 1304)
+    vampytest.assert_eq(user_stats_calculated.extra_health, 236)
+    vampytest.assert_eq(user_stats_calculated.extra_energy, 226)
+    
+    vampytest.assert_is(user_stats_calculated.item_costume, None)
+    vampytest.assert_is(user_stats_calculated.item_head, None)
+    vampytest.assert_is(user_stats_calculated.item_species, None)
+    vampytest.assert_is(user_stats_calculated.item_weapon, None)
+    vampytest.assert_eq(user_stats_calculated.stat_bedroom, stat_bedroom)
+    vampytest.assert_eq(user_stats_calculated.stat_charm, stat_charm)
+    vampytest.assert_eq(user_stats_calculated.stat_cuteness, stat_cuteness)
+    vampytest.assert_eq(user_stats_calculated.stat_housewife, stat_housewife)
+    vampytest.assert_eq(user_stats_calculated.stat_loyalty, stat_loyalty)
 
 
 def test__UserStatsCalculated__repr():
@@ -156,13 +150,8 @@ def test__UserStatsCalculated__repr():
         'item_id_weapon': item_id_weapon,
     }
     
-    try:
-        
-        stats = UserStats.from_entry(entry)
-        
-        user_stats_calculated = UserStatsCalculated(stats)
-        output = repr(user_stats_calculated)
-        vampytest.assert_instance(output, str)
-        
-    finally:
-        STATS_CACHE.clear()
+    stats = UserStats.from_entry(entry)
+    
+    user_stats_calculated = UserStatsCalculated(stats)
+    output = repr(user_stats_calculated)
+    vampytest.assert_instance(output, str)

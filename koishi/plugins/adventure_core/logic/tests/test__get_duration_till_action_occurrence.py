@@ -13,7 +13,7 @@ def _iter_options():
             9999: LootAccumulation(16, 420, 42),
         },
         1.25,
-        1452,
+        1369,
     )
 
 

@@ -17,11 +17,17 @@ class OptionBattle(OptionBase):
     amount_interval : `int`
         The interval between the base amount and the maximal amount that can be given.
     
+    amount_scaling_enabled : `int`
+        Whether the amount should be scaled by the multiplier.
+    
     chance_in : `int`
         The chance to be chosen in.
     
     chance_out : `int`
         The chance to be chosen out of.
+    
+    chance_scaling_enabled : `bool`
+        Whether the chance should be scaled by the multiplier.
     
     enemy_id : `int`
         The given enemy's identifier.
@@ -31,17 +37,33 @@ class OptionBattle(OptionBase):
     """
     __slots__ = ('enemy_id', 'loot')
     
-    def __new__(cls, chance_in, chance_out, amount_min, amount_max, enemy_id, loot):
+    def __new__(
+        cls,
+        chance_scaling_enabled,
+        chance_in,
+        chance_out,
+        amount_scaling_enabled,
+        amount_min,
+        amount_max,
+        enemy_id,
+        loot,
+    ):
         """
         Creates a new battle option.
         
         Parameters
         ----------
+        chance_scaling_enabled : `bool`
+            Whether the chance should be scaled by the multiplier.
+        
         chance_in : `int`
             The chance to be chosen in.
         
         chance_out : `int`
             The chance to be chosen out of.
+        
+        amount_scaling_enabled : `int`
+            Whether the amount should be scaled by the multiplier.
         
         amount_min : `int`
             The minimal amount to battle.
@@ -55,7 +77,15 @@ class OptionBattle(OptionBase):
         loot : ``None | tuple<LootOption>``
             Additional role options for battled enemies.
         """
-        self = OptionBase.__new__(cls, chance_in, chance_out, amount_min, amount_max)
+        self = OptionBase.__new__(
+            cls,
+            chance_scaling_enabled,
+            chance_in,
+            chance_out,
+            amount_scaling_enabled,
+            amount_min,
+            amount_max,
+        )
         self.enemy_id = enemy_id
         self.loot = loot
         return self

@@ -34,7 +34,7 @@ def _iter_options():
         False,
     )
     
-    for tag in ('kon', 'stare'):
+    for tag in ('awoo', 'kon', 'moon', 'stare'):
         yield (
             {CHEN},
             {tag},

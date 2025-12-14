@@ -12,7 +12,7 @@ def _iter_options():
         user_id,
         create_button(
             'Burn the divorce papers!',
-            custom_id = 'user_balance.relationship_divorces.decrement.invoke.other.2f261037e0'
+            custom_id = f'user.burn_divorce_papers.invoke.{user_id:x}'
         ),
     )
 

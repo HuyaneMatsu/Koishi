@@ -14,11 +14,11 @@ def _iter_options():
         None,
         None,
         (
-            next((action for action in ACTIONS if action.name == 'lap-sleep'), None),
+            next((action for action in ACTIONS if action.name == 'feed'), None),
             next(
                 (
                     image_detail for image_detail in TOUHOU_ACTION_ALL.iter_character_filterable()
-                    if image_detail.url.endswith('akyuu-kosuzu-lap_sleep-0000.png')
+                    if image_detail.url.endswith('akyuu-feed-0000.png')
                 ),
                 None,
             ),
@@ -91,16 +91,19 @@ def test__get_action_and_image_detail(action_tag_name, source_character_name, ta
     ----------
     action_tag_name : `None | str`
         Selected action tag name.
+    
     source_character_name : `None | str`
         Name of the source character.
+    
     target_character_name : `None | str`
         Name of the target character.
+    
     image_name : `None | str`
         The name of the image.
     
     Returns
     -------
-    output : `(None | Action, None | ImageDetailBase)`
+    output : ``(None | Action, None | ImageDetailBase)``
     """
     output = get_action_and_image_detail(action_tag_name, source_character_name, target_character_name, image_name)
     vampytest.assert_instance(output, tuple)

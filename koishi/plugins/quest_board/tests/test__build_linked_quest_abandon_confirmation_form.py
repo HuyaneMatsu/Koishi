@@ -94,7 +94,7 @@ def test__build_linked_quest_abandon_confirmation_form(
     output : ``InteractionForm``
     """
     user_stats = UserStats(user_id)
-    user_stats.set('credibility', credibility)
+    user_stats.modify_credibility_by(credibility)
 
     output = build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_index, credibility_penalty)
     

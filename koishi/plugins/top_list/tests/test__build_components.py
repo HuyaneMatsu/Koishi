@@ -1,5 +1,5 @@
 import vampytest
-from hata import create_button, create_row
+from hata import Component, create_button, create_row
 
 from ..builders import build_components
 from ..constants import (
@@ -79,6 +79,7 @@ def test__build_components(page_index, entry_count):
     ----------
     page_index : `int`
         Page index (0 based).
+    
     entry_count : `int`
         The entry count on this page.
     
@@ -86,4 +87,6 @@ def test__build_components(page_index, entry_count):
     -------
     output : ``Component``
     """
-    return build_components(page_index, entry_count)
+    output = build_components(page_index, entry_count)
+    vampytest.assert_instance(output, Component)
+    return output

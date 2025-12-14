@@ -912,6 +912,7 @@ KURODANI_YAMAME = TouhouCharacter(
     'kurodani_yamame',
     'Kurodani Yamame',
     (
+        'Yamame',
         '黒谷 ヤマメ',
         'Yamame Kurodani',
     ),
@@ -1500,6 +1501,7 @@ STAR_SAPPHIRE = TouhouCharacter(
     'star_sapphire',
     'Star Sapphire',
     (
+        'Star',
         'スターサファイア',
         'Safaia Sutaa',
     ),
@@ -1520,6 +1522,7 @@ SUNNY_MILK = TouhouCharacter(
     'sunny_milk',
     'Sunny Milk',
     (
+        'Sunny',
         'サニーミルク',
         'Sanii Miruku',
     ),

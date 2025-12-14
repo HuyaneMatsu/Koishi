@@ -5,14 +5,14 @@ from ..adventurer_rank_info_generation import get_guild_adventurer_rank_info
 
 
 def _iter_options():
-    yield 0, (0, 2)
-    yield 1023, (0, 2)
+    yield 0, (0, 3)
+    yield 1023, (0, 3)
     
-    yield 1024, (1, 3)
-    yield 2047, (1, 3)
+    yield 1024, (1, 4)
+    yield 2047, (1, 4)
     
-    yield 2048, (2, 5)
-    yield 4095, (2, 5)
+    yield 2048, (2, 6)
+    yield 4095, (2, 6)
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())

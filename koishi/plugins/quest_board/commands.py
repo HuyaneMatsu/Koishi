@@ -26,7 +26,7 @@ async def command_guild_quest_board(client, interaction_event):
     if (guild is None):
         return
     
-    await client.application_command_acknowledge(
+    await client.interaction_application_command_acknowledge(
         interaction_event,
         False,
     )
@@ -62,7 +62,7 @@ async def command_user_quests(client, interaction_event):
     -------
     response : ``InteractionResponse``
     """
-    await client.application_command_acknowledge(
+    await client.interaction_application_command_acknowledge(
         interaction_event,
         False,
     )

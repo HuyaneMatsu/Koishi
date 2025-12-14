@@ -51,10 +51,10 @@ async def handle_allocations_view_page(
         The received interaction.
     
     user_id : `str`
-        The original invoking user's identifier as hexadecimal string.
+        The original invoking user's identifier as hexadecimal integer.
     
     page_index : `str`
-        The selected page's index as hexadecimal string.
+        The selected page's index as hexadecimal integer.
     """
     try:
         user_id = int(user_id, 16)
@@ -108,16 +108,16 @@ async def handle_allocations_details(
         The received interaction.
     
     user_id : `str`
-        The original invoking user's identifier as hexadecimal string.
+        The original invoking user's identifier as hexadecimal integer.
     
     page_index : `str`
-        The current page's index as hexadecimal string.
+        The current page's index as hexadecimal integer.
     
     allocation_feature_id : `str`
-        The allocation feature's identifier as hexadecimal string.
+        The allocation feature's identifier as hexadecimal integer.
     
     allocation_session_id : `str`
-        The allocation session's identifier as hexadecimal string.
+        The allocation session's identifier as hexadecimal integer.
     """
     try:
         user_id = int(user_id, 16)

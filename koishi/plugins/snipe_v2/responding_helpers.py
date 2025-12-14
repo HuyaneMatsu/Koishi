@@ -403,7 +403,7 @@ def parse_choices(interaction_event, user_id, feature_flags):
         The original invoking user's identifier as hexadecimal integer.
     
     feature_flags : `int`
-        The current feature flags of the snipe as hexadecimal string.
+        The current feature flags of the snipe as hexadecimal integer.
     
     Returns
     -------

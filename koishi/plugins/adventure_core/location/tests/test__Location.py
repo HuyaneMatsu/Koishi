@@ -14,6 +14,7 @@ def _assert_fields_set(location):
     vampytest.assert_instance(location, Location)
     vampytest.assert_instance(location.distance, int)
     vampytest.assert_instance(location.id, int)
+    vampytest.assert_instance(location.level, int)
     vampytest.assert_instance(location.name, str)
     vampytest.assert_instance(location.target_ids, tuple)
 
@@ -26,12 +27,14 @@ def test__Location__new():
     name = 'Reisen'
     distance = 10000
     target_ids = (13335, 13323)
+    level = 1
     
     location = Location(
         location_id,
         name,
         distance,
         target_ids,
+        level,
     )
     
     _assert_fields_set(location)
@@ -40,6 +43,7 @@ def test__Location__new():
     vampytest.assert_eq(location.id, location_id)
     vampytest.assert_eq(location.name, name)
     vampytest.assert_eq(location.target_ids, target_ids)
+    vampytest.assert_eq(location.level, level)
 
 
 def test__Location__repr():
@@ -50,12 +54,14 @@ def test__Location__repr():
     name = 'Reisen'
     distance = 10000
     target_ids = (13335, 13323)
+    level = 1
     
     location = Location(
         location_id,
         name,
         distance,
         target_ids,
+        level,
     )
     
     output = repr(location)

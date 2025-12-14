@@ -5,6 +5,8 @@ from datetime import datetime as DateTime, timezone as TimeZone
 from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import elapsed_time
 
+from config import ORIN_ID
+
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ..item_core import ITEM_NAME_DEFAULT, get_item_name, get_item_nullable
@@ -709,6 +711,7 @@ def produce_linked_quest_submit_success_n_left_description(
 
 
 def produce_linked_quest_submit_success_completed_description(
+    client_id,
     item,
     amount_type,
     amount_required,
@@ -725,6 +728,9 @@ def produce_linked_quest_submit_success_completed_description(
     
     Parameters
     ----------
+    client_id : `int`
+        The client's identifier who is rendering this message.
+    
     item : ``None | Item``
         The submitted item.
     
@@ -775,4 +781,16 @@ def produce_linked_quest_submit_success_completed_description(
     yield get_adventurer_level_name(user_level_old)
     yield '** to **'
     yield get_adventurer_level_name(user_level_new)
-    yield '** rank; congratulation.'
+    yield '** rank.\n'
+    
+    if client_id == ORIN_ID:
+        name = 'Maids'
+        whos = 'my'
+    else:
+        name = 'Orin'
+        whos = None
+    
+    yield name
+    yield '! Bring '
+    yield ('the' if whos is None else whos)
+    yield ' buffet chariot! Let the party begin!'

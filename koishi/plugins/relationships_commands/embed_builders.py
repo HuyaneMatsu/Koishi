@@ -1268,17 +1268,17 @@ def build_success_embed_divorce_confirmed(target_user, source_received, target_r
     description_parts.append(target_user.name_at(guild_id))
     description_parts.append('.')
     
-    if source_received or target_received:
+    if source_received > 0 or target_received > 0:
         description_parts.append('\n')
         
-        if source_received:
+        if source_received > 0:
             description_parts.append('\nYou received ')
             description_parts.append(str(source_received))
             description_parts.append(' ')
             description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
             description_parts.append(' after investing much into the relationship.')
         
-        if target_received:
+        if target_received > 0:
             description_parts.append('\nThey received ')
             description_parts.append(str(target_received))
             description_parts.append(' ')
@@ -1350,7 +1350,7 @@ def build_notification_embed_divorced(source_user, target_received, guild_id):
     description_parts.append(source_user.name_at(guild_id))
     description_parts.append(' broke up with you.')
     
-    if target_received:
+    if target_received > 0:
         description_parts.append('\n\nYou received ')
         description_parts.append(str(target_received))
         description_parts.append(' ')

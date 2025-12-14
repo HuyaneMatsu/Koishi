@@ -73,7 +73,11 @@ def build_view_components(
     while True:
         entity_type = type(entity)
         if (entity_type is Emoji):
-            asset_component = create_media_gallery(entity.url)
+            if entity.is_custom_emoji():
+                asset_component = create_media_gallery(entity.url)
+            
+            else:
+                break
         
         elif (entity_type is Sticker):
             sticker_format = entity.format

@@ -96,7 +96,7 @@ def build_quest_board_quest_listing_components(guild, guild_stats, user_stats, l
             else:
                 if (
                     (quest_template is None) or
-                    (quest_template.level > user_level)
+                    (quest_template.level > user_level + 1)
                 ):
                     style = ButtonStyle.gray
                 elif linked_quest is None:
@@ -132,30 +132,34 @@ def build_quest_board_quest_listing_components(guild, guild_stats, user_stats, l
     # Add interactive components.
     quest_count = len(quest_batch.quests)
     if page_index == 0:
-        button_page_index_decrement = create_button(
-            emoji = EMOJI_PAGE_PREVIOUS,
-            custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_DECREMENT_DISABLED,
-            enabled = False,
-        )
+        custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_DECREMENT_DISABLED
+        enabled = False
     
     else:
-        button_page_index_decrement = create_button(
-            emoji = EMOJI_PAGE_PREVIOUS,
-            custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_FACTORY(user_stats.user_id, page_index - 1),
-        )
+        custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_FACTORY(user_stats.user_id, page_index - 1)
+        enabled = True
+    
+    button_page_index_decrement = create_button(
+        f'Page {page_index!s}',
+        emoji = EMOJI_PAGE_PREVIOUS,
+        custom_id = custom_id,
+        enabled = enabled
+    )
     
     if quest_count <= (page_index + 1) * PAGE_SIZE:
-        button_page_index_increment = create_button(
-            emoji = EMOJI_PAGE_NEXT,
-            custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_INCREMENT_DISABLED,
-            enabled = False,
-        )
+        custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_INCREMENT_DISABLED
+        enabled = False
     
     else:
-        button_page_index_increment = create_button(
-            emoji = EMOJI_PAGE_NEXT,
-            custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_FACTORY(user_stats.user_id, page_index + 1),
-        )
+        custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_FACTORY(user_stats.user_id, page_index + 1)
+        enabled = True
+    
+    button_page_index_increment = create_button(
+        f'Page {page_index + 2!s}',
+        emoji = EMOJI_PAGE_NEXT,
+        custom_id = custom_id,
+        enabled = enabled,
+    )
     
     components.append(
         create_row(
@@ -221,7 +225,7 @@ def build_quest_details_components(user_id, guild_id, local_guild_id, page_index
     
     if (
         (quest_template is None) or
-        (quest_template.level > user_adventurer_rank_info.level)
+        (quest_template.level > user_adventurer_rank_info.level + 1)
     ):
         accept_enabled = False
     else:
@@ -432,7 +436,7 @@ def build_linked_quests_listing_components(user, guild_id, user_stats, linked_qu
                     
                     if (
                         (quest_template is None) or
-                        (quest_template.level > user_adventurer_rank_info.level)
+                        (quest_template.level > user_adventurer_rank_info.level + 1)
                     ):
                         style = ButtonStyle.gray
                         break
@@ -753,6 +757,7 @@ def build_linked_quest_submit_success_n_left_components(
 
 
 def build_linked_quest_submit_success_completed_components(
+    client_id,
     user_id,
     page_index,
     local_guild_id,
@@ -771,6 +776,9 @@ def build_linked_quest_submit_success_completed_components(
     
     Parameters
     ----------
+    client_id : `int`
+        The client's identifier who is rendering this message.
+    
     user_id : `int`
         The invoking user's identifier.
     
@@ -818,6 +826,7 @@ def build_linked_quest_submit_success_completed_components(
     # Description
     components.append(create_text_display(
         ''.join([*produce_linked_quest_submit_success_completed_description(
+            client_id,
             item,
             amount_type,
             amount_required,
@@ -844,7 +853,7 @@ def build_linked_quest_submit_success_completed_components(
             repeat_style = ButtonStyle.gray
             break
         
-        if (quest_template.level > user_level_new):
+        if (quest_template.level > user_level_new + 1):
             repeat_enabled = False
             repeat_style = ButtonStyle.gray
             break

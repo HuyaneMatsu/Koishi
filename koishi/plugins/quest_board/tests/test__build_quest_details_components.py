@@ -177,7 +177,7 @@ def test__build_quest_details_components(
     output : ``list<Component>``
     """
     user_stats = UserStats(user_id)
-    user_stats.set('credibility', credibility)
+    user_stats.modify_credibility_by(credibility)
 
     output = build_quest_details_components(
         user_id, guild_id, local_guild_id, page_index, quest, linked_quest, user_stats

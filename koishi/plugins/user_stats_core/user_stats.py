@@ -2,23 +2,19 @@ __all__ = ('UserStats',)
 
 from datetime import timezone as TimeZone
 
-from scarletio import copy_docs
+from scarletio import RichAttributeErrorBaseType
 
-from ...bot_utils.entry_proxy import EntryProxy
-
-from .constants import STATS_CACHE
 from .helpers import generate_user_stats_defaults
 from .user_stats_calculated import UserStatsCalculated
-from .user_stats_saver import UserStatsSaver
 
 
-class UserStats(EntryProxy):
+class UserStats(RichAttributeErrorBaseType):
     """
     A user's stats.
     
     Attributes
     ----------
-    _cache_stats_calculated : `None | UserStatsCalculated`
+    _cache_user_stats_calculated : `None | UserStatsCalculated`
         Cache field for the calculated stats after applying the modifiers.
     
     entry_id : `int`
@@ -39,11 +35,11 @@ class UserStats(EntryProxy):
     item_id_weapon : `int`
         The user's weapon item's identifier.
     
+    modified_fields : `None | dict<str, object>`
+        The name of the already modified fields.
+    
     recovering_until : `None | DateTime`
         Until when the user is in recovery.
-    
-    saver : `None | UserStatsSaver`
-        Saver responsible for save synchronization.
     
     stat_bedroom : `int`
         The user's bedroom skills.
@@ -64,13 +60,10 @@ class UserStats(EntryProxy):
         The represented user's identifier.
     """
     __slots__ = (
-        '__weakref__', '_cache_stats_calculated', 'credibility', 'item_id_costume', 'item_id_head', 'item_id_species',
-        'item_id_weapon', 'recovering_until', 'saver', 'stat_bedroom', 'stat_charm', 'stat_cuteness', 'stat_housewife',
-        'stat_loyalty', 'user_id',
+        '__weakref__', '_cache_user_stats_calculated', 'credibility', 'entry_id', 'item_id_costume', 'item_id_head',
+        'item_id_species', 'item_id_weapon', 'modified_fields', 'recovering_until', 'stat_bedroom', 'stat_charm',
+        'stat_cuteness', 'stat_housewife', 'stat_loyalty', 'user_id',
     )
-    
-    saver_type = UserStatsSaver
-    
     
     def __new__(cls, user_id):
         """
@@ -82,8 +75,8 @@ class UserStats(EntryProxy):
             The user's identifier.
         """
         self = object.__new__(cls)
-        self._cache_stats_calculated = None
-        self.saver = None
+        self._cache_user_stats_calculated = None
+        self.modified_fields = None
         
         self.entry_id = 0
         self.user_id = user_id
@@ -107,56 +100,44 @@ class UserStats(EntryProxy):
         return self
     
     
-    @copy_docs(EntryProxy._put_repr_parts)
-    def _put_repr_parts(self, repr_parts, field_added):
-        if field_added:
+    def __repr__(self):
+        """Returns repr(self)."""
+        repr_parts = ['<', type(self).__name__]
+        
+        # entry_id
+        entry_id = self.entry_id
+        if entry_id != 0:
+            repr_parts.append(' entry_id = ')
+            repr_parts.append(repr(entry_id))
             repr_parts.append(',')
         
-        # source_user_id
+        # user_id
         repr_parts.append(' user_id = ')
         repr_parts.append(repr(self.user_id))
         
-        return repr_parts
-    
-    
-    async def save(self):
-        """
-        Saves the entry and then caches it.
-        
-        This function is a coroutine.
-        """
-        saver = self.get_saver()
-        await saver.begin()
-        self._store_in_cache()
-    
-    
-    @copy_docs(EntryProxy._store_in_cache)
-    def _store_in_cache(self):
-        STATS_CACHE[self.user_id] = self
-    
-    
-    @copy_docs(EntryProxy._pop_from_cache)
-    def _pop_from_cache(self):
-        try:
-            del STATS_CACHE[self.user_id]
-        except KeyError:
-            pass
+        repr_parts.append('>')
+        return ''.join(repr_parts)
     
     
     @classmethod
-    @copy_docs(EntryProxy.from_entry)
     def from_entry(cls, entry):
-        user_id = entry['user_id']
+        """
+        Creates an new instance from the given entry.
         
-        try:
-            self = STATS_CACHE[user_id]
-        except KeyError:
-            self = object.__new__(cls)
-            self.entry_id = entry['id']
-            self.user_id = user_id
-            self._cache_stats_calculated = None
-            self.saver = None
-            STATS_CACHE[user_id] = self
+        Parameters
+        ----------
+        entry : `sqlalchemy.engine.result.RowProxy`
+            The entry to create the instance based on.
+        
+        Returns
+        -------
+        self : `instance<cls>`
+        """
+        self = object.__new__(cls)
+        self.entry_id = entry['id']
+        self.user_id = entry['user_id']
+        self._cache_user_stats_calculated = None
+        self.modified_fields = None
         
         self.stat_housewife = entry['stat_housewife']
         self.stat_cuteness = entry['stat_cuteness']
@@ -179,10 +160,24 @@ class UserStats(EntryProxy):
         return self
     
     
-    @copy_docs(EntryProxy.set)
-    def set(self, field_name, field_value):
-        EntryProxy.set(self, field_name, field_value)
-        self._cache_stats_calculated = None
+    def _mark_modification(self, key, value):
+        """
+        Marks a field as modified.
+        
+        Parameters
+        ----------
+        key : `str`
+            The field's key.
+        
+        value : `object`
+            The field's value.
+        """
+        self._cache_user_stats_calculated = None
+        modified_fields = self.modified_fields
+        if (modified_fields is None):
+            self.modified_fields = modified_fields = {}
+        
+        modified_fields[key] = value
     
     
     @property
@@ -194,9 +189,152 @@ class UserStats(EntryProxy):
         -------
         stats_calculated : ``UserStatsCalculated``
         """
-        stats_calculated = self._cache_stats_calculated
+        stats_calculated = self._cache_user_stats_calculated
         if stats_calculated is None:
             stats_calculated = UserStatsCalculated(self)
-            self._cache_stats_calculated = stats_calculated
+            self._cache_user_stats_calculated = stats_calculated
         
         return stats_calculated
+    
+    
+    def modify_stat_housewife_by(self, value):
+        """
+        Modifies the housewife of the user stats.
+        
+        Parameters
+        ----------
+        value : `int`
+            value to modify by.
+        """
+        self.stat_housewife = stat_housewife = max(self.stat_housewife + value, 0)
+        self._mark_modification('stat_housewife', stat_housewife)
+    
+    
+    def modify_stat_cuteness_by(self, value):
+        """
+        Modifies the cuteness of the user stats.
+        
+        Parameters
+        ----------
+        value : `int`
+            value to modify by.
+        """
+        self.stat_cuteness = stat_cuteness = max(self.stat_cuteness + value, 0)
+        self._mark_modification('stat_cuteness', stat_cuteness)
+    
+    
+    def modify_stat_bedroom_by(self, value):
+        """
+        Modifies the bedroom of the user stats.
+        
+        Parameters
+        ----------
+        value : `int`
+            value to modify by.
+        """
+        self.stat_bedroom = stat_bedroom = max(self.stat_bedroom + value, 0)
+        self._mark_modification('stat_bedroom', stat_bedroom)
+    
+    
+    def modify_stat_charm_by(self, value):
+        """
+        Modifies the charm of the user stats.
+        
+        Parameters
+        ----------
+        value : `int`
+            value to modify by.
+        """
+        self.stat_charm = stat_charm = max(self.stat_charm + value, 0)
+        self._mark_modification('stat_charm', stat_charm)
+    
+    
+    def modify_stat_loyalty_by(self, value):
+        """
+        Modifies the loyalty of the user stats.
+        
+        Parameters
+        ----------
+        value : `int`
+            value to modify by.
+        """
+        self.stat_loyalty = stat_loyalty = max(self.stat_loyalty + value, 0)
+        self._mark_modification('stat_loyalty', stat_loyalty)
+    
+    
+    def set_recovering_until(self, date_time):
+        """
+        Sets till when the user is recovering.
+        
+        Parameters
+        ----------
+        date_time : `DateTime`
+            Amount to set to.
+        """
+        self.recovering_until = date_time
+        self._mark_modification('recovering_until', date_time)
+    
+    
+    def modify_credibility_by(self, value):
+        """
+        Modifies the credibility of the user stats.
+        
+        Parameters
+        ----------
+        value : `int`
+            value to modify by.
+        """
+        self.credibility = credibility = max(self.credibility + value, 0)
+        self._mark_modification('credibility', credibility)
+    
+    
+    def set_item_id_costume(self, item_id):
+        """
+        Sets the costume item.
+        
+        Parameters
+        ----------
+        item_id : `int`
+            Item identifier to set to.
+        """
+        self.item_id_costume = item_id
+        self._mark_modification('item_id_costume', item_id)
+    
+    
+    def set_item_id_head(self, item_id):
+        """
+        Sets the head item.
+        
+        Parameters
+        ----------
+        item_id : `int`
+            Item identifier to set to.
+        """
+        self.item_id_head = item_id
+        self._mark_modification('item_id_head', item_id)
+    
+    
+    def set_item_id_species(self, item_id):
+        """
+        Sets the species item.
+        
+        Parameters
+        ----------
+        item_id : `int`
+            Item identifier to set to.
+        """
+        self.item_id_species = item_id
+        self._mark_modification('item_id_species', item_id)
+    
+    
+    def set_item_id_weapon(self, item_id):
+        """
+        Sets the weapon item.
+        
+        Parameters
+        ----------
+        item_id : `int`
+            Item identifier to set to.
+        """
+        self.item_id_weapon = item_id
+        self._mark_modification('item_id_weapon', item_id)

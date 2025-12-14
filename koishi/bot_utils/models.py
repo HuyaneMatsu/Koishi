@@ -7,9 +7,6 @@ USER_BALANCE_TABLE = None
 automation_reaction_role_model = None
 AUTOMATION_REACTION_ROLE_TABLE = None
 
-emoji_counter_model = None
-EMOJI_COUNTER_TABLE = None
-
 ds_v2_model = None
 DS_V2_TABLE = None
 
@@ -21,8 +18,8 @@ STICKER_COUNTER_TABLE = None
 
 DB_ENGINE = None
 
-stats_model = None
-STATS_TABLE = None
+user_stats_model = None
+USER_STATS_TABLE = None
 
 todo_model = None
 TODO_TABLE = None
@@ -131,17 +128,6 @@ if (DB_ENGINE is not None):
     AUTOMATION_REACTION_ROLE_TABLE = automation_reaction_role_model.__table__
     
     
-    class emoji_counter_model(BASE):
-        __tablename__   = 'EMOJI_COUNTER'
-        id              = Column(Int64, primary_key = True)
-        user_id         = Column(Int64)
-        emoji_id        = Column(Int64)
-        timestamp       = Column(DateTime)
-        action_type     = Column(Int32)
-    
-    EMOJI_COUNTER_TABLE = emoji_counter_model.__table__
-    
-    
     class sticker_counter_model(BASE):
         __tablename__   = 'STICKER_COUNTER'
         id              = Column(Int64, primary_key = True)
@@ -183,7 +169,7 @@ if (DB_ENGINE is not None):
     TODO_TABLE = todo_model.__table__
     
     
-    class stats_model(BASE):
+    class user_stats_model(BASE):
         __tablename__ = 'WAIFU_STATS'
         
         id = Column(Int64, primary_key = True)
@@ -204,7 +190,7 @@ if (DB_ENGINE is not None):
         item_id_weapon = Column(Int32, default = 0, nullable = False)
         
     
-    STATS_TABLE = stats_model.__table__
+    USER_STATS_TABLE = user_stats_model.__table__
     
         
     class automation_configuration_model(BASE):

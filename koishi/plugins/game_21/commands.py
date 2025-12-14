@@ -66,7 +66,7 @@ async def game_21(
     
     while True:
         if amount < BET_MIN:
-            error_message = f'You must bet at least {BET_MIN!s} {EMOJI__HEART_CURRENCY}',
+            error_message = f'You must bet at least {BET_MIN!s} {EMOJI__HEART_CURRENCY}'
             break
         
         source_user_balance = await get_user_balance(interaction_event.user_id)

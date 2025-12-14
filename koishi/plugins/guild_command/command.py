@@ -27,6 +27,20 @@ else:
 
 
 try:
+    from ..expression_tracking_statistic_interactions import (
+        command_in_guild_emoji_statistics, command_of_guild_emoji_statistics, command_in_guild_sticker_statistics,
+        command_of_guild_sticker_statistics
+    )
+except ImportError:
+    if not MARISA_MODE:
+        raise
+    
+    EXPRESSION_TRACKING_AVAILABLE = False
+else:
+    EXPRESSION_TRACKING_AVAILABLE = True
+
+
+try:
     from ..quest_board import command_guild_quest_board
 except ImportError:
     if not MARISA_MODE:
@@ -82,3 +96,10 @@ if GUILD_ICON_AVAILABLE:
 
 if GUILD_QUEST_BOARD_AVAILABLE:
     GUILD_COMMANDS.interactions(command_guild_quest_board, name = 'quest-board')
+
+
+if EXPRESSION_TRACKING_AVAILABLE:
+    GUILD_COMMANDS.interactions(command_in_guild_emoji_statistics, name = 'in-guild-emoji-stats')
+    GUILD_COMMANDS.interactions(command_of_guild_emoji_statistics, name = 'of-guild-emoji-stats')
+    GUILD_COMMANDS.interactions(command_in_guild_sticker_statistics, name = 'in-guild-sticker-stats')
+    GUILD_COMMANDS.interactions(command_of_guild_sticker_statistics, name = 'of-guild-sticker-stats')

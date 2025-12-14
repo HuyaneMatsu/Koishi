@@ -2,11 +2,12 @@ __all__ = ('adventure_cancel', 'scheduled_adventure_arrival', 'set_adventure_ret
 
 from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from random import Random
+from math import ceil
 
 from scarletio import Task, get_event_loop
 
 from ...inventory_core import get_inventory, save_inventory
-from ...user_stats_core import get_user_stats
+from ...user_stats_core import get_user_stats, save_user_stats
 
 from ..action import ACTION_ID_SYSTEM_ARRIVAL, ACTION_ID_SYSTEM_CANCELLATION, ACTION_ID_SYSTEM_UNKNOWN
 from ..adventure import (
@@ -115,7 +116,7 @@ async def adventure_arrival(adventure):
     user_stats = await get_user_stats(adventure.user_id)
     multiplier = get_action_type_multiplier(action.type, user_stats)
     travel_duration = get_location_distance_travel_duration(adventure, user_stats)
-    loot_accumulations = accumulate_action_loot(action, random)
+    loot_accumulations = accumulate_action_loot(action, random, multiplier)
     duration = get_duration_till_action_occurrence(action.duration, random, loot_accumulations, multiplier)
     
     arrival_date = adventure.updated_at + TimeDelta(seconds = travel_duration)
@@ -167,7 +168,7 @@ async def schedule_adventure_action(adventure):
     
     user_stats = await get_user_stats(adventure.user_id)
     multiplier = get_action_type_multiplier(action.type, user_stats)
-    loot_accumulations = accumulate_action_loot(action, random)
+    loot_accumulations = accumulate_action_loot(action, random, multiplier)
     duration = get_duration_till_action_occurrence(action.duration, random, loot_accumulations, multiplier)
     
     # Schedule new handle.
@@ -215,13 +216,14 @@ async def adventure_action_step(adventure):
     health_exhausted = 0
     
     # Accumulate loot.
-    loot_accumulations = accumulate_action_loot(action, random)
     multiplier = get_action_type_multiplier(action.type, user_stats)
+    loot_accumulations = accumulate_action_loot(action, random, multiplier)
     duration = get_duration_till_action_occurrence(action.duration, random, loot_accumulations, multiplier)
     
     looted_items, energy_exhausted = accumulate_looted_items(
         adventure, user_stats, inventory, loot_accumulations, multiplier
     )
+    energy_exhausted = ceil(energy_exhausted / multiplier)
     
     # Save inventory.
     await save_inventory(inventory)
@@ -247,8 +249,8 @@ async def adventure_action_step(adventure):
         callback = invoke_adventure_return
     
     else:
-        next_loot_accumulations = accumulate_action_loot(next_action, next_random)
         next_multiplier = get_action_type_multiplier(next_action.type, user_stats)
+        next_loot_accumulations = accumulate_action_loot(next_action, next_random, next_multiplier)
         next_duration = get_duration_till_action_occurrence(
             next_action.duration, next_random, next_loot_accumulations, next_multiplier
         )
@@ -416,8 +418,8 @@ async def adventure_return(adventure):
     # Calculate for how long the user is eeping after the adventure.
     duration_till_recovery_end = get_duration_till_recovery_end(adventure)
     if duration_till_recovery_end:
-        user_stats.set('recovering_until', return_date + TimeDelta(seconds = duration_till_recovery_end))
-        await user_stats.save()
+        user_stats.set_recovering_until(return_date + TimeDelta(seconds = duration_till_recovery_end))
+        await save_user_stats(user_stats)
     
     # Notify
     notifier = get_adventure_return_notifier()

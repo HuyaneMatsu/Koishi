@@ -28,10 +28,10 @@ async def deepen_and_boost_relationship(
     source_user_balance : ``UserBalance``
         The source user's balance.
     
-    target_user_balance : `None | UserBalance`
+    target_user_balance : ``None | UserBalance``
         The target user's balance.
     
-    relationship_to_deepen : `None | Relationship`
+    relationship_to_deepen : ``None | Relationship``
         The relationship or the connector relationship between the two users if available.
     
     spent_balance : `int`
@@ -121,8 +121,8 @@ async def deepen_and_boost_relationship(
     if save_source_user_balance > 1:
         await save_user_balance(source_user_balance)
     
-    if save_target_user_balance > 1:
+    if (target_user_balance is not None) and (save_target_user_balance > 1):
         await save_user_balance(target_user_balance)
     
-    if save_relationship_to_deepen > 1:
+    if (relationship_to_deepen is not None) and (save_relationship_to_deepen > 1):
         await relationship_to_deepen.save()

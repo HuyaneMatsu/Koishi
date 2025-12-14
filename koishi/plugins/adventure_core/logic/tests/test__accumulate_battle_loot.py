@@ -13,6 +13,7 @@ def _iter_options():
     yield (
         None,
         Random(255),
+        1.0,
         {},
     )
     
@@ -20,8 +21,10 @@ def _iter_options():
     yield (
         (
             OptionBattle(
+                False,
                 1,
                 1,
+                True,
                 1,
                 2,
                 999,
@@ -29,6 +32,7 @@ def _iter_options():
             ),
         ),
         Random(23),
+        1.0,
         {},
     )
     
@@ -37,39 +41,46 @@ def _iter_options():
     yield (
         (
             OptionBattle(
+                False,
                 1,
                 1,
+                True,
                 1,
                 2,
                 999,
                 (
-                    OptionLoot(1, 1, 10, 20, 9999, 100, 20, 10, 2),
+                    OptionLoot(False, 1, 1, False, 10, 20, 9999, 100, 20, 10, 2),
                 ),
             ),
         ),
         Random(27),
+        1.0,
         {
             9999 : LootAccumulation(37, 940, 94)
         },
     )
 
+
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__accumulate_battle_loot(loot, random):
+def test__accumulate_battle_loot(battle, random, multiplier):
     """
     tests whether ``accumulate_battle_loot`` works as intended.
     
     Parameters
     ----------
-    loot : ``None | tuple<OptionBattle>``
-        Loot options.
+    battle : ``None | tuple<OptionBattle>``
+        Battle options.
     
     random : `random.Random`
         Random number generator to use.
+    
+    multiplier : `float`
+        Multiplier of the user for this given action.
     
     Returns
     -------
     output : ``dict<int, LootAccumulation>``
     """
     accumulations = {}
-    accumulate_battle_loot(loot, accumulations, random)
+    accumulate_battle_loot(battle, accumulations, random, multiplier)
     return accumulations

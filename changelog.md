@@ -1,3 +1,68 @@
+### 2025-12-14
+
+- Fix `/guild quest-board` not responding. (Since last update) (huhbuh)
+- Fix `/game_21` failing to display bet too low error message. (Since last update)
+- Fix `/snipe` trying to display unicode emoji's image. (Since 2025-11-09)
+- Fix relationship break up notification could display negative value even tho the user balance is not modified by
+    such. (1cyn1)
+- Fix relationship break up success response could display negative values even tho the user balances were not
+    modified by such.
+- Fix `/heart-event` not tracking who clicked when user limiting is disabled. (2vio2vieevie)
+- Rewrite `/shop upgrade-stats` to allow the user to upgrade multiple stats at once.
+- Rewrite all `/shop` commands, now they use confirmation form and show the output to everyone.
+- Allow loot options to scale chance and / or amount as required.
+- Scale loot amount when generating amount instead after.
+    This not only improves distribution but also removes some loss due to rounding 1 less time.
+- Guilds now may offer higher level quests with reduced chance (half as much by each additional rank).
+- Guilds now have in average 0.5 more quests, starting with 3 at rank G.
+- Users now may accept quests one level higher as them (completing these quests will not yield higher credibility).
+- Adventure rank names beyond `S+` now get additional `+` for each level.
+- Rework adventure rank up notification. (huhbuh)
+- `/adventure depart` wont suggest and allow locations that the user cannot get quests for. (huhbuh)
+- Update unique item name format from: `object of whom` to `whom's object`.
+- Add `nue` style to `/automation welcome`. (fariz_12134, akashiarvin)
+- Fix typo in readme. (pichu0357)
+- Fix `/snipe` close not working. (braindead_monke)
+- Add `/guild in-guild-emoji-stats`, `/guild of-guild-emoji-stats`, `/guild in-guild-sticker-stats`,
+    `/guild of-guild-sticker-stats` commands.
+- Fix `heart` generator stopped working. (Since last update)
+
+- Add **44** new images to `/hug`.
+- Add **7** new images to `/pat`.
+- Add **2** new images to `/lick`.
+- Add **3** new images to `/fluff`.
+- Add **144** new images to `/stare`.
+- Add **11** new images to `/peg`.
+- Add **29** new images to `/handhold`.
+- Add **6** new images to `/feed`.
+- Add **2** new images to `/pocky`.
+- Add **17** new images to `/kiss`.
+- Add **5** new images to `/lap_sleep`.
+
+- Balance quests:
+    - Tewi - Bishophat -> Rank D -> C (+1), duration 14 days -> 21 days.
+    - Sakuya - Blueberry -> rank F -> D (+2).
+    - Mystia - Peach -> rank G -> E (+2).
+    - Sakuya - Fishing rod -> rank D -> C (+1).
+    - Sakuya - Strawberry -> rank F -> G (+1).
+    - Koishi - Bishophat -> rank D -> G (-3), duration 3 days -> 7 days, weight 240 -> 200, reward balance 700 -> 1400.
+    - Koishi - Angelroot -> rank D -> E (-1).
+
+- Add new items:
+    - Kitchen knife
+    - Poking knife
+    - Aching affection's Heart-piercer (thfan_yumeiru)
+
+- Add new quests:
+    - Alice - Angelroot (2vio2vieevie)
+
+- Balance items:
+    - Corpse voyager's Roguish dress -> Double base stat bonuses.
+
+- Balance adventure locations & targets:
+    - Moriya shrine - Foraging -> Add Kitchen knife Mythical drop (thfan_yumeiru)
+    - Moriya shrine - Foraging -> Add Poking knife Mythical drop (thfan_yumeiru)
+
 ### 2025-11-28
 
 - Fix `Kokoro - Scissor` quest could require more items than intended. (huhbuh)
@@ -9,7 +74,7 @@
 - Fix adventure cancellation while departing returned the user instantly.
 - Add a new `ip_range_detector` cli command.
 - Fix `/guild info` did not use the user's local names.
-- Fix `/heart-event` and `/daily-event` commands.
+- Fix `/heart-event` command, and remove `/daily-event`.
 - Rewrite `/guild info` command & add a new `boost perks` option.
 - Add new `/user allocations` command.
 - Allow the user to participate in multiple games at once.
@@ -31,7 +96,7 @@
 
 - Balance quests:
     - Koishi - Garlic -> Reward Balance 22000 -> 6500.
-    - Alice - Flykiller Amanita -> Reward balance 1000 - 1300, requirement 700 grams -> 3 count. (remi495)
+    - Alice - Flykiller Amanita -> Reward balance 1000 -> 1300, requirement 700 grams -> 3 count. (remi495)
     - Yuuka - Straw hat -> Duration 14 days -> 28 days.
     - Koishi - Ruler -> Duration 14 days -> 28 days.
     - Kokoro - Scissor -> Duration 14 days -> 28 days.
@@ -39,7 +104,7 @@
     - Yukari - Ruler -> Duration 7 days -> 14 days.
 
 - Balance adventure locations & targets:
-    - Human village vineyards - gardening (all) -> Add straw hat as mythical loot.
+    - Human village vineyards - gardening (all) -> Add scissors as mythical loot.
     - Ruins - foraging -> Increase bishophat chance 1 in 80 -> 1 in 40.
     - Ruins - foraging -> Add ribbon bow mythical loot.
     - Ruins - foraging -> Add plushie bear mythical loot.

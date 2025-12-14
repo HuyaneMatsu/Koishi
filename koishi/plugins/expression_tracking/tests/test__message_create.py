@@ -65,7 +65,7 @@ async def test__message_create():
         
         vampytest.assert_is(message, input_message)
         vampytest.assert_eq(input_custom_emojis, {emoji_0, emoji_1})
-        vampytest.assert_eq(input_stickers, {sticker_0})
+        vampytest.assert_eq(input_stickers, {sticker_0, sticker_1})
         execute_message_create_called = True
     
     

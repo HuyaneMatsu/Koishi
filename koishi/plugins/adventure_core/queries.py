@@ -24,7 +24,8 @@ from .constants import (
 
 EVENT_LOOP = get_event_loop()
 
-COUNTER = iter(count(1))
+if (DB_ENGINE is None):
+    COUNTER = iter(count(1))
 
 
 async def get_active_adventures():
@@ -570,7 +571,7 @@ async def query_get_adventure(adventure_entry_id):
     
     Returns
     -------
-    result : `sqlalchemy.engine.result.RowProxy`
+    result : `None | sqlalchemy.engine.result.RowProxy`
     """
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(

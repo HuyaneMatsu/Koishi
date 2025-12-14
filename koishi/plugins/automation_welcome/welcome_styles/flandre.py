@@ -1,7 +1,8 @@
 __all__ = ()
 
-import config
 from hata import Emoji
+
+from config import FLANDRE_ID
 
 from ..welcome_style_reply import WelcomeStyleReply
 from ..welcome_style import WelcomeStyle
@@ -277,7 +278,7 @@ REPLY_STYLES = (
 
 WELCOME_STYLE = WelcomeStyle(
     NAME,
-    config.FLANDRE_ID,
+    FLANDRE_ID,
     MESSAGE_CONTENT_BUILDERS,
     IMAGES,
     IMAGE_CREATOR,

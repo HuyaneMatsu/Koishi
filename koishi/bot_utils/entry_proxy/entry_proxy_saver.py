@@ -8,7 +8,8 @@ from scarletio import RichAttributeErrorBaseType, Task, copy_docs
 from ..models import DB_ENGINE
 
 
-COUNTER = iter(count(1))
+if (DB_ENGINE is None):
+    COUNTER = iter(count(1))
 
 
 class EntryProxySaver(RichAttributeErrorBaseType):

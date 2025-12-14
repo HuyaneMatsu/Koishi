@@ -21,10 +21,13 @@ class Location(RichAttributeErrorBaseType):
     
     target_ids : `tuple<int>`
         The available target actions at the location.
-    """
-    __slots__ = ('distance', 'id', 'name', 'target_ids', )
     
-    def __new__(cls, location_id, name, distance, target_ids):
+    level : `int`
+        The level requirement for suggesting the location.
+    """
+    __slots__ = ('distance', 'id', 'level', 'name', 'target_ids')
+    
+    def __new__(cls, location_id, name, distance, target_ids, level):
         """
         Creates a new location.
         
@@ -41,10 +44,14 @@ class Location(RichAttributeErrorBaseType):
         
         target_ids : `tuple<int>`
             The available target actions at the location.
+        
+        level : `int`
+            The level requirement for suggesting the location.
         """
         self = object.__new__(cls)
         self.distance = distance
         self.id = location_id
+        self.level = level
         self.name = name
         self.target_ids = target_ids
         return self
@@ -69,6 +76,10 @@ class Location(RichAttributeErrorBaseType):
         # target_ids
         repr_parts.append(', target_ids = ')
         repr_parts.append(repr(self.target_ids))
+        
+        # level
+        repr_parts.append(', level = ')
+        repr_parts.append(repr(self.level))
         
         repr_parts.append('>')
         return ''.join(repr_parts)

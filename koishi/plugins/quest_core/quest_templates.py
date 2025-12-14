@@ -12,7 +12,8 @@ from .amount_types import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT
 from .constants import DAY_IN_SECONDS, HOUR_IN_SECONDS, QUEST_TEMPLATES
 from .quest_template import QuestTemplate
 from .quest_template_ids import (
-    QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_CHIRUNO_FROG, QUEST_TEMPLATE_ID_DAI_FROG,
+    QUEST_TEMPLATE_ID_ALICE_ANGELROOT, QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_CHIRUNO_FROG,
+    QUEST_TEMPLATE_ID_DAI_FROG,
     QUEST_TEMPLATE_ID_JUNKO_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT,
     QUEST_TEMPLATE_ID_KOISHI_GARLIC, QUEST_TEMPLATE_ID_KOISHI_RULER, QUEST_TEMPLATE_ID_KOKORO_SCISSORS,
     QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA,
@@ -26,8 +27,8 @@ from .quest_template_ids import (
 from .quest_types import QUEST_TYPE_ITEM_SUBMISSION
 
 
-# - Sakuya +1 level
-# - non-village collection +1 level
+# - Sakuya +2 level
+# - Ruins +1 level
 # Reward is around 2.5x of the value
 QUEST_SAKUYA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY] = QuestTemplate(
     QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
@@ -44,7 +45,7 @@ QUEST_SAKUYA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY] =
         'I would like to surprise them with it, for this I would like to request its main ingredient, Strawberries.'
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
-    2,
+    3,
     1,
     ITEM_ID_STRAWBERRY,
     ITEM_ID_SAKUYA,
@@ -65,7 +66,8 @@ QUEST_SAKUYA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY] =
 )
 
 
-# - non-village collection +1 level
+# - Balancing +1 level
+# - Hakugyokurou mansion +2 level
 # Reward is around 2.0x of the value
 QUEST_TEMPLATE_MYSTIA_PEACH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_PEACH] = QuestTemplate(
     QUEST_TEMPLATE_ID_MYSTIA_PEACH,
@@ -78,7 +80,7 @@ QUEST_TEMPLATE_MYSTIA_PEACH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_PEACH] = 
         'Requesting a basketful of Peaches.'
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
-    1,
+    3,
     3,
     ITEM_ID_PEACH,
     ITEM_ID_MYSTIA,
@@ -99,8 +101,8 @@ QUEST_TEMPLATE_MYSTIA_PEACH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_PEACH] = 
 )
 
 
-# - Sakuya +1 level
-# - non-village collection +1 level
+# - Sakuya +2 level
+# - Moriya shrine +2 level
 # Reward is around 2.5x of the value
 QUEST_TEMPLATE_SAKUYA_BLUEBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY] = QuestTemplate(
     QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY,
@@ -113,7 +115,7 @@ QUEST_TEMPLATE_SAKUYA_BLUEBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BLUEB
         'I would like to request enough blueberries for a single occasion.'
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
-    2,
+    4,
     1,
     ITEM_ID_BLUEBERRY,
     ITEM_ID_SAKUYA,
@@ -209,7 +211,7 @@ QUEST_TEMPLATE_SAKUYA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUY
 
 
 # - Marisa +2 level
-# - non-village collection +1 level
+# - Magic forest +1 level
 # Reward is around 1.5x of the value
 QUEST_TEMPLATE_MARISA_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA] = QuestTemplate(
     QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA,
@@ -243,8 +245,7 @@ QUEST_TEMPLATE_MARISA_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARI
 )
 
 
-# - Sakuya +1 level
-# - long term quest +1 level
+# - Sakuya +2 level
 # Reward is around 1.5x of the value
 #
 # This quest requires a lot of grapes, making it great. 
@@ -383,8 +384,9 @@ QUEST_TEMPLATE_MYSTIA_SCARLET_ONION = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_S
 )
 
 
-# - Alice +3 level
-# - non-village collection +1 level
+# - Alice +2 level
+# - Magic forest +1 level
+# - Short duration +1 level
 # Reward is around 2.5x of the value
 QUEST_TEMPLATE_ALICE_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA] = QuestTemplate(
     QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA,
@@ -418,9 +420,9 @@ QUEST_TEMPLATE_ALICE_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE
 )
 
 
-# - Sakuya +1 level
+# - Sakuya +2 level
 # - misty lake +2 level
-# - equipment + 1 level
+# - equipment +1 level
 # Reward is around 2.0x of the value
 QUEST_TEMPLATE_SAKUYA_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD] = QuestTemplate(
     QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD,
@@ -434,7 +436,7 @@ QUEST_TEMPLATE_SAKUYA_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_FIS
         'Could you please find me my missing fishing rod?'
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
-    4,
+    5,
     1,
     ITEM_ID_FISHING_ROD,
     ITEM_ID_SAKUYA,
@@ -456,7 +458,7 @@ QUEST_TEMPLATE_SAKUYA_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_FIS
 
 
 # - Chiruno +1 level
-# - misty lake +2 level
+# - Misty lake +2 level
 # Reward is around 2.5x of the value
 QUEST_TEMPLATE_CHIRUNO_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_CHIRUNO_FROG] = QuestTemplate(
     QUEST_TEMPLATE_ID_CHIRUNO_FROG,
@@ -535,7 +537,7 @@ QUEST_TEMPLATE_DAI_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_DAI_FROG] = QuestTem
 )
 
 
-# - Tewi +2 level
+# - Tewi +3 level
 # - misty lake +2 level
 # Reward is around 1.5x of the value
 QUEST_TEMPLATE_TEWI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_BISHOPHAT] = QuestTemplate(
@@ -551,7 +553,7 @@ QUEST_TEMPLATE_TEWI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_BISHOPHAT
         'Please bring us a delivery of bishophats, not to be confused with the pesky horny goat weed.'
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
-    4,
+    5,
     9,
     ITEM_ID_BISHOPHAT,
     ITEM_ID_TEWI,
@@ -560,7 +562,7 @@ QUEST_TEMPLATE_TEWI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_BISHOPHAT
     70,
     120,
     AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 14,
+    DAY_IN_SECONDS * 21,
     DAY_IN_SECONDS,
     70,
     150,
@@ -606,8 +608,8 @@ QUEST_TEMPLATE_JUNKO_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_JUNKO_ANGELRO
     110,
 )
 
-# - Koishi +2 level
-# - misty lake +2 level
+# - Koishi +1 level
+# - Misty lake +2 level
 # Reward is around 2.0x of the value
 QUEST_TEMPLATE_KOISHI_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_ANGELROOT] = QuestTemplate(
     QUEST_TEMPLATE_ID_KOISHI_ANGELROOT,
@@ -622,7 +624,7 @@ QUEST_TEMPLATE_KOISHI_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_ANGEL
         'I heard angelroot is good for treating it, would you please bring me some?'
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
-    4,
+    3,
     1,
     ITEM_ID_ANGELROOT,
     ITEM_ID_KOISHI,
@@ -643,7 +645,7 @@ QUEST_TEMPLATE_KOISHI_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_ANGEL
 )
 
 # - Kokoro +2 level
-# - rare drop +3 level
+# - Rare drop +3 level
 # Reward is around 2x of the value
 QUEST_TEMPLATE_KOKORO_SCISSORS = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOKORO_SCISSORS] = QuestTemplate(
     QUEST_TEMPLATE_ID_KOKORO_SCISSORS,
@@ -677,9 +679,9 @@ QUEST_TEMPLATE_KOKORO_SCISSORS = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOKORO_SCISSO
     110,
 )
 
-# - Koishi +2 level
-# - misty lake +2 level
-# Reward is around 3.0x of the value
+# - Koishi +1 level
+# - Bamboo forest +0 level
+# Reward is around 2.5x of the value
 QUEST_TEMPLATE_KOISHI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT] = QuestTemplate(
     QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT,
     None,
@@ -694,27 +696,28 @@ QUEST_TEMPLATE_KOISHI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BISHO
         'could you please bring some of it?'
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
-    4,
+    1,
     3,
     ITEM_ID_BISHOPHAT,
     ITEM_ID_KOISHI,
-    240,
+    200,
     10,
     70,
     130,
     AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 3,
+    DAY_IN_SECONDS * 7,
     HOUR_IN_SECONDS,
     80,
     120,
     10,
-    700,
+    1400,
     50,
     80,
     120,
 )
 
-# - Koishi +2 level
+# - Koishi +1 level
+# - Magic forest + 1 level
 # - rare drop +3 level
 # Reward is around 2.5x of the value
 QUEST_TEMPLATE_KOISHI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_RULER] = QuestTemplate(
@@ -825,8 +828,9 @@ QUEST_TEMPLATE_YUUKA_STRAW_HAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YUUKA_STRAW_H
     120,
 )
 
-# - Koishi +2 level
+# - Koishi +1 level
 # - human village outskirts +0 level
+# - large quantity with short time +1
 # Reward is around 1.5x of the value
 QUEST_TEMPLATE_KOISHI_GARLIC = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_GARLIC] = QuestTemplate(
     QUEST_TEMPLATE_ID_KOISHI_GARLIC,
@@ -894,6 +898,45 @@ QUEST_TEMPLATE_MYSTIA_BAMBOO_SHOOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_BA
     120,
     10,
     1100,
+    50,
+    90,
+    110,
+)
+
+
+# - Alice +2 level
+# - Misty lake +2 level
+# Reward is around 2.0x of the value
+QUEST_TEMPLATE_ALICE_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_ANGELROOT] = QuestTemplate(
+    QUEST_TEMPLATE_ID_ALICE_ANGELROOT,
+    None,
+    4, # Target: 1
+    10,
+    (
+        'Word of Angelroot has gotten around enough as it seems to be in demand lately, '
+        'and really popular amongst couples.\n'
+        'I keep asking Marisa about it, but they doesn\'t explain and just says not to worry, '
+        'so I have decided to procure some on my own.\n'
+        '\n'
+        'Since I do not frequent the forests like Marisa does, '
+        'I put up a quest so that the angelroots can be delivered me.'
+    ),
+    QUEST_TYPE_ITEM_SUBMISSION,
+    4,
+    1,
+    ITEM_ID_FLYKILLER_AMANITA,
+    ITEM_ID_ALICE,
+    8,
+    1,
+    100,
+    100,
+    AMOUNT_TYPE_COUNT,
+    DAY_IN_SECONDS * 2,
+    HOUR_IN_SECONDS,
+    100,
+    130,
+    10,
+    2550,
     50,
     90,
     110,

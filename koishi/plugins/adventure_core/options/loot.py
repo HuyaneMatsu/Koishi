@@ -17,11 +17,17 @@ class OptionLoot(OptionBase):
     amount_interval : `int`
         The interval between the base amount and the maximal amount that can be given.
     
+    amount_scaling_enabled : `int`
+        Whether the amount should be scaled by the multiplier.
+    
     chance_in : `int`
         The chance to be chosen in.
     
     chance_out : `int`
         The chance to be chosen out of.
+    
+    chance_scaling_enabled : `bool`
+        Whether the chance should be scaled by the multiplier.
     
     duration_cost_flat : `int`
         The required  duration to execute this action.
@@ -44,8 +50,10 @@ class OptionLoot(OptionBase):
     
     def __new__(
         cls,
+        chance_scaling_enabled,
         chance_in,
         chance_out,
+        amount_scaling_enabled,
         amount_min,
         amount_max,
         item_id,
@@ -59,11 +67,17 @@ class OptionLoot(OptionBase):
         
         Parameters
         ----------
+        chance_scaling_enabled : `bool`
+            Whether the chance should be scaled by the multiplier.
+        
         chance_in : `int`
             The chance to be chosen in.
         
         chance_out : `int`
             The chance to be chosen out of.
+        
+        amount_scaling_enabled : `int`
+            Whether the amount should be scaled by the multiplier.
         
         amount_min : `int`
             The minimal amount.
@@ -86,7 +100,15 @@ class OptionLoot(OptionBase):
         energy_cost_scaling : `int`
             The required energy for each item given.
         """
-        self = OptionBase.__new__(cls, chance_in, chance_out, amount_min, amount_max)
+        self = OptionBase.__new__(
+            cls,
+            chance_scaling_enabled,
+            chance_in,
+            chance_out,
+            amount_scaling_enabled,
+            amount_min,
+            amount_max,
+        )
         self.duration_cost_flat = duration_cost_flat
         self.duration_cost_scaling = duration_cost_scaling
         self.energy_cost_flat = energy_cost_flat

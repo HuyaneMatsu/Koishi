@@ -195,7 +195,7 @@ class UserBalance(RichAttributeErrorBaseType):
     @classmethod
     def from_entry(cls, entry):
         """
-        Creates an entry proxy from the given entry.
+        Creates an new instance from the given entry.
         
         Parameters
         ----------

@@ -6,7 +6,7 @@ from re import I as re_ignore_case, compile as re_compile, escape as re_escape
 from ..adventure_core import LOCATIONS, LOCATIONS_ALLOWED
 
 
-def get_best_matching_location(value):
+def get_best_matching_location(value, user_level):
     """
     Gets the best matching location for the given value.
     
@@ -14,6 +14,9 @@ def get_best_matching_location(value):
     ----------
     value : `None | str`
         The value to match.
+    
+    user_level : `int`
+        The user's level.
     
     Returns
     -------
@@ -28,9 +31,14 @@ def get_best_matching_location(value):
         pass
     else: 
         try:
-            return LOCATIONS[location_id]
+            location = LOCATIONS[location_id]
         except KeyError:
             pass
+        else:
+            if location.level > user_level:
+                return None
+            
+            return location
     
     pattern = re_compile('.*?'.join(re_escape(character) for character in value), re_ignore_case)
     
@@ -38,6 +46,9 @@ def get_best_matching_location(value):
     best_match_rate = (1 << 63, 1 << 63)
     
     for location in LOCATIONS_ALLOWED:
+        if location.level > user_level:
+            continue
+        
         match = pattern.search(location.name)
         if (match is None):
             continue
@@ -71,7 +82,7 @@ def _location_match_sort_key_getter(item):
     return item[1]
 
 
-def get_matching_locations(value):
+def get_matching_locations(value, user_level):
     """
     Gets all the location matching the given value.
     
@@ -80,12 +91,15 @@ def get_matching_locations(value):
     value : `None | str`
         The value to match.
     
+    user_level : `int`
+        The user's level.
+    
     Returns
     -------
     locations : ``list<Location>``
     """
     if value is None:
-        return [*LOCATIONS_ALLOWED]
+        return [location for location in LOCATIONS_ALLOWED if location.level <= user_level]
     
     try:
         location_id = int(value, base = 16)
@@ -97,12 +111,18 @@ def get_matching_locations(value):
         except KeyError:
             pass
         else:
+            if location.level > user_level:
+                return []
+            
             return [location]
     
     pattern = re_compile('.*?'.join(re_escape(character) for character in value), re_ignore_case)
     locations_with_match_rates = []
     
     for index, location in enumerate(LOCATIONS_ALLOWED):
+        if location.level > user_level:
+            continue
+        
         match = pattern.search(location.name)
         if (match is None):
             continue
@@ -116,7 +136,7 @@ def get_matching_locations(value):
     return [item[0] for item in locations_with_match_rates]
 
 
-def get_location_suggestions(value):
+def get_location_suggestions(value, user_level):
     """
     Gets location suggestions for the given value.
     
@@ -125,10 +145,13 @@ def get_location_suggestions(value):
     value : `None | str`
         The value to match.
     
+    user_level : `int`
+        The user's level.
+    
     Returns
     -------
     suggestions : `list<(str, str)>`
     """
-    locations = get_matching_locations(value)
+    locations = get_matching_locations(value, user_level)
     del locations[25:]
     return [(location.name, format(location.id, 'x')) for location in locations]

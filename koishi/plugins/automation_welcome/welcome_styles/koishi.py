@@ -1,7 +1,8 @@
 __all__ = ()
 
-import config
 from hata import Emoji
+
+from config import KOISHI_ID
 
 from ..welcome_style_reply import WelcomeStyleReply
 from ..welcome_style import WelcomeStyle
@@ -469,7 +470,7 @@ REPLY_STYLES = (
 
 WELCOME_STYLE = WelcomeStyle(
     NAME,
-    config.KOISHI_ID,
+    KOISHI_ID,
     MESSAGE_CONTENT_BUILDERS,
     IMAGES,
     IMAGE_CREATOR,

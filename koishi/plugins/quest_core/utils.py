@@ -57,7 +57,7 @@ def get_adventurer_level_name(level):
         name = 'S'
     
     else:
-        name = 'S+'
+        name = 'S' + '+' * (level - 8)
     
     return name
 

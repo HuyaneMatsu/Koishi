@@ -3,8 +3,8 @@ __all__ = ()
 from ...item_core import (
     ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT,
     ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC,
-    ITEM_ID_PEACH, ITEM_ID_PLUSHIE_BEAR, ITEM_ID_RIBBON_BOW, ITEM_ID_RULER, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS,
-    ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT
+    ITEM_ID_KITCHEN_KNIFE, ITEM_ID_PEACH, ITEM_ID_PLUSHIE_BEAR, ITEM_ID_POKING_KNIFE, ITEM_ID_RIBBON_BOW, ITEM_ID_RULER,
+    ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT
 )
 
 from ..constants import ACTIONS
@@ -79,10 +79,10 @@ ACTIONS[ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION] = Action(
     1,
     None,
     (
-        OptionLoot(1, 1, 5, 20, ITEM_ID_SCARLET_ONION, 300, 40, 10, 2),
-        OptionLoot(1, 100, 50, 75, ITEM_ID_SCARLET_ONION, 0, 20, 0, 1),
-        OptionLoot(1, 230, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
-        OptionLoot(1, 2000, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
+        OptionLoot(False, 1, 1, True, 5, 20, ITEM_ID_SCARLET_ONION, 300, 40, 10, 2),
+        OptionLoot(False, 1, 100, True, 50, 75, ITEM_ID_SCARLET_ONION, 0, 20, 0, 1),
+        OptionLoot(True, 1, 230, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
+        OptionLoot(True, 1, 2000, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
     ),
 )
 
@@ -95,10 +95,10 @@ ACTIONS[ACTION_ID_HUMAN_VILLAGE_VINEYARDS_GARDENING_BLUEFRANKISH] = Action(
     1,
     None,
     (
-        OptionLoot(1, 1, 10, 20, ITEM_ID_BLUEFRANKISH, 2400, 20, 10, 1),
-        OptionLoot(1, 100, 10, 40, ITEM_ID_BLUEFRANKISH, 300, 10, 10, 1),
-        OptionLoot(1, 500, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
-        OptionLoot(1, 2000, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
+        OptionLoot(False, 1, 1, True, 10, 20, ITEM_ID_BLUEFRANKISH, 2400, 20, 10, 1),
+        OptionLoot(False, 1, 100, True, 10, 40, ITEM_ID_BLUEFRANKISH, 300, 10, 10, 1),
+        OptionLoot(True, 1, 500, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
+        OptionLoot(True, 1, 2000, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
 )
 
@@ -111,10 +111,10 @@ ACTIONS[ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_CARROT] = Action(
     1,
     None,
     (
-        OptionLoot(1, 1, 5, 10, ITEM_ID_CARROT, 100, 60, 10, 2),
-        OptionLoot(1, 100, 25, 40, ITEM_ID_CARROT, 0, 60, 0, 2),
-        OptionLoot(1, 230, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
-        OptionLoot(1, 2000, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
+        OptionLoot(False, 1, 1, True, 5, 10, ITEM_ID_CARROT, 100, 60, 10, 2),
+        OptionLoot(False, 1, 100, True, 25, 40, ITEM_ID_CARROT, 0, 60, 0, 2),
+        OptionLoot(True, 1, 230, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
+        OptionLoot(True, 1, 2000, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
     ),
 )
 
@@ -127,10 +127,10 @@ ACTIONS[ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_GARLIC] = Action(
     1,
     None,
     (
-        OptionLoot(1, 1, 5, 10, ITEM_ID_GARLIC, 100, 50, 10, 1),
-        OptionLoot(1, 100, 25, 30, ITEM_ID_GARLIC, 0, 25, 0, 1),
-        OptionLoot(1, 230, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
-        OptionLoot(1, 2800, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
+        OptionLoot(False, 1, 1, True, 5, 10, ITEM_ID_GARLIC, 100, 50, 10, 1),
+        OptionLoot(False, 1, 100, True, 25, 30, ITEM_ID_GARLIC, 0, 25, 0, 1),
+        OptionLoot(True, 1, 230, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
+        OptionLoot(True, 1, 2800, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
     ),
 )
 
@@ -143,10 +143,10 @@ ACTIONS[ACTION_ID_RUINS_FORAGING_STRAWBERRY] = Action(
     1,
     None,
     (
-        OptionLoot(3, 4, 5, 25, ITEM_ID_STRAWBERRY, 600, 15, 1, 1),
-        OptionLoot(1, 40, 1, 4, ITEM_ID_BISHOPHAT, 100, 300, 1, 5),
-        OptionLoot(1, 1800, 1, 1, ITEM_ID_RIBBON_BOW, 300, 0, 1, 0),
-        OptionLoot(1, 2700, 1, 1, ITEM_ID_PLUSHIE_BEAR, 300, 0, 1, 0),
+        OptionLoot(False, 3, 4, True, 5, 25, ITEM_ID_STRAWBERRY, 600, 15, 1, 1),
+        OptionLoot(False, 1, 40, True, 1, 4, ITEM_ID_BISHOPHAT, 100, 300, 1, 5),
+        OptionLoot(True, 1, 1800, False, 1, 1, ITEM_ID_RIBBON_BOW, 300, 0, 1, 0),
+        OptionLoot(True, 1, 2700, False, 1, 1, ITEM_ID_PLUSHIE_BEAR, 300, 0, 1, 0),
     ),
 )
 
@@ -170,8 +170,8 @@ ACTIONS[ACTION_ID_EIENTEI_MANSION_GARDENING_CARROT] = Action(
     19,
     None,
     (
-        OptionLoot(1, 1, 10, 15, ITEM_ID_CARROT, 0, 90, 15, 2),
-        OptionLoot(1, 230, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
+        OptionLoot(False, 1, 1, True, 10, 15, ITEM_ID_CARROT, 0, 90, 15, 2),
+        OptionLoot(True, 1, 230, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
     ),
 )
 
@@ -195,10 +195,10 @@ ACTIONS[ACTION_ID_BAMBOO_FOREST_FORAGING_CATEGORY_MUSHROOM] = Action(
     3,
     None,
     (
-        OptionLoot(3, 5, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
-        OptionLoot(1, 5, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
-        OptionLoot(1, 10, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
-        OptionLoot(1, 800, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
+        OptionLoot(False, 3, 5, True, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
+        OptionLoot(False, 1, 5, True, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
+        OptionLoot(False, 1, 10, True, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
+        OptionLoot(True, 1, 800, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
 )
 
@@ -211,9 +211,9 @@ ACTIONS[ACTION_ID_BAMBOO_FOREST_FORAGING_BAMBOO] = Action(
     16,
     None,
     (
-        OptionLoot(1, 1, 1, 3, ITEM_ID_BAMBOO_SHOOT, 0, 300, 0, 3),
-        OptionLoot(1, 10, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
-        OptionLoot(1, 1200, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
+        OptionLoot(False, 1, 1, True, 1, 3, ITEM_ID_BAMBOO_SHOOT, 0, 300, 0, 3),
+        OptionLoot(False, 1, 10, True, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
+        OptionLoot(True, 1, 1200, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
 )
 
@@ -226,7 +226,9 @@ ACTIONS[ACTION_ID_MORIYA_SHRINE_FORAGING_BLUEBERRY] = Action(
     1,
     None,
     (
-        OptionLoot(3, 4, 4, 20, ITEM_ID_BLUEBERRY, 600, 15, 1, 1),
+        OptionLoot(False, 3, 4, True, 4, 20, ITEM_ID_BLUEBERRY, 600, 15, 1, 1),
+        OptionLoot(True, 1, 1200, False, 1, 1, ITEM_ID_KITCHEN_KNIFE, 300, 0, 1, 0),
+        OptionLoot(True, 1, 1200, False, 1, 1, ITEM_ID_POKING_KNIFE, 300, 0, 1, 0),
     ),
 )
 
@@ -239,8 +241,8 @@ ACTIONS[ACTION_ID_HAKUGYOKUROU_MANSION_GARDENING_PEACH] = Action(
     1,
     None,
     (
-        OptionLoot(1, 2, 8, 22, ITEM_ID_PEACH, 200, 40, 6, 1),
-        OptionLoot(1, 200, 20, 34, ITEM_ID_PEACH, 0, 20, 0, 1),
+        OptionLoot(False, 1, 2, True, 8, 22, ITEM_ID_PEACH, 200, 40, 6, 1),
+        OptionLoot(False, 1, 200, True, 20, 34, ITEM_ID_PEACH, 0, 20, 0, 1),
     ),
 )
 
@@ -253,9 +255,9 @@ ACTIONS[ACTION_ID_MISTY_LAKE_FORAGING] = Action(
     1,
     None,
     (
-        OptionLoot(3, 5, 1, 4, ITEM_ID_FROG, 60, 300, 1, 2),
-        OptionLoot(2, 5, 1, 4, ITEM_ID_ANGELROOT, 100, 200, 2, 3),
-        OptionLoot(1, 200, 1, 1, ITEM_ID_FISHING_ROD, 300, 10, 1, 0),
+        OptionLoot(False, 3, 5, True, 1, 4, ITEM_ID_FROG, 60, 300, 1, 2),
+        OptionLoot(False, 2, 5, True, 1, 4, ITEM_ID_ANGELROOT, 100, 200, 2, 3),
+        OptionLoot(True, 1, 200, False, 1, 1, ITEM_ID_FISHING_ROD, 300, 10, 1, 0),
     ),
 )
 
@@ -268,10 +270,10 @@ ACTIONS[ACTION_ID_MAGIC_FOREST_FORAGING] = Action(
     3,
     None,
     (
-        OptionLoot(7, 10, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
-        OptionLoot(4, 10, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
-        OptionLoot(1, 20, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
-        OptionLoot(1, 600, 1, 1, ITEM_ID_RULER, 300, 0, 1, 0),
-        OptionLoot(1, 1600, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
+        OptionLoot(False, 7, 10, True, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
+        OptionLoot(False, 4, 10, True, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
+        OptionLoot(False, 1, 20, True, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
+        OptionLoot(True, 1, 600, False, 1, 1, ITEM_ID_RULER, 300, 0, 1, 0),
+        OptionLoot(True, 1, 1600, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
 )

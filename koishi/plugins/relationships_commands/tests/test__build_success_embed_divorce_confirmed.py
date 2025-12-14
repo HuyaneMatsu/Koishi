@@ -27,6 +27,19 @@ def _iter_options():
     
     yield (
         target_user,
+        -1000,
+        -1000,
+        0,
+        Embed(
+            'Break up confirmed',
+            (
+                'You have broke up with Satori.'
+            ),
+        )
+    )
+    
+    yield (
+        target_user,
         0,
         0,
         guild_id,

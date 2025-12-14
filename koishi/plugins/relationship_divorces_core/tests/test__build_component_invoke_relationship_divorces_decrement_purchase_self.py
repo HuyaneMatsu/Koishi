@@ -9,7 +9,7 @@ def _iter_options():
     yield (
         create_button(
             'Burn the divorce papers!',
-            custom_id = 'user_balance.relationship_divorces.decrement.invoke.self'
+            custom_id = 'user.burn_divorce_papers.invoke.0'
         ),
     )
 
