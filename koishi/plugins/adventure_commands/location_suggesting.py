@@ -133,6 +133,7 @@ def get_matching_locations(value, user_level):
         locations_with_match_rates.append((location, (match_start, match_length, index)))
     
     locations_with_match_rates.sort(key = _location_match_sort_key_getter)
+    del locations_with_match_rates[25:]
     return [item[0] for item in locations_with_match_rates]
 
 

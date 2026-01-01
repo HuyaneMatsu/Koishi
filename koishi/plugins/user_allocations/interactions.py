@@ -136,7 +136,7 @@ async def handle_allocations_details(
     
     while True:
         user_balance = await get_user_balance(user_id)
-        for feature_id, session_id, amount in user_balance.iter_allocations():
+        for feature_id, session_id, amount, data in user_balance.iter_allocations():
             if (feature_id == allocation_feature_id) and (session_id == allocation_session_id):
                 break
         else:

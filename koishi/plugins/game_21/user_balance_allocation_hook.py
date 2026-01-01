@@ -1,11 +1,14 @@
 __all__ = ()
 
-from ..user_balance import ALLOCATION_FEATURE_ID_GAME_21, register_user_balance_allocation_hook
+from ..user_balance import (
+    ALLOCATION_FEATURE_ID_GAME_21, USER_BALANCE_ALLOCATION_ALIVENESS_ALIVE,
+    USER_BALANCE_ALLOCATION_ALIVENESS_DEAD_DELETE,register_user_balance_allocation_hook
+)
 
 from .constants import SESSIONS
 
 
-def is_allocation_alive_sync(session_id):
+def get_allocation_aliveness(session_id, data):
     """
     Returns whether such an allocation is alive.
     
@@ -14,11 +17,18 @@ def is_allocation_alive_sync(session_id):
     session_id : `int`
         The session's identifier.
     
+    data : `None`
+        Additional data.
+    
     Returns
     -------
-    alive : `bool`
+    aliveness : `int`
     """
-    return session_id in SESSIONS
+    return (
+        USER_BALANCE_ALLOCATION_ALIVENESS_ALIVE
+        if (session_id in SESSIONS) else
+        USER_BALANCE_ALLOCATION_ALIVENESS_DEAD_DELETE
+    )
 
 
 async def get_session_enty(session_id):
@@ -34,13 +44,13 @@ async def get_session_enty(session_id):
     
     Returns
     -------
-    session_entry : ``Game21Session``
+    session_entry : ``None | Game21Session``
     """
     return SESSIONS.get(session_id, None)
 
 
 register_user_balance_allocation_hook(
     ALLOCATION_FEATURE_ID_GAME_21,
-    is_allocation_alive_sync,
+    get_allocation_aliveness,
     get_session_enty,
 )

@@ -1,5 +1,6 @@
 __all__ = ()
 
+
 def produce_successful_item_discard_description(item, discarded_amount, new_amount):
     """
     Produces a successful item discard message.

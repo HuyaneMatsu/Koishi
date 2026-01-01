@@ -4,9 +4,10 @@ from hata import (
     create_button, create_row, create_section, create_separator, create_text_display, create_thumbnail_media
 )
 
-from ..user_balance import ALLOCATION_FEATURE_ID_GAME_21
+from ..user_balance import ALLOCATION_FEATURE_ID_GAME_21, ALLOCATION_FEATURE_ID_MARKET_PLACE
 
 from .component_building_game_21 import build_game_21_detailed_components, build_game_21_entry_component
+from .component_building_market_place import build_market_place_detailed_components, build_market_place_entry_component
 from .component_building_unknown import build_unknown_detailed_components, build_unknown_entry_component
 from .constants import EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS, EMOJI_REFRESH
 from .custom_ids import (
@@ -55,9 +56,11 @@ def build_view_components(user, page_index, page_count, guild_id, allocations):
     
     if allocations:
         
-        for allocation_feature_id, allocation_session_id, allocation_amount in allocations:
+        for allocation_feature_id, allocation_session_id, allocation_amount, data in allocations:
             if allocation_feature_id == ALLOCATION_FEATURE_ID_GAME_21:
                 component_builder = build_game_21_entry_component
+            elif allocation_feature_id == ALLOCATION_FEATURE_ID_MARKET_PLACE:
+                component_builder = build_market_place_entry_component
             else:
                 component_builder = build_unknown_entry_component
             
@@ -141,6 +144,8 @@ def build_details_components(user_id, page_index, allocation_feature_id, session
     """
     if allocation_feature_id == ALLOCATION_FEATURE_ID_GAME_21:
         component_builder = build_game_21_detailed_components
+    elif allocation_feature_id == ALLOCATION_FEATURE_ID_MARKET_PLACE:
+        component_builder = build_market_place_detailed_components
     else:
         component_builder = build_unknown_detailed_components
     

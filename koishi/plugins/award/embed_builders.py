@@ -23,7 +23,7 @@ def build_success_embed(target_user, guild_id, up_from, amount, message):
         From what amount the user is up from.
     
     amount : `int`
-        The amount teh user was awarded with.
+        The amount the user was awarded with.
     
     awarded_with : `str`
         With what the user is awarded with.

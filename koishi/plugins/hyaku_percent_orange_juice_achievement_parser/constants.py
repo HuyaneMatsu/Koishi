@@ -352,4 +352,7 @@ ACHIEVEMENTS = (
     'Vanguard of the Burning Sands',
     'And Make It Double',
     'Path of Most Resistance',
+    'Miss Mascot',
+    'Popo Hands',
+    'Beating the Odds',
 )

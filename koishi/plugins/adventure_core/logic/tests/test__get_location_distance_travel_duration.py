@@ -9,11 +9,11 @@ from ..helpers import get_location_distance_travel_duration
 
 
 def _iter_options():
-    user_id = 202507250000
+    user_id_0 = 202507250000
     location_id = 9999
     
-    adventure = Adventure(
-        user_id,
+    adventure_0 = Adventure(
+        user_id_0,
         location_id,
         0,
         0,
@@ -23,15 +23,15 @@ def _iter_options():
         0,
     )
     
-    user_stats = UserStats(
-        user_id,
+    user_stats_0 = UserStats(
+        user_id_0,
     )
     # If the user has every of its stats as 10, they should move 1.2 m / s
-    user_stats.stat_housewife = 10
-    user_stats.stat_cuteness = 10
-    user_stats.stat_bedroom = 10
-    user_stats.stat_charm = 10
-    user_stats.stat_loyalty = 10
+    user_stats_0.stat_housewife = 10
+    user_stats_0.stat_cuteness = 10
+    user_stats_0.stat_bedroom = 10
+    user_stats_0.stat_charm = 10
+    user_stats_0.stat_loyalty = 10
     
     # Set distance to 1200 meters, like this, it will take us 1000 seconds to complete it.
     location = Location(
@@ -43,8 +43,8 @@ def _iter_options():
     )
     
     yield (
-        adventure,
-        user_stats,
+        adventure_0,
+        user_stats_0,
         {
             location_id : location,
         },
@@ -53,10 +53,39 @@ def _iter_options():
     
     # If the location is not found, we take a default distance.
     yield (
-        adventure,
-        user_stats,
+        adventure_0,
+        user_stats_0,
         {},
         833,
+    )
+    
+    user_id_1 = 202512270001
+    
+    adventure_1 = Adventure(
+        user_id_1,
+        location_id,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    )
+    
+    user_stats_1 = UserStats(
+        user_id_1,
+    )
+    stats_calculated = user_stats_1.stats_calculated
+    stats_calculated.extra_movement = 0
+    
+    # Movement at 0
+    yield (
+        adventure_1,
+        user_stats_1,
+        {
+            location_id : location,
+        },
+        12_000_000,
     )
 
 

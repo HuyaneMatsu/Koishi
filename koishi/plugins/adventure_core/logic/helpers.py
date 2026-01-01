@@ -50,7 +50,14 @@ def get_location_distance_travel_duration(adventure, user_stats):
     else:
         distance = location.distance
     
-    return distance * 1000 // user_stats.stats_calculated.extra_movement
+    extra_movement = user_stats.stats_calculated.extra_movement
+    duration = distance * 1000
+    if extra_movement:
+        duration //= extra_movement
+    else:
+        duration *= 10
+    
+    return duration
 
 
 def get_duration_till_action_occurrence(base_duration, random, loot_accumulations, multiplier):
@@ -124,7 +131,14 @@ def get_action_type_multiplier(action_type, user_stats):
     else:
         stat = 10
     
-    return log(stat) / 2.302585092994046
+    if stat > 1:
+        multiplier = log(stat) / 2.302585092994046
+    elif stat == 1:
+        multiplier = 0.15
+    else:
+        multiplier = 0.05
+    
+    return multiplier
 
 
 def get_action(adventure, random):
@@ -305,7 +319,7 @@ def accumulate_looted_item_loss_due_to_low_inventory(loot_accumulations, looted_
                     pass
 
 
-def accumulate_looted_items(adventure, user_stats, inventory, loot_accumulations, multiplier):
+def accumulate_looted_items(adventure, user_stats, inventory, loot_accumulations):
     """
     Accumulates how much items the user looted.
     
@@ -323,9 +337,6 @@ def accumulate_looted_items(adventure, user_stats, inventory, loot_accumulations
     loot_accumulations : ``dict<int, LootAccumulation>``
         Accumulated loot from the action.
     
-    multiplier : `float`
-        Multiplier of the user for this given action.
-    
     Returns
     -------
     looted_items_and_energy_exhausted : `(list<(int, int, int)>, int)`
@@ -338,9 +349,6 @@ def accumulate_looted_items(adventure, user_stats, inventory, loot_accumulations
         if not loot_accumulations:
             energy_exhausted = 0
             break
-        
-        for loot_accumulation in loot_accumulations.values():
-            loot_accumulation.amount = floor(loot_accumulation.amount * multiplier)
         
         # Calculate how much energy we have available and reduce the loot amount as required.
         energy_exhausted = accumulate_looted_item_loss_due_to_low_energy(

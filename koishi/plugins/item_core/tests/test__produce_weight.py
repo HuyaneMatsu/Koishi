@@ -1,6 +1,6 @@
 import vampytest
 
-from ..utils import produce_weight
+from ..content_building import produce_weight
 
 
 def _iter_options():

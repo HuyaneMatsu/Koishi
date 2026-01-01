@@ -3,6 +3,7 @@ from hata import (
     ButtonStyle, Component, InteractionEvent, Guild, Message, User, create_button, create_row, create_separator,
     create_text_display
 )
+
 from ...game_21 import Game21Session
 
 from ..component_building_game_21 import build_game_21_detailed_components
@@ -131,7 +132,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_game_21_detailed_components(user_id, page_index, session_id, amount, session, guild_id, entity_cache):
+def test__build_game_21_detailed_components(
+    user_id, page_index, session_id, amount, session, guild_id, entity_cache
+):
     """
     Tests whether ``build_game_21_detailed_components`` works as intended.
     

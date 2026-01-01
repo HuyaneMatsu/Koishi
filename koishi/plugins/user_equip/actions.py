@@ -1,38 +1,8 @@
-__all__ = ('equip_item', 'get_equip_item_suggestions', 'unequip_item')
+__all__ = ()
 
-from ..inventory_core import create_item_suggestions, get_inventory, save_inventory, select_item
+from ..inventory_core import get_inventory, save_inventory, select_item
 from ..item_core import ITEM_FLAG_HEAD, ITEM_FLAG_COSTUME, get_item_nullable
 from ..user_stats_core import get_user_stats, save_user_stats
-
-from .constants import ITEM_FLAGS_ALLOWED
-
-
-async def get_equip_item_suggestions(user_id, item_flag, value):
-    """
-    Gets item suggestions for the given value.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    user_id : `int`
-        The user's identifier.
-    
-    item_flag : `int`
-        The item flag to filter for.
-    
-    value : `None | str`
-        Value to filter for.
-    
-    Returns
-    -------
-    suggestions : `None | list<(str, int)>`
-    """
-    if item_flag not in ITEM_FLAGS_ALLOWED:
-        return
-    
-    inventory = await get_inventory(user_id)
-    return create_item_suggestions(inventory, item_flag, value)
 
 
 async def equip_item(user_id, item_flag, value):
@@ -56,9 +26,6 @@ async def equip_item(user_id, item_flag, value):
     -------
     old_and_new_item : `(None | Item, None | Item)`
     """
-    if item_flag not in ITEM_FLAGS_ALLOWED:
-        return None, None
-    
     inventory = await get_inventory(user_id)
     item = select_item(inventory, item_flag, value)
     if item is None:
@@ -111,8 +78,6 @@ async def unequip_item(user_id, item_flag):
     -------
     old_item : ``None | Item``
     """
-    if item_flag not in ITEM_FLAGS_ALLOWED:
-        return None
     
     user_stats = await get_user_stats(user_id)
     

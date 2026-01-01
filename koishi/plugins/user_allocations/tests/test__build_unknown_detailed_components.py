@@ -36,7 +36,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_unknown_detailed_components(user_id, page_index, session_id, amount, session, guild_id):
+def test__build_unknown_detailed_components(
+    user_id, page_index, session_id, amount, session, guild_id
+):
     """
     Tests whether ``build_unknown_detailed_components`` works as intended.
     

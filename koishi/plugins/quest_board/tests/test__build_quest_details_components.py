@@ -64,7 +64,7 @@ def _iter_options():
                 f'- **5** credibility\n'
                 f'**Time available:**\n'
                 f'- **1 hour**\n'
-                f'**Repeatable:**\n'
+                f'**Completable:**\n'
                 f'- **3** times'
             ),
             create_separator(),
@@ -111,7 +111,7 @@ def _iter_options():
                 f'- **5** credibility\n'
                 f'**Time available:**\n'
                 f'- **1 hour**\n'
-                f'**Repeatable:**\n'
+                f'**Completable:**\n'
                 f'- **3** times (0 left)'
             ),
             create_separator(),

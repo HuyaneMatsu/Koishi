@@ -915,16 +915,16 @@ QUEST_TEMPLATE_ALICE_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_ANGELRO
     (
         'Word of Angelroot has gotten around enough as it seems to be in demand lately, '
         'and really popular amongst couples.\n'
-        'I keep asking Marisa about it, but they doesn\'t explain and just says not to worry, '
+        'I keep asking Marisa about it, but she doesn\'t explain and just says not to worry, '
         'so I have decided to procure some on my own.\n'
         '\n'
         'Since I do not frequent the forests like Marisa does, '
-        'I put up a quest so that the angelroots can be delivered me.'
+        'I put up a quest so that the angelroots can be delivered to me.'
     ),
     QUEST_TYPE_ITEM_SUBMISSION,
     4,
     1,
-    ITEM_ID_FLYKILLER_AMANITA,
+    ITEM_ID_ANGELROOT,
     ITEM_ID_ALICE,
     8,
     1,

@@ -20,7 +20,7 @@ def _iter_options():
         ),
         Random(255),
         2.0,
-        10,
+        11,
     )
     
     yield (

@@ -27,7 +27,7 @@ class Game21Session(RichAttributeErrorBaseType):
         The latest interaction event the user received.
     
     message : ``None | Message``
-        The message of teh session.
+        The message of the session.
     
     user_ids : `None | tuple<int>`
         The joined users' identifiers.

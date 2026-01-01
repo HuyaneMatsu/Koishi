@@ -1,7 +1,7 @@
 __all__ = ()
 
 
-from hata import Embed
+from hata import DiscordException, ERROR_CODES, Embed
 
 from ..image_handling_core import add_embed_provider
 from ..touhou_core import get_familiar_touhou_matches
@@ -161,8 +161,17 @@ class NewTouhouCharacter:
         else:
             function = type(client).interaction_response_message_edit
         
-        await function(
-            client,
-            event,
-            embed = embed,
-        )
+        try:
+            await function(
+                client,
+                event,
+                embed = embed,
+            )
+        except ConnectionError:
+            pass
+        
+        except DiscordException as exception:
+            if exception.code not in (
+                ERROR_CODES.cannot_message_user, # Perhaps the user blocked the bot and used it (in a dm ofc)?
+            ):
+                raise

@@ -94,11 +94,11 @@ async def game_21(
         
         session_id = create_session_identifier()
         
-        source_user_balance.add_allocation(ALLOCATION_FEATURE_ID_GAME_21, session_id, amount)
+        source_user_balance.add_allocation(ALLOCATION_FEATURE_ID_GAME_21, session_id, amount, None)
         await save_user_balance(source_user_balance)
         
         if single_player_mode:
-            target_user_balance.add_allocation(ALLOCATION_FEATURE_ID_GAME_21, session_id, amount)
+            target_user_balance.add_allocation(ALLOCATION_FEATURE_ID_GAME_21, session_id, amount, None)
             await save_user_balance(target_user_balance)
         
         

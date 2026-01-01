@@ -1,10 +1,12 @@
-__all__ = ('user_discard_item_command',)
+__all__ = ('command_user_discard_item',)
 
 from math import floor, inf, isnan as is_nan
 
 from hata.ext.slash import P
 
-from .actions import discard_item, get_discard_item_suggestions
+from ..inventory_core import create_item_suggestions, get_inventory
+
+from .actions import discard_item
 from .content_building import produce_successful_item_discard_description
 
 
@@ -24,13 +26,14 @@ async def autocomplete_item(interaction_event, value):
     -------
     suggestions : `None | list<(str, int)>`
     """
-    return await get_discard_item_suggestions(interaction_event.user_id, value)
+    inventory = await get_inventory(interaction_event.user_id)
+    return create_item_suggestions(inventory, 0, value)
 
 
-async def user_discard_item_command(
+async def command_user_discard_item(
     client,
     interaction_event,
-    item_name : P(str, 'The item\'s name', 'item', autocomplete = autocomplete_item),
+    item_name : P(str, 'The item\'s name.', 'item', autocomplete = autocomplete_item),
     amount : ('expression', 'The amount of items to discard.'),
 ):
     """
@@ -46,17 +49,11 @@ async def user_discard_item_command(
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    item_slot : `int`
-        The selected user.
-    
     item_name : `str`
-        The give item name.
+        The selected item's name.
     
     amount : `int | float`
-    
-    Returns
-    -------
-    response : ``Embed``
+        The amount of item to discard.
     """
     await client.interaction_application_command_acknowledge(
         interaction_event,

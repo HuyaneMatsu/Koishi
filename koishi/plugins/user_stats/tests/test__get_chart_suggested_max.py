@@ -1,6 +1,6 @@
 import vampytest
 
-from ..embed_builders import get_chart_suggested_max
+from ..chart import get_chart_suggested_max
 
 
 def _iter_options():

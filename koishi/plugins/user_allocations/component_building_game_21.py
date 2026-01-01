@@ -50,14 +50,14 @@ def _produce_game_21_title(amount):
 
 def _produce_game_21_long_description(session, guild_id):
     """
-    Produces game 21 log description
+    Produces game 21 long description
     
     This function is an iterable generator.
     
     Parameters
     ----------
     session : ``Game21Session``
-        The game's session.
+        The allocation's session.
     
     guild_id : `int`
         The local guild's identifier.
@@ -151,25 +151,44 @@ def build_game_21_detailed_components(user_id, page_index, session_id, amount, s
     components = []
     
     # Add title
+    
     components.append(create_text_display(
         ''.join([*_produce_game_21_title(amount)])
     ))
     
+    # Add description
+    
     if (session is not None):
-        # Add description
         components.append(create_text_display(
             ''.join(_produce_game_21_long_description(session, guild_id))
         ))
-        components.append(create_separator())
+    
+    components.append(create_separator())
     
     # Add control
-    message = None if (session is None) else session.message
+    
+    while True:
+        if (session is not None):
+            message = session.message
+            if (message is not None):
+                custom_id = None
+                enabled = True
+                url = message.url
+                style = ButtonStyle.link
+                break
+        
+        custom_id = USER_ALLOCATION_CUSTOM_ID_LINK_DISABLED
+        enabled = False
+        url = None
+        style = ButtonStyle.gray
+        break
+    
     link_component = create_button(
         'Get me there',
-        custom_id = (USER_ALLOCATION_CUSTOM_ID_LINK_DISABLED if (message is None) else None),
-        enabled = (message is not None),
-        url = (None if (message is None) else message.url),
-        style = (ButtonStyle.gray if (message is None) else ButtonStyle.link),
+        custom_id = custom_id,
+        enabled = enabled,
+        url = url,
+        style = style,
     )
     
     components.append(create_row(

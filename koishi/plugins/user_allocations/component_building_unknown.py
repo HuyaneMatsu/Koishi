@@ -9,7 +9,6 @@ from .custom_ids import (
 )
 
 
-
 def _produce_unknown_short_description(amount):
     """
     Produces unknown short description.
@@ -115,12 +114,15 @@ def build_unknown_detailed_components(user_id, page_index, session_id, amount, s
     components = []
     
     # Add title
+    
     components.append(create_text_display(
         ''.join([*_produce_unknown_title(amount)])
     ))
+    
     components.append(create_separator())
     
     # Add control
+    
     components.append(create_row(
         create_button(
             'Back to allocations',

@@ -34,7 +34,7 @@ def _iter_options():
             f'- **10** credibility\n'
             f'**Time available:**\n'
             f'- **1 day**\n'
-            f'**Repeatable:**\n'
+            f'**Completable:**\n'
             f'- **3** times (1 left)'
         ),
     )

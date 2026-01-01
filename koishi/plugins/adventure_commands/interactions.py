@@ -373,11 +373,6 @@ async def handle_adventure_create_confirm(
             error_message = 'Could not restore the adventure data. Please depart to a new one.'
             break
         
-        adventure = await get_active_adventure(user_id)
-        if (adventure is not None):
-            error_message = 'You are already on an adventure.'
-            break
-        
         user_stats = await get_user_stats(user_id)
         recovering_until = user_stats.recovering_until
         if (recovering_until is not None) and (recovering_until > DateTime.now(tz = TimeZone.utc)):
@@ -390,6 +385,11 @@ async def handle_adventure_create_confirm(
         inventory = await get_inventory(interaction_event.user_id)
         if inventory.weight > stats_calculated.extra_inventory:
             error_message = f'Your inventory is overloaded, cannot go on an adventure like this.'
+            break
+        
+        adventure = await get_active_adventure(user_id)
+        if (adventure is not None):
+            error_message = 'You are already on an adventure.'
             break
         
         adventure = Adventure(

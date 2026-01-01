@@ -34,89 +34,73 @@ except ImportError:
 else:
     USER_HEARTS_AVAILABLE = True
 
+
 try:
-    from ..user_stats_core import get_user_stats
+    from ..user_stats import command_user_stats
 except ImportError:
     if not MARISA_MODE:
         raise
     
     USER_STATS_AVAILABLE = False
-    USER_EQUIPMENT_AVAILABLE = False
-    USER_EQUIP_AVAILABLE = False
-    USER_INVENTORY_AVAILABLE = False
-    USER_DISCARD_ITEM_AVAILABLE = False
-    USER_QUESTS_AVAILABLE = False
-else:
-    try:
-        from ..user_stats import build_stats_embed
-    except ImportError:
-        if not MARISA_MODE:
-            raise
-        
-        USER_STATS_AVAILABLE = False
-    
-    else:
-        USER_STATS_AVAILABLE = True
-    
-    try:
-        from ..user_equipment import build_equipment_embed
-    except ImportError:
-        if not MARISA_MODE:
-            raise
-        
-        USER_EQUIPMENT_AVAILABLE = False
-    
-    else:
-        USER_EQUIPMENT_AVAILABLE = True
 
-    try:
-        from ..user_equip import (
-            ITEM_SLOTS, build_failure_embed_empty_equipment_slot, build_failure_embed_no_equipment_like,
-            build_failure_embed_same_item, build_success_embed_item_equipped, build_success_embed_item_unequipped,
-            build_success_embed_item_replaced, equip_item, get_equip_item_suggestions, unequip_item
-        )
-    except ImportError:
-        if not MARISA_MODE:
-            raise
-        
-        USER_EQUIP_AVAILABLE = False
+else:
+    USER_STATS_AVAILABLE = True
+
+try:
+    from ..user_equipment import command_user_equipment
+except ImportError:
+    if not MARISA_MODE:
+        raise
     
-    else:
-        USER_EQUIP_AVAILABLE = True
+    USER_EQUIPMENT_AVAILABLE = False
+
+else:
+    USER_EQUIPMENT_AVAILABLE = True
+
+try:
+    from ..user_equip import command_user_equip, command_user_unequip
+except ImportError:
+    if not MARISA_MODE:
+        raise
     
-    try:
-        from ..user_inventory import user_inventory_command
-    except ImportError:
-        if not MARISA_MODE:
-            raise
-        
-        USER_INVENTORY_AVAILABLE = False
+    USER_EQUIP_AVAILABLE = False
+
+else:
+    USER_EQUIP_AVAILABLE = True
+
+try:
+    from ..user_inventory import command_user_inventory
+except ImportError:
+    if not MARISA_MODE:
+        raise
     
-    else:
-        USER_INVENTORY_AVAILABLE = True
+    USER_INVENTORY_AVAILABLE = False
+
+else:
+    USER_INVENTORY_AVAILABLE = True
+
+try:
+    from ..user_discard_item import command_user_discard_item
+except ImportError:
+    if not MARISA_MODE:
+        raise
     
-    try:
-        from ..user_discard_item import user_discard_item_command
-    except ImportError:
-        if not MARISA_MODE:
-            raise
-        
-        USER_DISCARD_ITEM_AVAILABLE = False
+    USER_DISCARD_ITEM_AVAILABLE = False
+
+else:
+    USER_DISCARD_ITEM_AVAILABLE = True
+
+
+try:
+    from ..quest_board import command_user_quests
+except ImportError:
+    if not MARISA_MODE:
+        raise
     
-    else:
-        USER_DISCARD_ITEM_AVAILABLE = True
-    
-    
-    try:
-        from ..quest_board import command_user_quests
-    except ImportError:
-        if not MARISA_MODE:
-            raise
-        
-        USER_QUESTS_AVAILABLE = False
-    
-    else:
-        USER_QUESTS_AVAILABLE = True
+    USER_QUESTS_AVAILABLE = False
+
+else:
+    USER_QUESTS_AVAILABLE = True
 
 
 try:
@@ -129,6 +113,19 @@ except ImportError:
 
 else:
     USER_ALLOCATIONS_AVAILABLE = True
+
+
+try:
+    from ..user_inspect_item import command_user_inspect_item
+except ImportError:
+    if not MARISA_MODE:
+        raise
+    
+    USER_INSPECT_ITEM_AVAILABLE = False
+
+else:
+    USER_INSPECT_ITEM_AVAILABLE = True
+
 
 
 USER_COMMANDS = FEATURE_CLIENTS.interactions(
@@ -280,204 +277,24 @@ if USER_HEARTS_AVAILABLE:
 
 
 if USER_STATS_AVAILABLE:
-    @USER_COMMANDS.interactions(name = 'stats')
-    async def user_stats_command(
-        event,
-        user: ('user', 'Select someone else?') = None,
-    ):
-        """
-        Shows your stats.
-        
-        This function is a coroutine.
-        
-        Parameters
-        ----------
-        event : ``InteractionEvent``
-            The received interaction event.
-        
-        user : ``None | ClientUserBase`` = `None`, Optional
-            The selected user.
-        
-        Returns
-        -------
-        response : ``Embed``
-        """
-        if user is None:
-            user = event.user
-        
-        stats = await get_user_stats(user.id)
-        return build_stats_embed(user, stats, event.guild_id)
+    USER_COMMANDS.interactions(command_user_stats, name = 'stats')
 
 
 if USER_EQUIPMENT_AVAILABLE:
-    @USER_COMMANDS.interactions(name = 'equipment')
-    async def user_equipment_command(
-        event,
-        user: (ClientUserBase, 'Select someone else?') = None,
-    ):
-        """
-        Shows your equipment.
-        
-        This function is a coroutine.
-        
-        Parameters
-        ----------
-        event : ``InteractionEvent``
-            The received interaction event.
-        
-        user : ``None | ClientUserBase`` = `None`, Optional
-            The selected user.
-        
-        Returns
-        -------
-        response : ``Embed``
-        """
-        if user is None:
-            user = event.user
-        
-        stats = await get_user_stats(user.id)
-        return build_equipment_embed(user, stats, event.guild_id)
+    USER_COMMANDS.interactions(command_user_equipment, name = 'equipment')
 
 
 if USER_EQUIP_AVAILABLE:
-    @USER_COMMANDS.interactions(name = 'equip')
-    async def user_equip_command(
-        client,
-        interaction_event,
-        item_slot : (ITEM_SLOTS, 'Select an item slot'),
-        item_name : (str, 'The item\'s name', 'item'),
-    ):
-        """
-        Equips the selected item at the selected item slot.
-        
-        This function is a coroutine.
-        
-        Parameters
-        ----------
-        client : ``Client``
-            The client who received the interaction.
-        
-        interaction_event : ``InteractionEvent``
-            The received interaction event.
-        
-        item_slot : `int`
-            The selected user.
-        
-        item_name : `str`
-            The give item name.
-        """
-        await client.interaction_application_command_acknowledge(
-            interaction_event,
-            False,
-            show_for_invoking_user_only = True,
-        )
-        
-        old_item, new_item = await equip_item(interaction_event.user_id, item_slot, item_name)
-        if new_item is None:
-            await client.interaction_response_message_edit(
-                interaction_event,
-                embed = build_failure_embed_no_equipment_like(item_slot, item_name),
-            )
-            return
-        
-        if old_item is new_item:
-            await client.interaction_response_message_edit(
-                interaction_event,
-                embed = build_failure_embed_same_item(item_slot, old_item),
-            )
-            return
-        
-        await client.interaction_response_message_edit(interaction_event, '-# _ _')
-        await client.interaction_response_message_delete(interaction_event)
-        
-        if old_item is None:
-            embed = build_success_embed_item_equipped(item_slot, new_item)
-        else:
-            embed = build_success_embed_item_replaced(item_slot, old_item, new_item)
-    
-        await client.interaction_followup_message_create(interaction_event, embed = embed)
-    
-    
-    @user_equip_command.autocomplete('item')
-    async def autocomplete_item(event, value):
-        """
-        Autocompletes the item to equip. Item type must be selected already.
-        
-        Parameters
-        ----------
-        event : ``InteractionEvent``
-            The received interaction event.
-        
-        value : `None | str`
-            The typed in value.
-        
-        Returns
-        -------
-        suggestions : `None | list<(str, int)>`
-        """
-        item_slot = event.get_value_of('equip', 'item-slot')
-        if item_slot is None:
-            return
-        
-        try:
-            item_slot = int(item_slot)
-        except ValueError:
-            return
-        
-        return await get_equip_item_suggestions(event.user_id, item_slot, value)
-    
-    
-    @USER_COMMANDS.interactions(name = 'unequip')
-    async def user_unequip_command(
-        client,
-        interaction_event,
-        item_slot : (ITEM_SLOTS, 'Select an item slot'),
-    ):
-        """
-        Unequips the item from the selected item slot.
-        
-        This function is a coroutine.
-        
-        Parameters
-        ----------
-        client : ``Client``
-            The client who received the interaction.
-        
-        interaction_event : ``InteractionEvent``
-            The received interaction event.
-        
-        item_slot : `int`
-            The selected user.
-        """
-        await client.interaction_application_command_acknowledge(
-            interaction_event,
-            False,
-            show_for_invoking_user_only = True,
-        )
-        
-        old_item = await unequip_item(interaction_event.user_id, item_slot)
-        if old_item is None:
-            await client.interaction_response_message_edit(
-                interaction_event,
-                embed = build_failure_embed_empty_equipment_slot(item_slot),
-            )
-            return
-        
-        await client.interaction_response_message_edit(interaction_event, '-# _ _')
-        await client.interaction_response_message_delete(interaction_event)
-        
-        await client.interaction_followup_message_create(
-            interaction_event,
-            embed = build_success_embed_item_unequipped(item_slot, old_item),
-        )
+    USER_COMMANDS.interactions(command_user_equip, name = 'equip')
+    USER_COMMANDS.interactions(command_user_unequip, name = 'unequip')
 
 
 if USER_INVENTORY_AVAILABLE:
-    USER_COMMANDS.interactions(user_inventory_command, name = 'inventory')
+    USER_COMMANDS.interactions(command_user_inventory, name = 'inventory')
 
 
 if USER_DISCARD_ITEM_AVAILABLE:
-    USER_COMMANDS.interactions(user_discard_item_command, name = 'discard-item')
+    USER_COMMANDS.interactions(command_user_discard_item, name = 'discard-item')
 
 
 if USER_QUESTS_AVAILABLE:
@@ -486,3 +303,7 @@ if USER_QUESTS_AVAILABLE:
 
 if USER_ALLOCATIONS_AVAILABLE:
     USER_COMMANDS.interactions(command_user_allocations, name = 'allocations')
+
+
+if USER_INSPECT_ITEM_AVAILABLE:
+    USER_COMMANDS.interactions(command_user_inspect_item, name = 'inspect-item')

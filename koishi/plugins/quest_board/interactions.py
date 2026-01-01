@@ -143,7 +143,7 @@ async def quest_board_quest_details(client, interaction_event, user_id, guild_id
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_PATTERN)
-async def quest_board_quest_listing_page_index_navigate(client, event, user_id, page_index):
+async def quest_board_quest_listing_page_index_navigate(client, interaction_event, user_id, page_index):
     """
     Handles a quest board page index navigation component interaction.
     
@@ -154,7 +154,7 @@ async def quest_board_quest_listing_page_index_navigate(client, event, user_id, 
     client : ``Client``
         The client who received the interaction.
     
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
     user_id : `str`
@@ -169,13 +169,16 @@ async def quest_board_quest_listing_page_index_navigate(client, event, user_id, 
     except ValueError:
         return
     
-    if user_id != event.user_id:
+    if user_id != interaction_event.user_id:
         return
     
-    await client.interaction_component_acknowledge(event)
+    await client.interaction_component_acknowledge(
+        interaction_event,
+        False,
+    )
     
     while True:
-        guild = event.guild
+        guild = interaction_event.guild
         if guild is None:
             error_message = 'Only guilds have quest board.'
             break
@@ -185,7 +188,7 @@ async def quest_board_quest_listing_page_index_navigate(client, event, user_id, 
         linked_quest_listing = await get_linked_quest_listing(user_id)
         
         await client.interaction_response_message_edit(
-            event,
+            interaction_event,
             components = build_quest_board_quest_listing_components(
                 guild, guild_stats, user_stats, linked_quest_listing, page_index
             ),
@@ -193,14 +196,14 @@ async def quest_board_quest_listing_page_index_navigate(client, event, user_id, 
         return
     
     await client.interaction_followup_message_create(
-        event,
+        interaction_event,
         content = error_message,
         show_for_invoking_user_only = True,
     )
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_ACCEPT_PATTERN)
-async def quest_accept(client, event, user_id, guild_id, page_index, quest_template_id):
+async def quest_accept(client, interaction_event, user_id, guild_id, page_index, quest_template_id):
     """
     Handles a quest accept component interaction.
     
@@ -211,7 +214,7 @@ async def quest_accept(client, event, user_id, guild_id, page_index, quest_templ
     client : ``Client``
         The client who received the interaction.
     
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
     user_id : `str`
@@ -234,10 +237,13 @@ async def quest_accept(client, event, user_id, guild_id, page_index, quest_templ
     except ValueError:
         return
     
-    if user_id != event.user_id:
+    if user_id != interaction_event.user_id:
         return
     
-    await client.interaction_component_acknowledge(event)
+    await client.interaction_component_acknowledge(
+        interaction_event,
+        False,
+    )
     
     while True:
         adventure = await get_active_adventure(user_id)
@@ -304,20 +310,20 @@ async def quest_accept(client, event, user_id, guild_id, page_index, quest_templ
             await update_linked_quest(linked_quest)
         
         await client.interaction_response_message_edit(
-            event,
+            interaction_event,
             components = build_quest_accept_success_components(user_id, page_index, linked_quest.entry_id),
         )
         return
     
     await client.interaction_followup_message_create(
-        event,
+        interaction_event,
         content = error_message,
         show_for_invoking_user_only = True,
     )
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_NAVIGATE_PATTERN)
-async def page_linked_quest_listing_page_index_navigate(client, event, user_id, page_index):
+async def page_linked_quest_listing_page_index_navigate(client, interaction_event, user_id, page_index):
     """
     Handles a user linked quest page index navigation component interaction.
     
@@ -328,7 +334,7 @@ async def page_linked_quest_listing_page_index_navigate(client, event, user_id, 
     client : ``Client``
         The client who received the interaction.
     
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
     user_id : `str`
@@ -343,26 +349,29 @@ async def page_linked_quest_listing_page_index_navigate(client, event, user_id, 
     except ValueError:
         return
     
-    if user_id != event.user_id:
+    if user_id != interaction_event.user_id:
         return
     
-    await client.interaction_component_acknowledge(event)
+    await client.interaction_component_acknowledge(
+        interaction_event,
+        False,
+    )
     
     linked_quest_listing = await get_linked_quest_listing(user_id)
     
     user_stats = await get_user_stats(user_id)
     components = build_linked_quests_listing_components(
-        event.user, event.guild_id, user_stats, linked_quest_listing, page_index
+        interaction_event.user, interaction_event.guild_id, user_stats, linked_quest_listing, page_index
     )
     
     await client.interaction_response_message_edit(
-        event,
+        interaction_event,
         components = components,
     )
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_DETAILS_PATTERN)
-async def linked_quest_details(client, event, user_id, page_index, linked_quest_entry_id):
+async def linked_quest_details(client, interaction_event, user_id, page_index, linked_quest_entry_id):
     """
     Handles a user linked quest page index navigation component interaction.
     
@@ -373,7 +382,7 @@ async def linked_quest_details(client, event, user_id, page_index, linked_quest_
     client : ``Client``
         The client who received the interaction.
     
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
     user_id : `str`
@@ -392,10 +401,13 @@ async def linked_quest_details(client, event, user_id, page_index, linked_quest_
     except ValueError:
         return
     
-    if user_id != event.user_id:
+    if user_id != interaction_event.user_id:
         return
     
-    await client.interaction_component_acknowledge(event)
+    await client.interaction_component_acknowledge(
+        interaction_event,
+        False,
+    )
     
     while True:
         linked_quest_listing = await get_linked_quest_listing(user_id)
@@ -408,21 +420,21 @@ async def linked_quest_details(client, event, user_id, page_index, linked_quest_
         user_stats = await get_user_stats(user_id)
         
         await client.interaction_response_message_edit(
-            event,
+            interaction_event,
             components = build_linked_quest_details_components(linked_quest, user_stats, page_index),
         )
         return
     
     
     await client.interaction_followup_message_create(
-        event,
+        interaction_event,
         content = error_message,
         show_for_invoking_user_only = True,
     )
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_PATTERN)
-async def linked_quest_submit_item(client, event, user_id, page_index, linked_quest_entry_id):
+async def linked_quest_submit_item(client, interaction_event, user_id, page_index, linked_quest_entry_id):
     """
     Handles a user linked quest item submission component interaction.
     
@@ -433,7 +445,7 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
     client : ``Client``
         The client who received the interaction.
     
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
     user_id : `str`
@@ -452,10 +464,13 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
     except ValueError:
         return
     
-    if user_id != event.user_id:
+    if user_id != interaction_event.user_id:
         return
     
-    await client.interaction_component_acknowledge(event)
+    await client.interaction_component_acknowledge(
+        interaction_event,
+        False,
+    )
     
     while True:
         adventure = await get_active_adventure(user_id)
@@ -472,6 +487,10 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
         
         if linked_quest.expires_at < DateTime.now(TimeZone.utc):
             error_message = 'The quest expired, you cannot interact with it anymore.'
+            break
+        
+        if linked_quest.completion_state == LINKED_QUEST_COMPLETION_STATE_COMPLETED:
+            error_message = 'The quest is already completed'
             break
         
         quest_template = get_quest_template(linked_quest.template_id)
@@ -555,7 +574,7 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
                 client.id,
                 user_id,
                 page_index,
-                event.guild_id,
+                interaction_event.guild_id,
                 linked_quest,
                 quest_template,
                 user_stats,
@@ -568,14 +587,14 @@ async def linked_quest_submit_item(client, event, user_id, page_index, linked_qu
             )
         
         await client.interaction_response_message_edit(
-            event,
+            interaction_event,
             components = components,
         )
         return
     
     
     await client.interaction_followup_message_create(
-        event,
+        interaction_event,
         content = error_message,
         show_for_invoking_user_only = True,
     )
@@ -732,6 +751,7 @@ async def linked_quest_abandon_confirm(client, interaction_event, user_id, page_
     
     await client.interaction_component_acknowledge(
         interaction_event,
+        False,
     )
     
     while True:

@@ -44,7 +44,7 @@ async def wild_card_action(
     event,
     action_tag_name : P(str, 'Select action tag', PARAMETER_NAME_ACTION_TAG) = None,
     source_character_name : P(str, 'Source character name.', PARAMETER_NAME_SOURCE) = None,
-    target_character_name : P(str, 'Target character mame.', PARAMETER_NAME_TARGET) = None,
+    target_character_name : P(str, 'Target character name.', PARAMETER_NAME_TARGET) = None,
     image_name : P(str, 'Image name', PARAMETER_NAME_NAME) = None,
     target_00: ('mentionable', 'Select someone', 'target-1') = None,
     target_01: ('mentionable', 'Select someone', 'target-2') = None,

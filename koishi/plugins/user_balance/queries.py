@@ -8,8 +8,9 @@ from scarletio import Future, Task, TaskGroup, copy_docs, shield
 from ...bot_utils.models import DB_ENGINE, USER_BALANCE_TABLE, user_balance_model
 
 from .constants import (
-    USER_BALANCE_ALLOCATION_HOOKS, USER_BALANCE_CACHE, USER_BALANCE_CACHE_SIZE, USER_BALANCE_QUERY_TASKS,
-    USER_BALANCE_SAVE_TASKS, USER_BALANCES
+    USER_BALANCES, USER_BALANCE_ALLOCATION_ALIVENESS_ALIVE, USER_BALANCE_ALLOCATION_ALIVENESS_DEAD_APPLY,
+    USER_BALANCE_ALLOCATION_ALIVENESS_DEAD_DELETE, USER_BALANCE_ALLOCATION_HOOKS, USER_BALANCE_CACHE,
+    USER_BALANCE_CACHE_SIZE, USER_BALANCE_QUERY_TASKS, USER_BALANCE_SAVE_TASKS
 )
 from .user_balance import UserBalance
 
@@ -33,7 +34,7 @@ async def get_user_balance(user_id):
     -------
     user_balance : ``UserBalance``
     """
-    user_balance = _get_user_balance_from_cache(user_id)
+    user_balance = await _get_user_balance_from_cache(user_id)
     if (user_balance is not None):
         return user_balance
     
@@ -64,7 +65,7 @@ async def get_user_balances(user_ids):
     user_ids_to_request = None
     
     for user_id in user_ids:
-        user_balance = _get_user_balance_from_cache(user_id)
+        user_balance = await _get_user_balance_from_cache(user_id)
         if (user_balance is not None):
             user_balances[user_id] = user_balance
             continue
@@ -99,9 +100,11 @@ async def get_user_balances(user_ids):
     return user_balances
 
 
-def _get_user_balance_from_cache(user_id):
+async def _get_user_balance_from_cache(user_id):
     """
     Gets the user balance from cache.
+    
+    This function is a coroutine.
     
     Parameters
     ----------
@@ -110,12 +113,14 @@ def _get_user_balance_from_cache(user_id):
     
     Returns
     -------
-    user_balance : `None | UserBalance`
+    user_balance : ``None | UserBalance``
     """
     try:
         user_balance = USER_BALANCES[user_id]
     except KeyError:
         return None
+    
+    await remove_dead_allocations(user_balance)
     
     try:
         USER_BALANCE_CACHE.move_to_end(user_id)
@@ -273,7 +278,7 @@ async def query_user_balances(items):
     
     Parameters
     ----------
-    items : `list<(int, list<Future>>`
+    items : ``list<(int, list<Future>>``
         A list of user's identifier and result waiter pairs.
     """
     try:
@@ -359,44 +364,54 @@ async def remove_dead_allocations(user_balance):
         User balance to check.
     """
     to_remove = None
+    to_apply = None
     
-    for allocation_feature_id, allocation_session_id, amount in user_balance.iter_allocations():
+    for allocation_feature_id, allocation_session_id, amount, data in user_balance.iter_allocations():
         while True:
             try:
                 user_balance_allocation_hook = USER_BALANCE_ALLOCATION_HOOKS[allocation_feature_id]
             except KeyError:
-                do_remove = True
+                allocation_aliveness = USER_BALANCE_ALLOCATION_ALIVENESS_DEAD_DELETE
                 break
             
-            is_allocation_alive_sync = user_balance_allocation_hook.is_allocation_alive_sync
-            if is_allocation_alive_sync is None:
-                do_remove = True
+            get_allocation_aliveness = user_balance_allocation_hook.get_allocation_aliveness
+            if get_allocation_aliveness is None:
+                allocation_aliveness = USER_BALANCE_ALLOCATION_ALIVENESS_DEAD_DELETE
                 break
             
-            if not is_allocation_alive_sync(allocation_session_id):
-                do_remove = True
-                break
-            
-            do_remove = False
+            allocation_aliveness = get_allocation_aliveness(allocation_session_id, data)
             break
         
-        if not do_remove:
+        if allocation_aliveness == USER_BALANCE_ALLOCATION_ALIVENESS_ALIVE:
             continue
         
-        if to_remove is None:
-            to_remove = []
+        if allocation_aliveness == USER_BALANCE_ALLOCATION_ALIVENESS_DEAD_DELETE:
+            if to_remove is None:
+                to_remove = []
+            
+            to_remove.append((allocation_feature_id, allocation_session_id))
+            continue
         
-        to_remove.append((allocation_feature_id, allocation_session_id))
+        if allocation_aliveness == USER_BALANCE_ALLOCATION_ALIVENESS_DEAD_APPLY:
+            if to_apply is None:
+                to_apply = []
+            
+            to_apply.append((allocation_feature_id, allocation_session_id, amount))
+            continue
+        
         continue
     
-    if to_remove is None:
-        return
+    if (to_apply is not None):
+        for allocation_feature_id, allocation_session_id, amount in reversed(to_apply):
+            user_balance.modify_balance_by(-amount)
+            user_balance.remove_allocation(allocation_feature_id, allocation_session_id)
     
-    for allocation_feature_id, allocation_session_id in reversed(to_remove):
-        user_balance.remove_allocation(allocation_feature_id, allocation_session_id)
+    if (to_remove is not None):
+        for allocation_feature_id, allocation_session_id in reversed(to_remove):
+            user_balance.remove_allocation(allocation_feature_id, allocation_session_id)
     
-    await save_user_balance(user_balance)
-    return
+    if (to_apply is not None) or (to_remove is not None):
+        await save_user_balance(user_balance)
 
 
 async def save_user_balance(user_balance):

@@ -196,10 +196,13 @@ BOT_NAMES = [
     ),
     
     # amazon crawler?
-    'mozilla/5.0 (compatible; crawler)'
+    'mozilla/5.0 (compatible; crawler)',
     
     # TruffleHog
-    'trufflehog'
+    'trufflehog',
+    
+    # Scrapy
+    'scrapy',
 ]
 
 
@@ -260,7 +263,11 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('8.210.128.0'), 15), # HonKong - Alibaba (US) Technology Co., Ltd.
     IPFilterRule(*parse_ip('47.254.64.0'), 14), # Losangeles - Alibaba (US) Technology Co., Ltd.
     IPFilterRule(*parse_ip('47.88.0.0'), 14), # Losangeles - Alibaba (US) Technology Co., Ltd.
+    IPFilterRule(*parse_ip('159.198.64.0'), 8), # Phoenix - Namecheap, Inc.
     
+    
+    # dataforseobot
+    IPFilterRule(*parse_ip('136.243.0.0'), 16), # Falkenstein - Dataforseo OU
     
     
     # Scraper "Mozilla/5.0 (compatible) Ai2Bot-Dolma (+https://www.allenai.org/crawl)"
@@ -280,6 +287,10 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('207.46.0.0'), 13), # Moseslake - Microsoft Corporation
     IPFilterRule(*parse_ip('40.76.0.0'), 18), # Boydton - Microsoft Corporation
     IPFilterRule(*parse_ip('52.160.0.0'), 21), # Boydton - Microsoft Corporation
+    
+    # Scrapy
+    IPFilterRule(*parse_ip('34.34.0.0'), 15), # Groningen - Google LLC
+    
     
     # Random bot
     IPFilterRule(*parse_ip('171.244.0.0'), 16), # Hochiminh - Viettel Group
@@ -412,7 +423,23 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     # Petalbot
     # "Mozilla/5.0 (Linux; Android 7.0;) AppleWebKit/537.36 (KHTML, like Gecko) Mobile Safari/537.36 (compatible; PetalBot;+https://webmaster.petalsearch.com/site/petalbot)"
     IPFilterRule(*parse_ip('114.119.128.0'), 13), # Singapore - HUAWEI CLOUDS
-     
+    
+    # Applebot
+    IPFilterRule(*parse_ip(' 	17.0.0.0'), 23), # Leesburg - Apple Inc.
+    
+    # AhrefsBot
+    IPFilterRule(*parse_ip('51.195.0.0'), 16), # London - Ahrefs Pte Ltd Dmytro
+    IPFilterRule(*parse_ip('142.44.128.0'), 15), # Montréal - Dmytro, Ahrefs Pte Ltd
+    IPFilterRule(*parse_ip('167.114.128.0'), 14), # Beauharnois - Dmytro, Ahrefs Pte Ltd
+    IPFilterRule(*parse_ip('51.161.0.0'), 15), # Beauharnois - Dmytro, Ahrefs Pte Lt
+    IPFilterRule(*parse_ip('54.39.0.0'), 16), # Beauharnois - Dmytro, Ahrefs Pte Lt
+    IPFilterRule(*parse_ip('51.222.0.0'), 16), # Beauharnois - Dmytro, Ahrefs Pte Lt
+    
+    # MJ12bot
+    IPFilterRule(*parse_ip('54.37.0.0'), 16), # London - Dunkerque
+    
+    # DotBot
+    IPFilterRule(*parse_ip('216.244.64.0'), 13), # Tukwila - Wowrack.com
     
     # Yandex
     # "Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)"
@@ -477,7 +504,8 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('43.163.0.0'), 15), # Singapore - Tencent Building, Kejizhongyi Avenue
     IPFilterRule(*parse_ip('43.173.0.0'), 13), # Singapore - ACEVILLE PTE.LTD.
     IPFilterRule(*parse_ip('119.28.100.0'), 9), # Singapore - Tencent cloud computing (Beijing) Co., Ltd.
-    IPFilterRule(*parse_ip('129.226.196.0'), 10), # Singapore - Tencent Building, Kejizhongyi Avenue 
+    IPFilterRule(*parse_ip('129.226.196.0'), 10), # Singapore - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('150.109.12.0'), 10), # Singapore - Tencent Building, Kejizhongyi Avenue
     
     
     # The Lewin Group
@@ -541,6 +569,7 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('74.7.0.0'), 16), # Atlanta - Microsoft Corporation
     IPFilterRule(*parse_ip('66.249.64.0'), 12), # Monckscorner - Google LLC
     IPFilterRule(*parse_ip('192.178.0.0'), 17), # Monckscorner - Google LLC
+    IPFilterRule(*parse_ip('20.0.0.0'), 21), # Desmoines - Microsoft Corporation
     
     # TruffleHog
     IPFilterRule(*parse_ip('35.168.0.0'), 19), # Ashburn - Amazon.com, Inc.
@@ -4278,7 +4307,226 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('84.236.0.0'), 15), # Hungary - DIGI Tavkozlesi es Szolgaltato Kft.
     IPFilterRule(*parse_ip('84.37.180.0'), 10), # United States - Datacamp Limited
     IPFilterRule(*parse_ip('89.223.14.0'), 8), # Russia - HostRoyale Technologies Pvt Ltd
-
+    IPFilterRule(*parse_ip('101.2.176.0'), 12), # Sri Lanka - Dialog Axiata PLC.
+    IPFilterRule(*parse_ip('103.106.240.0'), 10), # Bangladesh - Saddam Hossain t/a Asian Network
+    IPFilterRule(*parse_ip('103.124.226.0'), 9), # Bangladesh - Level3 Carrier Ltd.
+    IPFilterRule(*parse_ip('103.144.198.0'), 8), # Bangladesh - Talukder net
+    IPFilterRule(*parse_ip('103.148.82.0'), 9), # Bangladesh - Jannat Mir Internet Service
+    IPFilterRule(*parse_ip('103.157.94.0'), 9), # Bangladesh - Computer Future
+    IPFilterRule(*parse_ip('103.170.178.0'), 9), # Pakistan - Netpoint IT & Communications Pvt. Ltd
+    IPFilterRule(*parse_ip('103.175.242.0'), 9), # Bangladesh - DISCOVERY INTERNET
+    IPFilterRule(*parse_ip('103.176.4.0'), 9), # Pakistan - Dubai Sky Internet
+    IPFilterRule(*parse_ip('103.179.14.0'), 9), # Bangladesh - POTATO
+    IPFilterRule(*parse_ip('103.183.10.0'), 9), # Indonesia - PT. Yasmin Amanah Media
+    IPFilterRule(*parse_ip('103.55.144.0'), 10), # Bangladesh - SAM ONLINE
+    IPFilterRule(*parse_ip('103.81.64.0'), 10), # Indonesia - PT Queen Network Nusantara
+    IPFilterRule(*parse_ip('104.238.22.0'), 8), # Singapore - Datacamp Limited
+    IPFilterRule(*parse_ip('106.213.0.0'), 15), # India - Bharti Airtel Ltd., Telemedia Services
+    IPFilterRule(*parse_ip('111.119.167.0'), 8), # Pakistan - Getlinks (SMC-Private) Limited
+    IPFilterRule(*parse_ip('111.119.48.0'), 9), # Nepal - C G Communications Pvt. Ltd
+    IPFilterRule(*parse_ip('114.8.200.0'), 11), # Indonesia - INDOSAT Internet Network Provider
+    IPFilterRule(*parse_ip('119.28.64.0'), 13), # Hong Kong - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('124.123.76.0'), 10), # India - Atria Convergence Technologies Ltd.,
+    IPFilterRule(*parse_ip('124.29.224.0'), 12), # Pakistan - Cyber Internet Services (Pvt) Ltd.
+    IPFilterRule(*parse_ip('125.94.144.0'), 11), # China - CHINANET-BACKBONE
+    IPFilterRule(*parse_ip('128.201.100.0'), 10), # Brazil - CONEXAO VIP TELECOM
+    IPFilterRule(*parse_ip('131.0.32.0'), 10), # Brazil - NETFACIL INTERNET VIA RADIO E INFORMATICA LTDA - M
+    IPFilterRule(*parse_ip('138.118.160.0'), 10), # Brazil - BRASIL TECPAR | AMIGO | AVATO
+    IPFilterRule(*parse_ip('138.185.96.0'), 10), # Brazil - GIGA MAIS FIBRA TELECOMUNICACOES S.A.
+    IPFilterRule(*parse_ip('138.255.216.0'), 10), # Brazil - Alares Cabo Servicos de Telecomunicacoes S.A.
+    IPFilterRule(*parse_ip('140.213.190.0'), 8), # Indonesia - PT XL Axiata Tbk
+    IPFilterRule(*parse_ip('143.137.212.0'), 10), # Brazil - ZAP AL INTERNET SERVICE LTDA
+    IPFilterRule(*parse_ip('146.174.128.0'), 14), # Singapore - HUAWEI CLOUDS
+    IPFilterRule(*parse_ip('146.19.24.0'), 8), # Poland - MEVSPACE sp. z o.o.
+    IPFilterRule(*parse_ip('150.109.224.0'), 13), # South Korea - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('152.231.32.0'), 11), # Nicaragua - Telefonia Celular de Nicaragua SA.
+    IPFilterRule(*parse_ip('157.20.150.0'), 9), # Bangladesh - LINK4 COMMUNICATION
+    IPFilterRule(*parse_ip('160.120.0.0'), 16), # Ivory Coast - Orange Côte d'Ivoire
+    IPFilterRule(*parse_ip('160.238.132.0'), 10), # Brazil - CONEXAO VIP TELECOM
+    IPFilterRule(*parse_ip('162.14.128.0'), 15), # China - Shenzhen Tencent Computer Systems Company Limited
+    IPFilterRule(*parse_ip('165.101.222.0'), 9), # Bangladesh - S.S.R.B Internet Service
+    IPFilterRule(*parse_ip('168.181.28.0'), 10), # Brazil - B.B. NET UP EIRELI -ME
+    IPFilterRule(*parse_ip('168.194.100.0'), 10), # Peru - RED INTERCABLE PERU SAC
+    IPFilterRule(*parse_ip('168.196.200.0'), 10), # Chile - WOM S.A.
+    IPFilterRule(*parse_ip('168.228.180.0'), 10), # Brazil - Contato Internet EIRELI
+    IPFilterRule(*parse_ip('168.90.248.0'), 10), # Brazil - GR TELECOMUNICAÇÕES LTDA ME
+    IPFilterRule(*parse_ip('170.233.48.0'), 10), # Brazil - GIGA MAIS FIBRA TELECOMUNICACOES S.A.
+    IPFilterRule(*parse_ip('170.245.120.0'), 10), # Brazil - G3 Telecom EIRELI
+    IPFilterRule(*parse_ip('170.254.228.0'), 10), # Colombia - Media Commerce Partners S.A
+    IPFilterRule(*parse_ip('173.52.0.0'), 16), # United States - Verizon Business
+    IPFilterRule(*parse_ip('175.107.232.0'), 9), # Pakistan - Cyber Internet Services (Pvt) Ltd.
+    IPFilterRule(*parse_ip('176.64.0.0'), 13), # Kazakhstan - Tele2 Kazakhstan
+    IPFilterRule(*parse_ip('177.10.72.0'), 10), # Brazil - WN Tellecom
+    IPFilterRule(*parse_ip('177.100.128.0'), 13), # Brazil - Claro NXT Telecomunicacoes Ltda
+    IPFilterRule(*parse_ip('177.129.204.0'), 10), # Brazil - Silva & Gonçalves Informática Ltda
+    IPFilterRule(*parse_ip('177.137.128.0'), 12), # Brazil - Paulinianet Telecom
+    IPFilterRule(*parse_ip('177.190.184.0'), 11), # Brazil - SPEED PLANET TELECOMUNICAÇÕES LTDA - EPP
+    IPFilterRule(*parse_ip('177.200.240.0'), 12), # Brazil - DTEL TELECOM
+    IPFilterRule(*parse_ip('177.221.128.0'), 10), # Brazil - Web Connect
+    IPFilterRule(*parse_ip('177.221.72.0'), 11), # Brazil - Companhia Itabirana Telecomunicações Ltda
+    IPFilterRule(*parse_ip('177.23.112.0'), 11), # Brazil - P4 TELECOM LTDA
+    IPFilterRule(*parse_ip('177.234.160.0'), 13), # Brazil - Barbosa & Costa Ltda
+    IPFilterRule(*parse_ip('177.234.194.0'), 8), # Ecuador - UFINET PANAMA S.A.
+    IPFilterRule(*parse_ip('177.46.64.0'), 14), # Brazil - ASSOCIAÇÃO NACIONAL PARA INCLUSÃO DIGITAL - ANID
+    IPFilterRule(*parse_ip('177.70.144.0'), 12), # Brazil - Superimagem Tecnologia em Eletronica Ltda
+    IPFilterRule(*parse_ip('177.74.104.0'), 10), # Brazil - MARANET TELECOM LTDA
+    IPFilterRule(*parse_ip('177.85.72.0'), 10), # Brazil - PROVEDOR INTERSOUSA LTDA
+    IPFilterRule(*parse_ip('179.51.118.0'), 9), # Colombia - HV TELEVISION S.A.S
+    IPFilterRule(*parse_ip('179.52.0.0'), 17), # Dominican Republic - Compañía Dominicana de Teléfonos S. A.
+    IPFilterRule(*parse_ip('179.72.0.0'), 19), # Brazil - TIM S/A
+    IPFilterRule(*parse_ip('181.1.192.0'), 14), # Argentina - Telecom Argentina S.A.
+    IPFilterRule(*parse_ip('181.160.0.0'), 18), # Chile - TELEFÓNICA CHILE S.A.
+    IPFilterRule(*parse_ip('181.233.80.0'), 10), # Brazil - Mega Telecom Ltda
+    IPFilterRule(*parse_ip('181.61.246.0'), 9), # Colombia - Telmex Colombia S.A.
+    IPFilterRule(*parse_ip('182.189.64.0'), 9), # Pakistan - Connect Communications
+    IPFilterRule(*parse_ip('182.252.94.0'), 9), # Bangladesh - SkyTel Communications Limited
+    IPFilterRule(*parse_ip('182.44.0.0'), 14), # China - Cloud Computing Corporation
+    IPFilterRule(*parse_ip('185.142.40.0'), 10), # Lebanon - Net Pro sarl
+    IPFilterRule(*parse_ip('185.151.84.0'), 10), # Ukraine - Omega Telecom LLC
+    IPFilterRule(*parse_ip('185.166.24.0'), 10), # Iraq - Online Company for Technological Information, Supply of Electronic Equipment and Internet Services Through Wifi Ltd.
+    IPFilterRule(*parse_ip('185.187.204.0'), 10), # Iraq - I.Q Online for Internet Services and Communications LLC
+    IPFilterRule(*parse_ip('185.53.228.0'), 10), # Kyrgyzstan - CJSC SAIMA TELECOM
+    IPFilterRule(*parse_ip('185.97.95.0'), 8), # Lebanon - T.H. Global Vision SARL
+    IPFilterRule(*parse_ip('186.12.244.0'), 10), # Argentina - Techtel LMDS Comunicaciones Interactivas S.A.
+    IPFilterRule(*parse_ip('186.194.144.0'), 12), # Brazil - Opcao Telecom
+    IPFilterRule(*parse_ip('186.195.240.0'), 10), # Brazil - REINALDO PEREIRA DOS SANTOS
+    IPFilterRule(*parse_ip('186.216.56.0'), 11), # Brazil - METROFLEX TELECOMUNICACOES LTDA
+    IPFilterRule(*parse_ip('186.227.16.0'), 12), # Brazil - lazernet.com.br ltda me
+    IPFilterRule(*parse_ip('186.228.0.0'), 18), # Brazil - TIM S/A
+    IPFilterRule(*parse_ip('186.232.104.0'), 10), # Brazil - DOMINIO TELECOM LTDA
+    IPFilterRule(*parse_ip('186.232.160.0'), 12), # Brazil - VIP NETWORK TELECOMUNICAÇÕES LTDA
+    IPFilterRule(*parse_ip('186.235.160.0'), 12), # Brazil - SATURNO COMUNICAÇÕES LTDA
+    IPFilterRule(*parse_ip('186.243.0.0'), 14), # Brazil - V tal
+    IPFilterRule(*parse_ip('186.250.32.0'), 10), # Brazil - DRM SERVICOS DE TELECOMUNICACOES EIRELI -ME
+    IPFilterRule(*parse_ip('187.102.212.0'), 10), # Brazil - START NET TELECOM LTDA
+    IPFilterRule(*parse_ip('187.102.48.0'), 12), # Brazil - Axnet Provedor de Internet Comercio Ltda
+    IPFilterRule(*parse_ip('187.108.80.0'), 12), # Brazil - Conquest Telecomunicações Ltda
+    IPFilterRule(*parse_ip('187.120.128.0'), 13), # Brazil - VERO S.A
+    IPFilterRule(*parse_ip('187.190.160.0'), 9), # Mexico - TOTAL PLAY TELECOMUNICACIONES SA DE CV
+    IPFilterRule(*parse_ip('187.190.88.0'), 8), # Mexico - TOTAL PLAY TELECOMUNICACIONES SA DE CV
+    IPFilterRule(*parse_ip('187.191.8.0'), 8), # Mexico - TOTAL PLAY TELECOMUNICACIONES SA DE CV
+    IPFilterRule(*parse_ip('187.211.0.0'), 16), # Mexico - UNINET
+    IPFilterRule(*parse_ip('187.227.128.0'), 15), # Mexico - UNINET
+    IPFilterRule(*parse_ip('187.240.0.0'), 18), # Mexico - Mega Cable, S.A. de C.V.
+    IPFilterRule(*parse_ip('187.4.0.0'), 18), # Brazil - V tal
+    IPFilterRule(*parse_ip('187.61.120.0'), 11), # Brazil - LIFE.IN TELECOM
+    IPFilterRule(*parse_ip('187.62.112.0'), 10), # Brazil - A. CHAVES DOS SANTOS COMERCIO
+    IPFilterRule(*parse_ip('187.66.0.0'), 15), # Brazil - Claro NXT Telecomunicacoes Ltda
+    IPFilterRule(*parse_ip('187.87.96.0'), 12), # Brazil - UNIFIQUE TELECOMUNICACOES S/A
+    IPFilterRule(*parse_ip('187.94.128.0'), 13), # Brazil - ZAAZ PROVEDOR DE INTERNET E TELECOMUNICACOES LTDA
+    IPFilterRule(*parse_ip('187.95.220.0'), 10), # Brazil - B.L.I NETWORK TELECOMUNICACAO LTDA
+    IPFilterRule(*parse_ip('188.72.10.0'), 8), # Iraq - Tarik Al-thuraya Company For Communications Service Ltd.
+    IPFilterRule(*parse_ip('189.10.0.0'), 17), # Brazil - V tal
+    IPFilterRule(*parse_ip('189.14.116.0'), 10), # Brazil - RODOLPHO SILVA BORGES EIRELI
+    IPFilterRule(*parse_ip('189.216.232.0'), 9), # Mexico - Cablevisión, S.A. de C.V.
+    IPFilterRule(*parse_ip('189.216.32.0'), 12), # Mexico - Cablevisión, S.A. de C.V.
+    IPFilterRule(*parse_ip('189.32.64.0'), 13), # Brazil - Claro NXT Telecomunicacoes Ltda
+    IPFilterRule(*parse_ip('190.102.44.0'), 10), # Brazil - WEB ONLINE TELECOMUNICACOES EIRELI ME
+    IPFilterRule(*parse_ip('190.107.96.0'), 13), # Argentina - MERCO COMUNICACIONES
+    IPFilterRule(*parse_ip('190.111.128.0'), 10), # Brazil - Solucao Network Provedor Ltda
+    IPFilterRule(*parse_ip('190.153.64.0'), 10), # Venezuela - Net Uno, C.A.
+    IPFilterRule(*parse_ip('190.2.128.0'), 13), # The Netherlands - WorldStream
+    IPFilterRule(*parse_ip('190.2.216.0'), 11), # Costa Rica - CoopeSantos R.L.
+    IPFilterRule(*parse_ip('190.252.128.0'), 15), # Colombia - COLOMBIA TELECOMUNICACIONES S.A. ESP BIC
+    IPFilterRule(*parse_ip('190.30.192.0'), 13), # Argentina - Telecom Argentina S.A.
+    IPFilterRule(*parse_ip('191.10.0.0'), 17), # Brazil - TELEFÔNICA BRASIL S.A
+    IPFilterRule(*parse_ip('191.240.128.0'), 11), # Brazil - SCNet Equipamentos de Informática Ltda
+    IPFilterRule(*parse_ip('191.241.20.0'), 10), # Brazil - IMF NETWORK DATA LTDA - ME
+    IPFilterRule(*parse_ip('191.242.192.0'), 10), # Brazil - DUFIBRANET TELECOM LTDA
+    IPFilterRule(*parse_ip('191.37.128.0'), 11), # Brazil - Cybertech Informática LTDA
+    IPFilterRule(*parse_ip('191.7.168.0'), 11), # Brazil - VIAFIBRA TELECOMUNICACOES LTDA
+    IPFilterRule(*parse_ip('191.8.192.0'), 14), # Brazil - TELEFÔNICA BRASIL S.A
+    IPFilterRule(*parse_ip('192.144.128.0'), 15), # China - Shenzhen Tencent Computer Systems Company Limited
+    IPFilterRule(*parse_ip('194.24.236.0'), 9), # Ukraine - RPC HomeNet Ltd.
+    IPFilterRule(*parse_ip('195.24.236.0'), 9), # The Netherlands - Netiface
+    IPFilterRule(*parse_ip('196.137.128.0'), 14), # Egypt - Vodafone Data
+    IPFilterRule(*parse_ip('196.189.64.0'), 13), # Ethiopia - Ethio Telecom
+    IPFilterRule(*parse_ip('196.25.128.0'), 12), # South Africa - Telkom SA Ltd.
+    IPFilterRule(*parse_ip('196.250.208.0'), 11), # Kenya - Mawingu Networks Ltd
+    IPFilterRule(*parse_ip('197.240.0.0'), 16), # Tunisia - TOPNET
+    IPFilterRule(*parse_ip('198.160.168.0'), 9), # Iraq - Al Atheer Telecommunication-Iraq Co. Ltd. Incorporated in Cayman Islands
+    IPFilterRule(*parse_ip('200.110.108.0'), 10), # Brazil - TVF INTERNET RAPIDA LTDA
+    IPFilterRule(*parse_ip('200.123.148.0'), 10), # Argentina - NSS S.A.
+    IPFilterRule(*parse_ip('200.185.192.0'), 13), # Brazil - BITCOM PROVEDOR DE SERVICOS DE INTERNET LTDA
+    IPFilterRule(*parse_ip('200.233.36.0'), 10), # Brazil - VIA FIBRA INTERNET LTDA
+    IPFilterRule(*parse_ip('200.236.224.0'), 13), # Brazil - Desktop Sigmanet Comunicação Multimídia SA
+    IPFilterRule(*parse_ip('200.6.80.0'), 10), # Brazil - TEK TELECOM LTDA
+    IPFilterRule(*parse_ip('200.80.116.0'), 10), # Brazil - NORTE TEL MATO GROSSO TELECOMUNICACOES LTDA
+    IPFilterRule(*parse_ip('201.175.60.0'), 10), # Brazil - Miriam dos Santos Oliveira ME
+    IPFilterRule(*parse_ip('201.22.0.0'), 16), # Brazil - TELEFÔNICA BRASIL S.A
+    IPFilterRule(*parse_ip('202.47.32.0'), 13), # Pakistan - Cyber Internet Services (Pvt) Ltd.
+    IPFilterRule(*parse_ip('202.76.128.0'), 14), # Singapore - HUAWEI CLOUDS
+    IPFilterRule(*parse_ip('206.84.32.0'), 13), # Brazil - AS SISTEMAS LTDA
+    IPFilterRule(*parse_ip('207.230.8.0'), 10), # Colombia - TV&MÁS S.A.S
+    IPFilterRule(*parse_ip('213.217.2.0'), 9), # Russia - IE Batov Aleksandr Aleksandrovich
+    IPFilterRule(*parse_ip('217.19.208.0'), 12), # Moldova - INTERDNESTRKOM, Sovmestnoe Zakrytoe Aktsionernoe Obshchestvo
+    IPFilterRule(*parse_ip('221.120.209.0'), 8), # Pakistan - Pakistan Telecommunication Company Limited
+    IPFilterRule(*parse_ip('31.207.91.0'), 8), # Mexico - Valor Information Technologies, S.L.
+    IPFilterRule(*parse_ip('35.232.0.0'), 16), # United States - Google LLC
+    IPFilterRule(*parse_ip('36.110.128.0'), 14), # China - IDC, China Telecommunications Corporation
+    IPFilterRule(*parse_ip('36.255.80.0'), 10), # Bangladesh - TM International Bangladesh Ltd.Internet service Provider,Gulshan-1,Dhaka-1212
+    IPFilterRule(*parse_ip('37.236.20.0'), 10), # Iraq - Hulum Almustakbal Company for Communication Engineering and Services Ltd
+    IPFilterRule(*parse_ip('38.253.192.0'), 13), # Oman - Awaser Oman LLC
+    IPFilterRule(*parse_ip('38.44.232.0'), 8), # Argentina - VIATEC SRL
+    IPFilterRule(*parse_ip('41.90.168.0'), 11), # Kenya - Safaricom Limited
+    IPFilterRule(*parse_ip('42.106.0.0'), 17), # India - Vodafone Idea Ltd
+    IPFilterRule(*parse_ip('43.128.64.0'), 14), # Singapore - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('43.130.0.0'), 15), # United States - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('43.159.128.0'), 14), # United States - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('45.160.200.0'), 10), # Argentina - ROSERO MARCELO JORGE MAXIMILIANO
+    IPFilterRule(*parse_ip('45.161.4.0'), 10), # Brazil - GIGA MAIS FIBRA TELECOMUNICACOES S.A.
+    IPFilterRule(*parse_ip('45.163.60.0'), 10), # Brazil - VOUE TELECOM LTDA
+    IPFilterRule(*parse_ip('45.163.88.0'), 10), # Brazil - SIMTEL INTERNET TELECOM LTDA
+    IPFilterRule(*parse_ip('45.164.232.0'), 10), # Brazil - ga de matos
+    IPFilterRule(*parse_ip('45.164.60.0'), 10), # Brazil - SRG TELECOM LTDA
+    IPFilterRule(*parse_ip('45.166.136.0'), 10), # Brazil - GT NET SERVIÇOS DE PROVEDORES LTDA ME
+    IPFilterRule(*parse_ip('45.166.196.0'), 10), # Brazil - VLMAX TELECOM
+    IPFilterRule(*parse_ip('45.170.160.0'), 10), # Brazil - FAST PROVEDOR NET TELECOM LTDA
+    IPFilterRule(*parse_ip('45.171.124.0'), 9), # Brazil - ULTRACONECT COMUNICACAO LTDA
+    IPFilterRule(*parse_ip('45.174.148.0'), 10), # Argentina - CABLE VIDEO IMAGEN CANAL 5 S.R.L
+    IPFilterRule(*parse_ip('45.176.100.0'), 10), # Brazil - MULTINET TELECOM LTDA
+    IPFilterRule(*parse_ip('45.181.100.0'), 10), # Brazil - PLUGAR TELECOM
+    IPFilterRule(*parse_ip('45.182.96.0'), 10), # Brazil - CONEXAO WEB TELECOM LTDA
+    IPFilterRule(*parse_ip('45.185.76.0'), 10), # Brazil - PRO TELECOMUNICACOES LTDA
+    IPFilterRule(*parse_ip('45.186.100.0'), 10), # Brazil - GKG NET TELECON LTDA
+    IPFilterRule(*parse_ip('45.187.84.0'), 10), # Brazil - MECONECTE COM BR
+    IPFilterRule(*parse_ip('45.188.52.0'), 10), # Brazil - TEX TELECOM EIRELI
+    IPFilterRule(*parse_ip('45.190.232.0'), 9), # Brazil - J&J Net Telecomunicações LTDA
+    IPFilterRule(*parse_ip('45.191.220.0'), 10), # Brazil - Brconecta LTDA
+    IPFilterRule(*parse_ip('45.229.164.0'), 10), # Brazil - GERACAO NET
+    IPFilterRule(*parse_ip('45.229.84.0'), 9), # Argentina - GABRIEL FRANCISCO ERBETTA Y MARIANO ANDRES CARRIZO RICHELET SOCIEDAD DE HECHO (TELNET SOLUCIONES)
+    IPFilterRule(*parse_ip('45.230.240.0'), 10), # Ecuador - TELEALFACOM S.A.S.
+    IPFilterRule(*parse_ip('45.235.36.0'), 10), # Chile - ANMAX TELECOMUNICACIONES MAXIMILIANO BIONDI EIRL
+    IPFilterRule(*parse_ip('45.237.192.0'), 10), # Brazil - JUPITTER TELECOM PROVEDOR LTDA ME
+    IPFilterRule(*parse_ip('45.238.200.0'), 10), # Brazil - TB TELECOM LTDA
+    IPFilterRule(*parse_ip('45.238.228.0'), 10), # Brazil - Andressa Montebugnoli de Camargo - ME
+    IPFilterRule(*parse_ip('45.239.72.0'), 10), # Brazil - RESENDE & GONÇALVES SERVIÇOS E INTERNET LTDA
+    IPFilterRule(*parse_ip('45.251.228.0'), 10), # Bangladesh - KS Network Limited
+    IPFilterRule(*parse_ip('45.5.208.0'), 10), # Brazil - UP LINE MULTIMIDIA LTDA - ME
+    IPFilterRule(*parse_ip('45.9.228.0'), 10), # Uzbekistan - CityNet LTD
+    IPFilterRule(*parse_ip('46.143.0.0'), 15), # Iran - Asiatech Data Transmission company
+    IPFilterRule(*parse_ip('49.213.32.0'), 9), # Bangladesh - LR International
+    IPFilterRule(*parse_ip('49.51.64.0'), 12), # United States - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('5.239.240.0'), 9), # Iran - Iran Telecommunication Company PJS
+    IPFilterRule(*parse_ip('5.38.0.0'), 15), # United Arab Emirates - Emirates Internet
+    IPFilterRule(*parse_ip('60.48.0.0'), 18), # Malaysia - TM TECHNOLOGY SERVICES SDN. BHD.
+    IPFilterRule(*parse_ip('62.168.160.0'), 13), # Georgia - Magticom Ltd.
+    IPFilterRule(*parse_ip('62.201.202.0'), 8), # Iraq - I.Q Online for Internet Services and Communications LLC
+    IPFilterRule(*parse_ip('64.43.0.0'), 14), # Ireland - Vodafone Ireland Limited
+    IPFilterRule(*parse_ip('68.183.208.0'), 12), # Germany - DigitalOcean, LLC
+    IPFilterRule(*parse_ip('74.120.121.0'), 8), # United States - 1GSERVERS, LLC
+    IPFilterRule(*parse_ip('77.87.96.0'), 11), # Russia - ITT Ltd.
+    IPFilterRule(*parse_ip('78.40.119.0'), 8), # Russia - Aleksandr Butenko
+    IPFilterRule(*parse_ip('78.98.0.0'), 17), # Slovakia - Slovak Telekom, a.s.
+    IPFilterRule(*parse_ip('84.37.224.0'), 12), # United States - Cox Communications Inc.
+    IPFilterRule(*parse_ip('90.192.0.0'), 21), # United Kingdom - Sky UK Limited
+    IPFilterRule(*parse_ip('92.115.0.0'), 16), # Moldova - Moldtelecom SA
+    IPFilterRule(*parse_ip('92.54.192.0'), 14), # Georgia - JSC "Silknet"
+    IPFilterRule(*parse_ip('93.123.109.32'), 5), # The Netherlands - TECHOFF SRV LIMITED
+    IPFilterRule(*parse_ip('93.159.228.0'), 10), # Russia - Kaspersky Lab Switzerland GmbH
+    IPFilterRule(*parse_ip('94.232.24.0'), 10), # Uzbekistan - NETKA TELEKOM LLC
+    IPFilterRule(*parse_ip('94.47.0.0'), 16), # Syria - STE PDN Internal AS
+    IPFilterRule(*parse_ip('95.32.240.0'), 12), # Russia - PJSC Rostelecom
 
 
 ])

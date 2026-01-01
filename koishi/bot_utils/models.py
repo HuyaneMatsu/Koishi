@@ -63,6 +63,9 @@ ADVENTURE_ACTION_TABLE = None
 adventure_model = None
 ADVENTURE_TABLE = None
 
+market_place_item_model = None
+MARKET_PLACE_ITEM_TABLE = None
+
 if (DATABASE_NAME is not None):
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy import Column, Integer as Int32, BIGINT as Int64, LargeBinary as Binary, create_engine, DateTime, \
@@ -417,6 +420,24 @@ if (DB_ENGINE is not None):
         energy_exhausted = Column(Int64, nullable = False)
     
     ADVENTURE_TABLE = adventure_model.__table__
+    
+    
+    class market_place_item_model(BASE):
+        __tablename__            = 'MARKET_PLACE_ITEMS'
+        id                       = Column(Int64, primary_key = True)
+        finalises_at             = Column(DateTime, nullable = False)
+        flags                    = Column(Int16, default = 0, nullable = False)
+        initial_sell_fee         = Column(Int64, default = 0, nullable = False)
+        item_flags               = Column(Int64, default = 0, nullable = False)
+        item_id                  = Column(Int32, default = 0, nullable = False)
+        item_amount              = Column(Int64, default = 0, nullable = False)
+        purchaser_user_id        = Column(Int64, default = 0, nullable = False)
+        purchaser_balance_amount = Column(Int64, default = 0, nullable = False)
+        seller_user_id           = Column(Int64, default = 0, nullable = False)
+        seller_balance_amount    = Column(Int64, default = 0, nullable = False)
+    
+    MARKET_PLACE_ITEM_TABLE = market_place_item_model.__table__
+    
     
     DB_ENGINE.dispose()
     # BASE.metadata.create_all(DB_ENGINE)

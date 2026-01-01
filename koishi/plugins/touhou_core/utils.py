@@ -23,7 +23,8 @@ def _build_allowed_names_and_lookup_map(characters):
     -------
     allowed_names : `list<str>`
         Names to match from.
-    lookup_map : `dict<str, TouhouCharacter>
+    
+    lookup_map : ``dict<str, TouhouCharacter>``
         Character lookup map.
     """
     allowed_names = []
@@ -46,9 +47,11 @@ def _get_touhou_character_like_from(name, allowed_names, lookup_map):
     ----------
     name : `str`
         Input value.
+    
     allowed_names : `list<str>`
         Names to match from.
-    lookup_map : `dict<str, TouhouCharacter>
+    
+    lookup_map : ``dict<str, TouhouCharacter>``
         Character lookup map.
     
     Returns

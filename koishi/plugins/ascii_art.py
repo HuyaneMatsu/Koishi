@@ -1,22 +1,24 @@
 from io import BytesIO
-from math import ceil, floor
+from math import ceil
 
-from hata import ClientUserBase, Color, create_ansi_format_code, AnsiForegroundColor, AnsiTextDecoration
+from hata import ClientUserBase, create_ansi_format_code, AnsiForegroundColor, AnsiTextDecoration
 from hata.ext.slash import InteractionResponse, abort
-from numpy import array as Array, around, uint8 as u8
-from PIL import Image, ImageOps
+from numpy import array as Array, full as create_filled_array, uint8 as UInt8
+from PIL.Image import open as open_image 
 
 from ..bots import FEATURE_CLIENTS
 
 
+INVISIBLE = ' '
+
 STYLE_NAME_CHARACTER_SHORT = 'character short'
-STYLE_CHARACTER_SHORT = ' .:-=oX8@'
+STYLE_CHARACTER_SHORT = '.:-=oX8@'
 
 STYLE_NAME_CHARACTER_EXTENDED = 'character extended'
-STYLE_CHARACTER_EXTENDED = ' .\'`^",:Il!i><~+_-?}{1)(|\\/tfjrxnuvczXYUJCLQ0OZ#MW&8%B@$'
+STYLE_CHARACTER_EXTENDED = '.\'`^",:Il!i><~+_-?}{1)(|\\/tfjrxnuvczXYUJCLQ0OZ#MW&8%B@$'
 
 STYLE_NAME_SHADE = 'shade'
-STYLE_SHADE = ' ░▒▓█'
+STYLE_SHADE = '░▒▓█'
 
 STYLE_NAMES = [
     STYLE_NAME_CHARACTER_SHORT,
@@ -39,6 +41,9 @@ COLOR_CODE_BLUE = create_ansi_format_code(foreground_color = AnsiForegroundColor
 COLOR_CODE_TEAL = create_ansi_format_code(foreground_color = AnsiForegroundColor.teal)
 COLOR_CODE_PINK = create_ansi_format_code(foreground_color = AnsiForegroundColor.pink)
 
+COLOR_CODE_WHITE = create_ansi_format_code(foreground_color = AnsiForegroundColor.white)
+COLOR_CODE_BLACK = create_ansi_format_code(foreground_color = AnsiForegroundColor.black)
+
 
 COLOR_CODES = (
     COLOR_CODE_RED,
@@ -48,7 +53,10 @@ COLOR_CODES = (
     COLOR_CODE_TEAL,
     COLOR_CODE_PINK,
     COLOR_CODE_NONE,
+    COLOR_CODE_WHITE,
+    COLOR_CODE_BLACK,
 )
+
 
 
 SIZE_ALLOWED = [16, 20, 32, 40, 64, 80]
@@ -91,15 +99,19 @@ def create_grayscale(image, scale):
     -------
     output : `str`
     """
-    image = mush(ImageOps.grayscale(image))
+    image = mush(image).convert('LA')
+    array = Array(image)
     
-    scale_ratio = (len(scale) - 1 ) / 255
-    array = around((Array(image) * scale_ratio)).astype(u8)
+    array[::, ::, 0] //= ceil(255 / (len(scale) - 1))
     
     output_parts = []
     for line in array:
-        for scale_index in line:
-            output_parts.append(scale[scale_index])
+        for scale_index, alpha in line:
+            if alpha < 127:
+                tile = INVISIBLE
+            else:
+                tile = scale[scale_index]
+            output_parts.append(tile)
         output_parts.append('\n')
 
     return ''.join(output_parts)
@@ -118,37 +130,55 @@ def create_colored(image, scale):
     -------
     output : `str`
     """
-    image = mush(image).convert('RGB')
+    image = mush(image).convert('RGBA')
     
-    scale_ratio = len(scale) - 1
     width, height = image.size
+    array = create_filled_array((height, width, 5), 255, UInt8)
+    array[::, ::, 0:3] = image.convert('HSV')
+    
+    # Apply alpha
+    try:
+        array[::, ::, 3] = image.getchannel('A')
+    except ValueError:
+        pass
+    
+    # Calculate color index
+    array[::, ::, 0] += 21
+    array[::, ::, 0] //= 43
+    
+    # Calculate tile index
+    array[::, ::, 3] = array[::, ::, 2] // ceil(255 / (len(scale) - 1))
     
     output_parts = []
-    pixels = image.load()
     
     output_parts.append(COLOR_CODE_NONE)
+    color_index = 6
     last_color_index = 6
     
-    for y in range(height):
-        for x in range(width):
-            hue, saturation, lightness = Color.from_rgb_tuple(pixels[x, y]).as_hsl_float_tuple
-            
-            scale_index = round(lightness * scale_ratio)
-            
-            if scale_index:
-                if saturation <= 0.20:
+    for line in array:
+        for hue, saturation, lightness, tile_index, alpha in line:
+            if alpha < 127:
+                tile = INVISIBLE
+                
+            else:
+                tile = scale[tile_index]
+                if lightness < 51:
+                    color_index = 8
+                elif lightness > 218:
+                    color_index = 7
+                elif saturation < 90:
                     color_index = 6
                 else:
-                    color_index = floor((hue + (1 / 12) % 1.0) * 6)
-                
-                if color_index != last_color_index:
-                    last_color_index = color_index
-                    output_parts.append(COLOR_CODES[color_index])
+                    color_index = hue
             
-            output_parts.append(scale[scale_index])
+            if color_index != last_color_index:
+                last_color_index = color_index
+                output_parts.append(COLOR_CODES[color_index])
+            
+            output_parts.append(tile)
         
         output_parts.append('\n')
-
+    
     return ''.join(output_parts)
 
 
@@ -183,7 +213,7 @@ async def get_ascii_art_of(client, image_url, scale, colored):
         
         data = await response.read()
     
-    return (create_colored if colored else create_grayscale)(Image.open(BytesIO(data)), scale)
+    return (create_colored if colored else create_grayscale)(open_image(BytesIO(data)), scale)
 
 
 ASCII_COMMANDS = FEATURE_CLIENTS.interactions(
@@ -262,12 +292,12 @@ async def avatar(
     if user is None:
         user = event.user
     
-    avatar_url = user.avatar_url_for_as(event.guild_id, size = size, ext = 'jpg')
+    avatar_url = user.avatar_url_for_as(event.guild_id, size = size, ext = 'png')
     if avatar_url is None:
         if not user.avatar:
             abort('The user has no avatar.')
         
-        avatar_url = user.avatar_url_as(size = size, ext = 'jpg')
+        avatar_url = user.avatar_url_as(size = size, ext = 'png')
     
     return output_ascii_art(client, avatar_url, style_name, invert, colored)
 
@@ -311,7 +341,7 @@ async def guild_icon(
     if guild is None:
         abort('Guild only command.')
     
-    icon_url = guild.icon_url_as(size = size, ext = 'jpg')
+    icon_url = guild.icon_url_as(size = size, ext = 'png')
     if icon_url is None:
         abort('The guild has no icon.')
     

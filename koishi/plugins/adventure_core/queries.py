@@ -101,11 +101,17 @@ async def store_adventure(adventure):
     adventure : ``Adventure``
         The adventure to insert.
     """
-    entry_id = await query_store_adventure(adventure)
-    adventure.entry_id = entry_id
+    user_id = adventure.user_id
+    ADVENTURES_ACTIVE[user_id] = adventure
+    try:
+        entry_id = await query_store_adventure(adventure)
+        adventure.entry_id = entry_id
+    except:
+        if ADVENTURES_ACTIVE.get(user_id, None) is adventure:
+            del ADVENTURES_ACTIVE[user_id]
+        raise
     
     ADVENTURES[entry_id] = adventure
-    ADVENTURES_ACTIVE[adventure.user_id] = adventure
     
     ADVENTURE_CACHE[entry_id] = adventure
     if len(ADVENTURE_CACHE) > ADVENTURE_CACHE_SIZE_MAX:
@@ -113,7 +119,6 @@ async def store_adventure(adventure):
     
     # Remove all the adventure listing page caches of the user.
     keys_to_delete = None
-    user_id = adventure.user_id
     
     for key in ADVENTURE_LISTING_CACHE.keys():
         if key[0] != user_id:

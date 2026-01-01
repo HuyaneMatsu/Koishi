@@ -1,4 +1,5 @@
 from .constants import *
+from .content_building import *
 from .flags import *
 from .item import *
 from .item_ids import *
@@ -8,6 +9,7 @@ from .utils import *
 
 __all__ = (
     *constants.__all__,
+    *content_building.__all__,
     *flags.__all__,
     *item.__all__,
     *item_ids.__all__,

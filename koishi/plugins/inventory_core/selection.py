@@ -9,7 +9,7 @@ def _item_match_sort_key(item):
     
     Parameters
     ----------
-    item : `tuple<Emoji, (int, int, str)>`
+    item : ``tuple<Emoji, (int, int, str)>``
         The item and it's match rate.
     
     Returns
@@ -77,15 +77,18 @@ def create_item_suggestions(inventory, item_flag, value):
     
     Returns
     -------
-    suggestions : `None | list<(str, int)>`
+    suggestions : `None | list<(str, str)>`
     """
-    if (value is not None) and value.isdigit():
-        item_entry = inventory.get_item_entry_by_id(int(value))
-        if item_entry is None:
-            return
-        
-        item = item_entry.item
-        return [(item.name, item.id)]
+    if (value is not None):
+        try:
+            item_id = int(value, 16)
+        except ValueError:
+            pass
+        else:
+            item_entry = inventory.get_item_entry_by_id(item_id)
+            if (item_entry is not None):
+                item = item_entry.item
+                return [(item.name, format(item.id, 'x'))]
     
     if item_flag:
         items = _filter_inventory_items_of_type(inventory, item_flag)
@@ -96,7 +99,7 @@ def create_item_suggestions(inventory, item_flag, value):
         return
     
     if (value is None):
-        return sorted((item.name, item.id) for item in items)
+        return sorted((item.name, format(item.id, 'x')) for item in items)
     
     item_name_pattern = re_compile('.*?'.join(re_escape(char) for char in value), re_ignore_case)
     
@@ -119,7 +122,7 @@ def create_item_suggestions(inventory, item_flag, value):
         return
     
     matches.sort(key = _item_match_sort_key)
-    return [(item.name, item.id) for item, match in matches]
+    return [(item.name, format(item.id, 'x')) for item, match in matches]
 
 
 def select_item(inventory, item_flag, value):
@@ -141,12 +144,14 @@ def select_item(inventory, item_flag, value):
     -------
     item : ``None | Item``
     """
-    if value.isdigit():
-        item_entry = inventory.get_item_entry_by_id(int(value))
-        if item_entry is None:
-            return
-        
-        return item_entry.item
+    try:
+        item_id = int(value, 16)
+    except ValueError:
+        pass
+    else:
+        item_entry = inventory.get_item_entry_by_id(item_id)
+        if (item_entry is not None):
+            return item_entry.item
     
     if item_flag:
         items = _filter_inventory_items_of_type(inventory, item_flag)

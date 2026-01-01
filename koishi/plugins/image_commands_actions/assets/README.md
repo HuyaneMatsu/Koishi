@@ -14809,15 +14809,6 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### eirin-kaguya-reisen-peg-0000
-
-- Creator: **suzushiro yukari**
-- Editor: *none*
-- Characters: **Houraisan Kaguya**, **Reisen Udongein Inaba**, **Yagokoro Eirin**
-- Source: **Touhou**
-
----
-
 ### aya-hatate-okuu-handhold-0000
 
 - Creator: **suzushiro yukari**

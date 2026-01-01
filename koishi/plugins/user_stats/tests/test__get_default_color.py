@@ -1,7 +1,7 @@
 import vampytest
 from hata import Color
 
-from ..embed_builders import get_default_color
+from ..chart import get_default_color
 
 
 def _iter_options():

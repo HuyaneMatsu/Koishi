@@ -34,8 +34,8 @@ def get_option_amount(option, random, multiplier):
         amount = 0
     
     else:
-        amount = floor(
-            (option.amount_base + random.random() * (option.amount_interval + 1))
+        amount = round(
+            (option.amount_base + random.random() * option.amount_interval)
             * (multiplier if option.amount_scaling_enabled else 1.0)
         )
     

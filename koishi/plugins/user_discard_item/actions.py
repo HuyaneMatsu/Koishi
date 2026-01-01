@@ -1,28 +1,6 @@
 __all__ = ()
 
-from ..inventory_core import create_item_suggestions, get_inventory, save_inventory, select_item
-
-
-async def get_discard_item_suggestions(user_id, value):
-    """
-    Gets item suggestions for the given value.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    user_id : `int`
-        The user's identifier.
-    
-    value : `None | str`
-        Value to filter for.
-    
-    Returns
-    -------
-    suggestions : `None | list<(str, int)>`
-    """
-    inventory = await get_inventory(user_id)
-    return create_item_suggestions(inventory, 0, value)
+from ..inventory_core import get_inventory, save_inventory, select_item
 
 
 async def discard_item(user_id, value, amount):

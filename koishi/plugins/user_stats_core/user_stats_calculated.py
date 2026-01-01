@@ -97,48 +97,58 @@ class UserStatsCalculated(RichAttributeErrorBaseType):
         
         modifiers = accumulate_modifier_values(item_costume, item_head, item_species, item_weapon)
         
-        stat_bedroom = apply_modifiers(stats.stat_bedroom, modifiers, MODIFIER_ID__STAT_BEDROOM)
-        stat_charm = apply_modifiers(stats.stat_charm, modifiers, MODIFIER_ID__STAT_CHARM)
-        stat_cuteness = apply_modifiers(stats.stat_cuteness, modifiers, MODIFIER_ID__STAT_CUTENESS)
-        stat_housewife = apply_modifiers(stats.stat_housewife, modifiers, MODIFIER_ID__STAT_HOUSEWIFE)
-        stat_loyalty = apply_modifiers(stats.stat_loyalty, modifiers, MODIFIER_ID__STAT_LOYALTY)
+        # Base stats
+        stat_bedroom = max(0, apply_modifiers(stats.stat_bedroom, modifiers, MODIFIER_ID__STAT_BEDROOM))
+        stat_charm = max(0, apply_modifiers(stats.stat_charm, modifiers, MODIFIER_ID__STAT_CHARM))
+        stat_cuteness = max(0, apply_modifiers(stats.stat_cuteness, modifiers, MODIFIER_ID__STAT_CUTENESS))
+        stat_housewife = max(0, apply_modifiers(stats.stat_housewife, modifiers, MODIFIER_ID__STAT_HOUSEWIFE))
+        stat_loyalty = max(0, apply_modifiers(stats.stat_loyalty, modifiers, MODIFIER_ID__STAT_LOYALTY))
         
         # extra inventory
         extra_inventory = calculate_inventory(stat_bedroom, stat_charm, stat_cuteness, stat_housewife, stat_loyalty)
         extra_inventory = apply_modifiers(extra_inventory, modifiers, MODIFIER_ID__INVENTORY)
         extra_inventory -= accumulate_item_weight(item_costume, item_head, item_species, item_weapon)
+        extra_inventory = max(0, extra_inventory)
         
         # extra movement
         extra_movement = calculate_movement(stat_bedroom, stat_charm, stat_cuteness, stat_housewife, stat_loyalty)
         extra_movement = apply_modifiers(extra_movement, modifiers, MODIFIER_ID__MOVEMENT)
+        extra_movement = max(0, extra_movement)
         
         # extra health
         extra_health = calculate_health(stat_bedroom, stat_charm, stat_cuteness, stat_housewife, stat_loyalty)
         extra_health = apply_modifiers(extra_health, modifiers, MODIFIER_ID__HEALTH)
+        extra_health = max(0, extra_health)
         
         # extra energy
         extra_energy = calculate_energy(stat_bedroom, stat_charm, stat_cuteness, stat_housewife, stat_loyalty)
         extra_energy = apply_modifiers(extra_energy, modifiers, MODIFIER_ID__ENERGY)
+        extra_energy = max(0, extra_energy)
         
         # extra butchering
         extra_butchering = calculate_butchering(stat_bedroom, stat_charm, stat_cuteness, stat_housewife, stat_loyalty)
         extra_butchering = apply_modifiers(extra_butchering, modifiers, MODIFIER_ID__BUTCHERING)
+        extra_butchering = max(0, extra_butchering)
         
         # extra fishing
         extra_fishing = calculate_fishing(stat_bedroom, stat_charm, stat_cuteness, stat_housewife, stat_loyalty)
         extra_fishing = apply_modifiers(extra_fishing, modifiers, MODIFIER_ID__FISHING)
+        extra_fishing = max(0, extra_fishing)
         
         # extra foraging
         extra_foraging = calculate_foraging(stat_bedroom, stat_charm, stat_cuteness, stat_housewife, stat_loyalty)
         extra_foraging = apply_modifiers(extra_foraging, modifiers, MODIFIER_ID__FORAGING)
+        extra_foraging = max(0, extra_foraging)
         
         # extra gardening
         extra_gardening = calculate_gardening(stat_bedroom, stat_charm, stat_cuteness, stat_housewife, stat_loyalty)
         extra_gardening = apply_modifiers(extra_gardening, modifiers, MODIFIER_ID__GARDENING)
+        extra_gardening = max(0, extra_gardening)
         
         # extra hunting
         extra_hunting = calculate_hunting(stat_bedroom, stat_charm, stat_cuteness, stat_housewife, stat_loyalty)
         extra_hunting = apply_modifiers(extra_hunting, modifiers, MODIFIER_ID__HUNTING)
+        extra_hunting = max(0, extra_hunting)
         
         
         # Construct

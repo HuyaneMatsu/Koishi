@@ -4,6 +4,7 @@ from datetime import datetime as DateTime, timezone as TimeZone
 from hata import DATETIME_FORMAT_CODE
 from scarletio import RichAttributeErrorBaseType
 
+from .allocation_feature_ids import get_allocation_data_size
 from .constants import ALLOCATION_STRUCT, ALLOCATION_STRUCT_SIZE, USER_RELATIONSHIP_SLOTS_DEFAULT
 
 
@@ -254,12 +255,32 @@ class UserBalance(RichAttributeErrorBaseType):
         
         Yields
         ------
-        allocation : `(int, int, int)`
+        allocation : `(int, int, int, None | memoryview)`
         
         """
         allocations = self.allocations
-        if (allocations is not None):
-            yield from ALLOCATION_STRUCT.iter_unpack(allocations)
+        if (allocations is None):
+            return
+        
+        index = 0
+        allocations_data_length = len(allocations)
+        allocations = memoryview(allocations)
+        while index < allocations_data_length:
+            end = index + ALLOCATION_STRUCT_SIZE
+            allocation_feature_id, session_id, amount = ALLOCATION_STRUCT.unpack(
+                allocations[index : end]
+            )
+            allocation_data_size = get_allocation_data_size(allocation_feature_id)
+            if not allocation_data_size:
+                data = None
+            
+            else:
+                index = end
+                end = index + allocation_data_size
+                data = allocations[index : end]
+            
+            index = end
+            yield (allocation_feature_id, session_id, amount, data)
     
     
     def get_cumulative_allocated_balance(self):
@@ -270,10 +291,27 @@ class UserBalance(RichAttributeErrorBaseType):
         -------
         cumulative_allocated_balance : `int`
         """
-        return sum(allocation[2] for allocation in self.iter_allocations())
+        allocations = self.allocations
+        if (allocations is None):
+            return 0
+        
+        cumulative_allocated_balance = 0
+        allocations_data_length = len(allocations)
+        allocations = memoryview(allocations)
+        index = 0
+        while index < allocations_data_length:
+            end = index + ALLOCATION_STRUCT_SIZE
+            allocation_feature_id, session_id, amount = ALLOCATION_STRUCT.unpack(
+                allocations[index : end]
+            )
+            allocation_data_size = get_allocation_data_size(allocation_feature_id)
+            index = end + allocation_data_size
+            cumulative_allocated_balance += amount
+        
+        return cumulative_allocated_balance
     
     
-    def add_allocation(self, allocation_feature_id, session_id, amount):
+    def add_allocation(self, allocation_feature_id, session_id, amount, data):
         """
         Adds a new allocation to the user balance.
         
@@ -287,8 +325,27 @@ class UserBalance(RichAttributeErrorBaseType):
         
         amount : `int`
             The amount of allocated balance.
+        
+        data : `None | bytes`
+            Allocation data.
         """
+        data_length = (0 if data is None else len(data))
+        expected_data_length = get_allocation_data_size(allocation_feature_id)
+        
+        if data_length != expected_data_length:
+            raise RuntimeError(
+                f'Badly sized data.\n'
+                f'allocation_feature_id = {allocation_feature_id!r}\n'
+                f'session_id = {session_id!r}\n'
+                f'data = {data!r}\n'
+                f'data_length = {data_length!r}\n'
+                f'expected_data_length = {expected_data_length!r}\n'
+            )
+        
         allocation = ALLOCATION_STRUCT.pack(allocation_feature_id, session_id, amount)
+        if (data is not None):
+            allocation += data
+        
         allocations = self.allocations
         if (allocations is None):
             allocations = allocation
@@ -314,22 +371,30 @@ class UserBalance(RichAttributeErrorBaseType):
         if (allocations is None):
             return
         
-        for (
-            index, (iterated_allocation_feature_id, iterated_session_id, amount)
-        ) in enumerate(ALLOCATION_STRUCT.iter_unpack(allocations)):
+        index = 0
+        allocations_data_length = len(allocations)
+        allocations = memoryview(allocations)
+        while index < allocations_data_length:
+            end = index + ALLOCATION_STRUCT_SIZE
+            iterated_allocation_feature_id, iterated_session_id, iterated_amount = ALLOCATION_STRUCT.unpack(
+                allocations[index : end]
+            )
+            allocation_data_size = get_allocation_data_size(allocation_feature_id)
             if (allocation_feature_id == iterated_allocation_feature_id) and (session_id == iterated_session_id):
                 break
+            
+            index = end + allocation_data_size
+            continue
+        
         else:
             return
         
-        allocations_size = len(allocations)
-        if allocations_size == ALLOCATION_STRUCT_SIZE:
+        allocation_size = ALLOCATION_STRUCT_SIZE + allocation_data_size
+        if (index == 0) and (allocations_data_length == allocation_size):
             allocations = None
+        
         else:
-            allocations = (
-                allocations[: index * ALLOCATION_STRUCT_SIZE] +
-                allocations[(index + 1) * ALLOCATION_STRUCT_SIZE :]
-            )
+            allocations = b''.join((allocations[: index], allocations[index + allocation_size :]))
         
         self.allocations = allocations
         self._mark_modification('allocations', allocations)

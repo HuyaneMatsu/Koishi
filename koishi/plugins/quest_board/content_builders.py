@@ -520,7 +520,7 @@ def produce_quest_detailed_description(quest, quest_template, user_level, comple
     yield '\n'
     yield from _produce_time_available(RelativeDelta(seconds = quest.duration))
     
-    yield '\n**Repeatable:**\n- '
+    yield '\n**Completable:**\n- '
     repeat_count = quest_template.repeat_count
     if not repeat_count:
         yield '**unlimited** times'
@@ -605,7 +605,7 @@ def produce_nullable_item_description(item):
     if (description is None):
         yield '*no description*'
     else:
-        yield item.description
+        yield description
 
 
 def _produce_amount_typed_bold(amount_type, amount):

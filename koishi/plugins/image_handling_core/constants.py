@@ -47,6 +47,7 @@ TOUHOU_TAGS_BANNED = frozenset((
     'greyscale',
     'ronald_mcdonald',
     'pokemon',
+    'furry',
 ))
 
 

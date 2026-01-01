@@ -9,7 +9,7 @@ def test__register_user_balance_allocation_hook():
     Tests whether ``register_user_balance_allocation_hook`` works as intended.
     """
     allocation_feature_id = 9999
-    is_allocation_alive_sync = None
+    get_allocation_aliveness = None
     get_session_enty = None
     
     hooks_patched = {}
@@ -21,7 +21,7 @@ def test__register_user_balance_allocation_hook():
     
     output = mocked(
         allocation_feature_id,
-        is_allocation_alive_sync,
+        get_allocation_aliveness,
         get_session_enty,
     )
     

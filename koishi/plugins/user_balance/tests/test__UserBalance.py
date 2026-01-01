@@ -3,6 +3,7 @@ from datetime import datetime as DateTime, timezone as TimeZone
 import vampytest
 from hata import DATETIME_FORMAT_CODE
 
+from ..allocation_feature_ids import ALLOCATION_FEATURE_ID_MARKET_PLACE
 from ..constants import USER_BALANCE_CACHE
 from ..user_balance import UserBalance
 
@@ -209,6 +210,7 @@ def test__UserBalance__add_allocation__new():
         6666,
         1233,
         50,
+        None,
     )
     
     user_balance = UserBalance(202511200000)
@@ -237,12 +239,14 @@ def test__UserBalance__add_allocation__existing():
         6666,
         1233,
         50,
+        None,
     )
     
     allocation_1 = (
-        6668,
+        ALLOCATION_FEATURE_ID_MARKET_PLACE,
         1236,
         56,
+        b'ayayayay',
     )
     
     user_balance = UserBalance(202511200001)
@@ -285,12 +289,14 @@ def test__UserBalance__get_cumulative_allocated_balance__filled():
         6666,
         1233,
         50,
+        None,
     )
     
     allocation_1 = (
         6668,
         1236,
         56,
+        None,
     )
     
     user_balance = UserBalance(202511200003)
@@ -310,6 +316,7 @@ def test__UserBalance__remove_allocation__none():
         6666,
         1233,
         50,
+        None,
     )
     
     user_balance = UserBalance(202511200004)
@@ -334,18 +341,21 @@ def test__UserBalance__remove_allocation__existing():
         6666,
         1233,
         50,
+        None,
     )
     
     allocation_1 = (
         6668,
         1236,
         56,
+        None,
     )
     
     allocation_2 = (
         6678,
         1266,
         59,
+        None,
     )
     
     user_balance = UserBalance(202511200005)

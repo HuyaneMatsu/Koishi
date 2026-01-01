@@ -1,3 +1,21 @@
+### 2026-01-01
+
+- Fix Alice - Angelroot quest asked for Flykiller amanita.
+- Fix Alice - Angelroot quest wording. (2vio2vieevie)
+- Fix applying multiplier to item count was done twice. (Since last update.) (chaos3326)
+- Item submission did not check whether the quest is completed, allowing it to be completed over limit. (remi495)
+- Fix typo in `/action` parameter description. (ayahiya)
+- Forbid stats going to negative and handle more related edge cases.
+- `/user stats` now allows the user to display their secondary stats as well.
+- `/user equipment` output's format updated.
+- Add `/user inspect-item` command.
+- Fix race conditions around adventure depart to avoid multi-departing.
+- `/user allocations` now displays `/market-place` entries as well.
+- Fix a rare crash in `/ds` when it tries to fallback edit a message that was fallback created.
+- Improve wording in quest view to do not imply that a quest can be done `1 + n` times, but only `n` times. (ayahiya)
+- Improve `ascii` command outputs. Especially the coloured ones.
+- Add new `/market-place sell`, `/market-place offers`, `/market-place inbox`, `/market-place view` commands.
+
 ### 2025-12-14
 
 - Fix `/guild quest-board` not responding. (Since last update) (huhbuh)

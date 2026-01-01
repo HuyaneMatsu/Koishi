@@ -212,7 +212,7 @@ async def try_edit_message(client, message, new_interaction_event, old_interacti
             return message, interaction_event
     
     # Try edit the message normally if we did not crash too hard.
-    channel = interaction_event.channel
+    channel = message.channel
     permissions = channel.cached_permissions_for(client)
     if channel.is_in_group_thread():
         can_create_message = permissions.send_messages_in_threads

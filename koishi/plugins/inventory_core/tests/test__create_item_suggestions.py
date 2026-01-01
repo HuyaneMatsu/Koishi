@@ -30,7 +30,7 @@ def _iter_options():
         ITEM_FLAG_WEAPON,
         None,
         [
-            (get_item(ITEM_ID_FISHING_ROD).name, ITEM_ID_FISHING_ROD),
+            (get_item(ITEM_ID_FISHING_ROD).name, format(ITEM_ID_FISHING_ROD, 'x')),
         ],
     )
     
@@ -40,7 +40,7 @@ def _iter_options():
         ITEM_FLAG_WEAPON,
         'fish',
         [
-            (get_item(ITEM_ID_FISHING_ROD).name, ITEM_ID_FISHING_ROD),
+            (get_item(ITEM_ID_FISHING_ROD).name, format(ITEM_ID_FISHING_ROD, 'x')),
         ],
     )
     
@@ -72,9 +72,9 @@ def _iter_options():
         202504010009,
         (ITEM_ID_FISHING_ROD,),
         ITEM_FLAG_WEAPON,
-        str(ITEM_ID_FISHING_ROD),
+        format(ITEM_ID_FISHING_ROD, 'x'),
         [
-            (get_item(ITEM_ID_FISHING_ROD).name, ITEM_ID_FISHING_ROD),
+            (get_item(ITEM_ID_FISHING_ROD).name, format(ITEM_ID_FISHING_ROD, 'x')),
         ],
     )
     
@@ -88,8 +88,8 @@ def _iter_options():
         ITEM_FLAG_EDIBLE,
         None,
         [
-            (get_item(ITEM_ID_PEACH).name, ITEM_ID_PEACH),
-            (get_item(ITEM_ID_STRAWBERRY).name, ITEM_ID_STRAWBERRY),
+            (get_item(ITEM_ID_PEACH).name, format(ITEM_ID_PEACH, 'x')),
+            (get_item(ITEM_ID_STRAWBERRY).name, format(ITEM_ID_STRAWBERRY, 'x')),
         ],
     )
 
@@ -115,7 +115,7 @@ def test__create_item_suggestions(user_id, item_ids, item_flag, value):
     
     Returns
     -------
-    output : `None | list<(str, int)>`
+    output : `None | list<(str, str)>`
     """
     inventory = Inventory(user_id)
     

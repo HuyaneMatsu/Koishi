@@ -55,7 +55,7 @@ ITEM_PEACH = ITEMS[ITEM_ID_PEACH] = Item(
         'red blush towards the sun.\n'
         '\n'
         'Can be found at the gardens of **Hakugyokurou mansion**. '
-        'Not sure if they were planted intentionally, or someone just mistake their pink blossom to cherry trees\''
+        'Not sure if they were planted intentionally, or someone just mistake their pink blossom to cherry trees\'.'
     ),
     ITEM_FLAG_EDIBLE,
     40, # value (hearts)

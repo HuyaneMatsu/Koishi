@@ -25,7 +25,7 @@ def _iter_options():
         Random(23),
         1.0,
         {
-            9999 : LootAccumulation(20, 500, 50)
+            9999 : LootAccumulation(19, 480, 48)
         },
     )
 

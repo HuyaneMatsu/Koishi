@@ -43,7 +43,7 @@ def _iter_options():
         202504010016,
         (ITEM_ID_FISHING_ROD,),
         ITEM_FLAG_WEAPON,
-        str(ITEM_ID_FISHING_ROD),
+        format(ITEM_ID_FISHING_ROD, 'x'),
         get_item(ITEM_ID_FISHING_ROD),
     )
 

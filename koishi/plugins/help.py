@@ -67,7 +67,7 @@ CATEGORIES = (
     ), (
         'Economy',
         EMOJI__HEART_CURRENCY,
-        ('adventure', 'daily', 'gift', 'shop', 'top-list',),
+        ('adventure', 'daily', 'gift', 'market-place', 'shop', 'top-list',),
         (),
     ), (
         'Fun',

@@ -2368,8 +2368,8 @@ def collect_commands():
 COLLECTED_COMMANDS = collect_commands()
 
 
-EMOJI_LEFT = BUILTIN_EMOJIS['arrow_left']
-EMOJI_RIGHT = BUILTIN_EMOJIS['arrow_right']
+EMOJI_LEFT = BUILTIN_EMOJIS['arrow_backward']
+EMOJI_RIGHT = BUILTIN_EMOJIS['arrow_forward']
 
 
 class InteractionCommandSource:

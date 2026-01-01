@@ -209,7 +209,7 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
                 )
                 break
             
-            user_balance.add_allocation(ALLOCATION_FEATURE_ID_GAME_21, session.id, amount)
+            user_balance.add_allocation(ALLOCATION_FEATURE_ID_GAME_21, session.id, amount, None)
             await save_user_balance(user_balance)
             
             player = Player(interaction_event.user, interaction_event)

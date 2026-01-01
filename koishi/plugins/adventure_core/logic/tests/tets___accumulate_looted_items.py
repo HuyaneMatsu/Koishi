@@ -43,7 +43,6 @@ def _iter_options():
         user_stats_0,
         inventory_0,
         {},
-        2.0,
         (
             set(),
             0,
@@ -59,11 +58,10 @@ def _iter_options():
             ITEM_ID_PEACH: LootAccumulation(4, 900, 80),
             ITEM_ID_STRAWBERRY: LootAccumulation(2, 100, 10),
         },
-        2.0,
         (
             {
-                (LOOT_STATE_SUCCESS, ITEM_ID_PEACH, 8),
-                (LOOT_STATE_SUCCESS, ITEM_ID_STRAWBERRY, 4),
+                (LOOT_STATE_SUCCESS, ITEM_ID_PEACH, 4),
+                (LOOT_STATE_SUCCESS, ITEM_ID_STRAWBERRY, 2),
             },
             90,
         ),
@@ -71,7 +69,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__accumulate_looted_items(adventure, user_stats, inventory, loot_accumulations, multiplier):
+def test__accumulate_looted_items(adventure, user_stats, inventory, loot_accumulations):
     """
     Tests whether ``accumulate_looted_items`` works as intended.
     
@@ -89,9 +87,6 @@ def test__accumulate_looted_items(adventure, user_stats, inventory, loot_accumul
     loot_accumulations : ``dict<int, LootAccumulation>``
         Accumulated loot from the action.
     
-    multiplier : `float`
-        Multiplier of the user for this given action.
-    
     Returns
     -------
     output : `(set<(int, int, int)>, int)`
@@ -100,7 +95,7 @@ def test__accumulate_looted_items(adventure, user_stats, inventory, loot_accumul
     loot_accumulations = {
         item_id: loot_accumulation.copy() for item_id, loot_accumulation in loot_accumulations.items()
     }
-    output = accumulate_looted_items(adventure, user_stats, inventory, loot_accumulations, multiplier)
+    output = accumulate_looted_items(adventure, user_stats, inventory, loot_accumulations)
     vampytest.assert_instance(output, tuple)
     vampytest.assert_eq(len(output), 2)
     

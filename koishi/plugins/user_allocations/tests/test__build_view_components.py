@@ -70,8 +70,8 @@ def _iter_options():
         page_count,
         guild_id,
         [
-            (ALLOCATION_FEATURE_ID_NONE, 123, 10),
-            (ALLOCATION_FEATURE_ID_GAME_21, 124, 20),
+            (ALLOCATION_FEATURE_ID_NONE, 123, 10, None),
+            (ALLOCATION_FEATURE_ID_GAME_21, 124, 20, None),
         ],
         [
             create_section(

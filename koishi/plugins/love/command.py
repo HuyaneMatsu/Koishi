@@ -25,7 +25,7 @@ async def love(
     Parameters
     ----------
     client : ``Client``
-        The client who received the vent.
+        The client receiving the event.
     
     event : ``InteractionEvent``
         The received event.

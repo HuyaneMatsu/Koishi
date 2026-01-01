@@ -1,4 +1,4 @@
-__all__ = ('user_inventory_command',)
+__all__ = ('command_user_inventory',)
 
 from ..inventory_core import get_inventory
 from ..user_stats_core import get_user_stats
@@ -8,7 +8,7 @@ from .constants import SORT_BY_DEFAULT, SORT_BYES, SORT_ORDER_DEFAULT, SORT_ORDE
 from .paging import get_inventory_page
 
 
-async def user_inventory_command(
+async def command_user_inventory(
     client,
     interaction_event,
     sort_by : (SORT_BYES, 'How to sort the items.') = SORT_BY_DEFAULT,

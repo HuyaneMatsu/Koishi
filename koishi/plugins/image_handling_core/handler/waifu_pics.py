@@ -46,6 +46,9 @@ BLACKLIST = {
     
     # not well formed file name
     'https://i.waifu.pics/VR8n91T.GIF',
+    
+    # Should be nom, but there is no nom on it
+    'https://i.waifu.pics/lL98Wc0.gif',
 }
 
 

@@ -21,7 +21,7 @@ def _iter_options():
     yield (
         ACTION_TYPE_GARDENING,
         user_stats,
-        log(100) / 2.302585092994046
+        log(100) / 2.302585092994046,
     )
     
     user_stats = UserStats(
@@ -32,7 +32,7 @@ def _iter_options():
     yield (
         ACTION_TYPE_FORAGING,
         user_stats,
-        log(100) / 2.302585092994046
+        log(100) / 2.302585092994046,
     )
     
     user_stats = UserStats(
@@ -43,7 +43,7 @@ def _iter_options():
     yield (
         ACTION_TYPE_BUTCHERING,
         user_stats,
-        log(100) / 2.302585092994046
+        log(100) / 2.302585092994046,
     )
     
     user_stats = UserStats(
@@ -54,7 +54,7 @@ def _iter_options():
     yield (
         ACTION_TYPE_FISHING,
         user_stats,
-        log(100) / 2.302585092994046
+        log(100) / 2.302585092994046,
     )
     
     user_stats = UserStats(
@@ -64,7 +64,7 @@ def _iter_options():
     yield (
         ACTION_TYPE_ENCOUNTER,
         user_stats,
-        log(10) / 2.302585092994046
+        log(10) / 2.302585092994046,
     )
     
     user_stats = UserStats(
@@ -75,7 +75,7 @@ def _iter_options():
     yield (
         ACTION_TYPE_HUNT,
         user_stats,
-        log(100) / 2.302585092994046
+        log(100) / 2.302585092994046,
     )
     
     user_stats = UserStats(
@@ -86,7 +86,7 @@ def _iter_options():
     yield (
         ACTION_TYPE_TRAP,
         user_stats,
-        log(12) / 2.302585092994046
+        log(12) / 2.302585092994046,
     )
     
     user_stats = UserStats(
@@ -96,7 +96,32 @@ def _iter_options():
     yield (
         9999,
         user_stats,
-        log(10) / 2.302585092994046
+        log(10) / 2.302585092994046,
+    )
+    
+    
+    # Value at 1
+    user_stats = UserStats(
+        202512270000,
+    )
+    user_stats.stats_calculated.extra_hunting = 1
+    
+    yield (
+        ACTION_TYPE_HUNT,
+        user_stats,
+        0.15,
+    )
+    
+    # Value at 0
+    user_stats = UserStats(
+        202512270000,
+    )
+    user_stats.stats_calculated.extra_hunting = 0
+    
+    yield (
+        ACTION_TYPE_HUNT,
+        user_stats,
+        0.05,
     )
 
 

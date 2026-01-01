@@ -129,6 +129,7 @@ Although here is a "short" description for all of her commands by category:
 - `/adventure` - Depart to adventures to collect items for completing quests.
 - `/daily` - Claim your daily hearts and your beloveds' one.
 - `/gift` - Gift hearts to your beloved ones.
+- `/market-place` - Sell / buy items that you or others acquired.
 - `/shop` - Spend your hearts.
 - `/top-list` - The horde of heart hoarders. Do not be like them.
 - `/user hearts` - Check your streak and heart count.

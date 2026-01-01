@@ -17,7 +17,7 @@ def _assert_fields_set(item):
         The item to test.
     """
     vampytest.assert_instance(item, Item)
-    vampytest.assert_instance(item.description, str)
+    vampytest.assert_instance(item.description, str, nullable = True)
     vampytest.assert_instance(item.emoji, Emoji, nullable = True)
     vampytest.assert_instance(item.flags, int)
     vampytest.assert_instance(item.id, int)

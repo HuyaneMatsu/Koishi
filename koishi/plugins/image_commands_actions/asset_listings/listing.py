@@ -13886,16 +13886,6 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1447684181831319654/eirin-kaguya-reisen-peg-0000.png',
-).with_action(
-    ACTION_TAG_PEG, REISEN_UDONGEIN_INABA, HOURAISAN_KAGUYA,
-).with_character(
-    YAGOKORO_EIRIN,
-).with_creator(
-    'suzushiro yukari',
-)
-
-TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1447684185954455583/aya-hatate-okuu-handhold-0000.png',
 ).with_actions(
     (ACTION_TAG_HANDHOLD, HIMEKAIDOU_HATATE, SHAMEIMARU_AYA),
