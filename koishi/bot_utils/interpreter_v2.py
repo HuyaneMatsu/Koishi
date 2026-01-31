@@ -182,6 +182,9 @@ class Interpreter:
             with StringIO() as buffer:
                 file_name = self._get_new_file_name()
                 
+                # Shitcord
+                source = source.replace(b'\xe2\x81\xa8'.decode(), '')
+                
                 try:
                     with warnings.catch_warnings():
                         warnings.simplefilter('error')

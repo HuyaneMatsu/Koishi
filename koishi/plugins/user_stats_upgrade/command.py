@@ -103,9 +103,15 @@ async def command_upgrade_stats(
         The targeted user.
     """
     while True:
-        target_user, relationship_to_deepen = await identify_targeted_user(
+        target_user_and_relationship_to_deepen = await identify_targeted_user(
             interaction_event.user, target_related_name, target_user, interaction_event.guild_id
         )
+        if target_user_and_relationship_to_deepen is None:
+            error_message = 'Could not match anyone.'
+            break
+        
+        target_user, relationship_to_deepen = target_user_and_relationship_to_deepen
+        
         if (target_user is not None) and (not can_gift(interaction_event.user, relationship_to_deepen)):
             error_message = ''.join([*produce_gift_requirements_unsatisfied_error_message()])
             break

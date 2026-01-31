@@ -48,18 +48,24 @@ def check_user_remove_safety(event):
         abort(f'Action forbidden for boosters.')
 
 
-def build_action_completed_embed(user, embed_builder, word_config, *position_parameters):
+def build_action_completed_embed(user, guild_id, embed_builder, word_config, *position_parameters):
     """
     Builds an action done embed.
     
     Parameters
     ----------
     user : ``ClientUserBase``
-        The user on who the action was executed..
+        The user on who the action was executed.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
     embed_builder : `FunctionType``
         Base embed builder.
+    
     word_config : ``WordConfig``
         Words to use for filling up the error messages about the action to be executed.
+    
     *position_parameters : Positional parameters
         Additional positional parameters to pass to the embed builder.
     
@@ -69,8 +75,9 @@ def build_action_completed_embed(user, embed_builder, word_config, *position_par
     """
     return embed_builder(
         user,
+        guild_id,
         'Hecatia yeah!',
-        f'**{user.full_name}** has self-{word_config.to_be} themselves.',
+        f'**{user.name_at(guild_id)}** has self-{word_config.to_be} themselves.',
         *position_parameters,
     )
 

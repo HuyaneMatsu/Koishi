@@ -46,13 +46,25 @@ async def command_buy_relationship_slot(
     target_user : `None | ClientUserBase` = `None`, Optional
         The targeted user.
     """
-    target_user, relationship_to_deepen = await identify_targeted_user(
-        interaction_event.user, target_related_name, target_user, interaction_event.guild_id
-    )
+    while True:
+        target_user_and_relationship_to_deepen = await identify_targeted_user(
+            interaction_event.user, target_related_name, target_user, interaction_event.guild_id
+        )
+        
+        if target_user_and_relationship_to_deepen is None:
+            error_message = 'Could not match anyone.'
+            break
+        
+        await relationship_increment_respond(
+            client,
+            interaction_event,
+            *target_user_and_relationship_to_deepen,
+        )
+        return
     
-    await relationship_increment_respond(
-        client,
+    await client.interaction_response_message_create(
         interaction_event,
-        target_user,
-        relationship_to_deepen,
+        content = error_message,
+        show_for_invoking_user_only = True,
     )
+    return

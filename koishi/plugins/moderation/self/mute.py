@@ -21,7 +21,7 @@ from .helpers import build_action_completed_embed, check_required_permissions, c
 CUSTOM_ID_SELF_MUTE = 'mod.self.form.mute'
 
 
-def build_mute_embed(user, title, description, reason, duration_string):
+def build_mute_embed(user, guild_id, title, description, reason, duration_string):
     """
     Builds a self-mute embed.
     
@@ -29,12 +29,19 @@ def build_mute_embed(user, title, description, reason, duration_string):
     ----------
     user : ``ClientUserBase``
         The user in context.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
     title : `str`
         Embed title.
+    
     description : `str`
         Embed description.
+    
     reason : `None`, `str`
         Action reason.
+    
     duration_string : `str`
         The duration in string.
     
@@ -42,7 +49,7 @@ def build_mute_embed(user, title, description, reason, duration_string):
     -------
     embed : ``Embed``
     """
-    embed = Embed(title, description).add_thumbnail(user.avatar_url)
+    embed = Embed(title, description).add_thumbnail(user.avatar_url_at(guild_id))
     add_standalone_field(embed, 'Duration', duration_string)
     add_reason_field(embed, reason)
     return embed

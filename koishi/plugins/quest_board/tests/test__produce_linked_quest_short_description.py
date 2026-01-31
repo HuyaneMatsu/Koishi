@@ -171,6 +171,9 @@ def test__produce_linked_quest_short_description(linked_quest, quest_template, c
     quest_template : ``QuestTemplate``
         The quest's template.
     
+    current_date : `Datetime`
+        The current date.
+    
     Returns
     -------
     output : `str`

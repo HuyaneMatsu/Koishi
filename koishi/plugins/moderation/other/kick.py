@@ -9,7 +9,7 @@ from .easter_eggs import apply_mode_orin, should_show_orin
 from .helpers import build_action_completed_embed, check_required_permissions, confirm_action, notify_user_action
 
 
-def build_kick_embed(user, title, description, reason, notify_user, orin_mode):
+def build_kick_embed(user, guild_id, title, description, reason, notify_user, orin_mode):
     """
     Build a kick embed.
     
@@ -17,21 +17,30 @@ def build_kick_embed(user, title, description, reason, notify_user, orin_mode):
     ----------
     user : ``ClientUserBase``
         The user in context.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
     title : `str`
         Embed title.
+    
     description : `str`
         Embed description.
+    
     reason : `None`, `str`
         Action reason.
+    
     notify_user : `bool`
         Whether the user should be notified.
+    
     orin_mode : `bool`
         Whether orin mode should be applied.
+    
     Returns
     -------
     embed : ``Embed``
     """
-    embed = Embed(title, description).add_thumbnail(user.avatar_url)
+    embed = Embed(title, description).add_thumbnail(user.avatar_url_at(guild_id))
     add_standalone_field(embed, 'Notify user', 'true' if notify_user else 'false')
     add_reason_field(embed, reason)
     if orin_mode:

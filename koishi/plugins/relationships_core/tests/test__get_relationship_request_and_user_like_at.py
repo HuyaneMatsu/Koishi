@@ -1,7 +1,6 @@
 import vampytest
 
 from hata import ClientUserBase, GuildProfile, User
-from hata.ext.slash import InteractionAbortedError
 
 from ..relationship_request import RelationshipRequest
 from ..relationship_request_completion import get_relationship_request_and_user_like_at
@@ -15,6 +14,7 @@ def _iter_options():
     user_id_1 = 202501020062_000000
     user_id_2 = 202501020063_000000
     user_id_3 = 202501020064_000000
+    user_id_4 = 202501020065_000000
     
     user_0 = User.precreate(user_id_0, name = 'Satori')
     user_0.guild_profiles[guild_id] = GuildProfile(nick = 'Sister')
@@ -115,34 +115,13 @@ def _iter_options():
         ],
         (relationship_request_2, user_3),
     )
-
-
-def _iter_options__aborted():
-    guild_id = 202501020070_000000
-    
-    user_id_0 = 202501020071_000000
-    user_id_1 = 202501020072_000000
-    user_id_2 = 202501020073_000000
-    user_id_3 = 202501020074_000000
-    user_id_4 = 202502220000_000000
-    
-    user_0 = User.precreate(user_id_0, name = 'Satori')
-    user_0.guild_profiles[guild_id] = GuildProfile(nick = 'Sister')
-    
-    user_1 = User.precreate(user_id_1, name = 'Koishi')
-    user_1.guild_profiles[guild_id] = GuildProfile(nick = 'Flower')
-    
-    user_2 = User.precreate(user_id_2, name = 'Orin')
-    user_2.guild_profiles[guild_id] = GuildProfile(nick = 'Maid')
-    
-    user_3 = User.precreate(user_id_3, name = 'Okuu')
-    user_3.guild_profiles[guild_id] = GuildProfile(nick = 'BirdBrain')
     
     yield (
         user_id_0,
         True,
         None,
         0,
+        None,
         None,
         None,
     )
@@ -167,6 +146,7 @@ def _iter_options__aborted():
             user_2,
             user_3,
         ],
+        None,
     )
     
     
@@ -189,6 +169,7 @@ def _iter_options__aborted():
             user_2,
             user_3,
         ],
+        None,
     )
     
     
@@ -211,11 +192,11 @@ def _iter_options__aborted():
             user_2,
             user_3,
         ],
+        None,
     )
     
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-@vampytest._(vampytest.call_from(_iter_options__aborted()).raising(InteractionAbortedError))
 async def test__get_relationship_request_and_user_like_at(
     user_id, outgoing, value, guild_id, relationship_requests, users
 ):
@@ -230,7 +211,7 @@ async def test__get_relationship_request_and_user_like_at(
         The user's identifier who is requesting.
     
     outgoing : `bool`
-        Whether to render the outgoing embed.
+        Whether redirect to outgoing requests.
     
     value : `None | str`
         The value to auto complete.
@@ -246,7 +227,7 @@ async def test__get_relationship_request_and_user_like_at(
     
     Returns
     -------
-    output : `(RelationshipRequest, ClientUserBase)`
+    output : ``None | (RelationshipRequest, ClientUserBase)``
     
     Raises
     ------
@@ -282,8 +263,11 @@ async def test__get_relationship_request_and_user_like_at(
     )
     
     output = await mocked(user_id, outgoing, value, guild_id)
-    vampytest.assert_instance(output, tuple)
-    vampytest.assert_eq(len(output), 2)
-    vampytest.assert_instance(output[0], RelationshipRequest)
-    vampytest.assert_instance(output[1], ClientUserBase)
+    vampytest.assert_instance(output, tuple, nullable = True)
+    
+    if (output is not None):
+        vampytest.assert_eq(len(output), 2)
+        vampytest.assert_instance(output[0], RelationshipRequest)
+        vampytest.assert_instance(output[1], ClientUserBase)
+    
     return output

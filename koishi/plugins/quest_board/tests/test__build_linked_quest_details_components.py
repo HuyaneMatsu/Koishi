@@ -56,7 +56,9 @@ def _iter_options():
                 f'**Time available:**\n'
                 f'- **1 hour**\n'
                 f'**Time left:**\n'
-                f'- **59 minutes, 59 seconds**'
+                f'- **59 minutes, 59 seconds**\n'
+                f'Completed:\n'
+                f'- 0 / 3 times, cannot be re-accepted anymore'
             ),
             create_separator(),
             create_row(

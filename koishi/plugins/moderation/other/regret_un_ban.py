@@ -13,24 +13,32 @@ from .regret_helpers import can_regret, check_regret_cooldown, check_regret_perm
 from .un_ban import build_un_ban_failed_successfully_embed, un_ban_user
 
 
-def build_regret_ban_embed(user, title, description, reason):
+def build_regret_un_ban_embed(user, guild_id, title, description, reason):
     """
     Build a ban embed.
     
     Parameters
     ----------
+    user : ``ClientUserBase``
+        The user regret unbanned.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
     title : `str`
         Embed title.
+    
     description : `str`
         Embed description.
-    reason : `None`, `str`
+    
+    reason : `None | str`
         Action reason.
     
     Returns
     -------
     embed : ``Embed``
     """
-    embed = Embed(title, description).add_thumbnail(user.avatar_url)
+    embed = Embed(title, description).add_thumbnail(user.avatar_url_at(guild_id))
     add_reason_field(embed, reason)
     return embed
 
@@ -88,7 +96,7 @@ async def regret_un_ban_command(
         return
     
     component_interaction = await confirm_action(
-        client, event, guild, user, build_regret_ban_embed, WORD_CONFIG__REGRET_UN_BAN, reason
+        client, event, guild, user, build_regret_un_ban_embed, WORD_CONFIG__REGRET_UN_BAN, reason
     )
     if (component_interaction is None):
         return
@@ -107,11 +115,11 @@ async def regret_un_ban_command(
         )
         
         embed = build_action_completed_embed(
-            user, guild.id, build_regret_ban_embed, WORD_CONFIG__REGRET_UN_BAN, notify_note, reason
+            user, guild.id, build_regret_un_ban_embed, WORD_CONFIG__REGRET_UN_BAN, notify_note, reason
         )
         
     else:
-        embed = build_un_ban_failed_successfully_embed(user, build_regret_ban_embed, reason)
+        embed = build_un_ban_failed_successfully_embed(user, build_regret_un_ban_embed, reason)
     
     await client.interaction_response_message_edit(
         component_interaction,

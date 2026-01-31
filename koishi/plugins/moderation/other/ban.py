@@ -9,7 +9,7 @@ from .easter_eggs import apply_mode_orin, should_show_orin
 from .helpers import build_action_completed_embed, check_required_permissions, confirm_action, notify_user_action
 
 
-def build_ban_embed(user, title, description, reason, notify_user, delete_message_days, orin_mode):
+def build_ban_embed(user, guild_id, title, description, reason, notify_user, delete_message_days, orin_mode):
     """
     Build a ban embed.
     
@@ -17,16 +17,25 @@ def build_ban_embed(user, title, description, reason, notify_user, delete_messag
     ----------
     user : ``ClientUserBase``
         The user in context.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
     title : `str`
         Embed title.
+    
     description : `str`
         Embed description.
+    
     reason : `None`, `str`
         Action reason.
+    
     notify_user : `bool`
         Whether the user should be notified.
+    
     delete_message_days : `int`
         How much message should be deleted (in days).
+    
     orin_mode : `bool`
         Whether orin mode should be applied.
     
@@ -34,8 +43,8 @@ def build_ban_embed(user, title, description, reason, notify_user, delete_messag
     -------
     embed : ``Embed``
     """
-    embed = Embed(title, description).add_thumbnail(user.avatar_url)
-    add_standalone_field(embed, 'Delete message day', str(delete_message_days))
+    embed = Embed(title, description).add_thumbnail(user.avatar_url_at(guild_id))
+    add_standalone_field(embed, 'Delete message days', str(delete_message_days))
     add_standalone_field(embed, 'Notify user', 'true' if notify_user else 'false')
     add_reason_field(embed, reason)
     if orin_mode:

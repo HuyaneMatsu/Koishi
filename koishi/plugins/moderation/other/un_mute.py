@@ -31,7 +31,7 @@ def check_can_un_mute(user, guild):
         abort('The user is not muted.')
 
 
-def build_un_mute_embed(user, title, description, reason, notify_user):
+def build_un_mute_embed(user, guild_id, title, description, reason, notify_user):
     """
     Builds a mute embed.
     
@@ -39,12 +39,19 @@ def build_un_mute_embed(user, title, description, reason, notify_user):
     ----------
     user : ``ClientUserBase``
         The user in context.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
     title : `str`
         Embed title.
+    
     description : `str`
         Embed description.
+    
     reason : `None`, `str`
         Action reason.
+    
     notify_user : `bool`
         Whether the user should be notified.
     
@@ -52,7 +59,7 @@ def build_un_mute_embed(user, title, description, reason, notify_user):
     -------
     embed : ``Embed``
     """
-    embed = Embed(title, description).add_thumbnail(user.avatar_url)
+    embed = Embed(title, description).add_thumbnail(user.avatar_url_at(guild_id))
     add_standalone_field(embed, 'Notify user', 'true' if notify_user else 'false')
     add_reason_field(embed, reason)
     return embed

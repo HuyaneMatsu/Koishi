@@ -1,6 +1,6 @@
 import vampytest
 
-from ..constants import RELATIONSHIP_REQUEST_CACHE_LISTING
+from ..constants import RELATIONSHIP_REQUEST_LISTING_CACHE
 from ..relationship_request import RelationshipRequest
 from ..relationship_request_queries import get_relationship_request_listing
 from ..relationship_types import RELATIONSHIP_TYPE_MAMA
@@ -43,8 +43,8 @@ async def test__get_relationship_request_listing__in_cache():
         1203,
     )
     try:
-        RELATIONSHIP_REQUEST_CACHE_LISTING[source_user_id_0, True] = [relationship_request_0]
-        RELATIONSHIP_REQUEST_CACHE_LISTING[source_user_id_1, True] = [relationship_request_1]
+        RELATIONSHIP_REQUEST_LISTING_CACHE[source_user_id_0, True] = [relationship_request_0]
+        RELATIONSHIP_REQUEST_LISTING_CACHE[source_user_id_1, True] = [relationship_request_1]
         
         output = await mocked(source_user_id_0, outgoing)
         
@@ -52,14 +52,14 @@ async def test__get_relationship_request_listing__in_cache():
         vampytest.assert_eq(output, [relationship_request_0])
         
         vampytest.assert_eq(
-            [*RELATIONSHIP_REQUEST_CACHE_LISTING.items()],
+            [*RELATIONSHIP_REQUEST_LISTING_CACHE.items()],
             [
                 ((source_user_id_1, True), [relationship_request_1]),
                 ((source_user_id_0, True), [relationship_request_0]),
             ],
         )
     finally:
-        RELATIONSHIP_REQUEST_CACHE_LISTING.clear()
+        RELATIONSHIP_REQUEST_LISTING_CACHE.clear()
 
 
 async def test__get_relationship_request_listing__query():
@@ -104,10 +104,10 @@ async def test__get_relationship_request_listing__query():
         vampytest.assert_eq(output, [relationship_request])
         
         vampytest.assert_eq(
-            [*RELATIONSHIP_REQUEST_CACHE_LISTING.items()],
+            [*RELATIONSHIP_REQUEST_LISTING_CACHE.items()],
             [
                 ((source_user_id, True), [relationship_request]),
             ],
         )
     finally:
-        RELATIONSHIP_REQUEST_CACHE_LISTING.clear()
+        RELATIONSHIP_REQUEST_LISTING_CACHE.clear()

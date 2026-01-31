@@ -1,26 +1,21 @@
 __all__ = ()
 
-from hata.ext.slash import abort
+from hata import create_row, create_text_display
 
 from ...bot_utils.user_getter import get_user
-
+from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 from ..gift_common import can_gift_with_request
 from ..relationship_slots_core import (
     build_component_invoke_relationship_slot_purchase_other, build_component_invoke_relationship_slot_purchase_self
 )
 from ..relationships_core import (
-    RELATIONSHIP_TYPE_MAMA, RELATIONSHIP_TYPE_MISTRESS, RELATIONSHIP_TYPE_WAIFU, select_relationship
+    RELATIONSHIP_TYPE_MAMA, RELATIONSHIP_TYPE_MISTRESS, RELATIONSHIP_TYPE_WAIFU, select_relationship,
+    RELATIONSHIP_TYPE_RELATIONSHIPS, RELATIONSHIP_TYPE_SISTER_LIL, RELATIONSHIP_TYPE_SISTER_BIG,
+    RELATIONSHIP_TYPE_MAID, RELATIONSHIP_TYPE_DAUGHTER, RELATIONSHIP_TYPE_NONE,
+    RELATIONSHIP_TYPE_UNSET
 )
 
-from .embed_builders import (
-    build_failure_embed_already_proposing, build_failure_embed_already_related,
-    build_failure_embed_insufficient_available_balance, build_failure_embed_insufficient_investment,
-    build_failure_embed_insufficient_relationship_slots, build_failure_embed_self_propose,
-    build_failure_embed_target_relationship_creation_disallowed, build_failure_embed_they_already_have_mama,
-    build_failure_embed_they_already_have_mistress, build_failure_embed_they_already_have_waifu,
-    build_failure_embed_you_already_have_mama, build_failure_embed_you_already_have_mistress,
-    build_failure_embed_you_already_have_waifu, build_failure_embed_you_already_have_waifu_request
-) 
+from .constants import ACTION_NAME_UNKNOWN
 
 
 def check_self_propose(source_user, target_user):
@@ -35,16 +30,16 @@ def check_self_propose(source_user, target_user):
     target_user : ``ClientUserBase``
         The target user.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    error_components : ``None | list<Component>``
     """
     if source_user is not target_user:
         return
     
-    abort(
-        embed = build_failure_embed_self_propose(),
-    )
+    return [
+        create_text_display('You cannot propose to yourself.')
+    ]
 
 
 def check_insufficient_available_balance(available_balance, investment):
@@ -59,26 +54,34 @@ def check_insufficient_available_balance(available_balance, investment):
     investment : `int`
         Investment to propose with.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    error_components : ``None | list<Component>``
     """
     if available_balance >= investment:
         return
     
-    abort(
-        embed = build_failure_embed_insufficient_available_balance(available_balance, investment),
-    )
+    return [
+        create_text_display(
+            f'You have {available_balance} available {EMOJI__HEART_CURRENCY} '
+            f'which is lower than {investment} {EMOJI__HEART_CURRENCY}.'
+        ),
+    ]
 
 
-def check_already_related(relationship_listing, checked_at_creation, source_user, target_user, guild_id):
+def check_already_related(
+    relationship_type, relationship, checked_at_creation, source_user, target_user, guild_id
+):
     """
     Checks whether the two users are already related.
     
     Parameters
     ----------
-    relationship_listing : `None | list<Relationship>`
-        The relationship_listing of one of the users.
+    relationship_type : `int`
+        The requested relationship type.
+    
+    relationship : ``None | Relationship``
+        The existing relationship between the two users.
     
     checked_at_creation : `bool`
         Whether called from request creation.
@@ -92,36 +95,66 @@ def check_already_related(relationship_listing, checked_at_creation, source_user
     guild_id : `int`
         The respective guild's identifier.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    error_components : ``None | list<Component>``
     """
-    if (relationship_listing is None):
+    if (relationship is None):
         return
     
-    source_user_id = source_user.id
-    target_user_id = target_user.id
+    existing_relationship_type = relationship.relationship_type
     
-    for relationship in relationship_listing:
-        if relationship.source_user_id == source_user_id and relationship.target_user_id == target_user_id:
-            outgoing = True
-            break
-        
-        if relationship.target_user_id == source_user_id and relationship.source_user_id == target_user_id:
-            outgoing = False
-            break
+    if (relationship.source_user_id == source_user.id) ^ checked_at_creation:
+        existing_relationship_type = RELATIONSHIP_TYPE_RELATIONSHIPS.get(
+            existing_relationship_type, RELATIONSHIP_TYPE_NONE
+        )
+    
+    if relationship_type == RELATIONSHIP_TYPE_WAIFU:
+        if existing_relationship_type & RELATIONSHIP_TYPE_WAIFU:
+            concept = 'married to'
+        else:
+            concept = None
+    elif (relationship_type == RELATIONSHIP_TYPE_SISTER_LIL) or (relationship_type == RELATIONSHIP_TYPE_SISTER_BIG):
+        if existing_relationship_type & RELATIONSHIP_TYPE_SISTER_LIL:
+            concept = 'the little sister of'
+        elif existing_relationship_type & RELATIONSHIP_TYPE_SISTER_BIG:
+            concept = 'the big sister of'
+        else:
+            concept = None
+    elif (relationship_type == RELATIONSHIP_TYPE_MAMA) or (relationship_type == RELATIONSHIP_TYPE_DAUGHTER):
+        if existing_relationship_type & RELATIONSHIP_TYPE_MAMA:
+            concept = 'the mama of'
+        elif existing_relationship_type & RELATIONSHIP_TYPE_DAUGHTER:
+            concept = 'the daughter of'
+        else:
+            concept = None
+    elif (relationship_type == RELATIONSHIP_TYPE_MAMA) or (relationship_type == RELATIONSHIP_TYPE_DAUGHTER):
+        if existing_relationship_type & RELATIONSHIP_TYPE_MISTRESS:
+            concept = 'the mistress of'
+        elif existing_relationship_type & RELATIONSHIP_TYPE_MAID:
+            concept = 'the maid of'
+        else:
+            concept = None
+    elif (relationship_type == RELATIONSHIP_TYPE_UNSET):
+        if existing_relationship_type & RELATIONSHIP_TYPE_UNSET:
+            concept = 'related to'
+        else:
+            concept = None
     else:
+        concept = None
+    
+    if (concept is None):
         return
     
-    abort(
-        embed = build_failure_embed_already_related(
-            relationship.relationship_type, outgoing, checked_at_creation, target_user, guild_id
+    return [
+        create_text_display(
+            f'You are already {concept} {target_user.name_at(guild_id)}.'
         ),
-    )
+    ]
 
 
 async def async_check_source_already_has_waifu(
-    relationship_type, source_relationship_listing, checked_at_creation, source_user, target_user, guild_id
+    relationship_type, source_relationship_listing, checked_at_creation, source_user, guild_id
 ):
     """
     Checks whether the source user already has a waifu.
@@ -142,15 +175,12 @@ async def async_check_source_already_has_waifu(
     source_user : ``ClientUserBase``
         The source user.
     
-    target_user : ``ClientUserBase``
-        The target user.
-    
     guild_id : `int`
         The respective guild's identifier.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    error_components : ``None | list<Component>``
     """
     if relationship_type != RELATIONSHIP_TYPE_WAIFU:
         return
@@ -164,19 +194,17 @@ async def async_check_source_already_has_waifu(
         waifu_id = relationship.target_user_id
     waifu = await get_user(waifu_id)
     
-    if checked_at_creation:
-        user = target_user
-        embed_builder = build_failure_embed_you_already_have_waifu
-    else:
-        user = source_user
-        embed_builder = build_failure_embed_they_already_have_waifu
-    
-    abort(
-        embed = embed_builder(waifu, user, guild_id),
-    )
+    return [
+        create_text_display(
+            f'{"You" if checked_at_creation else source_user.name_at(guild_id)} '
+            f'{"are" if checked_at_creation else "is"} already married to {waifu.name_at(guild_id)}!'
+        ),
+    ]
 
 
-def check_insufficient_relationship_slots(relationship_count, relationship_request_count, relationship_slots):
+def check_insufficient_relationship_slots(
+    relationship_count, relationship_request_count, already_related, relationship_slots
+):
     """
     Checks whether the user has insufficient relationship slots.
     
@@ -191,19 +219,27 @@ def check_insufficient_relationship_slots(relationship_count, relationship_reque
     relationship_slots : `int`
         How much relationships the user can have.
     
-    Raises
-    ------
-    InteractionAbortedError
+    already_related : `bool`
+        Whether the two users are already related.
+    
+    Returns
+    -------
+    error_components : ``None | list<Component>``
     """
-    if (relationship_count + relationship_request_count) < relationship_slots:
+    if (max(relationship_count - already_related, 0) + relationship_request_count) < relationship_slots:
         return
     
-    abort(
-        embed = build_failure_embed_insufficient_relationship_slots(
-            relationship_count, relationship_request_count, relationship_slots
+    return [
+        create_text_display(
+            f'You do not have enough available relationship slots.\n'
+            f'You have {relationship_slots} relationship slots from which '
+            f'{relationship_count} is occupied by relationships and '
+            f'{relationship_request_count} is occupied by relationship requests.'
         ),
-        components = build_component_invoke_relationship_slot_purchase_self(),
-    )
+        create_row(
+            build_component_invoke_relationship_slot_purchase_self(),
+        ),
+    ]
 
 
 def check_already_proposing(source_relationship_request_listing, target_user, guild_id):
@@ -221,9 +257,9 @@ def check_already_proposing(source_relationship_request_listing, target_user, gu
     guild_id : `int`
         The respective guild's identifier.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    error_components : ``None | list<Component>``
     """
     if (source_relationship_request_listing is None):
         return
@@ -234,14 +270,27 @@ def check_already_proposing(source_relationship_request_listing, target_user, gu
     else:
         return
     
-    abort(
-        embed = build_failure_embed_already_proposing(
-            relationship_request.relationship_type,
-            relationship_request.investment,
-            target_user,
-            guild_id,
+    relationship_type = relationship_request.relationship_type
+    investment = relationship_request.investment
+    
+    if relationship_type == RELATIONSHIP_TYPE_WAIFU:
+        concept = 'a marriage proposal'
+    elif relationship_type == RELATIONSHIP_TYPE_SISTER_BIG:
+        concept = 'a blood-pact request'
+    elif relationship_type == RELATIONSHIP_TYPE_MAMA:
+        concept = 'an adoption agreement'
+    elif relationship_type == RELATIONSHIP_TYPE_MISTRESS:
+        concept = 'an employment contract'
+    else:
+        concept = ACTION_NAME_UNKNOWN
+    
+    return [
+        create_text_display(
+            f'You have already sent {concept} towards {target_user.name_at(guild_id)} '
+            f'with {investment} {EMOJI__HEART_CURRENCY}.\n'
+            f'Cancel the old proposal before reissuing a new one.'
         ),
-    )
+    ]
 
 
 async def async_check_can_propose_to_bot(
@@ -269,9 +318,9 @@ async def async_check_can_propose_to_bot(
     guild_id : `int`
         The respective guild's identifier.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    error_components : ``None | list<Component>``
     """
     if not target_user.bot:
         return
@@ -279,15 +328,21 @@ async def async_check_can_propose_to_bot(
     if target_relationship_count < target_relationship_slots:
         return
     
-    if (await can_gift_with_request(source_user, target_user)):
-        components = build_component_invoke_relationship_slot_purchase_other(target_user.id),
-    else:
-        components = None
+    components = [
+        create_text_display(
+            f'{target_user.name_at(guild_id)} is disallowed to create relationships.\n'
+            f'Therefore creating a proposal towards them is not allowed.'
+        ),
+    ]
     
-    abort(
-        embed = build_failure_embed_target_relationship_creation_disallowed(target_user, guild_id),
-        components = components,
-    )
+    if (await can_gift_with_request(source_user, target_user)):
+        components.append(
+            create_row(
+                build_component_invoke_relationship_slot_purchase_other(target_user.id),
+            ),
+        )
+    
+    return components
 
 
 async def async_check_source_already_has_waifu_request(
@@ -302,7 +357,7 @@ async def async_check_source_already_has_waifu_request(
     ----------
     relationship_type : `int`
         The requested relationship type.
-     
+    
     source_relationship_request_listing : `None | list<RelationshipRequest>`
         The relationship requests of the source user.
     
@@ -312,9 +367,9 @@ async def async_check_source_already_has_waifu_request(
     guild_id : `int`
         The respective guild's identifier.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    error_components : ``None | list<Component>``
     """
     if (
         relationship_type != RELATIONSHIP_TYPE_WAIFU or
@@ -330,13 +385,16 @@ async def async_check_source_already_has_waifu_request(
     
     source_waifu = await get_user(relationship_request.target_user_id)
     
-    abort(
-        embed = build_failure_embed_you_already_have_waifu_request(source_waifu, target_user, guild_id),
-    )
+    return [
+        create_text_display(
+            f'What would {source_waifu.name_at(guild_id)} say if they would know about '
+            f'{target_user.name_at(guild_id)}?'
+        ),
+    ]
 
 
 async def async_check_target_already_has_waifu(
-    relationship_type, target_relationship_listing, checked_at_creation, source_user, target_user, guild_id
+    relationship_type, target_relationship_listing, checked_at_creation, target_user, guild_id
 ):
     """
     Checks whether the target user already has a waifu.
@@ -354,18 +412,15 @@ async def async_check_target_already_has_waifu(
     checked_at_creation : `bool`
         Whether called from request creation.
     
-    source_user : ``ClientUserBase``
-        The source user.
-    
     target_user : ``ClientUserBase``
         The target user.
     
     guild_id : `int`
         The respective guild's identifier.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    error_components : ``None | list<Component>``
     """
     if relationship_type != RELATIONSHIP_TYPE_WAIFU:
         return
@@ -379,20 +434,16 @@ async def async_check_target_already_has_waifu(
         waifu_id = relationship.target_user_id
     waifu = await get_user(waifu_id)
     
-    if checked_at_creation:
-        user = target_user
-        embed_builder = build_failure_embed_they_already_have_waifu
-    else:
-        user = source_user
-        embed_builder = build_failure_embed_you_already_have_waifu
-    
-    abort(
-        embed = embed_builder(waifu, user, guild_id),
-    )
+    return [
+        create_text_display(
+            f'{target_user.name_at(guild_id) if checked_at_creation else "You"} '
+            f'{"is" if checked_at_creation else "are"} already married to {waifu.name_at(guild_id)}!'
+        ),
+    ]
 
 
 async def async_check_target_already_has_mistress(
-    relationship_type, target_relationship_listing, checked_at_creation, source_user, target_user, guild_id
+    relationship_type, target_relationship_listing, checked_at_creation, target_user, guild_id
 ):
     """
     Checks whether the target user already has a mistress.
@@ -404,14 +455,11 @@ async def async_check_target_already_has_mistress(
     relationship_type : `int`
         The requested relationship type.
      
-    target_relationship_listing : `None | list<Relationship>`
+    target_relationship_listing : ``None | list<Relationship>``
         The relationship_listing of the target user.
     
     checked_at_creation : `bool`
         Whether called from request creation.
-    
-    source_user : ``ClientUserBase``
-        The source user.
     
     target_user : ``ClientUserBase``
         The target user.
@@ -419,9 +467,9 @@ async def async_check_target_already_has_mistress(
     guild_id : `int`
         The respective guild's identifier.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    error_components : ``None | list<Component>``
     """
     if relationship_type != RELATIONSHIP_TYPE_MISTRESS:
         return
@@ -435,20 +483,19 @@ async def async_check_target_already_has_mistress(
         mistress_id = relationship.target_user_id
     mistress = await get_user(mistress_id)
     
-    if checked_at_creation:
-        user = target_user
-        embed_builder = build_failure_embed_they_already_have_mistress
-    else:
-        user = source_user
-        embed_builder = build_failure_embed_you_already_have_mistress
+    # Yupp, python does not allow inlining this into the f string
+    target_postfix = '\'s' if checked_at_creation else ''
     
-    abort(
-        embed = embed_builder(mistress, user, guild_id),
-    )
+    return [
+        create_text_display(
+            f'{target_user.name_at(guild_id) if checked_at_creation else "Your"}{target_postfix} '
+            f'mistress is {mistress.name_at(guild_id)}, therefore they cannot serve you.'
+        ),
+    ]
 
 
 async def async_check_target_already_has_mama(
-    relationship_type, target_relationship_listing, checked_at_creation, source_user, target_user, guild_id
+    relationship_type, target_relationship_listing, checked_at_creation, target_user, guild_id
 ):
     """
     Checks whether the target user already has a mama.
@@ -460,14 +507,11 @@ async def async_check_target_already_has_mama(
     relationship_type : `int`
         The requested relationship type.
      
-    target_relationship_listing : `None | list<Relationship>`
+    target_relationship_listing : ``None | list<Relationship>``
         The relationship_listing of the target user.
     
     checked_at_creation : `bool`
         Whether called from request creation.
-    
-    source_user : ``ClientUserBase``
-        The source user.
     
     target_user : ``ClientUserBase``
         The target user.
@@ -475,9 +519,9 @@ async def async_check_target_already_has_mama(
     guild_id : `int`
         The respective guild's identifier.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    error_components : ``None | list<Component>``
     """
     if relationship_type != RELATIONSHIP_TYPE_MAMA:
         return
@@ -491,16 +535,15 @@ async def async_check_target_already_has_mama(
         mama_id = relationship.target_user_id
     mama = await get_user(mama_id)
     
-    if checked_at_creation:
-        user = target_user
-        embed_builder = build_failure_embed_they_already_have_mama
-    else:
-        user = source_user
-        embed_builder = build_failure_embed_you_already_have_mama
+    # Yupp, python does not allow inlining this into the f string
+    target_postfix = '\'s' if checked_at_creation else ''
     
-    abort(
-        embed = embed_builder(mama, user, guild_id),
-    )
+    return [
+        create_text_display(
+            f'{target_user.name_at(guild_id) if checked_at_creation else "Your"}{target_postfix} '
+            f'mama is {mama.name_at(guild_id)}, therefore you cannot adopt them.'
+        ),
+    ]
 
 
 def check_insufficient_investment(relationship_value, investment):
@@ -515,13 +558,16 @@ def check_insufficient_investment(relationship_value, investment):
     investment : `int`
         Investment to propose with.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    error_components : ``None | list<Component>``
     """
     if relationship_value <= investment:
         return
     
-    return abort(
-        embed = build_failure_embed_insufficient_investment(relationship_value, investment)
-    )
+    return [
+        create_text_display(
+            f'Your investment {investment} {EMOJI__HEART_CURRENCY} is lower than the required '
+            f'{relationship_value} {EMOJI__HEART_CURRENCY}.'
+        )
+    ]

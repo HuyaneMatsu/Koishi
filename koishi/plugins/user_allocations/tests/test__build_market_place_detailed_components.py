@@ -53,6 +53,7 @@ def _iter_options():
         entry_id,
         balance_amount,
         market_place_item,
+        None,
         0,
         DateTime(2016, 5, 15, tzinfo = TimeZone.utc),
         [
@@ -83,6 +84,7 @@ def _iter_options():
         entry_id,
         balance_amount,
         None,
+        None,
         0,
         DateTime(2016, 5, 15, tzinfo = TimeZone.utc),
         [
@@ -108,7 +110,7 @@ def _iter_options():
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__build_market_place_detailed_components(
-    user_id, page_index, session_id, amount, session, guild_id, current_date_time
+    user_id, page_index, session_id, amount, session, extra, guild_id, current_date_time
 ):
     """
     Tests whether ``build_market_place_detailed_components`` works as intended.
@@ -130,6 +132,9 @@ def test__build_market_place_detailed_components(
     session : ``NoneType | MarketPlaceItem``
         The session.
     
+    extra : `None`
+        Additionally requested fields.
+    
     guild_id : `int`
         The local guild's identifier.
     
@@ -146,7 +151,7 @@ def test__build_market_place_detailed_components(
         2,
         DateTime = DateTimeMock,
     )
-    output = mocked(user_id, page_index, session_id, amount, session, guild_id)
+    output = mocked(user_id, page_index, session_id, amount, session, extra, guild_id)
     vampytest.assert_instance(output, list)
     for element in output:
         vampytest.assert_instance(element, Component)

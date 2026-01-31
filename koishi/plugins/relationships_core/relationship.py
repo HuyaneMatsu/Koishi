@@ -2,18 +2,13 @@ __all__ = ('Relationship',)
 
 from datetime import timezone as TimeZone
 
-from scarletio import copy_docs
+from scarletio import RichAttributeErrorBaseType
 from hata import DATETIME_FORMAT_CODE
 
-from ...bot_utils.entry_proxy import EntryProxy
-from ...bot_utils.models import DB_ENGINE
-
-from .constants import RELATIONSHIP_CACHE, RELATIONSHIP_LISTING_CACHE
-from .relationship_saver import RelationshipSaver
-from .relationship_types import get_relationship_type_name
+from .relationship_types import get_relationship_type_name_basic
 
 
-class Relationship(EntryProxy):
+class Relationship(RichAttributeErrorBaseType):
     """
     Represents the relationship between two users.
     
@@ -22,11 +17,11 @@ class Relationship(EntryProxy):
     entry_id : `int`
         The entry's identifier in the database.
     
+    modified_fields : `None | dict<str, object>`
+        the modified fields of the relationship.
+    
     relationship_type : `int`
         The requested relationship type.
-    
-    saver : `None | RelationshipSaver`
-        Saver responsible for save synchronization.
     
     source_can_boost_at : `DateTime`
         When the source user can boost next.
@@ -47,11 +42,9 @@ class Relationship(EntryProxy):
         Target user identifier.
     """
     __slots__ = (
-        '__weakref__', 'relationship_type', 'source_can_boost_at', 'source_investment', 'source_user_id',
-        'target_can_boost_at', 'target_investment', 'target_user_id'
+        '__weakref__', 'entry_id', 'modified_fields', 'relationship_type', 'source_can_boost_at', 'source_investment',
+        'source_user_id', 'target_can_boost_at', 'target_investment', 'target_user_id'
     )
-    
-    saver_type = RelationshipSaver
     
     
     def __new__(cls, source_user_id, target_user_id, relationship_type, investment, now):
@@ -77,8 +70,8 @@ class Relationship(EntryProxy):
         """
         self = object.__new__(cls)
         self.entry_id = 0
+        self.modified_fields = None
         self.relationship_type = relationship_type
-        self.saver = None
         self.source_can_boost_at = now
         self.source_investment = investment
         self.source_user_id = source_user_id
@@ -89,9 +82,14 @@ class Relationship(EntryProxy):
         return self
     
     
-    @copy_docs(EntryProxy._put_repr_parts)
-    def _put_repr_parts(self, repr_parts, field_added):
-        if field_added:
+    def __repr__(self):
+        """Returns repr(self)."""
+        repr_parts = ['<', type(self).__name__]
+        
+        entry_id = self.entry_id
+        if entry_id:
+            repr_parts.append(' entry_id = ')
+            repr_parts.append(repr(entry_id))
             repr_parts.append(',')
         
         # source_user_id
@@ -105,7 +103,7 @@ class Relationship(EntryProxy):
         # relationship_type
         relationship_type = self.relationship_type
         repr_parts.append(', relationship_type = ')
-        repr_parts.append(get_relationship_type_name(relationship_type))
+        repr_parts.append(get_relationship_type_name_basic(relationship_type))
         repr_parts.append(' ~ ')
         repr_parts.append(repr(relationship_type))
         
@@ -125,84 +123,28 @@ class Relationship(EntryProxy):
         repr_parts.append(', target_can_boost_at = ')
         repr_parts.append(format(self.target_can_boost_at, DATETIME_FORMAT_CODE))
         
-        return repr_parts
-    
-    
-    async def save(self):
-        """
-        Saves the entry and then caches it.
-        
-        This function is a coroutine.
-        """
-        saver = self.get_saver()
-        await saver.begin()
-        self._store_in_cache()
-    
-    
-    @copy_docs(EntryProxy._store_in_cache)
-    def _store_in_cache(self):
-        RELATIONSHIP_CACHE[self.entry_id] = self
-        
-        for listing_key in (self.source_user_id, self.target_user_id):
-            try:
-                listing = RELATIONSHIP_LISTING_CACHE[listing_key]
-            except KeyError:
-                if (DB_ENGINE is not None):
-                    continue
-                
-                listing = None
-            
-            if (listing is None):
-                RELATIONSHIP_LISTING_CACHE[listing_key] = [self]
-                continue
-            
-            if (self not in listing):
-                listing.append(self)
-            
-            continue
-    
-    
-    @copy_docs(EntryProxy._pop_from_cache)
-    def _pop_from_cache(self):
-        try:
-            del RELATIONSHIP_CACHE[self.entry_id]
-        except KeyError:
-            pass
-        
-        for listing_key in (self.source_user_id, self.target_user_id):
-            try:
-                listing = RELATIONSHIP_LISTING_CACHE[listing_key]
-            except KeyError:
-                continue
-            
-            if (listing is None):
-                continue
-            
-            try:
-                listing.remove(self)
-            except ValueError:
-                continue
-            
-            if listing:
-                continue
-            
-            RELATIONSHIP_LISTING_CACHE[listing_key] = None
-            continue
+        repr_parts.append('>')
+        return ''.join(repr_parts)
     
     
     @classmethod
-    @copy_docs(EntryProxy.from_entry)
     def from_entry(cls, entry):
-        entry_id = entry['id']
+        """
+        Creates an new instance from the given entry.
         
-        try:
-            self = RELATIONSHIP_CACHE[entry_id]
-        except KeyError:
-            self = object.__new__(cls)
-            self.entry_id = entry_id
-            self.saver = None
-            RELATIONSHIP_CACHE[entry_id] = self
+        Parameters
+        ----------
+        entry : `sqlalchemy.engine.result.RowProxy`
+            The entry to create the instance based on.
         
+        Returns
+        -------
+        self : `instance<cls>`
+        """
+        self = object.__new__(cls)
+        
+        self.entry_id = entry['id']
+        self.modified_fields = None
         self.relationship_type = entry['relationship_type']
         
         self.source_can_boost_at = entry['source_can_boost_at'].replace(tzinfo = TimeZone.utc)
@@ -214,3 +156,87 @@ class Relationship(EntryProxy):
         self.target_user_id = entry['target_user_id']
         
         return self
+    
+    
+    def _mark_modification(self, key, value):
+        """
+        Marks a field as modified.
+        
+        Parameters
+        ----------
+        key : `str`
+            The field's key.
+        
+        value : `object`
+            The field's value.
+        """
+        modified_fields = self.modified_fields
+        if (modified_fields is None):
+            self.modified_fields = modified_fields = {}
+        
+        modified_fields[key] = value
+    
+    
+    def set_relationship_type(self, relationship_type):
+        """
+        Sets the relationship type.
+        
+        Parameters
+        ----------
+        relationship_type : `int`
+            Relationship type to set.
+        """
+        self.relationship_type = relationship_type
+        self._mark_modification('relationship_type', relationship_type)
+    
+    
+    def set_source_can_boost_at(self, source_can_boost_at):
+        """
+        Sets when the source can boost.
+        
+        Parameters
+        ----------
+        source_can_boost_at : `DateTime`
+            When the source can boost at.
+        """
+        self.source_can_boost_at = source_can_boost_at
+        self._mark_modification('source_can_boost_at', source_can_boost_at)
+    
+    
+    def set_source_investment(self, source_investment):
+        """
+        Sets when the source's investment.
+        
+        Parameters
+        ----------
+        source_investment : `int`
+            The source's investment.
+        """
+        self.source_investment = source_investment
+        self._mark_modification('source_investment', source_investment)
+    
+    
+    def set_target_can_boost_at(self, target_can_boost_at):
+        """
+        Sets when the target can boost.
+        
+        Parameters
+        ----------
+        target_can_boost_at : `DateTime`
+            When the target can boost at.
+        """
+        self.target_can_boost_at = target_can_boost_at
+        self._mark_modification('target_can_boost_at', target_can_boost_at)
+    
+    
+    def set_target_investment(self, target_investment):
+        """
+        Sets when the target's investment.
+        
+        Parameters
+        ----------
+        target_investment : `int`
+            The target's investment.
+        """
+        self.target_investment = target_investment
+        self._mark_modification('target_investment', target_investment)

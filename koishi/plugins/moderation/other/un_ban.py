@@ -8,18 +8,27 @@ from ..shared_helpers import add_reason_field, add_standalone_field, create_auto
 from .helpers import build_action_completed_embed, check_required_permissions_only, confirm_action, notify_user_action
 
 
-def build_un_ban_embed(user, title, description, reason, notify_user):
+def build_un_ban_embed(user, guild_id, title, description, reason, notify_user):
     """
     Build a un-ban embed.
     
     Parameters
     ----------
+    user : ``ClientUserBase``
+        The user being un-banned.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
     title : `str`
         Embed title.
+    
     description : `str`
         Embed description.
+    
     reason : `None`, `str`
         Action reason.
+    
     notify_user : `bool`
         Whether the user should be notified.
     
@@ -27,7 +36,7 @@ def build_un_ban_embed(user, title, description, reason, notify_user):
     -------
     embed : ``Embed``
     """
-    embed = Embed(title, description).add_thumbnail(user.avatar_url)
+    embed = Embed(title, description).add_thumbnail(user.avatar_url_at(guild_id))
     add_standalone_field(embed, 'Notify user', 'true' if notify_user else 'false')
     add_reason_field(embed, reason)
     return embed

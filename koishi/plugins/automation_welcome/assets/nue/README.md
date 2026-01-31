@@ -1,12 +1,21 @@
 ### Asset Information
 
-All image's author is `howhow notei`. They are nice.
+---
+
+### `nue-welcome-0000`
+
+- Artist: **howhow notei**
+- Edit: *none*
+
+
+- Character: **Houjuu Nue**
+- Source: **Touhou**
 
 ---
 
-### `Nue-welcome-0000`
+### `nue-welcome-0001`
 
-- Artist: **howhow notei**
+- Artist: **manorea**
 - Edit: *none*
 
 

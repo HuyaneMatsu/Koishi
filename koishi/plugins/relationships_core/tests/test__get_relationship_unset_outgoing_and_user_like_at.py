@@ -3,7 +3,6 @@ from datetime import datetime as DateTime, timezone as TimeZone
 import vampytest
 
 from hata import ClientUserBase, GuildProfile, User
-from hata.ext.slash import InteractionAbortedError
 
 from ..relationship import Relationship
 from ..relationship_completion import get_relationship_unset_outgoing_and_user_like_at
@@ -17,6 +16,7 @@ def _iter_options():
     user_id_1 = 202501080022_000000
     user_id_2 = 202501080023_000000
     user_id_3 = 202501080024_000000
+    user_id_4 = 202501080025_000000
     
     user_0 = User.precreate(user_id_0, name = 'Satori')
     user_0.guild_profiles[guild_id] = GuildProfile(nick = 'Sister')
@@ -94,28 +94,6 @@ def _iter_options():
         ],
         (relationship_1, user_2),
     )
-
-
-def _iter_options__aborted():
-    guild_id = 202501080030_000000
-    
-    user_id_0 = 202501080031_000000
-    user_id_1 = 202501080032_000000
-    user_id_2 = 202501080033_000000
-    user_id_3 = 202501080034_000000
-    user_id_4 = 202502220002_000000
-    
-    user_0 = User.precreate(user_id_0, name = 'Satori')
-    user_0.guild_profiles[guild_id] = GuildProfile(nick = 'Sister')
-    
-    user_1 = User.precreate(user_id_1, name = 'Koishi')
-    user_1.guild_profiles[guild_id] = GuildProfile(nick = 'Flower')
-    
-    user_2 = User.precreate(user_id_2, name = 'Orin')
-    user_2.guild_profiles[guild_id] = GuildProfile(nick = 'Maid')
-    
-    user_3 = User.precreate(user_id_3, name = 'Okuu')
-    user_3.guild_profiles[guild_id] = GuildProfile(nick = 'BirdBrain')
     
     now = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
     
@@ -123,6 +101,7 @@ def _iter_options__aborted():
         user_id_0,
         None,
         0,
+        None,
         None,
         None,
     )
@@ -146,6 +125,7 @@ def _iter_options__aborted():
             user_2,
             user_3,
         ],
+        None,
     )
 
     
@@ -167,6 +147,7 @@ def _iter_options__aborted():
             user_2,
             user_3,
         ],
+        None,
     )
     
     relationship_0 = Relationship(user_id_0, user_id_1, RELATIONSHIP_TYPE_UNSET, 1000, now)
@@ -187,6 +168,7 @@ def _iter_options__aborted():
             user_2,
             user_3,
         ],
+        None,
     )
     
     relationship_0 = Relationship(user_id_1, user_id_0, RELATIONSHIP_TYPE_UNSET, 1000, now)
@@ -207,6 +189,7 @@ def _iter_options__aborted():
             user_2,
             user_3,
         ],
+        None,
     )
     
     relationship_0 = Relationship(user_id_1, user_id_0, RELATIONSHIP_TYPE_UNSET, 1000, now)
@@ -227,11 +210,11 @@ def _iter_options__aborted():
             user_2,
             user_3,
         ],
+        None,
     )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-@vampytest._(vampytest.call_from(_iter_options__aborted()).raising(InteractionAbortedError))
 async def test__get_relationship_unset_outgoing_and_user_like_at(user_id, value, guild_id, relationships, users):
     """
     Tests whether ``get_relationship_unset_outgoing_and_user_like_at`` works as intended.
@@ -257,11 +240,7 @@ async def test__get_relationship_unset_outgoing_and_user_like_at(user_id, value,
     
     Returns
     -------
-    output : `(Relationship, ClientUserBase)`
-    
-    Raises
-    ------
-    InteractionAbortedError
+    output : ``None | (Relationship, ClientUserBase)``
     """
     async def mock_get_relationship_listing(input_user_id):
         nonlocal user_id
@@ -292,8 +271,9 @@ async def test__get_relationship_unset_outgoing_and_user_like_at(user_id, value,
     )
     
     output = await mocked(user_id, value, guild_id)
-    vampytest.assert_instance(output, tuple)
-    vampytest.assert_eq(len(output), 2)
-    vampytest.assert_instance(output[0], Relationship)
-    vampytest.assert_instance(output[1], ClientUserBase)
+    vampytest.assert_instance(output, tuple, nullable = True)
+    if (output is not None):
+        vampytest.assert_eq(len(output), 2)
+        vampytest.assert_instance(output[0], Relationship)
+        vampytest.assert_instance(output[1], ClientUserBase)
     return output

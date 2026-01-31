@@ -120,7 +120,7 @@ def build_game_21_entry_component(user_id, page_index, session_id, amount):
     )
 
 
-def build_game_21_detailed_components(user_id, page_index, session_id, amount, session, guild_id):
+def build_game_21_detailed_components(user_id, page_index, session_id, amount, session, extra, guild_id):
     """
     Builds game 21 detailed components.
     
@@ -140,6 +140,9 @@ def build_game_21_detailed_components(user_id, page_index, session_id, amount, s
     
     session : ``None | Game21Session``
         The game's session.
+    
+    extra : `None`
+        Additionally requested fields.
     
     guild_id : `int`
         The local guild's identifier.

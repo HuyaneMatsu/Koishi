@@ -294,14 +294,14 @@ async def daily(
         await claim_daily_for_yourself(client, interaction_event)
         return
     
-    (
-        extender_relationship,
-        relationship,
-        target_user
-    ) = await get_extender_relationship_and_relationship_and_user_like_at(
+    extender_relationship_and_relationship_and_user = await get_extender_relationship_and_relationship_and_user_like_at(
         interaction_event.user_id, remove_comment(target_user_name), interaction_event.guild_id
     )
+    if extender_relationship_and_relationship_and_user is None:
+        await client.interaction_response_message_edit(
+            interaction_event,
+            content = 'Could not match anyone.',
+        )
+        return
     
-    await claim_daily_for_other(
-        client, interaction_event, extender_relationship, relationship, target_user
-    )
+    await claim_daily_for_other(client, interaction_event, *extender_relationship_and_relationship_and_user)

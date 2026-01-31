@@ -264,6 +264,9 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('47.254.64.0'), 14), # Losangeles - Alibaba (US) Technology Co., Ltd.
     IPFilterRule(*parse_ip('47.88.0.0'), 14), # Losangeles - Alibaba (US) Technology Co., Ltd.
     IPFilterRule(*parse_ip('159.198.64.0'), 8), # Phoenix - Namecheap, Inc.
+    IPFilterRule(*parse_ip('103.8.25.0'), 8), # Petalingjaya - SKSA TECHNOLOGY SDN BHD
+    IPFilterRule(*parse_ip('172.105.252.0'), 9), # Mumbai - Linode
+    IPFilterRule(*parse_ip('176.65.148.0'), 8), # Hopel - Pfcloud UG
     
     
     # dataforseobot
@@ -299,6 +302,9 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     # "Mozilla/5.0 (compatible; CMS-Checker/1.0; +https://example.com)"
     IPFilterRule(*parse_ip('34.125.192.0'), 12), # Lasvegas - Google LLC
     IPFilterRule(*parse_ip('34.46.0.0'), 16), # Councilbluffs - Google LLC
+    IPFilterRule(*parse_ip('136.113.0.0'), 16), # Councilbluffs - Google LLC
+    IPFilterRule(*parse_ip('136.113.0.0'), 16), # Councilbluffs - Google LLC
+    IPFilterRule(*parse_ip('34.186.32.0'), 13), # Washington - Google LLC
     
     # Google bot
     # "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.7204.183 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
@@ -570,6 +576,8 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('66.249.64.0'), 12), # Monckscorner - Google LLC
     IPFilterRule(*parse_ip('192.178.0.0'), 17), # Monckscorner - Google LLC
     IPFilterRule(*parse_ip('20.0.0.0'), 21), # Desmoines - Microsoft Corporation
+    IPFilterRule(*parse_ip('27.115.124.0'), 8), # Shanghai - CHINA UNICOM Shanghai city network
+    IPFilterRule(*parse_ip('201.33.76.0'), 9), # Barretos - Desktop Sigmanet Comunicação Multimídia SA
     
     # TruffleHog
     IPFilterRule(*parse_ip('35.168.0.0'), 19), # Ashburn - Amazon.com, Inc.
@@ -4526,7 +4534,26 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('93.159.228.0'), 10), # Russia - Kaspersky Lab Switzerland GmbH
     IPFilterRule(*parse_ip('94.232.24.0'), 10), # Uzbekistan - NETKA TELEKOM LLC
     IPFilterRule(*parse_ip('94.47.0.0'), 16), # Syria - STE PDN Internal AS
-    IPFilterRule(*parse_ip('95.32.240.0'), 12), # Russia - PJSC Rostelecom
+    IPFilterRule(*parse_ip('95.32.240.0'), 12), # Russia - PJSC Rostelecom    IPFilterRule(*parse_ip('103.48.68.0'), 10), # India - Country Online Services PVT LTD
+    IPFilterRule(*parse_ip('111.88.16.0'), 12), # Pakistan - Connect Communications
+    IPFilterRule(*parse_ip('122.51.0.0'), 16), # China - Shenzhen Tencent Computer Systems Company Limited
+    IPFilterRule(*parse_ip('123.187.0.0'), 16), # China - CHINANET-BACKBONE
+    IPFilterRule(*parse_ip('151.247.70.0'), 8), # Cambodia - BUNNY TECHNOLOGY LLC
+    IPFilterRule(*parse_ip('166.0.254.0'), 8), # United States - Allstream Business US, LLC
+    IPFilterRule(*parse_ip('181.228.0.0'), 18), # Argentina - Telecom Argentina S.A.
+    IPFilterRule(*parse_ip('186.32.208.0'), 12), # Costa Rica - MILLICOM CABLE COSTA RICA S.A.
+    IPFilterRule(*parse_ip('192.71.10.0'), 8), # Sweden - Glesys AB
+    IPFilterRule(*parse_ip('192.71.30.0'), 8), # Sweden - Glesys AB
+    IPFilterRule(*parse_ip('192.71.42.0'), 8), # Sweden - Glesys AB
+    IPFilterRule(*parse_ip('203.2.64.0'), 9), # China - Chongqing Telecom
+    IPFilterRule(*parse_ip('38.252.110.0'), 9), # Venezuela - CONEXA TECNOLOGY, C.A.
+    IPFilterRule(*parse_ip('43.135.0.0'), 15), # Hong Kong - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('43.154.0.0'), 16), # Hong Kong - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('45.207.176.0'), 12), # United States - unknown
+    IPFilterRule(*parse_ip('49.51.176.0'), 12), # United States - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('8.160.0.0'), 17), # China - Hangzhou Alibaba Advertising Co.,Ltd.
+    IPFilterRule(*parse_ip('84.37.194.0'), 9), # United States - Datacamp Limited
+
 
 
 ])

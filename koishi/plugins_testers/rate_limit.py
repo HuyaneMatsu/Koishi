@@ -13,7 +13,8 @@ from hata import (
     ExplicitContentFilterLevel, ForumTag, GUILDS, Guild, InteractionResponseType, KOKORO, MessageNotificationLevel,
     Oauth2User, OnboardingMode, Permission, Poll, PrivacyLevel, Role, ScheduledEventEntityType, SoundboardSound,
     Sticker, StickerPack, Team, User, VerificationLevel, VerificationScreen, VoiceRegion, Webhook, WebhookType,
-    WelcomeScreen, create_partial_user_from_id, datetime_to_timestamp, eventlist, now_as_id, parse_oauth2_redirect_url
+    WelcomeScreen, create_partial_user_from_id, datetime_to_timestamp, eventlist, now_as_id, parse_oauth2_redirect_url,
+    MessageSearchQuery, MessageSearchResponse
 )
 from hata.discord.client.functionality_helpers import role_move_key
 from hata.discord.guild import GuildDiscovery, create_partial_guild_from_data
@@ -3700,6 +3701,16 @@ async def guild_activity_overview_edit(client, guild_id, name):
         {'name': name},
     )
 
+
+async def message_search_guild(client, guild_id, message_search_query):
+    response_data = await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/messages/search',
+        None,
+        message_search_query.to_data()
+    )
+    return MessageSearchResponse.from_data(response_data)
 
 
 @RATE_LIMIT_COMMANDS
@@ -8921,7 +8932,7 @@ async def rate_limit_test_0240(client, message):
     Gets the pinned messages.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'rate_limit_test_0241') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test_0240') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -8930,3 +8941,48 @@ async def rate_limit_test_0240(client, message):
             await RLT.send('I need admin permission to complete this command.')
         
         await message_pinneds(client, message.channel)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0241(client, message):
+    """
+    Message searches in a single guild channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0241') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        result = await message_search_guild(client, guild.id, MessageSearchQuery(limit = 20))
+        
+        await client.message_create(channel, repr(result)[:2000])
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0242(client, message, guild_2 : 'guild' = None):
+    """
+    Message searches in two guild channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0241') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        if guild_2 is None:
+            await RLT.send('Second guild unknown.')
+        
+        task_0 = Task(KOKORO, message_search_guild(client, guild.id, MessageSearchQuery(limit = 20)))
+        task_1 = Task(KOKORO, message_search_guild(client, guild_2.id, MessageSearchQuery(limit = 20)))
+        
+        result_0 = await task_0
+        result_1 = await task_1
+        
+        await client.message_create(channel, repr((result_0, result_1))[:2000])

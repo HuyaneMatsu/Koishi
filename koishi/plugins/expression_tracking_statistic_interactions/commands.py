@@ -28,7 +28,7 @@ PARAMETER_ORDER_DECREASING = P(
         ('Decreasing', format(True, 'x')),
         ('Increasing', format(False, 'x')),
     ],
-    'Ordering?'
+    'Ordering?',
     'order',
 )
 PARAMETER_ORDER_DECREASING_DEFAULT = format(True, 'x')

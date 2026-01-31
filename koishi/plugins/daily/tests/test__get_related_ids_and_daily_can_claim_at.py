@@ -3,7 +3,10 @@ from datetime import datetime as DateTime, timezone as TimeZone
 import vampytest
 from hata import User
 
-from ...relationships_core import RELATIONSHIP_TYPE_SISTER_LIL, Relationship
+from ...relationships_core import (
+    RELATIONSHIP_TYPE_RELATIONSHIPS, RELATIONSHIP_TYPE_NONE, RELATIONSHIP_TYPE_SISTER_LIL, Relationship,
+    RelationshipExtensionTrace
+)
 from ...user_balance import UserBalance
 
 from ..related_completion import get_related_users_with_name_and_next_daily
@@ -93,7 +96,7 @@ async def test__get_related_users_with_name_and_next_daily(relationships, user_b
         Users mentioned in the relationships. Excluding the source user obviously.
     
     user_id : `int`
-        Use id to query for.
+        User identifier to query for.
     
     guild_id : `int`
         Respective guild's identifier to extend matching for.
@@ -105,13 +108,31 @@ async def test__get_related_users_with_name_and_next_daily(relationships, user_b
     -------
     output : `dict<ClientUserBase, DateTime>`
     """
-    async def mock_get_relationship_listing_with_extend(input_user_id):
+    async def mock_get_relationship_extension_traces(input_user_id):
         nonlocal user_id
         nonlocal relationships
         
         vampytest.assert_eq(user_id, input_user_id)
         
-        return [(relationship, None) for relationship in relationships]
+        if not relationships:
+            return None
+        
+        relationship_extension_traces = {}
+        for relationship in relationships:
+            
+            other_user_id = relationship.source_user_id
+            relationship_type = relationship.relationship_type
+            if other_user_id == user_id:
+                other_user_id = relationship.target_user_id
+                relationship_type = RELATIONSHIP_TYPE_RELATIONSHIPS.get(relationship_type, RELATIONSHIP_TYPE_NONE)
+            
+            relationship_extension_traces[other_user_id] = RelationshipExtensionTrace(
+                other_user_id,
+                relationship_type,
+                (relationship,),
+            )
+        
+        return relationship_extension_traces
     
     
     async def mock_get_user_balances(input_user_ids):
@@ -133,7 +154,7 @@ async def test__get_related_users_with_name_and_next_daily(relationships, user_b
     
     mocked = vampytest.mock_globals(
         get_related_users_with_name_and_next_daily,
-        get_relationship_listing_with_extend = mock_get_relationship_listing_with_extend,
+        get_relationship_extension_traces = mock_get_relationship_extension_traces,
         get_user_balances = mock_get_user_balances,
         get_users_unordered = mock_get_users_unordered,
     )

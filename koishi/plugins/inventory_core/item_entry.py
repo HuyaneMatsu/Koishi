@@ -87,7 +87,7 @@ class ItemEntry(RichAttributeErrorBaseType):
         
         Returns
         -------
-        copy : `instance<cls>`
+        new : `instance<type<self>>`
         """
         copy = object.__new__(type(self))
         copy.amount = self.amount

@@ -135,7 +135,7 @@ class EntryProxySaver(RichAttributeErrorBaseType):
         try:
             async with DB_ENGINE.connect() as connector:
                 entry_id = entry_proxy.entry_id
-                # Entry new that is all
+                # If the entry is new, insert it.
                 if (entry_id == 0) and entry_proxy:
                     self.modified_fields = None
                     entry_id = await self._insert_entry(connector, entry_proxy)

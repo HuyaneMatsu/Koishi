@@ -725,7 +725,7 @@ async def create_response_content_and_embed(
         while True:
             if handler.supports_weight_mapping():
                 weight_map = await get_preferred_image_source_weight_map(
-                    [*source_user.id, *(target.id for target in target_users)]
+                    [source_user.id, *(target.id for target in target_users)]
                 )
                 if is_preferred_image_source_weight_map_valuable(weight_map):
                     cg_get_image = handler.cg_get_image_weighted(weight_map)

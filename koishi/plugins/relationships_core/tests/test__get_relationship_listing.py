@@ -86,6 +86,7 @@ async def test__get_relationship_listing__query():
     
     mocked = vampytest.mock_globals(
         get_relationship_listing,
+        2,
         query_relationship_listing = mock_query_relationship_listing,
     )
     
@@ -137,6 +138,7 @@ async def test__get_relationship_listing__double_query():
     
     mocked = vampytest.mock_globals(
         get_relationship_listing,
+        2,
         query_relationship_listing = mock_query_relationship_listing,
     )
     

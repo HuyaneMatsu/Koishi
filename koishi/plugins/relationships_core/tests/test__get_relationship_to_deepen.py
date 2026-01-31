@@ -4,7 +4,8 @@ import vampytest
 
 from ..relationship import Relationship
 from ..relationship_completion import get_relationship_to_deepen
-from ..relationship_types import RELATIONSHIP_TYPE_SISTER_BIG, RELATIONSHIP_TYPE_WAIFU
+from ..relationship_extension_trace import RelationshipExtensionTrace
+from ..relationship_types import RELATIONSHIP_TYPE_SISTER_BIG, RELATIONSHIP_TYPE_SISTER_LIL, RELATIONSHIP_TYPE_WAIFU
 
 
 def _iter_options():
@@ -30,10 +31,18 @@ def _iter_options():
     yield (
         user_id_0,
         user_id_1,
-        [
-            (relationship_0, None),
-            (relationship_1, None),
-        ],
+        {
+            user_id_2 : RelationshipExtensionTrace(
+                user_id_2,
+                RELATIONSHIP_TYPE_WAIFU,
+                (relationship_0,),
+            ),
+            user_id_3 : RelationshipExtensionTrace(
+                user_id_3,
+                RELATIONSHIP_TYPE_SISTER_LIL,
+                (relationship_1,),
+            )
+        },
         None,
     )
     
@@ -44,10 +53,18 @@ def _iter_options():
     yield (
         user_id_0,
         user_id_1,
-        [
-            (relationship_0, None),
-            (relationship_1, None),
-        ],
+        {
+            user_id_2 : RelationshipExtensionTrace(
+                user_id_2,
+                RELATIONSHIP_TYPE_WAIFU,
+                (relationship_0,),
+            ),
+            user_id_1 : RelationshipExtensionTrace(
+                user_id_1,
+                RELATIONSHIP_TYPE_SISTER_LIL,
+                (relationship_1,),
+            )
+        },
         relationship_1,
     )
     
@@ -58,10 +75,18 @@ def _iter_options():
     yield (
         user_id_0,
         user_id_1,
-        [
-            (relationship_0, None),
-            (relationship_1, None),
-        ],
+        {
+            user_id_2 : RelationshipExtensionTrace(
+                user_id_2,
+                RELATIONSHIP_TYPE_WAIFU,
+                (relationship_0,),
+            ),
+            user_id_1 : RelationshipExtensionTrace(
+                user_id_1,
+                RELATIONSHIP_TYPE_SISTER_BIG,
+                (relationship_1,),
+            )
+        },
         relationship_1,
     )
     
@@ -72,15 +97,24 @@ def _iter_options():
     yield (
         user_id_0,
         user_id_1,
-        [
-            (relationship_0, [relationship_1]),
-        ],
+        {
+            user_id_2 : RelationshipExtensionTrace(
+                user_id_2,
+                RELATIONSHIP_TYPE_WAIFU,
+                (relationship_0,),
+            ),
+            user_id_1 : RelationshipExtensionTrace(
+                user_id_1,
+                RELATIONSHIP_TYPE_SISTER_BIG, # not actually this one, but it is okay
+                (relationship_0, relationship_1),
+            )
+        },
         relationship_0,
     )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-async def test__get_relationship_to_deepen(source_user_id, target_user_id, relationship_listing_with_extend):
+async def test__get_relationship_to_deepen(source_user_id, target_user_id, relationship_extension_traces):
     """
     Tests whether ``get_relationship_to_deepen`` works as intended.
     
@@ -92,25 +126,25 @@ async def test__get_relationship_to_deepen(source_user_id, target_user_id, relat
     target_user_id : `int`
         The target user's identifier.
     
-    relationship_listing_with_extend : `None | list<(Relationship, None | list<Relationship>)>`
-        The relationship listing with its extend to return when requested.
+    relationship_extension_traces : ```None | dict<int, RelationshipExtensionTrace>``
+        The relationship extensions traces to return.
     
     Returns
     -------
     relationship : `None | Relationship`
     """
-    async def mock_get_relationship_listing_with_extend(input_user_id):
+    async def mock_get_relationship_extension_traces(input_user_id):
         nonlocal source_user_id
-        nonlocal relationship_listing_with_extend
+        nonlocal relationship_extension_traces
         
         vampytest.assert_eq(input_user_id, source_user_id)
         
-        return relationship_listing_with_extend
+        return relationship_extension_traces
     
     
     mocked = vampytest.mock_globals(
         get_relationship_to_deepen,
-        get_relationship_listing_with_extend = mock_get_relationship_listing_with_extend,
+        get_relationship_extension_traces = mock_get_relationship_extension_traces,
     )
     
     

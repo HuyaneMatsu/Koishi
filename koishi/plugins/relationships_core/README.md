@@ -54,3 +54,28 @@ It is possible to extend relationships through someone else.
 | daughter is your      | daughter<br>(in law)      | niece                         | niece                         | big / lil sister<br>(half)    | granddaughter         | young mistress        | N / A         |
 | mistress is your      | N / A                     | N / A                         | N / A                         | N / A                         | tea friend            | N / A                 | N / A         |
 | maid is your          | maid<br>(in law)          | N / A                         | N / A                         | nanny                         | N / A                 | co-worker             | N / A         |
+
+## Multi-type relationships
+
+It may happen that two users are related in multiple ways due to proposing them on multiple ways,
+or due to second tier connections.
+If the existing relationship type is not mutually exclusive with the additionally applied one,
+both will be inherited in the traced result.
+
+## Relationship modifiers
+
+Sistership, ancestorship and employmentship may have modifiers assigned to them,
+depending on the routes of the second tier connections.
+
+These modifiers are:
+
+- none
+- half
+- step
+- in law
+
+If a user would have a relationship with multiple modifiers, always the one with the highest priority will be preferred.
+This produces an interesting scenario when multiple competing relationships with same preferences are applied.
+At ancestorship and employmentship always the one already applied will take priority.
+While in sistership this will result in turning it to relative instead, effectively postponing the decision after the
+whole resolution has been completed.

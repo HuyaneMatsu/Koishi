@@ -6,7 +6,11 @@ from hata import GuildProfile, User
 
 from ..relationship import Relationship
 from ..relationship_completion import get_relationship_extended_user_names_like_at
-from ..relationship_types import RELATIONSHIP_TYPE_MAMA, RELATIONSHIP_TYPE_SISTER_BIG, RELATIONSHIP_TYPE_WAIFU
+from ..relationship_extension_trace import RelationshipExtensionTrace
+from ..relationship_types import (
+    RELATIONSHIP_TYPE_DAUGHTER, RELATIONSHIP_TYPE_MAMA, RELATIONSHIP_TYPE_SISTER_BIG, RELATIONSHIP_TYPE_SISTER_LIL,
+    RELATIONSHIP_TYPE_WAIFU
+)
 
 
 def _iter_options():
@@ -39,11 +43,23 @@ def _iter_options():
         user_id_0,
         'okuu',
         0,
-        [
-            (relationship_0, None),
-            (relationship_1, None),
-            (relationship_2, None),
-        ],
+        {
+            user_id_1 : RelationshipExtensionTrace(
+                user_id_1,
+                RELATIONSHIP_TYPE_DAUGHTER,
+                (relationship_0,),
+            ),
+            user_id_2 : RelationshipExtensionTrace(
+                user_id_2,
+                RELATIONSHIP_TYPE_DAUGHTER,
+                (relationship_1,),
+            ),
+            user_id_3 : RelationshipExtensionTrace(
+                user_id_3,
+                RELATIONSHIP_TYPE_DAUGHTER,
+                (relationship_2,),
+            ),
+        },
         [
             user_1,
             user_2,
@@ -62,11 +78,23 @@ def _iter_options():
         user_id_0,
         'bird',
         guild_id,
-        [
-            (relationship_0, None),
-            (relationship_1, None),
-            (relationship_2, None),
-        ],
+        {
+            user_id_1 : RelationshipExtensionTrace(
+                user_id_1,
+                RELATIONSHIP_TYPE_MAMA,
+                (relationship_0,),
+            ),
+            user_id_2 : RelationshipExtensionTrace(
+                user_id_2,
+                RELATIONSHIP_TYPE_MAMA,
+                (relationship_1,),
+            ),
+            user_id_3 : RelationshipExtensionTrace(
+                user_id_3,
+                RELATIONSHIP_TYPE_DAUGHTER,
+                (relationship_2,),
+            ),
+        },
         [
             user_1,
             user_2,
@@ -86,9 +114,23 @@ def _iter_options():
         user_id_0,
         'bird',
         guild_id,
-        [
-            (relationship_0, [relationship_1, relationship_2]),
-        ],
+        {
+            user_id_1 : RelationshipExtensionTrace(
+                user_id_1,
+                RELATIONSHIP_TYPE_WAIFU,
+                (relationship_0,),
+            ),
+            user_id_2 : RelationshipExtensionTrace(
+                user_id_2,
+                RELATIONSHIP_TYPE_SISTER_LIL, # not actually, but doesnt matter
+                (relationship_0, relationship_1,),
+            ),
+            user_id_3 : RelationshipExtensionTrace(
+                user_id_3,
+                RELATIONSHIP_TYPE_SISTER_BIG, # not actually, but doesnt matter
+                (relationship_0, relationship_2,),
+            ),
+        },
         [
             user_1,
             user_2,
@@ -118,11 +160,23 @@ def _iter_options():
         user_id_0,
         'satori',
         0,
-        [
-            (relationship_0, None),
-            (relationship_1, None),
-            (relationship_2, None),
-        ],
+        {
+            user_id_1 : RelationshipExtensionTrace(
+                user_id_1,
+                RELATIONSHIP_TYPE_DAUGHTER,
+                (relationship_0,),
+            ),
+            user_id_2 : RelationshipExtensionTrace(
+                user_id_2,
+                RELATIONSHIP_TYPE_DAUGHTER,
+                (relationship_1,),
+            ),
+            user_id_3 : RelationshipExtensionTrace(
+                user_id_3,
+                RELATIONSHIP_TYPE_MAMA,
+                (relationship_2,),
+            ),
+        },
         [
             user_1,
             user_2,
@@ -140,11 +194,23 @@ def _iter_options():
         user_id_0,
         'satori',
         guild_id,
-        [
-            (relationship_0, None),
-            (relationship_1, None),
-            (relationship_2, None),
-        ],
+        {
+            user_id_1 : RelationshipExtensionTrace(
+                user_id_1,
+                RELATIONSHIP_TYPE_DAUGHTER,
+                (relationship_0,),
+            ),
+            user_id_2 : RelationshipExtensionTrace(
+                user_id_2,
+                RELATIONSHIP_TYPE_DAUGHTER,
+                (relationship_1,),
+            ),
+            user_id_3 : RelationshipExtensionTrace(
+                user_id_3,
+                RELATIONSHIP_TYPE_MAMA,
+                (relationship_2,),
+            ),
+        },
         [
             user_1,
             user_2,
@@ -162,9 +228,23 @@ def _iter_options():
         user_id_0,
         'satori',
         guild_id,
-        [
-            (relationship_0, [relationship_1, relationship_2]),
-        ],
+        {
+            user_id_1 : RelationshipExtensionTrace(
+                user_id_1,
+                RELATIONSHIP_TYPE_WAIFU,
+                (relationship_0,),
+            ),
+            user_id_2 : RelationshipExtensionTrace(
+                user_id_2,
+                RELATIONSHIP_TYPE_SISTER_LIL, # not actually, but doesnt matter
+                (relationship_0, relationship_1,),
+            ),
+            user_id_3 : RelationshipExtensionTrace(
+                user_id_3,
+                RELATIONSHIP_TYPE_SISTER_BIG, # not actually, but doesnt matter
+                (relationship_0, relationship_2,),
+            ),
+        },
         [
             user_1,
             user_2,
@@ -181,11 +261,23 @@ def _iter_options():
         user_id_0,
         str(user_id_3),
         guild_id,
-        [
-            (relationship_0, None),
-            (relationship_1, None),
-            (relationship_2, None),
-        ],
+        {
+            user_id_1 : RelationshipExtensionTrace(
+                user_id_1,
+                RELATIONSHIP_TYPE_MAMA,
+                (relationship_0,),
+            ),
+            user_id_2 : RelationshipExtensionTrace(
+                user_id_2,
+                RELATIONSHIP_TYPE_MAMA,
+                (relationship_1,),
+            ),
+            user_id_3 : RelationshipExtensionTrace(
+                user_id_3,
+                RELATIONSHIP_TYPE_DAUGHTER,
+                (relationship_2,),
+            ),
+        },
         [
             user_1,
             user_2,
@@ -199,7 +291,7 @@ def _iter_options():
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 async def test__get_relationship_extended_user_names_like_at(
-    user_id, value, guild_id, relationship_listing_with_extend, users
+    user_id, value, guild_id, relationship_extension_traces, users
 ):
     """
     Tests whether ``get_relationship_extended_user_names_like_at`` works as intended.
@@ -217,8 +309,8 @@ async def test__get_relationship_extended_user_names_like_at(
     guild_id : `int`
         The respective guild's identifier.
     
-    relationship_listing_with_extend : `None | list<(Relationship, None | list<Relationship>)>`
-        The relationship listing with its extend to return when requested.
+    relationship_extension_traces : ``None | dict<int, RelationshipExtensionTrace>``
+        Relationship extension traces to return.
     
     users : `None | list<str>`
         Users to return when requested.
@@ -231,13 +323,13 @@ async def test__get_relationship_extended_user_names_like_at(
     ------
     InteractionAbortedError
     """
-    async def mock_get_relationship_listing_with_extend(input_user_id):
+    async def mock_get_relationship_extension_traces(input_user_id):
         nonlocal user_id
-        nonlocal relationship_listing_with_extend
+        nonlocal relationship_extension_traces
         
         vampytest.assert_eq(input_user_id, user_id)
         
-        return relationship_listing_with_extend
+        return relationship_extension_traces
     
     
     async def mock_get_users_unordered(input_user_ids):
@@ -255,7 +347,7 @@ async def test__get_relationship_extended_user_names_like_at(
     
     mocked = vampytest.mock_globals(
         get_relationship_extended_user_names_like_at,
-        get_relationship_listing_with_extend = mock_get_relationship_listing_with_extend,
+        get_relationship_extension_traces = mock_get_relationship_extension_traces,
         get_users_unordered = mock_get_users_unordered,
     )
     

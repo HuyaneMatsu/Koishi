@@ -10,6 +10,7 @@ from ...user_stats_core import UserStats
 from ..component_building import build_linked_quest_abandon_confirmation_form
 
 
+
 def _iter_options():
     user_id = 202505240020
     guild_id = 202505240021
@@ -57,7 +58,9 @@ def _iter_options():
                     f'**Time available:**\n'
                     f'- **1 hour**\n'
                     f'**Time left:**\n'
-                    f'- **59 minutes, 59 seconds**'
+                    f'- **59 minutes, 59 seconds**\n'
+                    f'Completed:\n'
+                    f'- 0 / 3 times, cannot be re-accepted anymore'
                 ),
                 create_text_display(
                     '-# You will lose 20 credibility upon abandoning this quest.'

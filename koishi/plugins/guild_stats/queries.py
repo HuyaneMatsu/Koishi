@@ -112,7 +112,7 @@ async def query_guild_stats(guild_id, waiters):
     guild_id : `int`
         The guild's identifier to query for.
     
-    waiters : `list<Future>`
+    waiters : ``list<Future>``
         Result waiters.
     """
     try:

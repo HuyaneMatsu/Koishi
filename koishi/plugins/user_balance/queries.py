@@ -76,6 +76,7 @@ async def get_user_balances(user_ids):
             if waiters is None:
                 waiters = []
             waiters.append(waiter)
+            continue
         
         # no waiter available, store for later.
         if user_ids_to_request is None:
@@ -143,7 +144,7 @@ def _get_user_balance_query_waiter(user_id):
     
     Returns
     -------
-    waiter : `None | Future`
+    waiter : ``None | Future``
     """
     try:
         task, waiters = USER_BALANCE_QUERY_TASKS[user_id]
@@ -166,7 +167,7 @@ def _create_user_balance_query_waiter(user_id):
     
     Returns
     -------
-    waiter : `Future`
+    waiter : ``Future``
     """
     waiters = []
     task = Task(KOKORO, query_user_balance(user_id, waiters))
@@ -189,7 +190,7 @@ def _create_user_balance_query_waiters(user_ids):
     
     Yields
     ------
-    waiter : `Future`
+    waiter : ``Future``
     """
     items = [(user_id, []) for user_id in user_ids]
     task = Task(KOKORO, query_user_balances(items))
@@ -212,7 +213,7 @@ async def query_user_balance(user_id, waiters):
     user_id : `int`
         The user's identifier to query for.
     
-    waiters : `list<Future>`
+    waiters : ``list<Future>``
         Result waiters.
     """
     try:
@@ -447,7 +448,7 @@ async def query_save_user_balance_loop(user_balance):
     try:
         async with DB_ENGINE.connect() as connector:
             entry_id = user_balance.entry_id
-            # Entry new that is all
+            # If the entry is new, insert it.
             if (entry_id == 0):
                 user_balance.modified_fields = None
                 response = await connector.execute(
@@ -498,6 +499,13 @@ async def query_save_user_balance_loop(user_balance):
 if (DB_ENGINE is None):
     @copy_docs(query_save_user_balance_loop)
     async def query_save_user_balance_loop(user_balance):
-        user_balance.modified_fields = None
-        if not user_balance.entry_id:
-            user_balance.entry_id = next(COUNTER)
+        try:
+            user_balance.modified_fields = None
+            if not user_balance.entry_id:
+                user_balance.entry_id = next(COUNTER)
+        
+        finally:
+            try:
+                del USER_BALANCE_SAVE_TASKS[user_balance.user_id]
+            except KeyError:
+                pass

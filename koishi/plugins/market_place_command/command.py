@@ -31,8 +31,9 @@ from .item_name_auto_completion import (
 
 MARKET_PLACE_COMMANDS = FEATURE_CLIENTS.interactions(
     None,
+    integration_types = ['guild_install', 'user_install'],
     is_global = True,
-    name = 'market_place',
+    name = 'market-place',
 )
 
 

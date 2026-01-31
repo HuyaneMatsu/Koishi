@@ -4,10 +4,15 @@ from hata import (
     create_button, create_row, create_section, create_separator, create_text_display, create_thumbnail_media
 )
 
-from ..user_balance import ALLOCATION_FEATURE_ID_GAME_21, ALLOCATION_FEATURE_ID_MARKET_PLACE
+from ..user_balance import (
+    ALLOCATION_FEATURE_ID_GAME_21, ALLOCATION_FEATURE_ID_MARKET_PLACE, ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST
+)
 
 from .component_building_game_21 import build_game_21_detailed_components, build_game_21_entry_component
 from .component_building_market_place import build_market_place_detailed_components, build_market_place_entry_component
+from .component_building_relationship_request import (
+    build_relationship_request_detailed_components, build_relationship_request_entry_component
+)
 from .component_building_unknown import build_unknown_detailed_components, build_unknown_entry_component
 from .constants import EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS, EMOJI_REFRESH
 from .custom_ids import (
@@ -61,6 +66,8 @@ def build_view_components(user, page_index, page_count, guild_id, allocations):
                 component_builder = build_game_21_entry_component
             elif allocation_feature_id == ALLOCATION_FEATURE_ID_MARKET_PLACE:
                 component_builder = build_market_place_entry_component
+            elif allocation_feature_id == ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST:
+                component_builder = build_relationship_request_entry_component
             else:
                 component_builder = build_unknown_entry_component
             
@@ -111,7 +118,7 @@ def build_view_components(user, page_index, page_count, guild_id, allocations):
     return components
 
 
-def build_details_components(user_id, page_index, allocation_feature_id, session_id, amount, session, guild_id):
+def build_details_components(user_id, page_index, allocation_feature_id, session_id, amount, session, extra, guild_id):
     """
     Builds the details components.
     
@@ -138,6 +145,9 @@ def build_details_components(user_id, page_index, allocation_feature_id, session
     guild_id : `int`
         The local guild's identifier.
     
+    extra : `None | object`
+        Additional value to pass to the specific component builder.
+    
     Returns
     -------
     components : ``list<Component>``
@@ -146,7 +156,9 @@ def build_details_components(user_id, page_index, allocation_feature_id, session
         component_builder = build_game_21_detailed_components
     elif allocation_feature_id == ALLOCATION_FEATURE_ID_MARKET_PLACE:
         component_builder = build_market_place_detailed_components
+    elif allocation_feature_id == ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST:
+        component_builder = build_relationship_request_detailed_components
     else:
         component_builder = build_unknown_detailed_components
     
-    return component_builder(user_id, page_index, session_id, amount, session, guild_id)
+    return component_builder(user_id, page_index, session_id, amount, session, extra, guild_id)

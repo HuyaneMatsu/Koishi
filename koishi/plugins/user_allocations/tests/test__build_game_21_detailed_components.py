@@ -54,6 +54,7 @@ def _iter_options():
         session_id,
         amount,
         session,
+        None,
         guild_id,
         [
             user_0,
@@ -105,6 +106,7 @@ def _iter_options():
         session_id,
         amount,
         session,
+        None,
         guild_id,
         [],
         [
@@ -133,7 +135,7 @@ def _iter_options():
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__build_game_21_detailed_components(
-    user_id, page_index, session_id, amount, session, guild_id, entity_cache
+    user_id, page_index, session_id, amount, session, extra, guild_id, entity_cache
 ):
     """
     Tests whether ``build_game_21_detailed_components`` works as intended.
@@ -155,6 +157,9 @@ def test__build_game_21_detailed_components(
     session : ``NoneType | Game21Session``
         The session.
     
+    extra : `None`
+        Additionally requested fields.
+    
     guild_id : `int`
         The local guild's identifier.
     
@@ -165,7 +170,7 @@ def test__build_game_21_detailed_components(
     -------
     output : ``list<Component>``
     """
-    output = build_game_21_detailed_components(user_id, page_index, session_id, amount, session, guild_id)
+    output = build_game_21_detailed_components(user_id, page_index, session_id, amount, session, extra, guild_id)
     vampytest.assert_instance(output, list)
     for element in output:
         vampytest.assert_instance(element, Component)

@@ -22,6 +22,7 @@ def _iter_options():
         session_id,
         amount,
         session,
+        None,
         guild_id,
         [
             create_text_display(
@@ -39,7 +40,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_details_components(user_id, page_index, allocation_feature_id, session_id, amount, session, guild_id):
+def test__build_details_components(
+    user_id, page_index, allocation_feature_id, session_id, amount, session, extra, guild_id
+):
     """
     Tests whether ``build_details_components`` works as intended.
     
@@ -63,6 +66,9 @@ def test__build_details_components(user_id, page_index, allocation_feature_id, s
     session : `None | object`
         The game's session.
     
+    extra : `None | object`
+        Additional value to pass to the specific component builder.
+    
     guild_id : `int`
         The local guild's identifier.
     
@@ -70,7 +76,9 @@ def test__build_details_components(user_id, page_index, allocation_feature_id, s
     -------
     output : ``list<Component>``
     """
-    output = build_details_components(user_id, page_index, allocation_feature_id, session_id, amount, session, guild_id)
+    output = build_details_components(
+        user_id, page_index, allocation_feature_id, session_id, amount, session, extra, guild_id
+    )
     vampytest.assert_instance(output, list)
     for element in output:
         vampytest.assert_instance(element, Component)

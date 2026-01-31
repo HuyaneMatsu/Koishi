@@ -83,7 +83,7 @@ def build_unknown_entry_component(user_id, page_index, session_id, amount):
     )
 
 
-def build_unknown_detailed_components(user_id, page_index, session_id, amount, session, guild_id):
+def build_unknown_detailed_components(user_id, page_index, session_id, amount, session, extra, guild_id):
     """
     Builds unknown detailed components.
     
@@ -103,6 +103,9 @@ def build_unknown_detailed_components(user_id, page_index, session_id, amount, s
     
     session : `NoneType`
         The session.
+    
+    extra : `None`
+        Additionally requested fields.
     
     guild_id : `int`
         The local guild's identifier.

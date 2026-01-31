@@ -13,9 +13,6 @@ DS_V2_TABLE = None
 ds_v2_result_model = None
 DS_V2_RESULT_TABLE = None
 
-sticker_counter_model = None
-STICKER_COUNTER_TABLE = None
-
 DB_ENGINE = None
 
 user_stats_model = None
@@ -129,16 +126,6 @@ if (DB_ENGINE is not None):
         data_version    = Column(Int16, nullable = False)
     
     AUTOMATION_REACTION_ROLE_TABLE = automation_reaction_role_model.__table__
-    
-    
-    class sticker_counter_model(BASE):
-        __tablename__   = 'STICKER_COUNTER'
-        id              = Column(Int64, primary_key = True)
-        user_id         = Column(Int64)
-        sticker_id      = Column(Int64)
-        timestamp       = Column(DateTime)
-    
-    STICKER_COUNTER_TABLE = sticker_counter_model.__table__
     
     
     class ds_v2_model(BASE):

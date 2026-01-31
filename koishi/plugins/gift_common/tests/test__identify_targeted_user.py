@@ -157,6 +157,18 @@ def _iter_options():
             None
         ),
     )
+    
+    # Something given, but nothing matched.
+    
+    yield (
+        user_0,
+        'koishi',
+        None,
+        guild_id,
+        None,
+        None,
+        None,
+    )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
@@ -191,12 +203,12 @@ async def test__identify_targeted_user(
         Return from `get_relationship_to_deepen_return` call.
     
     get_extender_relationship_and_relationship_and_user_like_at_return : \
-            `(None | Relationship, None | Relationship, None | ClientUserBase)`
+            ``None | (None | Relationship, None | Relationship, None | ClientUserBase)``
         Return from `get_extender_relationship_and_relationship_and_user_like_at_return` call.
         
     Returns
     -------
-    output : `(None | ClientUserBase, None | Relationship)`
+    output : ``None | (None | ClientUserBase, None | Relationship)``
     """
     async def mocked_get_relationship_to_deepen(passed_source_user_id, passed_target_user_id):
         nonlocal source_user
@@ -231,9 +243,10 @@ async def test__identify_targeted_user(
     
     output = await mocked(source_user, target_related_name, target_user, guild_id)
     
-    vampytest.assert_instance(output, tuple)
-    vampytest.assert_eq(len(output), 2)
-    vampytest.assert_instance(output[0], ClientUserBase, nullable = True)
-    vampytest.assert_instance(output[1], Relationship, nullable = True)
+    vampytest.assert_instance(output, tuple, nullable = True)
+    if (output is not None):
+        vampytest.assert_eq(len(output), 2)
+        vampytest.assert_instance(output[0], ClientUserBase, nullable = True)
+        vampytest.assert_instance(output[1], Relationship, nullable = True)
     
     return output

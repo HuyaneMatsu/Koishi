@@ -14,7 +14,7 @@ from ..quest_core import (
     AMOUNT_TYPE_COUNT, AMOUNT_TYPE_NAME_DEFAULT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT,
     LINKED_QUEST_COMPLETION_STATE_ACTIVE, QUEST_TYPE_ITEM_SUBMISSION, QUEST_TYPE_MONSTER_SUBJUGATION_LOCATED,
     QUEST_TYPE_MONSTER_SUBJUGATION_SELECTED, calculate_received_reward_credibility, get_adventurer_level_name,
-    get_quest_board_resets_at
+    get_current_batch_id, get_quest_board_resets_at
 )
 
 from .constants import BROKEN_QUEST_DESCRIPTION
@@ -577,6 +577,25 @@ def produce_linked_quest_detailed_description(linked_quest, quest_template, user
     yield from _produce_time_available(RelativeDelta(linked_quest.expires_at, linked_quest.taken_at))
     yield '\n'
     yield from _produce_time_left(linked_quest.expires_at)
+    yield '\n'
+    
+    completion_count = linked_quest.completion_count
+    repeat_count = quest_template.repeat_count
+    yield 'Completed:\n- '
+    yield str(completion_count)
+    
+    if repeat_count:
+        yield ' / '
+        yield str(repeat_count)
+    
+    yield ' times, '
+    
+    if (linked_quest.batch_id == get_current_batch_id()) and ((not repeat_count) or (repeat_count > completion_count)):
+        yield 're-acceptable for '
+        yield elapsed_time(RelativeDelta(get_quest_board_resets_at(), DateTime.now(tz = TimeZone.utc)))
+    
+    else:
+        yield 'cannot be re-accepted anymore'
 
 
 def produce_nullable_item_description(item):

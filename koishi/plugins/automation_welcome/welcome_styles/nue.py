@@ -4,6 +4,7 @@ from hata import Emoji
 
 from config import NUE_ID
 
+from ..welcome_image import WelcomeImage
 from ..welcome_style_reply import WelcomeStyleReply
 from ..welcome_style import WelcomeStyle
 
@@ -34,11 +35,16 @@ MESSAGE_CONTENT_BUILDERS = (
 
 
 IMAGES = (
-    'https://cdn.discordapp.com/attachments/568837922288173058/1446985114750943356/nue-welcome-0000.png',
+    WelcomeImage(
+        'howhow notei',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1446985114750943356/nue-welcome-0000.png',
+    ),
+    WelcomeImage(
+        'manorea',
+        'https://cdn.discordapp.com/attachments/568837922288173058/1465826242015006871/nue-welcome-0001.png',
+    ),
 )
 
-
-IMAGE_CREATOR = 'howhow notei'
 
 REPLY_STYLES = (
     WelcomeStyleReply(
@@ -79,6 +85,5 @@ WELCOME_STYLE = WelcomeStyle(
     NUE_ID,
     MESSAGE_CONTENT_BUILDERS,
     IMAGES,
-    IMAGE_CREATOR,
     REPLY_STYLES,
 )

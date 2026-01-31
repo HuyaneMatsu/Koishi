@@ -15,8 +15,9 @@ def get_handler_weights_with_weight_map(handlers, weight_map):
     
     Parameters
     ----------
-    handlers : `list` of ``ImageHandlerBase``
+    handlers : ``list<ImageHandlerBase>``
         Handlers to get weights for.
+    
     weight_map : `dict<int, int>`
         Weight map to prefer an image source over an other.
     
@@ -52,7 +53,7 @@ class ImageHandlerGroup(ImageHandlerBase):
     
     Attributes
     ----------
-    _handlers : ``list<ImageHandlerBase``
+    _handlers : ``list<ImageHandlerBase>``
         Registered sub handlers.
     
     _weights : `list<float>`
@@ -107,10 +108,10 @@ class ImageHandlerGroup(ImageHandlerBase):
     
     
     @copy_docs(ImageHandlerBase.cg_get_image_weighted)
-    async def cg_get_image_weighted(self, weight_map, **acknowledge_parameters):
+    async def cg_get_image_weighted(self, weight_map):
         weights = get_handler_weights_with_weight_map(self._handlers, weight_map)
         
-        async for image_detail in  self._get_image_with_weights(weights):
+        async for image_detail in self._get_image_with_weights(weights):
             yield image_detail
     
     
@@ -190,7 +191,7 @@ class ImageHandlerGroup(ImageHandlerBase):
                 previous_preferred_image_source = preferred_image_source
                 continue
             
-            if previous_preferred_image_source != previous_preferred_image_source:
+            if previous_preferred_image_source != preferred_image_source:
                 return True
         
         return False

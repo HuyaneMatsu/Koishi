@@ -3,7 +3,7 @@ __all__ = ()
 from math import floor, inf, isnan as is_nan
 
 from hata import ClientUserBase, create_button
-from hata.ext.slash import P
+from hata.ext.slash import P, abort
 
 from ...bot_utils.utils import send_embed_to
 from ...bots import FEATURE_CLIENTS
@@ -93,9 +93,13 @@ async def gift(
     
     source_user = interaction_event.user
     
-    target_user, relationship_to_deepen = await identify_targeted_user(
+    target_user_and_relationship_to_deepen = await identify_targeted_user(
         source_user, target_related_name, target_user, interaction_event.guild_id
     )
+    if target_user_and_relationship_to_deepen is None:
+        return abort('Could not match anyone.')
+    
+    target_user, relationship_to_deepen = target_user_and_relationship_to_deepen
     
     check_can_gift(source_user, relationship_to_deepen)
     check_is_target_valid(source_user, target_user)

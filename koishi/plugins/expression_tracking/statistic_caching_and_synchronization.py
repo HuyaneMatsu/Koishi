@@ -48,7 +48,7 @@ def _query_done_callback(key, waiters, task):
     key : `(CoroutineFunction, tuple<object>)`
         Key used in caching. First element is the coroutine function to run and the second are the parameters.
     
-    waiters : `list<Future>`
+    waiters : ``list<Future>``
         Result waiters.
     
     task : ``Future``

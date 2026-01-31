@@ -16,7 +16,7 @@ from .helpers import (
 )
 
 
-def build_mute_embed(user, title, description, reason, notify_user, duration_string, nazrin_mode):
+def build_mute_embed(user, guild_id, title, description, reason, notify_user, duration_string, nazrin_mode):
     """
     Builds a mute embed.
     
@@ -24,16 +24,25 @@ def build_mute_embed(user, title, description, reason, notify_user, duration_str
     ----------
     user : ``ClientUserBase``
         The user in context.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
     title : `str`
         Embed title.
+    
     description : `str`
         Embed description.
+    
     reason : `None`, `str`
         Action reason.
+    
     notify_user : `bool`
         Whether the user should be notified.
+    
     duration_string : `str`
         The duration in string.
+    
     nazrin_mode : `bool`
         Whether nazrin mode should be applied on the embed.
     
@@ -41,7 +50,7 @@ def build_mute_embed(user, title, description, reason, notify_user, duration_str
     -------
     embed : ``Embed``
     """
-    embed = Embed(title, description).add_thumbnail(user.avatar_url)
+    embed = Embed(title, description).add_thumbnail(user.avatar_url_at(guild_id))
     add_standalone_field(embed, 'Duration', duration_string)
     add_standalone_field(embed, 'Notify user', 'true' if notify_user else 'false')
     add_reason_field(embed, reason)

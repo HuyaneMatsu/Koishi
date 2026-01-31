@@ -74,11 +74,8 @@ async def identify_targeted_user(source_user, target_related_name, target_user, 
     
     Returns
     -------
-    target_user : `None | ClientUserBase`
-        The targeted user.
-    
-    relationship_to_deepen : `None | Relationship`
-        The relationship to deepen by the action.
+    target_user_and_relationship_to_deepen : ``None | (None | ClientUserBase, None | Relationship)``
+        The targeted user and the relationship to deepen by the action if any.
     """
     if source_user is target_user:
         target_user = None
@@ -87,12 +84,15 @@ async def identify_targeted_user(source_user, target_related_name, target_user, 
         relationship_to_deepen = await get_relationship_to_deepen(source_user.id, target_user.id)
     
     elif (target_related_name is not None):
-        extender_relationship, relationship, target_user = (
+        extender_relationship_and_relationship_and_user = (
             await get_extender_relationship_and_relationship_and_user_like_at(
                 source_user.id, target_related_name, guild_id
             )
         )
+        if extender_relationship_and_relationship_and_user is None:
+            return None
         
+        extender_relationship, relationship, target_user = extender_relationship_and_relationship_and_user
         if extender_relationship is None:
             relationship_to_deepen = relationship
         else:

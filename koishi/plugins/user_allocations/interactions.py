@@ -11,6 +11,7 @@ from .custom_ids import (
     USER_ALLOCATIONS_CUSTOM_ID_VIEW_PAGE_INDEX_INCREMENT_DISABLED, USER_ALLOCATIONS_CUSTOM_ID_VIEW_PAGE_PATTERN,
     USER_ALLOCATION_CUSTOM_ID_LINK_DISABLED
 )
+from .extra import get_extra
 
 
 @FEATURE_CLIENTS.interactions(
@@ -155,10 +156,19 @@ async def handle_allocations_details(
             else:
                 session = await get_session_enty(allocation_session_id)
         
+        extra = await get_extra(user_id, allocation_feature_id, session_id, amount, session)
+        
         await client.interaction_response_message_edit(
             interaction_event,
             components = build_details_components(
-                user_id, page_index, allocation_feature_id, session_id, amount, session, interaction_event.guild_id
+                user_id,
+                page_index,
+                allocation_feature_id,
+                session_id,
+                amount,
+                session,
+                extra,
+                interaction_event.guild_id,
             ),
         )
         return

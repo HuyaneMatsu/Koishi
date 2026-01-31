@@ -31,3 +31,33 @@ def is_private_channel_of_two(channel, source_user, target_user):
         return False
     
     return True
+
+
+def select_existing_relationship(relationship_listing, source_user_id, target_user_id):
+    """
+    Selects the existing relationship between the two users.
+    
+    Parameters
+    ----------
+    relationship_listing : `None | list<Relationship>`
+        The relationship listing of one of the users.
+    
+    source_user_id : `int`
+        The source user's identifier.
+    
+    target_user_id : `int`
+        The targeted user's identifier.
+    
+    Returns
+    -------
+    relationship : ``None | Relationship``
+    """
+    if (relationship_listing is None):
+        return
+    
+    for relationship in relationship_listing:
+        if (
+            ((relationship.source_user_id == source_user_id) and (relationship.target_user_id == target_user_id)) or
+            ((relationship.target_user_id == source_user_id) and (relationship.source_user_id == target_user_id))
+        ):
+            return relationship

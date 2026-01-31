@@ -1,3 +1,48 @@
+### 2026-01-31
+
+- Fix stepping adventures failed, due to after live patching it, forgot to revert the code. (ayahiya)
+- Fix allocation removal using wrong allocation feature id to calculate data size. (huhbuh)
+- Fix accepting relationship modified something else instead of the user's balance by half the amount.
+  (Since around 2 months) (huhbuh)
+- Relationship requests now instead of reducing the user's hearts, allocates them instead.
+- Relationship requests now integrate with `/user allocations`.
+- Integrate the `/proposal` command into `/relationships`. `/proposal reject`, `/proposal cancel`, `/proposal cancel`
+    were fully removed, now they can be executed through the UI of `/relationships proposal-list-incoming`,
+    `/relationships proposal-list-incoming` commands.
+- Fix `/mod` & `/self-mod` commands not using the users local names / avatars every time.
+- Fix `/self-mod mute` failing to respond.
+- Fix group image handler aggregating multiple ones, always reported that it does not supports weight mapping.
+    making `preferred-image-source` to be ignored`. (ayahiya)
+- Fix typos and working in frog description. (huhbuh)
+- Fix `/market-place inbox` always displayed page 1.
+- Add a new image to `/automation welcome`'s `nue` style. (fariz_12134)
+- Fix `/accessibility character-preference` commands having the same description. (aspecialguest)
+- Linked quest description now also shows how much times the quest has been and can be completed. (ayahiya)
+- Fix `emoji` and `sticker` stat commands' `order` parameter having wrong name and description.
+- Remove old `/sticker` command, now there are alternatives available. (Support guild only.)
+- Allow creating relationship towards users who are already related to you.
+- `/relationship info` now allows choosing rendering method.
+
+- Add new quests:
+    - Nina - Strawberry
+
+- Add new items:
+    - Broom
+    - Hand fan
+    - Parasol
+    - Gothic attire
+    - Hiking set
+    - Kimono
+
+- Balance adventure locations & targets:
+    - Moriya shrine - Foraging -> Add Broom Mythical drop
+    - Hakugyokurou mansion - Gardening -> Add Hand fan as mythical drop.
+    - Hakugyokurou mansion - Gardening -> Add Parasol fan as mythical drop.
+    - Ruins - Foraging -> Add Gothic attire as mythical drop.
+    - Misty lake - Foraging -> Add Hiking set as mythical drop.
+    - Eientei mansion - Gardening -> Add Kimono mythical drop.
+
+
 ### 2026-01-01
 
 - Fix Alice - Angelroot quest asked for Flykiller amanita.

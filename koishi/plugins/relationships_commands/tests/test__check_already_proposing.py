@@ -1,13 +1,14 @@
 import vampytest
-from hata import User
-from hata.ext.slash import InteractionAbortedError
+from hata import Component, User, create_text_display
+
+from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ...relationships_core import RELATIONSHIP_TYPE_MAMA, RelationshipRequest
 
 from ..checks import check_already_proposing
 
 
-def _iter_options__passing():
+def _iter_options():
     user_id_0 = 202501030060
     user_id_1 = 202501030061
     user_id_2 = 202501030062
@@ -20,6 +21,7 @@ def _iter_options__passing():
         None,
         user_1,
         0,
+        None,
     )
     
     yield (
@@ -28,15 +30,8 @@ def _iter_options__passing():
         ],
         user_1,
         0,
+        None
     )
-
-
-def _iter_options__failing():
-    user_id_0 = 202501030063
-    user_id_1 = 202501030064
-    
-    user_0 = User.precreate(user_id_0, name = 'Satori')
-    user_1 = User.precreate(user_id_1, name = 'Koishi')
     
     yield (
         [
@@ -44,11 +39,16 @@ def _iter_options__failing():
         ],
         user_1,
         0,
+        [
+            create_text_display(
+                f'You have already sent an adoption agreement towards Koishi with 500 {EMOJI__HEART_CURRENCY}.\n'
+                f'Cancel the old proposal before reissuing a new one.'
+            ),
+        ],
     )
 
 
-@vampytest._(vampytest.call_from(_iter_options__passing()))
-@vampytest._(vampytest.call_from(_iter_options__failing()).raising(InteractionAbortedError))
+@vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__check_already_proposing(source_relationship_request_listing, target_user, guild_id):
     """
     Tests whether ``check_already_proposing`` works as intended.
@@ -64,8 +64,15 @@ def test__check_already_proposing(source_relationship_request_listing, target_us
     guild_id : `int`
         The respective guild's identifier.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    output : ``None | list<Component>``
     """
-    check_already_proposing(source_relationship_request_listing, target_user, guild_id)
+    output = check_already_proposing(source_relationship_request_listing, target_user, guild_id)
+    vampytest.assert_instance(output, list, nullable = True)
+    
+    if (output is not None):
+        for element in output:
+            vampytest.assert_instance(element, Component)
+    
+    return output

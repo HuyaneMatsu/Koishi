@@ -2,7 +2,7 @@ __all__ = (
     'autocomplete_relationship_extended_user_name', 'autocomplete_relationship_unset_outgoing_user_name',
     'autocomplete_relationship_user_name', 'get_extender_relationship_and_relationship_and_user_like_at',
     'get_relationship_unset_outgoing_and_user_like_at', 'get_relationship_and_user_like_at',
-    'get_relationship_to_deepen', 'iter_relationship_and_extend_user_ids_to_request',
+    'get_relationship_to_deepen',
 )
 
 from hata.ext.slash import abort
@@ -11,11 +11,8 @@ from ...bot_utils.constants import RELATIONSHIP_VALUE_DEFAULT
 from ...bot_utils.user_getter import get_users_unordered
 
 from .completion_helpers import _make_suggestions
-from .helpers import (
-    select_first_user_for_value, select_extender_relationship_and_relationship_for_user_id,
-    select_relationship_for_user_id,
-)
-from .relationship_queries import get_relationship_listing, get_relationship_listing_with_extend
+from .helpers import select_first_user_for_value, select_relationship_for_user_id
+from .relationship_queries import get_relationship_listing, get_relationship_extension_traces
 from .relationship_types import RELATIONSHIP_TYPE_UNSET
 
 
@@ -43,46 +40,6 @@ def _iter_relationship_user_ids_to_request(excluded_user_id, relationship_listin
             user_id = relationship.target_user_id
         
         yield user_id
-
-
-def iter_relationship_and_extend_user_ids_to_request(
-    excluded_user_id, relationship_listing_with_extend
-):
-    """
-    Iterates over the relationship's and their extends' users' identifiers.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    excluded_user_id : `int`
-        The user identifier to exclude.
-    
-    relationship_listing_with_extend : `None | list<(Relationship, None | list<Relationship>)>`
-        The relationship listing with its extend.
-    
-    Yields
-    -------
-    user_id : `int`
-    """
-    if relationship_listing_with_extend is None:
-        return
-    
-    for relationship, relationship_listing_extend in relationship_listing_with_extend:
-        user_id = relationship.source_user_id
-        if user_id == excluded_user_id:
-            user_id = relationship.target_user_id
-        
-        yield user_id
-        
-        if (relationship_listing_extend is None):
-            continue
-        
-        for user_id in _iter_relationship_user_ids_to_request(user_id, relationship_listing_extend):
-            if user_id != excluded_user_id:
-                yield user_id
-        
-        continue
 
 
 def _filter_relationships_unset_outgoing(user_id, relationships):
@@ -172,11 +129,7 @@ async def get_relationship_and_user_like_at(user_id, value, guild_id):
     
     Returns
     -------
-    relationship_and_user : `(Relationship, ClientUserBase)`
-    
-    Raises
-    ------
-    InteractionAbortedError
+    relationship_and_user : ``None | (Relationship, ClientUserBase)``
     """
     while True:
         if value is None:
@@ -198,7 +151,7 @@ async def get_relationship_and_user_like_at(user_id, value, guild_id):
         
         return relationship, user
     
-    abort('Could not match anyone.')
+    return None
 
 
 async def autocomplete_relationship_user_name(event, value):
@@ -274,7 +227,7 @@ async def get_relationship_unset_outgoing_and_user_like_at(user_id, value, guild
     
     Returns
     -------
-    relationship_and_user : `(Relationship, ClientUserBase)`
+    relationship_and_user : ``None | (Relationship, ClientUserBase)``
     
     Raises
     ------
@@ -304,7 +257,7 @@ async def get_relationship_unset_outgoing_and_user_like_at(user_id, value, guild
         
         return (relationship, user)
     
-    abort('Could not match anyone.')
+    return None
 
 
 async def autocomplete_relationship_unset_outgoing_user_name(event, value):
@@ -349,13 +302,11 @@ async def get_relationship_extended_user_names_like_at(user_id, value, guild_id)
     -------
     suggestions : `None | list<(str, str)>`
     """
-    relationship_listing_with_extend = await get_relationship_listing_with_extend(user_id)
-    if relationship_listing_with_extend is None:
+    relationship_extension_traces = await get_relationship_extension_traces(user_id)
+    if relationship_extension_traces is None:
         return None
     
-    users = await get_users_unordered(iter_relationship_and_extend_user_ids_to_request(
-        user_id, relationship_listing_with_extend
-    ))
+    users = await get_users_unordered(relationship_extension_traces.keys())
     
     return _make_suggestions(users, value, guild_id)
 
@@ -380,38 +331,35 @@ async def get_extender_relationship_and_relationship_and_user_like_at(user_id, v
     
     Returns
     -------
-    extender_relationship_and_relationship_and_user : `(None | Relationship, Relationship, ClientUserBase)`
-    
-    Raises
-    ------
-    InteractionAbortedError
+    extender_relationship_and_relationship_and_user : ``(None | Relationship, Relationship, ClientUserBase)``
     """
     while True:
         if value is None:
             break
         
-        relationship_listing_with_extend = await get_relationship_listing_with_extend(user_id)
-        if relationship_listing_with_extend is None:
+        relationship_extension_traces = await get_relationship_extension_traces(user_id)
+        if relationship_extension_traces is None:
             break
         
-        users = await get_users_unordered(iter_relationship_and_extend_user_ids_to_request(
-            user_id, relationship_listing_with_extend
-        ))
-        
+        users = await get_users_unordered(relationship_extension_traces.keys())
         user = select_first_user_for_value(users, value, guild_id)
         if user is None:
             break
         
-        extender_relationship_and_relationship = select_extender_relationship_and_relationship_for_user_id(
-            relationship_listing_with_extend, user.id
-        )
-        if (extender_relationship_and_relationship is None):
+        
+        try:
+            relationship_extension_trace = relationship_extension_traces[user.id]
+        except KeyError:
             break
         
-        extender_relationship, relationship = extender_relationship_and_relationship
-        return (extender_relationship, relationship, user)
+        relationship_route = relationship_extension_trace.relationship_route
+        return (
+            (None if len(relationship_route) == 1 else relationship_route[0]),
+            relationship_route[-1],
+            user,
+        )
     
-    abort('Could not match anyone.')
+    return None
 
 
 async def autocomplete_relationship_extended_user_name(event, value):
@@ -449,27 +397,22 @@ async def get_relationship_to_deepen(source_user_id, target_user_id):
     
     Returns
     -------
-    relationship : `None | Relationship`
+    relationship : ``None | Relationship``
     """
     # Get relationship to increment its value if any.
     while True:
-        relationship_listing_with_extend = await get_relationship_listing_with_extend(source_user_id)
-        if relationship_listing_with_extend is None:
+        relationship_extension_traces = await get_relationship_extension_traces(source_user_id)
+        if relationship_extension_traces is None:
             relationship = None
             break
         
-        extender_relationship_and_relationship = select_extender_relationship_and_relationship_for_user_id(
-            relationship_listing_with_extend, target_user_id
-        )
-        if extender_relationship_and_relationship is None:
+        try:
+            relationship_extension_trace = relationship_extension_traces[target_user_id]
+        except KeyError:
             relationship = None
             break
         
-        relationship = extender_relationship_and_relationship[0]
-        if relationship is not None:
-            break
-        
-        relationship = extender_relationship_and_relationship[1]
+        relationship = relationship_extension_trace.relationship_route[0]
         break
     
     return relationship

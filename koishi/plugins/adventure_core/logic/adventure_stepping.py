@@ -220,9 +220,7 @@ async def adventure_action_step(adventure):
     loot_accumulations = accumulate_action_loot(action, random, multiplier)
     duration = get_duration_till_action_occurrence(action.duration, random, loot_accumulations, multiplier)
     
-    looted_items, energy_exhausted = accumulate_looted_items(
-        adventure, user_stats, inventory, loot_accumulations, multiplier
-    )
+    looted_items, energy_exhausted = accumulate_looted_items(adventure, user_stats, inventory, loot_accumulations)
     energy_exhausted = ceil(energy_exhausted / multiplier)
     
     # Save inventory.

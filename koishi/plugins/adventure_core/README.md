@@ -91,12 +91,14 @@ Each action offers their own cost, battles and loot.
             - Bishophat (rare)
             - Ribbon bow (mythical)
             - Plushie bear (mythical)
+            - Gothic attire (mythical)
 
 - Eientei mansion (level 1)
     - Gardening
         - Gardening
             - Carrot (certain)
             - Frog (epic)
+            - Kimono (mythical)
         - Trapped
 
 - Magic forest (level 1)
@@ -113,6 +115,8 @@ Each action offers their own cost, battles and loot.
         - Gardening
             - Peach (basic)
             - Peach (rare)
+            - Hand fan (mythical)
+            - Parasol (mythical)
 
 - Moriya shrine (level 2)
     - Foraging
@@ -120,10 +124,12 @@ Each action offers their own cost, battles and loot.
             - BlueBerry (basic)
             - Kitchen knife (mythical)
             - Poking knife (mythical)
+            - Broom (mythical)
 
-- Misty lake
+- Misty lake (level 2)
     - Foraging
         - Foraging
             - Frog (basic)
             - Angelroot (basic)
             - Fishing rod (rare)
+            - Hiking set (mythical)

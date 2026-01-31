@@ -1,7 +1,7 @@
 __all__ = (
     'calculate_relationship_value', 'get_affinity_multiplier', 'get_affinity_percent', 'get_root', 'get_square',
-    'iter_select_relationships', 'select_extender_relationship_and_relationship_for_user_id',
-    'select_first_user_for_value', 'select_relationship', 'select_relationship_for_user_id',
+    'iter_select_relationships', 'select_first_user_for_value', 'select_relationship',
+    'select_relationship_for_user_id',
 )
 
 from config import KOISHI_ID
@@ -119,7 +119,7 @@ def calculate_relationship_value(user_id, base_relationship_value, relationships
     base_relationship_value : `int`
         The base value for the user's relationships.
     
-    relationships : `None | list<Relationship>`
+    relationships : ``None | list<Relationship>``
         The user's relationships.
     
     Returns
@@ -276,36 +276,3 @@ def select_relationship_for_user_id(relationship_listing, user_id):
     for relationship in relationship_listing:
         if (relationship.source_user_id == user_id) or (relationship.target_user_id == user_id):
             return relationship
-
-
-def select_extender_relationship_and_relationship_for_user_id(
-    relationship_listing_with_extend, user_id
-):
-    """
-    Selects the extender relationship and the relationship of the given user identifier.
-    
-    Parameters
-    ----------
-    relationship_listing_with_extend : `None | list<(Relationship, None | list<Relationship>)>`
-        The relationship extends to get the user identifiers from.
-    
-    user_id : `int`
-        The user identifier to select relationship with.
-    
-    Returns
-    -------
-    extender_relationship_and_relationship : `None | (None | Relationship, Relationship)`
-    """
-    if relationship_listing_with_extend is None:
-        return None
-    
-    for extender_relationship, relationship_listing_extend in relationship_listing_with_extend:
-        if (extender_relationship.source_user_id == user_id) or (extender_relationship.target_user_id == user_id):
-            return None, extender_relationship
-        
-        if (relationship_listing_extend is None):
-            continue
-        
-        relationship = select_relationship_for_user_id(relationship_listing_extend, user_id)
-        if (relationship is not None):
-            return extender_relationship, relationship

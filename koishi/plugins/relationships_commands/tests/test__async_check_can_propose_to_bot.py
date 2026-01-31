@@ -1,11 +1,10 @@
 import vampytest
-from hata import User
-from hata.ext.slash import InteractionAbortedError
+from hata import Component, User, create_button, create_row, create_text_display
 
 from ..checks import async_check_can_propose_to_bot
 
 
-def _iter_options__passing():
+def _iter_options():
     user_id_0 = 202501100000
     user_id_1 = 202501100001
     user_id_2 = 202502240020
@@ -20,6 +19,7 @@ def _iter_options__passing():
         0,
         1,
         0,
+        None,
     )
     
     yield (
@@ -28,15 +28,8 @@ def _iter_options__passing():
         2,
         1,
         0,
+        None,
     )
-
-
-def _iter_options__failing():
-    user_id_0 = 202501100002
-    user_id_1 = 202502240021
-    
-    user_0 = User.precreate(user_id_0, name = 'Satori', bot = True)
-    user_1 = User.precreate(user_id_1)
     
     yield (
         user_1,
@@ -44,11 +37,22 @@ def _iter_options__failing():
         1,
         1,
         0,
+        [
+            create_text_display(
+                'Satori is disallowed to create relationships.\n'
+                'Therefore creating a proposal towards them is not allowed.'
+            ),
+            create_row(
+                create_button(
+                    'Buy one relationship slot for them <3',
+                    custom_id = f'user.buy_relationship_slots.invoke.{user_id_0:x}'
+                ),
+            ),
+        ],
     )
 
 
-@vampytest._(vampytest.call_from(_iter_options__passing()))
-@vampytest._(vampytest.call_from(_iter_options__failing()).raising(InteractionAbortedError))
+@vampytest._(vampytest.call_from(_iter_options()).returning_last())
 async def test__async_check_can_propose_to_bot(
     source_user, target_user, target_relationship_count, target_relationship_slots, guild_id
 ):
@@ -74,9 +78,9 @@ async def test__async_check_can_propose_to_bot(
     guild_id : `int`
         The respective guild's identifier.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    output : ``None | list<Component>``
     """
     async def mocked_can_gift_with_request(passed_source_user, passed_target_user):
         nonlocal source_user
@@ -92,6 +96,13 @@ async def test__async_check_can_propose_to_bot(
         can_gift_with_request = mocked_can_gift_with_request,
     )
     
-    await mocked(
+    output = await mocked(
         source_user, target_user, target_relationship_count, target_relationship_slots, guild_id
     )
+    vampytest.assert_instance(output, list, nullable = True)
+    
+    if (output is not None):
+        for element in output:
+            vampytest.assert_instance(element, Component)
+    
+    return output

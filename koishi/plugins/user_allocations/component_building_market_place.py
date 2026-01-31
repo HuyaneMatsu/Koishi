@@ -155,7 +155,7 @@ def build_market_place_entry_component(user_id, page_index, session_id, amount):
     )
 
 
-def build_market_place_detailed_components(user_id, page_index, session_id, amount, session, guild_id):
+def build_market_place_detailed_components(user_id, page_index, session_id, amount, session, extra, guild_id):
     """
     Builds market place detailed components.
     
@@ -175,6 +175,9 @@ def build_market_place_detailed_components(user_id, page_index, session_id, amou
     
     session : ``None | MarketPlaceItem``
         The game's session.
+    
+    extra : `None`
+        Additionally requested fields.
     
     guild_id : `int`
         The local guild's identifier.

@@ -224,7 +224,7 @@ async def character_preference_add(
     name : P(str, 'Select a character', autocomplete = auto_complete_touhou_character_name),
 ):
     """
-    Shows your preferred character(s).
+    Add character to your preference.
     
     This function is a coroutine.
     
@@ -277,7 +277,7 @@ async def character_preference_remove(
     name : (str, 'Select a character'),
 ):
     """
-    Shows your preferred character(s).
+    Remove a character from your preference.
     
     This function is a coroutine.
     

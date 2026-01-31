@@ -1,9 +1,7 @@
 __all__ = (
     'autocomplete_relationship_request_source_user_name', 'autocomplete_relationship_request_target_user_name',
-    'get_relationship_request', 'get_relationship_request_and_user_like_at'
+    'get_relationship_request_from', 'get_relationship_request_and_user_like_at', 'get_relationship_request_between'
 )
-
-from hata.ext.slash import abort
 
 from ...bot_utils.user_getter import get_users_unordered
 
@@ -93,7 +91,7 @@ async def get_relationship_request_and_user_like_at(user_id, outgoing, value, gu
     
     Returns
     -------
-    relationship_request_and_user : `(RelationshipRequest, ClientUserBase)`
+    relationship_request_and_user : ``None | (RelationshipRequest, ClientUserBase)``
     
     Raises
     ------
@@ -137,7 +135,7 @@ async def get_relationship_request_and_user_like_at(user_id, outgoing, value, gu
         
         return relationship_request, user
     
-    abort('Could not match anyone.')
+    return
 
 
 async def autocomplete_relationship_request_source_user_name(event, value):
@@ -182,7 +180,7 @@ async def autocomplete_relationship_request_target_user_name(event, value):
     return await get_relationship_request_user_names_like_at(event.user_id, True, value, event.guild_id)
 
 
-async def get_relationship_request(source_user_id, target_user_id):
+async def get_relationship_request_between(source_user_id, target_user_id):
     """
     gets a relationship request for the given user identifier combination.
     
@@ -196,15 +194,42 @@ async def get_relationship_request(source_user_id, target_user_id):
     target_user_id : `int`
         The target user's identifier.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    relationship_proposal : ``None | RelationshipRequest``
     """
     relationship_proposal_listing = await get_relationship_request_listing(source_user_id, True)
     
-    if relationship_proposal_listing is not None:
+    if (relationship_proposal_listing is not None):
         for relationship_proposal in relationship_proposal_listing:
             if relationship_proposal.target_user_id == target_user_id:
                 return relationship_proposal
+
+
+async def get_relationship_request_from(user_id, outgoing, entry_id):
+    """
+    gets a relationship request for the given user identifier combination.
     
-    abort('Could not match anyone.')
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    user_id : `int`
+        The user's identifier who is requesting.
+    
+    outgoing : `bool`
+        Whether to auto complete the outgoing users.
+    
+    entry_id : `int`
+        The entry's identifier to get.
+    
+    Returns
+    -------
+    relationship_proposal : ``None | RelationshipRequest``
+    """
+    relationship_proposal_listing = await get_relationship_request_listing(user_id, outgoing)
+    
+    if (relationship_proposal_listing is not None):
+        for relationship_proposal in relationship_proposal_listing:
+            if relationship_proposal.entry_id == entry_id:
+                return relationship_proposal

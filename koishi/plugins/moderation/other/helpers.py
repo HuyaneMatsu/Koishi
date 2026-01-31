@@ -157,6 +157,7 @@ def build_action_completed_embed(user, guild_id, embed_builder, word_config, not
     """
     embed = embed_builder(
         user,
+        guild_id,
         'Hecatia yeah!',
         f'**{user.name_at(guild_id)}** has been {word_config.to_be}.',
         *position_parameters,
@@ -198,6 +199,7 @@ def build_action_failed_embed(user, guild_id, embed_builder, word_config, note, 
     """
     embed = embed_builder(
         user,
+        guild_id,
         'Oh snap..',
         f'Failed to {word_config.name!s} **{user.name_at(guild_id)}**.',
         *position_parameters,

@@ -184,7 +184,7 @@ async def query_save_user_stats_loop(user_stats):
     try:
         async with DB_ENGINE.connect() as connector:
             entry_id = user_stats.entry_id
-            # Entry new that is all
+            # If the entry is new, insert it.
             if (entry_id == 0):
                 user_stats.modified_fields = None
                 response = await connector.execute(

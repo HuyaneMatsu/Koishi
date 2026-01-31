@@ -37,7 +37,7 @@ async def rules(client, event):
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RULES_SELECT)
-async def handle_rules_select(event):
+async def handle_rules_select(event, *, selected_value):
     """
     Handles a rules select event.
     
@@ -48,6 +48,9 @@ async def handle_rules_select(event):
     event : ``InteractionEvent``
         The received interaction event.
     
+    selected_value : `str` (Keyword only)
+        The selected value by the user.
+    
     Returns
     -------
     response : ``None | InteractionResponse``
@@ -55,11 +58,10 @@ async def handle_rules_select(event):
     if event.message.interaction.user_id != event.user_id:
         return
     
-    select_value = event.value
-    if (select_value is None) or (not select_value.isdecimal()):
+    if (selected_value is None) or (not selected_value.isdecimal()):
         return
     
-    chapter_id = int(select_value)
+    chapter_id = int(selected_value)
     if chapter_id:
         chapter = CHAPTERS.get(chapter_id, None)
     else:

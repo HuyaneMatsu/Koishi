@@ -13,6 +13,7 @@ def _iter_options():
     
     yield (
         user,
+        0,
         'hey mister',
         'great success',
         'because i said so',
@@ -56,7 +57,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_mute_embed(user, title, description, reason, notify_user, duration_string, nazrin_mode):
+def test__build_mute_embed(user, guild_id, title, description, reason, notify_user, duration_string, nazrin_mode):
     """
     Tests whether ``build_mute_embed`` works as intended.
     
@@ -64,16 +65,25 @@ def test__build_mute_embed(user, title, description, reason, notify_user, durati
     ----------
     user : ``ClientUserBase``
         The user in context.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
     title : `str`
         Embed title.
+    
     description : `str`
         Embed description.
-    reason : `None`, `str`
+    
+    reason : `None | str`
         Action reason.
+    
     notify_user : `bool`
         Whether the user should be notified.
+    
     duration_string : `str`
         The duration in string.
+    
     nazrin_mode : `bool`
         Whether nazrin mode should be applied on the embed.
     
@@ -81,6 +91,6 @@ def test__build_mute_embed(user, title, description, reason, notify_user, durati
     -------
     output : ``Embed``
     """
-    output = build_mute_embed(user, title, description, reason, notify_user, duration_string, nazrin_mode)
+    output = build_mute_embed(user, guild_id, title, description, reason, notify_user, duration_string, nazrin_mode)
     vampytest.assert_instance(output, Embed)
     return output

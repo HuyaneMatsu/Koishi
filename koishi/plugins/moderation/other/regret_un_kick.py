@@ -12,7 +12,7 @@ from .helpers import (
 from .regret_helpers import can_regret, check_regret_cooldown, check_regret_permissions, get_regret_invite_url
 
 
-def build_regret_kick_embed(user, title, description, reason):
+def build_regret_un_kick_embed(user, guild_id, title, description, reason):
     """
     Build a kick embed.
     
@@ -20,10 +20,16 @@ def build_regret_kick_embed(user, title, description, reason):
     ----------
     user : ``ClientUserBase``
         The user in context.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
     title : `str`
         Embed title.
+    
     description : `str`
         Embed description.
+    
     reason : `None`, `str`
         Action reason.
     
@@ -31,7 +37,7 @@ def build_regret_kick_embed(user, title, description, reason):
     -------
     embed : ``Embed``
     """
-    embed = Embed(title, description).add_thumbnail(user.avatar_url)
+    embed = Embed(title, description).add_thumbnail(user.avatar_url_at(guild_id))
     add_reason_field(embed, reason)
     return embed
 
@@ -89,7 +95,7 @@ async def regret_un_kick_command(
         return
     
     component_interaction = await confirm_action(
-        client, event, guild, user, build_regret_kick_embed, WORD_CONFIG__REGRET_UN_KICK, reason
+        client, event, guild, user, build_regret_un_kick_embed, WORD_CONFIG__REGRET_UN_KICK, reason
     )
     if (component_interaction is None):
         return
@@ -107,6 +113,6 @@ async def regret_un_kick_command(
         allowed_mentions = None,
         components = None,
         embed = build_action_completed_embed(
-            user, guild.id, build_regret_kick_embed, WORD_CONFIG__REGRET_UN_KICK, notify_note, reason
+            user, guild.id, build_regret_un_kick_embed, WORD_CONFIG__REGRET_UN_KICK, notify_note, reason
         ),
     )

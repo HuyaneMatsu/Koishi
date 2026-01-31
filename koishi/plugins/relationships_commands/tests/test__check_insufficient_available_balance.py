@@ -1,20 +1,37 @@
 import vampytest
-from hata.ext.slash import InteractionAbortedError
+from hata import Component, create_text_display
+
+from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ..checks import check_insufficient_available_balance
 
 
-def _iter_options__passing():
-    yield 200, 199
-    yield 200, 200
+def _iter_options():
+    yield (
+        200,
+        199,
+        None,
+    )
+    
+    yield (
+        200,
+        200,
+        None,
+    )
+    
+    yield (
+        200,
+        201,
+        [
+            create_text_display(
+                f'You have {200} available {EMOJI__HEART_CURRENCY} '
+                f'which is lower than {201} {EMOJI__HEART_CURRENCY}.'
+            ),
+        ],
+    )
 
 
-def _iter_options__failing():
-    yield 200, 201
-
-
-@vampytest._(vampytest.call_from(_iter_options__passing()))
-@vampytest._(vampytest.call_from(_iter_options__failing()).raising(InteractionAbortedError))
+@vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__check_insufficient_available_balance(available_balance, investment):
     """
     Tests whether ``check_insufficient_available_balance`` works as intended.
@@ -27,8 +44,15 @@ def test__check_insufficient_available_balance(available_balance, investment):
     investment : `int`
         Investment to propose with.
     
-    Raises
-    ------
-    InteractionAbortedError
+    Returns
+    -------
+    output : ``None | list<Component>``
     """
-    check_insufficient_available_balance(available_balance, investment)
+    output = check_insufficient_available_balance(available_balance, investment)
+    vampytest.assert_instance(output, list, nullable = True)
+    
+    if (output is not None):
+        for element in output:
+            vampytest.assert_instance(element, Component)
+    
+    return output

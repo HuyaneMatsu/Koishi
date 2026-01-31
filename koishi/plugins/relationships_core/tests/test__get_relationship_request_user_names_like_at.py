@@ -197,7 +197,7 @@ async def test__get_relationship_request_user_names_like_at(
         The user's identifier who is requesting.
     
     outgoing : `bool`
-        Whether to render the outgoing embed.
+        Whether redirect to outgoing requests.
     
     value : `None | str`
         The value to auto complete.

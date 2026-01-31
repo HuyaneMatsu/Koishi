@@ -12,10 +12,7 @@ class WelcomeStyle(RichAttributeErrorBaseType):
     client_id : `int`
         Client identifier to associate with the welcome style.
     
-    image_creator : `str`
-        Who created the images.
-    
-    images : `tuple<str>`
+    images : ``tuple<WelcomeImage>``
         Images used when welcoming.
     
     message_content_builders : `tuple<FunctionType>`
@@ -24,13 +21,13 @@ class WelcomeStyle(RichAttributeErrorBaseType):
     name : `str`
         The welcome style's name.
     
-    reply_styles : `tuple<WelcomeStyleReply>`
+    reply_styles : ``tuple<WelcomeStyleReply>``
         Reply styles.
     """
-    __slots__ = ('client_id', 'image_creator', 'images', 'message_content_builders', 'name', 'reply_styles')
+    __slots__ = ('client_id', 'images', 'message_content_builders', 'name', 'reply_styles')
     
     
-    def __new__(cls, name, client_id, message_content_builders, images, image_creator, reply_styles):
+    def __new__(cls, name, client_id, message_content_builders, images, reply_styles):
         """
         Creates a new welcome style instance.
         
@@ -45,19 +42,15 @@ class WelcomeStyle(RichAttributeErrorBaseType):
         message_content_builders : `tuple<FunctionType>`
             Content builders for the messages.
         
-        images : `tuple<str>`
+        images : ``tuple<WelcomeImage>``
             Images used when welcoming.
         
-        image_creator : `str`
-            Who created the images.
-        
-        reply_styles : `tuple<FunctionType>`
+        reply_styles : ``tuple<FunctionType>``
             Content builders for the reply messages.
         """
         self = object.__new__(cls)
         self.client_id = client_id
         self.images = images
-        self.image_creator = image_creator
         self.message_content_builders = message_content_builders
         self.name = name
         self.reply_styles = reply_styles

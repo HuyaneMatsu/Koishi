@@ -15,7 +15,7 @@ from .helpers import (
 CUSTOM_ID_SELF_BAN = 'mod.self.form.ban'
 
 
-def build_ban_embed(user, title, description, reason):
+def build_ban_embed(user, guild_id, title, description, reason):
     """
     Build a self-ban embed.
     
@@ -23,18 +23,24 @@ def build_ban_embed(user, title, description, reason):
     ----------
     user : ``ClientUserBase``
         The user in context.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
     title : `str`
         Embed title.
+    
     description : `str`
         Embed description.
-    reason : `None`, `str`
+    
+    reason : `None | str`
         Action reason.
     
     Returns
     -------
     embed : ``Embed``
     """
-    embed = Embed(title, description).add_thumbnail(user.avatar_url)
+    embed = Embed(title, description).add_thumbnail(user.avatar_url_at(guild_id))
     add_reason_field(embed, reason)
     return embed
 

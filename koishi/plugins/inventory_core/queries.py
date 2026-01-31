@@ -24,7 +24,7 @@ def _inventory_query_done_callback(key, waiters, task):
     key : `int`
         The user's identifier used as a key.
     
-    waiters : `list<Future>`
+    waiters : ``list<Future>``
         Result waiters.
     
     task : ``Future``
@@ -103,7 +103,7 @@ def _inventory_save_done_callback(key, waiters, task):
     key : `int`
         The user's identifier used as a key.
     
-    waiters : `list<Future>`
+    waiters : ``list<Future>``
         Result waiters.
     
     task : ``Future``

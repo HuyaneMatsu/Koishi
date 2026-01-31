@@ -4,7 +4,8 @@ from ...item_core import (
     ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT,
     ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC,
     ITEM_ID_KITCHEN_KNIFE, ITEM_ID_PEACH, ITEM_ID_PLUSHIE_BEAR, ITEM_ID_POKING_KNIFE, ITEM_ID_RIBBON_BOW, ITEM_ID_RULER,
-    ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT
+    ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_BROOM, ITEM_ID_HAND_FAN,
+    ITEM_ID_PARASOL, ITEM_ID_GOTHIC_ATTIRE, ITEM_ID_HIKING_SET, ITEM_ID_KIMONO
 )
 
 from ..constants import ACTIONS
@@ -147,6 +148,7 @@ ACTIONS[ACTION_ID_RUINS_FORAGING_STRAWBERRY] = Action(
         OptionLoot(False, 1, 40, True, 1, 4, ITEM_ID_BISHOPHAT, 100, 300, 1, 5),
         OptionLoot(True, 1, 1800, False, 1, 1, ITEM_ID_RIBBON_BOW, 300, 0, 1, 0),
         OptionLoot(True, 1, 2700, False, 1, 1, ITEM_ID_PLUSHIE_BEAR, 300, 0, 1, 0),
+        OptionLoot(True, 1, 3600, False, 1, 1, ITEM_ID_GOTHIC_ATTIRE, 300, 0, 1, 0),
     ),
 )
 
@@ -172,6 +174,8 @@ ACTIONS[ACTION_ID_EIENTEI_MANSION_GARDENING_CARROT] = Action(
     (
         OptionLoot(False, 1, 1, True, 10, 15, ITEM_ID_CARROT, 0, 90, 15, 2),
         OptionLoot(True, 1, 230, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
+        # Since nobody comes here, set Kimono chance to high. Normally would have set it to 1 in 3000.
+        OptionLoot(True, 1, 1000, False, 1, 1, ITEM_ID_KIMONO, 300, 0, 1, 0),
     ),
 )
 
@@ -229,6 +233,7 @@ ACTIONS[ACTION_ID_MORIYA_SHRINE_FORAGING_BLUEBERRY] = Action(
         OptionLoot(False, 3, 4, True, 4, 20, ITEM_ID_BLUEBERRY, 600, 15, 1, 1),
         OptionLoot(True, 1, 1200, False, 1, 1, ITEM_ID_KITCHEN_KNIFE, 300, 0, 1, 0),
         OptionLoot(True, 1, 1200, False, 1, 1, ITEM_ID_POKING_KNIFE, 300, 0, 1, 0),
+        OptionLoot(True, 1, 2000, False, 1, 1, ITEM_ID_BROOM, 300, 0, 1, 0),
     ),
 )
 
@@ -243,6 +248,8 @@ ACTIONS[ACTION_ID_HAKUGYOKUROU_MANSION_GARDENING_PEACH] = Action(
     (
         OptionLoot(False, 1, 2, True, 8, 22, ITEM_ID_PEACH, 200, 40, 6, 1),
         OptionLoot(False, 1, 200, True, 20, 34, ITEM_ID_PEACH, 0, 20, 0, 1),
+        OptionLoot(True, 1, 800, False, 1, 1, ITEM_ID_HAND_FAN, 300, 0, 1, 0),
+        OptionLoot(True, 1, 2400, False, 1, 1, ITEM_ID_PARASOL, 300, 0, 1, 0),
     ),
 )
 
@@ -258,6 +265,7 @@ ACTIONS[ACTION_ID_MISTY_LAKE_FORAGING] = Action(
         OptionLoot(False, 3, 5, True, 1, 4, ITEM_ID_FROG, 60, 300, 1, 2),
         OptionLoot(False, 2, 5, True, 1, 4, ITEM_ID_ANGELROOT, 100, 200, 2, 3),
         OptionLoot(True, 1, 200, False, 1, 1, ITEM_ID_FISHING_ROD, 300, 10, 1, 0),
+        OptionLoot(True, 1, 1600, False, 1, 1, ITEM_ID_HIKING_SET, 300, 10, 1, 0),
     ),
 )
 

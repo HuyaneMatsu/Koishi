@@ -4,28 +4,25 @@ from hata import BUILTIN_EMOJIS
 
 from ..item_modifier_core import (
     MODIFIER_ID__BUTCHERING, MODIFIER_ID__ENERGY, MODIFIER_ID__FISHING, MODIFIER_ID__FORAGING, MODIFIER_ID__GARDENING,
-    MODIFIER_ID__HEALTH, MODIFIER_ID__HUNTING,
-    MODIFIER_ID__INVENTORY, MODIFIER_ID__MOVEMENT, MODIFIER_ID__STAT_BEDROOM, MODIFIER_ID__STAT_CHARM,
-    MODIFIER_ID__STAT_CUTENESS, MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT,
-    MODIFIER_KIND__PERCENT, Modifier, construct_modifier_type
+    MODIFIER_ID__HEALTH, MODIFIER_ID__HUNTING, MODIFIER_ID__INVENTORY, MODIFIER_ID__MOVEMENT, MODIFIER_ID__STAT_BEDROOM,
+    MODIFIER_ID__STAT_CHARM, MODIFIER_ID__STAT_CUTENESS, MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_ID__STAT_LOYALTY,
+    MODIFIER_KIND__FLAT, MODIFIER_KIND__PERCENT, Modifier, construct_modifier_type
 )
 
 from .constants import ITEMS
 from .flags import ITEM_FLAG_COSTUME, ITEM_FLAG_EDIBLE, ITEM_FLAG_HEAD, ITEM_FLAG_NPC, ITEM_FLAG_WEAPON
 from .item import Item
 from .item_ids import (
-    ITEM_ID_ACHING_AFFECTION_S_HEART_PIERCER, ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT,
-    ITEM_ID_HELL_CAT_S_BIG_BRAIDS, ITEM_ID_BISHOPHAT,
-    ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH,
-    ITEM_ID_BUNNY_SUIT,
-    ITEM_ID_CARROT, ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRESS, ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS,
-    ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DEVILCART_OYSTER,
-    ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT, ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT, ITEM_ID_FISHING_ROD,
-    ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_KINGS_NEW_CLOTHES, ITEM_ID_KITCHEN_KNIFE,
-    ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_MAID_DRESS, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_ORIN, ITEM_ID_PEACH,
-    ITEM_ID_RIBBON_BOW, ITEM_ID_RULER,
-    ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAW_HAT, ITEM_ID_STRAWBERRY,
-    ITEM_ID_PLUSHIE_BEAR, ITEM_ID_POKING_KNIFE, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_TEWI,
+    ITEM_ID_ACHING_AFFECTION_S_HEART_PIERCER, ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT,
+    ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_BROOM, ITEM_ID_BUNNY_SUIT, ITEM_ID_CARROT,
+    ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS, ITEM_ID_CHIRUNO, ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRESS, ITEM_ID_DAI,
+    ITEM_ID_DEVILCART_OYSTER, ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT, ITEM_ID_FISHING_ROD,
+    ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_GOTHIC_ATTIRE, ITEM_ID_HAND_FAN,
+    ITEM_ID_HELL_CAT_S_BIG_BRAIDS, ITEM_ID_HIKING_SET, ITEM_ID_JUNKO, ITEM_ID_KIMONO, ITEM_ID_KINGS_NEW_CLOTHES,
+    ITEM_ID_KITCHEN_KNIFE, ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_MAID_DRESS, ITEM_ID_MARISA, ITEM_ID_MYSTIA,
+    ITEM_ID_NINA, ITEM_ID_ORIN, ITEM_ID_PARASOL, ITEM_ID_PEACH, ITEM_ID_PLUSHIE_BEAR, ITEM_ID_POKING_KNIFE,
+    ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT, ITEM_ID_RIBBON_BOW, ITEM_ID_RULER, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION,
+    ITEM_ID_SCISSORS, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_TEWI, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING,
     ITEM_ID_YUKARI, ITEM_ID_YUUKA
 )
 
@@ -317,15 +314,15 @@ ITEM_FROG = ITEMS[ITEM_ID_FROG] = Item(
     'Frog',
     BUILTIN_EMOJIS['frog'],
     (
-        'Tailless amphibians with flattened body, protruding eyes and with weak front, but long muscular back legs '
+        'Tailless amphibians with flattened bodies, protruding eyes, with weak front, but long muscular back legs '
         'specialized in jumping. '
-        'They have a carnivorous diet which mainly consist of insects. '
-        'They look defenseless, but they are admissible in camouflage, and can flee dexterously by leaping with their '
+        'They have a carnivorous diet which mainly consists of insects. '
+        'They look defenseless, but they are adept in camouflage, and can flee dexterously by leaping with their '
         'strong back legs. '
-        'The skin of many frogs contains mild toxin, the ones with more potent ones usually advertise it with bright '
-        'colours. '
+        'The skin of many frogs contains mild toxins, the species with more potent ones usually advertise it with '
+        'bright colours. '
         'Frogs usually spawn their eggs in water bodies. These eggs hatch into fully aquatic tadpoles which have '
-        'tails and internal grills.'
+        'tails and internal gills. '
         'Their life cycle is completed when they metamorphose into their semiaquatic adult form.\n'
         '\n'
         'They can be most commonly found around wetlands, like the **Misty Lake**.'
@@ -861,5 +858,159 @@ ITEM_ACHING_AFFECTION_S_HEART_PIERCER = ITEMS[ITEM_ID_ACHING_AFFECTION_S_HEART_P
         Modifier(construct_modifier_type(MODIFIER_ID__BUTCHERING, MODIFIER_KIND__FLAT), 2),
         Modifier(construct_modifier_type(MODIFIER_ID__BUTCHERING, MODIFIER_KIND__PERCENT), +15),
         Modifier(construct_modifier_type(MODIFIER_ID__HUNTING, MODIFIER_KIND__PERCENT), +10),
+    ),
+)
+
+
+ITEM_NINA = ITEMS[ITEM_ID_NINA] = Item(
+    ITEM_ID_NINA,
+    'Nina',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_BROOM = ITEMS[ITEM_ID_BROOM] = Item(
+    ITEM_ID_BROOM,
+    'Broom',
+    BUILTIN_EMOJIS['broom'],
+    (
+        'A popular housekeeping cleaning tool. Its common form a bundle which is attached to a long shaft. '
+        'The bundle is usually made out from sorghum, perhaps twigs, from plastic bristles, or feathers.\n'
+        'Dust or trash is collected with its help; typically used with a dustpan. '
+        'For different cleaning jobs, different brooms are optimal.'
+    ),
+    ITEM_FLAG_WEAPON,
+    900, # value (hearts)
+    1428, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +5),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +4),
+    ),
+)
+
+
+ITEM_HAND_FAN = ITEMS[ITEM_ID_HAND_FAN] = Item(
+    ITEM_ID_HAND_FAN,
+    'Hand fan',
+    BUILTIN_EMOJIS['folding_hand_fan'],
+    (
+        'A popular tool since the ancient times, which can be fanned to produce airflow. '
+        'The tool is broad with a flat surface, usually made out of thin materials like skin, feathers, paper or wood. '
+        'General purpose fans are usually folding, and have the shape of a circle segment when opened.\n'
+        'The generated airflow can be used for cooling, to rouse fire, to chase flies and other bugs away, '
+        'or simply as a protective tool from the sun rays.'
+    ),
+    ITEM_FLAG_WEAPON,
+    1000, # value (hearts)
+    136, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +3),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +4),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__HUNTING, MODIFIER_KIND__PERCENT), +20),
+    ),
+)
+
+
+ITEM_PARASOL = ITEMS[ITEM_ID_PARASOL] = Item(
+    ITEM_ID_PARASOL,
+    'Parasol',
+    BUILTIN_EMOJIS['closed_umbrella'],
+    (
+        'A shading tool used to keep the sun rays (either the light and/or the heat) away. '
+        'It can be used to protect not only people, but also buildings, areas and vehicles as well.\n'
+        'Its main parts being: the shaft, which is made out of bamboo, wood, or from metal nowadays; canopy, '
+        'which is made out of linen, cotton or silk; ribs, that were made out from fish bones, although nowadays '
+        'they are made out of really thin steel beams; stretchers which are also made out of thin steel beams, '
+        'they connect the ribs with either the shaft or the runner which can be slid on the shaft to open or '
+        'close the canopy.'
+    ),
+    ITEM_FLAG_WEAPON,
+    1200, # value (hearts)
+    1800, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +3),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +4),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__PERCENT), +20),
+    ),
+)
+
+
+ITEM_GOTHIC_ATTIRE = ITEMS[ITEM_ID_GOTHIC_ATTIRE] = Item(
+    ITEM_ID_GOTHIC_ATTIRE,
+    'Gothic attire',
+    BUILTIN_EMOJIS['womans_clothes'],
+    (
+        'The outfit consists of a dress and vest with a frilled shirt underneath, '
+        'ruffle socks and red sandals as well as a mob cap. '
+    ),
+    ITEM_FLAG_COSTUME,
+    12000, # value (hearts)
+    3840, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +8),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +5),
+    ),
+)
+
+
+
+ITEM_HIKING_SET = ITEMS[ITEM_ID_HIKING_SET] = Item(
+    ITEM_ID_HIKING_SET,
+    'Hiking set',
+    BUILTIN_EMOJIS['school_satchel'],
+    (
+        'Long stretch pants and a long sleeved t-shirt that provides excellent protection against vegetation and bugs '
+        'while letting the body breath. Boots which hold the feet securely in place, keeping the user\'s heels '
+        'planted. A backpack that can hold everything for the trip and a little more.\n'
+        'For colder days, a jacket and a beanie is also worn.'
+    ),
+    ITEM_FLAG_COSTUME,
+    7300, # value (hearts)
+    2300, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +2),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__INVENTORY, MODIFIER_KIND__FLAT), +10000),
+        Modifier(construct_modifier_type(MODIFIER_ID__HEALTH, MODIFIER_KIND__PERCENT), +6),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__FORAGING, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__HUNTING, MODIFIER_KIND__FLAT), +2),
+    ),
+)
+
+
+ITEM_KIMONO = ITEMS[ITEM_ID_KIMONO] = Item(
+    ITEM_ID_KIMONO,
+    'Kimono',
+    BUILTIN_EMOJIS['kimono'],
+    (
+        'The kimono\'s original meaning was wearable clothes, later on, it would become limited to only a few pieces.\n'
+        'It\'s tailored to a T shape. Unlike most clothes, it doesn\'t follow the body\'s shape in '
+        'favour of an angular appearance when worn.\n'
+        'Traditionally, the left end of the kimono is folded over the right one.'
+    ),
+    ITEM_FLAG_COSTUME,
+    1800, # value (hearts)
+    1400, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +3),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +2),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__PERCENT), +20),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +2),
     ),
 )

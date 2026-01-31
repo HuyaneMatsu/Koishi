@@ -333,7 +333,7 @@ async def handle_inbox_view(
     now = DateTime.now(TimeZone.utc)
     
     market_place_item_listing, has_more = await get_market_place_item_listing_inbox(
-        interaction_event.user_id, now, 0, page_size
+        interaction_event.user_id, now, page_index, page_size
     )
     
     await client.interaction_response_message_edit(

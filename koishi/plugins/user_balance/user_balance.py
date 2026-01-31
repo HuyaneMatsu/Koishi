@@ -379,7 +379,7 @@ class UserBalance(RichAttributeErrorBaseType):
             iterated_allocation_feature_id, iterated_session_id, iterated_amount = ALLOCATION_STRUCT.unpack(
                 allocations[index : end]
             )
-            allocation_data_size = get_allocation_data_size(allocation_feature_id)
+            allocation_data_size = get_allocation_data_size(iterated_allocation_feature_id)
             if (allocation_feature_id == iterated_allocation_feature_id) and (session_id == iterated_session_id):
                 break
             
