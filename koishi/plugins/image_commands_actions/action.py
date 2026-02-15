@@ -649,13 +649,14 @@ def create_action_command_function(action):
             )
         
         # Reverse the users when there are no target.
-        if (not targets) and (not client_in_users):
+        do_self_target = should_self_target(action, targets, user_in_users)
+        
+        if do_self_target or client_in_users or targets:
+            source_user = interaction_event.user
+        else:
             source_user = client
             targets.add(interaction_event.user)
-        else:
-            source_user = interaction_event.user
         
-        do_self_target = should_self_target(action, targets, user_in_users)
         content = build_header(action, client, source_user, targets, client_in_users, do_self_target)
         image_detail = await get_response_image_detail(
             client,
@@ -692,7 +693,7 @@ def should_self_target(action, targets, user_in_users):
     """
     return (
         user_in_users and
-        (len(targets) <= 1) and
+        (not targets) and
         (action.handler_self is not None)
     )
 
