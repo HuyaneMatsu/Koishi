@@ -5,7 +5,9 @@ from random import random
 from time import perf_counter
 
 from hata import (
-    CHANNELS, Client, ClientWrapper, DiscordException, ERROR_CODES, Embed, GUILDS, IntentFlag, KOKORO, Locale,
+    CHANNELS, CheckboxGroupOption, Client, ClientWrapper, DiscordException, ERROR_CODES, Embed, GUILDS, IntentFlag,
+    InteractionForm, KOKORO, Locale, RadioGroupOption, create_checkbox, create_checkbox_group, create_label,
+    create_radio_group
 )
 from hata.ext.commands_v2 import checks
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
@@ -607,3 +609,56 @@ async def user_install():
 )
 async def bot_private():
     return 'mister'
+
+
+@Marisa.interactions(guild = GUILD__SUPPORT)
+async def test_checkbox_and_radio_groups():
+    """
+    Returns a form with a radio group, a checkbox group and a checkbox component.
+    """
+    return InteractionForm(
+        'Please submit things',
+        [
+            create_label(
+                'Radio group',
+                None,
+                create_radio_group(
+                    [
+                        RadioGroupOption('flandre'),
+                        RadioGroupOption('remilia'),
+                        RadioGroupOption('both', default = True),
+                    ],
+                    custom_id = 'radio_group',
+                ),
+            ),
+            create_label(
+                'Checkbox group',
+                None,
+                create_checkbox_group(
+                    [
+                        CheckboxGroupOption('flandre', default = True),
+                        CheckboxGroupOption('remilia', default = True),
+                    ],
+                    custom_id = 'checkbox_group',
+                ),
+            ),
+            create_label(
+                'Checkbox',
+                'both',
+                create_checkbox(
+                    custom_id = 'checkbox',
+                    default = True,
+                ),
+            ),
+        ],
+        custom_id = 'test_components_20_21_22',
+    )
+
+
+@Marisa.interactions(custom_id = 'test_components_20_21_22', target = 'form')
+async def test_checkbox_and_radio_groups_handle_form_submit(*, radio_group, checkbox_group, checkbox):
+    return (
+        f'Radio group : {radio_group!r}\n'
+        f'Checkbox group : {checkbox_group!r}\n'
+        f'Checkbox : {checkbox!r}'
+    )

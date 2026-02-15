@@ -1,7 +1,7 @@
 import vampytest
-from hata import Color, Embed, Guild, GuildProfile, Role, User
+from hata import Color, Embed, GuildProfile, Role, User
 
-from ...image_handling_core import ImageDetailStatic, ImageHandlerStatic
+from ...image_handling_core import ImageDetailStatic
 
 from ..action import create_response_embed
 
@@ -83,8 +83,7 @@ def test__create_response_embed(client, guild_id, source_user, targets, client_i
         Target entities.
     client_in_users : `bool`
         Whether the client is in the mentioned users.
-    allowed_mentions : `list<ClientUserBase>`
-        The allowed mentions.
+    
     extra : `list<object>`
         Additional objects to keep in the cache.
     

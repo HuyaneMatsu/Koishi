@@ -53,13 +53,22 @@ __all__ = (
 # - 3.22.00
 # - 3.23.00
 
-# 2024-07-04
+# 2025-07-04
 # - 3.24.00 - Extracurricular Crisis
 # - 3.24.01 - Clash of Cakes
+# - 3.24.02 - Poyo & Chuu character pack
+# - 3.24.03 - Beware Pigformation
+# - 3.25.00 - Segmentation fault (core dumped) | Haruka & Kanata character pack | Fool's Gambit
+# - 3.25.01 - Shroom Zoom
 
-# 3.24.02 - Poyo & Chuu character pack
-# 3.24.03 - Beware Pigformation
-# 3.25.00 - Segmentation fault (core dumped) | Haruka & Kanata character pack | Fool's Gambit
-# 3.25.01 - Shroom Zoom
+# 2026-02-14
+# - 3.26.00 - Extracurricular pack
+# - 3.26.01 - Bounty Hungers
+# - 3.27.00 - Triple Trouble
+# - 3.27.01 - Operation autumn
+# - 3.28.00 - Clubroom challengers
+# - 3.28.01 - 3 million downloads celebration + winter scramble
+# - 3.28.02 - (empty)
 
-# https://orangejuice.wiki/wiki/Version_3.24.2
+
+# https://orangejuice.wiki/wiki/Version_3.28.2

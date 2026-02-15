@@ -6,14 +6,15 @@ from hata.ext.slash import P, abort
 from ...bots import FEATURE_CLIENTS
 
 from .action import (
-    COOLDOWN_HANDLER, create_action_command_function, create_response_embed, get_allowed_users, produce_header,
-    send_action_response
+    COOLDOWN_HANDLER, create_action_command_function, create_response_embed, get_allowed_users,
+    send_action_response, build_header
 )
 from .action_filtering import (
     PARAMETER_NAME_ACTION_TAG, PARAMETER_NAME_NAME, PARAMETER_NAME_SOURCE, PARAMETER_NAME_TARGET,
     get_action_tag_suggestions, get_name_suggestions, get_source_character_suggestions,
     get_target_character_suggestions, get_action_and_image_detail
 )
+
 from .actions import ACTIONS
 
 
@@ -41,7 +42,7 @@ del action
 )
 async def wild_card_action(
     client,
-    event,
+    interaction_event,
     action_tag_name : P(str, 'Select action tag', PARAMETER_NAME_ACTION_TAG) = None,
     source_character_name : P(str, 'Source character name.', PARAMETER_NAME_SOURCE) = None,
     target_character_name : P(str, 'Target character name.', PARAMETER_NAME_TARGET) = None,
@@ -66,33 +67,39 @@ async def wild_card_action(
     ----------
     client : ``Client``
         The client who received the event.
-    event : ``InteractionEvent``
+    
+    interaction_event : ``InteractionEvent``
         The received interaction event.
+    
     action_tag_name : `None | str` = `None`, Optional
         Selected action tag name.
+    
     source_character_name : `None | str` = `None`, Optional
         Name of the source character.
+    
     target_character_name : `None | str` = `None`, Optional
         Name of the target character.
+    
     image_name : `None | str` = `None`, Optional
         The name of the image.
+    
     user_{n} : ``None | ClientUserBase`` = `None`, Optional
         Additional users to target.
     """
     targets, client_in_users, user_in_users, allowed_mentions = get_allowed_users(
         client,
-        event.user,
+        interaction_event.user,
         (
             target_00, target_01, target_02, target_03, target_04, target_05, target_06, target_07, target_08,
             target_09,
         ),
     )
     
-    expire_after = COOLDOWN_HANDLER.get_cooldown(event, len(targets))
+    expire_after = COOLDOWN_HANDLER.get_cooldown(interaction_event, len(targets))
     if expire_after > 0.0:
         abort(
-            f'{client.name_at(event.guild_id)} got bored of enacting your {event.application_command_name} try again '
-            f'in {expire_after:.2f} seconds.'
+            f'{client.name_at(interaction_event.guild_id)} got bored of enacting your '
+            f'{interaction_event.application_command_name} try again in {expire_after:.2f} seconds.'
         )
     action, image_detail = get_action_and_image_detail(
         action_tag_name, source_character_name, target_character_name, image_name
@@ -106,16 +113,17 @@ async def wild_card_action(
     # Reverse the users when there are no target.
     if (not targets) and (not client_in_users):
         source_user = client
-        targets = {event.user}
+        targets.add(interaction_event.user)
     else:
-        source_user = event.user
+        source_user = interaction_event.user
     
-    content = ''.join([*produce_header(
-        client, action.starter_text, action.verb, source_user, [*targets], client_in_users
-    )])
-    embed = create_response_embed(client, event.guild_id, event.user, targets, client_in_users, image_detail)
+    content = build_header(action, client, source_user, targets, client_in_users, False)
     
-    await send_action_response(client, event, content, embed, allowed_mentions)
+    embed = create_response_embed(
+        client, interaction_event.guild_id, interaction_event.user, targets, client_in_users, image_detail
+    )
+    
+    await send_action_response(client, interaction_event, content, embed, allowed_mentions)
 
 
 @wild_card_action.autocomplete('action_tag_name')

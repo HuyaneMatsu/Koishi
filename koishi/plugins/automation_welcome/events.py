@@ -90,7 +90,7 @@ async def welcome_user(client, guild, user, welcome_style, welcome_channel, welc
             welcome_channel,
             components = welcome_reply_buttons,
             content = f'> {message_content}',
-            embed = Embed(color = color).add_image(image).add_footer(f'By {welcome_style.image_creator}.'),
+            embed = Embed(color = color).add_image(image.url).add_footer(f'By {image.creator}.'),
             silent = True,
         )
     except DiscordException as exception:

@@ -1,37 +1,37 @@
-__all__ = ('AutoCancellationCondition',)
+__all__ = ('AutoCancellationConditionFunctional',)
 
 from scarletio import RichAttributeErrorBaseType
 
 
-class AutoCancellationCondition(RichAttributeErrorBaseType):
+class AutoCancellationConditionFunctional(RichAttributeErrorBaseType):
     """
-    A condition of an auto cancellation rule.
+    A functional condition of an auto cancellation rule.
     
     Attributes
     ----------
-    condition : `int`
-        The condition's identifier.
+    function : `(object) : bool`
+        Function to execute.
     
-    threshold : `int`
-        Threshold value.
+    name : `str`
+        The name of the condition.
     """
-    __slots__ = ('condition', 'threshold')
+    __slots__ = ('function', 'name')
     
-    def __new__(cls, condition, threshold):
+    def __new__(cls, name, function):
         """
         Creates a new condition.
         
         Parameters
         ----------
-        condition : `int`
-            Condition identifier.
+        name : `str`
+            The name of the condition.
         
-        threshold : `int`
-            Threshold value.
+        function : `(object) : bool`
+            Function to execute.
         """
         self = object.__new__(cls)
-        self.condition = condition
-        self.threshold = threshold
+        self.function = function
+        self.name = name
         return self
     
     
@@ -40,12 +40,12 @@ class AutoCancellationCondition(RichAttributeErrorBaseType):
         repr_parts = ['<', type(self).__name__]
         
         # condition
-        repr_parts.append(', condition = ')
-        repr_parts.append(repr(self.condition))
+        repr_parts.append(', name = ')
+        repr_parts.append(repr(self.name))
         
         # threshold
-        repr_parts.append(', threshold = ')
-        repr_parts.append(repr(self.threshold))
+        repr_parts.append(', function = ')
+        repr_parts.append(repr(self.function))
         
         repr_parts.append('>')
         return ''.join(repr_parts)
@@ -57,11 +57,11 @@ class AutoCancellationCondition(RichAttributeErrorBaseType):
             return NotImplemented
         
         # condition
-        if self.condition != other.condition:
+        if self.name != other.name:
             return False
         
         # threshold
-        if self.threshold != other.threshold:
+        if self.function is not other.function:
             return False
         
         return True
@@ -71,10 +71,10 @@ class AutoCancellationCondition(RichAttributeErrorBaseType):
         """Returns hash(self)."""
         hash_value = 0
         
-        # condition
-        hash_value ^= self.condition << 16
+        # name
+        hash_value ^= hash(self.name)
         
-        # threshold
-        hash_value ^= self.threshold
+        # function
+        hash_value ^= hash(self.function)
         
         return hash_value

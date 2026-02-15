@@ -219,7 +219,7 @@ def check_is_user_agent_banned():
 
 
 IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
-    # Try to explot any vulnerabilities
+    # Try to exploit any vulnerabilities
     IPFilterRule(*parse_ip('118.193.44.0'), 8), # Hongkong - UCLOUD INFORMATION TECHNOLOGY (HK) LIMITED
     IPFilterRule(*parse_ip('152.32.192.0'), 8), # Hongkong - UCLOUD INFORMATION TECHNOLOGY (HK) LIMITED
     IPFilterRule(*parse_ip('40.68.0.0'), 18), # Dublin - Microsoft Corporation
@@ -267,6 +267,8 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('103.8.25.0'), 8), # Petalingjaya - SKSA TECHNOLOGY SDN BHD
     IPFilterRule(*parse_ip('172.105.252.0'), 9), # Mumbai - Linode
     IPFilterRule(*parse_ip('176.65.148.0'), 8), # Hopel - Pfcloud UG
+    IPFilterRule(*parse_ip('139.59.224.0'), 12), # Singapore - DigitalOcean, LLC
+    IPFilterRule(*parse_ip('152.42.224.0'), 12), # Singapore - DigitalOcean, LLC
     
     
     # dataforseobot
@@ -453,6 +455,8 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('87.250.224.0'), 13), # Moscow - YANDEX LLC
     IPFilterRule(*parse_ip('5.255.192.0'), 14), # Moscow - YANDEX LLC
     IPFilterRule(*parse_ip('213.180.192.0'), 13), # Moscow - YANDEX LLC
+    IPFilterRule(*parse_ip('141.8.128.0'), 14), # Moscow - YANDEX 
+    IPFilterRule(*parse_ip('77.88.0.0'), 14), # Moscow - YANDEX LLC
     
     # Facebook
     # "meta-externalagent/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/crawler)"
@@ -535,6 +539,7 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     # semrushbot
     # "Mozilla/5.0 (compatible; SemrushBot/7~bl; +http://www.semrush.com/bot.html)"
     IPFilterRule(*parse_ip('85.208.96.0'), 10), # Leesburg - SEMrush CY LTD
+    IPFilterRule(*parse_ip('185.191.171.0'), 8), # Ashburn - SEMrush CY LTD
     
     # GigeNET
     # "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
@@ -4553,6 +4558,24 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('49.51.176.0'), 12), # United States - Tencent Building, Kejizhongyi Avenue
     IPFilterRule(*parse_ip('8.160.0.0'), 17), # China - Hangzhou Alibaba Advertising Co.,Ltd.
     IPFilterRule(*parse_ip('84.37.194.0'), 9), # United States - Datacamp Limited
+    IPFilterRule(*parse_ip('101.33.64.0'), 13), # South Korea - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('111.172.224.0'), 13), # China - Hubei Jiangxia IDC
+    IPFilterRule(*parse_ip('16.98.0.0'), 15), # United States - Charter Communications, Inc
+    IPFilterRule(*parse_ip('23.244.0.0'), 17), # United States - Breezeline
+    IPFilterRule(*parse_ip('24.16.0.0'), 19), # United States - Comcast Cable Communications, LLC
+    IPFilterRule(*parse_ip('24.243.0.0'), 16), # United States - Charter Communications Inc
+    IPFilterRule(*parse_ip('35.148.0.0'), 17), # United States - Charter Communications LLC
+    IPFilterRule(*parse_ip('38.162.48.0'), 12), # United States - Smithville Digital, LLC
+    IPFilterRule(*parse_ip('43.152.72.0'), 8), # United States - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('43.230.211.0'), 8), # Bangladesh - Md Abul Kashem t/a Spark Net
+    IPFilterRule(*parse_ip('45.48.0.0'), 18), # United States - Charter Communications Inc
+    IPFilterRule(*parse_ip('47.184.0.0'), 19), # United States - Frontier Communications of America, Inc.
+    IPFilterRule(*parse_ip('47.208.0.0'), 20), # United States - Optimum
+    IPFilterRule(*parse_ip('47.24.0.0'), 18), # United States - Charter Communications LLC
+    IPFilterRule(*parse_ip('67.160.0.0'), 21), # United States - Comcast Cable Communications, LLC
+    IPFilterRule(*parse_ip('69.248.0.0'), 19), # United States - Comcast Cable Communications, LLC
+    IPFilterRule(*parse_ip('73.0.0.0'), 24), # United States - Comcast Cable Communications, LLC
+    IPFilterRule(*parse_ip('99.112.0.0'), 20), # United States - AT&T Enterprises, LLC
 
 
 

@@ -361,11 +361,8 @@ def produce_linked_quest_short_description(linked_quest, quest_template):
         
         yield 'Completed: '
         yield str(completion_count)
-        
-        if repeat_count:
-            yield ' / '
-            yield str(repeat_count)
-        
+        yield ' / '
+        yield (str(repeat_count) if repeat_count else 'unlimited')
         yield ' times, '
         
         if (not repeat_count) or (repeat_count > completion_count):
@@ -581,21 +578,20 @@ def produce_linked_quest_detailed_description(linked_quest, quest_template, user
     
     completion_count = linked_quest.completion_count
     repeat_count = quest_template.repeat_count
-    yield 'Completed:\n- '
+    yield '**Completed:**\n- **'
     yield str(completion_count)
+    yield ' / '
+    yield (str(repeat_count) if repeat_count else 'unlimited')
+    yield '** times'
     
-    if repeat_count:
-        yield ' / '
-        yield str(repeat_count)
-    
-    yield ' times, '
-    
-    if (linked_quest.batch_id == get_current_batch_id()) and ((not repeat_count) or (repeat_count > completion_count)):
-        yield 're-acceptable for '
-        yield elapsed_time(RelativeDelta(get_quest_board_resets_at(), DateTime.now(tz = TimeZone.utc)))
-    
-    else:
-        yield 'cannot be re-accepted anymore'
+    if (not repeat_count) or (repeat_count - 1 > completion_count):
+        yield ', '
+        if (linked_quest.batch_id == get_current_batch_id()):
+            yield 're-acceptable if completed within '
+            yield elapsed_time(RelativeDelta(get_quest_board_resets_at(), DateTime.now(tz = TimeZone.utc)))
+        
+        else:
+            yield 'cannot be re-accepted anymore'
 
 
 def produce_nullable_item_description(item):

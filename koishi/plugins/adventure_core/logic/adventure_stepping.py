@@ -254,7 +254,7 @@ async def adventure_action_step(adventure):
         )
         
         should_return = get_should_cancel_adventure(
-            adventure, user_stats, inventory, action_date, next_duration, travel_duration
+            adventure, user_stats, inventory, action_date, next_duration, travel_duration, looted_items
         )
         if should_return:
             duration = travel_duration

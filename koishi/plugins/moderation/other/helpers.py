@@ -279,6 +279,7 @@ async def confirm_action(client, event, guild, user, embed_builder, word_config,
         components = COMPONENT__ROW,
         embed = embed_builder(
             user,
+            guild.id,
             'Confirmation',
             (
                 f'Are you sure to {word_config.name} **{user.name_at(event.guild_id)}** '
@@ -301,6 +302,7 @@ async def confirm_action(client, event, guild, user, embed_builder, word_config,
                 components = None,
                 embed = embed_builder(
                     user,
+                    guild.id,
                     'Timeout',
                     (
                         f'**{user.name_at(event.guild_id)}** was not {word_config.to_be} '
@@ -333,6 +335,7 @@ async def confirm_action(client, event, guild, user, embed_builder, word_config,
             components = None,
             embed = embed_builder(
                 user,
+                guild.id,
                 'Cancelled',
                 (
                     f'**{user.name_at(event.guild_id)}** was not {word_config.to_be} {word_config.connector} '

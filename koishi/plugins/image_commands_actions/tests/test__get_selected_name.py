@@ -12,7 +12,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__get_selected_name(parameters):
+def test__get_selected_name(name):
     """
     Tests whether ``get_selected_name`` works as intended.
     
@@ -25,6 +25,6 @@ def test__get_selected_name(parameters):
     -------
     output : `None | str`
     """
-    output = get_selected_name(parameters)
+    output = get_selected_name(name)
     vampytest.assert_instance(output, str, nullable = True)
     return output

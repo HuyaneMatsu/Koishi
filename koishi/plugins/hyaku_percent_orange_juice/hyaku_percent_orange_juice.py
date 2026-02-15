@@ -53,6 +53,7 @@ CARD_TYPE_BOOST = 1 << 1
 CARD_TYPE_EVENT = 1 << 2
 CARD_TYPE_GIFT = 1 << 3
 CARD_TYPE_TRAP = 1 << 4
+CARD_TYPE_BANNER = 1 << 5
 CARD_TYPE_HYPER = 1 << 7
 
 CARD_TYPE_NAME_BATTLE = 'BATTLE'
@@ -60,6 +61,7 @@ CARD_TYPE_NAME_BOOST = 'BOOST'
 CARD_TYPE_NAME_EVENT = 'EVENT'
 CARD_TYPE_NAME_GIFT = 'GIFT'
 CARD_TYPE_NAME_TRAP = 'TRAP'
+CARD_TYPE_NAME_BANNER = 'BANNER'
 CARD_TYPE_NAME_HYPER = 'HYPER'
 
 CARD_TYPE_GENERIC_MASK_NAME_PAIRS = (
@@ -68,6 +70,7 @@ CARD_TYPE_GENERIC_MASK_NAME_PAIRS = (
     (CARD_TYPE_EVENT ,CARD_TYPE_NAME_EVENT),
     (CARD_TYPE_GIFT, CARD_TYPE_NAME_GIFT),
     (CARD_TYPE_TRAP, CARD_TYPE_NAME_TRAP),
+    (CARD_TYPE_BANNER, CARD_TYPE_NAME_BANNER),
 )
 
 CARD_TYPE_NAME_TO_MASK = {
@@ -76,6 +79,7 @@ CARD_TYPE_NAME_TO_MASK = {
     CARD_TYPE_NAME_EVENT: CARD_TYPE_EVENT,
     CARD_TYPE_NAME_GIFT: CARD_TYPE_GIFT,
     CARD_TYPE_NAME_TRAP: CARD_TYPE_TRAP,
+    CARD_TYPE_NAME_BANNER: CARD_TYPE_BANNER,
     CARD_TYPE_NAME_HYPER: CARD_TYPE_HYPER,
 }
 
@@ -85,6 +89,7 @@ CARD_TYPE_FILTERABLE_NAMES = [
     CARD_TYPE_NAME_EVENT,
     CARD_TYPE_NAME_GIFT,
     CARD_TYPE_NAME_TRAP,
+    CARD_TYPE_NAME_BANNER,
 ]
 
 CARD_COST_TYPE_STATIC = 0
@@ -679,6 +684,12 @@ CARD_PACK_COMMUNITY_PACK_4 = OJCardPack(
     9,
     'Community Pack 4',
     1080,
+)
+
+CARD_PACK_EXTRACURRICULAR_PACK = OJCardPack(
+    10,
+    'Extracurricular Pack',
+    320,
 )
 
 #### #### #### #### CARD COSTS #### #### #### ####
@@ -1465,8 +1476,10 @@ CARD_PRICE_OF_POWER = OJCard(
     66,
     'Price of Power',
     1, CARD_COST_0, 1, CARD_TYPE_GIFT, CARD_PACK_COMMUNITY_PACK_1, CARD_RARITY_RARE,
-    'You may play cards one level higher than your current level. All card costs are increased by 5. This card is '
-    'discarded on use.',
+    (
+        'You may pay 5 more stars to play a card one level higher than your current level. '
+        'This card is discarded on use.',
+    ),
     '"Even if I survive the war... With this body, there\'s nothing I can do." ―Nath',
     None,
     'Price_of_Power',
@@ -1476,8 +1489,10 @@ CARD_UNLUCKY_CHARM = OJCard(
     67,
     'Unlucky Charm',
     1, CARD_COST_Lvx5, 1, CARD_TYPE_GIFT, CARD_PACK_ACCELERATION_PACK, CARD_RARITY_UNCOMMON,
-    'Lose Lvl x 1 stars at the start of your turn. Using this card sends it to another player. If Cost is higher than '
-    'your star count, you may use this card for free.',
+    (
+        'Lose Lvl x 1 stars at the start of your turn. Using this card sends it to another player. '
+        'If Cost is higher than your star count, you may use this card for free.'
+    ),
     '"Pitch black darkness disrupts my slumber, hence I yearn for light..." —Krilalaris',
     None,
     'Unlucky_Charm',
@@ -3616,9 +3631,250 @@ CARD_INTELLECTUAL_SOUNDING_BLUFF = OJCard(
     'Intellectual-Sounding_Bluff',
 )
 
+#### #### #### #### EXTRACURRICULAR PACK #### #### #### ####
+
+CARD_FULL_BURST = OJCard(
+    221,
+    'Full Burst',
+    2,
+    CARD_COST_10,
+    3,
+    CARD_TYPE_BOOST,
+    CARD_PACK_EXTRACURRICULAR_PACK,
+    CARD_RARITY_COMMON,
+    (
+        'Draw a card. You may play one more card this turn. It can be one level higher than your current level. '
+        'If you do, discard your hand.\n'
+        'Repeat (1): Draw 1 more card.'
+    ),
+    '"I\'m going to go all out." ―Nath',
+    None,
+    'Full_Burst',
+)
+
+CARD_GO_WITH_THE_FLOW = OJCard(
+    222,
+    'Go with the Flow',
+    1,
+    CARD_COST_10,
+    3,
+    CARD_TYPE_BOOST,
+    CARD_PACK_EXTRACURRICULAR_PACK,
+    CARD_RARITY_COMMON,
+    'Warp to a random panel.',
+    '"Halena! This direction is better, trust Cook." ―Cook',
+    None,
+    'Go_with_the_Flow',
+)
+
+CARD_CHEFS_SPECIAL = OJCard(
+    223,
+    'Chef\'s Special',
+    2,
+    CARD_COST_5,
+    3,
+    CARD_TYPE_BOOST,
+    CARD_PACK_EXTRACURRICULAR_PACK,
+    CARD_RARITY_COMMON,
+    (
+        'Randomly heal 2 HP or take 1 damage.\n'
+        '(Trigger: Go down to 1 HP):\n'
+        'Randomly heal to full HP or set HP to 1.'
+    ),
+    '"This is what we recommend today!" ―Chris',
+    None,
+    'Chef\'s_Special',
+)
+
+CARD_MOUSSE_THE_THIEF = OJCard(
+    224,
+    'Mousse the Thief',
+    2,
+    CARD_COST_10,
+    3,
+    CARD_TYPE_BATTLE,
+    CARD_PACK_EXTRACURRICULAR_PACK,
+    CARD_RARITY_COMMON,
+    'After battle card activation, steal a random card from the enemy that wasn\'t used in this battle.',
+    '"Wait up, that\'s something important to me." ―Sora',
+    None,
+    'Go_with_the_Flow',
+)
+
+CARD_COMING_BACK_STRONGER = OJCard(
+    225,
+    'Coming Back Stronger',
+    4,
+    CARD_COST_5,
+    3,
+    CARD_TYPE_BATTLE,
+    CARD_PACK_EXTRACURRICULAR_PACK,
+    CARD_RARITY_COMMON,
+    (
+        'Gain +1 ATK.\n'
+        '(Trigger: Suffer KO):\n'
+        'Gain +2 ATK.'
+    ),
+    '"The bigger the trouble, the more fired up I get, I guess?" ―Ellie',
+    None,
+    'Coming_Back_Stronger',
+)
+
+CARD_EXTREME_ALTERATION = OJCard(
+    226,
+    'Extreme Alteration',
+    3,
+    CARD_COST_10,
+    3,
+    CARD_TYPE_EVENT,
+    CARD_PACK_EXTRACURRICULAR_PACK,
+    CARD_RARITY_COMMON,
+    (
+        'Effect Duration: 2 chapters.\n'
+        'Turn all Encounter and Boss Encounter panels into Drop panels. '
+        'Turn all Bonus panels into Draw panels. Turn all Heal panels into Damage panels.\n'
+        '(Trigger: land on 3 Draw, Damage or Drop panels):\n'
+        'Turn all Encounter and Boss Encounter panels into 2x Drop panels. Turn all Bonus panels into 2x Draw panels. '
+        'Turn all Heal panels into 2x Damage panels.'
+    ),
+    '"I\'ll cure the disease this world\'s suffering from..." ―Kiriko',
+    None,
+    'Extreme_Alteration',
+)
+
+CARD_THE_GREATEST_TROUBLEMAKER_EVER = OJCard(
+    227,
+    'The Greatest Troublemaker Ever',
+    2,
+    CARD_COST_10,
+    3,
+    CARD_TYPE_EVENT,
+    CARD_PACK_EXTRACURRICULAR_PACK,
+    CARD_RARITY_UNCOMMON,
+    (
+        'Deal 3 damage to a random unit.\n'
+        'Repeat (1): Draw a card for each unit KO\'d by this card.\n'
+        'Repeat (2): If the unit is KO\'d, deal 1 damage to another random unit.'
+    ),
+    '"How do I want to destroy a world this time?" ―Mio',
+    None,
+    'The_Greatest_Troublemaker_Ever',
+)
+
+CARD_LOOK_HOW_LONG_MY_ARMS_AND_LEGS_ARE_NOW = OJCard(
+    228,
+    'Look How Long My Arms and Legs Are Now',
+    1,
+    CARD_COST_0,
+    1,
+    CARD_TYPE_GIFT,
+    CARD_PACK_EXTRACURRICULAR_PACK,
+    CARD_RARITY_RARE,
+    (
+        'You may pay 5 more stars to place traps within a 2 panel radius. '
+        'Increase all non-Trap, non-Gift card levels by 1 (up to 5). '
+        'This card is discarded upon use or landing on a trap.'
+    ),
+    '"Let Mother hug you in these long arms of hers." ―Mother Poppo',
+    None,
+    'Look_How_Long_My_Arms_and_Legs_Are_Now',
+)
+
+CARD_WERE_TICKED_OFF = OJCard(
+    229,
+    'We\'re Ticked Off!',
+    1,
+    CARD_COST_0,
+    1,
+    CARD_TYPE_GIFT,
+    CARD_PACK_EXTRACURRICULAR_PACK,
+    CARD_RARITY_UNCOMMON,
+    (
+        'If your HP is 1 at the start of the battle, gain +2 ATK.\n'
+        'If you suffer KO in battle where this effect is active, discard this card.'
+    ),
+    '"Alright, I think I have to go a little wild now." ―Chuu',
+    None,
+    'We\'re_Ticked_Off!',
+)
+
+CARD_PROTECTION_FEE = OJCard(
+    230,
+    'Protection Fee',
+    3,
+    CARD_COST_5,
+    1,
+    CARD_TYPE_BANNER,
+    CARD_PACK_EXTRACURRICULAR_PACK,
+    CARD_RARITY_RARE,
+    (
+        'When you stop on another player\'s Home panel, pay (your Lvl) x2 stars to them. '
+        'If you fail the Norma check, your next turn will be skipped.'
+    ),
+    '"This is such a rip-off..." ―Lulu',
+    None,
+    'Protection_Fee',
+)
+
+CARD_FLUFFY_AND_FUZZY = OJCard(
+    231,
+    'Fluffy and Fuzzy',
+    2,
+    CARD_COST_20,
+    1,
+    CARD_TYPE_BANNER,
+    CARD_PACK_EXTRACURRICULAR_PACK,
+    CARD_RARITY_UNCOMMON,
+    'While playing a card with a damage effect, the first time it damages each unit it deals 1 more damage.',
+    '"Can you handle this elegant assault of mine?" ―Pomeranius',
+    None,
+    'Fluffy_and_Fuzzy',
+)
+
+CARD_FEEL_THE_RUSH_WITH_AN_ENERGY_DRINK = OJCard(
+    232,
+    'Feel the Rush with an Energy Drink',
+    2,
+    CARD_COST_10,
+    1,
+    CARD_TYPE_BANNER,
+    CARD_PACK_EXTRACURRICULAR_PACK,
+    CARD_RARITY_RARE,
+    'All players gain -1 REC.',
+    '"Now we can have fun \'til morning!" ―Poyo',
+    None,
+    'Feel_the_Rush_with_an_Energy_Drink',
+)
+
+#### #### #### #### 3000000 DOWNLOADS #### #### #### ####
+
+CARD_PRECISE_DICE_ROLLS = OJCard(
+    233,
+    'Precise Dice Rolls',
+    2,
+    CARD_COST_10,
+    -1,
+    CARD_TYPE_HYPER | CARD_TYPE_BOOST,
+    None,
+    CARD_RARITY_NONE,
+    (
+        'Precise Dice Rolls.png\n'
+        'Effect Duration: 2 chapters\n'
+        '-Can only roll 4 or higher for movement, battle, and bonus.\n'
+        '-Can only roll 2 or lower for drop.\n'
+        'After the effect ends, gain Tendonitis at the start of the next turn.\n'
+        'Remove all Strain.'
+    ),
+    '"Find out for yourself just how incredible Popo\'s dice rolls are." ―Popomi',
+    None,
+    'Precise_Dice_Rolls',
+)
+
+
 #### #### #### #### CHARACTERS #### #### #### ####
 
-CHARACTER_QP = OJCharacter(1,
+CHARACTER_QP = OJCharacter(
+    1,
     'QP',
     5, 0, 0, 0, 5,
     ORIGIN_QP_SHOOTING,
@@ -3627,7 +3883,8 @@ CHARACTER_QP = OJCharacter(1,
     'QP_(unit)',
 )
 
-CHARACTER_SUGURI = OJCharacter(2,
+CHARACTER_SUGURI = OJCharacter(
+    2,
     'Suguri',
     4, 1, -1, 2, 5,
     ORIGIN_SUGURI,
@@ -3636,7 +3893,8 @@ CHARACTER_SUGURI = OJCharacter(2,
     'Suguri_(unit)',
 )
 
-CHARACTER_MARC = OJCharacter(3,
+CHARACTER_MARC = OJCharacter(
+    3,
     'Marc',
     4, 1, 1, -1, 5,
     ORIGIN_FLYING_RED_BARREL,
@@ -3645,7 +3903,8 @@ CHARACTER_MARC = OJCharacter(3,
     'Marc_(unit)',
 )
 
-CHARACTER_KAI = OJCharacter(4,
+CHARACTER_KAI = OJCharacter(
+    4,
     'Kai',
     5, 1, 0, 0, 5,
     ORIGIN_100_ORANGE_JUICE,
@@ -3654,7 +3913,8 @@ CHARACTER_KAI = OJCharacter(4,
     'Kai_(unit)',
 )
 
-CHARACTER_YUKI = OJCharacter(5,
+CHARACTER_YUKI = OJCharacter(
+    5,
     'Yuki',
     5, 2, -1, -1, 5,
     ORIGIN_QP_SHOOTING,
@@ -3663,7 +3923,8 @@ CHARACTER_YUKI = OJCharacter(5,
     'Yuki_(unit)',
 )
 
-CHARACTER_ARU = OJCharacter(6,
+CHARACTER_ARU = OJCharacter(
+    6,
     'Aru',
     5, -1, -1, 2, 5,
     ORIGIN_CHRISTMAS_SHOOTING,
@@ -3672,7 +3933,8 @@ CHARACTER_ARU = OJCharacter(6,
     'Aru_(unit)',
 )
 
-CHARACTER_HIME = OJCharacter(7,
+CHARACTER_HIME = OJCharacter(
+    7,
     'Hime',
     5, 1, -1, 1, 5,
     ORIGIN_SUGURI,
@@ -3681,7 +3943,8 @@ CHARACTER_HIME = OJCharacter(7,
     'Hime_(unit)',
 )
 
-CHARACTER_SORA = OJCharacter(8,
+CHARACTER_SORA = OJCharacter(
+    8,
     'Sora',
     4, 1, 0, 1, 5,
     ORIGIN_SORA,
@@ -3690,7 +3953,8 @@ CHARACTER_SORA = OJCharacter(8,
     'Sora_(unit)',
 )
 
-CHARACTER_FERNET = OJCharacter(9,
+CHARACTER_FERNET = OJCharacter(
+    9,
     'Fernet',
     6, -1, 2, -2, 5,
     ORIGIN_FLYING_RED_BARREL,
@@ -3699,7 +3963,8 @@ CHARACTER_FERNET = OJCharacter(9,
     'Fernet_(unit)',
 )
 
-CHARACTER_PEAT = OJCharacter(10,
+CHARACTER_PEAT = OJCharacter(
+    10,
     'Peat',
     3, 1, 1, 1, 4,
     ORIGIN_FLYING_RED_BARREL,
@@ -3708,7 +3973,8 @@ CHARACTER_PEAT = OJCharacter(10,
     'Peat_(unit)',
 )
 
-CHARACTER_MARIE_POPPO = OJCharacter(11,
+CHARACTER_MARIE_POPPO = OJCharacter(
+    11,
     'Marie Poppo',
     7, -1, -1, -1, 5,
     ORIGIN_100_ORANGE_JUICE,
@@ -3717,7 +3983,8 @@ CHARACTER_MARIE_POPPO = OJCharacter(11,
     'Marie_Poppo_(unit)',
 )
 
-CHARACTER_TOMOMO_UNSOFTENED = OJCharacter(12,
+CHARACTER_TOMOMO_UNSOFTENED = OJCharacter(
+    12,
     'Tomomo (Unsoftened)',
     6, 2, 0, 1, 6,
     ORIGIN_100_ORANGE_JUICE,
@@ -3726,7 +3993,8 @@ CHARACTER_TOMOMO_UNSOFTENED = OJCharacter(12,
     'Tomomo_(Softened)_(unit)',
 )
 
-CHARACTER_TOMOMO_SOFTENED = OJCharacter(13,
+CHARACTER_TOMOMO_SOFTENED = OJCharacter(
+    13,
     'Tomomo (Softened)',
     4, 2, 0, 0, 6,
     ORIGIN_100_ORANGE_JUICE,
@@ -3735,7 +4003,8 @@ CHARACTER_TOMOMO_SOFTENED = OJCharacter(13,
     'Tomomo_(Softened)_(unit)',
 )
 
-CHARACTER_MIO = OJCharacter(14,
+CHARACTER_MIO = OJCharacter(
+    14,
     'Mio',
     6, 0, -1, 1, 4,
     ORIGIN_100_ORANGE_JUICE,
@@ -3744,7 +4013,8 @@ CHARACTER_MIO = OJCharacter(14,
     'Mio_(unit)',
 )
 
-CHARACTER_SYURA = OJCharacter(15,
+CHARACTER_SYURA = OJCharacter(
+    15,
     'Syura',
     4, 0, 1, 0, 4,
     ORIGIN_QP_SHOOTING_DANGEROUS,
@@ -3753,7 +4023,8 @@ CHARACTER_SYURA = OJCharacter(15,
     'Syura_(unit)',
 )
 
-CHARACTER_NANAKO = OJCharacter(16,
+CHARACTER_NANAKO = OJCharacter(
+    16,
     'Nanako',
     3, 0, 2, 1, 4,
     ORIGIN_SUGURI,
@@ -3762,7 +4033,8 @@ CHARACTER_NANAKO = OJCharacter(16,
     'Nanako_(unit)',
 )
 
-CHARACTER_SAKI = OJCharacter(17,
+CHARACTER_SAKI = OJCharacter(
+    17,
     'Saki',
     4, 0, 0, 1, 4,
     ORIGIN_SUGURI,
@@ -3771,7 +4043,8 @@ CHARACTER_SAKI = OJCharacter(17,
     'Saki_(unit)',
 )
 
-CHARACTER_KYOUSUKE = OJCharacter(18,
+CHARACTER_KYOUSUKE = OJCharacter(
+    18,
     'Kyousuke',
     5, -1, 2, 0, 5,
     ORIGIN_QP_KISS,
@@ -3780,7 +4053,8 @@ CHARACTER_KYOUSUKE = OJCharacter(18,
     'Kyousuke_(unit)',
 )
 
-CHARACTER_KRILALARIS = OJCharacter(19,
+CHARACTER_KRILALARIS = OJCharacter(
+    19,
     'Krilalaris',
     6, 0, 0, -1, 5,
     ORIGIN_QP_SHOOTING_DANGEROUS,
@@ -3789,7 +4063,8 @@ CHARACTER_KRILALARIS = OJCharacter(19,
     'Krilalaris_(unit)',
 )
 
-CHARACTER_KAE = OJCharacter(20,
+CHARACTER_KAE = OJCharacter(
+    20,
     'Kae',
     4, 0, -1, 1, 4,
     ORIGIN_SUGURI,
@@ -3798,7 +4073,8 @@ CHARACTER_KAE = OJCharacter(20,
     'Kae_(unit)',
 )
 
-CHARACTER_ALTE = OJCharacter(21,
+CHARACTER_ALTE = OJCharacter(
+    21,
     'Alte',
     5, 0, -1, 1, 5,
     ORIGIN_SORA,
@@ -3807,7 +4083,8 @@ CHARACTER_ALTE = OJCharacter(21,
     'Alte_(unit)',
 )
 
-CHARACTER_KYOKO = OJCharacter(22,
+CHARACTER_KYOKO = OJCharacter(
+    22,
     'Kyoko',
     5, -1, 3, -2, 5,
     ORIGIN_SUGURI,
@@ -3816,7 +4093,8 @@ CHARACTER_KYOKO = OJCharacter(22,
     'Kyoko_(unit)',
 )
 
-CHARACTER_SHAM = OJCharacter(23,
+CHARACTER_SHAM = OJCharacter(
+    23,
     'Sham',
     4, 0, 1, 1, 5,
     ORIGIN_SORA,
@@ -3825,7 +4103,8 @@ CHARACTER_SHAM = OJCharacter(23,
     'Sham_(unit)',
 )
 
-CHARACTER_SHERRY = OJCharacter(24,
+CHARACTER_SHERRY = OJCharacter(
+    24,
     'Sherry',
     5, 1, 1, 1, 5,
     ORIGIN_FLYING_RED_BARREL,
@@ -3834,7 +4113,8 @@ CHARACTER_SHERRY = OJCharacter(24,
     'Sherry_(unit)',
 )
 
-CHARACTER_STAR_BREAKER = OJCharacter(25,
+CHARACTER_STAR_BREAKER = OJCharacter(
+    25,
     'Star Breaker',
     5, 2, 0, -1, 5,
     ORIGIN_SORA,
@@ -3843,7 +4123,8 @@ CHARACTER_STAR_BREAKER = OJCharacter(25,
     'Star_Breaker_(unit)',
 )
 
-CHARACTER_SWEET_BREAKER = OJCharacter(26,
+CHARACTER_SWEET_BREAKER = OJCharacter(
+    26,
     'Sweet breaker',
     6, 0, 0, 0, 6,
     ORIGIN_QP_SHOOTING_DANGEROUS,
@@ -3852,7 +4133,8 @@ CHARACTER_SWEET_BREAKER = OJCharacter(26,
     'Sweet_Breaker_(unit)',
 )
 
-CHARACTER_NATH = OJCharacter(27,
+CHARACTER_NATH = OJCharacter(
+    27,
     'Nath',
     5, -1, -1, 1, 5,
     ORIGIN_SORA,
@@ -3896,7 +4178,8 @@ CHARACTER_TOMATO = OJCharacter(
     'Tomato_(unit)',
 )
 
-CHARACTER_KIRIKO = OJCharacter(30,
+CHARACTER_KIRIKO = OJCharacter(
+    30,
     'Kiriko',
     8, 0, -1, 0, 5,
     ORIGIN_XMAS_SHOOTING_SCRAMBLE,
@@ -3906,7 +4189,8 @@ CHARACTER_KIRIKO = OJCharacter(30,
     'Kiriko_(unit)',
 )
 
-CHARACTER_NONAME = OJCharacter(31,
+CHARACTER_NONAME = OJCharacter(
+    31,
     'NoName',
     5, 1, -1, 0, 6,
     ORIGIN_ACCELERATION_OF_SUGURI,
@@ -3915,7 +4199,8 @@ CHARACTER_NONAME = OJCharacter(31,
     'NoName_(unit)',
 )
 
-CHARACTER_NONAME_HEAD = OJCharacter(32,
+CHARACTER_NONAME_HEAD = OJCharacter(
+    32,
     'NoName (Head)',
     2, -1, -1, -1, 6,
     ORIGIN_ACCELERATION_OF_SUGURI,
@@ -3924,7 +4209,8 @@ CHARACTER_NONAME_HEAD = OJCharacter(32,
     'NoName_(Head)_(unit)',
 )
 
-CHARACTER_MIUSAKI = OJCharacter(33,
+CHARACTER_MIUSAKI = OJCharacter(
+    33,
     'Miusaki',
     4, 1, -2, 0, 5,
     ORIGIN_ALICIANRONE,
@@ -3933,7 +4219,8 @@ CHARACTER_MIUSAKI = OJCharacter(33,
     'Miusaki_(unit)',
 )
 
-CHARACTER_CEOREPARQUE = OJCharacter(34,
+CHARACTER_CEOREPARQUE = OJCharacter(
+    34,
     'Ceoreparque',
     4, 0, 0, 1, 5,
     ORIGIN_ALICIANRONE,
@@ -3942,7 +4229,8 @@ CHARACTER_CEOREPARQUE = OJCharacter(34,
     'Ceoreparque_(unit)',
 )
 
-CHARACTER_YUKI_DANGEROUS = OJCharacter(35,
+CHARACTER_YUKI_DANGEROUS = OJCharacter(
+    35,
     'Yuki (Dangerous)',
     5, 1, -2, 0, 5,
     ORIGIN_QP_SHOOTING_DANGEROUS,
@@ -3954,7 +4242,8 @@ CHARACTER_YUKI_DANGEROUS = OJCharacter(35,
     'Yuki_(Dangerous)_(unit)',
 )
 
-CHARACTER_TOMOMO_CASUAL = OJCharacter(36,
+CHARACTER_TOMOMO_CASUAL = OJCharacter(
+    36,
     'Tomomo (Casual)',
     4, -1, 0, 1, 5,
     ORIGIN_100_ORANGE_JUICE,
@@ -3963,7 +4252,8 @@ CHARACTER_TOMOMO_CASUAL = OJCharacter(36,
     'Tomomo_(Casual)_(unit)',
 )
 
-CHARACTER_TOMOMO_SWEET_EATER = OJCharacter(37,
+CHARACTER_TOMOMO_SWEET_EATER = OJCharacter(
+    37,
     'Tomomo (Sweet Eater)',
     6, 3, 0, 0, 6,
     ORIGIN_100_ORANGE_JUICE,
@@ -3972,7 +4262,8 @@ CHARACTER_TOMOMO_SWEET_EATER = OJCharacter(37,
     'Tomomo_(Sweet_Eater)_(unit)',
 )
 
-CHARACTER_TEQUILA = OJCharacter(38,
+CHARACTER_TEQUILA = OJCharacter(
+    38,
     'Tequila',
     5, 0, 1, -3, 6,
     ORIGIN_FLYING_RED_BARREL,
@@ -3981,7 +4272,8 @@ CHARACTER_TEQUILA = OJCharacter(38,
     'Tequila_(unit)',
 )
 
-CHARACTER_TSIH = OJCharacter(39,
+CHARACTER_TSIH = OJCharacter(
+    39,
     'Tsih',
     4, 0, -1, 2, 5,
     ORIGIN_SORA,
@@ -3990,7 +4282,8 @@ CHARACTER_TSIH = OJCharacter(39,
     'Tsih_(unit)',
 )
 
-CHARACTER_MEI = OJCharacter(40,
+CHARACTER_MEI = OJCharacter(
+    40,
     'Mei',
     4, 0, 0, 0, 5,
     ORIGIN_QP_SHOOTING,
@@ -3999,7 +4292,8 @@ CHARACTER_MEI = OJCharacter(40,
     'Mei_(unit)',
 )
 
-CHARACTER_NATSUMI = OJCharacter(41,
+CHARACTER_NATSUMI = OJCharacter(
+    41,
     'Natsumi',
     5, 0, -1, 0, 5,
     ORIGIN_XMAS_SHOOTING_SCRAMBLE,
@@ -4009,7 +4303,8 @@ CHARACTER_NATSUMI = OJCharacter(41,
     'Natsumi_(unit)',
 )
 
-CHARACTER_NICO = OJCharacter(42,
+CHARACTER_NICO = OJCharacter(
+    42,
     'Nico',
     4, 0, 0, 1, 5,
     ORIGIN_XMAS_SHOOTING_SCRAMBLE,
@@ -4019,7 +4314,8 @@ CHARACTER_NICO = OJCharacter(42,
     'Nico_(unit)',
 )
 
-CHARACTER_ARTHUR = OJCharacter(43,
+CHARACTER_ARTHUR = OJCharacter(
+    43,
     'Arthur',
     7, 0, -1, -1, 6,
     ORIGIN_CHRISTMAS_SHOOTING,
@@ -4028,7 +4324,8 @@ CHARACTER_ARTHUR = OJCharacter(43,
     'Arthur_(unit)',
 )
 
-CHARACTER_IRU = OJCharacter(44,
+CHARACTER_IRU = OJCharacter(
+    44,
     'Iru',
     5, 0, 0, 0, 5,
     ORIGIN_SUGURI,
@@ -4037,7 +4334,8 @@ CHARACTER_IRU = OJCharacter(44,
     'Iru_(unit)',
 )
 
-CHARACTER_MIRA = OJCharacter(45,
+CHARACTER_MIRA = OJCharacter(
+    45,
     'Mira',
     5, 1, -1, 1, 5,
     ORIGIN_SORA,
@@ -4047,7 +4345,8 @@ CHARACTER_MIRA = OJCharacter(45,
     'Mira_(unit)',
 )
 
-CHARACTER_CUTIES = OJCharacter(46,
+CHARACTER_CUTIES = OJCharacter(
+    46,
     'Cuties',
     4, 0, 0, 1, 5,
     ORIGIN_SORA,
@@ -4059,7 +4358,8 @@ CHARACTER_CUTIES = OJCharacter(46,
     'Sora_&_Sham_(Cuties)_(unit)',
 )
 
-CHARACTER_YUUKI = OJCharacter(47,
+CHARACTER_YUUKI = OJCharacter(
+    47,
     'Yuuki',
     4, 0, 0, 0, 5,
     ORIGIN_QP_SHOOTING,
@@ -4068,7 +4368,8 @@ CHARACTER_YUUKI = OJCharacter(47,
     'Yuuki_(unit)',
 )
 
-CHARACTER_ISLAY = OJCharacter(48,
+CHARACTER_ISLAY = OJCharacter(
+    48,
     'Islay',
     5, 1, 1, 1, 5,
     ORIGIN_FLYING_RED_BARREL,
@@ -4095,7 +4396,8 @@ CHARACTER_SUGURI_46_BILLION_YEARS = OJCharacter(
     'Suguri_(46_Billion_Years)_(unit)',
 )
 
-CHARACTER_SUMIKA = OJCharacter(50,
+CHARACTER_SUMIKA = OJCharacter(
+    50,
     'Sumika',
     5, 1, -1, 1, 5,
     ORIGIN_200_MIXED_JUICE,
@@ -4104,7 +4406,8 @@ CHARACTER_SUMIKA = OJCharacter(50,
     'Sumika_(unit)',
 )
 
-CHARACTER_ELLIE = OJCharacter(51,
+CHARACTER_ELLIE = OJCharacter(
+    51,
     'Ellie',
     5, 1, 0, 0, 5,
     ORIGIN_100_ORANGE_JUICE,
@@ -4113,7 +4416,8 @@ CHARACTER_ELLIE = OJCharacter(51,
     'Ellie_(unit)',
 )
 
-CHARACTER_LULU = OJCharacter(52,
+CHARACTER_LULU = OJCharacter(
+    52,
     'Lulu',
     5, 0, 1, -1, 5,
     ORIGIN_100_ORANGE_JUICE,
@@ -4122,7 +4426,8 @@ CHARACTER_LULU = OJCharacter(52,
     'Lulu_(unit)',
 )
 
-CHARACTER_ALICIANRONE = OJCharacter(53,
+CHARACTER_ALICIANRONE = OJCharacter(
+    53,
     'Alicianrone',
     4, 1, -1, 1, 5,
     ORIGIN_ALICIANRONE,
@@ -4134,7 +4439,8 @@ CHARACTER_ALICIANRONE = OJCharacter(53,
     'Alicianrone_(unit)',
 )
 
-CHARACTER_TEOTORATTA = OJCharacter(54,
+CHARACTER_TEOTORATTA = OJCharacter(
+    54,
     'Teotoratta',
     5, 0, 0, 1, 4,
     ORIGIN_ALICIANRONE,
@@ -4143,7 +4449,8 @@ CHARACTER_TEOTORATTA = OJCharacter(54,
     'Teotoratta_(unit)',
 )
 
-CHARACTER_ARNELLE = OJCharacter(55,
+CHARACTER_ARNELLE = OJCharacter(
+    55,
     'Arnelle',
     5, 1, -1, 0, 5,
     ORIGIN_100_ORANGE_JUICE,
@@ -4152,7 +4459,8 @@ CHARACTER_ARNELLE = OJCharacter(55,
     'Arnelle_(unit)',
 )
 
-CHARACTER_MAYNIE = OJCharacter(56,
+CHARACTER_MAYNIE = OJCharacter(
+    56,
     'Maynie',
     4, 0, 1, 0, 5,
     ORIGIN_100_ORANGE_JUICE,
@@ -4161,7 +4469,8 @@ CHARACTER_MAYNIE = OJCharacter(56,
     'Maynie_(unit)',
 )
 
-CHARACTER_CHRIS = OJCharacter(57,
+CHARACTER_CHRIS = OJCharacter(
+    57,
     'Chris',
     5, -1, 0, 0, 5,
     ORIGIN_QP_SHOOTING,
@@ -4171,7 +4480,8 @@ CHARACTER_CHRIS = OJCharacter(57,
     'Chris_(unit)',
 )
 
-CHARACTER_KYUPITA = OJCharacter(58,
+CHARACTER_KYUPITA = OJCharacter(
+    58,
     'Kyupita',
     5, 0, 0, 0, 5,
     ORIGIN_QP_KISS,
@@ -4197,7 +4507,8 @@ CHARACTER_QP_DANGEROUS = OJCharacter(
     'QP_(Dangerous)_(unit)',
 )
 
-CHARACTER_MARIE_POPPO_MIXED = OJCharacter(60,
+CHARACTER_MARIE_POPPO_MIXED = OJCharacter(
+    60,
     'Marie Poppo (Mixed)',
     7, -1, -1, -1, 5,
     ORIGIN_200_MIXED_JUICE,
@@ -4206,7 +4517,8 @@ CHARACTER_MARIE_POPPO_MIXED = OJCharacter(60,
     'Marie_Poppo_(Mixed)_(unit)',
 )
 
-CHARACTER_SORA_MILITARY = OJCharacter(61,
+CHARACTER_SORA_MILITARY = OJCharacter(
+    61,
     'Sora (Military)',
     4, 1, 0, 1, 5,
     ORIGIN_SORA,
@@ -4215,7 +4527,8 @@ CHARACTER_SORA_MILITARY = OJCharacter(61,
     'Sora_(Military)_(unit)',
 )
 
-CHARACTER_ARU_SCRAMBLE = OJCharacter(62,
+CHARACTER_ARU_SCRAMBLE = OJCharacter(
+    62,
     'Aru (Scramble)',
     5, -1, -1, 2, 5,
     ORIGIN_XMAS_SHOOTING_SCRAMBLE,
@@ -4224,7 +4537,8 @@ CHARACTER_ARU_SCRAMBLE = OJCharacter(62,
     'Aru_(Scramble)_(unit)',
 )
         
-CHARACTER_SUGURI_VER_2 = OJCharacter(63,
+CHARACTER_SUGURI_VER_2 = OJCharacter(
+    63,
     'Suguri (Ver.2)',
     5, 1, -1, 2, 5,
     ORIGIN_ACCELERATION_OF_SUGURI_2,
@@ -4233,7 +4547,8 @@ CHARACTER_SUGURI_VER_2 = OJCharacter(63,
     'Suguri_(Ver.2)_(unit)',
 )
         
-CHARACTER_MARC_PILOT = OJCharacter(64,
+CHARACTER_MARC_PILOT = OJCharacter(
+    64,
     'Marc (Pilot)',
     4, 1, 1, 1, 5,
     ORIGIN_FLYING_RED_BARREL,
@@ -4242,7 +4557,8 @@ CHARACTER_MARC_PILOT = OJCharacter(64,
     'Marc_(Pilot)_(unit)',
 )
         
-CHARACTER_CHICKEN = OJCharacter(65,
+CHARACTER_CHICKEN = OJCharacter(
+    65,
     'Chicken',
     3, -1, -1, 1, 3,
     ORIGIN_QP_SHOOTING,
@@ -4251,7 +4567,8 @@ CHARACTER_CHICKEN = OJCharacter(65,
     'Chicken_(unit)',
 )
         
-CHARACTER_ROBO_BALL = OJCharacter(66,
+CHARACTER_ROBO_BALL = OJCharacter(
+    66,
     'Robo Ball',
     3, -1, 1, -1, 4,
     ORIGIN_SUGURI,
@@ -4260,7 +4577,8 @@ CHARACTER_ROBO_BALL = OJCharacter(66,
     'Robo_Ball_(unit)',
 )
         
-CHARACTER_SEAGULL = OJCharacter(67,
+CHARACTER_SEAGULL = OJCharacter(
+    67,
     'SeaGull',
     3, -1, 1, -1, 4,
     ORIGIN_FLYING_RED_BARREL,
@@ -4269,7 +4587,8 @@ CHARACTER_SEAGULL = OJCharacter(67,
     'Seagull_(unit)',
 )
         
-CHARACTER_STORE_MANAGER = OJCharacter(68,
+CHARACTER_STORE_MANAGER = OJCharacter(
+    68,
     'Store Manager',
     6, 2, 0, -1, 6,
     ORIGIN_QP_SHOOTING,
@@ -4278,7 +4597,8 @@ CHARACTER_STORE_MANAGER = OJCharacter(68,
     'Store_Manager_(unit)',
 )
         
-CHARACTER_SHIFU_ROBOT = OJCharacter(69,
+CHARACTER_SHIFU_ROBOT = OJCharacter(
+    69,
     'Shifu Robot',
     5, 1, 0, -1, 0,
     ORIGIN_SUGURI,
@@ -4291,7 +4611,8 @@ CHARACTER_SHIFU_ROBOT = OJCharacter(69,
     'Shifu_Robot_(unit)',
 )
 
-CHARACTER_FLYING_CASTLE = OJCharacter(70,
+CHARACTER_FLYING_CASTLE = OJCharacter(
+    70,
     'Flying Castle',
     8, 1, -1, -2, 6,
     ORIGIN_FLYING_RED_BARREL,
@@ -4302,7 +4623,8 @@ CHARACTER_FLYING_CASTLE = OJCharacter(70,
 
 #### #### #### #### DLC 30 #### #### #### ####
 
-CHARACTER_HALENA = OJCharacter(71,
+CHARACTER_HALENA = OJCharacter(
+    71,
     'Halena',
     5, -1, +1, +1, 5,
     ORIGIN_100_ORANGE_JUICE,
@@ -4311,7 +4633,8 @@ CHARACTER_HALENA = OJCharacter(71,
     'Halena_(unit)',
 )
 
-CHARACTER_COOK = OJCharacter(72,
+CHARACTER_COOK = OJCharacter(
+    72,
     'Cook',
     4, 0, -1, +3, 5,
     ORIGIN_100_ORANGE_JUICE,
@@ -4323,7 +4646,8 @@ CHARACTER_COOK = OJCharacter(72,
 
 #### #### #### #### DLC 31 #### #### #### ####
 
-CHARACTER_LONE_RIDER = OJCharacter(73,
+CHARACTER_LONE_RIDER = OJCharacter(
+    73,
     'Lone Rider',
     5, 0, 0, -1, 5,
     ORIGIN_FLYING_RED_BARREL,
@@ -4332,7 +4656,8 @@ CHARACTER_LONE_RIDER = OJCharacter(73,
     'Lone_Rider_(unit)',
 )
 
-CHARACTER_MERCHANT = OJCharacter(74,
+CHARACTER_MERCHANT = OJCharacter(
+    74,
     'Merchant',
     5, 0, 0, 0, 6,
     ORIGIN_FLYING_RED_BARREL,
@@ -4344,7 +4669,8 @@ CHARACTER_MERCHANT = OJCharacter(74,
 
 #### #### #### #### DLC 32 #### #### #### ####
 
-CHARACTER_HIME_MOONLIGHT = OJCharacter(75,
+CHARACTER_HIME_MOONLIGHT = OJCharacter(
+    75,
     'Hime (Moonlight)',
     5, +1, -2, +2, 5,
     ORIGIN_SUGURI,
@@ -4353,7 +4679,8 @@ CHARACTER_HIME_MOONLIGHT = OJCharacter(75,
     'Hime_(Moonlight)_(unit)',
 )
 
-FERNET_NOBLE = OJCharacter(76,
+FERNET_NOBLE = OJCharacter(
+    76,
     'Fernet (Noble)',
     6, -1, +1, -1, 5,
     ORIGIN_FLYING_RED_BARREL,
@@ -4723,7 +5050,7 @@ CHARACTER_HARUKA = OJCharacter(
 
 CHARACTER_KANATA = OJCharacter(
     98,
-    'KANATA',
+    'Kanata',
     4,
     0,
     2,
@@ -4733,6 +5060,26 @@ CHARACTER_KANATA = OJCharacter(
     'If holding "Intellectual-Sounding Bluff", 50% chance to see the basic card type of any card an opponent draws.',
     (CARD_INTELLECTUAL_SOUNDING_BLUFF,),
     'Kanata_(unit)',
+)
+
+#### #### #### #### 3000000 DOWNLOADS #### #### #### ####
+
+CHARACTER_MARI_POPOMI = OJCharacter(
+    99,
+    'Mari Popomi',
+    6,
+    0,
+    0,
+    0,
+    5,
+    ORIGIN_100_ORANGE_JUICE,
+    (
+        'Gain Strain every time you roll dice. At 30 Strain, gain Tendonitis at the start of your next turn:\n'
+        'Effect Duration: 1 Chapter. 60% chance for each die roll to be 0.\n'
+        'Effect removed by receiving a heal effect that can heal 2 HP or more, or playing Precise Dice Rolls.'
+    ),
+    (CARD_PRECISE_DICE_ROLLS,),
+    'Mari_Popomi_(unit)',
 )
 
 #### #### #### #### COMMANDS #### #### #### ####
@@ -4928,7 +5275,7 @@ RELATIONS = {
     'Lucky_Charm': 'https://cdn.discordapp.com/attachments/568837922288173058/901030233195565067/Lucky_Charm.png',
     'Metallic_Monocoque': 'https://cdn.discordapp.com/attachments/568837922288173058/901030238107074570/Metallic_Monocoque.png',
     'Poppo_the_Snatcher': 'https://cdn.discordapp.com/attachments/568837922288173058/1288605481413115965/Poppo_the_Snatcher.png',
-    'Price_of_Power': 'https://cdn.discordapp.com/attachments/568837922288173058/901030246856392746/Price_of_Power.png',
+    'Price_of_Power': 'https://cdn.discordapp.com/attachments/568837922288173058/1472256860945121402/Price_of_Power.png',
     'Unlucky_Charm': 'https://cdn.discordapp.com/attachments/568837922288173058/901030251981840394/Unlucky_Charm.png',
     'Windy_Enchantment': 'https://cdn.discordapp.com/attachments/568837922288173058/901030256754982912/Windy_Enchantment.png',
     'Assault': 'https://cdn.discordapp.com/attachments/568837922288173058/901030261137997884/Assault.png',
@@ -5108,7 +5455,23 @@ RELATIONS = {
     'Haruka_(unit)' : 'https://cdn.discordapp.com/attachments/568837922288173058/1391860904655716404/Haruka_unit.png',
     'Intellectual-Sounding_Bluff': 'https://cdn.discordapp.com/attachments/568837922288173058/1391866068900905061/Intellectual-Sounding_Bluff.png',
     'Kanata_(unit)' : 'https://cdn.discordapp.com/attachments/568837922288173058/1391866069471199283/Kanata_unit.png',
+    'Full_Burst' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472242425639473304/Full_Burst.png',
+    'Go_with_the_Flow' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472242425232883762/Go_with_the_Flow.png',
+    'Chef\'s_Special' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472242424691560623/Chefs_Special.png',
+    'Mousse_the_Thief' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472242424028987403/Mousse_the_Thief.png',
+    'Coming_Back_Stronger' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472242423521611849/Coming_Back_Stronger.png',
+    'Extreme_Alteration' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472242423047651583/Extreme_Alteration.png',
+    'The_Greatest_Troublemaker_Ever' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472242450906218538/The_Greatest_Troublemaker_Ever.png',
+    'Look_How_Long_My_Arms_and_Legs_Are_Now' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472242450516017233/Look_How_Long_My_Arms_and_Legs_Are_Now.png',
+    'We\'re_Ticked_Off!' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472242450071556278/Were_Ticked_Off.png',
+    'Protection_Fee' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472242449740202095/Protection_Fee.png',
+    'Fluffy_and_Fuzzy' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472242449425367130/Fluffy_and_Fuzzy.png',
+    'Feel_the_Rush_with_an_Energy_Drink' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472242448930574430/Feel_the_Rush_with_an_Energy_Drink.png',
+    'Precise_Dice_Rolls' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472262842127225044/Precise_Dice_Rolls.png',
+    'Mari_Popomi_(unit)' : 'https://cdn.discordapp.com/attachments/568837922288173058/1472262841703727218/Mari_Popomi_unit.png',
 }
+
+
 
 
 def autocomplete_key(entity_factor_pair):

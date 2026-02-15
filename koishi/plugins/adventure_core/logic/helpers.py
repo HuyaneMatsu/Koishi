@@ -376,7 +376,9 @@ def accumulate_looted_items(adventure, user_stats, inventory, loot_accumulations
     return looted_items, energy_exhausted
 
 
-def get_should_cancel_adventure(adventure, user_stats, inventory, now, duration_till_next_occurrence, travel_duration):
+def get_should_cancel_adventure(
+    adventure, user_stats, inventory, now, duration_till_next_occurrence, travel_duration, looted_items
+):
     """
     Gets whether the adventure should be cancelled.
     
@@ -399,6 +401,9 @@ def get_should_cancel_adventure(adventure, user_stats, inventory, now, duration_
     
     travel_duration : `int`
         The duration to travel back.
+    
+    looted_items : `list<(int, int, int)>`
+        A list of tuple of 3 elements: loot state, item id and given amount.
     
     Returns
     -------
@@ -432,6 +437,7 @@ def get_should_cancel_adventure(adventure, user_stats, inventory, now, duration_
             adventure.health_exhausted,
             adventure.energy_initial,
             adventure.energy_exhausted,
+            looted_items,
         )
         if cancelled:
             return True

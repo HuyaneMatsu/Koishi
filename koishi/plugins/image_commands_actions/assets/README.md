@@ -274,15 +274,6 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### chen-ran-fluff-0015
-
-- Creator: **kaisen**
-- Editor: *none*
-- Characters: **Chen**, **Yakumo Ran**
-- Source: **Touhou**
-
----
-
 ### chen-ran-fluff-0016
 
 - Creator: **inoe (noie)**

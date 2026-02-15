@@ -51,6 +51,7 @@ def _iter_options():
         now + TimeDelta(hours = 6),
         3600,
         1600,
+        [],
         False,
     )
     
@@ -92,6 +93,7 @@ def _iter_options():
         now + TimeDelta(hours = 6),
         3600,
         1600,
+        [],
         True,
     )
     
@@ -133,6 +135,7 @@ def _iter_options():
         now + TimeDelta(hours = 6),
         3600,
         1600,
+        [],
         True,
     )
     
@@ -174,6 +177,7 @@ def _iter_options():
         now + TimeDelta(hours = 6),
         3600,
         1600,
+        [],
         True,
     )
     
@@ -214,6 +218,7 @@ def _iter_options():
         now + TimeDelta(hours = 11, minutes = 40),
         3600,
         1600,
+        [],
         True,
     )
     
@@ -254,13 +259,14 @@ def _iter_options():
         now + TimeDelta(hours = 10, minutes = 40),
         3600,
         1600,
+        [],
         True,
     )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__get_should_cancel_adventure(
-    adventure, user_stats, inventory, now, duration_till_next_occurrence, travel_duration
+    adventure, user_stats, inventory, now, duration_till_next_occurrence, travel_duration, looted_items
 ):
     """
     Tests whether ``get_should_cancel_adventure`` works as intended.
@@ -285,12 +291,15 @@ def test__get_should_cancel_adventure(
     travel_duration : `int`
         The duration to travel back.
     
+    looted_items : `list<(int, int, int)>`
+        A list of tuple of 3 elements: loot state, item id and given amount.
+    
     Returns
     -------
     output : `bool`
     """
     output = get_should_cancel_adventure(
-        adventure, user_stats, inventory, now, duration_till_next_occurrence, travel_duration
+        adventure, user_stats, inventory, now, duration_till_next_occurrence, travel_duration, looted_items
     )
     vampytest.assert_instance(output, bool)
     return output

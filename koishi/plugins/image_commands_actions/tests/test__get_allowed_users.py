@@ -96,7 +96,7 @@ def _iter_options():
                 role_0,
             },
             False,
-            True,
+            False,
             [
                 user_0,
                 user_1,
@@ -107,7 +107,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def get_allowed_users(client, source_user, input_targets):
+def test__get_allowed_users(client, source_user, input_targets):
     """
     Tests whether ``get_allowed_users`` works as intended.
     
@@ -150,7 +150,7 @@ def get_allowed_users(client, source_user, input_targets):
     vampytest.assert_instance(user_in_users, bool)
     
     vampytest.assert_instance(allowed_mentions, list)
-    for element in targets:
+    for element in allowed_mentions:
         vampytest.assert_instance(element, ClientUserBase)
     
     return output

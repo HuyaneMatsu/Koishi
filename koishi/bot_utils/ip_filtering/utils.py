@@ -122,7 +122,7 @@ def produce_ip_representation(ip_type, ip):
         return
     
     mask = (1 << unit_size) - 1
-    for shift in range(ip_size -unit_size, -unit_size, -unit_size):
+    for shift in range(ip_size - unit_size, -unit_size, -unit_size):
         yield format((ip >> shift) & mask, mode)
         if shift:
             yield separator

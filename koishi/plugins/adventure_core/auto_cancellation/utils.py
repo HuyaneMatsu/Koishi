@@ -101,6 +101,43 @@ def _produce_single_condition(auto_cancellation_condition, field_added, value_na
     return True
 
 
+def _produce_single_condition_functional(auto_cancellation_condition_functional, field_added, value_name):
+    """
+    Produces a single condition.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    auto_cancellation_condition_functional : ``None | AutoCancellationConditionFunctional``
+        The condition to produce.
+    
+    field_added : `bool`
+        Whether a field was already added.
+    
+    value_name : `str`
+        The name of the value.
+    
+    Yields
+    ------
+    part : `str`
+    
+    Returns
+    -------
+    field_added : `bool`
+    """
+    if auto_cancellation_condition_functional is None:
+        return field_added
+
+    if field_added:
+        yield ' or '
+    
+    yield value_name
+    yield ': '
+    yield auto_cancellation_condition_functional.name
+    return True
+
+
 def produce_auto_cancellation_conditions(auto_cancellation):
     """
     Produces auto cancellation conditions.
@@ -135,6 +172,9 @@ def produce_auto_cancellation_conditions(auto_cancellation):
     )
     field_added = yield from _produce_single_condition(
         auto_cancellation.energy_percentage, field_added, 'energy', True, None
+    )
+    field_added = yield from _produce_single_condition_functional(
+        auto_cancellation.looted_items, field_added, 'looted items'
     )
     
     if not field_added:
@@ -177,7 +217,7 @@ def _check_condition_percentage_succeeds(auto_cancellation_condition, total, exh
     Parameters
     ----------
     auto_cancellation_condition : ``None | AutoCancellationCondition``
-        The condition to produce.
+        The condition to check.
     
     total : `int`
         The total amount
@@ -236,6 +276,28 @@ def _check_condition_condition(condition, value, threshold):
     return succeeds
 
 
+def _check_condition_functional(auto_cancellation_condition_functional, data):
+    """
+    Checks custom condition.
+    
+    Parameters
+    ----------
+    auto_cancellation_condition_functional : ``None | AutoCancellationConditionFunctional``
+        Condition to check.
+    
+    data : `object`
+        Data to test with.
+    
+    Returns
+    -------
+    succeeds : `bool`
+    """
+    if auto_cancellation_condition_functional is None:
+        return False
+    
+    return auto_cancellation_condition_functional.function(data)
+
+
 def check_auto_cancellation_conditions(
     auto_cancellation,
     inventory_total,
@@ -244,6 +306,7 @@ def check_auto_cancellation_conditions(
     health_exhausted,
     energy_total,
     energy_exhausted,
+    looted_items,
 ):
     """
     Checks whether any condition succeeds.
@@ -271,6 +334,9 @@ def check_auto_cancellation_conditions(
     energy_exhausted : `int`
         The exhausted energy of the user.
     
+    looted_items : `list<(int, int, int)>`
+        A list of tuple of 3 elements: loot state, item id and given amount.
+    
     Returns
     -------
     succeeds : `bool`
@@ -293,5 +359,8 @@ def check_auto_cancellation_conditions(
         ) or
         _check_condition_percentage_succeeds(
             auto_cancellation.energy_percentage, energy_total, energy_exhausted
+        ) or
+        _check_condition_functional(
+            auto_cancellation.looted_items, looted_items,
         )
     )

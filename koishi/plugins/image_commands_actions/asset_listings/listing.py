@@ -412,14 +412,6 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1208517062495051796/chen-ran-fluff-0015.png',
-).with_action(
-    ACTION_TAG_FLUFF, CHEN, YAKUMO_RAN,
-).with_creator(
-    'kaisen',
-)
-
-TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1208517062847111268/chen-ran-fluff-0016.png',
 ).with_action(
     ACTION_TAG_FLUFF, CHEN, YAKUMO_RAN,

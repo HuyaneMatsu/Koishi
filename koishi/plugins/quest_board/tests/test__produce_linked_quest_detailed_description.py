@@ -44,8 +44,8 @@ def _iter_options():
             f'- **1 day**\n'
             f'**Time left:**\n'
             f'- **23 hours, 59 minutes, 59 seconds**\n'
-            f'Completed:\n'
-            f'- 0 / 3 times, cannot be re-accepted anymore'
+            f'**Completed:**\n'
+            f'- **0 / 3** times, cannot be re-accepted anymore'
         ),
     )
 

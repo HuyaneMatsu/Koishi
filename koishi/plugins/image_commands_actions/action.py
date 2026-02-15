@@ -75,7 +75,7 @@ def get_allowed_users(client, source_user, input_targets):
     return targets, client_in_users, user_in_users, allowed_mentions
 
 
-def produce_header(client, starter_text, verb, source_user, targets, client_in_targets):
+def produce_header_other(client, starter_text, verb, source_user, targets, client_in_targets):
     """
     Builds action response text and allowed mentions.
     
@@ -459,7 +459,7 @@ class Action(RichAttributeErrorBaseType):
     handler : ``ImageHandlerBase``
         Image handler to use when invoking self-action.
     
-    handler : ``ImageHandlerBase``
+    handler_self : ``None | ImageHandlerBase``
         Image handler to use.
     
     starter_text : `None | str`
@@ -581,7 +581,7 @@ def create_action_command_function(action):
     """
     async def action_command_function(
         client,
-        event,
+        interaction_event,
         target_00: ('mentionable', 'Select someone', 'target-1') = None,
         target_01: ('mentionable', 'Select someone', 'target-2') = None,
         target_02: ('mentionable', 'Select someone', 'target-3') = None,
@@ -617,8 +617,10 @@ def create_action_command_function(action):
         ----------
         client : ``Client``
             The client who received the event.
-        event : ``InteractionEvent``
+        
+        interaction_event : ``InteractionEvent``
             The received interaction event.
+        
         user_{n} : ``None | ClientUserBase`` = `None`, Optional
             Additional users to target.
         
@@ -631,7 +633,7 @@ def create_action_command_function(action):
         
         targets, client_in_users, user_in_users, allowed_mentions = get_allowed_users(
             client,
-            event.user,
+            interaction_event.user,
             (
                 target_00, target_01, target_02, target_03, target_04, target_05, target_06, target_07, target_08,
                 target_09, target_10, target_11, target_12, target_13, target_14, target_15, target_16, target_17,
@@ -639,82 +641,133 @@ def create_action_command_function(action):
             ),
         )
         
-        expire_after = COOLDOWN_HANDLER.get_cooldown(event, len(targets))
+        expire_after = COOLDOWN_HANDLER.get_cooldown(interaction_event, len(targets))
         if expire_after > 0.0:
             abort(
-                f'{client.name_at(event.guild_id)} got bored of enacting your {event.application_command_name} try '
-                f'again in {expire_after:.2f} seconds.'
+                f'{client.name_at(interaction_event.guild_id)} got bored of enacting your '
+                f'{interaction_event.application_command_name} try again in {expire_after:.2f} seconds.'
             )
         
         # Reverse the users when there are no target.
         if (not targets) and (not client_in_users):
             source_user = client
-            targets = {event.user}
+            targets.add(interaction_event.user)
         else:
-            source_user = event.user
+            source_user = interaction_event.user
         
-        content, embed = await create_response_content_and_embed(
-            action, client, event, event.guild_id, source_user, targets, client_in_users, user_in_users, allowed_mentions
+        do_self_target = should_self_target(action, targets, user_in_users)
+        content = build_header(action, client, source_user, targets, client_in_users, do_self_target)
+        image_detail = await get_response_image_detail(
+            client,
+            interaction_event,
+            content,
+            (action.handler_self if do_self_target else action.handler),
+            source_user,
+            [target for target in targets if isinstance(target, ClientUserBase)],
+            allowed_mentions,
         )
-        
-        await send_action_response(client, event, content, embed, allowed_mentions)
+        embed = create_response_embed(
+            client, interaction_event.guild_id, interaction_event.user, targets, client_in_users, image_detail
+        )
+        await send_action_response(client, interaction_event, content, embed, allowed_mentions)
+    
     
     return action_command_function
 
 
-async def create_response_content_and_embed(
-    action, client, event, guild_id, source_user, targets, client_in_users, user_in_users, allowed_mentions
-):
+def should_self_target(action, targets, user_in_users):
     """
-    Creates response content and embed.
-    
-    This function is a coroutine.
+    Returns whether the action should self target.
     
     Parameters
     ----------
     action : ``Action``
         The action to work on.
-    client : ``Client``
-        The client who received the event.
-    event : ``None | InteractionEvent``
-        The received interaction event if called from a command.
-    guild_id : `int`
-        The guild's identifier where the command was called from.
-    source_user : ``ClientUserBase``
-        The user source user who invoked the event.
-    targets : `set<Role | ClientUserBase>`
+    
+    targets : ``set<Role | ClientUserBase>``
         Target entities.
-    client_in_users : `bool`
-        Whether the client is in the mentioned users.
+    
     user_in_users : `bool`
         Whether the user in in the mentioned users as well.
-    allowed_mentions : `list<ClientUserBase>`
+    """
+    return (
+        user_in_users and
+        (len(targets) <= 1) and
+        (action.handler_self is not None)
+    )
+
+
+def build_header(action, client, source_user, targets, client_in_users, do_self_target):
+    """
+    Gets rendered content and handler to use.
+    
+    Parameters
+    ----------
+    action : ``Action``
+        The action to work on.
+    
+    client : ``Client``
+        The client who received the event.
+    
+    source_user : ``ClientUserBase``
+        The user source user who invoked the event.
+    
+    targets : ``set<Role | ClientUserBase>``
+        Target entities.
+    
+    client_in_users : `bool`
+        Whether the client is in the mentioned users.
+    
+    do_self_target : `bool`
+        Whether should build a self target header.
+    
+    Returns
+    -------
+    content_and_handler : `str`
+    """
+    if do_self_target:
+        producer = produce_header_self(action.starter_text, action.verb, source_user)
+    else:
+        producer = produce_header_other(
+            client, action.starter_text, action.verb, source_user, [*targets], client_in_users
+        )
+    
+    return ''.join([*producer])
+
+
+async def get_response_image_detail(
+    client, interaction_event, content, handler, source_user, target_users, allowed_mentions
+):
+    """
+    Gets response image detail.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+        
+    interaction_event : ``None | InteractionEvent``
+        The received interaction event if called from a command.
+    
+    content : `str`
+        Content to send when acknowledging if necessary.
+    
+    handler : ``ImageHandlerBase``
+        Handler to use.
+    
+    source_user : ``ClientUserBase``
+        The user source user who invoked the event.
+    
+    target_users : ``set<ClientUserBase>``
+        The targeted users.
+    
+    allowed_mentions : ``list<ClientUserBase>``
         The allowed mentions.
     
     Returns
     -------
-    content : `str`
-        Response content.
-    embed : ``Embed``
-        Response embed.
+    image_detail : ``None | ImageDetailBase``
     """
-    if (
-        user_in_users and
-        (not targets) and
-        (action.handler_self is not None) and
-        ((random() < 0.5) if client_in_users else True)
-    ):
-        producer = produce_header_self(action.starter_text, action.verb, source_user)
-        handler = action.handler_self
-        
-    else:
-        producer = produce_header(client, action.starter_text, action.verb, source_user, [*targets], client_in_users)
-        handler = action.handler
-    
-    content = ''.join([*producer])
-    
-    target_users = [target for target in targets if isinstance(target, ClientUserBase)]
-    
     # Use goto
     while True:
         if handler.is_character_filterable():
@@ -740,7 +793,7 @@ async def create_response_content_and_embed(
                 acknowledge_task = Task(
                     KOKORO,
                     client.interaction_response_message_create(
-                        event,
+                        interaction_event,
                         allowed_mentions = allowed_mentions,
                         content = content,
                         silent = True,
@@ -763,5 +816,4 @@ async def create_response_content_and_embed(
         
         break
     
-    embed = create_response_embed(client, guild_id, source_user, targets, client_in_users, image_detail)
-    return content, embed
+    return image_detail

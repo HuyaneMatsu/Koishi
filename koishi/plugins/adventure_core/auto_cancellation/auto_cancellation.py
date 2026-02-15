@@ -30,12 +30,15 @@ class AutoCancellation(RichAttributeErrorBaseType):
     inventory_percentage : ``None | AutoCancellationCondition``
         Condition for percentage inventory based cancellation.
     
+    looted_items : ``None | AutoCancellationConditionFunctional``
+        Condition for looted items based cancellation.
+    
     name : `int`
         The name of the auto cancellation.
     """
     __slots__ = (
         'energy_flat', 'energy_percentage', 'health_flat', 'health_percentage', 'id', 'inventory_flat',
-        'inventory_percentage', 'name',
+        'inventory_percentage', 'looted_items', 'name',
     )
     
     def __new__(
@@ -48,6 +51,7 @@ class AutoCancellation(RichAttributeErrorBaseType):
         health_percentage,
         energy_flat,
         energy_percentage,
+        looted_items,
     ):
         """
         Creates a new auto cancellation.
@@ -77,6 +81,9 @@ class AutoCancellation(RichAttributeErrorBaseType):
         
         energy_percentage : ``None | AutoCancellationCondition``
             Condition for percentage energy based cancellation.
+        
+        looted_items : ``None | AutoCancellationConditionFunctional``
+            Condition for looted items based cancellation.
         """
         self = object.__new__(cls)
         self.energy_flat = energy_flat
@@ -86,6 +93,7 @@ class AutoCancellation(RichAttributeErrorBaseType):
         self.id = auto_cancellation_id
         self.inventory_flat = inventory_flat
         self.inventory_percentage = inventory_percentage
+        self.looted_items = looted_items
         self.name = name
         return self
     
@@ -137,6 +145,12 @@ class AutoCancellation(RichAttributeErrorBaseType):
         if (inventory_percentage is not None):
             repr_parts.append(', inventory_percentage = ')
             repr_parts.append(repr(inventory_percentage))
+        
+        # looted_items
+        looted_items = self.looted_items
+        if (looted_items is not None):
+            repr_parts.append(', looted_items = ')
+            repr_parts.append(repr(looted_items))
         
         repr_parts.append('>')
         return ''.join(repr_parts)

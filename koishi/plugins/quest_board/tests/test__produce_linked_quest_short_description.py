@@ -152,7 +152,7 @@ def _iter_options():
         quest_template_1,
         now,
         (
-            f'Completed: 1 times, re-acceptable for 23 hours, 59 minutes, 40 seconds\n'
+            f'Completed: 1 / unlimited times, re-acceptable for 23 hours, 59 minutes, 40 seconds\n'
             f'Submit 0.02 kg {BUILTIN_EMOJIS["grapes"]} Bluefrankish to Sakuya.'
         ),
     )

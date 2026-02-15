@@ -366,10 +366,13 @@ def get_action_and_image_detail(action_tag_name, source_character_name, target_c
     ----------
     action_tag_name : `None | str`
         Selected action tag name.
+    
     source_character_name : `None | str`
         Name of the source character.
+    
     target_character_name : `None | str`
         Name of the target character.
+    
     image_name : `None | str`
         The name of the image.
     

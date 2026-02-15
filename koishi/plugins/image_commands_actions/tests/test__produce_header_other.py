@@ -1,7 +1,7 @@
 import vampytest
 from hata import ClientUserBase, Role, User
 
-from ..action import EMOJI_FLUSHED, produce_header
+from ..action import EMOJI_FLUSHED, produce_header_other
 
 
 def _iter_options():
@@ -58,9 +58,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__produce_header(client, starter_text, verb, source_user, targets, client_in_targets, random_yield):
+def test__produce_header_other(client, starter_text, verb, source_user, targets, client_in_targets, random_yield):
     """
-    Tests whether ``produce_header`` works as intended.
+    Tests whether ``produce_header_other`` works as intended.
     
     Parameters
     ----------
@@ -90,7 +90,7 @@ def test__produce_header(client, starter_text, verb, source_user, targets, clien
     output : `str`
     """
     mocked = vampytest.mock_globals(
-        produce_header,
+        produce_header_other,
         random = (lambda : random_yield),
     )
     output = [*mocked(client, starter_text, verb, source_user, targets, client_in_targets)]

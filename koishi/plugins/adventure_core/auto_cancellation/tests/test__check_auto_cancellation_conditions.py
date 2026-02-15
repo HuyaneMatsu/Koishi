@@ -2,6 +2,7 @@ import vampytest
 
 from ..auto_cancellation import AutoCancellation
 from ..auto_cancellation_condition import AutoCancellationCondition
+from ..auto_cancellation_condition_functional import AutoCancellationConditionFunctional
 from ..auto_cancellation_condition_ids import (
     AUTO_CANCELLATION_CONDITION_ID_EQUAL, AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL,
     AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, AUTO_CANCELLATION_CONDITION_ID_LESS_OR_EQUAL,
@@ -22,6 +23,7 @@ def _iter_options():
             None,
             None,
             None,
+            None,
         ),
         100,
         0,
@@ -29,6 +31,7 @@ def _iter_options():
         0,
         100,
         0,
+        [],
         False,
     )
     
@@ -44,6 +47,7 @@ def _iter_options():
             None,
             None,
             None,
+            None,
         ),
         100,
         0,
@@ -51,6 +55,7 @@ def _iter_options():
         0,
         100,
         0,
+        [],
         True,
     )
     
@@ -64,6 +69,7 @@ def _iter_options():
             None,
             None,
             None,
+            None,
         ),
         100,
         0,
@@ -71,6 +77,7 @@ def _iter_options():
         0,
         100,
         0,
+        [],
         True,
     )
     
@@ -84,6 +91,7 @@ def _iter_options():
             None,
             None,
             None,
+            None,
         ),
         100,
         0,
@@ -91,6 +99,7 @@ def _iter_options():
         0,
         100,
         0,
+        [],
         True,
     )
     
@@ -104,6 +113,7 @@ def _iter_options():
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
             None,
             None,
+            None,
         ),
         100,
         0,
@@ -111,6 +121,7 @@ def _iter_options():
         0,
         100,
         0,
+        [],
         True,
     )
     
@@ -124,6 +135,7 @@ def _iter_options():
             None,
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
             None,
+            None,
         ),
         100,
         0,
@@ -131,6 +143,7 @@ def _iter_options():
         0,
         100,
         0,
+        [],
         True,
     )
     
@@ -144,6 +157,7 @@ def _iter_options():
             None,
             None,
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
+            None,
         ),
         100,
         0,
@@ -151,6 +165,7 @@ def _iter_options():
         0,
         100,
         0,
+        [],
         True,
     )
     
@@ -166,6 +181,7 @@ def _iter_options():
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 20),
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
             None,
+            None,
         ),
         100,
         0,
@@ -173,6 +189,7 @@ def _iter_options():
         0,
         100,
         0,
+        [],
         True,
     )
     
@@ -188,6 +205,7 @@ def _iter_options():
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_EQUAL, 20),
             None,
             None,
+            None,
         ),
         100,
         0,
@@ -195,6 +213,7 @@ def _iter_options():
         0,
         100,
         0,
+        [],
         False,
     )
     
@@ -208,6 +227,7 @@ def _iter_options():
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, 20),
             None,
             None,
+            None,
         ),
         100,
         0,
@@ -215,6 +235,7 @@ def _iter_options():
         0,
         100,
         0,
+        [],
         True,
     )
     
@@ -228,6 +249,7 @@ def _iter_options():
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_LESS_OR_EQUAL, 20),
             None,
             None,
+            None,
         ),
         100,
         0,
@@ -235,6 +257,7 @@ def _iter_options():
         0,
         100,
         0,
+        [],
         False,
     )
     
@@ -248,6 +271,7 @@ def _iter_options():
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_LESS_THAN, 20),
             None,
             None,
+            None,
         ),
         100,
         0,
@@ -255,6 +279,7 @@ def _iter_options():
         0,
         100,
         0,
+        [],
         False,
     )
     
@@ -268,6 +293,7 @@ def _iter_options():
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_NOT_EQUAL, 20),
             None,
             None,
+            None,
         ),
         100,
         0,
@@ -275,6 +301,51 @@ def _iter_options():
         0,
         100,
         0,
+        [],
+        True,
+    )
+    
+    yield (
+        AutoCancellation(
+            9999,
+            '',
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            AutoCancellationConditionFunctional('shrimp', lambda looted_items : (True if looted_items else False)),
+        ),
+        100,
+        0,
+        100,
+        0,
+        100,
+        0,
+        [],
+        False,
+    )
+    
+    yield (
+        AutoCancellation(
+            9999,
+            '',
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            AutoCancellationConditionFunctional('shrimp', lambda looted_items : (True if looted_items else False)),
+        ),
+        100,
+        0,
+        100,
+        0,
+        100,
+        0,
+        [(1, 10, 300)],
         True,
     )
 
@@ -288,6 +359,7 @@ def test__check_auto_cancellation_conditions(
     health_exhausted,
     energy_total,
     energy_exhausted,
+    looted_items,
 ):
     """
     Tests whether ``check_auto_cancellation_conditions`` works as intended.
@@ -315,6 +387,9 @@ def test__check_auto_cancellation_conditions(
     energy_exhausted : `int`
         The exhausted energy of the user.
     
+    looted_items : `list<(int, int, int)>`
+        A list of tuple of 3 elements: loot state, item id and given amount.
+    
     Returns
     -------
     output : `bool`
@@ -327,6 +402,7 @@ def test__check_auto_cancellation_conditions(
         health_exhausted,
         energy_total,
         energy_exhausted,
+        looted_items,
     )
     vampytest.assert_instance(output, bool)
     return output

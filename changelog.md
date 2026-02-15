@@ -1,3 +1,16 @@
+### 2026-02-15
+
+- Fix completability rendering of active quests, was different from other sections.
+- Fix `/automation welcome`, the welcoming logic was not updated to handle the new `creator` / image logic.
+- Fix self targetable action commands, such as `/pocky-kiss` did not produce self target output when self targeted.
+- Fix single & multi touhou character completion could yield to different 1st result. (yumeirusynthesis)
+- Add low health or energy adventure auto cancellation rule. (yumeirusynthesis)
+- Add loot lost once adventure auto cancellation rule. (yumeirusynthesis)
+- Update `/oj` command (1 card updated, 13 new cards added, 1 new character added).
+- Update touhou character auto completion's first step from `start matching, select first` to
+    `match anywhere anyhow, select closest to start`. Second step, `typo match, select best` unchanged.
+    If the suggestion order is less relevant as before, we can work on it.
+
 ### 2026-01-31
 
 - Fix stepping adventures failed, due to after live patching it, forgot to revert the code. (ayahiya)

@@ -8,13 +8,13 @@ from time import time as time_now
 
 from hata import (
     ApplicationCommand, ApplicationCommandPermission, ApplicationCommandPermissionOverwrite,
-    AutoModerationAction, AutoModerationRule, BUILTIN_EMOJIS, CHANNELS, CLIENTS, Channel, Client, ComponentType,
-    DISCORD_EPOCH, DiscordException, DiscoveryCategory, ERROR_CODES, Embed, Emoji, EntitlementOwnerType,
+    AutoModerationAction, AutoModerationRule, BUILTIN_EMOJIS, CHANNELS, CLIENTS, Channel, Client, ClientUserBase,
+    ComponentType, DISCORD_EPOCH, DiscordException, DiscoveryCategory, ERROR_CODES, Embed, Emoji, EntitlementOwnerType,
     ExplicitContentFilterLevel, ForumTag, GUILDS, Guild, InteractionResponseType, KOKORO, MessageNotificationLevel,
     Oauth2User, OnboardingMode, Permission, Poll, PrivacyLevel, Role, ScheduledEventEntityType, SoundboardSound,
     Sticker, StickerPack, Team, User, VerificationLevel, VerificationScreen, VoiceRegion, Webhook, WebhookType,
-    WelcomeScreen, create_partial_user_from_id, datetime_to_timestamp, eventlist, now_as_id, parse_oauth2_redirect_url,
-    MessageSearchQuery, MessageSearchResponse
+    WelcomeScreen, create_partial_user_from_id, datetime_to_id, datetime_to_timestamp, eventlist, now_as_id,
+    parse_oauth2_redirect_url, MessageSearchQuery, MessageSearchResponse
 )
 from hata.discord.client.functionality_helpers import role_move_key
 from hata.discord.guild import GuildDiscovery, create_partial_guild_from_data
@@ -3713,6 +3713,54 @@ async def message_search_guild(client, guild_id, message_search_query):
     return MessageSearchResponse.from_data(response_data)
 
 
+async def scheduled_event_occasion_overwrite_create(client, scheduled_event, timestamp, cancelled):
+    return await bypass_request(
+        client,
+        METHOD_POST,
+        f'{API_ENDPOINT}/guilds/{scheduled_event.guild_id}/scheduled-events/{scheduled_event.id}/exceptions',
+        {
+            'original_scheduled_start_time': datetime_to_timestamp(timestamp),
+            'is_canceled': cancelled,
+        },
+    )
+
+
+async def scheduled_event_occasion_overwrite_edit(client, scheduled_event, timestamp, cancelled):
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
+        f'{API_ENDPOINT}/guilds/{scheduled_event.guild_id}/scheduled-events/{scheduled_event.id}/exceptions/{datetime_to_id(timestamp)}',
+        {
+            'is_canceled': cancelled,
+        },
+    )
+
+
+async def scheduled_event_occasion_overwrite_delete(client, scheduled_event, timestamp):
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
+        f'{API_ENDPOINT}/guilds/{scheduled_event.guild_id}/scheduled-events/{scheduled_event.id}/exceptions/{datetime_to_id(timestamp)}',
+    )
+
+async def scheduled_event_occasion_user_get_chunk(client, scheduled_event, timestamp):
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{scheduled_event.guild_id}/scheduled-events/{scheduled_event.id}/exceptions/{datetime_to_id(timestamp)}/users',
+    )
+
+async def scheduled_event_user_counts_get(client, scheduled_event, timestamps):
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{scheduled_event.guild_id}/scheduled-events/{scheduled_event.id}/users/counts',
+        query = {
+            'timestamps': [datetime_to_id(timestamp) for timestamp in timestamps],
+        },
+    )
+
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0000(client, message):
     """
@@ -4431,23 +4479,23 @@ async def rate_limit_test_0027(client, message, guild_id : str = ''):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0027') as RLT:
-        guild_1 = channel.guild
-        if guild_1 is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not guild_1.cached_permissions_for(client).administrator:
+        if not guild_0.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         try:
-            guild_2 = GUILDS[int(guild_id)]
+            guild_1 = GUILDS[int(guild_id)]
         except (KeyError, ValueError):
             await RLT.send('Please pass a guild id as well, where I am as well.')
         
-        if not guild_2.cached_permissions_for(client).administrator:
+        if not guild_1.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission at the other guild as well')
             
-        role_1 = await client.role_create(guild_1, name = 'Sanae')
-        role_2 = await client.role_create(guild_2, name = 'Reimu')
+        role_1 = await client.role_create(guild_0, name = 'Sanae')
+        role_2 = await client.role_create(guild_1, name = 'Reimu')
         await role_edit(client, role_1, name = 'Chiruno')
         await role_edit(client, role_2, name = 'Ririi')
         await client.role_delete(role_1)
@@ -4461,27 +4509,27 @@ async def rate_limit_test_0028(client, message, guild_id : str = ''):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0027') as RLT:
-        guild_1 = channel.guild
-        if guild_1 is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
             
-        if not guild_1.cached_permissions_for(client).administrator:
+        if not guild_0.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         try:
-            guild_2 = GUILDS[int(guild_id)]
+            guild_1 = GUILDS[int(guild_id)]
         except (KeyError, ValueError):
             await RLT.send('Please pass a guild id as well, where I am as well.')
         
-        if not guild_2.cached_permissions_for(client).administrator:
+        if not guild_1.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission at the other guild as well')
             
-        role_1_data = await role_create(client, guild_1, name = 'Yuyuko')
-        role_2_data = await role_create(client, guild_2, name = 'Yoshika')
+        role_1_data = await role_create(client, guild_0, name = 'Yuyuko')
+        role_2_data = await role_create(client, guild_1, name = 'Yoshika')
         role_1_id = int(role_1_data['id'])
         role_2_id = int(role_2_data['id'])
-        await client.api.role_delete(guild_1.id, role_1_id, None)
-        await client.api.role_delete(guild_2.id, role_2_id, None)
+        await client.api.role_delete(guild_0.id, role_1_id, None)
+        await client.api.role_delete(guild_1.id, role_2_id, None)
 
 
 @RATE_LIMIT_COMMANDS
@@ -4587,12 +4635,12 @@ async def rate_limit_test_0032(client, message):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0032') as RLT:
-        guild_1 = channel.guild
-        if guild_1 is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
             
-        for guild_2_id in client.guild_profiles.keys():
-            if guild_2_id == guild_1.id:
+        for guild_1_id in client.guild_profiles.keys():
+            if guild_1_id == guild_0.id:
                 continue
             
             break
@@ -4600,8 +4648,8 @@ async def rate_limit_test_0032(client, message):
         else:
             await RLT.send('I must have at least 2 guilds.')
         
-        await guild_user_get(client, guild_1, client.id)
-        await guild_user_get(client, GUILDS[guild_2_id], client.id)
+        await guild_user_get(client, guild_0, client.id)
+        await guild_user_get(client, GUILDS[guild_1_id], client.id)
 
 
 @RATE_LIMIT_COMMANDS
@@ -4611,12 +4659,12 @@ async def rate_limit_test_0033(client, message):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0033') as RLT:
-        guild_1 = channel.guild
-        if guild_1 is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
             
-        for guild_2_id in client.guild_profiles.keys():
-            if guild_2_id is guild_1.id:
+        for guild_1_id in client.guild_profiles.keys():
+            if guild_1_id is guild_0.id:
                 continue
             
             break
@@ -4624,8 +4672,8 @@ async def rate_limit_test_0033(client, message):
         else:
             await RLT.send('I must have at least 2 guilds.')
         
-        await guild_user_search(client, guild_1, 'nyan')
-        await guild_user_search(client, GUILDS[guild_2_id], 'nyan')
+        await guild_user_search(client, guild_0, 'nyan')
+        await guild_user_search(client, GUILDS[guild_1_id], 'nyan')
 
 
 @RATE_LIMIT_COMMANDS
@@ -4958,7 +5006,7 @@ async def rate_limit_test_0047(client, message):
 
 @RATE_LIMIT_COMMANDS
 @configure_converter('user', everywhere = True)
-async def rate_limit_test_0048(client, message, user : 'user' = None):
+async def rate_limit_test_0048(client, message, user : ClientUserBase = None):
     """
     Bans gets the ban and un-bans the given user.
     
@@ -5551,13 +5599,13 @@ async def rate_limit_test_0082(client, message, name : str, emoji : 'Emoji'):
             if index == 0:
                 guild_0 = guild
             else:
-                guild_2 = guild
+                guild_1 = guild
         
         async with client.http.get(emoji.url) as response:
             emoji_data = await response.read()
         
         emoji_1 = await client.emoji_create_guild(guild_0, emoji_data, name = name)
-        emoji_2 = await client.emoji_create_guild(guild_2, emoji_data, name = name)
+        emoji_2 = await client.emoji_create_guild(guild_1, emoji_data, name = name)
         
         await emoji_delete_guild(client, emoji_1)
         await emoji_delete_guild(client, emoji_2)
@@ -5580,13 +5628,13 @@ async def rate_limit_test_0083(client, message, name : str, emoji : 'Emoji'):
             if index == 0:
                 guild_0 = guild
             else:
-                guild_2 = guild
+                guild_1 = guild
         
         async with client.http.get(emoji.url) as response:
             emoji_data = await response.read()
         
-        emoji_1 = await emoji_create_guild(client, guild_0, emoji_data, name = name)
-        emoji_2 = await emoji_create_guild(client, guild_2, name, emoji_data)
+        emoji_1 = await emoji_create_guild(client, guild_0, name, emoji_data)
+        emoji_2 = await emoji_create_guild(client, guild_1, name, emoji_data)
         
         await client.emoji_delete_guild(emoji_1)
         await client.emoji_delete_guild(emoji_2)
@@ -5653,7 +5701,7 @@ async def rate_limit_test_0086(client, message, name : str):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0087(client, message, user : 'user'):
+async def rate_limit_test_0087(client, message, user : ClientUserBase):
     """
     Kicks the given user from the guild.
     
@@ -5906,7 +5954,7 @@ async def rate_limit_test_0099(client, message):
         await application_command_guild_delete(client, guild, application_command)
 
 
-class check_interacter:
+class check_interactor:
     __slots__ = ('user', 'channel', 'application_command')
     
     def __init__(self, channel, user, application_command):
@@ -5953,7 +6001,7 @@ async def rate_limit_test_0100(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(channel, message.author, application_command), timeout = 300.0)
+                check_interactor(channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await RLT.send('timeout occurred.')
         else:
@@ -5989,7 +6037,7 @@ async def rate_limit_test_0101(client, message):
         try:
             try:
                 interaction1 = await client.wait_for('interaction_create',
-                    check_interacter(channel, message.author, application_command), timeout = 300.0)
+                    check_interactor(channel, message.author, application_command), timeout = 300.0)
             except TimeoutError:
                 await RLT.send('timeout occurred.')
             
@@ -5997,7 +6045,7 @@ async def rate_limit_test_0101(client, message):
             
             try:
                 interaction2 = await client.wait_for('interaction_create',
-                    check_interacter(channel, message.author, application_command), timeout = 300.0)
+                    check_interactor(channel, message.author, application_command), timeout = 300.0)
             except TimeoutError:
                 await RLT.send('timeout occurred.')
             
@@ -6037,7 +6085,7 @@ async def rate_limit_test_0102(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(channel, message.author, application_command), timeout = 300.0)
+                check_interactor(channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await RLT.send('timeout occurred.')
         else:
@@ -6095,21 +6143,21 @@ async def rate_limit_test_0105(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0106(client, message, guild_2 : 'guild' = None):
+async def rate_limit_test_0106(client, message, guild_1 : Guild = None):
     """
     Edits the welcome screen of 2 guilds. Please also define the second guild.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0106') as RLT:
-        guild = channel.guild
-        if guild is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
-        if guild_2 is None:
+        if guild_1 is None:
             await RLT.send('Second guild unknown.')
         
-        await welcome_screen_edit(client, guild)
-        await welcome_screen_edit(client, guild_2)
+        await welcome_screen_edit(client, guild_0)
+        await welcome_screen_edit(client, guild_1)
 
 
 @RATE_LIMIT_COMMANDS
@@ -6204,21 +6252,21 @@ async def rate_limit_test_0109(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0110(client, message, guild_2 : 'guild' = None):
+async def rate_limit_test_0110(client, message, guild_1 : Guild = None):
     """
     Adds command with 2 guilds, then uses the update many endpoint. Please give an additional guild to use the command
     within.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0110') as RLT:
-        guild = channel.guild
-        if guild is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
-        if guild_2 is None:
+        if guild_1 is None:
             await RLT.send('Second guild unknown.')
         
-        application_commands = await client.application_command_guild_get_all(guild_2)
+        application_commands = await client.application_command_guild_get_all(guild_1)
         if application_commands:
             application_command = application_commands[0]
             delete_command_after = False
@@ -6227,13 +6275,13 @@ async def rate_limit_test_0110(client, message, guild_2 : 'guild' = None):
             delete_command_after = True
         
         try:
-            application_commands = await application_command_guild_update_multiple(client, guild_2, [application_command])
+            application_commands = await application_command_guild_update_multiple(client, guild_1, [application_command])
         finally:
             if delete_command_after:
                 application_command = application_commands[0]
-                await client.application_command_guild_delete(guild_2, application_command)
+                await client.application_command_guild_delete(guild_1, application_command)
         
-        application_commands = await client.application_command_guild_get_all(guild)
+        application_commands = await client.application_command_guild_get_all(guild_0)
         if application_commands:
             application_command = application_commands[0]
             delete_command_after = False
@@ -6242,48 +6290,48 @@ async def rate_limit_test_0110(client, message, guild_2 : 'guild' = None):
             delete_command_after = True
         
         try:
-            application_commands = await application_command_guild_update_multiple(client, guild, [application_command])
+            application_commands = await application_command_guild_update_multiple(client, guild_0, [application_command])
         finally:
             if delete_command_after:
                 application_command = application_commands[0]
-                await client.application_command_guild_delete(guild, application_command)
+                await client.application_command_guild_delete(guild_0, application_command)
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0111(client, message, guild_2 : 'guild' = None):
+async def rate_limit_test_0111(client, message, guild_1 : Guild = None):
     """
     Creates application command within 2 guilds. Please define a second guild.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0111') as RLT:
-        guild = channel.guild
-        if guild is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
-        if guild_2 is None:
+        if guild_1 is None:
             await RLT.send('Second guild unknown.')
         
         application_command = ApplicationCommand('test_command', 'ayaya')
-        application_command = await application_command_guild_create(client, guild_2, application_command)
-        await client.application_command_guild_delete(guild_2, application_command)
+        application_command = await application_command_guild_create(client, guild_1, application_command)
+        await client.application_command_guild_delete(guild_1, application_command)
         
         application_command = ApplicationCommand('test_command', 'ayaya')
-        application_command = await application_command_guild_create(client, guild, application_command)
-        await client.application_command_guild_delete(guild, application_command)
+        application_command = await application_command_guild_create(client, guild_0, application_command)
+        await client.application_command_guild_delete(guild_0, application_command)
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0112(client, message, guild_2 : 'guild' = None):
+async def rate_limit_test_0112(client, message, guild_1 : Guild = None):
     """
     Creates, edits and the deletes a guild bound application command. Please define a second guild as well.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0112') as RLT:
-        guild = channel.guild
-        if guild is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
-        if guild_2 is None:
+        if guild_1 is None:
             await RLT.send('Second guild unknown.')
         
         application_command_schema = ApplicationCommand(
@@ -6291,26 +6339,26 @@ async def rate_limit_test_0112(client, message, guild_2 : 'guild' = None):
             'But does nothing for real, pls don\'t use it.',
         )
         
-        application_command = await application_command_guild_create(client, guild, application_command_schema)
+        application_command = await application_command_guild_create(client, guild_0, application_command_schema)
         
         application_command_schema.description = 'The floor is lava.'
         application_command_schema.name = 'derping-out'
         
-        await application_command_guild_edit(client, guild, application_command, application_command_schema)
-        await application_command_guild_delete(client, guild, application_command)
+        await application_command_guild_edit(client, guild_0, application_command, application_command_schema)
+        await application_command_guild_delete(client, guild_0, application_command)
         
         application_command_schema = ApplicationCommand(
             'This-command_cake',
             'But does nothing for real, pls don\'t use it.',
         )
         
-        application_command = await application_command_guild_create(client, guild_2, application_command_schema)
+        application_command = await application_command_guild_create(client, guild_1, application_command_schema)
         
         application_command_schema.description = 'The floor is lava.'
         application_command_schema.name = 'derping-out'
         
-        await application_command_guild_edit(client, guild_2, application_command, application_command_schema)
-        await application_command_guild_delete(client, guild_2, application_command)
+        await application_command_guild_edit(client, guild_1, application_command, application_command_schema)
+        await application_command_guild_delete(client, guild_1, application_command)
 
 
 @RATE_LIMIT_COMMANDS
@@ -6418,36 +6466,36 @@ async def rate_limit_test_0116(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0117(client, message, guild_2 : 'guild' = None):
+async def rate_limit_test_0117(client, message, guild_1 : Guild = None):
     """
     Creates and edits application commands inside of 2 guilds.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0117') as RLT:
-        guild = channel.guild
-        if guild is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
-        if guild_2 is None:
+        if guild_1 is None:
             await RLT.send('Second guild unknown.')
         
         access = await client.owners_access('applications.commands.permissions.update')
         
         application_command = ApplicationCommand('test_command_56', 'ayaya')
-        application_command = await client.application_command_guild_create(guild, application_command)
+        application_command = await client.application_command_guild_create(guild_0, application_command)
         
-        await application_command_permission_edit(client, access, guild, application_command,
+        await application_command_permission_edit(client, access, guild_0, application_command,
             [ApplicationCommandPermissionOverwrite(client.owner, True)])
         
-        await client.application_command_guild_delete(guild, application_command)
+        await client.application_command_guild_delete(guild_0, application_command)
         
         application_command = ApplicationCommand('test_command_56', 'ayaya')
-        application_command = await client.application_command_guild_create(guild_2, application_command)
+        application_command = await client.application_command_guild_create(guild_1, application_command)
         
-        await application_command_permission_edit(client, access, guild_2, application_command,
+        await application_command_permission_edit(client, access, guild_1, application_command,
             [ApplicationCommandPermissionOverwrite(client.owner, True)])
         
-        await client.application_command_guild_delete(guild_2, application_command)
+        await client.application_command_guild_delete(guild_1, application_command)
 
 
 @RATE_LIMIT_COMMANDS
@@ -6481,7 +6529,7 @@ async def rate_limit_test_0119_parallel(client, stage_channel):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0119(client, message, guild_1 : 'guild' = None):
+async def rate_limit_test_0119(client, message, guild_1 : Guild = None):
     """
     Joins to 2 stage channels. Please also define a second guild.
     """
@@ -6525,7 +6573,7 @@ async def rate_limit_test_0120_parallel(client, stage_channel, user):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0120(client, message, guild_1 : 'guild' = None):
+async def rate_limit_test_0120(client, message, guild_1 : Guild = None):
     """
     Moves 2 users in stage channels. Please also define an other guild.
     """
@@ -6601,7 +6649,7 @@ async def rate_limit_test_0122(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0123(client, message, stage_channel : 'channel' = None):
+async def rate_limit_test_0123(client, message, stage_channel : Channel = None):
     """
     Edits a stage channel.
     """
@@ -6625,7 +6673,7 @@ async def rate_limit_test_0123(client, message, stage_channel : 'channel' = None
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0124(client, message, stage_channel : 'channel' = None):
+async def rate_limit_test_0124(client, message, stage_channel : Channel = None):
     """
     Edits a stage channel's topic only.
     """
@@ -6658,7 +6706,7 @@ async def rate_limit_test_0125(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0126(client, message, stage_channel : 'channel' = None):
+async def rate_limit_test_0126(client, message, stage_channel : Channel = None):
     """
     Deletes a stage.
     """
@@ -6732,7 +6780,7 @@ async def rate_limit_test_0128(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(channel, message.author, application_command), timeout = 300.0)
+                check_interactor(channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await RLT.send('timeout occurred.')
         else:
@@ -6938,7 +6986,7 @@ async def rate_limit_test_0140(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0141(client, message, stage_channel : 'channel' = None):
+async def rate_limit_test_0141(client, message, stage_channel : Channel = None):
     """
     Gets a stage channel.
     """
@@ -7021,7 +7069,7 @@ async def rate_limit_test_0145(client, message, sticker_id : int = None):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0146(client, message, emoji_1: 'emoji' = None, emoji_2: 'emoji' = None):
+async def rate_limit_test_0146(client, message, emoji_0: Emoji = None, emoji_1: Emoji = None):
     """
     Creates a sticker from an emoji.
     """
@@ -7034,24 +7082,24 @@ async def rate_limit_test_0146(client, message, emoji_1: 'emoji' = None, emoji_2
         if not channel.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        if emoji_1 is None:
+        if emoji_0 is None:
             await RLT.send('Please give an emoji to mimic.')
         
-        if (emoji_1.is_unicode_emoji()):
+        if (emoji_0.is_unicode_emoji()):
             await RLT.send('First emoji must be custom emoji.')
         
-        if emoji_2 is None:
+        if emoji_1 is None:
             await RLT.send('Please give a second emoji to use as tag.')
         
-        if (emoji_2.is_custom_emoji()):
+        if (emoji_1.is_custom_emoji()):
             await RLT.send('Second emoji must be unicode emoji.')
         
-        async with client.http.get(emoji_1.url) as response:
+        async with client.http.get(emoji_0.url) as response:
             file = await response.read()
         
-        name = emoji_1.name
+        name = emoji_0.name
         description = name
-        tags = [emoji_2.name, 'egg']
+        tags = [emoji_1.name, 'egg']
         
         await sticker_create(client, guild, name, description, file, tags)
 
@@ -7112,17 +7160,17 @@ async def rate_limit_test_0150(client, message, name : str, guild_id : str = '')
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0150') as RLT:
-        guild_1 = channel.guild
-        if guild_1 is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
         try:
-            guild_2 = GUILDS[int(guild_id)]
+            guild_1 = GUILDS[int(guild_id)]
         except (KeyError, ValueError):
             await RLT.send('Please pass a guild id as well, where I am as well.')
         
+        await client_guild_profile_edit(client, guild_0, name)
         await client_guild_profile_edit(client, guild_1, name)
-        await client_guild_profile_edit(client, guild_2, name)
 
 
 @RATE_LIMIT_COMMANDS
@@ -7208,7 +7256,7 @@ async def rate_limit_test_0156(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0157(client, message, directory_channel : 'channel' = None, name : str = None):
+async def rate_limit_test_0157(client, message, directory_channel : Channel = None, name : str = None):
     """
     Gets directory sub-channel by name?
     
@@ -7233,7 +7281,7 @@ async def rate_limit_test_0157(client, message, directory_channel : 'channel' = 
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0158(client, message, directory_channel : 'channel' = None):
+async def rate_limit_test_0158(client, message, directory_channel : Channel = None):
     """
     Gets directory sub-channel count?
     
@@ -7255,7 +7303,7 @@ async def rate_limit_test_0158(client, message, directory_channel : 'channel' = 
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0159(client, message, directory_channel : 'channel' = None):
+async def rate_limit_test_0159(client, message, directory_channel : Channel = None):
     """
     Gets directory sub-channels?
     
@@ -7398,17 +7446,17 @@ async def rate_limit_test_0167(client, message, guild_id : str = ''):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0167') as RLT:
-        guild_1 = channel.guild
-        if guild_1 is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
         try:
-            guild_2 = GUILDS[int(guild_id)]
+            guild_1 = GUILDS[int(guild_id)]
         except (KeyError, ValueError):
             await RLT.send('Please pass a guild id as well, where I am as well.')
         
+        await scheduled_event_get_all_guild(client, guild_0)
         await scheduled_event_get_all_guild(client, guild_1)
-        await scheduled_event_get_all_guild(client, guild_2)
 
 
 @RATE_LIMIT_COMMANDS
@@ -7438,29 +7486,29 @@ async def rate_limit_test_0169(client, message, guild_id : str = ''):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0169') as RLT:
-        guild_1 = channel.guild
-        if guild_1 is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
         try:
-            guild_2 = GUILDS[int(guild_id)]
+            guild_1 = GUILDS[int(guild_id)]
         except (KeyError, ValueError):
             await RLT.send('Please pass a guild id as well, where I am as well.')
         
-        guild_1_voice_channels = guild_1.voice_channels
-        if (not guild_1_voice_channels):
+        guild_0_voice_channels = guild_0.voice_channels
+        if (not guild_0_voice_channels):
             await RLT.send('The guild has no voice channel, please create one..')
             
-        voice_1 = guild_1_voice_channels[0]
+        voice_1 = guild_0_voice_channels[0]
         
-        guild_2_voice_channels = guild_2.voice_channels
-        if (not guild_2_voice_channels):
+        guild_1_voice_channels = guild_1.voice_channels
+        if (not guild_1_voice_channels):
             await RLT.send('The other guild has no voice channel, please create one..')
         
-        voice_2 = guild_2_voice_channels[0]
+        voice_2 = guild_1_voice_channels[0]
         
-        await scheduled_event_create(client, guild_1, voice_1, 'ayaya')
-        await scheduled_event_create(client, guild_2, voice_2, 'ayaya')
+        await scheduled_event_create(client, guild_0, voice_1, 'ayaya')
+        await scheduled_event_create(client, guild_1, voice_2, 'ayaya')
 
 
 @RATE_LIMIT_COMMANDS
@@ -7490,14 +7538,20 @@ async def rate_limit_test_0171(client, message, guild_id : str = ''):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0171') as RLT:
-        guild_1 = channel.guild
-        if guild_1 is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
         try:
-            guild_2 = GUILDS[int(guild_id)]
+            guild_1 = GUILDS[int(guild_id)]
         except (KeyError, ValueError):
             await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        guild_0_scheduled_events = await client.scheduled_event_get_all_guild(guild_0)
+        if not guild_0_scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        guild_0_scheduled_event_id = guild_0_scheduled_events[0].id
         
         guild_1_scheduled_events = await client.scheduled_event_get_all_guild(guild_1)
         if not guild_1_scheduled_events:
@@ -7505,14 +7559,8 @@ async def rate_limit_test_0171(client, message, guild_id : str = ''):
         
         guild_1_scheduled_event_id = guild_1_scheduled_events[0].id
         
-        guild_2_scheduled_events = await client.scheduled_event_get_all_guild(guild_2)
-        if not guild_2_scheduled_events:
-            await RLT.send('Please create a scheduled event first.')
-        
-        guild_2_scheduled_event_id = guild_2_scheduled_events[0].id
-        
+        await scheduled_event_get(client, guild_0, guild_0_scheduled_event_id)
         await scheduled_event_get(client, guild_1, guild_1_scheduled_event_id)
-        await scheduled_event_get(client, guild_2, guild_2_scheduled_event_id)
 
 
 @RATE_LIMIT_COMMANDS
@@ -7546,14 +7594,24 @@ async def rate_limit_test_0173(client, message, guild_id : str = ''):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0173') as RLT:
-        guild_1 = channel.guild
-        if guild_1 is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
         try:
-            guild_2 = GUILDS[int(guild_id)]
+            guild_1 = GUILDS[int(guild_id)]
         except (KeyError, ValueError):
             await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        guild_0_scheduled_events = await client.scheduled_event_get_all_guild(guild_0)
+        if not guild_0_scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        guild_0_scheduled_event = guild_0_scheduled_events[0]
+        if guild_0_scheduled_event.name == 'ayaya':
+            guild_0_name = 'apple'
+        else:
+            guild_0_name = 'ayaya'
         
         guild_1_scheduled_events = await client.scheduled_event_get_all_guild(guild_1)
         if not guild_1_scheduled_events:
@@ -7565,18 +7623,8 @@ async def rate_limit_test_0173(client, message, guild_id : str = ''):
         else:
             guild_1_name = 'ayaya'
         
-        guild_2_scheduled_events = await client.scheduled_event_get_all_guild(guild_2)
-        if not guild_2_scheduled_events:
-            await RLT.send('Please create a scheduled event first.')
-        
-        guild_2_scheduled_event = guild_2_scheduled_events[0]
-        if guild_2_scheduled_event.name == 'ayaya':
-            guild_2_name = 'apple'
-        else:
-            guild_2_name = 'ayaya'
-        
+        await scheduled_event_edit(client, guild_0_scheduled_event, guild_0_name)
         await scheduled_event_edit(client, guild_1_scheduled_event, guild_1_name)
-        await scheduled_event_edit(client, guild_2_scheduled_event, guild_2_name)
 
 
 @RATE_LIMIT_COMMANDS
@@ -7586,14 +7634,20 @@ async def rate_limit_test_0174(client, message, guild_id : str = ''):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0174') as RLT:
-        guild_1 = channel.guild
-        if guild_1 is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
         try:
-            guild_2 = GUILDS[int(guild_id)]
+            guild_1 = GUILDS[int(guild_id)]
         except (KeyError, ValueError):
             await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        guild_0_scheduled_events = await client.scheduled_event_get_all_guild(guild_0)
+        if not guild_0_scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        guild_0_scheduled_event = guild_0_scheduled_events[0]
         
         guild_1_scheduled_events = await client.scheduled_event_get_all_guild(guild_1)
         if not guild_1_scheduled_events:
@@ -7601,14 +7655,8 @@ async def rate_limit_test_0174(client, message, guild_id : str = ''):
         
         guild_1_scheduled_event = guild_1_scheduled_events[0]
         
-        guild_2_scheduled_events = await client.scheduled_event_get_all_guild(guild_2)
-        if not guild_2_scheduled_events:
-            await RLT.send('Please create a scheduled event first.')
-        
-        guild_2_scheduled_event = guild_2_scheduled_events[0]
-        
+        await scheduled_event_delete(client, guild_0_scheduled_event)
         await scheduled_event_delete(client, guild_1_scheduled_event)
-        await scheduled_event_delete(client, guild_2_scheduled_event)
 
 
 @RATE_LIMIT_COMMANDS
@@ -7643,14 +7691,20 @@ async def rate_limit_test_0176(client, message, guild_id : str = ''):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0176') as RLT:
-        guild_1 = channel.guild
-        if guild_1 is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
         try:
-            guild_2 = GUILDS[int(guild_id)]
+            guild_1 = GUILDS[int(guild_id)]
         except (KeyError, ValueError):
             await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        guild_0_scheduled_events = await client.scheduled_event_get_all_guild(guild_0)
+        if not guild_0_scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        guild_0_scheduled_event = guild_0_scheduled_events[0]
         
         guild_1_scheduled_events = await client.scheduled_event_get_all_guild(guild_1)
         if not guild_1_scheduled_events:
@@ -7658,14 +7712,8 @@ async def rate_limit_test_0176(client, message, guild_id : str = ''):
         
         guild_1_scheduled_event = guild_1_scheduled_events[0]
         
-        guild_2_scheduled_events = await client.scheduled_event_get_all_guild(guild_2)
-        if not guild_2_scheduled_events:
-            await RLT.send('Please create a scheduled event first.')
-        
-        guild_2_scheduled_event = guild_2_scheduled_events[0]
-        
+        await scheduled_event_user_get_chunk(client, guild_0_scheduled_event)
         await scheduled_event_user_get_chunk(client, guild_1_scheduled_event)
-        await scheduled_event_user_get_chunk(client, guild_2_scheduled_event)
 
 
 @RATE_LIMIT_COMMANDS
@@ -7807,12 +7855,12 @@ async def rate_limit_test_0181(client, message, guild_id : str = ''):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0181') as RLT:
-        guild_1 = channel.guild
-        if guild_1 is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
         try:
-            guild_2 = GUILDS[int(guild_id)]
+            guild_1 = GUILDS[int(guild_id)]
         except (KeyError, ValueError):
             await RLT.send('Please pass a guild id as well, where I am as well.')
         
@@ -7833,13 +7881,13 @@ async def rate_limit_test_0181(client, message, guild_id : str = ''):
             keywords = ['windows'],
         )
         
-        for guild in (guild_1, guild_2):
-            rule = await auto_moderation_rule_create(client, guild_1.id, rule_to_create,)
+        for guild in (guild_0, guild_1):
+            rule = await auto_moderation_rule_create(client, guild, rule_to_create,)
             await sleep(1.0) # we are going too fast! lol
             # await auto_moderation_rule_get(client, guild.id, rule.id)
             # await auto_moderation_rule_get_all(client, guild.id)
-            await auto_moderation_rule_edit(client, guild_1.id, rule.id, rule_to_edit_to,)
-            await auto_moderation_rule_delete(client, guild_1.id, rule.id)
+            await auto_moderation_rule_edit(client, guild, rule.id, rule_to_edit_to,)
+            await auto_moderation_rule_delete(client, guild, rule.id)
 
 
 @RATE_LIMIT_COMMANDS
@@ -8145,7 +8193,7 @@ async def rate_limit_test_0192(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0193(client, message, voice_channel : 'channel' = None):
+async def rate_limit_test_0193(client, message, voice_channel : Channel = None):
     """
     Edits a voice channel's status.
     """
@@ -8173,7 +8221,7 @@ async def rate_limit_test_0193(client, message, voice_channel : 'channel' = None
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0194(client, message, voice_channel_0 : 'channel' = None, voice_channel_1 : 'channel' = None):
+async def rate_limit_test_0194(client, message, voice_channel_0 : Channel = None, voice_channel_1 : Channel = None):
     """
     Edits two voice channel's status 6 times.
     """
@@ -8220,7 +8268,7 @@ async def rate_limit_test_0194(client, message, voice_channel_0 : 'channel' = No
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0195(client, message, voice_channel : 'channel' = None):
+async def rate_limit_test_0195(client, message, voice_channel : Channel = None):
     """
     Edits one voice channel's status 10 times.
     """
@@ -8274,7 +8322,7 @@ async def rate_limit_test_0196(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0197(client, message, guild_1: 'guild' = None):
+async def rate_limit_test_0197(client, message, guild_1 : Guild = None):
     """
     Edits the guild's incidents in two guilds.
     """
@@ -8963,26 +9011,392 @@ async def rate_limit_test_0241(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0242(client, message, guild_2 : 'guild' = None):
+async def rate_limit_test_0242(client, message, guild_1 : Guild = None):
     """
     Message searches in two guild channel.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0241') as RLT:
-        guild = channel.guild
-        if guild is None:
+        guild_0 = channel.guild
+        if guild_0 is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).administrator:
+        if not guild_0.cached_permissions_for(client).administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        if guild_2 is None:
+        if guild_1 is None:
             await RLT.send('Second guild unknown.')
         
-        task_0 = Task(KOKORO, message_search_guild(client, guild.id, MessageSearchQuery(limit = 20)))
-        task_1 = Task(KOKORO, message_search_guild(client, guild_2.id, MessageSearchQuery(limit = 20)))
+        task_0 = Task(KOKORO, message_search_guild(client, guild_0.id, MessageSearchQuery(limit = 20)))
+        task_1 = Task(KOKORO, message_search_guild(client, guild_1.id, MessageSearchQuery(limit = 20)))
         
         result_0 = await task_0
         result_1 = await task_1
         
         await client.message_create(channel, repr((result_0, result_1))[:2000])
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0243(client, message, cancelled : str = None):
+    """
+    scheduled_event_occasion_overwrite_create
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0243') as RLT:
+        if cancelled is None:
+            cancelled = True
+        elif cancelled == 'true':
+            cancelled = True
+        elif cancelled == 'false':
+            cancelled = False
+        else:
+            RLT.send('Cancelled can be true or false.')
+        
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        scheduled_events = await client.scheduled_event_get_all_guild(guild)
+        if not scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        for scheduled_event in scheduled_events:
+            if scheduled_event.schedule is not None:
+                break
+        
+        else:
+            await RLT.send('No scheduled event with schedule.')
+        
+        data = await scheduled_event_occasion_overwrite_create(
+            client, scheduled_event, scheduled_event.start, cancelled
+        )
+        await client.message_create(channel, repr(data))
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0244(client, message, guild_1 : Guild = None,  cancelled : str = None):
+    """
+    scheduled_event_occasion_overwrite_create | 2 guilds
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0244') as RLT:
+        if cancelled is None:
+            cancelled = True
+        elif cancelled == 'true':
+            cancelled = True
+        elif cancelled == 'false':
+            cancelled = False
+        else:
+            RLT.send('Cancelled can be true or false.')
+        
+        guild_0 = channel.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if guild_1 is None:
+            await RLT.send('Second guild unknown.')
+        
+        scheduled_events = await client.scheduled_event_get_all_guild(guild_0)
+        if not scheduled_events:
+            await RLT.send('Please create a scheduled event first in guild 0')
+        
+        for scheduled_event_0 in scheduled_events:
+            if scheduled_event_0.schedule is not None:
+                break
+        
+        else:
+            await RLT.send('No scheduled event with schedule in guild 0')
+        
+        scheduled_events = await client.scheduled_event_get_all_guild(guild_1)
+        if not scheduled_events:
+            await RLT.send('Please create a scheduled event first in guild 1')
+        
+        for scheduled_event_1 in scheduled_events:
+            if scheduled_event_1.schedule is not None:
+                break
+        
+        else:
+            await RLT.send('No scheduled event with schedule in guild 1')
+        
+        task_0 = Task(
+            KOKORO,
+            scheduled_event_occasion_overwrite_create(
+                client, scheduled_event_0, scheduled_event_0.start, cancelled
+            )
+        )
+        task_1 = Task(
+            KOKORO,
+            scheduled_event_occasion_overwrite_create(
+                client, scheduled_event_1, scheduled_event_1.start, cancelled
+            )
+        )
+        
+        await task_0
+        await task_1
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0245(client, message, cancelled : str = None):
+    """
+    scheduled_event_occasion_overwrite_create | 1 guild twice
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0245') as RLT:
+        if cancelled is None:
+            cancelled = True
+        elif cancelled == 'true':
+            cancelled = True
+        elif cancelled == 'false':
+            cancelled = False
+        else:
+            RLT.send('Cancelled can be true or false.')
+        
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        scheduled_events = await client.scheduled_event_get_all_guild(guild)
+        if not scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        for scheduled_event in scheduled_events:
+            if scheduled_event.schedule is not None:
+                break
+        
+        else:
+            await RLT.send('No scheduled event with schedule.')
+        
+        task_0 = Task(
+            KOKORO,
+            scheduled_event_occasion_overwrite_create(
+                client, scheduled_event, scheduled_event.start, cancelled
+            )
+        )
+        task_1 = Task(
+            KOKORO,
+            scheduled_event_occasion_overwrite_create(
+                client, scheduled_event, scheduled_event.start, cancelled
+            )
+        )
+        
+        await task_0
+        await task_1
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0246(client, message, cancelled : str = None):
+    """
+    scheduled_event_occasion_overwrite_edit | 1 guild twice
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0246') as RLT:
+        if cancelled is None:
+            cancelled = True
+        elif cancelled == 'true':
+            cancelled = True
+        elif cancelled == 'false':
+            cancelled = False
+        else:
+            RLT.send('Cancelled can be true or false.')
+        
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        scheduled_events = await client.scheduled_event_get_all_guild(guild)
+        if not scheduled_events:
+            await RLT.send('Please edit a scheduled event first.')
+        
+        for scheduled_event in scheduled_events:
+            if scheduled_event.schedule is not None:
+                break
+        
+        else:
+            await RLT.send('No scheduled event with schedule.')
+        
+        task_0 = Task(
+            KOKORO,
+            scheduled_event_occasion_overwrite_edit(
+                client, scheduled_event, scheduled_event.start, cancelled
+            )
+        )
+        task_1 = Task(
+            KOKORO,
+            scheduled_event_occasion_overwrite_edit(
+                client, scheduled_event, scheduled_event.start, cancelled
+            )
+        )
+        
+        await task_0
+        await task_1
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0247(client, message):
+    """
+    scheduled_event_occasion_overwrite_delete | 1 guild twice
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0247') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        scheduled_events = await client.scheduled_event_get_all_guild(guild)
+        if not scheduled_events:
+            await RLT.send('Please delete a scheduled event first.')
+        
+        for scheduled_event in scheduled_events:
+            if scheduled_event.schedule is not None:
+                break
+        
+        else:
+            await RLT.send('No scheduled event with schedule.')
+        
+        task_0 = Task(
+            KOKORO,
+            scheduled_event_occasion_overwrite_delete(
+                client, scheduled_event, scheduled_event.start
+            )
+        )
+        task_1 = Task(
+            KOKORO,
+            scheduled_event_occasion_overwrite_delete(
+                client, scheduled_event, scheduled_event.start
+            )
+        )
+        
+        await task_0
+        await task_1
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0248(client, message, cancelled : str = None):
+    """
+    scheduled_event_occasion_overwrite_edit + scheduled_event_occasion_overwrite_delete
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0248') as RLT:
+        if cancelled is None:
+            cancelled = True
+        elif cancelled == 'true':
+            cancelled = True
+        elif cancelled == 'false':
+            cancelled = False
+        else:
+            RLT.send('Cancelled can be true or false.')
+        
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        scheduled_events = await client.scheduled_event_get_all_guild(guild)
+        if not scheduled_events:
+            await RLT.send('Please edit a scheduled event first.')
+        
+        for scheduled_event in scheduled_events:
+            if scheduled_event.schedule is not None:
+                break
+        
+        else:
+            await RLT.send('No scheduled event with schedule.')
+        
+        task_0 = Task(
+            KOKORO,
+            scheduled_event_occasion_overwrite_delete(
+                client, scheduled_event, scheduled_event.start
+            )
+        )
+        task_1 = Task(
+            KOKORO,
+            scheduled_event_occasion_overwrite_edit(
+                client, scheduled_event, scheduled_event.start, cancelled
+            )
+        )
+        
+        await task_0.wait_for_completion()
+        await task_1.wait_for_completion()
+        
+        task_0.cancel()
+        task_1.cancel()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0249(client, message):
+    """
+    scheduled_event_occasion_user_get_chunk | 1 guild twice
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0249') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        scheduled_events = await client.scheduled_event_get_all_guild(guild)
+        if not scheduled_events:
+            await RLT.send('Please delete a scheduled event first.')
+        
+        for scheduled_event in scheduled_events:
+            if scheduled_event.schedule is not None:
+                break
+        
+        else:
+            await RLT.send('No scheduled event with schedule.')
+        
+        task_0 = Task(
+            KOKORO,
+            scheduled_event_occasion_user_get_chunk(
+                client, scheduled_event, scheduled_event.start
+            )
+        )
+        task_1 = Task(
+            KOKORO,
+            scheduled_event_occasion_user_get_chunk(
+                client, scheduled_event, scheduled_event.start
+            )
+        )
+        
+        await task_0.wait_for_completion()
+        await task_1.wait_for_completion()
+        
+        task_0.cancel()
+        task_1.cancel()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0250(client, message):
+    """
+    scheduled_event_user_counts_get | 1 guild twice
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0250') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        scheduled_events = await client.scheduled_event_get_all_guild(guild)
+        if not scheduled_events:
+            await RLT.send('Please delete a scheduled event first.')
+        
+        for scheduled_event in scheduled_events:
+            if scheduled_event.schedule is not None:
+                break
+        
+        else:
+            await RLT.send('No scheduled event with schedule.')
+        
+        task_0 = Task(
+            KOKORO,
+            scheduled_event_user_counts_get(
+                client, scheduled_event, [scheduled_event.start],
+            )
+        )
+        task_1 = Task(
+            KOKORO,
+            scheduled_event_user_counts_get(
+                client, scheduled_event, [scheduled_event.start],
+            )
+        )
+        
+        await task_0
+        await task_1

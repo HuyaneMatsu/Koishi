@@ -66,7 +66,13 @@ def _iter_options():
             ],
         ),
         'ran',
-        ['ran', 'seiran', 'rin'],
+        [
+            'ran',
+            'merankorii medisun',
+            'seiran',
+            'kuraunpiisu',
+            'fujiwara no mokou',
+        ],
     )
     
     yield (
@@ -123,7 +129,10 @@ def _iter_options():
             ],
         ),
         'koi',
-        ['koishi'],
+        [
+            'koishi',
+            'komeiji satori',
+        ],
     )
 
 

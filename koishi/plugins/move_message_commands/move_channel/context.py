@@ -59,7 +59,7 @@ class ChannelMoverContext:
         Target channel to move the messages to.
     total_moved_messages : `int`
         The total amount of messages moved.
-    status_message_update_waiter : `None`, ``Future``
+    status_message_update_waiter : ``None | Future``
         Message status update waiter.
     webhook : ``Webhook``
         Webhook to use for moving the messages.

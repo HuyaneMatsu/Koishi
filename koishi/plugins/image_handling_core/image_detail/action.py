@@ -149,7 +149,7 @@ class ImageDetailAction(RichAttributeErrorBaseType):
     
     def iter_characters(self):
         """
-        Iterates overt he characters registered into the tag.
+        Iterates over the characters registered into the tag.
         
         This method is an iterable generator.
         

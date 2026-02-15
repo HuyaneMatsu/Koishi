@@ -1,14 +1,29 @@
 import vampytest
 
-from ..characters import KOMEIJI_KOISHI, REIUJI_UTSUHO, SHAMEIMARU_AYA
+from ..characters import JOUTOUGUU_MAYUMI, KOMEIJI_KOISHI, SHAMEIMARU_AYA
 from ..utils import get_touhou_character_like
 
 
 def _iter_options():
-    yield 'Komeiji Koishi', KOMEIJI_KOISHI
-    yield 'aya', SHAMEIMARU_AYA
-    yield 'oguu', REIUJI_UTSUHO
-    yield 'Gilgamesh', None
+    yield (
+        'Komeiji Koishi',
+        KOMEIJI_KOISHI,
+    )
+    
+    yield (
+        'aya',
+        SHAMEIMARU_AYA,
+    )
+    
+    yield (
+        'oguu',
+        JOUTOUGUU_MAYUMI,
+    )
+    
+    yield (
+        'Gilgamesh',
+        None,
+    )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())

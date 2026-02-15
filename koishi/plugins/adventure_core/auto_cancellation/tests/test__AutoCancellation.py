@@ -2,6 +2,7 @@ import vampytest
 
 from ..auto_cancellation import AutoCancellation
 from ..auto_cancellation_condition import AutoCancellationCondition
+from ..auto_cancellation_condition_functional import AutoCancellationConditionFunctional
 from ..auto_cancellation_condition_ids import AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN
 
 
@@ -21,6 +22,7 @@ def _assert_fields_set(auto_cancellation):
     vampytest.assert_instance(auto_cancellation.id, int)
     vampytest.assert_instance(auto_cancellation.inventory_flat, AutoCancellationCondition, nullable = True)
     vampytest.assert_instance(auto_cancellation.inventory_percentage, AutoCancellationCondition, nullable = True)
+    vampytest.assert_instance(auto_cancellation.looted_items, AutoCancellationConditionFunctional, nullable = True)
     vampytest.assert_instance(auto_cancellation.name, str)
 
 
@@ -36,6 +38,7 @@ def test__AutoCancellation__new():
     health_percentage = AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, 3)
     energy_flat = AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, 2)
     energy_percentage = AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, 3)
+    looted_items = AutoCancellationConditionFunctional('yes', lambda looted_items : True)
     
     auto_cancellation = AutoCancellation(
         auto_cancellation_id,
@@ -46,6 +49,7 @@ def test__AutoCancellation__new():
         health_percentage,
         energy_flat,
         energy_percentage,
+        looted_items,
     )
     
     vampytest.assert_eq(auto_cancellation.id, auto_cancellation_id)
@@ -56,6 +60,7 @@ def test__AutoCancellation__new():
     vampytest.assert_eq(auto_cancellation.health_percentage, health_percentage)
     vampytest.assert_eq(auto_cancellation.inventory_flat, inventory_flat)
     vampytest.assert_eq(auto_cancellation.inventory_percentage, inventory_percentage)
+    vampytest.assert_eq(auto_cancellation.looted_items, looted_items)
 
 
 def test__AutoCancellation__repr():
@@ -70,6 +75,7 @@ def test__AutoCancellation__repr():
     health_percentage = AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, 3)
     energy_flat = AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, 2)
     energy_percentage = AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, 3)
+    looted_items = AutoCancellationConditionFunctional('yes', lambda looted_items : True)
     
     auto_cancellation = AutoCancellation(
         auto_cancellation_id,
@@ -80,6 +86,7 @@ def test__AutoCancellation__repr():
         health_percentage,
         energy_flat,
         energy_percentage,
+        looted_items,
     )
     
     output = repr(auto_cancellation)

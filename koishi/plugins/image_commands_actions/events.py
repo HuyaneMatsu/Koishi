@@ -9,7 +9,8 @@ from ...bots import FEATURE_CLIENTS
 
 from ..user_settings import get_one_user_settings, get_preferred_client_in_channel
 
-from .action import COOLDOWN_HANDLER, create_response_content_and_embed, send_action_response_to
+from .action import COOLDOWN_HANDLER, send_action_response_to, \
+    get_response_image_detail, create_response_embed, should_self_target, build_header
 from .actions import ACTIONS
 
 # Optional dependencies
@@ -50,6 +51,7 @@ def is_message_action_interaction(client, message):
     ----------
     client : ``Client``
         The client who received the event.
+    
     message : ``Message``
         The message to check.
         
@@ -126,10 +128,9 @@ async def get_user_from_referenced_message(client, referenced_message):
     ----------
     client : ``Client``
         The client who received the event.
-    message : ``Message``
-        The message to check.
-        
-        > Note that this is the replied message.
+    
+    referenced_message : ``Message``
+        The referenced message to check.
     
     Returns
     -------
@@ -258,8 +259,20 @@ async def message_create(client, message):
     allowed_mentions = [*targets, message.author, client]
     # Create response and send
     action = ACTIONS_BY_NAME[intended_action]
-    content, embed = await create_response_content_and_embed(
-        action, client, None, message.guild_id, message.author, targets, client_in_users, user_in_users, allowed_mentions,
-    )
     
+    do_self_target = should_self_target(action, targets, user_in_users)
+    content = build_header(action, client, message.author, targets, client_in_users, do_self_target)
+    
+    image_detail = await get_response_image_detail(
+        client,
+        None,
+        content,
+        (action.handler_self if do_self_target else action.handler),
+        message.author,
+        targets,
+        allowed_mentions,
+    )
+    embed = create_response_embed(
+        client, message.guild_id, message.author, targets, client_in_users, image_detail
+    )
     await send_action_response_to(client, referenced_message, content, embed, allowed_mentions)

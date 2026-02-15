@@ -2,6 +2,7 @@ import vampytest
 
 from ..auto_cancellation import AutoCancellation
 from ..auto_cancellation_condition import AutoCancellationCondition
+from ..auto_cancellation_condition_functional import AutoCancellationConditionFunctional
 from ..auto_cancellation_condition_ids import (
     AUTO_CANCELLATION_CONDITION_ID_EQUAL, AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL,
     AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, AUTO_CANCELLATION_CONDITION_ID_LESS_OR_EQUAL,
@@ -16,6 +17,7 @@ def _iter_options():
         AutoCancellation(
             9999,
             '',
+            None,
             None,
             None,
             None,
@@ -38,6 +40,7 @@ def _iter_options():
             None,
             None,
             None,
+            None,
         ),
         'inventory >= 0.056 kg',
     )
@@ -48,6 +51,7 @@ def _iter_options():
             '',
             None,
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
+            None,
             None,
             None,
             None,
@@ -66,6 +70,7 @@ def _iter_options():
             None,
             None,
             None,
+            None,
         ),
         'health >= 56',
     )
@@ -78,6 +83,7 @@ def _iter_options():
             None,
             None,
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
+            None,
             None,
             None,
         ),
@@ -94,6 +100,7 @@ def _iter_options():
             None,
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
             None,
+            None,
         ),
         'energy >= 56',
     )
@@ -108,6 +115,7 @@ def _iter_options():
             None,
             None,
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
+            None,
         ),
         'energy >= 56 %',
     )
@@ -123,6 +131,7 @@ def _iter_options():
             None,
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 20),
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
+            None,
             None,
         ),
         'health >= 20 % or energy >= 56',
@@ -140,6 +149,7 @@ def _iter_options():
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_EQUAL, 21),
             None,
             None,
+            None,
         ),
         'health == 21 %',
     )
@@ -152,6 +162,7 @@ def _iter_options():
             None,
             None,
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, 22),
+            None,
             None,
             None,
         ),
@@ -168,6 +179,7 @@ def _iter_options():
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_LESS_OR_EQUAL, 23),
             None,
             None,
+            None,
         ),
         'health <= 23 %',
     )
@@ -180,6 +192,7 @@ def _iter_options():
             None,
             None,
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_LESS_THAN, 24),
+            None,
             None,
             None,
         ),
@@ -196,8 +209,24 @@ def _iter_options():
             AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_NOT_EQUAL, 25),
             None,
             None,
+            None,
         ),
         'health != 25 %',
+    )
+    
+    yield (
+        AutoCancellation(
+            9999,
+            '',
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            AutoCancellationConditionFunctional('shrimp', lambda looted_items : True),
+        ),
+        'looted items: shrimp',
     )
 
 

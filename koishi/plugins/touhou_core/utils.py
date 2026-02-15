@@ -16,7 +16,7 @@ def _build_allowed_names_and_lookup_map(characters):
     
     Parameters
     ----------
-    characters : `iterable<TouhouCharacter>`
+    characters : ``iterable<TouhouCharacter>``
         Characters to build the output for.
     
     Returns
@@ -56,28 +56,49 @@ def _get_touhou_character_like_from(name, allowed_names, lookup_map):
     
     Returns
     -------
-    matched : `None | TouhouCharacter`
+    matched : ``None | TouhouCharacter``
     """
-    name_length = len(name)
-    if name_length == 0:
-        return None
+    name_pattern = re_compile('.*?'.join(re_escape(char) for char in name), re_ignore_case)
     
-    name = name.casefold().replace('-', ' ').replace('_', ' ')
+    accurate_character_name = None
+    accurate_match_key = None
     
-    if name_length > 10:
-        name_length = 10
+    for character_name in allowed_names:
+        parsed = name_pattern.search(character_name)
+        if (parsed is None):
+            continue
+        
+        match_start = parsed.start()
+        match_length = parsed.end() - match_start
+        
+        match_rate = (match_length, match_start, character_name)
+        if (accurate_match_key is not None) and (accurate_match_key < match_rate):
+            continue
+        
+        accurate_character_name = character_name
+        accurate_match_key = match_rate
+        continue
     
-    diversity = 0.2 + (10 - name_length) * 0.02
+    if (accurate_character_name is not None):
+        return lookup_map[accurate_character_name]
+
+    value_length = len(name)
+    if value_length < 3:
+        return 1
     
-    matcheds = get_close_matches(
+    if len(name) > 10:
+        value_length = 10
+    
+    diversity = 0.2 + (10 - value_length) * 0.02
+    
+    matches = get_close_matches(
         name,
         allowed_names,
         n = 1,
         cutoff = 1.0 - diversity,
     )
-    
-    if matcheds:
-        return lookup_map[matcheds[0]]
+    if matches:
+        return lookup_map[matches[0]]
 
 
 def _iter_names_like(name, allowed_names):
@@ -89,7 +110,8 @@ def _iter_names_like(name, allowed_names):
     Parameters
     ----------
     name : `str`
-        Names to match.
+        Name to match.
+    
     allowed_names : `list<str>`
         Names to match from.
     
@@ -97,12 +119,25 @@ def _iter_names_like(name, allowed_names):
     ------
     character_name : `str`
     """
-    matcher = re_compile(re_escape(name), re_ignore_case | re_unicode)
+    name_pattern = re_compile('.*?'.join(re_escape(char) for char in name), re_ignore_case | re_unicode)
+    matches = []
     
     for character_name in allowed_names:
-        if (matcher.match(character_name) is not None):
-            yield character_name
-
+        parsed = name_pattern.search(character_name)
+        if (parsed is None):
+            continue
+        
+        match_start = parsed.start()
+        match_length = parsed.end() - match_start
+        
+        matches.append((match_length, match_start, character_name))
+        continue
+    
+    if matches:
+        matches.sort()
+        for match in matches:
+            yield match[2]
+    
     value_length = len(name)
     if value_length < 3:
         return
@@ -128,9 +163,11 @@ def _get_touhou_character_names_like_from(name, allowed_names, lookup_map):
     ----------
     name : `str`
         Input value.
+    
     allowed_names : `list<str>`
         Names to match from.
-    lookup_map : `dict<str, TouhouCharacter>
+    
+    lookup_map : ``dict<str, TouhouCharacter>``
         Character lookup map.
     
     Returns
@@ -163,9 +200,11 @@ def _get_familiar_touhou_matches_from(name,  allowed_names, lookup_map):
     ----------
     name : `str`
         Input value.
+    
     allowed_names : `list<str>`
         Names to match from.
-    lookup_map : `dict<str, TouhouCharacter>
+    
+    lookup_map : ``dict<str, TouhouCharacter>``
         Character lookup map.
     
     Returns
