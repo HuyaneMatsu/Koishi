@@ -2,7 +2,7 @@ from random import Random
 
 import vampytest
 
-from ..quest_batch_generation import get_random_value_and_diversity_with_variance
+from ..generation_helpers import get_random_value_and_diversity_with_variance
 
 
 def test__get_random_value_and_diversity_with_variance():

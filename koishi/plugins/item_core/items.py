@@ -13,17 +13,18 @@ from .constants import ITEMS
 from .flags import ITEM_FLAG_COSTUME, ITEM_FLAG_EDIBLE, ITEM_FLAG_HEAD, ITEM_FLAG_NPC, ITEM_FLAG_WEAPON
 from .item import Item
 from .item_ids import (
-    ITEM_ID_ACHING_AFFECTION_S_HEART_PIERCER, ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT,
-    ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_BROOM, ITEM_ID_BUNNY_SUIT, ITEM_ID_CARROT,
-    ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS, ITEM_ID_CHIRUNO, ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRESS, ITEM_ID_DAI,
-    ITEM_ID_DEVILCART_OYSTER, ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT, ITEM_ID_FISHING_ROD,
-    ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_GOTHIC_ATTIRE, ITEM_ID_HAND_FAN,
-    ITEM_ID_HELL_CAT_S_BIG_BRAIDS, ITEM_ID_HIKING_SET, ITEM_ID_JUNKO, ITEM_ID_KIMONO, ITEM_ID_KINGS_NEW_CLOTHES,
-    ITEM_ID_KITCHEN_KNIFE, ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_MAID_DRESS, ITEM_ID_MARISA, ITEM_ID_MYSTIA,
-    ITEM_ID_NINA, ITEM_ID_ORIN, ITEM_ID_PARASOL, ITEM_ID_PEACH, ITEM_ID_PLUSHIE_BEAR, ITEM_ID_POKING_KNIFE,
-    ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT, ITEM_ID_RIBBON_BOW, ITEM_ID_RULER, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION,
-    ITEM_ID_SCISSORS, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_TEWI, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING,
-    ITEM_ID_YUKARI, ITEM_ID_YUUKA
+    ITEM_ID_ACHING_AFFECTION_S_HEART_PIERCER, ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO, ITEM_ID_BAMBOO_SHOOT,
+    ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_BOUGH, ITEM_ID_BROOM, ITEM_ID_BUNNY_SUIT,
+    ITEM_ID_CARROT, ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS, ITEM_ID_CHIRUNO, ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRESS,
+    ITEM_ID_DAI, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_EIRIN, ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT,
+    ITEM_ID_CUT_WOOD, ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC,
+    ITEM_ID_GOTHIC_ATTIRE, ITEM_ID_HAND_FAN, ITEM_ID_HELL_CAT_S_BIG_BRAIDS, ITEM_ID_HIKING_SET, ITEM_ID_JUNKO,
+    ITEM_ID_KIMONO, ITEM_ID_KINGS_NEW_CLOTHES, ITEM_ID_KITCHEN_KNIFE, ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_LOG,
+    ITEM_ID_MAID_DRESS, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_ORIN, ITEM_ID_PARASOL, ITEM_ID_PEACH,
+    ITEM_ID_PLUSHIE_BEAR, ITEM_ID_POKING_KNIFE, ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT, ITEM_ID_REIMU,
+    ITEM_ID_RIBBON_BOW, ITEM_ID_RULER, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS,
+    ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA, ITEM_ID_TEWI, ITEM_ID_TWIGS,
+    ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YUKARI, ITEM_ID_YUUKA
 )
 
 
@@ -541,8 +542,8 @@ ITEM_BAMBOO_SHOOT = ITEMS[ITEM_ID_BAMBOO_SHOOT] = Item(
         'Can be found in the **Bamboo forest**.'
     ),
     ITEM_FLAG_EDIBLE,
-    107, # value (hearts)
-    640, # weight (grams)
+    88, # value (hearts)
+    525, # weight (grams)
     None,
 )
 
@@ -618,7 +619,7 @@ ITEM_CHIEF_MAID_S_ELEGANT_DRESS = ITEMS[ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS] = It
     'Chief maid\'s Elegant dress',
     BUILTIN_EMOJIS['stopwatch'],
     (
-        'Perfect fit for a mansion\'s senior maid who directorly reports to her mistress. '
+        'Perfect fit for a mansion\'s senior maid who directly reports to her mistress. '
         'A blue dress with white trim and a laced skirt above knee length. Worn with an ruffled apron, '
         'dark stockings and black shoes. '
         'Always keeping knifes in reach within the garter ... who knows when they may be needed.'
@@ -964,7 +965,6 @@ ITEM_GOTHIC_ATTIRE = ITEMS[ITEM_ID_GOTHIC_ATTIRE] = Item(
 )
 
 
-
 ITEM_HIKING_SET = ITEMS[ITEM_ID_HIKING_SET] = Item(
     ITEM_ID_HIKING_SET,
     'Hiking set',
@@ -1013,4 +1013,136 @@ ITEM_KIMONO = ITEMS[ITEM_ID_KIMONO] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +1),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +2),
     ),
+)
+
+
+ITEM_TWIGS = ITEMS[ITEM_ID_TWIGS] = Item(
+    ITEM_ID_TWIGS,
+    'Twigs',
+    BUILTIN_EMOJIS['chopsticks'],
+    (
+        'Twigs are thin branches of trees or bushes. '
+        'Due to their high surface to volume ratio, they catch on fire fast and burn on high temperature, '
+        'making them really good for starting fires.'
+    ),
+    0,
+    5, # value (hearts)
+    134, # weight (grams)
+    None,
+)
+
+
+ITEM_BOUGH = ITEMS[ITEM_ID_BOUGH] = Item(
+    ITEM_ID_BOUGH,
+    'Bough',
+    BUILTIN_EMOJIS['chopsticks'],
+    (
+        'Thick branches of trees or bushes, usually 3 or more years old. '
+        'They are thick enough to saw, but not thick enough to cut to fire wood.'
+    ),
+    0,
+    50, # value (hearts)
+    1206, # weight (grams)
+    None,
+)
+
+
+ITEM_LOG = ITEMS[ITEM_ID_LOG] = Item(
+    ITEM_ID_LOG,
+    'Log',
+    BUILTIN_EMOJIS['wood'],
+    (
+        'A slice of a trunk or of a really thick bough. '
+        'They can be cut to firewood to use as a fuel and to make charcoal as well.'
+    ),
+    0,
+    250, # value (hearts)
+    5427, # weight (grams)
+    None,
+)
+
+
+ITEM_BAMBOO = ITEMS[ITEM_ID_BAMBOO] = Item(
+    ITEM_ID_BAMBOO,
+    'Bamboo',
+    BUILTIN_EMOJIS['tanabata_tree'],
+    (
+        'Bamboos belong to the family of Poaceae, but unlike its other members, '
+        'bamboos\'s leaves are connected to its stem with petioles. '
+        'Some bamboos develop to tress, their height is between 3 and 10 meters, '
+        'and their stem width between 3 and 5 cm-s.\n'
+        'Due to its hollow build, low weight and flexible stem, it can be used in most areas of life.'
+    ),
+    0,
+    200, # value (hearts)
+    5360, # weight (grams)
+    None,
+)
+
+
+ITEM_CUT_WOOD = ITEMS[ITEM_ID_CUT_WOOD] = Item(
+    ITEM_ID_CUT_WOOD,
+    'Cut wood',
+    BUILTIN_EMOJIS['wood'],
+    (
+        'A split log or sliced up bough, just the right width to fuel a fire.'
+    ),
+    0,
+    250, # value (hearts)
+    4824, # weight (grams)
+    None,
+)
+
+
+ITEM_EIRIN = ITEMS[ITEM_ID_EIRIN] = Item(
+    ITEM_ID_EIRIN,
+    'Eirin',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_REIMU = ITEMS[ITEM_ID_REIMU] = Item(
+    ITEM_ID_REIMU,
+    'Reimu',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_SAKE = ITEMS[ITEM_ID_SAKE] = Item(
+    ITEM_ID_SAKE,
+    'Sake',
+    BUILTIN_EMOJIS['sake'],
+    (
+        'Sake is an alcoholic drink made by fermenting rice.\n'
+        'They add enzyme-producing fungus and yeast to the soaked and cooked rice. '
+        'This makes the sugaring and the sugar\'s fermentation happen at the same time.\n'
+        'Sake originally is a broad term for any alcoholic drink. '
+        'What we specifically call sake has its own name, nihonsu.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    1715, # value (hearts)
+    880, # weight (grams), including the bottle, ofc
+    None,
+)
+
+
+ITEM_SUIKA = ITEMS[ITEM_ID_SUIKA] = Item(
+    ITEM_ID_SUIKA,
+    'Suika',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
 )

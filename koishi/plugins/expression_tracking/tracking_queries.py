@@ -25,7 +25,7 @@ if (DB_ENGINE is None):
             Condition to check the entry with.
         
         *condition_parameters : `<condition_function>.parameters[1:]`
-            Additional positional parameters to pass to teh condition.
+            Additional positional parameters to pass to the condition.
         """
         indexes = None
         

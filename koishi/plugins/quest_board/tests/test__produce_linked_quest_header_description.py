@@ -3,7 +3,7 @@ from hata import GuildProfile, User
 
 from ...quest_core import AdventurerRankInfo
 
-from ..content_builders import produce_linked_quest_header_description
+from ..content_building import produce_linked_quest_header_description
 
 
 def _iter_options():
@@ -39,7 +39,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__produce_linked_quest_header_description(user_id, user_name, guild_id, user_nick, adventurer_info, quest_count):
+def test__produce_linked_quest_header_description(
+    user_id, user_name, guild_id, user_nick, adventurer_info, quest_count
+):
     """
     Tests whether ``produce_linked_quest_header_description`` works as intended.
     

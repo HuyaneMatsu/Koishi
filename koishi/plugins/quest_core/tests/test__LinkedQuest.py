@@ -2,12 +2,22 @@ from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
 
+
+from ...item_core import ITEM_ID_STRAWBERRY
+
+from ..amount_types import AMOUNT_TYPE_WEIGHT
 from ..linked_quest import LinkedQuest
 from ..linked_quest_completion_states import (
     LINKED_QUEST_COMPLETION_STATE_ACTIVE, LINKED_QUEST_COMPLETION_STATE_COMPLETED
 )
-from ..quest import Quest
+from ..quest_requirement_serialisables import (
+    QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact
+)
+from ..quest_reward_serialisables import (
+    QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility
+)
 from ..quest_template_ids import QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
+from ..serialisation import quest_serialisable_serialise
 
 
 def _assert_fields_set(linked_quest):
@@ -20,15 +30,14 @@ def _assert_fields_set(linked_quest):
         The quest to test.
     """
     vampytest.assert_instance(linked_quest, LinkedQuest)
-    vampytest.assert_instance(linked_quest.amount_submitted, int)
-    vampytest.assert_instance(linked_quest.amount_required, int)
+    vampytest.assert_instance(linked_quest.batch_id, int)
     vampytest.assert_instance(linked_quest.completion_count, int)
     vampytest.assert_instance(linked_quest.completion_state, int)
     vampytest.assert_instance(linked_quest.entry_id, int)
-    vampytest.assert_instance(linked_quest.expires_at, DateTime)
-    vampytest.assert_instance(linked_quest.reward_balance, int)
-    vampytest.assert_instance(linked_quest.reward_credibility, int)
-    vampytest.assert_instance(linked_quest.taken_at, DateTime)
+    vampytest.assert_instance(linked_quest.flags, int)
+    vampytest.assert_instance(linked_quest.guild_id, int)
+    vampytest.assert_instance(linked_quest.requirements, tuple, nullable = True)
+    vampytest.assert_instance(linked_quest.rewards, tuple, nullable = True)
     vampytest.assert_instance(linked_quest.template_id, int)
     vampytest.assert_instance(linked_quest.user_id, int)
 
@@ -37,45 +46,40 @@ def test__LinkedQuest__new():
     """
     Tests whether ``LinkedQuest.__new__`` works as intended.
     """
-    duration = 3600 * 24 * 3
-    amount = 4
-    reward_balance = 2600
-    reward_credibility = 4
-    template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
-    
-    quest = Quest(
-        template_id,
-        amount,
-        duration,
-        reward_credibility,
-        reward_balance,
-    )
-    
     user_id = 202505090000
     guild_id = 202505090001
     batch_id = 5666
+    template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
     
+    requirements = (
+        QuestRequirementSerialisableDuration(3600 * 24 * 3),
+        QuestRequirementSerialisableExpiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
+        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
+    )
+    rewards = (
+        QuestRewardSerialisableBalance(2600),
+        QuestRewardSerialisableCredibility(4),
+    )
     
     linked_quest = LinkedQuest(
         user_id,
         guild_id,
         batch_id,
-        quest,
+        template_id,
+        requirements,
+        rewards,
     )
     
     _assert_fields_set(linked_quest)
     
-    vampytest.assert_eq(linked_quest.amount_submitted, 0)
-    vampytest.assert_eq(linked_quest.amount_required, amount)
+    vampytest.assert_eq(linked_quest.batch_id, batch_id)
     vampytest.assert_eq(linked_quest.completion_count, 0)
     vampytest.assert_eq(linked_quest.completion_state, LINKED_QUEST_COMPLETION_STATE_ACTIVE)
-    vampytest.assert_eq(linked_quest.batch_id, batch_id)
     vampytest.assert_eq(linked_quest.entry_id, 0)
-    # skip expires_at
+    vampytest.assert_eq(linked_quest.flags, 0)
     vampytest.assert_eq(linked_quest.guild_id, guild_id)
-    vampytest.assert_eq(linked_quest.reward_balance, reward_balance)
-    vampytest.assert_eq(linked_quest.reward_credibility, reward_credibility)
-    # skip taken_at
+    vampytest.assert_eq(linked_quest.requirements, requirements)
+    vampytest.assert_eq(linked_quest.rewards, rewards)
     vampytest.assert_eq(linked_quest.template_id, template_id)
     vampytest.assert_eq(linked_quest.user_id, user_id)
 
@@ -84,29 +88,28 @@ def test__LinkedQuest__repr():
     """
     Tests whether ``LinkedQuest.__repr__`` works as intended.
     """
-    duration = 3600 * 24 * 3
-    amount = 4
-    reward_balance = 2600
-    reward_credibility = 4
+    user_id = 202505090000
+    guild_id = 202505090001
+    batch_id = 5666
     template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
     
-    quest = Quest(
-        template_id,
-        amount,
-        duration,
-        reward_credibility,
-        reward_balance,
+    requirements = (
+        QuestRequirementSerialisableDuration(3600 * 24 * 3),
+        QuestRequirementSerialisableExpiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
+        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
     )
-    
-    user_id = 202505090002
-    guild_id = 202505090003
-    batch_id = 5666
+    rewards = (
+        QuestRewardSerialisableBalance(2600),
+        QuestRewardSerialisableCredibility(4),
+    )
     
     linked_quest = LinkedQuest(
         user_id,
         guild_id,
         batch_id,
-        quest,
+        template_id,
+        requirements,
+        rewards,
     )
     
     output = repr(linked_quest)
@@ -117,34 +120,35 @@ def test__LinkedQuest__from_entry():
     """
     Tests whether ``LinkedQuest.from_entry`` works as intended.
     """
-    taken_at = DateTime(2016, 5, 10, tzinfo = TimeZone.utc)
-    expires_at = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
-    amount_submitted = 4
-    amount_required = 20
-    completion_count = 1
-    completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
-    reward_balance = 2600
-    reward_credibility = 4
-    template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
     user_id = 202505090000
     guild_id = 202505090001
     batch_id = 5666
+    template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
+    
+    requirements = (
+        QuestRequirementSerialisableDuration(3600 * 24 * 3),
+        QuestRequirementSerialisableExpiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
+        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
+    )
+    rewards = (
+        QuestRewardSerialisableBalance(2600),
+        QuestRewardSerialisableCredibility(4),
+    )
+    
+    completion_count = 1
+    completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
     entry_id = 1222
     
     
     entry = {
-        'taken_at': taken_at.replace(tzinfo = None),
-        'expires_at': expires_at.replace(tzinfo = None),
-        'amount_submitted': amount_submitted,
-        'amount_required': amount_required,
-        'completion_count': completion_count,
-        'completion_state': completion_state,
-        'reward_balance': reward_balance,
-        'reward_credibility': reward_credibility,
-        'template_id': template_id,
         'user_id': user_id,
         'guild_id': guild_id,
         'batch_id': batch_id,
+        'template_id': template_id,
+        'requirements': quest_serialisable_serialise(requirements),
+        'rewards': quest_serialisable_serialise(rewards),
+        'completion_count': completion_count,
+        'completion_state': completion_state,
         'id': entry_id,
     }
     
@@ -153,69 +157,13 @@ def test__LinkedQuest__from_entry():
     
     _assert_fields_set(linked_quest)
     
-    vampytest.assert_eq(linked_quest.amount_submitted, amount_submitted)
-    vampytest.assert_eq(linked_quest.amount_required, amount_required)
     vampytest.assert_eq(linked_quest.completion_count, completion_count)
     vampytest.assert_eq(linked_quest.completion_state, completion_state)
     vampytest.assert_eq(linked_quest.batch_id, batch_id)
     vampytest.assert_eq(linked_quest.entry_id, entry_id)
-    vampytest.assert_eq(linked_quest.expires_at, expires_at)
+    vampytest.assert_eq(linked_quest.flags, 0)
     vampytest.assert_eq(linked_quest.guild_id, guild_id)
-    vampytest.assert_eq(linked_quest.reward_balance, reward_balance)
-    vampytest.assert_eq(linked_quest.reward_credibility, reward_credibility)
-    vampytest.assert_eq(linked_quest.taken_at, taken_at)
-    vampytest.assert_eq(linked_quest.template_id, template_id)
-    vampytest.assert_eq(linked_quest.user_id, user_id)
-
-
-def test__LinkedQuest__reset():
-    """
-    Tests whether ``LinkedQuest.reset`` works as intended.
-    """
-    duration = 3600 * 24 * 3
-    amount = 4
-    reward_balance = 2600
-    reward_credibility = 4
-    template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
-    
-    quest = Quest(
-        template_id,
-        amount,
-        duration,
-        reward_credibility,
-        reward_balance,
-    )
-    
-    user_id = 202510120005
-    guild_id = 202510120006
-    batch_id = 5666
-    
-    
-    linked_quest = LinkedQuest(
-        user_id,
-        guild_id,
-        batch_id,
-        quest,
-    )
-    
-    linked_quest.amount_submitted = 999
-    linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
-    linked_quest.completion_count = 1
-    
-    linked_quest.reset()
-    
-    _assert_fields_set(linked_quest)
-    
-    vampytest.assert_eq(linked_quest.amount_submitted, 0)
-    vampytest.assert_eq(linked_quest.amount_required, amount)
-    vampytest.assert_eq(linked_quest.completion_count, 1)
-    vampytest.assert_eq(linked_quest.completion_state, LINKED_QUEST_COMPLETION_STATE_ACTIVE)
-    vampytest.assert_eq(linked_quest.batch_id, batch_id)
-    vampytest.assert_eq(linked_quest.entry_id, 0)
-    # skip expires_at
-    vampytest.assert_eq(linked_quest.guild_id, guild_id)
-    vampytest.assert_eq(linked_quest.reward_balance, reward_balance)
-    vampytest.assert_eq(linked_quest.reward_credibility, reward_credibility)
-    # skip taken_at
+    vampytest.assert_eq(linked_quest.requirements, requirements)
+    vampytest.assert_eq(linked_quest.rewards, rewards)
     vampytest.assert_eq(linked_quest.template_id, template_id)
     vampytest.assert_eq(linked_quest.user_id, user_id)

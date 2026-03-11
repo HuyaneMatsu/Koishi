@@ -5,24 +5,9 @@ from ..constants import LINKED_QUEST_LISTING_CACHE, LINKED_QUEST_LISTING_GET_QUE
 from ..linked_quest import LinkedQuest
 from ..linked_quest_completion_states import LINKED_QUEST_COMPLETION_STATE_COMPLETED
 from ..queries import get_linked_quest_listing
-from ..quest import Quest
-from ..quest_template_ids import QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
 
+from .helpers import _create_linked_quest_additional_input_fields
 
-def _create_test_quest():
-    duration = 3600 * 24 * 3
-    amount = 4
-    reward_balance = 2600
-    reward_credibility = 4
-    template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
-    
-    return Quest(
-        template_id,
-        amount,
-        duration,
-        reward_credibility,
-        reward_balance,
-    )
 
 
 async def test__get_linked_quest_listing__in_cache():
@@ -58,28 +43,28 @@ async def test__get_linked_quest_listing__in_cache():
         recursion = 2,
     )
     
-    quest_0 = _create_test_quest()
     user_id_0 = 202505190000
     guild_id_0 = 202505190001
     batch_id_0 = current_batch_id
     entry_id_0 = 122
+    additional_input_fields_0 = _create_linked_quest_additional_input_fields()
     
-    quest_1 = _create_test_quest()
     user_id_1 = 202505190002
     guild_id_1 = 202505190003
     batch_id_1 = current_batch_id
     entry_id_1 = 123
+    additional_input_fields_1 = _create_linked_quest_additional_input_fields()
     
-    quest_2 = _create_test_quest()
     guild_id_2 = 202510120001
     batch_id_2 = 5665
     entry_id_2 = 124
+    additional_input_fields_2 = _create_linked_quest_additional_input_fields()
     
     linked_quest_0 = LinkedQuest(
         user_id_0,
         guild_id_0,
         batch_id_0,
-        quest_0,
+        *additional_input_fields_0,
     )
     linked_quest_0.entry_id = entry_id_0
     
@@ -87,7 +72,7 @@ async def test__get_linked_quest_listing__in_cache():
         user_id_1,
         guild_id_1,
         batch_id_1,
-        quest_1,
+        *additional_input_fields_1,
     )
     linked_quest_1.entry_id = entry_id_1
     
@@ -95,7 +80,7 @@ async def test__get_linked_quest_listing__in_cache():
         user_id_0,
         guild_id_2,
         batch_id_2,
-        quest_2,
+        *additional_input_fields_2,
     )
     linked_quest_2.entry_id = entry_id_2
     linked_quest_2.completion_count = 1
@@ -143,17 +128,17 @@ async def test__get_linked_quest_listing__query():
     async def mock_query_linked_quest_listing(input_user_id):
         nonlocal user_id_0
         nonlocal linked_quest_0
-        nonlocal linked_quest_2
+        nonlocal linked_quest_1
         
         vampytest.assert_eq(input_user_id, user_id_0)
         
-        return [linked_quest_0, linked_quest_2]
+        return [linked_quest_0, linked_quest_1]
     
     async def mock_query_delete_linked_quests(entry_ids):
-        nonlocal entry_id_2
+        nonlocal entry_id_1
         nonlocal query_delete_linked_quests_called
         
-        vampytest.assert_eq(entry_ids, [entry_id_2])
+        vampytest.assert_eq(entry_ids, [entry_id_1])
         query_delete_linked_quests_called = True
     
     def mock_get_current_batch_id():
@@ -169,34 +154,34 @@ async def test__get_linked_quest_listing__query():
         recursion = 3,
     )
     
-    quest_0 = _create_test_quest()
     user_id_0 = 202505190004
     guild_id_0 = 202505190005
     batch_id_0 = current_batch_id
     entry_id_0 = 124
+    additional_input_fields_0 = _create_linked_quest_additional_input_fields()
     
-    quest_2 = _create_test_quest()
-    guild_id_2 = 202510120002
-    batch_id_2 = 5665
-    entry_id_2 = 124
+    guild_id_1 = 202510120002
+    batch_id_1 = 5665
+    entry_id_1 = 124
+    additional_input_fields_1 = _create_linked_quest_additional_input_fields()
     
     linked_quest_0 = LinkedQuest(
         user_id_0,
         guild_id_0,
         batch_id_0,
-        quest_0,
+        *additional_input_fields_0,
     )
     linked_quest_0.entry_id = entry_id_0
     
-    linked_quest_2 = LinkedQuest(
+    linked_quest_1 = LinkedQuest(
         user_id_0,
-        guild_id_2,
-        batch_id_2,
-        quest_2,
+        guild_id_1,
+        batch_id_1,
+        *additional_input_fields_1,
     )
-    linked_quest_2.entry_id = entry_id_2
-    linked_quest_2.completion_count = 1
-    linked_quest_2.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
+    linked_quest_1.entry_id = entry_id_1
+    linked_quest_1.completion_count = 1
+    linked_quest_1.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
     
     event_loop = get_event_loop()
     
@@ -263,17 +248,17 @@ async def test__get_linked_quest_listing__double_query():
         recursion = 3,
     )
     
-    quest_0 = _create_test_quest()
     user_id_0 = 202505190006
     guild_id_0 = 202505190007
     batch_id_0 = current_batch_id
     entry_id_0 = 125
+    additional_input_fields_0 = _create_linked_quest_additional_input_fields()
     
     linked_quest_0 = LinkedQuest(
         user_id_0,
         guild_id_0,
         batch_id_0,
-        quest_0,
+        *additional_input_fields_0,
     )
     linked_quest_0.entry_id = entry_id_0
     

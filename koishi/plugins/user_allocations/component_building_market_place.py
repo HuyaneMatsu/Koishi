@@ -20,14 +20,21 @@ from .custom_ids import (
 
 # Use `get_item_nullable` instead of `get_item`, so we can patch it better.
 try:
-    from ..item_core import get_item_nullable, produce_weight
+    from ..item_core import get_item_nullable
 except ImportError:
     if not MARISA_MODE:
         raise
     
     get_item_nullable = lambda item_id : None
     
-    def produce_weight(value):
+
+try:
+    from ..unit_core import produce_kilogram
+except ImportError:
+    if not MARISA_MODE:
+        raise
+    
+    def produce_kilogram(value):
         yield 'unknown kg'
 
 
@@ -112,8 +119,8 @@ def _produce_market_place_long_description(session, guild_id):
         
         yield item.name
         yield ' ('
-        yield from produce_weight(item.weight * item_amount)
-        yield ' kg)'
+        yield from produce_kilogram(item.weight * item_amount)
+        yield ')'
     
     # Produce time left
     yield '\nTime left: '

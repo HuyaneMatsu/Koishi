@@ -81,13 +81,14 @@ class Item(RichAttributeErrorBaseType):
         """Returns repr(self)."""
         repr_parts = ['<', type(self).__name__]
         
+        # id
+        repr_parts.append('id = ')
+        repr_parts.append(repr(self.id))
+        
         # name
-        repr_parts.append(' name = ')
+        repr_parts.append(', name = ')
         repr_parts.append(repr(self.name))
         
-        # id
-        repr_parts.append(', id = ')
-        repr_parts.append(repr(self.id))
         
         repr_parts.append('>')
         return ''.join(repr_parts)

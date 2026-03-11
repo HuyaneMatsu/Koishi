@@ -4,6 +4,8 @@ from ..quest import Quest
 from ..quest_batch import QuestBatch
 from ..quest_template_ids import QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
 
+from .helpers import _create_quest
+
 
 def _assert_fields_set(quest_batch):
     """
@@ -23,19 +25,7 @@ def test__QuestBatch__new():
     """
     Tests whether ``QuestBatch.__new__`` works as intended.
     """
-    duration = 3600 * 24 * 3
-    amount = 4
-    reward_balance = 2600
-    reward_credibility = 4
-    template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
-    
-    quest = Quest(
-        template_id,
-        amount,
-        duration,
-        reward_credibility,
-        reward_balance,
-    )
+    quest = _create_quest()
     
     quest_batch_id = 26663
     
@@ -53,19 +43,7 @@ def test__QuestBatch__repr():
     """
     Tests whether ``QuestBatch.__repr__`` works as intended.
     """
-    duration = 3600 * 24 * 3
-    amount = 4
-    reward_balance = 2600
-    reward_credibility = 4
-    template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
-    
-    quest = Quest(
-        template_id,
-        amount,
-        duration,
-        reward_credibility,
-        reward_balance,
-    )
+    quest = _create_quest()
     
     quest_batch_id = 26663
     

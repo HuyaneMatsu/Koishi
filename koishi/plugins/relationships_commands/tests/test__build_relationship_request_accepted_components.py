@@ -57,7 +57,7 @@ def test__build_relationship_request_accepted_components(
     
     Parameters
     ----------
-    user : ``ClientUserbase``
+    user : ``ClientUserBase``
         The invoking user.
     
     outgoing : `bool`

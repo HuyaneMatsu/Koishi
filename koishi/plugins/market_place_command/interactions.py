@@ -23,7 +23,7 @@ from .component_building import (
     build_own_offers_view_components, build_purchase_details_components, build_purchase_view_components,
     build_sell_success_components
 )
-from .constants import BID_INCREASE_LOWER_THRESHOLD, PAGE_SIZE_DEFAULT
+from .constants import BID_INCREASE_LOWER_THRESHOLD, FINALISATION_DELAY_AFTER_BID, PAGE_SIZE_DEFAULT
 from .custom_ids import (
     CUSTOM_ID_BID_BALANCE_AMOUNT, CUSTOM_ID_MARKET_PLACE_BID_DISABLED, CUSTOM_ID_MARKET_PLACE_BID_RP,
     CUSTOM_ID_MARKET_PLACE_CLOSE_RP, CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_RP,
@@ -1022,6 +1022,11 @@ async def handle_bid_confirmation(
             other_user_balance = await get_user_balance(purchaser_user_id)
             other_user_balance.remove_allocation(ALLOCATION_FEATURE_ID_MARKET_PLACE, entry_id)
         
+        # To avoid sniping, set `finalises_at` to a minimum amount. This allows other users to rect.
+        finalises_at = max(market_place_item.finalises_at, now + FINALISATION_DELAY_AFTER_BID)
+        
+        # Update the market place item.
+        market_place_item.finalises_at = finalises_at
         market_place_item.purchaser_user_id = user_id
         market_place_item.purchaser_balance_amount = bid_balance_amount
         
@@ -1029,7 +1034,7 @@ async def handle_bid_confirmation(
             ALLOCATION_FEATURE_ID_MARKET_PLACE,
             entry_id,
             bid_balance_amount,
-            int(market_place_item.finalises_at.timestamp()).to_bytes(8, 'little'),
+            int(finalises_at.timestamp()).to_bytes(8, 'little'),
         )
         
         await update_market_place_item(market_place_item)

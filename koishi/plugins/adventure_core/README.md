@@ -83,6 +83,9 @@ Each action offers their own cost, battles and loot.
             - Bluefrankish (rare)
             - Straw hat (epic)
             - Scissors (mythical)
+        - Gardening
+            - Twigs (certain)
+            - Bough (rare)
 
 - Ruins (level 1)
     - Foraging
@@ -117,6 +120,9 @@ Each action offers their own cost, battles and loot.
             - Peach (rare)
             - Hand fan (mythical)
             - Parasol (mythical)
+        - Gardening
+            - Twigs (basic)
+            - Bough (uncommon)
 
 - Moriya shrine (level 2)
     - Foraging

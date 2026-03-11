@@ -31,7 +31,8 @@ def should_render_exception(exception):
         ERROR_CODES.unknown_channel, # message's channel deleted
         ERROR_CODES.missing_access, # client removed
         ERROR_CODES.missing_permissions, # permissions changed meanwhile
-        ERROR_CODES.cannot_message_user, # user dm-s disabled or bot blocked.
+        ERROR_CODES.cannot_message_user_0, # user dm-s disabled or bot blocked.
+        ERROR_CODES.cannot_message_user_1, # user dm-s disabled or bot blocked.
         ERROR_CODES.unknown_interaction, # discord is lagging as usual.
     ):
          return False

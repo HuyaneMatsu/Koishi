@@ -1,8 +1,8 @@
 import vampytest
 
+from ..helpers import get_quest_template
 from ..quest_template import QuestTemplate
 from ..quest_templates import QUEST_TEMPLATE_MYSTIA_SCARLET_ONION
-from ..utils import get_quest_template
 
 
 def _iter_options():

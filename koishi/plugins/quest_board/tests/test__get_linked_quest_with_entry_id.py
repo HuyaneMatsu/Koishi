@@ -2,7 +2,7 @@ import vampytest
 
 from ...quest_core import (
     LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
-    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, Quest, get_quest_template
+    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, get_quest_template
 )
 
 from ..helpers import get_linked_quest_with_entry_id
@@ -15,20 +15,15 @@ def _iter_options():
     quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_CARROT
     quest_template_0 = get_quest_template(quest_template_id_0)
     assert quest_template_0 is not None
-    quest_amount_0 = 36
     linked_quest_entry_id_0 = 533
     
     linked_quest_0 = LinkedQuest(
         user_id,
         guild_id,
         123,
-        Quest(
-            quest_template_id_0,
-            quest_amount_0,
-            3600,
-            2,
-            1000,
-        ),
+        quest_template_id_0,
+        None,
+        None,
     )
     linked_quest_0.entry_id = linked_quest_entry_id_0
     
@@ -42,13 +37,9 @@ def _iter_options():
         user_id,
         guild_id,
         124,
-        Quest(
-            quest_template_id_1,
-            quest_amount_1,
-            3600,
-            2,
-            1000,
-        ),
+        quest_template_id_1,
+        None,
+        None,
     )
     linked_quest_1.entry_id = linked_quest_entry_id_1
     
@@ -62,13 +53,9 @@ def _iter_options():
         user_id,
         guild_id,
         125,
-        Quest(
-            quest_template_id_2,
-            quest_amount_2,
-            3600,
-            2,
-            1000,
-        ),
+        quest_template_id_2,
+        None,
+        None,
     )
     linked_quest_2.entry_id = linked_quest_entry_id_2
     

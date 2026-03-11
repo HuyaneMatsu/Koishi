@@ -3,7 +3,7 @@ from hata import Guild
 
 from ...quest_core import AdventurerRankInfo
 
-from ..content_builders import produce_quest_board_header_description
+from ..content_building import produce_quest_board_header_description
 
 
 def _iter_options():

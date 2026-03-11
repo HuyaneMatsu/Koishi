@@ -2,34 +2,23 @@ from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as T
 
 import vampytest
 from hata import (
-    BUILTIN_EMOJIS, ButtonStyle, CDN_ENDPOINT, Component, GuildProfile, Icon, IconType, User, create_button,
-    create_row, create_section, create_separator, create_text_display, create_thumbnail_media
+    BUILTIN_EMOJIS, ButtonStyle, CDN_ENDPOINT, Component, GuildProfile, Icon, IconType, User, create_button, create_row,
+    create_section, create_separator, create_text_display, create_thumbnail_media
 )
 
+from ...item_core import ITEM_ID_CARROT, ITEM_ID_PEACH
 from ...quest_core import (
-    LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT,
-    QUEST_TEMPLATE_ID_MYSTIA_PEACH, Quest, get_quest_template
+    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest,
+    QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QuestRequirementSerialisableDuration,
+    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
+    QuestRewardSerialisableCredibility, get_quest_template
 )
 from ...user_stats_core import UserStats
 
 from ..component_building import build_linked_quests_listing_components
 from ..constants import EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS
 
-
-class DateTimeMock(DateTime):
-    __slots__ = ()
-    current_date_time = None
-    
-    @classmethod
-    def set_current(cls, value):
-        cls.current_date_time = value
-    
-    @classmethod
-    def now(cls, tz):
-        value = cls.current_date_time
-        if value is None:
-            value = DateTime.now(tz)
-        return value
+from .helpers import DateTimeMock
 
 
 def _iter_options():
@@ -39,6 +28,7 @@ def _iter_options():
     guild_id_1 = 202510130010
     user_nick = 'You must be new here'
     quest_duration = 3600
+    quests_began_at = DateTime(2016, 5, 14, 0, 0, 0, tzinfo = TimeZone.utc)
     now = DateTime(2016, 5, 14, 0, 0, 20, tzinfo = TimeZone.utc)
     
     quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_CARROT
@@ -52,54 +42,55 @@ def _iter_options():
     quest_amount_1 = 18
     
     
-    quest_0 = Quest(
-        quest_template_id_0,
-        quest_amount_0,
-        quest_duration,
-        2,
-        1000,
-    )
-    
-    quest_1 = Quest(
-        quest_template_id_1,
-        quest_amount_1,
-        quest_duration,
-        2,
-        1000,
-    )
-    
     linked_quest_0 = LinkedQuest(
         user_id,
         guild_id_0,
         5666,
-        quest_0,
+        quest_template_id_0,
+        (
+            QuestRequirementSerialisableDuration(quest_duration),
+            QuestRequirementSerialisableExpiration(quests_began_at + TimeDelta(seconds = quest_duration)),
+            QuestRequirementSerialisableItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0, 0),
+        ),
+        (
+            QuestRewardSerialisableBalance(1000),
+            QuestRewardSerialisableCredibility(2),
+        ),
     )
     linked_quest_entry_id_0 = 123
     linked_quest_0.entry_id = linked_quest_entry_id_0
-    linked_quest_0.taken_at = now - TimeDelta(seconds = 20)
-    linked_quest_0.expires_at = now + TimeDelta(seconds = quest_duration - 20)
     
     linked_quest_1 = LinkedQuest(
         user_id,
         guild_id_0,
         57777,
-        quest_1,
+        quest_template_id_1,
+        (
+            QuestRequirementSerialisableDuration(quest_duration),
+            QuestRequirementSerialisableExpiration(quests_began_at + TimeDelta(seconds = quest_duration)),
+            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
+        ),
+        (
+            QuestRewardSerialisableBalance(1000),
+            QuestRewardSerialisableCredibility(2),
+        ),
     )
     linked_quest_entry_id_1 = 124
     linked_quest_1.entry_id = linked_quest_entry_id_1
-    linked_quest_1.taken_at = now - TimeDelta(seconds = 20)
-    linked_quest_1.expires_at = now + TimeDelta(seconds = quest_duration - 20)
     
     linked_quest_2 = LinkedQuest(
         user_id,
         guild_id_1,
         57774,
-        Quest(
-            quest_template_id_1,
-            quest_amount_1,
-            3600,
-            2,
-            1000,
+        quest_template_id_1,
+        (
+            QuestRequirementSerialisableDuration(quest_duration),
+            QuestRequirementSerialisableExpiration(quests_began_at + TimeDelta(seconds = quest_duration)),
+            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
+        ),
+        (
+            QuestRewardSerialisableBalance(1000),
+            QuestRewardSerialisableCredibility(2),
         ),
     )
     linked_quest_entry_id_2 = 124
@@ -111,12 +102,15 @@ def _iter_options():
         user_id,
         guild_id_0,
         57775,
-        Quest(
-            quest_template_id_1,
-            quest_amount_1,
-            3600,
-            3,
-            1000,
+        quest_template_id_1,
+        (
+            QuestRequirementSerialisableDuration(quest_duration),
+            QuestRequirementSerialisableExpiration(quests_began_at + TimeDelta(seconds = quest_duration)),
+            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
+        ),
+        (
+            QuestRewardSerialisableBalance(1000),
+            QuestRewardSerialisableCredibility(3),
         ),
     )
     linked_quest_entry_id_3 = 135
@@ -128,18 +122,19 @@ def _iter_options():
         user_id,
         guild_id_0,
         57125,
-        Quest(
-            quest_template_id_1,
-            quest_amount_1,
-            3600,
-            3,
-            1000,
+        quest_template_id_1,
+        (
+            QuestRequirementSerialisableDuration(quest_duration),
+            QuestRequirementSerialisableExpiration(quests_began_at),
+            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
+        ),
+        (
+            QuestRewardSerialisableBalance(1000),
+            QuestRewardSerialisableCredibility(3),
         ),
     )
     linked_quest_entry_id_4 = 149
     linked_quest_4.entry_id = linked_quest_entry_id_4
-    linked_quest_4.taken_at = now - TimeDelta(seconds = 20)
-    linked_quest_4.expires_at = now
     
     page_index = 0
     
@@ -203,7 +198,7 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'Expired\n'
+                    f'Time left: expired\n'
                     f'Submit 0 / {quest_amount_1} {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
                 ),
                 thumbnail = create_button(

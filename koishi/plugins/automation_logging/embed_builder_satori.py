@@ -792,6 +792,7 @@ ACTIVITY_DIFFERENCE_RENDERERS = {
     'emoji': render_emoji_difference_into,
     'buttons': render_buttons_difference_into,
     'hang_type': render_hang_type_difference_into,
+    'details_url': render_url_difference_into,
 }
 
 

@@ -66,6 +66,7 @@ def _iter_options():
             ('Frog', '12'),
             ('Garlic', '9'),
             ('Peach', '2'),
+            ('Sake', '3b'),
             ('Scarlet onion', 'a'),
             ('Strawberry', '1'),
         ],

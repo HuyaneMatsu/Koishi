@@ -125,7 +125,10 @@ async def send_embed_to(client, user_id, embed, components = None):
         return
     
     except DiscordException as err:
-        if err.code == ERROR_CODES.cannot_message_user:
+        if err.code in (
+            ERROR_CODES.cannot_message_user_0, # user has dm-s disallowed
+            ERROR_CODES.cannot_message_user_1, # user has dm-s disallowed
+        ):
             return
         
         raise

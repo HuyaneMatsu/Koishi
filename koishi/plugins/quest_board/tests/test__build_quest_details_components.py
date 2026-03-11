@@ -1,13 +1,19 @@
-import vampytest
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 
+import vampytest
 from hata import (
     BUILTIN_EMOJIS, ButtonStyle, Component, create_button, create_row, create_separator, create_text_display
 )
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
+from ...item_core import ITEM_ID_CARROT
 from ...quest_core import (
-    LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, Quest, get_quest_template
+    AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, Quest,
+    QuestRequirementInstantiableDuration, QuestRequirementInstantiableItemExact, QuestRequirementSerialisableDuration,
+    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardInstantiableBalance,
+    QuestRewardInstantiableCredibility, QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility,
+    get_quest_template
 )
 from ...user_stats_core import UserStats
 
@@ -29,17 +35,30 @@ def _iter_options():
     
     quest = Quest(
         quest_template_id_0,
-        quest_amount_0,
-        3600,
-        10,
-        1000,
+        (
+            QuestRequirementInstantiableDuration(3600),
+            QuestRequirementInstantiableItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0),
+        ),
+        (
+            QuestRewardInstantiableBalance(1000),
+            QuestRewardInstantiableCredibility(10),
+        ),
     )
     
     linked_quest = LinkedQuest(
         user_id,
         guild_id_0,
         batch_id,
-        quest,
+        quest_template_id_0,
+        (
+            QuestRequirementSerialisableDuration(3600),
+            QuestRequirementSerialisableExpiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600)),
+            QuestRequirementSerialisableItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0, 0),
+        ),
+        (
+            QuestRewardSerialisableBalance(1000),
+            QuestRewardSerialisableCredibility(10),
+        ),
     )
     linked_quest.completion_count = 3
     linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
@@ -59,7 +78,7 @@ def _iter_options():
                 f'I am running low on some vegetables for soups.\n'
                 f'\nRequesting a basketful of Carrot.\n'
                 f'\n'
-                f'**Reward:**\n'
+                f'**Rewards:**\n'
                 f'- **1000** {EMOJI__HEART_CURRENCY}\n'
                 f'- **5** credibility\n'
                 f'**Time available:**\n'
@@ -80,13 +99,6 @@ def _iter_options():
                     enabled = True,
                     style = ButtonStyle.green,
                 ),
-                create_button(
-                    'Item information',
-                    custom_id = (
-                        f'quest_board.item.{user_id:x}.{guild_id_0:x}.{page_index:x}.{quest_template_id_0:x}.'
-                        f'{quest_template_0.item_id:x}'
-                    ),
-                ),
             ),
         ],
     )
@@ -106,7 +118,7 @@ def _iter_options():
                 f'I am running low on some vegetables for soups.\n'
                 f'\nRequesting a basketful of Carrot.\n'
                 f'\n'
-                f'**Reward:**\n'
+                f'**Rewards:**\n'
                 f'- **1000** {EMOJI__HEART_CURRENCY}\n'
                 f'- **5** credibility\n'
                 f'**Time available:**\n'
@@ -126,13 +138,6 @@ def _iter_options():
                     custom_id = f'quest_board.accept.{user_id:x}.{guild_id_0:x}.{page_index:x}.{quest_template_id_0:x}',
                     enabled = False,
                     style = ButtonStyle.gray,
-                ),
-                create_button(
-                    'Item information',
-                    custom_id = (
-                        f'quest_board.item.{user_id:x}.{guild_id_0:x}.{page_index:x}.{quest_template_id_0:x}.'
-                        f'{quest_template_0.item_id:x}'
-                    ),
                 ),
             ),
         ],
@@ -163,7 +168,7 @@ def test__build_quest_details_components(
     quest : ``Quest``
         The quest to describe.
     
-    linked_quest : : ``None LinkedQuest``
+    linked_quest : : ``None | LinkedQuest``
         The linked quest if the user already completed this quest before.
     
     user_id : `int`

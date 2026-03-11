@@ -1,12 +1,17 @@
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
+
 import vampytest
 from hata import BUILTIN_EMOJIS
 
+from ...item_core import ITEM_ID_BLUEFRANKISH, ITEM_ID_PEACH, ITEM_ID_STRAWBERRY
 from ...quest_core import (
-    LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH,
-    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, Quest, get_quest_template
+    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
+    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, Quest,
+    QuestRequirementInstantiableDuration, QuestRequirementInstantiableItemExact, QuestRequirementSerialisableDuration,
+    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, get_quest_template
 )
 
-from ..content_builders import produce_quest_short_description
+from ..content_building import produce_quest_short_description
 
 
 def _iter_options():
@@ -23,27 +28,44 @@ def _iter_options():
     guild_id = 202510130003
     batch_id = 5999
     
+    quest_0 = Quest(
+        quest_template_id_0,
+        (
+            QuestRequirementInstantiableDuration(3600 * 24),
+            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
+        ),
+        None,
+    )
+    
     quest_1 = Quest(
         quest_template_id_1,
-        20,
-        3600 * 24,
-        10,
-        1000,
+        (
+            QuestRequirementInstantiableDuration(3600 * 24),
+            QuestRequirementInstantiableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 500),
+        ),
+        None,
     )
     
     quest_2 = Quest(
         quest_template_id_2,
-        20,
-        3600 * 24,
-        10,
-        1000,
+        (
+            QuestRequirementInstantiableDuration(3600 * 24),
+            QuestRequirementInstantiableItemExact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, 500),
+        ),
+        None,
     )
     
     linked_quest_1 = LinkedQuest(
         user_id,
         guild_id,
         batch_id,
-        quest_1,
+        quest_template_id_1,
+        (
+            QuestRequirementSerialisableDuration(3600 * 24),
+            QuestRequirementSerialisableExpiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600 * 24)),
+            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 500, 0),
+        ),
+        None,
     )
     linked_quest_1.completion_count = 1
     
@@ -51,14 +73,20 @@ def _iter_options():
         user_id,
         guild_id,
         batch_id,
-        quest_2,
+        quest_template_id_2,
+        (
+            QuestRequirementSerialisableDuration(3600 * 24),
+            QuestRequirementSerialisableExpiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600 * 24)),
+            QuestRequirementSerialisableItemExact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, 500, 0),
+        ),
+        None,
     )
     linked_quest_2.completion_count = 1
     
     yield (
         None,
+        quest_0,
         quest_template_0,
-        20,
         (
             f'Required rank: E\n'
             f'Submit 20 {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
@@ -67,8 +95,8 @@ def _iter_options():
     
     yield (
         linked_quest_1,
+        quest_1,
         quest_template_1,
-        500,
         (
             f'Required rank: E      Completed: 1 / 1 times\n'
             f'Submit 0.5 kg {BUILTIN_EMOJIS["strawberry"]} Strawberry to Sakuya.'
@@ -77,8 +105,8 @@ def _iter_options():
     
     yield (
         linked_quest_2,
+        quest_2,
         quest_template_2,
-        500,
         (
             f'Required rank: F      Completed: 1 times\n'
             f'Submit 0.5 kg {BUILTIN_EMOJIS["grapes"]} Bluefrankish to Sakuya.'
@@ -90,7 +118,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__produce_quest_short_description(linked_quest, quest_template, amount_required):
+def test__produce_quest_short_description(linked_quest, quest, quest_template):
     """
     Tests whether ``produce_quest_short_description`` works as intended.
     
@@ -99,17 +127,17 @@ def test__produce_quest_short_description(linked_quest, quest_template, amount_r
     linked_quest : ``None | LinkedQuest``
         The user's linked quest for this entry.
     
+    quest : ``Quest``
+        The quest to produce description for.
+    
     quest_template : ``QuestTemplate``
         The quest's template.
-    
-    amount_required : `int`
-        The required amount of items to submit.
     
     Returns
     -------
     output : `str`
     """
-    output = [*produce_quest_short_description(linked_quest, quest_template, amount_required)]
+    output = [*produce_quest_short_description(linked_quest, quest, quest_template)]
     
     for element in output:
         vampytest.assert_instance(element, str)

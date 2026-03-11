@@ -4,7 +4,7 @@ from .constants import USER_BALANCE_ALLOCATION_HOOKS
 from .user_balance_allocation_hook import UserBalanceAllocationHook
 
 
-def register_user_balance_allocation_hook(allocation_feature_id, get_allocation_aliveness, get_session_enty):
+def register_user_balance_allocation_hook(allocation_feature_id, get_allocation_aliveness, get_session_entry):
     """
     Registers and returns the new hook.
     
@@ -16,7 +16,7 @@ def register_user_balance_allocation_hook(allocation_feature_id, get_allocation_
     get_allocation_aliveness : `None | FunctionType`
         Sync check whether the allocation is alive.
     
-    get_session_enty : `None | CoroutineFunction`
+    get_session_entry : `None | CoroutineFunction`
         A function to get the session's entry.
     
     Returns
@@ -26,7 +26,7 @@ def register_user_balance_allocation_hook(allocation_feature_id, get_allocation_
     user_balance_allocation_hook = UserBalanceAllocationHook(
         allocation_feature_id,
         get_allocation_aliveness,
-        get_session_enty,
+        get_session_entry,
     )
     USER_BALANCE_ALLOCATION_HOOKS[allocation_feature_id] = user_balance_allocation_hook
     return user_balance_allocation_hook

@@ -17,7 +17,7 @@ def _assert_fields_set(user_balance_allocation_hook):
     vampytest.assert_instance(user_balance_allocation_hook, UserBalanceAllocationHook)
     vampytest.assert_instance(user_balance_allocation_hook.allocation_feature_id, int)
     vampytest.assert_instance(user_balance_allocation_hook.get_allocation_aliveness, FunctionType, nullable = True)
-    vampytest.assert_instance(user_balance_allocation_hook.get_session_enty, FunctionType, nullable = True)
+    vampytest.assert_instance(user_balance_allocation_hook.get_session_entry, FunctionType, nullable = True)
 
 
 def test__UserBalanceAllocationHook__new():
@@ -28,19 +28,19 @@ def test__UserBalanceAllocationHook__new():
     def get_allocation_aliveness(session_id, data):
         return False
     
-    async def get_session_enty(session_id):
+    async def get_session_entry(session_id):
         return None
     
     user_balance_allocation_hook = UserBalanceAllocationHook(
         allocation_feature_id,
         get_allocation_aliveness,
-        get_session_enty,
+        get_session_entry,
     )
     
     _assert_fields_set(user_balance_allocation_hook)
     vampytest.assert_eq(user_balance_allocation_hook.allocation_feature_id, allocation_feature_id)
     vampytest.assert_is(user_balance_allocation_hook.get_allocation_aliveness, get_allocation_aliveness)
-    vampytest.assert_is(user_balance_allocation_hook.get_session_enty, get_session_enty)
+    vampytest.assert_is(user_balance_allocation_hook.get_session_entry, get_session_entry)
 
 
 def test__UserBalanceAllocationHook__repr():
@@ -51,13 +51,13 @@ def test__UserBalanceAllocationHook__repr():
     def get_allocation_aliveness(session_id, data):
         return False
     
-    async def get_session_enty(session_id):
+    async def get_session_entry(session_id):
         return None
     
     user_balance_allocation_hook = UserBalanceAllocationHook(
         allocation_feature_id,
         get_allocation_aliveness,
-        get_session_enty,
+        get_session_entry,
     )
     
     output = repr(user_balance_allocation_hook)

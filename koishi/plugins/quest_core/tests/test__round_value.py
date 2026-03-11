@@ -1,6 +1,6 @@
 import vampytest
 
-from ..quest_batch_generation import round_value
+from ..generation_helpers import round_value
 
 
 def _iter_options():

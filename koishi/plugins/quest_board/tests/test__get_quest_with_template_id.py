@@ -12,40 +12,31 @@ def _iter_options():
     quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_CARROT
     quest_template_0 = get_quest_template(quest_template_id_0)
     assert quest_template_0 is not None
-    quest_amount_0 = 36
     
     quest_0 = Quest(
         quest_template_id_0,
-        quest_amount_0,
-        3600,
-        2,
-        1000,
+        None,
+        None,
     )
     
     quest_template_id_1 = QUEST_TEMPLATE_ID_MYSTIA_PEACH
     quest_template_1 = get_quest_template(quest_template_id_1)
     assert quest_template_1 is not None
-    quest_amount_1 = 18
     
     quest_1 = Quest(
         quest_template_id_1,
-        quest_amount_1,
-        3600,
-        2,
-        1000,
+        None,
+        None,
     )
     
     quest_template_id_2 = QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH
     quest_template_2 = get_quest_template(quest_template_id_2)
     assert quest_template_2 is not None
-    quest_amount_2 = 174000
     
     quest_2 = Quest(
         quest_template_id_2,
-        quest_amount_2,
-        3600,
-        2,
-        1000,
+        None,
+        None,
     )
     
     yield (

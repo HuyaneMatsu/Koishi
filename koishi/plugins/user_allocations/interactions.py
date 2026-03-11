@@ -150,11 +150,11 @@ async def handle_allocations_details(
             session = None
         
         else:
-            get_session_enty = user_balance_allocation_hook.get_session_enty
-            if (get_session_enty is None):
+            get_session_entry = user_balance_allocation_hook.get_session_entry
+            if (get_session_entry is None):
                 session = None
             else:
-                session = await get_session_enty(allocation_session_id)
+                session = await get_session_entry(allocation_session_id)
         
         extra = await get_extra(user_id, allocation_feature_id, session_id, amount, session)
         

@@ -97,7 +97,7 @@ async def test__try_message_create__cannot_message_user():
     
     exception = DiscordException(None, None, None, None)
     exception.status = 400
-    exception.code = ERROR_CODES.cannot_message_user
+    exception.code = ERROR_CODES.cannot_message_user_0
     
     async def message_create(input_channel, **keyword_parameters):
         nonlocal channel

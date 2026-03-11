@@ -83,9 +83,11 @@ async def try_send_notification(client, event, message, user_1, user_2, timestam
         return
     
     except DiscordException as err:
-        if err.code != ERROR_CODES.cannot_message_user:
+        if err.code not in (
+            ERROR_CODES.cannot_message_user_0, # user has dm-s disallowed
+            ERROR_CODES.cannot_message_user_1, # user has dm-s disallowed
+        ):
             raise
-
 
 
 async def xox_multi_player(client, event):

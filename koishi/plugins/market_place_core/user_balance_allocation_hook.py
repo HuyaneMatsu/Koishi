@@ -36,7 +36,7 @@ def get_allocation_aliveness(session_id, data):
     )
 
 
-async def get_session_enty(session_id):
+async def get_session_entry(session_id):
     """
     Returns the session's entry.
     
@@ -57,5 +57,5 @@ async def get_session_enty(session_id):
 register_user_balance_allocation_hook(
     ALLOCATION_FEATURE_ID_MARKET_PLACE,
     get_allocation_aliveness,
-    get_session_enty,
+    get_session_entry,
 )

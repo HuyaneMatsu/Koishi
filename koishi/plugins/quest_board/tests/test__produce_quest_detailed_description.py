@@ -3,9 +3,14 @@ from hata import BUILTIN_EMOJIS
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...quest_core import QUEST_TEMPLATE_ID_MYSTIA_PEACH, Quest, get_quest_template
+from ...item_core import ITEM_ID_PEACH
+from ...quest_core import (
+    AMOUNT_TYPE_COUNT, QUEST_TEMPLATE_ID_MYSTIA_PEACH, Quest, QuestRequirementInstantiableDuration,
+    QuestRequirementInstantiableItemExact, QuestRewardInstantiableBalance, QuestRewardInstantiableCredibility,
+    get_quest_template
+)
 
-from ..content_builders import produce_quest_detailed_description
+from ..content_building import produce_quest_detailed_description
 
 
 def _iter_options():
@@ -16,10 +21,14 @@ def _iter_options():
     yield (
         Quest(
             quest_template_id,
-            20,
-            3600 * 24,
-            10,
-            1000,
+            (
+                QuestRequirementInstantiableDuration(3600 * 24),
+                QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
+            ),
+            (
+                QuestRewardInstantiableBalance(1000),
+                QuestRewardInstantiableCredibility(10),
+            ),
         ),
         quest_template,
         1,
@@ -29,7 +38,7 @@ def _iter_options():
             f'\n'
             f'{quest_template.description}\n'
             f'\n'
-            f'**Reward:**\n'
+            f'**Rewards:**\n'
             f'- **1000** {EMOJI__HEART_CURRENCY}\n'
             f'- **10** credibility\n'
             f'**Time available:**\n'

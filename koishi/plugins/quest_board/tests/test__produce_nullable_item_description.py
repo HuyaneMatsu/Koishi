@@ -2,7 +2,7 @@ import vampytest
 
 from ...item_core import ITEM_ID_PEACH, get_item_nullable
 
-from ..content_builders import produce_nullable_item_description
+from ..content_building import produce_nullable_item_description
 
 
 def _iter_options():

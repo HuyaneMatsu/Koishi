@@ -1,6 +1,6 @@
 __all__ = ('produce_modifiers_section',)
 
-from .helpers import get_modifier_name_and_amount_postfix
+from .helpers import get_modifier_name_and_value_producer_and_amount_postfix
 
 
 def produce_modifiers_section(modifiers):
@@ -27,13 +27,25 @@ def produce_modifiers_section(modifiers):
             yield '\n'
         
         yield '- '
-        name, postfix = get_modifier_name_and_amount_postfix(modifier.type)
+        
+        (
+            modifier_name,
+            value_producer,
+            modifier_amount_postfix,
+        ) = get_modifier_name_and_value_producer_and_amount_postfix(modifier.type)
+        
         amount = modifier.amount
         yield ('+' if amount >= 0 else '-')
-        yield str(abs(amount))
-        if (postfix is not None):
-            yield postfix
+        amount = abs(amount)
+        
+        if value_producer is None:
+            yield str(amount)
+        else:
+            yield from value_producer(amount)
+            
+        if (modifier_amount_postfix is not None):
+            yield modifier_amount_postfix
         
         yield ' '
-        yield name
+        yield modifier_name
         continue

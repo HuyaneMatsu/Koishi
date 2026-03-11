@@ -560,7 +560,10 @@ class battleships_game:
             if isinstance(err, ConnectionError):
                 return
             
-            if isinstance(err, DiscordException) and err.code == ERROR_CODES.cannot_message_user:
+            if isinstance(err, DiscordException) and err.code in (
+                ERROR_CODES.cannot_message_user_0, # user has dm-s disallowed
+                ERROR_CODES.cannot_message_user_1, # user has dm-s disallowed
+            ):
                 return
             
             await client.events.error(client, f'{self!r}.start', err)

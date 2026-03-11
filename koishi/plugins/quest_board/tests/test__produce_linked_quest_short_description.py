@@ -3,30 +3,21 @@ from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as T
 import vampytest
 from hata import BUILTIN_EMOJIS
 
+from ...item_core import ITEM_ID_BLUEFRANKISH, ITEM_ID_PEACH
 from ...quest_core import (
-    LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
-    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, Quest, get_quest_template
+    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest,
+    QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QuestRequirementSerialisableDuration,
+    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
+    QuestRewardSerialisableCredibility, get_quest_template
 )
 
-from ..content_builders import produce_linked_quest_short_description
+from ..content_building import produce_linked_quest_short_description
 
-
-class DateTimeMock(DateTime):
-    current_date_time = None
-    
-    @classmethod
-    def set_current(cls, value):
-        cls.current_date_time = value
-    
-    @classmethod
-    def now(cls, tz):
-        value = cls.current_date_time
-        if value is None:
-            value = DateTime.now(tz)
-        return value
+from .helpers import DateTimeMock
 
 
 def _iter_options():
+    quest_accepted_at = DateTime(2016, 5, 14, 0, 0, 0, tzinfo = TimeZone.utc)
     now = DateTime(2016, 5, 14, 0, 0, 20, tzinfo = TimeZone.utc)
     
     quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_PEACH
@@ -44,31 +35,21 @@ def _iter_options():
     reward_balance = 2600
     reward_credibility = 4
     
-    quest_0 = Quest(
-        quest_template_id_0,
-        amount_required,
-        duration,
-        reward_credibility,
-        reward_balance,
-    )
-    
-    quest_1 = Quest(
-        quest_template_id_1,
-        amount_required,
-        duration,
-        reward_credibility,
-        reward_balance,
-    )
-    
     linked_quest_0 = LinkedQuest(
         user_id,
         guild_id,
         batch_id,
-        quest_0,
+        quest_template_id_0,
+        (
+            QuestRequirementSerialisableDuration(duration),
+            QuestRequirementSerialisableExpiration(quest_accepted_at + TimeDelta(seconds = duration)),
+            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 2),
+        ),
+        (
+            QuestRewardSerialisableBalance(reward_balance),
+            QuestRewardSerialisableCredibility(reward_credibility),
+        ),
     )
-    linked_quest_0.taken_at = now - TimeDelta(seconds = 20)
-    linked_quest_0.expires_at = now + TimeDelta(seconds = duration - 20)
-    linked_quest_0.amount_submitted = 2
     
     yield (
         linked_quest_0,
@@ -84,7 +65,16 @@ def _iter_options():
         user_id,
         guild_id,
         batch_id,
-        quest_0,
+        quest_template_id_0,
+        (
+            QuestRequirementSerialisableDuration(duration),
+            QuestRequirementSerialisableExpiration(quest_accepted_at + TimeDelta(seconds = duration)),
+            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 0),
+        ),
+        (
+            QuestRewardSerialisableBalance(reward_balance),
+            QuestRewardSerialisableCredibility(reward_credibility),
+        ),
     )
     linked_quest_1.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
     linked_quest_1.completion_count = 1
@@ -103,7 +93,16 @@ def _iter_options():
         user_id,
         guild_id,
         batch_id,
-        quest_0,
+        quest_template_id_0,
+        (
+            QuestRequirementSerialisableDuration(duration),
+            QuestRequirementSerialisableExpiration(quest_accepted_at + TimeDelta(seconds = duration)),
+            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 0),
+        ),
+        (
+            QuestRewardSerialisableBalance(reward_balance),
+            QuestRewardSerialisableCredibility(reward_credibility),
+        ),
     )
     linked_quest_2.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
     linked_quest_2.completion_count = 3
@@ -122,18 +121,24 @@ def _iter_options():
         user_id,
         guild_id,
         batch_id,
-        quest_0,
+        quest_template_id_0,
+        (
+            QuestRequirementSerialisableDuration(duration),
+            QuestRequirementSerialisableExpiration(quest_accepted_at),
+            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 2),
+        ),
+        (
+            QuestRewardSerialisableBalance(reward_balance),
+            QuestRewardSerialisableCredibility(reward_credibility),
+        ),
     )
-    linked_quest_3.taken_at = now - TimeDelta(seconds = duration)
-    linked_quest_3.expires_at = now - TimeDelta(seconds = duration)
-    linked_quest_3.amount_submitted = 2
     
     yield (
         linked_quest_3,
         quest_template_0,
         now,
         (
-            f'Expired\n'
+            f'Time left: expired\n'
             f'Submit 2 / 20 {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
         ),
     )
@@ -142,7 +147,16 @@ def _iter_options():
         user_id,
         guild_id,
         batch_id,
-        quest_1,
+        quest_template_id_0,
+        (
+            QuestRequirementSerialisableDuration(duration),
+            QuestRequirementSerialisableExpiration(now + TimeDelta(seconds = duration)),
+            QuestRequirementSerialisableItemExact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, amount_required, 0),
+        ),
+        (
+            QuestRewardSerialisableBalance(reward_balance),
+            QuestRewardSerialisableCredibility(reward_credibility),
+        ),
     )
     linked_quest_4.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
     linked_quest_4.completion_count = 1

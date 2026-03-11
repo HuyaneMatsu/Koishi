@@ -1,35 +1,40 @@
-import vampytest
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 
+import vampytest
 from hata import BUILTIN_EMOJIS, InteractionForm, create_text_display
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...quest_core import LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, Quest, get_quest_template
+from ...item_core import ITEM_ID_CARROT
+from ...quest_core import (
+    AMOUNT_TYPE_WEIGHT, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QuestRequirementSerialisableDuration,
+    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
+    QuestRewardSerialisableCredibility
+)
 from ...user_stats_core import UserStats
 
 from ..component_building import build_linked_quest_abandon_confirmation_form
-
 
 
 def _iter_options():
     user_id = 202505240020
     guild_id = 202505240021
     
-    quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_CARROT
-    quest_template_0 = get_quest_template(quest_template_id_0)
-    assert quest_template_0 is not None
     quest_amount_0 = 3600
     
     linked_quest_0 = LinkedQuest(
         user_id,
         guild_id,
         5666,
-        Quest(
-            quest_template_id_0,
-            quest_amount_0,
-            3600,
-            10,
-            1000,
+        QUEST_TEMPLATE_ID_MYSTIA_CARROT,
+        (
+            QuestRequirementSerialisableDuration(3600),
+            QuestRequirementSerialisableExpiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600)),
+            QuestRequirementSerialisableItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0, 0),
+        ),
+        (
+            QuestRewardSerialisableBalance(1000),
+            QuestRewardSerialisableCredibility(10),
         ),
     )
     linked_quest_entry_id_0 = 123
@@ -52,7 +57,7 @@ def _iter_options():
                     f'I am running low on some vegetables for soups.\n'
                     f'\nRequesting a basketful of Carrot.\n'
                     f'\n'
-                    f'**Reward:**\n'
+                    f'**Rewards:**\n'
                     f'- **1000** {EMOJI__HEART_CURRENCY}\n'
                     f'- **5** credibility\n'
                     f'**Time available:**\n'

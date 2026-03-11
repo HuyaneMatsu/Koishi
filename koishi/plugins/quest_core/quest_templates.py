@@ -1,30 +1,38 @@
 __all__ = ()
 
 from ..item_core import (
-    ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH,
-    ITEM_ID_CARROT, ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_FISHING_ROD,
-    ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_KOISHI, ITEM_ID_KOKORO,
-    ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_PEACH, ITEM_ID_RULER, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION,
-    ITEM_ID_SCISSORS, ITEM_ID_STRAW_HAT, ITEM_ID_STRAWBERRY, ITEM_ID_TEWI, ITEM_ID_YUKARI, ITEM_ID_YUUKA
+    ITEM_GROUP_ID_FIREWOOD, ITEM_GROUP_ID_KNIFE, ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT,
+    ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_CHIRUNO, ITEM_ID_DAI,
+    ITEM_ID_DEVILCART_OYSTER, ITEM_ID_EIRIN, ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG,
+    ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_NINA,
+    ITEM_ID_PEACH, ITEM_ID_REIMU, ITEM_ID_RULER, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS,
+    ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA, ITEM_ID_TEWI, ITEM_ID_YUKARI, ITEM_ID_YUUKA
 )
 
-from .amount_types import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT
+from .amount_types import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT
 from .constants import DAY_IN_SECONDS, HOUR_IN_SECONDS, QUEST_TEMPLATES
+from .quest_requirement_generators import (
+    QuestRequirementGeneratorChoice, QuestRequirementGeneratorChoiceOption, QuestRequirementGeneratorDuration,
+    QuestRequirementGeneratorItemExact, QuestRequirementGeneratorItemGroup
+)
+from .quest_reward_generators import (
+    QuestRewardGeneratorBalance, QuestRewardGeneratorCredibility, QuestRewardGeneratorCredibilityFix,
+    QuestRewardGeneratorItemExactFix
+)
 from .quest_template import QuestTemplate
 from .quest_template_ids import (
     QUEST_TEMPLATE_ID_ALICE_ANGELROOT, QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_CHIRUNO_FROG,
-    QUEST_TEMPLATE_ID_DAI_FROG,
-    QUEST_TEMPLATE_ID_JUNKO_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT,
-    QUEST_TEMPLATE_ID_KOISHI_GARLIC, QUEST_TEMPLATE_ID_KOISHI_RULER, QUEST_TEMPLATE_ID_KOKORO_SCISSORS,
-    QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA,
-    QUEST_TEMPLATE_ID_MYSTIA_BAMBOO_SHOOT, QUEST_TEMPLATE_ID_MYSTIA_CARROT,
-    QUEST_TEMPLATE_ID_MYSTIA_DEVILCART_OYSTER, QUEST_TEMPLATE_ID_MYSTIA_GARLIC, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
-    QUEST_TEMPLATE_ID_MYSTIA_SCARLET_ONION, QUEST_TEMPLATE_ID_NINA_STRAWBERRY, QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY,
-    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER,
-    QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QUEST_TEMPLATE_ID_TEWI_BISHOPHAT,
+    QUEST_TEMPLATE_ID_DAI_FROG, QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT, QUEST_TEMPLATE_ID_JUNKO_ANGELROOT,
+    QUEST_TEMPLATE_ID_KOISHI_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT, QUEST_TEMPLATE_ID_KOISHI_GARLIC,
+    QUEST_TEMPLATE_ID_KOISHI_KNIFE, QUEST_TEMPLATE_ID_KOISHI_RULER, QUEST_TEMPLATE_ID_KOKORO_SCISSORS,
+    QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_MYSTIA_BAMBOO_SHOOT, QUEST_TEMPLATE_ID_MYSTIA_CARROT,
+    QUEST_TEMPLATE_ID_MYSTIA_DEVILCART_OYSTER, QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD, QUEST_TEMPLATE_ID_MYSTIA_GARLIC,
+    QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_MYSTIA_SCARLET_ONION, QUEST_TEMPLATE_ID_NINA_STRAWBERRY,
+    QUEST_TEMPLATE_ID_REIMU_BANQUET, QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH,
+    QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER, QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD,
+    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QUEST_TEMPLATE_ID_SUIKA_SAKE, QUEST_TEMPLATE_ID_TEWI_BISHOPHAT,
     QUEST_TEMPLATE_ID_YUKARI_RULER, QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT
 )
-from .quest_types import QUEST_TYPE_ITEM_SUBMISSION
 
 
 # - Sakuya +2 level
@@ -44,25 +52,17 @@ QUEST_SAKUYA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY] =
         '\n'
         'I would like to surprise them with it, for this I would like to request its main ingredient, Strawberries.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     3,
     1,
-    ITEM_ID_STRAWBERRY,
     ITEM_ID_SAKUYA,
-    1000,
-    50,
-    75,
-    150,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 3,
-    HOUR_IN_SECONDS,
-    70,
-    120,
-    10,
-    2300,
-    100,
-    80,
-    120,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 70, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 50, 75, 150),
+    ),
+    (
+        QuestRewardGeneratorBalance(2300, 100, 80, 120),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
 
 
@@ -79,25 +79,17 @@ QUEST_TEMPLATE_MYSTIA_PEACH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_PEACH] = 
         '\n'
         'Requesting a basketful of Peaches.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     3,
     3,
-    ITEM_ID_PEACH,
     ITEM_ID_MYSTIA,
-    30,
-    5,
-    75,
-    150,
-    AMOUNT_TYPE_COUNT,
-    DAY_IN_SECONDS * 3,
-    HOUR_IN_SECONDS,
-    70,
-    100,
-    10,
-    2400,
-    50,
-    80,
-    120,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 70, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 5, 75, 150),
+    ),
+    (
+        QuestRewardGeneratorBalance(2400, 50, 80, 120),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
 
 
@@ -114,25 +106,17 @@ QUEST_TEMPLATE_SAKUYA_BLUEBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BLUEB
         '\n'
         'I would like to request enough blueberries for a single occasion.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     4,
     1,
-    ITEM_ID_BLUEBERRY,
     ITEM_ID_SAKUYA,
-    400,
-    20,
-    75,
-    125,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 6,
-    HOUR_IN_SECONDS,
-    70,
-    120,
-    20,
-    1350,
-    50,
-    90,
-    120,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 6, HOUR_IN_SECONDS, 70, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_BLUEBERRY, AMOUNT_TYPE_WEIGHT, 400, 20, 75, 125),
+    ),
+    (
+        QuestRewardGeneratorBalance(1350, 50, 90, 120),
+        QuestRewardGeneratorCredibility(20),
+    ),
 )
 
 
@@ -142,31 +126,23 @@ QUEST_TEMPLATE_MYSTIA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTI
     QUEST_TEMPLATE_ID_MYSTIA_DEVILCART_OYSTER,
     None,
     1,
-    1,
+    2,
     (
         'I am running low on mushroom to be prepared as part of foods.\n'
         '\n'
         'Requesting a basketful of Devilcart oysters.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     1,
     3,
-    ITEM_ID_DEVILCART_OYSTER,
     ITEM_ID_MYSTIA,
-    2000,
-    100,
-    75,
-    215,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 3,
-    HOUR_IN_SECONDS,
-    70,
-    140,
-    10,
-    2300,
-    100,
-    90,
-    110,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 70, 140),
+        QuestRequirementGeneratorItemExact(ITEM_ID_DEVILCART_OYSTER, AMOUNT_TYPE_WEIGHT, 2000, 100, 75, 215),
+    ),
+    (
+        QuestRewardGeneratorBalance(2300, 100, 90, 110),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
 
 
@@ -188,25 +164,17 @@ QUEST_TEMPLATE_SAKUYA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUY
         '\n'
         'I am making a request to retrieve a handful of Devilcart oysters in haste.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     2,
     1,
-    ITEM_ID_DEVILCART_OYSTER,
     ITEM_ID_SAKUYA,
-    1400,
-    50,
-    75,
-    215,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 2,
-    HOUR_IN_SECONDS,
-    50,
-    100,
-    10,
-    2000,
-    100,
-    80,
-    110,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 67, 133),
+        QuestRequirementGeneratorItemExact(ITEM_ID_DEVILCART_OYSTER, AMOUNT_TYPE_WEIGHT, 1400, 50, 75, 215),
+    ),
+    (
+        QuestRewardGeneratorBalance(2000, 100, 80, 110),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
 
 
@@ -223,25 +191,17 @@ QUEST_TEMPLATE_MARISA_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARI
         '\n'
         'Please bring me a great batch of Flykiller amanita.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     3,
     0,
-    ITEM_ID_FLYKILLER_AMANITA,
     ITEM_ID_MARISA,
-    8000,
-    500,
-    85,
-    125,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 7,
-    HOUR_IN_SECONDS,
-    100,
-    130,
-    30,
-    6300,
-    100,
-    90,
-    110,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS, 100, 130),
+        QuestRequirementGeneratorItemExact(ITEM_ID_FLYKILLER_AMANITA, AMOUNT_TYPE_WEIGHT, 8000, 500, 85, 125),
+    ),
+    (
+        QuestRewardGeneratorBalance(6300, 100, 90, 110),
+        QuestRewardGeneratorCredibility(30),
+    ),
 )
 
 
@@ -261,25 +221,17 @@ QUEST_TEMPLATE_SAKUYA_BLUEFRANKISH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BL
         '\n'
         'I would like to request a great amount of grapes.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     2,
     0,
-    ITEM_ID_BLUEFRANKISH,
     ITEM_ID_SAKUYA,
-    100000,
-    1000,
-    100,
-    250,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 10,
-    DAY_IN_SECONDS,
-    80,
-    120,
-    50,
-    16000,
-    1000,
-    100,
-    120,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 10, DAY_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, 100000, 1000, 100, 250),
+    ),
+    (
+        QuestRewardGeneratorBalance(16000, 1000, 100, 120),
+        QuestRewardGeneratorCredibility(50),
+    ),
 )
 
 
@@ -296,25 +248,17 @@ QUEST_TEMPLATE_MYSTIA_CARROT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_CARROT] 
         '\n'
         'Requesting a basketful of Carrot.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     0,
     3,
-    ITEM_ID_CARROT,
     ITEM_ID_MYSTIA,
-    9000,
-    1000,
-    50,
-    120,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 6,
-    HOUR_IN_SECONDS,
-    90,
-    110,
-    10,
-    2700,
-    50,
-    90,
-    110,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 6, HOUR_IN_SECONDS, 90, 110),
+        QuestRequirementGeneratorItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, 9000, 1000, 50, 120),
+    ),
+    (
+        QuestRewardGeneratorBalance(2700, 50, 90, 110),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
 
 
@@ -329,25 +273,17 @@ QUEST_TEMPLATE_MYSTIA_GARLIC = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_GARLIC] 
         '\n'
         'Requesting a few Garlic.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     0,
     1,
-    ITEM_ID_GARLIC,
     ITEM_ID_MYSTIA,
-    1000,
-    100,
-    75,
-    125,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 2,
-    HOUR_IN_SECONDS,
-    100,
-    120,
-    10,
-    1050,
-    100,
-    90,
-    110,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 100, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_GARLIC, AMOUNT_TYPE_WEIGHT, 1000, 100, 75, 125),
+    ),
+    (
+        QuestRewardGeneratorBalance(1050, 100, 90, 110),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
 
 
@@ -362,25 +298,17 @@ QUEST_TEMPLATE_MYSTIA_SCARLET_ONION = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_S
         '\n'
         'Requesting a basketful of Scarlet onions.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     0,
     3,
-    ITEM_ID_SCARLET_ONION,
     ITEM_ID_MYSTIA,
-    40,
-    1,
-    75,
-    125,
-    AMOUNT_TYPE_COUNT,
-    DAY_IN_SECONDS * 2,
-    HOUR_IN_SECONDS,
-    100,
-    120,
-    10,
-    1800,
-    100,
-    90,
-    110,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 100, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_COUNT, 40, 1, 75, 125),
+    ),
+    (
+        QuestRewardGeneratorBalance(1800, 100, 90, 110),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
 
 
@@ -398,25 +326,17 @@ QUEST_TEMPLATE_ALICE_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE
         '\n'
         'Please bring me some Flykiller amanita.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     4,
     1,
-    ITEM_ID_FLYKILLER_AMANITA,
     ITEM_ID_ALICE,
-    3,
-    1,
-    100,
-    100,
-    AMOUNT_TYPE_COUNT,
-    DAY_IN_SECONDS,
-    HOUR_IN_SECONDS,
-    100,
-    130,
-    10,
-    1300,
-    50,
-    90,
-    110,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS, HOUR_IN_SECONDS, 100, 130),
+        QuestRequirementGeneratorItemExact(ITEM_ID_FLYKILLER_AMANITA, AMOUNT_TYPE_COUNT, 3, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(1300, 50, 90, 110),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
 
 
@@ -435,25 +355,17 @@ QUEST_TEMPLATE_SAKUYA_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_FIS
         '\n'
         'Could you please find me my missing fishing rod?'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     5,
     1,
-    ITEM_ID_FISHING_ROD,
     ITEM_ID_SAKUYA,
-    1,
-    1,
-    100,
-    100,
-    AMOUNT_TYPE_COUNT,
-    DAY_IN_SECONDS * 14,
-    DAY_IN_SECONDS,
-    100,
-    120,
-    10,
-    6000,
-    1000,
-    100,
-    120,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 14, DAY_IN_SECONDS, 100, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_FISHING_ROD, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(6000, 1000, 100, 120),
+        QuestRewardGeneratorCredibilityFix(45),
+    ),
 )
 
 
@@ -475,26 +387,19 @@ QUEST_TEMPLATE_CHIRUNO_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_CHIRUNO_FROG] = 
         '\n'
         'If you do not bring me some, you will be the one I state order through!'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     3,
     3,
-    ITEM_ID_FROG,
     ITEM_ID_CHIRUNO,
-    20,
-    1,
-    100,
-    150,
-    AMOUNT_TYPE_COUNT,
-    DAY_IN_SECONDS * 2,
-    HOUR_IN_SECONDS,
-    100,
-    140,
-    10,
-    3400,
-    50,
-    80,
-    120,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 100, 140),
+        QuestRequirementGeneratorItemExact(ITEM_ID_FROG, AMOUNT_TYPE_COUNT, 20, 1, 100, 150),
+    ),
+    (
+        QuestRewardGeneratorBalance(3400, 50, 80, 120),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
+
 
 # - Dai +3 level
 # - misty lake +2 level
@@ -515,30 +420,22 @@ QUEST_TEMPLATE_DAI_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_DAI_FROG] = QuestTem
         '\n'
         'What are you waiting for? Help save the frogs!'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     5,
     0,
-    ITEM_ID_FROG,
     ITEM_ID_DAI,
-    50,
-    10,
-    100,
-    200,
-    AMOUNT_TYPE_COUNT,
-    DAY_IN_SECONDS * 7,
-    HOUR_IN_SECONDS,
-    80,
-    120,
-    20,
-    6900,
-    100,
-    80,
-    120,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_FROG, AMOUNT_TYPE_COUNT, 50, 10, 100, 200),
+    ),
+    (
+        QuestRewardGeneratorBalance(6900, 100, 80, 120),
+        QuestRewardGeneratorCredibility(20),
+    ),
 )
 
 
 # - Tewi +3 level
-# - misty lake +2 level
+# - Bamboo forest +0 level
 # Reward is around 1.5x of the value
 QUEST_TEMPLATE_TEWI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_BISHOPHAT] = QuestTemplate(
     QUEST_TEMPLATE_ID_TEWI_BISHOPHAT,
@@ -552,30 +449,22 @@ QUEST_TEMPLATE_TEWI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_BISHOPHAT
         '\n'
         'Please bring us a delivery of bishophats, not to be confused with the pesky horny goat weed.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
-    5,
+    3,
     9,
-    ITEM_ID_BISHOPHAT,
     ITEM_ID_TEWI,
-    1000,
-    100,
-    70,
-    120,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 21,
-    DAY_IN_SECONDS,
-    70,
-    150,
-    20,
-    4300,
-    100,
-    80,
-    130,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 21, DAY_IN_SECONDS, 70, 150),
+        QuestRequirementGeneratorItemExact(ITEM_ID_BISHOPHAT, AMOUNT_TYPE_WEIGHT, 1000, 100, 70, 120),
+    ),
+    (
+        QuestRewardGeneratorBalance(4300, 100, 80, 130),
+        QuestRewardGeneratorCredibility(20),
+    ),
 )
 
 
 # - Junko +3 level
-# - misty lake +2 level
+# - Misty lake +2 level
 # Reward is around 2.5x of the value
 QUEST_TEMPLATE_JUNKO_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_JUNKO_ANGELROOT] = QuestTemplate(
     QUEST_TEMPLATE_ID_JUNKO_ANGELROOT,
@@ -587,25 +476,17 @@ QUEST_TEMPLATE_JUNKO_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_JUNKO_ANGELRO
         '\n'
         'Please deliver angelroots.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     5,
     1,
-    ITEM_ID_ANGELROOT,
     ITEM_ID_JUNKO,
-    1000,
-    1000,
-    100,
-    100,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 2 + HOUR_IN_SECONDS * 12,
-    HOUR_IN_SECONDS,
-    70,
-    130,
-    10,
-    3050,
-    50,
-    90,
-    110,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2 + HOUR_IN_SECONDS * 12, HOUR_IN_SECONDS, 70, 130),
+        QuestRequirementGeneratorItemExact(ITEM_ID_ANGELROOT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(3050, 50, 90, 110),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
 
 # - Koishi +1 level
@@ -623,25 +504,17 @@ QUEST_TEMPLATE_KOISHI_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_ANGEL
         '\n'
         'I heard angelroot is good for treating it, would you please bring me some?'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     3,
     1,
-    ITEM_ID_ANGELROOT,
     ITEM_ID_KOISHI,
-    600,
-    100,
-    70,
-    120,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 5,
-    HOUR_IN_SECONDS,
-    70,
-    130,
-    10,
-    1200,
-    50,
-    80,
-    110,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 5, HOUR_IN_SECONDS, 70, 130),
+        QuestRequirementGeneratorItemExact(ITEM_ID_ANGELROOT, AMOUNT_TYPE_WEIGHT, 600, 100, 70, 120),
+    ),
+    (
+        QuestRewardGeneratorBalance(1200, 50, 80, 110),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
 
 # - Kokoro +2 level
@@ -658,25 +531,17 @@ QUEST_TEMPLATE_KOKORO_SCISSORS = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOKORO_SCISSO
         '\n'
         'Please deliver me a single scissors.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     5,
     1,
-    ITEM_ID_SCISSORS,
     ITEM_ID_KOKORO,
-    1,
-    1,
-    100,
-    100,
-    AMOUNT_TYPE_COUNT,
-    DAY_IN_SECONDS * 28,
-    DAY_IN_SECONDS,
-    70,
-    130,
-    10,
-    16000,
-    50,
-    90,
-    110,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 70, 130),
+        QuestRequirementGeneratorItemExact(ITEM_ID_SCISSORS, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(16000, 50, 90, 110),
+        QuestRewardGeneratorCredibilityFix(270),
+    ),
 )
 
 # - Koishi +1 level
@@ -695,26 +560,19 @@ QUEST_TEMPLATE_KOISHI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BISHO
         'They recommended to try brewing for Satori some bishophat tea to increase their blood-flow, '
         'could you please bring some of it?'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     1,
     3,
-    ITEM_ID_BISHOPHAT,
     ITEM_ID_KOISHI,
-    200,
-    10,
-    70,
-    130,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 7,
-    HOUR_IN_SECONDS,
-    80,
-    120,
-    10,
-    1400,
-    50,
-    80,
-    120,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_BISHOPHAT, AMOUNT_TYPE_WEIGHT, 200, 10, 70, 130),
+    ),
+    (
+        QuestRewardGeneratorBalance(1400, 50, 80, 120),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
+
 
 # - Koishi +1 level
 # - Magic forest + 1 level
@@ -722,7 +580,9 @@ QUEST_TEMPLATE_KOISHI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BISHO
 # Reward is around 2.5x of the value
 QUEST_TEMPLATE_KOISHI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_RULER] = QuestTemplate(
     QUEST_TEMPLATE_ID_KOISHI_RULER,
-    None,
+    (
+        QUEST_TEMPLATE_ID_KOISHI_KNIFE,
+    ),
     4, # Target: 1
     28,
     (
@@ -731,26 +591,19 @@ QUEST_TEMPLATE_KOISHI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_RULER] = 
         '\n'
         'Could you please find the ruler I have lost?'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     5,
     1,
-    ITEM_ID_RULER,
     ITEM_ID_KOISHI,
-    1,
-    1,
-    100,
-    100,
-    AMOUNT_TYPE_COUNT,
-    DAY_IN_SECONDS * 28,
-    DAY_IN_SECONDS,
-    80,
-    120,
-    10,
-    750,
-    100,
-    80,
-    120,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_RULER, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(750, 100, 80, 120),
+        QuestRewardGeneratorCredibility(250),
+    ),
 )
+
 
 # - Yukari +3 level
 # - rare drop +3 level
@@ -774,25 +627,17 @@ QUEST_TEMPLATE_YUKARI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YUKARI_RULER] = 
         'Respectfully yours,\n'
         'Sage Yakumo Yukari'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     6,
     1,
-    ITEM_ID_RULER,
     ITEM_ID_YUKARI,
-    1,
-    1,
-    100,
-    100,
-    AMOUNT_TYPE_COUNT,
-    DAY_IN_SECONDS * 14,
-    DAY_IN_SECONDS,
-    90,
-    130,
-    10,
-    900,
-    100,
-    80,
-    120,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 14, DAY_IN_SECONDS, 90, 130),
+        QuestRequirementGeneratorItemExact(ITEM_ID_RULER, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(900, 100, 80, 120),
+        QuestRewardGeneratorCredibilityFix(250),
+    ),
 )
 
 # - Yuuka +2 level
@@ -807,25 +652,17 @@ QUEST_TEMPLATE_YUUKA_STRAW_HAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YUUKA_STRAW_H
         'Could you please bring me a new straw hat, my current one is torn. '
         'Those with a flower on them look like a lot of fun.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     5,
     1,
-    ITEM_ID_STRAW_HAT,
     ITEM_ID_YUUKA,
-    1,
-    1,
-    100,
-    100,
-    AMOUNT_TYPE_COUNT,
-    DAY_IN_SECONDS * 28,
-    DAY_IN_SECONDS,
-    70,
-    130,
-    10,
-    1400,
-    100,
-    80,
-    120,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 70, 130),
+        QuestRequirementGeneratorItemExact(ITEM_ID_STRAW_HAT, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(1400, 100, 80, 120),
+        QuestRewardGeneratorCredibilityFix(240),
+    ),
 )
 
 # - Koishi +1 level
@@ -848,25 +685,17 @@ QUEST_TEMPLATE_KOISHI_GARLIC = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_GARLIC] 
         'It actually makes it easier for vampires to sukk your blood, so they actually gaslighted the whole world '
         'into thinking that it helps repel them, while it just seasons them and make them bleed easier!'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     2,
     1,
-    ITEM_ID_GARLIC,
     ITEM_ID_KOISHI,
-    8000,
-    500,
-    80,
-    130,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 3 + HOUR_IN_SECONDS * 12,
-    HOUR_IN_SECONDS,
-    80,
-    120,
-    40,
-    6500,
-    500,
-    80,
-    120,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3 + HOUR_IN_SECONDS * 12, HOUR_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_GARLIC, AMOUNT_TYPE_WEIGHT, 8000, 500, 80, 130),
+    ),
+    (
+        QuestRewardGeneratorBalance(6500, 500, 80, 120),
+        QuestRewardGeneratorCredibility(40),
+    ),
 )
 
 
@@ -882,25 +711,17 @@ QUEST_TEMPLATE_MYSTIA_BAMBOO_SHOOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_BA
         '\n'
         'Could you please bring some bamboo shoots?'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     1,
     3,
-    ITEM_ID_BAMBOO_SHOOT,
     ITEM_ID_MYSTIA,
-    5,
-    1,
-    80,
-    120,
-    AMOUNT_TYPE_COUNT,
-    DAY_IN_SECONDS * 3,
-    HOUR_IN_SECONDS,
-    80,
-    120,
-    10,
-    1100,
-    50,
-    90,
-    110,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_BAMBOO_SHOOT, AMOUNT_TYPE_COUNT, 5, 1, 80, 120),
+    ),
+    (
+        QuestRewardGeneratorBalance(900, 50, 90, 110),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
 
 
@@ -921,25 +742,17 @@ QUEST_TEMPLATE_ALICE_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_ANGELRO
         'Since I do not frequent the forests like Marisa does, '
         'I put up a quest so that the angelroots can be delivered to me.'
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     4,
     1,
-    ITEM_ID_ANGELROOT,
     ITEM_ID_ALICE,
-    8,
-    1,
-    100,
-    100,
-    AMOUNT_TYPE_COUNT,
-    DAY_IN_SECONDS * 2,
-    HOUR_IN_SECONDS,
-    100,
-    130,
-    10,
-    2550,
-    50,
-    90,
-    110,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 100, 130),
+        QuestRequirementGeneratorItemExact(ITEM_ID_ANGELROOT, AMOUNT_TYPE_COUNT, 8, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(2550, 50, 90, 110),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )
 
 # - Nina +3 level
@@ -958,23 +771,180 @@ QUEST_NINA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NINA_STRAWBERRY] = Que
         'Without them my days would be so boring... I want to request them.'
         
     ),
-    QUEST_TYPE_ITEM_SUBMISSION,
     4,
     1,
-    ITEM_ID_STRAWBERRY,
     ITEM_ID_NINA,
-    8000,
-    500,
-    75,
-    175,
-    AMOUNT_TYPE_WEIGHT,
-    DAY_IN_SECONDS * 6,
-    DAY_IN_SECONDS,
-    70,
-    130,
-    30,
-    14000,
-    1000,
-    80,
-    120,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 6, DAY_IN_SECONDS, 70, 130),
+        QuestRequirementGeneratorItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 8000, 500, 75, 175),
+    ),
+    (
+        QuestRewardGeneratorBalance(14000, 1000, 80, 120),
+        QuestRewardGeneratorCredibility(30),
+    ),
+)
+
+# - Koishi +1 level
+# - Moriya shrine +2 level
+# - rare drop +3 level
+# Reward is around 2x of the value
+QUEST_TEMPLATE_KOISHI_KNIFE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_KNIFE] = QuestTemplate(
+    QUEST_TEMPLATE_ID_KOISHI_KNIFE,
+    (
+        QUEST_TEMPLATE_ID_KOISHI_RULER,
+    ),
+    28, # Target: 1
+    28,
+    (
+        'Help me! I was lost my knife! Probably I\'m dropped knife during Danmaku match with Reimu recently...\n'
+        'Will you find my lost knife?'
+    ),
+    6,
+    1,
+    ITEM_ID_KOISHI,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 70, 130),
+        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(13000, 1000, 80, 120),
+        QuestRewardGeneratorCredibilityFix(250),
+    ),
+)
+
+
+# - Mystia +1 level
+# - Uncommon drop + 1 level
+# Reward is around 1.0x of the value
+QUEST_TEMPLATE_MYSTIA_FIREWOOD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD] = QuestTemplate(
+    QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD,
+    (
+        QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD,
+    ),
+    1,
+    2,
+    (
+        'To run an izakaya, one is always in need of dry firewood in great quantities. '
+        'Since I have to attend it, I do not have the opportunity to go out and collect any.\n'
+        '\n'
+        'I hope you would not mind helping me out, I will pay you fairly.'
+    ),
+    2,
+    0,
+    ITEM_ID_MYSTIA,
+    (
+        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_FIREWOOD, AMOUNT_TYPE_VALUE, 1000, 1000, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(1000, 1000, 100, 100),
+        QuestRewardGeneratorCredibilityFix(10),
+    ),
+)
+
+
+# - Eirin +2 level
+# - Misty lake +2 level
+# Reward is around 2.0x of the value
+QUEST_TEMPLATE_EIRIN_ANGELROOT_AND_BISHOPHAT = \
+QUEST_TEMPLATES[QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT] = QuestTemplate(
+    QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT,
+    None,
+    4, # Target: 1
+    14,
+    (
+        'The residents of Gensoukyou seem to be interested in angelroots and bishophats lately... '
+        'As nice it is of them to look towards these items for medicinal properties, '
+        'they don\'t realise their true potential if correctly combined.\n'
+        '\n'
+        'I would like to request some bishophats and angelroots to further my research on this new kind of medicine.'
+    ),
+    4,
+    1,
+    ITEM_ID_EIRIN,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3 + HOUR_IN_SECONDS * 12, HOUR_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_ANGELROOT, AMOUNT_TYPE_WEIGHT, 1000, 50, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_BISHOPHAT, AMOUNT_TYPE_WEIGHT, 500, 10, 80, 120),
+    ),
+    (
+        QuestRewardGeneratorBalance(5300, 100, 80, 120),
+        QuestRewardGeneratorCredibility(15),
+    ),
+)
+
+
+# - Reimu +1 level
+# - Balance +1 level
+# Reward around 2x the value in Sake
+QUEST_TEMPLATE_REIMU_BANQUET = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REIMU_BANQUET] = QuestTemplate(
+    QUEST_TEMPLATE_ID_REIMU_BANQUET,
+    None,
+    4, # Target: 1
+    10,
+    (
+        'As the shrine maiden of the Hakurei Shrine; '
+        'I would like to hold a banquet inviting the most generous shrinegoers, '
+        'where a delicious hot pot shall be served.\n'
+        'Alas, the donations this month haven\'t been very kind to neither me nor the shrine itself for me to '
+        'afford procuring the ingredients from the market, '
+        'therefore I have put up this quest requesting for the ingredients required to prepare the hot pot.\n'
+        '\n'
+        'No need to question the reward, what this request lacks in monetary gain is made up for through the honour '
+        'of having worked with the Hakurei Shrine Maiden herself.'
+    ),
+    2,
+    1,
+    ITEM_ID_REIMU,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 6, HOUR_IN_SECONDS * 12, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_DEVILCART_OYSTER, AMOUNT_TYPE_WEIGHT, 1800, 100, 65, 135),
+        QuestRequirementGeneratorItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, 6000, 500, 65, 135),
+        QuestRequirementGeneratorItemExact(ITEM_ID_BAMBOO_SHOOT, AMOUNT_TYPE_COUNT, 8, 1, 65, 135),
+        QuestRequirementGeneratorChoice(
+            (
+                QuestRequirementGeneratorChoiceOption(
+                    QuestRequirementGeneratorItemExact(ITEM_ID_GARLIC, AMOUNT_TYPE_WEIGHT, 600, 50, 65, 135),
+                    1,
+                ),
+                QuestRequirementGeneratorChoiceOption(
+                    QuestRequirementGeneratorItemExact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_WEIGHT, 1600, 100, 65, 135),
+                    1,
+                ),
+            ),
+        ),
+    ),
+    (
+        QuestRewardGeneratorItemExactFix(ITEM_ID_SAKE, 3),
+        QuestRewardGeneratorCredibility(30),
+    ),
+)
+
+# - Suika +2 level
+# - Requires reward +1 level
+# Reward around 2x the value
+QUEST_TEMPLATE_SUIKA_SAKE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SUIKA_SAKE] = QuestTemplate(
+    QUEST_TEMPLATE_ID_SUIKA_SAKE,
+    None,
+    4, # Target: 1
+    21,
+    (
+        'Hey! I heard Alice will be joining the next feast. '
+        'She\'s usually cold and unwilling to talk to non-humans. Does she wish to be a human? '
+        'Or is she too cowardly to talk to people stronger than her?\n'
+        'I\'d like to make her a little relaxed, so she can have fun. It\'s for her sake, I promise.\n'
+        '\n'
+        'For this, all I need is some Hakurei Sake, the three digits on the back...\n'
+        'Sorry, Reimu keeps replaying this dumb video, it\'s so annoying, smh (shaking my horns).'
+    ),
+    3,
+    1,
+    ITEM_ID_SUIKA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 5 + HOUR_IN_SECONDS * 12, HOUR_IN_SECONDS * 12, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_SAKE, AMOUNT_TYPE_COUNT, 4, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(13600, 400, 80, 120),
+        QuestRewardGeneratorCredibility(10),
+    ),
 )

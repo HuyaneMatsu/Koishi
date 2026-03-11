@@ -1,6 +1,6 @@
 __all__ = ()
 
-from ..item_core import produce_weight
+from ..unit_core import produce_kilogram, produce_kilogram_ratio
 
 from .constants import SORT_BY_REVERSED_DEFAULT, SORT_BYES_REVERSED, SORT_ORDER_REVERSED_DEFAULT, SORT_ORDERS_REVERSED
 
@@ -47,10 +47,7 @@ def produce_inventory_header(user, guild_id, page_index, sort_by, sort_order, we
     yield '; Sort order: '
     yield SORT_ORDERS_REVERSED.get(sort_order, SORT_ORDER_REVERSED_DEFAULT)
     yield '\nWeight: '
-    yield from produce_weight(weight)
-    yield ' / '
-    yield from produce_weight(capacity)
-    yield ' kg'
+    yield from produce_kilogram_ratio(weight, capacity)
 
 
 def produce_inventory_description(item_entries):
@@ -90,5 +87,5 @@ def produce_inventory_description(item_entries):
         yield str(amount)
         
         yield ' ('
-        yield from produce_weight(amount * item.weight)
-        yield ' kg)'
+        yield from produce_kilogram(amount * item.weight)
+        yield ')'

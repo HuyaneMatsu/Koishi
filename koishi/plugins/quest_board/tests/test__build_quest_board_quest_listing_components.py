@@ -1,14 +1,19 @@
-import vampytest
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 
+import vampytest
 from hata import (
     BUILTIN_EMOJIS, ButtonStyle, CDN_ENDPOINT, Component, Guild, Icon, IconType, create_button, create_row,
     create_section, create_separator, create_text_display, create_thumbnail_media
 )
 
 from ...guild_stats import GuildStats
+from ...item_core import ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_PEACH
 from ...quest_core import (
-    LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH,
-    Quest, QuestBatch, get_quest_template
+    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
+    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, Quest, QuestBatch, QuestRequirementInstantiableDuration,
+    QuestRequirementInstantiableItemExact, QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration,
+    QuestRequirementSerialisableItemExact, QuestRewardInstantiableBalance, QuestRewardInstantiableCredibility,
+    QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility, get_quest_template
 )
 from ...user_stats_core import UserStats
 
@@ -38,35 +43,56 @@ def _iter_options():
     
     linked_quest_entry_id_0 = 111
     
-    qtest_0 = Quest(
+    quest_0 = Quest(
         quest_template_id_0,
-        quest_amount_0,
-        3600,
-        2,
-        1000,
+        (
+            QuestRequirementInstantiableDuration(3600),
+            QuestRequirementInstantiableItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0),
+        ),
+        (
+            QuestRewardInstantiableBalance(1000),
+            QuestRewardInstantiableCredibility(2),
+        ),
     )
     
     quest_1 = Quest(
         quest_template_id_1,
-        quest_amount_1,
-        3600,
-        2,
-        1000,
+        (
+            QuestRequirementInstantiableDuration(3600),
+            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1),
+        ),
+        (
+            QuestRewardInstantiableBalance(1000),
+            QuestRewardInstantiableCredibility(2),
+        ),
     )
     
     quest_2 = Quest(
         quest_template_id_2,
-        quest_amount_2,
-        3600,
-        2,
-        1000,
+        (
+            QuestRequirementInstantiableDuration(3600),
+            QuestRequirementInstantiableItemExact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, quest_amount_2),
+        ),
+        (
+            QuestRewardInstantiableBalance(1000),
+            QuestRewardInstantiableCredibility(2),
+        ),
     )
     
     linked_quest_0 = LinkedQuest(
         user_id,
         guild_id,
         batch_id,
-        quest_1,
+        quest_template_id_1,
+        (
+            QuestRequirementSerialisableDuration(3600),
+            QuestRequirementSerialisableExpiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600)),
+            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_0, 0),
+        ),
+        (
+            QuestRewardSerialisableBalance(1000),
+            QuestRewardSerialisableCredibility(2),
+        ),
     )
     linked_quest_0.entry_id = linked_quest_entry_id_0
     linked_quest_0.completion_count = 1
@@ -85,7 +111,7 @@ def _iter_options():
         QuestBatch(
             batch_id,
             (
-                qtest_0,
+                quest_0,
                 quest_1,
                 quest_2,
             )

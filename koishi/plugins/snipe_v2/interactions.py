@@ -117,7 +117,10 @@ async def respond_snipe_direct_message(client, interaction_event, feature_flags,
         return
     
     except DiscordException as err:
-        if err.code == ERROR_CODES.cannot_message_user: # user has dm-s disabled:
+        if err.code in (
+            ERROR_CODES.cannot_message_user_0, # user has dm-s disallowed
+            ERROR_CODES.cannot_message_user_1, # user has dm-s disallowed
+        ):
             await client.interaction_followup_message_create(
                 interaction_event,
                 'Could not deliver direct message.',

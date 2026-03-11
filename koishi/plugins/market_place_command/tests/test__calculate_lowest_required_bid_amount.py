@@ -4,9 +4,9 @@ from ..helpers import calculate_lowest_required_bid_amount
 
 
 def _iter_options():
-    yield 0, 10
-    yield 10, 20
-    yield 10000, 10100
+    yield 0, 20
+    yield 10, 30
+    yield 10000, 10200
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())

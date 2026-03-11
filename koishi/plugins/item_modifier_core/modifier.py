@@ -2,7 +2,7 @@ __all__ = ('Modifier',)
 
 from scarletio import RichAttributeErrorBaseType
 
-from .helpers import get_modifier_name_and_amount_postfix
+from .helpers import get_modifier_name_and_value_producer_and_amount_postfix
 
 
 class Modifier(RichAttributeErrorBaseType):
@@ -41,11 +41,19 @@ class Modifier(RichAttributeErrorBaseType):
         """Returns repr(self)."""
         repr_parts = ['<', type(self).__name__, ' ']
         
+        (
+            modifier_name,
+            value_producer,
+            modifier_amount_postfix,
+        ) = get_modifier_name_and_value_producer_and_amount_postfix(self.type)
+        
         amount = self.amount
         repr_parts.append('+' if amount >= 0 else '-')
-        repr_parts.append(str(abs(amount)))
-        
-        modifier_name, modifier_amount_postfix = get_modifier_name_and_amount_postfix(self.type)
+        amount = abs(amount)
+        if value_producer is None:
+            repr_parts.append(str(amount))
+        else:
+            repr_parts.extend(value_producer(amount))
         
         if (modifier_amount_postfix is not None):
             repr_parts.append(modifier_amount_postfix)

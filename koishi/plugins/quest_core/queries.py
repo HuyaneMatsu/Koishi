@@ -13,15 +13,17 @@ from ...bot_utils.models import DB_ENGINE, LINKED_QUEST_TABLE, linked_quest_mode
 from .constants import (
     LINKED_QUEST_LISTING_CACHE, LINKED_QUEST_LISTING_CACHE_SIZE_MAX, LINKED_QUEST_LISTING_GET_QUERY_TASKS
 )
+from .flags import QUEST_FLAG_INITIALISATION_FAILURE
 from .linked_quest import LinkedQuest
 from .linked_quest_completion_states import LINKED_QUEST_COMPLETION_STATE_COMPLETED
+from .serialisation import quest_serialisable_serialise
 from .utils import get_current_batch_id
 
 
 EVENT_LOOP = get_event_loop()
 
 
-def _pop_completed_linked_quests(linked_quest_listing):
+def _pop_completed_and_broken_linked_quests(linked_quest_listing):
     """
     Pops completed linked quests from the listing that are for older batch.
     
@@ -42,10 +44,22 @@ def _pop_completed_linked_quests(linked_quest_listing):
     linked_quests_to_pop = None
     
     for linked_quest in linked_quest_listing:
-        if linked_quest.batch_id == quest_batch_id:
-            continue
+        while True:
+            if linked_quest.flags & QUEST_FLAG_INITIALISATION_FAILURE:
+                do_pop = True
+                break
+            
+            if (
+                (linked_quest.batch_id != quest_batch_id) and
+                (linked_quest.completion_state == LINKED_QUEST_COMPLETION_STATE_COMPLETED)
+            ):
+                do_pop = True
+                break
+            
+            do_pop = False
+            break
         
-        if linked_quest.completion_state != LINKED_QUEST_COMPLETION_STATE_COMPLETED:
+        if not do_pop:
             continue
         
         if linked_quests_to_pop is None:
@@ -90,7 +104,9 @@ async def get_linked_quest_listing(user_id):
         pass
     else:
         LINKED_QUEST_LISTING_CACHE.move_to_end(user_id)
-        LINKED_QUEST_LISTING_CACHE[user_id] = linked_quest_listing = _pop_completed_linked_quests(linked_quest_listing)
+        LINKED_QUEST_LISTING_CACHE[user_id] = linked_quest_listing = _pop_completed_and_broken_linked_quests(
+            linked_quest_listing
+        )
         return linked_quest_listing
     
     try:
@@ -127,7 +143,9 @@ def _linked_quest_listing_query_done_callback(key, waiters, task):
         for waiter in waiters:
             waiter.set_exception_if_pending(exception)
     else:
-        LINKED_QUEST_LISTING_CACHE[key] = linked_quest_listing = _pop_completed_linked_quests(linked_quest_listing)
+        LINKED_QUEST_LISTING_CACHE[key] = linked_quest_listing = _pop_completed_and_broken_linked_quests(
+            linked_quest_listing
+        )
         if len(LINKED_QUEST_LISTING_CACHE) > LINKED_QUEST_LISTING_CACHE_SIZE_MAX:
             del LINKED_QUEST_LISTING_CACHE[next(iter(LINKED_QUEST_LISTING_CACHE))]
         
@@ -306,18 +324,14 @@ async def query_add_linked_quest(linked_quest):
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
             LINKED_QUEST_TABLE.insert().values(
-                amount_required = linked_quest.amount_required,
-                amount_submitted = linked_quest.amount_submitted,
-                completion_count = linked_quest.completion_count,
-                completion_state = linked_quest.completion_state,
                 batch_id = linked_quest.batch_id,
-                expires_at = linked_quest.expires_at,
                 guild_id = linked_quest.guild_id,
-                reward_balance = linked_quest.reward_balance,
-                reward_credibility = linked_quest.reward_credibility,
-                taken_at = linked_quest.taken_at,
                 template_id = linked_quest.template_id,
                 user_id = linked_quest.user_id,
+                completion_count = linked_quest.completion_count,
+                completion_state = linked_quest.completion_state,
+                requirements = quest_serialisable_serialise(linked_quest.requirements),
+                rewards = quest_serialisable_serialise(linked_quest.rewards),
             ).returning(
                 linked_quest_model.id,
             )
@@ -368,11 +382,9 @@ async def query_update_linked_quest(linked_quest):
             LINKED_QUEST_TABLE.update(
                 linked_quest_model.id == linked_quest.entry_id
             ).values(
-                amount_submitted = linked_quest.amount_submitted,
                 completion_count = linked_quest.completion_count,
                 completion_state = linked_quest.completion_state,
-                expires_at = linked_quest.expires_at,
-                taken_at = linked_quest.taken_at,
+                requirements = quest_serialisable_serialise(linked_quest.requirements),
             ),
         )
 

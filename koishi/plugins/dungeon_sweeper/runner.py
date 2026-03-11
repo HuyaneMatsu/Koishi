@@ -139,7 +139,8 @@ async def try_create_initial_message(client, interaction_event, components):
                 ERROR_CODES.unknown_channel, # message's channel deleted
                 ERROR_CODES.missing_access, # client removed
                 ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                ERROR_CODES.cannot_message_user, # user has dm-s disallowed
+                ERROR_CODES.cannot_message_user_0, # user has dm-s disallowed
+                ERROR_CODES.cannot_message_user_1, # user has dm-s disallowed
             )
         ):
             raise
@@ -238,7 +239,8 @@ async def try_edit_message(client, message, new_interaction_event, old_interacti
                 ERROR_CODES.unknown_channel, # message's channel deleted
                 ERROR_CODES.missing_access, # client removed
                 ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                ERROR_CODES.cannot_message_user, # user has dm-s disallowed
+                ERROR_CODES.cannot_message_user_0, # user has dm-s disallowed
+                ERROR_CODES.cannot_message_user_1, # user has dm-s disallowed
             )
         ):
             raise

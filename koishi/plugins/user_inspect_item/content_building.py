@@ -2,8 +2,10 @@ __all__ = ()
 
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ..item_core import produce_flags_section, produce_weight
+from ..item_core import produce_flags_section
 from ..item_modifier_core import produce_modifiers_section
+
+from ..unit_core import produce_kilogram
 
 
 def produce_item_inspect_description(item):
@@ -36,8 +38,8 @@ def produce_item_inspect_description(item):
         yield description
     
     yield '\n\n### Trading information\nWeight: '
-    yield from produce_weight(item.weight)
-    yield ' kg\nValue: '
+    yield from produce_kilogram(item.weight)
+    yield '\nValue: '
     yield str(item.value)
     yield ' '
     yield EMOJI__HEART_CURRENCY.as_emoji

@@ -4,7 +4,7 @@ from ..constants import LINKED_QUEST_LISTING_CACHE
 from ..linked_quest import LinkedQuest
 from ..queries import add_linked_quest
 
-from .test__get_linked_quest_listing import _create_test_quest
+from .helpers import _create_linked_quest_additional_input_fields
 
 
 async def test__add_linked_quest__in_cache():
@@ -32,30 +32,30 @@ async def test__add_linked_quest__in_cache():
         query_add_linked_quest = mock_query_add_linked_quest,
     )
     
-    quest_0 = _create_test_quest()
     user_id_0 = 202505190020
     guild_id_0 = 202505190021
     batch_id_0 = 5666
     entry_id_0 = 140
+    additional_input_fields_0 = _create_linked_quest_additional_input_fields()
     
-    quest_1 = _create_test_quest()
     user_id_1 = 202505190022
     guild_id_1 = 202505190023
     batch_id_1 = 5666
     entry_id_1 = 141
+    additional_input_fields_1 = _create_linked_quest_additional_input_fields()
     
     linked_quest_0 = LinkedQuest(
         user_id_0,
         guild_id_0,
         batch_id_0,
-        quest_0,
+        *additional_input_fields_0,
     )
     
     linked_quest_1 = LinkedQuest(
         user_id_1,
         guild_id_1,
         batch_id_1,
-        quest_1,
+        *additional_input_fields_1,
     )
     linked_quest_1.entry_id = entry_id_1
     

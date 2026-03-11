@@ -71,8 +71,8 @@ def test__Item__repr():
     
     vampytest.assert_instance(output, str)
     vampytest.assert_in(type(item).__name__, output)
-    vampytest.assert_in(f'name = {name!r}', output)
     vampytest.assert_in(f'id = {item_id}', output)
+    vampytest.assert_in(f'name = {name!r}', output)
 
 
 def test__Item__iter_modifiers__0():

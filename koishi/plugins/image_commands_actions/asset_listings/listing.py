@@ -4435,14 +4435,6 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1239500712560431126/chiruno-sunny-kiss-0000.png',
-).with_action(
-    ACTION_TAG_KISS, SUNNY_MILK, CHIRUNO,
-).with_creator(
-    'senmura',
-)
-
-TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1239501762780463114/koishi-satori-kiss-0002.png',
 ).with_action(
     ACTION_TAG_KISS, KOMEIJI_KOISHI, KOMEIJI_SATORI,

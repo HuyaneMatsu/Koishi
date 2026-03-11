@@ -48,6 +48,7 @@ TOUHOU_TAGS_BANNED = frozenset((
     'ronald_mcdonald',
     'pokemon',
     'furry',
+    'large_variant_set',
 ))
 
 

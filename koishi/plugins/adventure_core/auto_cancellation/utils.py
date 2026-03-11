@@ -2,32 +2,13 @@ __all__ = ('check_auto_cancellation_conditions', 'produce_auto_cancellation_cond
 
 from math import floor
 
-from ...item_core import produce_weight
+from ...unit_core import produce_kilogram
 
 from .auto_cancellation_condition_ids import (
     AUTO_CANCELLATION_CONDITION_ID_EQUAL, AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL,
     AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, AUTO_CANCELLATION_CONDITION_ID_LESS_OR_EQUAL,
     AUTO_CANCELLATION_CONDITION_ID_LESS_THAN, AUTO_CANCELLATION_CONDITION_ID_NOT_EQUAL
 )
-
-
-def _produce_kilogram(value):
-    """
-    Produces a kilogram value.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    value : `int`
-        Weight to produce as kilogram in grams.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield from produce_weight(value)
-    yield ' kg'
 
 
 def _produce_single_condition(auto_cancellation_condition, field_added, value_name, percentage, value_producer):
@@ -156,7 +137,7 @@ def produce_auto_cancellation_conditions(auto_cancellation):
     field_added = False
     
     field_added = yield from _produce_single_condition(
-        auto_cancellation.inventory_flat, field_added, 'inventory', False, _produce_kilogram
+        auto_cancellation.inventory_flat, field_added, 'inventory', False, produce_kilogram
     )
     field_added = yield from _produce_single_condition(
         auto_cancellation.inventory_percentage, field_added, 'inventory', True, None

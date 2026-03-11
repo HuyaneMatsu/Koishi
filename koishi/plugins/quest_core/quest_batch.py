@@ -44,7 +44,7 @@ class QuestBatch(RichAttributeErrorBaseType):
         repr_parts.append(repr(self.id))
         
         # quests
-        repr_parts.append(' quests = ')
+        repr_parts.append(', quests = ')
         repr_parts.append(repr(self.quests))
         
         repr_parts.append('>')

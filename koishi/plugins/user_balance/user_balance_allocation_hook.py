@@ -12,15 +12,15 @@ class UserBalanceAllocationHook(RichAttributeErrorBaseType):
     allocation_feature_id : `int`
         The allocation feature's identifier.
     
-    get_session_enty : `None | CoroutineFunction`
+    get_session_entry : `None | CoroutineFunction`
         A function to get the session's entry.
     
     get_allocation_aliveness : `None | FunctionType`
         Sync check whether the allocation is alive.
     """
-    __slots__ = ('allocation_feature_id', 'get_session_enty', 'get_allocation_aliveness')
+    __slots__ = ('allocation_feature_id', 'get_session_entry', 'get_allocation_aliveness')
     
-    def __new__(cls, allocation_feature_id, get_allocation_aliveness, get_session_enty):
+    def __new__(cls, allocation_feature_id, get_allocation_aliveness, get_session_entry):
         """
         Creates a new user balance allocation hook.
         
@@ -32,12 +32,12 @@ class UserBalanceAllocationHook(RichAttributeErrorBaseType):
         get_allocation_aliveness : `None | FunctionType`
             Sync check whether the allocation is alive.
         
-        get_session_enty : `None | CoroutineFunction`
+        get_session_entry : `None | CoroutineFunction`
             A function to get the session's entry.
         """
         self = object.__new__(cls)
         self.allocation_feature_id = allocation_feature_id
-        self.get_session_enty = get_session_enty
+        self.get_session_entry = get_session_entry
         self.get_allocation_aliveness = get_allocation_aliveness
         return self
     

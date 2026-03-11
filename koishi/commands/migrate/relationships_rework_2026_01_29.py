@@ -20,7 +20,7 @@ def execute_migration():
     """
     with DB_ENGINE.connect() as connector:
         # ---- Update the requests. ----
-    
+        
         # I could not figure out how to do the shifting, so I load everything instead.
         response = connector.execute(
             select(

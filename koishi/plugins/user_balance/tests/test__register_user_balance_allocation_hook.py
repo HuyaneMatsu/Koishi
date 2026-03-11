@@ -10,7 +10,7 @@ def test__register_user_balance_allocation_hook():
     """
     allocation_feature_id = 9999
     get_allocation_aliveness = None
-    get_session_enty = None
+    get_session_entry = None
     
     hooks_patched = {}
     
@@ -22,7 +22,7 @@ def test__register_user_balance_allocation_hook():
     output = mocked(
         allocation_feature_id,
         get_allocation_aliveness,
-        get_session_enty,
+        get_session_entry,
     )
     
     vampytest.assert_instance(output, UserBalanceAllocationHook)

@@ -1,13 +1,13 @@
 import vampytest
 
-from config import ORIN_ID
-
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ...item_core import ITEM_ID_PEACH, get_item_nullable
-from ...quest_core import AMOUNT_TYPE_COUNT
+from ...quest_core import AMOUNT_TYPE_COUNT, QUEST_REWARD_TYPE_BALANCE, QUEST_REWARD_TYPE_CREDIBILITY
 
-from ..content_builders import produce_linked_quest_submit_success_completed_description
+from ..content_building import produce_linked_quest_submit_success_completed_description
+
+from config import ORIN_ID
 
 
 def _iter_options():
@@ -17,17 +17,19 @@ def _iter_options():
     
     yield (
         0,
-        item,
-        AMOUNT_TYPE_COUNT,
-        50,
-        12,
-        900,
-        3,
+        [
+            (item, AMOUNT_TYPE_COUNT, 50, 38, 12)
+        ],
+        [
+            (QUEST_REWARD_TYPE_BALANCE, 0, 900),
+            (QUEST_REWARD_TYPE_CREDIBILITY, 0, 3),
+        ],
         1,
         2,
         (
             f'You have submitted **12** {item.emoji} {item.name}.\n'
-            f'For a total of **50** and finished the quest.\n'
+            f'For a total of **50**.\n'
+            f'By doing so, you finished the quest.\n'
             f'\n'
             f'**You received:**\n'
             f'- **900** {EMOJI__HEART_CURRENCY}\n'
@@ -40,17 +42,19 @@ def _iter_options():
     
     yield (
         ORIN_ID,
-        item,
-        AMOUNT_TYPE_COUNT,
-        50,
-        12,
-        900,
-        3,
+        [
+            (item, AMOUNT_TYPE_COUNT, 50, 38, 12)
+        ],
+        [
+            (QUEST_REWARD_TYPE_BALANCE, 0, 900),
+            (QUEST_REWARD_TYPE_CREDIBILITY, 0, 3),
+        ],
         1,
         2,
         (
             f'You have submitted **12** {item.emoji} {item.name}.\n'
-            f'For a total of **50** and finished the quest.\n'
+            f'For a total of **50**.\n'
+            f'By doing so, you finished the quest.\n'
             f'\n'
             f'**You received:**\n'
             f'- **900** {EMOJI__HEART_CURRENCY}\n'
@@ -65,17 +69,18 @@ def _iter_options():
     # If you accept a lower rank quest it is possible you receive 0.
     yield (
         0,
-        item,
-        AMOUNT_TYPE_COUNT,
-        50,
-        12,
-        900,
+        [
+            (item, AMOUNT_TYPE_COUNT, 50, 38, 12)
+        ],
+        [
+            (QUEST_REWARD_TYPE_BALANCE, 0, 900),
+        ],
         0,
-        1,
-        1,
+        0,
         (
             f'You have submitted **12** {item.emoji} {item.name}.\n'
-            f'For a total of **50** and finished the quest.\n'
+            f'For a total of **50**.\n'
+            f'By doing so, you finished the quest.\n'
             f'\n'
             f'**You received:**\n'
             f'- **900** {EMOJI__HEART_CURRENCY}'
@@ -86,12 +91,8 @@ def _iter_options():
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__produce_linked_quest_submit_success_completed_description(
     client_id,
-    item,
-    amount_type,
-    amount_required,
-    amount_used,
-    reward_balance,
-    reward_credibility,
+    submissions_normalised,
+    rewards_normalised,
     user_level_old,
     user_level_new,
 ):
@@ -103,23 +104,11 @@ def test__produce_linked_quest_submit_success_completed_description(
     client_id : `int`
         The client's identifier who is rendering this message.
     
-    item : ``None | Item``
-        The submitted item.
+    submissions_normalised : ``list<(Item, int, int, int, int)>``
+        The submitted amounts normalised.
     
-    amount_type : `int`
-        The amount's type.
-    
-    amount_required : `int`
-        The amount of required items.
-    
-    amount_used : `int`
-        The used up amount.
-    
-    reward_balance : `int`
-        The amount of balance the user receives.
-    
-    reward_credibility : `int`
-        The amount of credibility the user receives.
+    rewards_normalised : `None | list<(int, int, int)>`
+        The rewards given by the quest in a normalised form.
     
     user_level_old : `int`
         The user's adventurer rank before completing the quest.
@@ -133,12 +122,8 @@ def test__produce_linked_quest_submit_success_completed_description(
     """
     output = ''.join([*produce_linked_quest_submit_success_completed_description(
         client_id,
-        item,
-        amount_type,
-        amount_required,
-        amount_used,
-        reward_balance,
-        reward_credibility,
+        submissions_normalised,
+        rewards_normalised,
         user_level_old,
         user_level_new,
     )])

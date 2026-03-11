@@ -128,6 +128,7 @@ async def query_update_market_place_item(market_place_item):
     # Updated before finalisation:
     # - purchaser_user_id
     # - purchaser_balance_amount
+    # - finalises_at
     #
     # Updated after finalisation:
     # - flags
@@ -137,9 +138,10 @@ async def query_update_market_place_item(market_place_item):
             MARKET_PLACE_ITEM_TABLE.update(
                 market_place_item_model.id == market_place_item.entry_id
             ).values(
-                purchaser_user_id = market_place_item.purchaser_user_id,
-                purchaser_balance_amount = market_place_item.purchaser_balance_amount,
+                finalises_at = market_place_item.finalises_at,
                 flags = market_place_item.flags,
+                purchaser_balance_amount = market_place_item.purchaser_balance_amount,
+                purchaser_user_id = market_place_item.purchaser_user_id,
             ),
         )
 

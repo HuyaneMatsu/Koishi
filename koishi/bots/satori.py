@@ -66,7 +66,8 @@ async def invalid_command(client, message, command, content):
             if isinstance(err, DiscordException):
                 if err.code in (
                     ERROR_CODES.missing_access, # client removed
-                    ERROR_CODES.cannot_message_user, # dm disabled
+                    ERROR_CODES.cannot_message_user_0, # user has dm-s disallowed
+                    ERROR_CODES.cannot_message_user_1, # user has dm-s disallowed
                 ):
                     return
             

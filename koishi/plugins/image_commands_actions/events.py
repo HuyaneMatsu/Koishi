@@ -251,7 +251,10 @@ async def message_create(client, message):
         
         except DiscordException as err:
             # do nothing if the user has dm-s disabled
-            if err.code != ERROR_CODES.cannot_message_user:
+            if err.code not in (
+                ERROR_CODES.cannot_message_user_0, # user has dm-s disallowed
+                ERROR_CODES.cannot_message_user_1, # user has dm-s disallowed
+            ):
                 raise
         
         return

@@ -17,7 +17,8 @@ from ..adventure_core import (
     can_cancel_adventure, get_duration_till_recovery_end, iter_loot_data, produce_auto_cancellation_conditions,
     produce_duration_suggestion
 )
-from ..item_core import get_item, produce_weight
+from ..item_core import get_item
+from ..unit_core import produce_kilogram_ratio
 
 from .custom_ids import (
     ADVENTURE_ACTION_BATTLE_LOGS_BUILDER, ADVENTURE_ACTION_LISTING_VIEW_BUILDER, ADVENTURE_ACTION_VIEW_BUILDER,
@@ -476,10 +477,8 @@ def produce_adventure_view_description_active(adventure, now, inventory_total, i
     yield '\n'
     yield from produce_used('energy', adventure.energy_initial, adventure.energy_exhausted)
     yield '\nUsed inventory: '
-    yield from produce_weight(inventory_exhausted)
-    yield ' / '
-    yield from produce_weight(inventory_total)
-    yield ' kg\nElapsed time: '
+    yield from produce_kilogram_ratio(inventory_exhausted, inventory_total)
+    yield '\nElapsed time: '
     yield elapsed_time(RelativeDelta(adventure.created_at, now))
     
     adventure_state = adventure.state

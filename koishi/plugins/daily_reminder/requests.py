@@ -140,7 +140,10 @@ async def try_message_create(client, channel, embed, components, entry_id, conne
             return
         
         # Cant send message to user
-        if exception.code == ERROR_CODES.cannot_message_user:
+        if exception.code in (
+            ERROR_CODES.cannot_message_user_0, # user has dm-s disallowed
+            ERROR_CODES.cannot_message_user_1, # user has dm-s disallowed
+        ):
             await set_entry_as_notified_with_connector(connector, entry_id)
             return
         

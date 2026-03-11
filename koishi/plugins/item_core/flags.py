@@ -9,3 +9,13 @@ ITEM_FLAG_HEAD = 1 << 2
 ITEM_FLAG_SPECIES = 1 << 3
 ITEM_FLAG_WEAPON = 1 << 4
 ITEM_FLAG_NPC = 1 << 5
+
+
+ITEM_FLAG_NAMES = (
+    'edible',
+    'costume',
+    'head',
+    'species',
+    'weapon',
+    'npc',
+)

@@ -351,18 +351,14 @@ if (DB_ENGINE is not None):
     class linked_quest_model(BASE):
         __tablename__      = 'LINKED_QUESTS'
         id                 = Column(Int64, primary_key = True)
-        amount_required    = Column(Int64, default = 0, nullable = False)
-        amount_submitted   = Column(Int64, default = 0, nullable = False)
         batch_id           = Column(Int64, default = 0, nullable = False)
-        expires_at         = Column(DateTime, nullable = False)
         guild_id           = Column(Int64, default = 0, nullable = False)
-        reward_balance     = Column(Int64, default = 0, nullable = False)
-        reward_credibility = Column(Int64, default = 0, nullable = False)
-        taken_at           = Column(DateTime, nullable = False)
         template_id        = Column(Int64, default = 0, nullable = False)
         user_id            = Column(Int64, default = 0, nullable = False)
         completion_state   = Column(Int16, default = 1, nullable = False)
         completion_count   = Column(Int32, default = 0, nullable = False)
+        requirements       = Column(Binary(), default = None, nullable = True)
+        rewards            = Column(Binary(), default = None, nullable = True)
     
     LINKED_QUEST_TABLE = linked_quest_model.__table__
     

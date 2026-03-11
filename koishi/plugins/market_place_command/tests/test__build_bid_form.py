@@ -67,7 +67,7 @@ def _iter_options():
                     'Lowest allowed bid auto-filled, modify or just confirm.',
                     create_text_input(
                         custom_id = 'bid_balance_amount',
-                        value = '10',
+                        value = '20',
                     ),
                 ),
             ],

@@ -172,6 +172,7 @@ class NewTouhouCharacter:
         
         except DiscordException as exception:
             if exception.code not in (
-                ERROR_CODES.cannot_message_user, # Perhaps the user blocked the bot and used it (in a dm ofc)?
+                ERROR_CODES.cannot_message_user_0,
+                ERROR_CODES.cannot_message_user_1, # Perhaps the user blocked the bot and used it (in a dm ofc)?
             ):
                 raise

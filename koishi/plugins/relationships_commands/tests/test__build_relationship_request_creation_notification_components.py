@@ -59,7 +59,7 @@ def test__build_relationship_request_creation_notification_components(
     
     Parameters
     ----------
-    source_user : ``ClientUserbase``
+    source_user : ``ClientUserBase``
         The user who created the relationship request.
     
     relationship_request : ``RelationshipRequest``

@@ -104,7 +104,7 @@ class Inventory(RichAttributeErrorBaseType):
         Parameters
         ----------
         item : ``Item``
-            The item to modify its amount of.
+            Item to get amount for.
         
         Returns
         -------
@@ -292,9 +292,12 @@ class Inventory(RichAttributeErrorBaseType):
         item_entries_modified = self.item_entries_modified
         if (item_entries_modified is not None):
             try:
-                return item_entries_modified[item_id]
+                item_entry = item_entries_modified[item_id]
             except KeyError:
                 pass
+            else:
+                if item_entry.amount:
+                    return item_entry
     
     
     @classmethod

@@ -3,10 +3,12 @@ __all__ = ()
 from hata.main import register
 
 from .relationships_rework_2026_01_29 import execute_migration as execute_migration_relationships_rework_2026_01_29
+from .quest_reword_2026_03_10 import execute_migration as execute_migration_quest_reword_2026_03_10
 
 
 MIGRATIONS = (
     ('relationships_rework_2026_01_29', execute_migration_relationships_rework_2026_01_29),
+    ('quest_reword_2026_03_10', execute_migration_quest_reword_2026_03_10)
 )
 
 
@@ -16,6 +18,8 @@ def migrate(
 ):
     """
     Executes a database migration.
+    
+    Adding the new fields before and removing the old fields after is on you.
     """
     for iterated_migration_name, executor in MIGRATIONS:
         if iterated_migration_name == migration_name:

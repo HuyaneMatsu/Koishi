@@ -27,5 +27,5 @@ These should be used to mark whether the buyer / retrieved their reward.
 - `CUSTOM_ID_MARKET_PLACE_OFFER_BUILDER`
 - `CUSTOM_ID_MARKET_PLACE_OFFER_RP`
 
-The builder one can be used from externally reference teh market place offer.
+The builder one can be used from externally reference the market place offer.
 While the regex pattern is used to handle it by the `market_place_command` plugin.

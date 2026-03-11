@@ -11,7 +11,7 @@ def test__create_quest_from_template():
     """
     Tests whether ``create_quest_from_template`` works as intended.
     """
-    random_number_generator = Random()
+    random_number_generator = Random(12)
     quest_template = QUEST_SAKUYA_STRAWBERRY
     
     quest = create_quest_from_template(random_number_generator, quest_template)

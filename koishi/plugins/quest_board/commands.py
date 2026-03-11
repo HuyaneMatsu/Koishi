@@ -52,7 +52,7 @@ async def command_user_quests(client, interaction_event):
     
     Parameters
     ----------
-    user : ``ClientUserbase``
+    user : ``ClientUserBase``
         The respective user.
     
     guild_id : `int`

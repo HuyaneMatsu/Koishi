@@ -4,10 +4,10 @@ from math import log
 
 from ..user_stats_core import (
     USER_STAT_NAME_FULL_BEDROOM, USER_STAT_NAME_FULL_CHARM, USER_STAT_NAME_FULL_CUTENESS, USER_STAT_NAME_FULL_HOUSEWIFE,
-    USER_STAT_NAME_FULL_LOYALTY, produce_speed
+    USER_STAT_NAME_FULL_LOYALTY
 )
 
-from ..item_core import produce_weight
+from ..unit_core import produce_speed, produce_weight
 
 
 def _produce_stat_increase(name, stat_base, stat_calculated):
@@ -104,7 +104,7 @@ def _produce_stat_with_diminishing_multiplier(name, stat):
         The stat's name.
     
     stat : `int`
-        The stats's value.
+        The stats' value.
     
     Yields
     ------

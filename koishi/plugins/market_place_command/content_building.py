@@ -6,7 +6,8 @@ from hata import elapsed_time
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ..item_modifier_core import produce_modifiers_section
-from ..item_core import get_item, produce_flags_section, produce_weight
+from ..item_core import get_item, produce_flags_section
+from ..unit_core import produce_kilogram
 
 from .constants import ITEM_CATEGORY_CHOICES
 
@@ -39,8 +40,8 @@ def _produce_item_with_amount(item, item_amount):
     yield ' '
     yield item.name
     yield ' ('
-    yield from produce_weight(item.weight * item_amount)
-    yield ' kg)'
+    yield from produce_kilogram(item.weight * item_amount)
+    yield ')'
 
 
 def produce_sell_confirmation_description(
@@ -497,8 +498,8 @@ def produce_item_description(item_id):
         yield '\n\n'
     
     yield '### Trading information\nWeight: '
-    yield from produce_weight(item.weight)
-    yield ' kg\nValue: '
+    yield from produce_kilogram(item.weight)
+    yield '\nValue: '
     yield str(item.value)
     yield ' '
     yield EMOJI__HEART_CURRENCY.as_emoji

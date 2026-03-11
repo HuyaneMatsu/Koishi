@@ -72,7 +72,10 @@ async def guild_create(client, guild):
                 await client.message_create(channel, content)
         
         except DiscordException as err:
-            if err.code != ERROR_CODES.cannot_message_user:
+            if err.code not in (
+                ERROR_CODES.cannot_message_user_0, # user has dm-s disallowed
+                ERROR_CODES.cannot_message_user_1, # user has dm-s disallowed
+            ):
                 raise
     
     finally:

@@ -1,3 +1,62 @@
+### 2026-03-11
+
+- Fix `chiruno-sunny-kiss-0000` image is present twice. (yumeirusynthesis)
+- Fix `inventory` and `movement` modifiers were rendered as is, without normalisation and unit.
+- `/market-place` minimal bid changed to `2%` or `20`, pick higher. The previous value just felt too low.
+- `/market-place` now sets finalisation to be at least 6 hours from "now" upon bidding to avoid campers sniping
+    everything.
+- Add `large_variant_set` to blacklisted touhou tags. (opecuted)
+- Add item groups.
+
+- Rework quests:
+    - Now they can have multiple requirements and rewards. Any of them can also be omitted.
+    - Expiration / duration / submission amounts are now encoded as requirements.
+    - Balance / credibility are now encoded as rewards.
+    - User interface updated to display the new features properly.
+    - Add new options allowing to select exactly where and what you want to submit.
+
+- Add many new options for quest generations:
+    - item group requirement
+    - item category requirement
+    - choice requirement (weightable, select one option)
+    - expiration requirement (not duration based)
+    - fix credibility reward
+    - item exact reward
+    - fix item exact reward
+
+- Add new quests:
+    - Koishi - knife (yumeirusynthesis).
+    - Eirin - Angelroot & bishophat (2vio2vieevie)
+    - Reimu - Banquet (chaos3326)
+    - Suika - Sake (2vio2vieevie)
+    - Mystia - firewood
+
+- Add new items:
+    - Twigs
+    - Bough
+    - Log
+    - Bamboo
+    - Cut wood
+    - Sake
+
+- Balance adventure locations & targets:
+    - Human village vineyards - gardening -> Add grape pruning action.
+    - Hakugyokurou mansion - gardening -> Add tree pruning action.
+
+- Balance quests:
+    - Mystia - Bamboo shoot -> Reward Balance 1100 -> 900.
+    - Mystia - Devilcart oyster -> 1 in 1 chance to appear -> 1 in 2 chance to appear.
+    - Sakuya - Devilcart oyster -> Duration range 50 - 100 % -> 67 - 133 %.
+    - Sakuya - Fishing rod -> Reward credibility 10 -> 45 (fixed).
+    - Tewi - Bishophat -> Rank C -> E.
+    - Kokoro - Scissors -> Reward credibility 10 -> 270 (fixed).
+    - Koishi - Ruler -> Reward credibility 10 -> 250 (fixed).
+    - Yukari - Ruler -> Reward credibility 10 -> 250 (fixed).
+    - Yuuka - Straw hat -> Reward credibility 10 -> 240 (fixed).
+
+- Balance items:
+    - Bamboo shoot -> value 107 -> 88, weight 640 -> 525 (around 18% decrease).
+
 ### 2026-02-15
 
 - Fix completability rendering of active quests, was different from other sections.
