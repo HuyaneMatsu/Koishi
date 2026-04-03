@@ -170,8 +170,22 @@ def _iter_options():
             create_separator(),
             create_section(
                 create_text_display(
+                    f'Time left: expired\n'
+                    f'Submit 0 / {quest_amount_1} {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
+                ),
+                thumbnail = create_button(
+                    'Details',
+                    custom_id = (
+                        f'linked_quest.details.{user_id:x}.{page_index:x}.{linked_quest_entry_id_4:x}'
+                    ),
+                    enabled = True,
+                    style = ButtonStyle.red,
+                ),
+            ),
+            create_section(
+                create_text_display(
                     f'Time left: 59 minutes, 40 seconds\n'
-                    f'Submit 0.00 / {quest_amount_0/1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.'
+                    f'Submit 0.00 / {quest_amount_0 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.'
                 ),
                 thumbnail = create_button(
                     'Details',
@@ -194,20 +208,6 @@ def _iter_options():
                     ),
                     enabled = True,
                     style = ButtonStyle.green,
-                ),
-            ),
-            create_section(
-                create_text_display(
-                    f'Time left: expired\n'
-                    f'Submit 0 / {quest_amount_1} {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
-                ),
-                thumbnail = create_button(
-                    'Details',
-                    custom_id = (
-                        f'linked_quest.details.{user_id:x}.{page_index:x}.{linked_quest_entry_id_4:x}'
-                    ),
-                    enabled = True,
-                    style = ButtonStyle.red,
                 ),
             ),
             create_section(

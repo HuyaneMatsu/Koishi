@@ -1,3 +1,37 @@
+### 2026-04-03
+
+- Fix submitting multiple items at once could fail submission due to the length of items the user owns changing.
+- Fix `/ds rules` failed to switch between options.
+- Fix `/guild in-guild-emoji-stats` and other expression tracking commands were cached incorrectly making them not
+    being updated even after `timeout` duration of time.
+
+- `/daily` now ignores `unkown interaction` errors when trying to send a new image.
+    Retry logic with normal message create also added.
+- `/accessibility character-preference remove`. now ignores `unknown interaction` errors
+    when auto completing an assigned character's name.
+- `/touhou-character` now ignores `unkown interaction` errors when trying to send a new image.
+    Retry logic with normal message edit also added.
+- Action commands, such as `/bite` now handles `unknown message` errors.
+- `/sex` now ignores `gateway timeout` status code.
+
+- Add `/user inspect-equipment`.
+- `item group`-s now have their own information, meaning now an information button appears next to them in linked quest
+    `requirement select`.
+- Linked quest details now will always direct you to `requirement select` view, since now `item group`-s also have
+    information views. (Item categories still do not have such an option.)
+- Quest board quests now also allow (again) to view requirement information.
+    Implemented to match how linked quests do it.
+- `/adventure view` now offers an option to either view the `current` (previous behaviour), the `previous` or
+    `current or previous` (new default) adventure.
+- Improve `/user quests` ordering by also taking quest expiration into account.
+
+- Add new adventure locations & targets:
+    - Magic forest - Collect firewood
+
+- Balance quests:
+    - Mystia - Firewood -> Reward credibility 10 -> 20.
+
+
 ### 2026-03-11
 
 - Fix `chiruno-sunny-kiss-0000` image is present twice. (yumeirusynthesis)
@@ -44,7 +78,7 @@
     - Hakugyokurou mansion - gardening -> Add tree pruning action.
 
 - Balance quests:
-    - Mystia - Bamboo shoot -> Reward Balance 1100 -> 900.
+    - Mystia - Bamboo shoot -> Reward balance 1100 -> 900.
     - Mystia - Devilcart oyster -> 1 in 1 chance to appear -> 1 in 2 chance to appear.
     - Sakuya - Devilcart oyster -> Duration range 50 - 100 % -> 67 - 133 %.
     - Sakuya - Fishing rod -> Reward credibility 10 -> 45 (fixed).
@@ -665,7 +699,7 @@
 - Fix love affinity percentage had bottom heavy distribution instead of scattered. (Since first relationship update.)
 - Fill out the relationship extend rules.
 - `/shop roles`, `/shop divorce-papers`, `/shop buy-relationship-slot` now only allows you to gift to anyone who is
-    related, or you must have the required roles to gift to anyone. This is to match the new `/gift` behavior.
+    related, or you must have the required roles to gift to anyone. This is to match the new `/gift` behaviour.
 - Fix `/shop burn-divorce-papers`, `/shop buy-relationship-slot` not saving the "deepened" relationship which could
     lead the deepening to be lost.
 - Relationship request & relation auto completion now works with duplicate (or highly familiar) user names.
@@ -680,7 +714,7 @@
     (Seems like many people did not like to get 4 rewards at once.)
 - The default notification delivering client for `top-gg` votes should be `Koishi`. (ongmylinh9)
 - `/shop sell-daily` removed.
-- Add more safety code to make sure users dont go negative. Especially for getting `/gift` to send negative amount.
+- Add more safety code to make sure users don't go negative. Especially for getting `/gift` to send negative amount.
     (.theclosedeyesoflove.)
 - `/automation reaction-copy`, `/move-channel`, `/move-message`, `/move-messages` commands now uses streaming for 
   attachments.
@@ -989,7 +1023,7 @@
 - Fix `/lucky-spin` float precision issues causing heart loss.
 - Fix `/9ball` displayed who invoked the command in both `embed.author` and in the command headers as well.
 - Fix `bozosort` now should handle listings with `as` keywords correctly.
-- Fix `&execute` removed empty lines from input causing unexpected behaviors when working with multi-line strings.
+- Fix `&execute` removed empty lines from input causing unexpected behaviours when working with multi-line strings.
 - Fix `embed_image_refresh` now does not force update external images that the client(s) cant see.
 - Add new error messages when an interaction raises.
 

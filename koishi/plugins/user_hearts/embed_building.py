@@ -9,8 +9,8 @@ from .constants import (
     EMOJI_COUNT_DAILY_BY_WAIFU, EMOJI_COUNT_DAILY_FOR_WAIFU, EMOJI_COUNT_DAILY_SELF, EMOJI_COUNT_TOP_GG_VOTE,
     EMOJI_DAILY_STREAK
 )
-from .rendering import (
-    render_hearts_extended_description, render_hearts_short_description, render_hearts_short_title, render_int_block
+from .content_building import (
+    produce_hearts_extended_description, produce_hearts_short_description, produce_hearts_short_title, produce_int_block
 )
 
 
@@ -37,9 +37,13 @@ def build_daily_embed_short(interaction_event, target_user, balance, streak, rea
     embed : ``Embed``
     """
     return Embed(
-        render_hearts_short_title(interaction_event, target_user, balance),
-        render_hearts_short_description(
-            interaction_event, target_user, balance, streak, ready_to_claim, 'claim your daily'
+        ''.join([*produce_hearts_short_title(interaction_event, target_user, balance)]),
+        (
+            None
+            if (not streak and balance) else
+            ''.join([*produce_hearts_short_description(
+                interaction_event, target_user, balance, streak, ready_to_claim, 'claim your daily'
+            )])
         ),
         color = COLOR__GAMBLING,
     )
@@ -70,7 +74,7 @@ def build_daily_embed_extended(interaction_event, target_user, balance, streak, 
     embed = build_daily_embed_short(interaction_event, target_user, balance, streak, ready_to_claim)
     embed.add_field(
         'Daily reward calculation:',
-        render_hearts_extended_description(interaction_event, target_user, REWARDS_DAILY, streak),
+        ''.join([*produce_hearts_extended_description(interaction_event, target_user, REWARDS_DAILY, streak)]),
     )
     return embed
 
@@ -98,9 +102,13 @@ def build_vote_embed_short(interaction_event, target_user, balance, streak, read
     embed : ``Embed``
     """
     return Embed(
-        render_hearts_short_title(interaction_event, target_user, balance),
-        render_hearts_short_description(
-            interaction_event, target_user, balance, streak, ready_to_vote, 'vote'
+        ''.join([*produce_hearts_short_title(interaction_event, target_user, balance)]),
+        (
+            None
+            if (not streak and balance) else
+            ''.join([*produce_hearts_short_description(
+                interaction_event, target_user, balance, streak, ready_to_vote, 'vote'
+            )])
         ),
         color = COLOR__GAMBLING,
     )
@@ -131,7 +139,7 @@ def build_vote_embed_extended(interaction_event, target_user, balance, streak, r
     embed = build_vote_embed_short(interaction_event, target_user, balance, streak, ready_to_vote)
     embed.add_field(
         'Vote reward calculation:',
-        render_hearts_extended_description(interaction_event, target_user, REWARDS_VOTE, streak),
+        ''.join([*produce_hearts_extended_description(interaction_event, target_user, REWARDS_VOTE, streak)]),
     )
     return embed
 
@@ -183,26 +191,26 @@ def build_stats_embed(
         target_user.avatar_url_at(interaction_event.guild),
     ).add_field(
         f'{EMOJI__HEART_CURRENCY} Hearts',
-        render_int_block(balance),
+        ''.join([*produce_int_block(balance)]),
         inline = True,
     ).add_field(
         f'{EMOJI_DAILY_STREAK} Streak',
-        render_int_block(streak),
+        ''.join([*produce_int_block(streak)]),
         inline = True,
     ).add_field(
         f'{EMOJI_COUNT_DAILY_SELF} Claimed dailies',
-        render_int_block(count_daily_self),
+        ''.join([*produce_int_block(count_daily_self)]),
         inline = True,
     ).add_field(
         f'{EMOJI_COUNT_DAILY_FOR_WAIFU} Claimed for related',
-        render_int_block(count_daily_for_related),
+        ''.join([*produce_int_block(count_daily_for_related)]),
         inline = True,
     ).add_field(
         f'{EMOJI_COUNT_DAILY_BY_WAIFU} Claimed by related',
-        render_int_block(count_daily_by_related),
+        ''.join([*produce_int_block(count_daily_by_related)]),
         inline = True,
     ).add_field(
         f'{EMOJI_COUNT_TOP_GG_VOTE} Top.gg votes',
-        render_int_block(count_top_gg_vote),
+        ''.join([*produce_int_block(count_top_gg_vote)]),
         inline = True,
     )

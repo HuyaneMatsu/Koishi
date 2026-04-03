@@ -6,21 +6,21 @@ from hata import DiscordException, ERROR_CODES, Embed, Permission
 from hata.ext.slash import abort
 
 from ...bot_utils.constants import ROLE__SUPPORT__NSFW_ACCESS
+from ...bot_utils.multi_client_utils import has_client_message_create_permissions
 from ...bots import FEATURE_CLIENTS
 
 from .constants import SEX_IMAGES
 from .spam_lock import check_lock_and_limit_level
 
 
-INTERACTION_PERMISSIONS = Permission().update_by_keys(embed_links = True)
-MESSAGE_CREATE_PERMISSIONS = Permission().update_by_keys(send_messages = True, embed_links = True)
+EXTRA_PERMISSIONS = Permission().update_by_keys(embed_links = True)
 
 
 @FEATURE_CLIENTS.interactions(
     integration_types = ['guild_install', 'user_install'],
     is_global = True,
 )
-async def sex(client, event):
+async def sex(client, interaction_event):
     """
     You horny? Try your luck!
     
@@ -31,20 +31,20 @@ async def sex(client, event):
     client : ``Client``
         The client who received the event.
     
-    event : ``InteractionEvent``
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
     Returns
     -------
     embed : ``Embed``
     """
-    if event.application_permissions & INTERACTION_PERMISSIONS != INTERACTION_PERMISSIONS:
+    if interaction_event.application_permissions & EXTRA_PERMISSIONS != EXTRA_PERMISSIONS:
         abort('Cannot execute this command without `embed links` permission.')
     
     value = random()
     
     # If the user has nsfw role increase their chance by 25%
-    if event.user.has_role(ROLE__SUPPORT__NSFW_ACCESS):
+    if interaction_event.user.has_role(ROLE__SUPPORT__NSFW_ACCESS):
         value *= 0.80
     
     if value > 0.150: # no sex
@@ -71,17 +71,17 @@ async def sex(client, event):
     else: # yes sex (koishi)
         level = 7
     
-    level = check_lock_and_limit_level(event, level)
+    level = check_lock_and_limit_level(interaction_event, level)
     
     response_embed = Embed().add_image(SEX_IMAGES[level])
     
     try:
-        await client.interaction_response_message_create(event, embed = response_embed)
+        await client.interaction_response_message_create(interaction_event, embed = response_embed)
     except ConnectionError:
         return
     
     except DiscordException as exception:
-        if exception.status == 500:
+        if exception.status >= 500:
             return
         
         if exception.code != ERROR_CODES.unknown_interaction:
@@ -90,16 +90,16 @@ async def sex(client, event):
     else:
         return
     
-    if event.application_permissions & MESSAGE_CREATE_PERMISSIONS != MESSAGE_CREATE_PERMISSIONS:
+    if not has_client_message_create_permissions(interaction_event.channel, client, EXTRA_PERMISSIONS):
         return
     
     try:
-        await client.message_create(event.channel, embed = response_embed)
+        await client.message_create(interaction_event.channel, embed = response_embed)
     except ConnectionError:
         return
     
     except DiscordException as exception:
-        if exception.status == 500:
+        if exception.status >= 500:
             return
         
         if exception.code not in (

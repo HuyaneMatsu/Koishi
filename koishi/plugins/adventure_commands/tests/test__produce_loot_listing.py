@@ -6,7 +6,7 @@ from ...adventure_core import (
 )
 from ...item_core import ITEM_ID_PEACH, ITEM_ID_STRAWBERRY
 
-from ..component_builders import produce_loot_listing
+from ..component_building import produce_loot_listing
 
 
 def _iter_options():

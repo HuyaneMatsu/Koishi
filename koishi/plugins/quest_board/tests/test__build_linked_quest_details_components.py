@@ -70,7 +70,7 @@ def _iter_options():
         page_index,
         [
             create_text_display(
-                f'**Task: Submit 0.00 / {3600/1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.**\n'
+                f'**Task: Submit 0.00 / {3600 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.**\n'
                 f'\n'
                 f'I am running low on some vegetables for soups.\n'
                 f'\nRequesting a basketful of Carrot.\n'
@@ -120,7 +120,7 @@ def _iter_options():
         page_index,
         [
             create_text_display(
-                f'**Task: Submit 0.00 / {3600/1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot and '
+                f'**Task: Submit 0.00 / {3600 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot and '
                 f'0 / 20 {BUILTIN_EMOJIS["peach"]} Peach to Mystia.**\n'
                 f'\n'
                 f'I am running low on some vegetables for soups.\n'

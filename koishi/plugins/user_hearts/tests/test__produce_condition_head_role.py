@@ -3,7 +3,7 @@ from hata import Guild, InteractionEvent, Role, User
 
 from ....bot_utils.daily import ConditionRole
 
-from ..rendering import produce_condition_head_role
+from ..content_building import produce_condition_head_role
 
 
 def _iter_options():
@@ -48,4 +48,7 @@ def test__produce_condition_head_role(condition, interaction_event):
     -------
     output : `str`
     """
-    return ''.join(produce_condition_head_role(condition, interaction_event))
+    output = [*produce_condition_head_role(condition, interaction_event)]
+    for element in output:
+        vampytest.assert_instance(element, str)
+    return ''.join(output)

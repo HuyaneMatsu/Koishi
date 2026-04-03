@@ -7,7 +7,7 @@ from hata import BUILTIN_EMOJIS, Component, create_button, create_row, create_se
 from ...adventure_core import ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, AdventureAction, LOOT_STATE_SUCCESS, build_loot_data
 from ...item_core import ITEM_ID_PEACH
 
-from ..component_builders import build_adventure_action_view_components
+from ..component_building import build_adventure_action_view_components
 
 
 def _iter_options():

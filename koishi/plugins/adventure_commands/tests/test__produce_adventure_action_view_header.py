@@ -4,7 +4,7 @@ import vampytest
 
 from ...adventure_core import ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, AdventureAction
 
-from ..component_builders import produce_adventure_action_view_header
+from ..component_building import produce_adventure_action_view_header
 
 
 def _iter_options():

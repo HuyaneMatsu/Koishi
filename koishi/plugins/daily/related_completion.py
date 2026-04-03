@@ -4,7 +4,7 @@ from datetime import datetime as DateTime, timezone as TimeZone
 from re import compile as re_compile
 
 from dateutil.relativedelta import relativedelta as RelativeDelta
-from hata import elapsed_time
+from hata import DiscordException, ERROR_CODES, elapsed_time
 
 from ...bot_utils.user_getter import get_users_unordered
 
@@ -130,12 +130,15 @@ def get_related_sort_key_and_suggestion(related_user, guild_id, now, daily_can_c
     return sort_key, (suggestion, str(related_user.id))
 
 
-async def autocomplete_related_name(interaction_event, value):
+async def autocomplete_related_name(client, interaction_event, value):
     """
     Auto-completes a related user's name.
     
     Parameters
     ----------
+    client : ``Client``
+        The client receiving this interaction.
+    
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
@@ -151,9 +154,26 @@ async def autocomplete_related_name(interaction_event, value):
     )
     now = DateTime.now(TimeZone.utc)
     
-    return [
+    suggestions = [
         item[1] for item in sorted(
             get_related_sort_key_and_suggestion(user, interaction_event.guild_id, now, daily_can_claim_at)
             for user, daily_can_claim_at in related_users_and_next_daily.items()
         )
     ]
+        
+    try:
+        await client.interaction_application_command_autocomplete(
+            interaction_event,
+            suggestions,
+        )
+    except ConnectionError:
+        pass
+    
+    except DiscordException as exception:
+        if (
+            (exception.status < 500) and
+            (exception.code != ERROR_CODES.unknown_interaction)
+        ):
+            raise
+
+    return 

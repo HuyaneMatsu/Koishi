@@ -7,7 +7,7 @@ from hata import DATETIME_FORMAT_CODE, elapsed_time
 
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ..item_core import ITEM_NAME_DEFAULT, get_item_group_name, get_item, produce_item_flags_names
+from ..item_core import ITEM_NAME_DEFAULT, get_item_group, get_item, get_item_name, produce_item_flags_names
 from ..quest_core import (
     AMOUNT_TYPE_COUNT, AMOUNT_TYPE_NAME_DEFAULT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT,
     LINKED_QUEST_COMPLETION_STATE_ACTIVE, QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY, QUEST_REQUIREMENT_TYPE_ITEM_EXACT,
@@ -120,6 +120,33 @@ def _produce_nullable_item_parts(item):
             yield ' '
         
         yield item.name
+
+
+def _produce_nullable_item_group_parts(item_group):
+    """
+    Produces a nullable item group's part.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    item_group : ``None | ItemGroup``
+        The item group to produce its part of.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    if item_group is None:
+        yield ITEM_NAME_DEFAULT
+    
+    else:
+        emoji = item_group.emoji
+        if (emoji is not None):
+            yield emoji.as_emoji
+            yield ' '
+        
+        yield item_group.name
 
 
 def _produce_amount_kg(amount):
@@ -306,7 +333,14 @@ def _produce_item_group_name(item_group_id):
     ------
     part : `str`
     """
-    yield get_item_group_name(item_group_id)
+    item_group = get_item_group(item_group_id)
+    
+    emoji = item_group.emoji
+    if (emoji is not None):
+        yield emoji.as_emoji
+        yield ' '
+    
+    yield item_group.name
 
 
 def _produce_item_category_name(item_flags):
@@ -846,6 +880,50 @@ def produce_nullable_item_description(item):
         yield description
 
 
+def produce_nullable_item_group_description(item_group):
+    """
+    Produces a nullable item group's description.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    item_group : ``None | ItemGroup``
+        Item group to produce its description of.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    yield '**Item group information: '
+    yield from _produce_nullable_item_group_parts(item_group)
+    yield '**\n\n'
+    
+    if item_group is None:
+        description = None
+    else:
+        description = item_group.description
+    if (description is None):
+        yield '*no description*'
+    else:
+        yield description
+    
+    if (item_group is None):
+        item_ids = None
+    else:
+        item_ids = item_group.item_ids
+    
+    yield '\n\n**Items:**'
+    
+    if (item_ids is None):
+        yield ' *none*'
+    
+    else:
+        for item_id in item_ids:
+            yield '\n- '
+            yield get_item_name(item_id)
+
+
 def _produce_amount_typed_bold(amount_type, amount):
     """
     Produces typed amount appearing bold in markdown.
@@ -1077,7 +1155,7 @@ def _produce_owned_amount_extra(amount_type, accumulated_weight, accumulated_val
     yield ')'
     
 
-def produce_linked_quest_submission_requirements_entry_description(
+def produce_submission_requirements_entry_description(
     submission_requirement_normalised, accumulated_amount, accumulated_weight, accumulated_value
 ):
     """
@@ -1148,7 +1226,7 @@ def produce_linked_quest_submission_item_select_header(
         return
     
     yield '\n\n'
-    yield from produce_linked_quest_submission_requirements_entry_description(
+    yield from produce_submission_requirements_entry_description(
         submission_requirement_normalised, accumulated_amount, accumulated_weight, accumulated_value
     )
 

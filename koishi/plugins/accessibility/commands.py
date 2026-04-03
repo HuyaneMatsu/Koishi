@@ -1,5 +1,6 @@
 __all__ = ()
 
+from hata import DiscordException, ERROR_CODES
 from hata.ext.slash import P
 
 from ...bots import FEATURE_CLIENTS
@@ -315,7 +316,7 @@ async def character_preference_remove(
 
 
 @character_preference_remove.autocomplete('name')
-async def autocomplete_character_preference_name(event, name):
+async def autocomplete_character_preference_name(client, interaction_event, name):
     """
     Auto completes touhou character name from the options of the user.
     
@@ -323,8 +324,12 @@ async def autocomplete_character_preference_name(event, name):
     
     Parameters
     ----------
-    event : ``InteractionEvent``
-        The received event
+    client : ``Client``
+        The client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
     name : `None`, `str`
         Input of the user.
     
@@ -332,28 +337,51 @@ async def autocomplete_character_preference_name(event, name):
     -------
     suggestions : `None | list<str>`
     """
-    user = event.user
-    character_preferences = await get_one_touhou_character_preference(user.id)
-    if character_preferences is None:
-        return None
+    while True:
+        user = interaction_event.user
+        character_preferences = await get_one_touhou_character_preference(user.id)
+        if character_preferences is None:
+            suggestions = None
+            break
+        
+        # Collect characters
+        characters = None
+        
+        for character_preference in character_preferences:
+            character = character_preference.get_character()
+            if (character is not None):
+                if characters is None:
+                    characters = []
+                
+                characters.append(character)
+        
+        if characters is None:
+            suggestions = None
+            break
+        
+        # No name -> list all characters
+        if name is None:
+            suggestions = [character.name for character in characters]
+            break
+        
+        # Yes name -> get matches
+        suggestions =  get_touhou_character_names_like_from(name, characters)
+        break
     
-    # Collect characters
-    characters = None
+        
+    try:
+        await client.interaction_application_command_autocomplete(
+            interaction_event,
+            suggestions,
+        )
+    except ConnectionError:
+        pass
     
-    for character_preference in character_preferences:
-        character = character_preference.get_character()
-        if (character is not None):
-            if characters is None:
-                characters = []
-            
-            characters.append(character)
-    
-    if characters is None:
-        return None
-    
-    # No name -> list all characters
-    if name is None:
-        return [character.name for character in characters]
-    
-    # Yes name -> get matches
-    return get_touhou_character_names_like_from(name, characters)
+    except DiscordException as exception:
+        if (
+            (exception.status < 500) and
+            (exception.code != ERROR_CODES.unknown_interaction)
+        ):
+            raise
+
+    return 

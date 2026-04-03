@@ -256,28 +256,6 @@ def produce_hearts_short_title(interaction_event, target_user, balance):
     yield EMOJI__HEART_CURRENCY.as_emoji
 
 
-def render_hearts_short_title(interaction_event, target_user, balance):
-    """
-    Renders a shot hearts title.
-    
-    Returns
-    -------
-    interaction_event : ``InteractionEvent``
-        The received interaction event.
-    
-    target_user : ``ClientUserBase``
-        The targeted user.
-    
-    balance : `int`
-        The user's balance.
-    
-    Returns
-    -------
-    title : `str`
-    """
-    return ''.join([*produce_hearts_short_title(interaction_event, target_user, balance)])
-
-
 def produce_hearts_short_description(
     interaction_event, target_user, balance, streak, ready_to_claim, ready_to_claim_string
 ):
@@ -335,44 +313,6 @@ def produce_hearts_short_description(
     
     yield '!'
     return
-
-
-def render_hearts_short_description(
-    interaction_event, target_user, balance, streak, ready_to_claim, ready_to_claim_string
-):
-    """
-    Renders a short hearts description.
-    
-    Parameters
-    ----------
-    interaction_event : ``InteractionEvent``
-        The received interaction event.
-    
-    target_user : ``ClientUserBase``
-        The targeted user.
-    
-    balance : `int`
-        The user's balance.
-    
-    streak : `int`
-        The user's streak
-    
-    ready_to_claim : `bool`
-        Whether daily is ready to claim.
-    
-    ready_to_claim_string : `str`
-        String to use when the user is ready to claim its reward.
-    
-    Returns
-    -------
-    description : `None | str`
-    """
-    if (not streak) and balance:
-        return
-    
-    return ''.join([*produce_hearts_short_description(
-        interaction_event, target_user, balance, streak, ready_to_claim, ready_to_claim_string
-    )])
 
 
 def produce_hearts_extended_description(interaction_event, target_user, rewards, streak):
@@ -434,46 +374,19 @@ def produce_hearts_extended_description(interaction_event, target_user, rewards,
     yield str(reward_accumulator.sum_rewards(streak))
 
 
-def render_hearts_extended_description(interaction_event, target_user, rewards, streak):
+def produce_int_block(value):
     """
-    Renders extended hearts description.
-    
-    Parameters
-    ----------
-    interaction_event : ``InteractionEvent``
-        The received interaction event.
-    
-    target_user : ``ClientUserBase``
-        User to calculate the reward of.
-    
-    rewards : `tuple<Reward>`
-        Rewards to render.
-    
-    streak : `int`
-        The user's streak.
-    
-    Returns
-    -------
-    description : `str`
-    """
-    return ''.join([*produce_hearts_extended_description(interaction_event, target_user, rewards, streak)])
-
-
-def render_int_block(value):
-    """
-    Renders a code block that encapsulates an integer.
+    Produces a code block that encapsulates an integer.
     
     Parameters
     ----------
     value : `int`
         The value to encapsulate.
     
-    Returns
+    Yields
     -------
-    block : `str`
+    part : `str`
     """
-    return (
-        f'```\n'
-        f'{value}\n'
-        f'```'
-    )
+    yield f'```\n'
+    yield str(value)
+    yield '\n```'

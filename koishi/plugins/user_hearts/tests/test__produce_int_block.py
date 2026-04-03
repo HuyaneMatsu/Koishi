@@ -1,6 +1,6 @@
 import vampytest
 
-from ..rendering import render_int_block
+from ..content_building import produce_int_block
 
 
 def _iter_options():
@@ -15,19 +15,20 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test_render_int_block(value):
+def test_produce_int_block(value):
     """
-    Tests whether ``render_int_block`` works as intended.
+    Tests whether ``produce_int_block`` works as intended.
     
     Parameters
     ----------
     value : `int`
-        The value to render.
+        The value to produce.
     
     Returns
     -------
     output : `str`
     """
-    output = render_int_block(value)
-    vampytest.assert_instance(output, str)
-    return output
+    output = [*produce_int_block(value)]
+    for element in output:
+        vampytest.assert_instance(element, str)
+    return ''.join(output)

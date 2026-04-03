@@ -52,7 +52,7 @@ def _iter_options():
             'Please confirm abandoning',
             [
                 create_text_display(
-                    f'**Task: Submit 0.00 / {quest_amount_0/1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.**\n'
+                    f'**Task: Submit 0.00 / {quest_amount_0 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.**\n'
                     f'\n'
                     f'I am running low on some vegetables for soups.\n'
                     f'\nRequesting a basketful of Carrot.\n'

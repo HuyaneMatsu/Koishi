@@ -20,16 +20,16 @@ from ..user_stats_core import get_user_stats, save_user_stats
 
 from .component_building import (
     build_linked_quest_abandon_confirmation_form, build_linked_quest_abandon_success_components,
-    build_linked_quest_details_components, build_linked_quest_item_components,
+    build_linked_quest_details_components, build_linked_quest_item_components, build_linked_quest_item_group_components,
     build_linked_quest_submit_select_item_components, build_linked_quest_submit_select_requirement_components,
     build_linked_quest_submit_success, build_linked_quest_submit_success_completed_components,
     build_linked_quests_listing_components, build_quest_accept_success_components, build_quest_board_item_components,
-    build_quest_board_quest_listing_components, build_quest_details_components
+    build_quest_board_item_group_components, build_quest_board_quest_listing_components, build_quest_details_components,
+    build_quest_select_requirement_components
 )
 from .constants import (
-    BROKEN_QUEST_DESCRIPTION, LINKED_QUEST_BACK_DIRECT_LOCATION_QUEST,
-    LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED, LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_TOP,
-    LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_REQUIREMENT
+    BACK_DIRECT_LOCATION_QUEST, BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED, BACK_DIRECT_LOCATION_SELECT_ITEM_TOP,
+    BACK_DIRECT_LOCATION_SELECT_REQUIREMENT, BROKEN_QUEST_DESCRIPTION
 )
 from .custom_ids import (
     CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN, CUSTOM_ID_LINKED_QUEST_INFO_ITEM_DISABLED,
@@ -38,8 +38,9 @@ from .custom_ids import (
     CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_NAVIGATE_PATTERN, CUSTOM_ID_LINKED_QUEST_SUBMIT_AUTO_PATTERN,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_DISABLED, CUSTOM_ID_LINKED_QUEST_SUBMIT_EXECUTE_ITEM_NESTED_PATTERN,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_EXECUTE_ITEM_TOP_PATTERN, CUSTOM_ID_LINKED_QUEST_SUBMIT_EXECUTE_REQUIREMENT_PATTERN,
-    CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_NESTED_PATTERN, CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_TOP_PATTERN,
-    CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_REQUIREMENT_PATTERN, CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_NESTED_PATTERN,
+    CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_GROUP_REQUIREMENT_PATTERN,
+    CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_NESTED_PATTERN, CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_REQUIREMENT_PATTERN,
+    CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_TOP_PATTERN, CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_NESTED_PATTERN,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_PAGE_INDEX_DECREMENT_DISABLED,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_PAGE_INDEX_INCREMENT_DISABLED,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_TOP_PATTERN,
@@ -48,7 +49,11 @@ from .custom_ids import (
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_REQUIREMENT_PATTERN, CUSTOM_ID_QUEST_ACCEPT_DISABLED,
     CUSTOM_ID_QUEST_ACCEPT_PATTERN, CUSTOM_ID_QUEST_BOARD_ITEM_DISABLED, CUSTOM_ID_QUEST_BOARD_ITEM_PATTERN,
     CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_DECREMENT_DISABLED, CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_INCREMENT_DISABLED,
-    CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_PATTERN, CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_PATTERN
+    CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_PATTERN, CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_PATTERN,
+    CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_GROUP_REQUIREMENT_PATTERN, CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_REQUIREMENT_PATTERN,
+    CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PAGE_INDEX_DECREMENT_DISABLED,
+    CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PAGE_INDEX_INCREMENT_DISABLED,
+    CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PATTERN
 )
 from .helpers import (
     get_linked_quest_expiration, get_linked_quest_for_deduplication, get_linked_quest_submission_requirement_at_index,
@@ -71,6 +76,8 @@ from .helpers import (
         CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_REQUIREMENT_PAGE_INDEX_INCREMENT_DISABLED,
         CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_PAGE_INDEX_DECREMENT_DISABLED,
         CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_PAGE_INDEX_INCREMENT_DISABLED,
+        CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PAGE_INDEX_DECREMENT_DISABLED,
+        CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PAGE_INDEX_INCREMENT_DISABLED,
     ],
 )
 async def quest_action_disabled():
@@ -658,7 +665,7 @@ async def handle_linked_quest_submit_item_auto(client, interaction_event, user_i
         requirements = linked_quest.requirements
         if (requirements is not None):
             for requirement in requirements:
-                for item_entry in iter_submission_requirement_item_entries_of_requirement(inventory, requirement):
+                for item_entry in [*iter_submission_requirement_item_entries_of_requirement(inventory, requirement)]:
                     submissions_normalised = _try_submit_item(
                         requirement, inventory, item_entry, submissions_normalised
                     )
@@ -678,7 +685,7 @@ async def handle_linked_quest_submit_item_auto(client, interaction_event, user_i
                 linked_quest_entry_id,
                 0,
                 0,
-                LINKED_QUEST_BACK_DIRECT_LOCATION_QUEST,
+                BACK_DIRECT_LOCATION_QUEST,
                 submissions_normalised,
             )
         
@@ -929,7 +936,7 @@ async def handle_linked_quest_submit_execute_requirement(
         requirement_index,
         None,
         item_id,
-        LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_REQUIREMENT,
+        BACK_DIRECT_LOCATION_SELECT_REQUIREMENT,
     )
 
 
@@ -974,7 +981,7 @@ async def handle_linked_quest_submit_execute_item_top(
         None,
         item_page_index,
         item_id,
-        LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_TOP,
+        BACK_DIRECT_LOCATION_SELECT_ITEM_TOP,
     )
 
 
@@ -1022,7 +1029,7 @@ async def handle_linked_quest_submit_execute_item_nested(
         requirement_index,
         item_page_index,
         item_id,
-        LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED,
+        BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED,
     )
 
 
@@ -1064,7 +1071,7 @@ async def linked_quest_abandon_invoke(client, interaction_event, user_id, page_i
     
     Parameters
     ----------
-    client : ``Client``
+    client : ``Client``batch_id
         The client who received the interaction.
     
     interaction_event : ``InteractionEvent``
@@ -1099,13 +1106,9 @@ async def linked_quest_abandon_invoke(client, interaction_event, user_id, page_i
         
         user_stats = await get_user_stats(user_id)
         
-        quest_completion_ratio = get_linked_quest_completion_ratio(linked_quest)
-        quest_template = get_quest_template(linked_quest.template_id)
         credibility_penalty = get_linked_quest_abandon_credibility_penalty(
-            linked_quest.reward_credibility,
-            (0 if quest_template is None else quest_template.level),
+            linked_quest,
             get_user_adventurer_rank_info(user_stats.credibility).level,
-            quest_completion_ratio,
         )
         
         # Ask the user for confirmation if the quest is still alive.
@@ -1143,7 +1146,7 @@ async def linked_quest_abandon_invoke(client, interaction_event, user_id, page_i
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN, target = 'form')
-async def linked_quest_abandon_confirm(client, interaction_event, user_id, page_index, linked_quest_entry_id):
+async def handle_linked_quest_abandon_confirm(client, interaction_event, user_id, page_index, linked_quest_entry_id):
     """
     Handles a user linked quest's abandoning component interaction.
     
@@ -1191,13 +1194,9 @@ async def linked_quest_abandon_confirm(client, interaction_event, user_id, page_
         
         user_stats = await get_user_stats(user_id)
         
-        quest_completion_ratio = get_linked_quest_completion_ratio(linked_quest)
-        quest_template = get_quest_template(linked_quest.template_id)
         credibility_penalty = get_linked_quest_abandon_credibility_penalty(
-            linked_quest.reward_credibility,
-            (0 if quest_template is None else quest_template.level),
+            linked_quest,
             get_user_adventurer_rank_info(user_stats.credibility).level,
-            quest_completion_ratio,
         )
         
         await _linked_quest_abandon(linked_quest, user_stats, credibility_penalty)
@@ -1216,8 +1215,80 @@ async def linked_quest_abandon_confirm(client, interaction_event, user_id, page_
     )
 
 
+async def _handle_quest_board_info_item_common(
+    client,
+    interaction_event,
+    user_id,
+    guild_id,
+    page_index,
+    quest_template_id,
+    requirement_index,
+    item_id,
+    back_direct_location,
+):
+    """
+    Handles item info received from a quest page.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The invoking user's identifier as a string representing a hexadecimal integer.
+    
+    guild_id : `str`
+        The parent quest's guild's identifier as a string representing a hexadecimal integer.
+    
+    page_index : `str`
+        The page's identifier as a string representing a hexadecimal integer.
+    
+    quest_template_id : `int`
+        The currently selected quest detail's template's identifier.
+    
+    requirement_index : `None | str`
+        Requirement index to submit to as a string representing a hexadecimal integer.
+    
+    item_id : `str`
+        The item's identifier to submit as a string representing a hexadecimal integer.
+    
+    back_direct_location : `int`
+        The location's identifier to back-direct the user to.
+    """
+    try:
+        user_id = int(user_id, 16)
+        guild_id = int(guild_id, 16)
+        page_index = int(page_index, 16)
+        quest_template_id = int(quest_template_id, 16)
+        requirement_index = 0 if (requirement_index is None) else int(requirement_index, 16)
+        item_id = int(item_id, 16)
+    except ValueError:
+        return
+    
+    if user_id != interaction_event.user_id:
+        return
+    
+    await client.interaction_component_message_edit(
+        interaction_event,
+        components = build_quest_board_item_components(
+            user_id,
+            guild_id,
+            page_index,
+            quest_template_id,
+            requirement_index,
+            back_direct_location,
+            item_id,
+        ),
+    )
+
+
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_BOARD_ITEM_PATTERN)
-async def quest_board_item(client, interaction_event, user_id, guild_id, page_index, quest_template_id, item_id):
+async def handle_quest_board_item(client, interaction_event, user_id, guild_id, page_index, quest_template_id, item_id):
     """
     Handles a quest board item component interaction.
     
@@ -1246,12 +1317,109 @@ async def quest_board_item(client, interaction_event, user_id, guild_id, page_in
     item_id : `str`
         The item's identifier to show as a string representing a hexadecimal integer.
     """
+    await _handle_quest_board_info_item_common(
+        client,
+        interaction_event,
+        user_id,
+        guild_id,
+        page_index,
+        quest_template_id,
+        None,
+        item_id,
+        BACK_DIRECT_LOCATION_QUEST,
+    )
+
+
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_REQUIREMENT_PATTERN)
+async def handle_quest_board_select_item_requirement(
+    client, interaction_event, user_id, guild_id, page_index, quest_template_id, requirement_index, item_id
+):
+    """
+    Handles a quest board select item requirement component interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The invoking user's identifier as a string representing a hexadecimal integer.
+    
+    guild_id : `str`
+        The parent quest's guild's identifier as a string representing a hexadecimal integer.
+    
+    page_index : `str`
+        The quest board's current page's index as a string representing a hexadecimal integer.
+    
+    quest_template_id : `str`
+        The quest's template identifier as a string representing a hexadecimal integer.
+    
+    requirement_index : `str`
+        Requirement index to submit to as a string representing a hexadecimal integer.
+    
+    item_id : `str`
+        The item's identifier to show as a string representing a hexadecimal integer.
+    """
+    await _handle_quest_board_info_item_common(
+        client,
+        interaction_event,
+        user_id,
+        guild_id,
+        page_index,
+        quest_template_id,
+        requirement_index,
+        item_id,
+        BACK_DIRECT_LOCATION_SELECT_REQUIREMENT,
+    )
+
+
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_GROUP_REQUIREMENT_PATTERN)
+async def handle_quest_board_select_item_group_requirement(
+    client, interaction_event, user_id, guild_id, page_index, quest_template_id, requirement_index, item_group_id
+):
+    """
+    Handles a quest board select item group requirement component interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The invoking user's identifier as a string representing a hexadecimal integer.
+    
+    guild_id : `str`
+        The parent quest's guild's identifier as a string representing a hexadecimal integer.
+    
+    page_index : `str`
+        The quest board's current page's index as a string representing a hexadecimal integer.
+    
+    quest_template_id : `str`
+        The quest's template identifier as a string representing a hexadecimal integer.
+    
+    requirement_index : `str`
+        Requirement index to submit to as a string representing a hexadecimal integer.
+    
+    item_group_id : `str`
+        The item group's identifier to show as a string representing a hexadecimal integer.
+    """
     try:
         user_id = int(user_id, 16)
         guild_id = int(guild_id, 16)
         page_index = int(page_index, 16)
         quest_template_id = int(quest_template_id, 16)
-        item_id = int(item_id, 16)
+        requirement_index = int(requirement_index, 16)
+        item_group_id = int(item_group_id, 16)
     except ValueError:
         return
     
@@ -1260,8 +1428,14 @@ async def quest_board_item(client, interaction_event, user_id, guild_id, page_in
     
     await client.interaction_component_message_edit(
         interaction_event,
-        components = build_quest_board_item_components(
-            user_id, guild_id, interaction_event.guild_id, page_index, quest_template_id, item_id
+        components = build_quest_board_item_group_components(
+            user_id,
+            guild_id,
+            page_index,
+            quest_template_id,
+            requirement_index,
+            BACK_DIRECT_LOCATION_SELECT_REQUIREMENT,
+            item_group_id,
         ),
     )
 
@@ -1278,7 +1452,7 @@ async def _handle_linked_quest_info_item_common(
     back_direct_location,
 ):
     """
-    Handles item info.
+    Handles item info received from a linked quest page.
     
     This function is a coroutine.
     
@@ -1324,19 +1498,17 @@ async def _handle_linked_quest_info_item_common(
     if user_id != interaction_event.user_id:
         return
     
-    components = build_linked_quest_item_components(
-        user_id,
-        page_index,
-        linked_quest_entry_id,
-        requirement_index,
-        item_page_index,
-        back_direct_location,
-        item_id,
-    )
-    
     await client.interaction_component_message_edit(
         interaction_event,
-        components = components,
+        components = build_linked_quest_item_components(
+            user_id,
+            page_index,
+            linked_quest_entry_id,
+            requirement_index,
+            item_page_index,
+            back_direct_location,
+            item_id,
+        ),
     )
 
 
@@ -1378,12 +1550,12 @@ async def handle_linked_quest_item_info(
         None,
         None,
         item_id,
-        LINKED_QUEST_BACK_DIRECT_LOCATION_QUEST,
+        BACK_DIRECT_LOCATION_QUEST,
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_REQUIREMENT_PATTERN)
-async def handle_linked_quest_submit_item_info_top(
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_REQUIREMENT_PATTERN)
+async def handle_linked_quest_submit_item_info_requirement(
     client, interaction_event, user_id, page_index, linked_quest_entry_id, requirement_index, item_id
 ):
     """
@@ -1423,7 +1595,7 @@ async def handle_linked_quest_submit_item_info_top(
         requirement_index,
         None,
         item_id,
-        LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_REQUIREMENT,
+        BACK_DIRECT_LOCATION_SELECT_REQUIREMENT,
     )
 
 
@@ -1468,7 +1640,7 @@ async def handle_linked_quest_submit_item_info_top(
         None,
         item_page_index,
         item_id,
-        LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_TOP,
+        BACK_DIRECT_LOCATION_SELECT_ITEM_TOP,
     )
 
 
@@ -1516,7 +1688,126 @@ async def handle_linked_quest_submit_item_info_nested(
         requirement_index,
         item_page_index,
         item_id,
-        LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED,
+        BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED,
+    )
+
+
+async def _handle_linked_quest_info_item_group_common(
+    client,
+    interaction_event,
+    user_id,
+    page_index,
+    linked_quest_entry_id,
+    requirement_index,
+    item_group_page_index,
+    item_group_id,
+    back_direct_location,
+):
+    """
+    Handles item group info.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The invoking user's identifier as a string representing a hexadecimal integer.
+    
+    page_index : `str`
+        The page's identifier as a string representing a hexadecimal integer.
+    
+    linked_quest_entry_id : `str`
+        The linked quest's entries identifier in the database as a string representing a hexadecimal integer.
+    
+    requirement_index : `None | str`
+        Requirement index to submit to as a string representing a hexadecimal integer.
+    
+    item_group_page_index : `None | str`
+        The submitted item_group's page's index as a string representing a hexadecimal integer.
+    
+    item_group_id : `str`
+        The item_group's identifier to submit as a string representing a hexadecimal integer.
+    
+    back_direct_location : `int`
+        The location's identifier to back-direct the user to.
+    """
+    try:
+        user_id = int(user_id, 16)
+        page_index = int(page_index, 16)
+        linked_quest_entry_id = int(linked_quest_entry_id, 16)
+        requirement_index = 0 if (requirement_index is None) else int(requirement_index, 16)
+        item_group_page_index = 0 if (item_group_page_index is None) else int(item_group_page_index, 16)
+        item_group_id = int(item_group_id, 16)
+    except ValueError:
+        return
+    
+    if user_id != interaction_event.user_id:
+        return
+    
+    components = build_linked_quest_item_group_components(
+        user_id,
+        page_index,
+        linked_quest_entry_id,
+        requirement_index,
+        item_group_page_index,
+        back_direct_location,
+        item_group_id,
+    )
+    
+    await client.interaction_component_message_edit(
+        interaction_event,
+        components = components,
+    )
+
+
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_GROUP_REQUIREMENT_PATTERN)
+async def handle_linked_quest_submit_item_group_info_requirement(
+    client, interaction_event, user_id, page_index, linked_quest_entry_id, requirement_index, item_group_id
+):
+    """
+    Handles a linked quest requirement (item group) info component interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The invoking user's identifier as a string representing a hexadecimal integer.
+    
+    page_index : `str`
+        The quest board's current page's index as a string representing a hexadecimal integer.
+    
+    linked_quest_entry_id : `str`
+        The currently selected quest's entry's identifier  as a string representing a hexadecimal integer.
+    
+    requirement_index : `str`
+        Requirement index to submit to as a string representing a hexadecimal integer.
+    
+    item_group_id : `str`
+        The item group's identifier to show as a string representing a hexadecimal integer.
+    """
+    await _handle_linked_quest_info_item_group_common(
+        client,
+        interaction_event,
+        user_id,
+        page_index,
+        linked_quest_entry_id,
+        requirement_index,
+        None,
+        item_group_id,
+        BACK_DIRECT_LOCATION_SELECT_REQUIREMENT,
     )
 
 
@@ -1771,4 +2062,80 @@ async def handle_linked_quest_submit_select_item_nested(
         requirement_index,
         item_page_index,
         False
+    )
+
+
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PATTERN)
+async def handle_quest_board_select_requirement(
+    client, interaction_event, user_id, guild_id, page_index, quest_template_id, requirement_select_page_index
+):
+    """
+    Handles a quest board select requirement component interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The invoking user's identifier as a string representing a hexadecimal integer.
+    
+    guild_id : `str`
+        The parent quest's guild's identifier as a string representing a hexadecimal integer.
+    
+    page_index : `str`
+        The quest board's current page's index as a string representing a hexadecimal integer.
+    
+    quest_template_id : `str`
+        The quest's template identifier as a string representing a hexadecimal integer.
+    
+    requirement_select_page_index : `int`
+        The requirement page index to display.
+    """
+    try:
+        user_id = int(user_id, 16)
+        guild_id = int(guild_id, 16)
+        page_index = int(page_index, 16)
+        quest_template_id = int(quest_template_id, 16)
+        requirement_select_page_index = int(requirement_select_page_index, 16)
+    except ValueError:
+        return
+    
+    if user_id != interaction_event.user_id:
+        return
+    
+    await client.interaction_component_acknowledge(
+        interaction_event,
+        False,
+    )
+    
+    while True:
+        guild_stats = await get_guild_stats(guild_id)
+        quest_batch = guild_stats.get_quest_batch()
+        
+        quest = get_quest_with_template_id(quest_batch, quest_template_id)
+        
+        if (quest is None):
+            error_message = 'This quest is no longer available.'
+            break
+        
+        inventory = await get_inventory(user_id)
+        
+        await client.interaction_response_message_edit(
+            interaction_event,
+            components = build_quest_select_requirement_components(
+                user_id, guild_id, quest, inventory, page_index, requirement_select_page_index
+            ),
+        )
+        return
+    
+    await client.interaction_followup_message_create(
+        interaction_event,
+        content = error_message,
+        show_for_invoking_user_only = True,
     )

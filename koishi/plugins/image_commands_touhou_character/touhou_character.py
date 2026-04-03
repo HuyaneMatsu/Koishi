@@ -3,10 +3,13 @@ __all__ = ()
 
 from hata import DiscordException, ERROR_CODES, Embed
 
+
+from ...bot_utils.multi_client_utils import has_client_message_create_permissions
+
 from ..image_handling_core import add_embed_provider
 from ..touhou_core import get_familiar_touhou_matches
 
-from .constants import EMBED_COLOR
+from .constants import EMBED_COLOR, EXTRA_PERMISSIONS
 
 
 def build_touhou_character_embed(touhou_character, image_detail):
@@ -124,7 +127,7 @@ class NewTouhouCharacter:
         return self
     
     
-    async def __call__(self, client, event):
+    async def __call__(self, client, interaction_event):
         """
         Calls the touhou character renew component command.
         
@@ -134,10 +137,11 @@ class NewTouhouCharacter:
         ----------
         client : ``Client``
             The client who received the event.
-        event : ``InteractionEvent``
+        
+        interaction_event : ``InteractionEvent``
             The received interaction event.
         """
-        if event.user is not event.message.interaction.user:
+        if interaction_event.user is not interaction_event.message.interaction.user:
             return
          
         cg_get_image = self.handler.cg_get_image()
@@ -145,7 +149,7 @@ class NewTouhouCharacter:
         try:
             image_detail = await cg_get_image.asend(None)
             if (image_detail is None):
-                await client.interaction_component_acknowledge(event, False)
+                await client.interaction_component_acknowledge(interaction_event, False)
                 image_detail = await cg_get_image.asend(None)
         
         except StopAsyncIteration:
@@ -156,7 +160,9 @@ class NewTouhouCharacter:
         
         embed = build_touhou_character_embed(self.touhou_character, image_detail)
         
-        if event.is_unanswered():
+        # Try respond with interaction.
+        
+        if interaction_event.is_unanswered():
             function = type(client).interaction_component_message_edit
         else:
             function = type(client).interaction_response_message_edit
@@ -164,15 +170,63 @@ class NewTouhouCharacter:
         try:
             await function(
                 client,
-                event,
+                interaction_event,
                 embed = embed,
             )
+        except GeneratorExit:
+            raise
+        
+        except ConnectionError:
+            retry_with_message_create = False
+        
+        except DiscordException as exception:
+            if exception.status >= 500:
+                retry_with_message_create = False
+            else:
+                exception_code = exception.code
+                if exception_code in (
+                    ERROR_CODES.cannot_message_user_0,
+                    ERROR_CODES.cannot_message_user_1, # Perhaps the user blocked the bot and used it (in a dm ofc)?
+                    ERROR_CODES.missing_permissions, # Perhaps the client is unlinked or removed in the meanwhile?
+                ):
+                    retry_with_message_create = False
+                
+                elif exception_code == ERROR_CODES.unknown_interaction:
+                    retry_with_message_create = True
+                
+                else:
+                    raise
+        else:
+            retry_with_message_create = False
+        
+        if not retry_with_message_create:
+            return
+        
+        # Retry with message edit.
+        if not has_client_message_create_permissions(interaction_event.channel, client, EXTRA_PERMISSIONS):
+            return
+        
+        try:
+            await client.message_edit(
+                interaction_event.message,
+                embed = embed,
+            )
+        except GeneratorExit:
+            raise
+        
         except ConnectionError:
             pass
         
         except DiscordException as exception:
-            if exception.code not in (
-                ERROR_CODES.cannot_message_user_0,
-                ERROR_CODES.cannot_message_user_1, # Perhaps the user blocked the bot and used it (in a dm ofc)?
+            if (
+                (exception.status < 500) and
+                (
+                    exception.code not in (
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # message's channel deleted
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                    )
+                )
             ):
                 raise

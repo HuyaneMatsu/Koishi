@@ -9,6 +9,12 @@ class ItemGroup(RichAttributeErrorBaseType):
     
     Attributes
     ----------
+    description : `str`
+        Description of the item group.
+    
+    emoji : ``None | Emoji``
+        Emoji representing the item group.
+    
     id : `int`
         The group's identifier.
     
@@ -18,9 +24,9 @@ class ItemGroup(RichAttributeErrorBaseType):
     name : `str`
         The group's name.
     """
-    __slots__ = ('id', 'item_ids', 'name')
+    __slots__ = ('description', 'emoji', 'id', 'item_ids', 'name')
     
-    def __new__(cls, item_group_id, name, item_ids):
+    def __new__(cls, item_group_id, name, emoji, description, item_ids):
         """
         Creates a new item group.
         
@@ -36,6 +42,8 @@ class ItemGroup(RichAttributeErrorBaseType):
             The item's identifiers covered by this group.
         """
         self = object.__new__(cls)
+        self.description = description
+        self.emoji = emoji
         self.id = item_group_id
         self.item_ids = item_ids
         self.name = name

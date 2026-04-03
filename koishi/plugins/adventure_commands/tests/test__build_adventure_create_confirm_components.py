@@ -6,7 +6,7 @@ from ...adventure_core import (
     RETURNS, RETURN_ID_AFTER, TARGETS, TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION
 )
 
-from ..component_builders import build_adventure_create_confirm_components
+from ..component_building import build_adventure_create_confirm_components
 
 
 def _iter_options():

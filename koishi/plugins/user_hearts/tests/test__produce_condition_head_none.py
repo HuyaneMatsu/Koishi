@@ -1,7 +1,7 @@
 import vampytest
 from hata import InteractionEvent, User
 
-from ..rendering import produce_condition_head_none
+from ..content_building import produce_condition_head_none
 
 
 def _iter_options():
@@ -32,4 +32,7 @@ def test__produce_condition_head_none(condition, interaction_event):
     -------
     output : `str`
     """
-    return ''.join(produce_condition_head_none(condition, interaction_event))
+    output = [*produce_condition_head_none(condition, interaction_event)]
+    for element in output:
+        vampytest.assert_instance(element, str)
+    return ''.join(output)

@@ -1,7 +1,7 @@
 import vampytest
 from hata import InteractionEvent, User
 
-from ..rendering import render_hearts_short_description
+from ..content_building import produce_hearts_short_description
 
 
 def _iter_options():
@@ -36,19 +36,6 @@ def _iter_options():
     
     yield (
         InteractionEvent.precreate(
-            202412030004,
-            user = user_0,
-        ),
-        user_0,
-        10,
-        0,
-        True,
-        'claim your daily',
-        None,
-    )
-    
-    yield (
-        InteractionEvent.precreate(
             202412030005,
             user = user_0,
         ),
@@ -75,11 +62,11 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__render_hearts_short_description(
+def test__produce_hearts_short_description(
     interaction_event, target_user, balance, streak, ready_to_claim, ready_to_claim_string
 ):
     """
-    Tests whether ``render_hearts_short_description`` works as intended.
+    Tests whether ``produce_hearts_short_description`` works as intended.
     
     Parameters
     ----------
@@ -103,10 +90,11 @@ def test__render_hearts_short_description(
     
     Returns
     -------
-    output : `None | str`
+    output : `str`
     """
-    output = render_hearts_short_description(
+    output = [*produce_hearts_short_description(
         interaction_event, target_user, balance, streak, ready_to_claim, ready_to_claim_string
-    )
-    vampytest.assert_instance(output, str, nullable = True)
-    return output
+    )]
+    for element in output:
+        vampytest.assert_instance(element, str)
+    return ''.join(output)

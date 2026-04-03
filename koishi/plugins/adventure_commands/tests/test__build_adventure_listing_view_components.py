@@ -9,7 +9,7 @@ from ...adventure_core import (
     TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS
 )
 
-from ..component_builders import build_adventure_listing_view_components
+from ..component_building import build_adventure_listing_view_components
 
 
 def _iter_options():

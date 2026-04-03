@@ -1,6 +1,6 @@
 import vampytest
 
-from ..component_builders import produce_used
+from ..component_building import produce_used
 
 
 def _iter_options():

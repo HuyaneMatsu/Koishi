@@ -99,6 +99,13 @@ def _iter_options():
                     enabled = True,
                     style = ButtonStyle.green,
                 ),
+                create_button(
+                    'Select requirement to inspect',
+                    custom_id = (
+                        f'quest_board.select_requirement.{user_id:x}.{guild_id_0:x}.{page_index:x}.'
+                        f'{quest_template_id_0:x}.{0:x}'
+                    ),
+                ),
             ),
         ],
     )
@@ -138,6 +145,13 @@ def _iter_options():
                     custom_id = f'quest_board.accept.{user_id:x}.{guild_id_0:x}.{page_index:x}.{quest_template_id_0:x}',
                     enabled = False,
                     style = ButtonStyle.gray,
+                ),
+                create_button(
+                    'Select requirement to inspect',
+                    custom_id = (
+                        f'quest_board.select_requirement.{user_id:x}.{guild_id_0:x}.{page_index:x}.'
+                        f'{quest_template_id_0:x}.{0:x}'
+                    ),
                 ),
             ),
         ],

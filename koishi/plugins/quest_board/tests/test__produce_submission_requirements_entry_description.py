@@ -3,7 +3,7 @@ import vampytest
 from ...item_core import ITEM_ID_PEACH, get_item_nullable
 from ...quest_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, QUEST_REQUIREMENT_TYPE_ITEM_EXACT
 
-from ..content_building import produce_linked_quest_submission_requirements_entry_description
+from ..content_building import produce_submission_requirements_entry_description
 
 
 def _iter_options():
@@ -54,7 +54,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__produce_linked_quest_submission_requirements_entry_description(
+def test__produce_submission_requirements_entry_description(
     submission_requirement_normalised, accumulated_amount, accumulated_weight, accumulated_value
 ):
     """
@@ -78,7 +78,7 @@ def test__produce_linked_quest_submission_requirements_entry_description(
     -------
     output : `str`
     """
-    output = [*produce_linked_quest_submission_requirements_entry_description(
+    output = [*produce_submission_requirements_entry_description(
         submission_requirement_normalised, accumulated_amount, accumulated_weight, accumulated_value
     )]
     

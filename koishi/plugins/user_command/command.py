@@ -1,7 +1,7 @@
 __all__ = ()
 
 from hata import ClientUserBase, Embed
-from hata.ext.slash import InteractionResponse, abort
+from hata.ext.slash import InteractionResponse
 
 from ...bots import FEATURE_CLIENTS
 
@@ -22,9 +22,7 @@ else:
 
 
 try:
-    from ..user_hearts import (
-        HEARTS_FIELD_CHOICES, HEARTS_FIELD_NAME_TO_RESPONSE_BUILDER, HEARTS_FIELD_NAME_SHORT
-    )
+    from ..user_hearts import user_hearts_command
 except ImportError:
     if not MARISA_MODE:
         raise
@@ -125,6 +123,18 @@ except ImportError:
 
 else:
     USER_INSPECT_ITEM_AVAILABLE = True
+
+
+try:
+    from ..user_inspect_equipment import command_user_inspect_equipment
+except ImportError:
+    if not MARISA_MODE:
+        raise
+    
+    USER_INSPECT_EQUIPMENT_AVAILABLE = False
+
+else:
+    USER_INSPECT_EQUIPMENT_AVAILABLE = True
 
 
 
@@ -239,41 +249,7 @@ if USER_INFO_AVAILABLE:
 
 
 if USER_HEARTS_AVAILABLE:
-    @USER_COMMANDS.interactions(name = 'hearts')
-    async def user_hearts_command(
-        interaction_event,
-        target_user: (ClientUserBase, 'Do you wanna know some1 else\'s hearts?') = None,
-        field: (HEARTS_FIELD_CHOICES, 'Choose a field!') = HEARTS_FIELD_NAME_SHORT,
-    ):
-        """
-        How many hearts do you have?
-        
-        This function is a coroutine.
-        
-        Parameters
-        ----------
-        interaction_event : ``InteractionEvent``
-            The received interaction event.
-        
-        target_user : `None | ClientUserBase`
-            The targeted user.
-        
-        field : `str`
-            The field to show.
-        
-        Returns
-        -------
-        response : ``InteractionResponse``
-        """
-        if target_user is None:
-            target_user = interaction_event.user
-        
-        try:
-            response_builder = HEARTS_FIELD_NAME_TO_RESPONSE_BUILDER[field]
-        except KeyError:
-            return abort(f'Unknown field: {field!r}.')
-        
-        return await response_builder(interaction_event, target_user)
+    USER_COMMANDS.interactions(user_hearts_command, name = 'hearts')
 
 
 if USER_STATS_AVAILABLE:
@@ -307,3 +283,7 @@ if USER_ALLOCATIONS_AVAILABLE:
 
 if USER_INSPECT_ITEM_AVAILABLE:
     USER_COMMANDS.interactions(command_user_inspect_item, name = 'inspect-item')
+
+
+if USER_INSPECT_EQUIPMENT_AVAILABLE:
+    USER_COMMANDS.interactions(command_user_inspect_equipment, name = 'inspect-equipment')

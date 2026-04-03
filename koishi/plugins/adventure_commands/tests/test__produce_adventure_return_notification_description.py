@@ -6,7 +6,7 @@ from ...adventure_core import (
     Adventure, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION
 )
 
-from ..component_builders import produce_adventure_return_notification_description
+from ..component_building import produce_adventure_return_notification_description
 
 
 def _iter_options():

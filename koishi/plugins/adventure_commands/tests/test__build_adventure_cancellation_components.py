@@ -1,7 +1,7 @@
 import vampytest
 from hata import Component, create_text_display
 
-from ..component_builders import build_adventure_cancellation_components
+from ..component_building import build_adventure_cancellation_components
 
 
 def _iter_options():

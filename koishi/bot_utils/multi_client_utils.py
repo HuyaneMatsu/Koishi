@@ -18,7 +18,7 @@ def has_client_message_create_permissions(channel, client, extra = 0):
     
     Parameters
     ----------
-    chanel : ``Channel``
+    channel : ``Channel``
         Channel to check.
     
     client : ``Client``
@@ -47,7 +47,7 @@ def get_first_client_with_message_create_permissions_from(channel, client_wrappe
     
     Parameters
     ----------
-    chanel : ``Channel``
+    channel : ``Channel``
         Channel to check.
     client_wrapper : ``ClientWrapper``
         The allowed clients.
@@ -74,7 +74,7 @@ def get_first_client_with_permissions(channel, client_wrapper, mask):
     
     Parameters
     ----------
-    chanel : ``Channel``
+    channel : ``Channel``
         Channel to check.
     client_wrapper : ``ClientWrapper``
         The allowed clients.

@@ -5,7 +5,7 @@ from config import MARISA_MODE
 from ...bot_utils.user_getter import get_user
 from ...bot_utils.utils import send_embed_to
 
-from .component_builders import build_adventure_return_notification_components
+from .component_building import build_adventure_return_notification_components
 
 try:
     from ..user_settings import get_one_user_settings, get_preferred_client_for_user

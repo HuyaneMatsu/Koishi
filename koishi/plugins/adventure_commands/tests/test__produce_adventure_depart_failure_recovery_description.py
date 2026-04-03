@@ -2,7 +2,7 @@ from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
 
-from ..component_builders import produce_adventure_depart_failure_recovery_description
+from ..component_building import produce_adventure_depart_failure_recovery_description
 
 
 def _iter_options():

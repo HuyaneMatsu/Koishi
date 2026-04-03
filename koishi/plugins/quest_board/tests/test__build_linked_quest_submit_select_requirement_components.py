@@ -2,7 +2,9 @@ import vampytest
 from hata import ButtonStyle, Component, create_button, create_row, create_separator, create_text_display
 
 from ...inventory_core import Inventory
-from ...item_core import ITEM_FLAG_EDIBLE, ITEM_GROUP_ID_KNIFE, ITEM_ID_PEACH, get_item_nullable
+from ...item_core import (
+    ITEM_FLAG_EDIBLE, ITEM_GROUP_ID_KNIFE, ITEM_ID_PEACH, get_item_group_nullable, get_item_nullable
+)
 from ...quest_core import (
     AMOUNT_TYPE_COUNT, LinkedQuest, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QuestRequirementSerialisableBase,
     QuestRequirementSerialisableItemCategory, QuestRequirementSerialisableItemExact,
@@ -16,6 +18,9 @@ from ..constants import EMOJI_BACK, EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS, EMOJI_
 def _iter_options():
     item_peach = get_item_nullable(ITEM_ID_PEACH)
     assert item_peach is not None
+    
+    item_group_knife = get_item_group_nullable(ITEM_GROUP_ID_KNIFE)
+    assert item_group_knife is not None
     
     user_id = 202603040000
     guild_id = 202603040001
@@ -126,7 +131,7 @@ def _iter_options():
                 create_button(
                     'Item information',
                     custom_id = (
-                        f'linked_quest.submit_info_requirement.{user_id:x}.{10:x}.{linked_quest_entry_id_1:x}.'
+                        f'linked_quest.submit_info_item_requirement.{user_id:x}.{10:x}.{linked_quest_entry_id_1:x}.'
                         f'{6:x}.{item_peach.id:x}'
                     ),
                 ),
@@ -146,7 +151,7 @@ def _iter_options():
                 create_button(
                     'Item information',
                     custom_id = (
-                        f'linked_quest.submit_info_requirement.{user_id:x}.{10:x}.{linked_quest_entry_id_1:x}.'
+                        f'linked_quest.submit_info_item_requirement.{user_id:x}.{10:x}.{linked_quest_entry_id_1:x}.'
                         f'{7:x}.{item_peach.id:x}'
                     ),
                 ),
@@ -166,7 +171,7 @@ def _iter_options():
                 create_button(
                     'Item information',
                     custom_id = (
-                        f'linked_quest.submit_info_requirement.{user_id:x}.{10:x}.{linked_quest_entry_id_1:x}.'
+                        f'linked_quest.submit_info_item_requirement.{user_id:x}.{10:x}.{linked_quest_entry_id_1:x}.'
                         f'{8:x}.{item_peach.id:x}'
                     ),
                 ),
@@ -186,13 +191,13 @@ def _iter_options():
                 create_button(
                     'Item information',
                     custom_id = (
-                        f'linked_quest.submit_info_requirement.{user_id:x}.{10:x}.{linked_quest_entry_id_1:x}.'
+                        f'linked_quest.submit_info_item_requirement.{user_id:x}.{10:x}.{linked_quest_entry_id_1:x}.'
                         f'{9:x}.{item_peach.id:x}'
                     ),
                 ),
             ),
             create_separator(),
-            create_text_display(f'0 / 1 knife, none on stock'),
+            create_text_display(f'0 / 1 {item_group_knife.emoji} {item_group_knife.name}, none on stock'),
             create_row(
                 create_button(
                     'Select item to submit',
@@ -202,6 +207,13 @@ def _iter_options():
                     ),
                     enabled = False,
                     style = ButtonStyle.green,
+                ),
+                create_button(
+                    'Item group information',
+                    custom_id = (
+                        f'linked_quest.submit_info_item_group_requirement.{user_id:x}.{10:x}.'
+                        f'{linked_quest_entry_id_1:x}.{10:x}.{ITEM_GROUP_ID_KNIFE:x}'
+                    ),
                 ),
             ),
             create_separator(),

@@ -698,8 +698,7 @@ class GameState:
         try:
             embed, components = self.render()
             
-            await client.interaction_response_message_create(event, embed = embed, components = components)
-            message = await client.interaction_response_message_get(event)
+            message = await client.interaction_response_message_create(event, embed = embed, components = components)
         except:
             try:
                 del ACTIVE_GAMES[event.user.id]

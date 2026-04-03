@@ -17,7 +17,7 @@ from ..inventory_core import get_inventory
 from ..quest_core import get_user_adventurer_rank_info
 from ..user_stats_core import get_user_stats
 
-from .component_builders import (
+from .component_building import (
     ADVENTURE_LISTING_PAGE_SIZE, build_adventure_action_listing_view_components, build_adventure_action_view_components,
     build_adventure_cancellation_components, build_adventure_cancellation_confirmation_form,
     build_adventure_create_confirm_components, build_adventure_create_confirmation_form,
@@ -467,10 +467,23 @@ async def cancel(
     )
 
 
+ADVENTURE_VIEW_OPTION_CURRENT = 1 << 0
+ADVENTURE_VIEW_OPTION_PREVIOUS = 1 << 1
+ADVENTURE_VIEW_OPTION_CURRENT_OR_PREVIOUS = ADVENTURE_VIEW_OPTION_CURRENT | ADVENTURE_VIEW_OPTION_PREVIOUS
+
+
 @ADVENTURE_COMMANDS.interactions
 async def view(
     client,
     interaction_event,
+    option : (
+        [
+            ('current', format(ADVENTURE_VIEW_OPTION_CURRENT, 'x')),
+            ('previous', format(ADVENTURE_VIEW_OPTION_PREVIOUS, 'x')),
+            ('current or previous', format(ADVENTURE_VIEW_OPTION_CURRENT_OR_PREVIOUS, 'x')),
+        ],
+        'Current or previous?',
+    ) = None,
 ):
     """
     View your current adventure and its progress.
@@ -484,7 +497,18 @@ async def view(
     
     interaction_event : ``InteractionEvent``
         The received interaction event.
+    
+    option : `None | str` = `None`, Optional
+        Which quest to show as a string representing a hexadecimal integer.
     """
+    if option is None:
+        option = ADVENTURE_VIEW_OPTION_CURRENT_OR_PREVIOUS
+    else:
+        try:
+            option = int(option, 16)
+        except ValueError:
+            option = ADVENTURE_VIEW_OPTION_CURRENT_OR_PREVIOUS
+    
     await client.interaction_application_command_acknowledge(
         interaction_event,
         False,
@@ -492,9 +516,32 @@ async def view(
     )
     
     while True:
-        adventure = await get_active_adventure(interaction_event.user_id)
-        if (adventure is None):
-            error_message = 'You are not on an adventure.'
+        error_message = None
+        
+        while True:
+            if (option & ADVENTURE_VIEW_OPTION_CURRENT):
+                adventure = await get_active_adventure(interaction_event.user_id)
+                if (adventure is not None):
+                    break
+                
+                if (option == ADVENTURE_VIEW_OPTION_CURRENT):
+                    error_message = 'You are not on an adventure.'
+                    break
+            
+            if (option & ADVENTURE_VIEW_OPTION_PREVIOUS):
+                page_count, adventure_listing = await get_adventure_listing_page(interaction_event.user_id, -1, 1)
+                if adventure_listing is not None:
+                    adventure = adventure_listing[0]
+                    break
+                
+                if (option == ADVENTURE_VIEW_OPTION_PREVIOUS):
+                    error_message = 'You were not on an adventure.'
+                    break
+            
+            error_message = 'You are not on adventure and never were.'
+            break
+        
+        if (error_message is not None):
             break
         
         adventure_action_listing = await get_adventure_action_listing(adventure.entry_id)

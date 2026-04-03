@@ -1,4 +1,4 @@
-__all__ = ()
+__all__ = ('produce_item_inspect_description', )
 
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 

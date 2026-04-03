@@ -35,10 +35,14 @@ IGNORED_NAMES = frozenset((
     'chesuto_data',
     'channel_names.csv',
     '.git',
+    'build',
+    '.profiles',
+    'egg-info',
 ))
 
 IGNORED_EXTENSIONS = frozenset((
     'png',
+    '.egg-info',
 ))
 
 

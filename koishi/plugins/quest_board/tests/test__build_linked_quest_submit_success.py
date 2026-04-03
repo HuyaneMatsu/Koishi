@@ -7,8 +7,8 @@ from ...quest_core import AMOUNT_TYPE_COUNT
 
 from ..component_building import build_linked_quest_submit_success
 from ..constants import (
-    EMOJI_BACK, LINKED_QUEST_BACK_DIRECT_LOCATION_QUEST, LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED,
-    LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_TOP, LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_REQUIREMENT,
+    EMOJI_BACK, BACK_DIRECT_LOCATION_QUEST, BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED,
+    BACK_DIRECT_LOCATION_SELECT_ITEM_TOP, BACK_DIRECT_LOCATION_SELECT_REQUIREMENT,
 )
 
 def _iter_options():
@@ -24,7 +24,7 @@ def _iter_options():
         999,
         0,
         0,
-        LINKED_QUEST_BACK_DIRECT_LOCATION_QUEST,
+        BACK_DIRECT_LOCATION_QUEST,
         [
             (item, AMOUNT_TYPE_COUNT, 50, 20, 12),
         ],
@@ -54,7 +54,7 @@ def _iter_options():
         999,
         7,
         0,
-        LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_REQUIREMENT,
+        BACK_DIRECT_LOCATION_SELECT_REQUIREMENT,
         [
             (item, AMOUNT_TYPE_COUNT, 50, 20, 12),
         ],
@@ -84,7 +84,7 @@ def _iter_options():
         999,
         0,
         2,
-        LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_TOP,
+        BACK_DIRECT_LOCATION_SELECT_ITEM_TOP,
         [
             (item, AMOUNT_TYPE_COUNT, 50, 20, 12),
         ],
@@ -114,7 +114,7 @@ def _iter_options():
         999,
         3,
         2,
-        LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED,
+        BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED,
         [
             (item, AMOUNT_TYPE_COUNT, 50, 20, 12),
         ],

@@ -1,4 +1,4 @@
-__all__ = ('ITEM_SLOTS',)
+__all__ = ('ITEM_FLAGS_ALLOWED', 'ITEM_SLOTS', 'ITEM_SLOT_NAMES',)
 
 from ..item_core import ITEM_FLAG_HEAD, ITEM_FLAG_COSTUME, ITEM_FLAG_WEAPON
 

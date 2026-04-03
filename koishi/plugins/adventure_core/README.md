@@ -112,6 +112,18 @@ Each action offers their own cost, battles and loot.
             - Bishophat (uncommon)
             - Ruler (epic)
             - Scissors (mythical)
+    - Collect firewood
+        - Foraging
+            - Twigs (basic)
+            - Bough (basic)
+            - Ruler (mythical)
+            - Scissors (mythical)
+        - Foraging
+            - Devilcart oyster (basic)
+            - Flykiller amanita (common)
+            - Bishophat (uncommon)
+            - Ruler (mythical)
+            - Scissors (mythical)
 
 - Hakugyokurou mansion (level 2)
     - Gardening

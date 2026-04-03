@@ -7,7 +7,7 @@ from hata import (
     create_thumbnail_media
 )
 
-from ..item_core import get_item_nullable
+from ..item_core import get_item_group_nullable, get_item_nullable
 from ..quest_core import (
     LINKED_QUEST_COMPLETION_STATE_ACTIVE, LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY,
     QUEST_REQUIREMENT_TYPE_ITEM_EXACT, QUEST_REQUIREMENT_TYPE_ITEM_GROUP, get_guild_adventurer_rank_info,
@@ -15,26 +15,27 @@ from ..quest_core import (
 )
 
 from .constants import (
-    EMOJI_BACK, EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS, EMOJI_REFRESH, LINKED_QUEST_BACK_DIRECT_LOCATION_QUEST,
-    LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED, LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_TOP,
-    LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_REQUIREMENT, PAGE_SIZE, REQUIREMENT_PAGE_SIZE
+    BACK_DIRECT_LOCATION_QUEST, BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED, BACK_DIRECT_LOCATION_SELECT_ITEM_TOP,
+    BACK_DIRECT_LOCATION_SELECT_REQUIREMENT, EMOJI_BACK, EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS, EMOJI_REFRESH, PAGE_SIZE,
+    REQUIREMENT_PAGE_SIZE
 )
 from .content_building import (
     produce_linked_quest_detailed_description, produce_linked_quest_header_description,
     produce_linked_quest_short_description, produce_linked_quest_submission_item_select_description,
-    produce_linked_quest_submission_item_select_header, produce_linked_quest_submission_requirements_entry_description,
-    produce_linked_quest_submit_success, produce_linked_quest_submit_success_completed_description,
-    produce_nullable_item_description, produce_quest_board_header_description, produce_quest_detailed_description,
-    produce_quest_short_description
+    produce_linked_quest_submission_item_select_header, produce_linked_quest_submit_success,
+    produce_linked_quest_submit_success_completed_description, produce_nullable_item_description,
+    produce_nullable_item_group_description, produce_quest_board_header_description, produce_quest_detailed_description,
+    produce_quest_short_description, produce_submission_requirements_entry_description
 )
 from .custom_ids import (
     CUSTOM_ID_LINKED_QUEST_ABANDON_BUILDER, CUSTOM_ID_LINKED_QUEST_ITEM_INFO_BUILDER,
     CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_DECREMENT_DISABLED, CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_INCREMENT_DISABLED,
     CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_NAVIGATE_BUILDER, CUSTOM_ID_LINKED_QUEST_SUBMIT_AUTO_BUILDER,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_EXECUTE_ITEM_NESTED_BUILDER, CUSTOM_ID_LINKED_QUEST_SUBMIT_EXECUTE_ITEM_TOP_BUILDER,
-    CUSTOM_ID_LINKED_QUEST_SUBMIT_EXECUTE_REQUIREMENT_BUILDER, CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_NESTED_BUILDER,
-    CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_TOP_BUILDER, CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_REQUIREMENT_BUILDER,
-    CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_NESTED_BUILDER,
+    CUSTOM_ID_LINKED_QUEST_SUBMIT_EXECUTE_REQUIREMENT_BUILDER,
+    CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_GROUP_REQUIREMENT_BUILDER,
+    CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_NESTED_BUILDER, CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_REQUIREMENT_BUILDER,
+    CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_TOP_BUILDER, CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_NESTED_BUILDER,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_PAGE_INDEX_DECREMENT_DISABLED,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_PAGE_INDEX_INCREMENT_DISABLED,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_TOP_BUILDER, CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_REQUIREMENT_BUILDER,
@@ -42,11 +43,15 @@ from .custom_ids import (
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_REQUIREMENT_PAGE_INDEX_INCREMENT_DISABLED, CUSTOM_ID_QUEST_ACCEPT_BUILDER,
     CUSTOM_ID_QUEST_ACCEPT_DISABLED, CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_DECREMENT_DISABLED,
     CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_INCREMENT_DISABLED, CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_BUILDER,
-    CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_BUILDER
+    CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_BUILDER, CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_GROUP_REQUIREMENT_BUILDER,
+    CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_REQUIREMENT_BUILDER, CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_BUILDER,
+    CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PAGE_INDEX_DECREMENT_DISABLED,
+    CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PAGE_INDEX_INCREMENT_DISABLED
 )
 from .helpers import (
     get_linked_quest_expiration, get_linked_quest_for_deduplication,
-    get_linked_quest_submission_requirements_normalised, iter_submission_requirement_item_entries_of_normalised
+    get_linked_quest_submission_requirements_normalised, get_quest_submission_requirements_normalised,
+    iter_submission_requirement_item_entries_of_normalised
 )
 
 
@@ -252,6 +257,34 @@ def build_quest_details_components(user_id, guild_id, local_guild_id, page_index
         else:
             accept_enabled = True
     
+    
+    has_submission_requirement = False
+    requirements = quest.requirements
+    if (requirements is not None):
+        for requirement in requirements:
+            if requirement.TYPE in (
+                QUEST_REQUIREMENT_TYPE_ITEM_EXACT,
+                QUEST_REQUIREMENT_TYPE_ITEM_GROUP,
+                QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY,
+            ):
+                has_submission_requirement = True
+                break
+    
+    
+    if not has_submission_requirement:
+        extra_control_components = ()
+    
+    else:
+        extra_control_components = (
+            create_button(
+                'Select requirement to inspect',
+                custom_id = CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_BUILDER(
+                    user_id, guild_id, page_index, quest_template.id, 0
+                ),
+            ),
+        )
+    
+    
     # Add interactive components.
     components.append(
         create_row(
@@ -270,6 +303,7 @@ def build_quest_details_components(user_id, guild_id, local_guild_id, page_index
                 enabled = accept_enabled,
                 style = (ButtonStyle.green if accept_enabled else ButtonStyle.gray),
             ),
+            *extra_control_components,
         ),
     )
     
@@ -327,15 +361,24 @@ def _linked_quest_sort_key_getter(linked_quest):
     
     Returns
     -------
-    sort_key : `(int, int, int)`
+    sort_key : `(int, int, int, int)`
     """
+    # Get basic fields
     completion_count = linked_quest.completion_count
     completion_state = linked_quest.completion_state
+    
     quest_template = get_quest_template(linked_quest.template_id)
     if quest_template is None:
         repeat_count = -1
     else:
         repeat_count = quest_template.repeat_count
+    
+    expiration = get_linked_quest_expiration(linked_quest)
+    
+    # First sort: by completion state
+    # - active
+    # - completed
+    # - other
     
     if completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE:
         completion_state_weight = 1
@@ -344,22 +387,38 @@ def _linked_quest_sort_key_getter(linked_quest):
     else:
         completion_state_weight = 3
     
-    if repeat_count == -1:
-        repeat_weight = 4
-    elif repeat_count == 0:
+    # Second sort: when teh quest expires
+    # - active with expiration
+    # - other
+    if (completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE) and (expiration is not None):
+        expiration_weight = int(expiration.timestamp())
+    else:
+        expiration_weight = (1 << 63) - 1
+    
+    # Third sort: whether the quest can be repeated; non repeatable comes first.
+    # - unlimited
+    # - limited
+    # - on last completion / other
+    
+    if repeat_count == 0:
         repeat_weight = 1
     elif completion_count < repeat_count:
         repeat_weight = 2
     else:
         repeat_weight = 3
     
-    if repeat_count == -1:
+    # Fourth sort: How much times the quest can be repeated.
+    # - limited -> negate count
+    # - unlimited
+    
+    if repeat_count == 0:
         completion_count_weight = 1
     else:
         completion_count_weight = -repeat_count
     
     return (
         completion_state_weight,
+        expiration_weight,
         repeat_weight,
         completion_count_weight,
     )
@@ -560,38 +619,23 @@ def build_linked_quest_details_components(linked_quest, user_stats, page_index):
     
     components.append(create_separator())
     
-    submission_requirements = None
+    has_submission_requirement = False
     requirements = linked_quest.requirements
     if (requirements is not None):
         for requirement in requirements:
-            if requirement.TYPE not in (
+            if requirement.TYPE in (
                 QUEST_REQUIREMENT_TYPE_ITEM_EXACT,
                 QUEST_REQUIREMENT_TYPE_ITEM_GROUP,
                 QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY,
             ):
-                continue
-            
-            if submission_requirements is None:
-                submission_requirements = []
-            
-            submission_requirements.append(requirement)
+                has_submission_requirement = True
+                break
     
     
-    if (submission_requirements is not None):
-        if (
-            (len(submission_requirements) == 1) and
-            (submission_requirements[0].TYPE != QUEST_REQUIREMENT_TYPE_ITEM_EXACT)
-        ):
-            select_label = 'Select item to submit'
-            select_custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_TOP_BUILDER(
-                user_stats.user_id, page_index, linked_quest.entry_id, 0
-            )
-        else:
-            select_label = 'Select requirement to submit for'
-            select_custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_REQUIREMENT_BUILDER(
-                user_stats.user_id, page_index, linked_quest.entry_id, 0
-            )
-        
+    if not has_submission_requirement:
+        extra_control_components = ()
+    
+    else:
         extra_control_components = (
             create_button(
                 'Auto submit items',
@@ -601,14 +645,13 @@ def build_linked_quest_details_components(linked_quest, user_stats, page_index):
                 style = ButtonStyle.green,
             ),
             create_button(
-                select_label,
-                custom_id = select_custom_id,
+                'Select requirement to submit for',
+                custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_REQUIREMENT_BUILDER(
+                    user_stats.user_id, page_index, linked_quest.entry_id, 0
+                ),
                 style = ButtonStyle.green,
             ),
         )
-    
-    else:
-        extra_control_components = ()
     
     
     components.append(
@@ -730,6 +773,56 @@ def build_linked_quest_abandon_success_components(user_id, page_index, guild_id,
     ]
 
 
+def _get_quest_board_back_direct_custom_id(
+    user_id,
+    guild_id,
+    page_index,
+    quest_template_id,
+    requirement_index,
+    back_direct_location,
+):
+    """
+    get quest board submission back-direct custom identifier.
+    
+    Parameters
+    ----------
+    user_id : `int`
+        The invoking user's identifier.
+    
+    guild_id : `int`
+        The parent quest's guild's identifier.
+    
+    page_index : `int`
+        The quest boards' current page's index.
+    
+    quest_template_id : `int`
+        The currently selected quest detail's template's identifier.
+    
+    requirement_index : `int`
+        The submitted requirement's index to back-direct to.
+    
+    back_direct_location : `int`
+        Where to back-direct to.
+    
+    Returns
+    -------
+    custom_id : `str`
+    """
+    if back_direct_location == BACK_DIRECT_LOCATION_QUEST:
+        custom_id = CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_BUILDER(user_id, guild_id, page_index, quest_template_id)
+    
+    elif back_direct_location == BACK_DIRECT_LOCATION_SELECT_REQUIREMENT:
+        custom_id = CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_BUILDER(
+            user_id, guild_id, page_index, quest_template_id, requirement_index // REQUIREMENT_PAGE_SIZE
+        )
+    
+    else:
+        # No other case, redirect to the quest.
+        custom_id = CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_BUILDER(user_id, page_index, quest_template_id)
+    
+    return custom_id
+
+
 def _get_linked_quest_submission_back_direct_custom_id(
     user_id,
     page_index,
@@ -765,20 +858,20 @@ def _get_linked_quest_submission_back_direct_custom_id(
     -------
     custom_id : `str`
     """
-    if back_direct_location == LINKED_QUEST_BACK_DIRECT_LOCATION_QUEST:
+    if back_direct_location == BACK_DIRECT_LOCATION_QUEST:
         custom_id = CUSTOM_ID_LINKED_QUEST_ITEM_INFO_BUILDER(user_id, page_index, linked_quest_entry_id)
     
-    elif back_direct_location == LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_REQUIREMENT:
+    elif back_direct_location == BACK_DIRECT_LOCATION_SELECT_REQUIREMENT:
         custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_REQUIREMENT_BUILDER(
             user_id, page_index, linked_quest_entry_id, requirement_index // REQUIREMENT_PAGE_SIZE
         )
     
-    elif back_direct_location == LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_TOP:
+    elif back_direct_location == BACK_DIRECT_LOCATION_SELECT_ITEM_TOP:
         custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_TOP_BUILDER(
             user_id, page_index, linked_quest_entry_id, item_page_index
         )
     
-    elif back_direct_location == LINKED_QUEST_BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED:
+    elif back_direct_location == BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED:
         custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_NESTED_BUILDER(
             user_id, page_index, linked_quest_entry_id, requirement_index, item_page_index
         )
@@ -972,7 +1065,9 @@ def build_linked_quest_submit_success_completed_components(
     return components
 
 
-def build_quest_board_item_components(user_id, guild_id, local_guild_id, page_index, quest_template_id, item_id):
+def build_quest_board_item_components(
+    user_id, guild_id, page_index, quest_template_id, requirement_index, back_direct_location, item_id
+):
     """
     Builds components describing the given item by identifier.
     
@@ -984,14 +1079,17 @@ def build_quest_board_item_components(user_id, guild_id, local_guild_id, page_in
     guild_id : `int`
         The quest's source guild's identifier.
     
-    local_guild_id : `int`
-        The local guild's identifier.
-    
     page_index : `int`
         The quest board's current page's index.
     
     quest_template_id : `int`
         The currently selected quest detail's template's identifier.
+    
+    requirement_index : `int`
+        The submitted requirement's index to back-direct to.
+    
+    back_direct_location : `int`
+        The location's identifier to back-direct the user to.
     
     item_id : `int`
         The item's identifier.
@@ -1005,14 +1103,68 @@ def build_quest_board_item_components(user_id, guild_id, local_guild_id, page_in
         create_separator(),
         create_row(
             create_button(
-                'View quest board',
-                custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_BUILDER(user_id, page_index),
-                enabled = (guild_id == local_guild_id),
+                'Back',
+                EMOJI_BACK,
+                custom_id = _get_quest_board_back_direct_custom_id(
+                    user_id,
+                    guild_id,
+                    page_index,
+                    quest_template_id,
+                    requirement_index,
+                    back_direct_location,
+                ),
             ),
+        ),
+    ]
+
+
+def build_quest_board_item_group_components(
+    user_id, guild_id, page_index, quest_template_id, requirement_index, back_direct_location, item_group_id
+):
+    """
+    Builds components describing the given item by identifier.
+    
+    Parameters
+    ----------
+    user_id : `int`
+        The invoking user's identifier.
+    
+    guild_id : `int`
+        The quest's source guild's identifier.
+    
+    page_index : `int`
+        The quest board's current page's index.
+    
+    quest_template_id : `int`
+        The currently selected quest detail's template's identifier.
+    
+    requirement_index : `int`
+        The submitted requirement's index to back-direct to.
+    
+    back_direct_location : `int`
+        The location's identifier to back-direct the user to.
+    
+    item_group_id : `int`
+        The item group's identifier.
+    
+    Returns
+    -------
+    components : ``list<Component>``
+    """
+    return [
+        create_text_display(''.join([*produce_nullable_item_group_description(get_item_group_nullable(item_group_id))])),
+        create_separator(),
+        create_row(
             create_button(
-                'Back to the quest',
-                custom_id = CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_BUILDER(
-                    user_id, guild_id, page_index, quest_template_id
+                'Back',
+                EMOJI_BACK,
+                custom_id = _get_quest_board_back_direct_custom_id(
+                    user_id,
+                    guild_id,
+                    page_index,
+                    quest_template_id,
+                    requirement_index,
+                    back_direct_location,
                 ),
             ),
         ),
@@ -1060,6 +1212,65 @@ def build_linked_quest_item_components(
     """
     return [
         create_text_display(''.join([*produce_nullable_item_description(get_item_nullable(item_id))])),
+        create_separator(),
+        create_row(
+            create_button(
+                'Back',
+                EMOJI_BACK,
+                custom_id = _get_linked_quest_submission_back_direct_custom_id(
+                    user_id,
+                    page_index,
+                    linked_quest_entry_id,
+                    requirement_index,
+                    item_page_index,
+                    back_direct_location,
+                ),
+            ),
+        ),
+    ]
+
+
+def build_linked_quest_item_group_components(
+    user_id,
+    page_index,
+    linked_quest_entry_id,
+    requirement_index,
+    item_page_index,
+    back_direct_location,
+    item_group_id,
+):
+    """
+    Builds components describing the given item group by identifier.
+    
+    Parameters
+    ----------
+    user_id : `int`
+        The invoking user's identifier.
+    
+    page_index : `int`
+        The linked quests' current page's index.
+    
+    linked_quest_entry_id : `int`
+        The currently selected quest's entry's identifier.
+    
+    requirement_index : `int`
+        The submitted requirement's index to back-direct to.
+    
+    item_page_index : `int`
+        The items' page's index to back-direct to.
+    
+    back_direct_location : `int`
+        Where to back-direct to.
+    
+    item_group_id : `int`
+        The item group's identifier.
+    
+    Returns
+    -------
+    components : ``list<Component>``
+    """
+    return [
+        create_text_display(''.join([*produce_nullable_item_group_description(get_item_group_nullable(item_group_id))])),
         create_separator(),
         create_row(
             create_button(
@@ -1128,7 +1339,6 @@ def build_linked_quest_submit_select_requirement_components(
         for index, submission_requirement_normalised in enumerate(
             submission_requirements_normalised_slice, requirement_select_page_index * REQUIREMENT_PAGE_SIZE
         ):
-            
             # Accumulate available
             accumulated_amount = 0
             accumulated_weight = 0
@@ -1144,7 +1354,7 @@ def build_linked_quest_submit_select_requirement_components(
                 accumulated_value += amount * item.value
             
             components.append(create_text_display(
-                ''.join([*produce_linked_quest_submission_requirements_entry_description(
+                ''.join([*produce_submission_requirements_entry_description(
                     submission_requirement_normalised, accumulated_amount, accumulated_weight, accumulated_value
                 )])
             ))
@@ -1161,33 +1371,54 @@ def build_linked_quest_submit_select_requirement_components(
                 
             
             requirement_identifier = submission_requirement_normalised[1]
-            if submission_requirement_normalised[0] == QUEST_REQUIREMENT_TYPE_ITEM_EXACT:
+            requirement_type = submission_requirement_normalised[0]
+            
+            if requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_EXACT:
+                button_submit = create_button(
+                    'Submit items',
+                    custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_EXECUTE_REQUIREMENT_BUILDER(
+                        linked_quest.user_id, page_index, linked_quest.entry_id, index, requirement_identifier
+                    ),
+                    enabled = submit_or_select_button_enabled,
+                    style = submit_or_select_button_style,
+                )
+            else:
+                button_submit = create_button(
+                    'Select item to submit',
+                    custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_NESTED_BUILDER(
+                        linked_quest.user_id, page_index, linked_quest.entry_id, index, 0,
+                    ),
+                    enabled = submit_or_select_button_enabled,
+                    style = submit_or_select_button_style,
+                )
+            
+            if requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_EXACT:
+                button_information = create_button(
+                    'Item information',
+                    custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_REQUIREMENT_BUILDER(
+                        linked_quest.user_id, page_index, linked_quest.entry_id, index, requirement_identifier
+                    ),
+                )
+            
+            elif requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_GROUP:
+                button_information = create_button(
+                    'Item group information',
+                    custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_ITEM_GROUP_REQUIREMENT_BUILDER(
+                        linked_quest.user_id, page_index, linked_quest.entry_id, index, requirement_identifier
+                    ),
+                )
+            
+            else:
+                button_information = None
+            
+            if button_information is None:
                 row_component = create_row(
-                    create_button(
-                        'Submit items',
-                        custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_EXECUTE_REQUIREMENT_BUILDER(
-                            linked_quest.user_id, page_index, linked_quest.entry_id, index, requirement_identifier
-                        ),
-                        enabled = submit_or_select_button_enabled,
-                        style = submit_or_select_button_style,
-                    ),
-                    create_button(
-                        'Item information',
-                        custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_INFO_REQUIREMENT_BUILDER(
-                            linked_quest.user_id, page_index, linked_quest.entry_id, index, requirement_identifier
-                        ),
-                    ),
+                    button_submit,
                 )
             else:
                 row_component = create_row(
-                    create_button(
-                        'Select item to submit',
-                        custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_NESTED_BUILDER(
-                            linked_quest.user_id, page_index, linked_quest.entry_id, index, 0,
-                        ),
-                        enabled = submit_or_select_button_enabled,
-                        style = submit_or_select_button_style,
-                    ),
+                    button_submit,
+                    button_information,
                 )
             
             components.append(row_component)
@@ -1489,6 +1720,171 @@ def build_linked_quest_submit_select_item_components(
             'Back',
             EMOJI_BACK,
             custom_id = back_custom_id,
+        ),
+    ))
+    
+    return components
+
+
+def build_quest_select_requirement_components(
+    user_id, guild_id, quest, inventory, page_index, requirement_select_page_index
+):
+    """
+    Builds quest submission select requirement components.
+    
+    Parameters
+    -----------
+    user_id : `int`
+        The invoking user's identifier.
+    
+    guild_id : `int`
+        The parent quest's guild's identifier.
+    
+    quest : ``Quest``
+        Quest in context.
+    
+    inventory : ``Inventory``
+        The user's inventory.
+    
+    page_index : `int`
+        The page's index to back-direct to.
+    
+    requirement_select_page_index : `int`
+        The requirement page index to display.
+    
+    Returns
+    -------
+    components : ``list<Component>``
+    """
+    submission_requirements_normalised = get_quest_submission_requirements_normalised(quest)
+    if submission_requirements_normalised is None:
+        submission_requirements_normalised_slice = None
+    else:
+        submission_requirements_normalised_slice = submission_requirements_normalised[
+            requirement_select_page_index * REQUIREMENT_PAGE_SIZE :
+            (requirement_select_page_index + 1) * REQUIREMENT_PAGE_SIZE
+        ]
+        if not submission_requirements_normalised_slice:
+            submission_requirements_normalised_slice = None
+    
+    components = []
+    
+    # Header
+    
+    components.append(create_text_display(
+        '### Select requirement to inspect'
+    ))
+    components.append(create_separator())
+    
+    # Requirement listing
+    
+    if (submission_requirements_normalised_slice is not None):
+        for index, submission_requirement_normalised in enumerate(
+            submission_requirements_normalised_slice, requirement_select_page_index * REQUIREMENT_PAGE_SIZE
+        ):
+            # Accumulate available
+            accumulated_amount = 0
+            accumulated_weight = 0
+            accumulated_value = 0
+            for item_entry in iter_submission_requirement_item_entries_of_normalised(
+                inventory, submission_requirement_normalised
+            ):
+                amount = item_entry.amount
+                item = item_entry.item
+                
+                accumulated_amount += amount
+                accumulated_weight += amount * item.weight
+                accumulated_value += amount * item.value
+            
+            components.append(create_text_display(
+                ''.join([*produce_submission_requirements_entry_description(
+                    submission_requirement_normalised, accumulated_amount, accumulated_weight, accumulated_value
+                )])
+            ))
+            
+            requirement_identifier = submission_requirement_normalised[1]
+            requirement_type = submission_requirement_normalised[0]
+            
+            if requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_EXACT:
+                button_information = create_button(
+                    'Item information',
+                    custom_id = CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_REQUIREMENT_BUILDER(
+                        user_id, guild_id, page_index, quest.template_id, index, requirement_identifier
+                    ),
+                )
+            
+            elif requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_GROUP:
+                button_information = create_button(
+                    'Item group information',
+                    custom_id = CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_GROUP_REQUIREMENT_BUILDER(
+                        user_id, guild_id, page_index, quest.template_id, index, requirement_identifier
+                    ),
+                )
+            
+            else:
+                button_information = None
+            
+            if button_information is None:
+                row_component = None
+            else:
+                row_component = create_row(
+                    button_information,
+                )
+            
+            if (row_component is not None):
+                components.append(row_component)
+            components.append(create_separator())
+    
+    # Control
+    
+    if submission_requirements_normalised is None:
+        submission_requirement_normalised_count = 0
+    else:
+        submission_requirement_normalised_count = len(submission_requirements_normalised)
+    
+    if requirement_select_page_index == 0:
+        custom_id = CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PAGE_INDEX_DECREMENT_DISABLED
+        enabled = False
+    
+    else:
+        custom_id = CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_BUILDER(
+            user_id, guild_id, page_index, quest.template_id, requirement_select_page_index - 1
+        )
+        enabled = True
+    
+    button_page_index_decrement = create_button(
+        f'Page {requirement_select_page_index!s}',
+        EMOJI_PAGE_PREVIOUS,
+        custom_id = custom_id,
+        enabled = enabled
+    )
+    
+    if submission_requirement_normalised_count <= (requirement_select_page_index + 1) * REQUIREMENT_PAGE_SIZE:
+        custom_id = CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PAGE_INDEX_INCREMENT_DISABLED
+        enabled = False
+    
+    else:
+        custom_id = CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_BUILDER(
+            user_id, guild_id, page_index, quest.template_id, requirement_select_page_index + 1
+        )
+        enabled = True
+    
+    button_page_index_increment = create_button(
+        f'Page {requirement_select_page_index + 2!s}',
+        EMOJI_PAGE_NEXT,
+        custom_id = custom_id,
+        enabled = enabled,
+    )
+    
+    components.append(create_row(
+        button_page_index_decrement,
+        button_page_index_increment,
+        create_button(
+            'Back',
+            EMOJI_BACK,
+            custom_id = CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_BUILDER(
+                user_id, guild_id, page_index, quest.template_id
+            ),
         ),
     ))
     

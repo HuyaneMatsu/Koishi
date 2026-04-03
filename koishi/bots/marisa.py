@@ -61,7 +61,7 @@ Marisa = Client(
         _27 = 1,
         _28 = 1,
     ),
-    # assert_application_command_permission_missmatch_at = [GUILD__SUPPORT],
+    # assert_application_command_permission_mismatch_at = [GUILD__SUPPORT],
     # enforce_application_command_permissions = True,
 )
 

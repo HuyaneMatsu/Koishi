@@ -3,7 +3,7 @@ from hata import InteractionEvent, User
 
 from ....bot_utils.daily import ConditionName, Reward
 
-from ..rendering import produce_reward
+from ..content_building import produce_reward
 
 
 def _iter_options():
@@ -68,4 +68,7 @@ def test__produce_reward(interaction_even, reward):
     -------
     output : `str`
     """
-    return ''.join(produce_reward(interaction_even, reward))
+    output = [*produce_reward(interaction_even, reward)]
+    for element in output:
+        vampytest.assert_instance(element, str)
+    return ''.join(output)

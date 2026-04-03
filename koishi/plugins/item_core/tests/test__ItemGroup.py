@@ -1,4 +1,5 @@
 import vampytest
+from hata import BUILTIN_EMOJIS, Emoji
 
 from ..item_group import ItemGroup
 
@@ -14,6 +15,8 @@ def _assert_fields_set(item_group):
     """
     vampytest.assert_instance(item_group, ItemGroup)
     vampytest.assert_instance(item_group.id, int)
+    vampytest.assert_instance(item_group.description, str, nullable = True)
+    vampytest.assert_instance(item_group.emoji, Emoji, nullable = True)
     vampytest.assert_instance(item_group.name, str)
     vampytest.assert_instance(item_group.item_ids, tuple, nullable = True)
 
@@ -22,13 +25,17 @@ def test__ItemGroup__new():
     """
     Tests whether ``ItemGroup.__new__`` works as intended.
     """
+    description = 'pudding <3'
+    emoji = BUILTIN_EMOJIS['custard']
     item_group_id = 99999
     name = 'pudding'
     item_ids = (5, 6)
     
-    item_group = ItemGroup(item_group_id, name, item_ids)
+    item_group = ItemGroup(item_group_id, name, emoji, description, item_ids)
     _assert_fields_set(item_group)
     
+    vampytest.assert_eq(item_group.description, description)
+    vampytest.assert_is(item_group.emoji, emoji)
     vampytest.assert_eq(item_group.id, item_group_id)
     vampytest.assert_eq(item_group.name, name)
     vampytest.assert_eq(item_group.item_ids, item_ids)
@@ -38,11 +45,13 @@ def test__ItemGroup__repr():
     """
     Tests whether ``ItemGroup.__repr__`` works as intended.
     """
+    description = 'pudding <3'
+    emoji = BUILTIN_EMOJIS['custard']
     item_group_id = 99999
     name = 'pudding'
     item_ids = (5, 6)
     
-    item_group = ItemGroup(item_group_id, name, item_ids)
+    item_group = ItemGroup(item_group_id, name, emoji, description, item_ids)
     
     output = repr(item_group)
     

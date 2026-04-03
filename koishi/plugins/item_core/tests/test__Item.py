@@ -1,7 +1,9 @@
 import vampytest
 from hata import BUILTIN_EMOJIS, Emoji
 
-from ...item_modifier_core import Modifier, MODIFIER_ID__FISHING, MODIFIER_KIND__FLAT, MODIFIER_KIND__PERCENT, construct_modifier_type
+from ...item_modifier_core import (
+    Modifier, MODIFIER_ID__FISHING, MODIFIER_KIND__FLAT, MODIFIER_KIND__PERCENT, construct_modifier_type
+)
 
 from ..flags import ITEM_FLAG_EDIBLE
 from ..item import Item

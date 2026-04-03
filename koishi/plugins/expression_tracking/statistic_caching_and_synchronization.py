@@ -22,14 +22,14 @@ def _get_from_cache(key):
     
     Returns
     -------
-    entries : `None | list<RowProxy<int, int>>`
+    entries : `None | list<tuple<int>>`
     """
     try:
         timeout, entries = STATISTIC_CACHE[key]
     except KeyError:
         return
     
-    if timeout < monotonic():
+    if timeout >= monotonic():
         STATISTIC_CACHE.move_to_end(key)
         return entries
     
@@ -61,7 +61,7 @@ def _query_done_callback(key, waiters, task):
             waiter.set_exception_if_pending(exception)
     else:
         STATISTIC_CACHE[key] = (monotonic() + STATISTIC_CACHE_TIMEOUT, entries)
-        if len(STATISTIC_CACHE) == STATISTIC_CACHE_SIZE_MAX:
+        if len(STATISTIC_CACHE) >= STATISTIC_CACHE_SIZE_MAX:
             del STATISTIC_CACHE[next(iter(STATISTIC_CACHE))]
         
         for waiter in waiters:
@@ -110,7 +110,7 @@ class QueryCacherAndSynchronizer(RichAttributeErrorBaseType):
         
         Returns
         -------
-        entries : `list<RowProxy<int, int>>`
+        entries : `list<tuple<int>>`
         """
         coroutine_function = self.coroutine_function
         key = (coroutine_function, positional_parameters)

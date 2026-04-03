@@ -132,7 +132,7 @@ def _iter_options():
             create_section(
                 create_text_display(
                     f'Required rank: H\n'
-                    f'Submit {quest_amount_0/1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.'
+                    f'Submit {quest_amount_0 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.'
                 ),
                 thumbnail = create_button(
                     'Details',

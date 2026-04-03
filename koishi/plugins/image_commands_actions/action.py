@@ -6,6 +6,8 @@ from hata import ClientUserBase, DiscordException, Embed, Emoji, ERROR_CODES, KO
 from hata.ext.slash import abort
 from scarletio import RichAttributeErrorBaseType, Task
 
+from ...bot_utils.multi_client_utils import has_client_message_create_permissions
+
 from ..embed_image_refresh import schedule_image_refresh
 from ..image_handling_core import add_embed_provider
 from ..user_settings import get_preferred_image_source_weight_map, is_preferred_image_source_weight_map_valuable
@@ -228,13 +230,14 @@ async def send_action_response_with_interaction_event(client, event, content, em
     """
     try:
         if event.is_unanswered():
-            await client.interaction_response_message_create(
+            message = await client.interaction_response_message_create(
                 event, content, allowed_mentions = allowed_mentions, embed = embed, silent = True
             )
         else:
             await client.interaction_followup_message_edit(
                 event, event.message, content, allowed_mentions = allowed_mentions, embed = embed
             )
+            message = None
     except ConnectionError:
         # No internet access
         return False
@@ -253,49 +256,29 @@ async def send_action_response_with_interaction_event(client, event, content, em
         
         raise
     
-    # Request the message back, so we can update its embed as required.
-    try:
-        message = await client.interaction_response_message_get(event)
-    except ConnectionError:
-        pass
-    
-    except DiscordException as exception:
-        if (
-            (exception.status < 500) and
-            (exception.code != ERROR_CODES.unknown_interaction)
-        ):
-            raise
-    
-    else:
+    while True:
+        if (message is None):
+            # Request the message back, so we can update its embed as required.
+            try:
+                message = await client.interaction_response_message_get(event)
+            except ConnectionError:
+                break
+            
+            except DiscordException as exception:
+                if (
+                    (exception.status < 500) and
+                    (
+                        exception.code not in (
+                            ERROR_CODES.unknown_interaction,
+                            ERROR_CODES.unknown_message, # Message deleted in the meanwhile?
+                        )
+                    )
+                ):
+                    raise
+                break
+            
         schedule_image_refresh(client, message, event)
-    
-    return True
-
-
-def can_send_response_to_channel(client, channel):
-    """
-    Returns whether response can be sent to the given channel.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The client to check for.
-    channel : ``Channel``
-        The channel to check.
-    
-    Returns
-    -------
-    can_send_response : `bool`
-    """
-    permissions = channel.cached_permissions_for(client)
-    
-    # send messages depends on channel type.
-    if channel.is_in_group_thread():
-        can_send_message = permissions.send_messages_in_threads
-    else:
-        can_send_message = permissions.send_messages
-    if not can_send_message:
-        return False
+        break
     
     return True
 
@@ -387,7 +370,7 @@ async def send_action_response(client, event, content, embed, allowed_mentions):
     
     # Try channel
     channel = event.channel
-    if can_send_response_to_channel(client, channel):
+    if has_client_message_create_permissions(channel, client):
         if await send_action_response_to(client, channel, content, embed, allowed_mentions):
             return True
     

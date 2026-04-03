@@ -3,7 +3,7 @@ from hata import InteractionEvent, User
 
 from ....bot_utils.daily import ConditionName, Reward
 
-from ..rendering import render_hearts_extended_description
+from ..content_building import produce_hearts_extended_description
 
 
 def _iter_options():
@@ -76,9 +76,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__render_hearts_extended_description(interaction_event, target_user, rewards, streak):
+def test__produce_hearts_extended_description(interaction_event, target_user, rewards, streak):
     """
-    Tests whether ``render_hearts_extended_description`` works as intended.
+    Tests whether ``produce_hearts_extended_description`` works as intended.
     
     Parameters
     ----------
@@ -98,6 +98,7 @@ def test__render_hearts_extended_description(interaction_event, target_user, rew
     -------
     output : `str`
     """
-    output = render_hearts_extended_description(interaction_event, target_user, rewards, streak)
-    vampytest.assert_instance(output, str)
-    return output
+    output = [*produce_hearts_extended_description(interaction_event, target_user, rewards, streak)]
+    for element in output:
+        vampytest.assert_instance(element, str)
+    return ''.join(output)

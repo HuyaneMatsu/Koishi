@@ -514,7 +514,7 @@ def _iter_submission_requirement_item_exact_item_group(inventory, item_group_id)
         
         yield item_entry
         continue
-    
+
 
 def _iter_submission_requirement_item_exact_item_category(inventory, item_flags):
     """

@@ -455,8 +455,7 @@ class DupeImageFilter:
             
             embed = self.get_embed()
             embed.add_footer('Requesting and processing messages')
-            await client.interaction_response_message_create(event, embed = embed)
-            message = await client.interaction_response_message_get(event)
+            message = await client.interaction_response_message_create(event, embed = embed)
             self.message = message
             
             user_id = event.user.id

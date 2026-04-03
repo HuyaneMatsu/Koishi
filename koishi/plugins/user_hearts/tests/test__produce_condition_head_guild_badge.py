@@ -3,7 +3,7 @@ from hata import Guild, InteractionEvent, User
 
 from ....bot_utils.daily import ConditionGuildBadge
 
-from ..rendering import produce_condition_head_guild_badge
+from ..content_building import produce_condition_head_guild_badge
 
 
 def _iter_options():
@@ -38,4 +38,7 @@ def test__produce_condition_head_guild_badge(condition, interaction_event):
     -------
     output : `str`
     """
-    return ''.join(produce_condition_head_guild_badge(condition, interaction_event))
+    output = [*produce_condition_head_guild_badge(condition, interaction_event)]
+    for element in output:
+        vampytest.assert_instance(element, str)
+    return ''.join(output)

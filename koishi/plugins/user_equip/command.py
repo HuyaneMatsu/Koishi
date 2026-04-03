@@ -138,8 +138,8 @@ async def command_user_unequip(
     interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    item_slot : `str`,
-        The selected item slot as a strong representing a hexadecimal integer.
+    item_slot : `str`
+        The selected item slot as a string representing a hexadecimal integer.
     """
     try:
         item_slot = int(item_slot, 16)

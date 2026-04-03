@@ -3,7 +3,7 @@ from hata import Guild, GuildProfile, InteractionEvent, User
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ..rendering import render_hearts_short_title
+from ..content_building import produce_hearts_short_title
 
 
 def _iter_options():
@@ -36,9 +36,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__render_hearts_short_title(interaction_event, target_user, balance):
+def test__produce_hearts_short_title(interaction_event, target_user, balance):
     """
-    Tests whether ``render_hearts_short_title`` works as intended.
+    Tests whether ``produce_hearts_short_title`` works as intended.
     
     Parameters
     ----------
@@ -55,6 +55,7 @@ def test__render_hearts_short_title(interaction_event, target_user, balance):
     -------
     output : `str`
     """
-    output = render_hearts_short_title(interaction_event, target_user, balance)
-    vampytest.assert_instance(output, str)
-    return output
+    output = [*produce_hearts_short_title(interaction_event, target_user, balance)]
+    for element in output:
+        vampytest.assert_instance(element, str)
+    return ''.join(output)

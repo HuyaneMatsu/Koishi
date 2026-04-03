@@ -1,13 +1,15 @@
 __all__ = (
-    'calculate_received_reward_credibility', 'get_adventurer_level_name', 'get_current_batch_id',
-    'get_quest_board_resets_at', 'get_linked_quest_abandon_credibility_penalty', 'get_linked_quest_completion_ratio',
-    'instantiate_quest', 'reset_linked_quest'
+    'calculate_linked_quest_abandon_credibility_penalty', 'calculate_received_reward_credibility',
+    'get_adventurer_level_name', 'get_current_batch_id', 'get_quest_board_resets_at',
+    'get_linked_quest_abandon_credibility_penalty', 'get_linked_quest_completion_ratio', 'instantiate_quest',
+    'reset_linked_quest'
 )
 
 from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from math import floor
 
 from .constants import UNIX_EPOCH
+from .helpers import get_quest_template
 from .linked_quest import LinkedQuest
 from .linked_quest_completion_states import LINKED_QUEST_COMPLETION_STATE_ACTIVE
 from .quest_requirement_serialisables import QuestRequirementSerialisableExpiration
@@ -15,6 +17,7 @@ from .quest_requirement_types import (
     QUEST_REQUIREMENT_TYPE_DURATION, QUEST_REQUIREMENT_TYPE_EXPIRATION, QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY,
     QUEST_REQUIREMENT_TYPE_ITEM_EXACT, QUEST_REQUIREMENT_TYPE_ITEM_GROUP
 )
+from .quest_reward_types import QUEST_REWARD_TYPE_CREDIBILITY
 
 
 def get_current_batch_id():
@@ -137,7 +140,7 @@ def get_linked_quest_completion_ratio(linked_quest):
     return (accumulated / count)
 
 
-def get_linked_quest_abandon_credibility_penalty(reward_credibility, quest_rank, entity_rank, completion_ratio):
+def calculate_linked_quest_abandon_credibility_penalty(reward_credibility, quest_rank, entity_rank, completion_ratio):
     """
     Calculates abandon credibility penalty.
     
@@ -165,6 +168,47 @@ def get_linked_quest_abandon_credibility_penalty(reward_credibility, quest_rank,
         rank_difference = entity_rank - quest_rank
     
     return floor(reward_credibility * (3 + rank_difference) / (1.5 * (1.0 + completion_ratio)))
+
+
+def get_linked_quest_abandon_credibility_penalty(linked_quest, entity_rank):
+    """
+    Gets linked quest abandon credibility penalty.
+    
+    Parameters
+    ----------
+    linked_quest : ``LinkedQuest``
+        Linked quest to get the penalty for.
+    
+    entity_rank : `int`
+        The entity's rank to be rewarded.
+    
+    Returns
+    -------
+    quest_abandon_penalty : `int`
+    """
+    while True:
+        rewards = linked_quest.rewards
+        if (rewards is None):
+            credibility_penalty = 0
+            break
+        
+        for reward in rewards:
+            if reward.TYPE == QUEST_REWARD_TYPE_CREDIBILITY:
+                break
+        else:
+            credibility_penalty = 0
+            break
+        
+        quest_template = get_quest_template(linked_quest.template_id)
+        credibility_penalty = calculate_linked_quest_abandon_credibility_penalty(
+            reward.credibility,
+            (0 if quest_template is None else quest_template.level),
+            entity_rank,
+            get_linked_quest_completion_ratio(linked_quest),
+        )
+        break
+    
+    return credibility_penalty
 
 
 def instantiate_quest(user_id, guild_id, batch_id, quest):

@@ -4,7 +4,7 @@ import vampytest
 
 from ...adventure_core import Adventure
 
-from ..component_builders import produce_adventure_view_description_finalized
+from ..component_building import produce_adventure_view_description_finalized
 
 
 def _iter_options():

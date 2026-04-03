@@ -837,7 +837,7 @@ QUEST_TEMPLATE_MYSTIA_FIREWOOD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FIREWO
     ),
     (
         QuestRewardGeneratorBalance(1000, 1000, 100, 100),
-        QuestRewardGeneratorCredibilityFix(10),
+        QuestRewardGeneratorCredibilityFix(20),
     ),
 )
 

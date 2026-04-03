@@ -3,7 +3,7 @@ from hata import InteractionEvent, User
 
 from ....bot_utils.daily import ConditionWeekend
 
-from ..rendering import produce_condition_head_weekend
+from ..content_building import produce_condition_head_weekend
 
 
 def _iter_options():
@@ -34,4 +34,7 @@ def test__produce_condition_head_weekend(condition, interaction_event):
     -------
     output : `str`
     """
-    return ''.join(produce_condition_head_weekend(condition, interaction_event))
+    output = [*produce_condition_head_weekend(condition, interaction_event)]
+    for element in output:
+        vampytest.assert_instance(element, str)
+    return ''.join(output)

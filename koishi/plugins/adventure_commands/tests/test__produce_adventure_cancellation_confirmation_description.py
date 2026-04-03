@@ -5,7 +5,7 @@ from ...adventure_core import (
     TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS
 )
 
-from ..component_builders import produce_adventure_cancellation_confirmation_description
+from ..component_building import produce_adventure_cancellation_confirmation_description
 
 
 def _iter_options():

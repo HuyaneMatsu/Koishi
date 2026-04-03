@@ -109,6 +109,8 @@ def get_item_group(item_group_id):
         item_group_id,
         ITEM_GROUP_NAME_DEFAULT,
         None,
+        None,
+        None,
     )
     
     ITEM_GROUPS[item_group_id] = item_group

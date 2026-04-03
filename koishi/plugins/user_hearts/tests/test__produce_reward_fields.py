@@ -1,6 +1,6 @@
 import vampytest
 
-from ..rendering import produce_reward_fields
+from ..content_building import produce_reward_fields
 
 
 def _iter_options():
@@ -102,4 +102,8 @@ def test__produce_reward_fields(prefix, base, extra_limit, extra_per_streak):
     -------
     output : `str`
     """
-    return ''.join(produce_reward_fields(prefix, base, extra_limit, extra_per_streak))
+    output = [*produce_reward_fields(prefix, base, extra_limit, extra_per_streak)]
+    for element in output:
+        vampytest.assert_instance(element, str)
+    return ''.join(output)
+

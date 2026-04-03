@@ -12,7 +12,7 @@ from ...adventure_core import (
 )
 from ...item_core import ITEM_ID_PEACH
 
-from ..component_builders import build_adventure_view_active_components
+from ..component_building import build_adventure_view_active_components
 
 
 def _iter_options():
