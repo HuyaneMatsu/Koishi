@@ -51,7 +51,7 @@ class TouhouCharacter(RichAttributeErrorBaseType):
     
     def __repr__(self):
         """Returns the touhou character's representation."""
-        repr_parts = ['<', self.__class__.__name__]
+        repr_parts = ['<', type(self).__name__]
         
         repr_parts.append(' system_name = ')
         repr_parts.append(repr(self.system_name))

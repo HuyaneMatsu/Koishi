@@ -459,7 +459,8 @@ def build_add_form(user, entity_type, entity, guild_id):
     ))
     
     # Roles
-    if (entity_type is Emoji):
+    # Note: role select is available only in guilds, so not in private channels.
+    if guild_id and (entity_type is Emoji):
         components.append(_build_form_roles_component(
             True,
             (None if ((entity is None) or (entity.guild_id != guild_id)) else entity.role_ids),

@@ -40,25 +40,42 @@ def create_relationship_listing_pages_legacy(relationship_extension_traces, user
         user_id = relationship_extension_trace.user_id
         relationship_type = relationship_extension_trace.relationship_type
         
+        best_mask = RELATIONSHIP_TYPE_UNSET
+        best_relationship_type_modifier = RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_NONE
+        
         for mask in RELATIONSHIP_TYPE_MASK_ORDER:
-            if relationship_type & mask:
+            if not relationship_type & mask:
+                continue
+            
+            # Find relationship_type_modifier.
+            modifier_shift = RELATIONSHIP_TYPE_MODIFIER_SHIFTS.get(mask, 0)
+            if not modifier_shift:
+                relationship_type_modifier = RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_NONE
+            else:
+                relationship_type_modifier = (relationship_type >> modifier_shift) & RELATIONSHIP_TYPE_CONNECTION_MODIFIER_MASK
+            
+            # If the relation is not modified, we found the best match, break
+            if relationship_type_modifier == RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_NONE:
+                best_mask = mask
+                best_relationship_type_modifier = RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_NONE
                 break
-        else:
-            # huh?
-            mask = RELATIONSHIP_TYPE_UNSET
+            
+            # If the relationship is modified, but we already have a better match, continue 
+            if (
+                (best_relationship_type_modifier != RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_NONE) and
+                (relationship_type_modifier >= best_relationship_type_modifier)
+            ):
+                continue
+            
+            best_mask = mask
+            best_relationship_type_modifier = relationship_type_modifier
+            continue
         
         try:
-            group = grouped_relationships[mask]
+            group = grouped_relationships[best_mask]
         except KeyError:
             group = []
-            grouped_relationships[mask] = group
-        
-        # Find relationship_type_modifier.
-        modifier_shift = RELATIONSHIP_TYPE_MODIFIER_SHIFTS.get(mask, 0)
-        if not modifier_shift:
-            relationship_type_modifier = RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_NONE
-        else:
-            relationship_type_modifier = (relationship_type >> modifier_shift) & RELATIONSHIP_TYPE_CONNECTION_MODIFIER_MASK
+            grouped_relationships[best_mask] = group
         
         # Find user.
         if (users is None):
@@ -75,7 +92,7 @@ def create_relationship_listing_pages_legacy(relationship_extension_traces, user
                 'Could not find a required user.', relationship_extension_traces, users, guild_id, user_id,
             )
         
-        group.append((relationship_type_modifier, user.name_at(guild_id)))
+        group.append((best_relationship_type_modifier, user.name_at(guild_id)))
         continue
     
     for group in grouped_relationships.values():

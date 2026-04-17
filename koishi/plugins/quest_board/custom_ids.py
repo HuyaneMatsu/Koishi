@@ -3,6 +3,9 @@ __all__ = ()
 from re import compile as re_compile, escape as re_escape
 
 
+CUSTOM_ID_COMPLETION_COUNT = 'completion_count'
+
+
 CUSTOM_ID_QUEST_BOARD_BASE = 'quest_board'
 
 CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_BUILDER = (
@@ -90,6 +93,17 @@ CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PAGE_INDEX_INCREMENT_DISABLED = (
     f'{CUSTOM_ID_QUEST_BOARD_BASE}.select_requirement.page_increment_disabled'
 )
 
+
+CUSTOM_ID_QUEST_BOARD_COMPLETE_BUILDER = (
+    lambda user_id, guild_id, page_index, quest_template_id : (
+        f'{CUSTOM_ID_QUEST_BOARD_BASE}.complete.{user_id:x}.{guild_id:x}.{page_index:x}.{quest_template_id:x}'
+    )
+)
+
+CUSTOM_ID_QUEST_BOARD_COMPLETE_PATTERN = re_compile(
+    f'{re_escape(CUSTOM_ID_QUEST_BOARD_BASE)}\\.complete\\.'
+    f'([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)'
+)
 
 
 CUSTOM_ID_LINKED_QUEST_BASE = 'linked_quest'

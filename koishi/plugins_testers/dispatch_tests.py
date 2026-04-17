@@ -418,7 +418,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        text = f'```\nA channel was deleted: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
+        text = f'```\nA channel was deleted: {channel.name} {channel.id}\nchannel type: {type(channel).__name__} ({channel.type})```'
         pages = [Embed(description = text)]
         await Pagination(client, self.channel, pages, timeout = 120.0)
 
@@ -431,7 +431,7 @@ class dispatch_tester:
         
         result = [
             f'A channel was edited: {channel.name} {channel.id}\n'
-            f'channel type: {channel.__class__.__name__} ({channel.type})'
+            f'channel type: {type(channel).__name__} ({channel.type})'
         ]
         
         for key, value in old.items():
@@ -464,7 +464,7 @@ class dispatch_tester:
             return
         
         result = [repr(channel)]
-        result.insert(0, f'A channel was created: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})')
+        result.insert(0, f'A channel was created: {channel.name} {channel.id}\nchannel type: {type(channel).__name__} ({channel.type})')
         pages = [Embed(description = chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout = 120.0)
 
@@ -474,7 +474,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        text = f'```\nA channel\'s pins changed: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
+        text = f'```\nA channel\'s pins changed: {channel.name} {channel.id}\nchannel type: {type(channel).__name__} ({channel.type})```'
         pages = [Embed(description = text)]
         await Pagination(client, self.channel, pages, timeout = 120.0)
     

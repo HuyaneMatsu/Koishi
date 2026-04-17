@@ -55,7 +55,7 @@ class ProcessedUrl:
         return True
     
     def __repr__(self):
-        return f'<{self.__class__.__name__} url = {self.url!r}>'
+        return f'<{type(self).__name__} url = {self.url!r}>'
 
 
 class ProcessedMessage:
@@ -67,7 +67,7 @@ class ProcessedMessage:
         self.urls = urls
     
     def __repr__(self):
-        return f'<{self.__class__.__name__} url count: {len(self.urls)}>'
+        return f'<{type(self).__name__} url count: {len(self.urls)}>'
     
     def __hash__(self):
         return self.message_id

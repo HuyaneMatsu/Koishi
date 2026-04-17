@@ -9,7 +9,7 @@ from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as T
 from math import floor
 
 from .constants import UNIX_EPOCH
-from .helpers import get_quest_template
+from .helpers import get_quest_template_nullable
 from .linked_quest import LinkedQuest
 from .linked_quest_completion_states import LINKED_QUEST_COMPLETION_STATE_ACTIVE
 from .quest_requirement_serialisables import QuestRequirementSerialisableExpiration
@@ -199,7 +199,7 @@ def get_linked_quest_abandon_credibility_penalty(linked_quest, entity_rank):
             credibility_penalty = 0
             break
         
-        quest_template = get_quest_template(linked_quest.template_id)
+        quest_template = get_quest_template_nullable(linked_quest.template_id)
         credibility_penalty = calculate_linked_quest_abandon_credibility_penalty(
             reward.credibility,
             (0 if quest_template is None else quest_template.level),
@@ -301,16 +301,14 @@ def reset_linked_quest(linked_quest):
                     requirement.expiration = DateTime.now(TimeZone.utc) + TimeDelta(seconds = duration)
                 continue
             
-            if requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_EXACT:
-                requirement.amount_submitted = 0
-                continue
-            
-            if requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_GROUP:
-                requirement.amount_submitted = 0
-                continue
-            
-            if requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY:
-                requirement.amount_submitted = 0
+            if requirement_type in (
+                QUEST_REQUIREMENT_TYPE_ITEM_EXACT,
+                QUEST_REQUIREMENT_TYPE_ITEM_GROUP,
+                QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY,
+            ):
+                # At the case of over-submit, keep the extra.
+                # Never go under 0 in case the requirement in fact was not fulfilled.
+                requirement.amount_submitted = max(0, requirement.amount_submitted - requirement.amount_required)
                 continue
             
             # No other cases

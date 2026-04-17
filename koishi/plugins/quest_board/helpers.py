@@ -2,13 +2,13 @@ __all__ = ()
 
 from dateutil.relativedelta import relativedelta as RelativeDelta
 
-from ..item_core import get_item_group_nullable
+from ..item_core import get_item, get_item_group_nullable, get_item_nullable
 
 from ..quest_core import (
     AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_REQUIREMENT_TYPE_DURATION,
     QUEST_REQUIREMENT_TYPE_EXPIRATION, QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY, QUEST_REQUIREMENT_TYPE_ITEM_EXACT,
     QUEST_REQUIREMENT_TYPE_ITEM_GROUP, QUEST_REWARD_TYPE_BALANCE, QUEST_REWARD_TYPE_CREDIBILITY,
-    QUEST_REWARD_TYPE_ITEM_EXACT, calculate_received_reward_credibility
+    QUEST_REWARD_TYPE_ITEM_EXACT, calculate_received_reward_credibility, get_guild_adventurer_rank_info
 )
 
 
@@ -83,6 +83,8 @@ def get_submit_amount(item, amount_type, amount_to_be_used, current_amount_count
             multiplier = item.weight
         else:
             multiplier = item.value
+        
+        multiplier = max(multiplier, 1)
         
         amount_used = min(amount_to_be_used, current_amount_count * multiplier)
         amount_used_count, modulus = divmod(amount_used, multiplier)
@@ -611,3 +613,289 @@ def iter_submission_requirement_item_entries_of_normalised(inventory, submission
         return
     
     yield from iterator_function(inventory, submission_requirement_normalised[1])
+
+
+def get_quest_in_possession_count(quest, inventory):
+    """
+    Returns how much times the user owns the items to complete the quests for.
+    
+    Parameters
+    ----------
+    quest : ``Quest``
+        Quest to work with.
+    
+    inventory : ``Inventory``
+        The user's inventory.
+    
+    Returns
+    -------
+    possession_count : `int`
+    """
+    possession_count = 0
+    
+    requirements = quest.requirements
+    if (requirements is not None):
+        for requirement in requirements:
+            requirement_type = requirement.TYPE
+            
+            # If we require category or group, disable
+            if (
+                (requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_GROUP) or
+                (requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY)
+            ):
+                possession_count = 0
+                break
+            
+            # If we require an  exact item, try to process it
+            if requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_EXACT:
+                item = get_item_nullable(requirement.item_id)
+                if item is None:
+                    continue
+                
+                amount_type = requirement.amount_type
+                if (amount_type == AMOUNT_TYPE_WEIGHT) or (amount_type == AMOUNT_TYPE_VALUE):
+                    if amount_type == AMOUNT_TYPE_WEIGHT:
+                        multiplier = item.weight
+                    else:
+                        multiplier = item.value
+                    
+                    multiplier = max(multiplier, 1)
+                
+                else:
+                    # AMOUNT_TYPE_COUNT and else
+                    multiplier = 1
+                
+                # DO not calculate it by completion to allow the user submitting it multiple times.
+                amount_owned = inventory.get_item_amount(item) * multiplier
+                amount_required = requirement.amount_required
+                
+                completable_count = amount_owned // amount_required
+                if (not possession_count) or (completable_count < possession_count):
+                    possession_count = completable_count
+                continue
+            
+            # Rest can be ignored for now
+            continue
+    
+    return possession_count
+
+
+def get_allowed_completion_count(linked_quest, quest_template, possession_count):
+    """
+    Gets how much a quest is allowed to be completed, up to possession count.
+    
+    Parameters
+    ----------
+    linked_quest : : ``None | LinkedQuest``
+        The linked quest if the user already completed this quest before.
+    
+    quest_template : ``QuestTemplate``
+        The quest's template.
+    
+    possession_count : `int`
+        How much times the required items are possessed by the user.
+    
+    Returns
+    -------
+    allowed_count : `int`
+    """
+    repeat_count = quest_template.repeat_count
+    
+    if not repeat_count:
+        allowed_count = possession_count
+    
+    else:
+        if (linked_quest is not None):
+            repeat_count = max(0, repeat_count - linked_quest.completion_count)
+        
+        allowed_count = min(repeat_count, possession_count)
+    
+    return allowed_count
+
+
+def try_submit_item(requirement, inventory, item_entry, submissions_normalised):
+    """
+    Tries to submit the given item.
+    
+    Parameters
+    ----------
+    requirement : ``QuestRequirementSerialisableItemExact | QuestRequirementSerialisableItemGroup | QuestRequirementSerialisable``
+        Requirement to submit to.
+    
+    inventory : ``Inventory``
+        The user's inventory.
+    
+    item_entry : ``ItemEntry``
+        Specific item entry to submit from.
+    
+    submissions_normalised : ``None | list<(Item, int, int, int, int)>``
+        Already done submissions.
+    
+    Returns
+    -------
+    submissions_normalised : ``None | list<(Item, int, int, int, int)>``
+    """
+    amount_required = requirement.amount_required
+    amount_submitted = requirement.amount_submitted
+    
+    # Do not submit 0 if all is already submitted
+    if (amount_submitted >= amount_required):
+        return submissions_normalised
+    
+    current_amount_count = item_entry.amount
+    item = item_entry.item
+    
+    amount_type = requirement.amount_type
+    amount_to_be_used = amount_required - amount_submitted
+    amount_used, amount_used_count = get_submit_amount(
+        item, amount_type, amount_to_be_used, current_amount_count
+    )
+    requirement.amount_submitted = amount_submitted + amount_used
+    inventory.modify_item_amount(item, -amount_used_count)
+    
+    if (submissions_normalised is None):
+        submissions_normalised = []
+    
+    submissions_normalised.append((
+        item, amount_type, amount_required, amount_submitted, amount_used
+    ))
+    return submissions_normalised
+
+
+def do_submit_complete_item(requirement, inventory, item_entry, submissions_normalised, submission_count):
+    """
+    Submits the given item until completion count completion.
+    Ignores already submitted item count and the user having les items as well.
+    
+    Parameters
+    ----------
+    requirement : ``QuestRequirementSerialisableItemExact | QuestRequirementSerialisableItemGroup | QuestRequirementSerialisable``
+        Requirement to submit to.
+    
+    inventory : ``Inventory``
+        The user's inventory.
+    
+    item_entry : ``ItemEntry``
+        Specific item entry to submit from.
+    
+    submissions_normalised : ``None | list<(Item, int, int, int, int)>``
+        Already done submissions.
+    
+    submission_count : `int`
+        How much times to submit the requirement.
+    
+    Returns
+    -------
+    submissions_normalised : ``list<(Item, int, int, int, int)>``
+    """
+    amount_required = requirement.amount_required
+    
+    current_amount_count = item_entry.amount
+    item = item_entry.item
+    amount_required_total = amount_required * submission_count
+    
+    amount_type = requirement.amount_type
+    amount_used, amount_used_count = get_submit_amount(
+        item, amount_type, amount_required_total, current_amount_count
+    )
+    inventory.modify_item_amount(item, -amount_used_count)
+    
+    # If you submit extra items, keep the extra in `.amount_submitted`.
+    # If you submitted less for whatever reason, do not point out that you indeed submitted less.
+    requirement.amount_submitted = max(amount_required, amount_required + amount_used - amount_required_total)
+    
+    if (submissions_normalised is None):
+        submissions_normalised = []
+    
+    submissions_normalised.append((
+        item, amount_type, amount_required_total, 0, amount_used
+    ))
+    return submissions_normalised
+
+
+def do_reward_user(
+    linked_quest, inventory, user_stats, user_balance, guild_stats, quest_level, user_level, reward_count
+):
+    """
+    Rewards the user.
+    
+    Parameters
+    ----------
+    linked_quest : ``LinkedQuest``
+        Linked quest to distribute the awards from..
+    
+    inventory : ``Inventory``
+        The user's inventory.
+    
+    user_stats : ``UserStats``
+        The user's stats.
+    
+    user_balance : ``UserBalance``
+        The user's balance.
+    
+    guild_stats : ``GuildStats``
+        The guild's stats.
+    
+    quest_level : `int`
+        The quest's level.
+    
+    user_level : `int`
+        The user's level.
+    
+    reward_count : `int`
+        How much times to reward the user.
+    
+    Returns
+    -------
+    rewards_normalised : ``None | list<(int, int, int)>``
+    """
+    rewards_normalised = None
+    
+    rewards = linked_quest.rewards
+    if (rewards is not None):
+        for reward in rewards:
+            reward_type = reward.TYPE
+            if reward_type == QUEST_REWARD_TYPE_BALANCE:
+                balance_given = reward.balance * reward_count
+                
+                user_balance.modify_balance_by(balance_given)
+                
+                if (rewards_normalised is None):
+                    rewards_normalised = []
+                
+                rewards_normalised.append((QUEST_REWARD_TYPE_BALANCE, 0, balance_given))
+            
+            elif reward_type == QUEST_REWARD_TYPE_CREDIBILITY:
+                credibility_given = reward.credibility * reward_count
+                
+                user_reward_credibility = calculate_received_reward_credibility(
+                    credibility_given, quest_level, user_level
+                )
+                user_stats.modify_credibility_by(user_reward_credibility)
+                
+                guild_adventurer_rank_info = get_guild_adventurer_rank_info(guild_stats.credibility)
+                guild_reward_credibility = calculate_received_reward_credibility(
+                    credibility_given, quest_level, guild_adventurer_rank_info.level
+                )
+                guild_stats.set('credibility', guild_stats.credibility + guild_reward_credibility)
+                
+                if (rewards_normalised is None):
+                    rewards_normalised = []
+                
+                rewards_normalised.append((QUEST_REWARD_TYPE_CREDIBILITY, 0, user_reward_credibility))
+            
+            elif reward_type == QUEST_REWARD_TYPE_ITEM_EXACT:
+                amount_given = reward.amount_given * reward_count
+                item_id = reward.item_id
+                inventory.modify_item_amount(get_item(item_id), amount_given)
+                
+                if (rewards_normalised is None):
+                    rewards_normalised = []
+                
+                rewards_normalised.append((QUEST_REWARD_TYPE_ITEM_EXACT, item_id, amount_given))
+            
+            else:
+                # No other cases
+                pass
+    
+    return rewards_normalised

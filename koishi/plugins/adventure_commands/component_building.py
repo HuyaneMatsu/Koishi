@@ -18,7 +18,7 @@ from ..adventure_core import (
     produce_duration_suggestion
 )
 from ..item_core import get_item
-from ..unit_core import produce_kilogram_ratio
+from ..unit_core import produce_kilogram, produce_kilogram_ratio
 
 from .custom_ids import (
     ADVENTURE_ACTION_BATTLE_LOGS_BUILDER, ADVENTURE_ACTION_LISTING_VIEW_BUILDER, ADVENTURE_ACTION_VIEW_BUILDER,
@@ -747,6 +747,9 @@ def produce_loot_listing(grouped_loot):
             yield item.name
             yield ' x'
             yield str(amount)
+            yield ' ('
+            yield from produce_kilogram(item.weight * amount)
+            yield ')'
 
 
 def iter_build_adventure_action_components(

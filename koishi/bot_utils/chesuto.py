@@ -97,7 +97,7 @@ class Rarity:
         self.BY_NAME[name.lower()] = self
 
     def __repr__(self):
-        return f'{self.__class__.__name__}(name = {self.name}, index = {self.index})'
+        return f'{type(self).__name__}(name = {self.name}, index = {self.index})'
     
     
     def __gt__(self, other):
@@ -405,7 +405,7 @@ class Card:
             if type(cards_data) is list:
                 exception = None
             else:
-                exception = f'Expected type \'list\' for \'cards_data\', got \'{cards_data.__class__.__name__}\''
+                exception = f'Expected type \'list\' for \'cards_data\', got \'{type(cards_data).__name__}\''
         
         if exception is not None:
             sys.stderr.write(f'Exception at loading cards:\n{exception}\n')
@@ -414,7 +414,7 @@ class Card:
         for card_data in cards_data:
             while True:
                 if type(card_data) is not dict:
-                    exception = f'Expected type \'dict\' for \'card_data\', got \'{card_data.__class__.__name__}\''
+                    exception = f'Expected type \'dict\' for \'card_data\', got \'{type(card_data).__name__}\''
                     break
                 
                 try:
@@ -424,7 +424,7 @@ class Card:
                     break
 
                 if type(description) is not str:
-                    exception = f'Expected type \'str\' for \'description\', got \'{description.__class__.__name__}\''
+                    exception = f'Expected type \'str\' for \'description\', got \'{type(description).__name__}\''
                     break
                     
                 try:
@@ -434,13 +434,13 @@ class Card:
                     break
                 
                 if type(id_) is not int:
-                    exception = f'Expected type \'int\' for \'id\', got \'{id_.__class__.__name__}\''
+                    exception = f'Expected type \'int\' for \'id\', got \'{type(id_).__name__}\''
                     break
                 
                 image_name = card_data.get('image_name', None)
                 if (image_name is not None):
                     if type(image_name) is not str:
-                        exception = f'Expected type \'str\' or None for \'image_name\', got \'{image_name.__class__.__name__}\''
+                        exception = f'Expected type \'str\' or None for \'image_name\', got \'{type(image_name).__name__}\''
                         break
                     
                     if not os.path.isfile(os.path.join(CHESUTO_FOLDER,image_name)):
@@ -453,7 +453,7 @@ class Card:
                     break
                 
                 if type(name) is not str:
-                    exception = f'Expected type \'str\' for \'name\', got \'{name.__class__.__name__}\''
+                    exception = f'Expected type \'str\' for \'name\', got \'{type(name).__name__}\''
                     break
                 
                 try:
@@ -463,7 +463,7 @@ class Card:
                     break
 
                 if type(rarity) is not int:
-                    exception = f'Expected type \'int\' for \'rarity\', got \'{rarity.__class__.__name__}\''
+                    exception = f'Expected type \'int\' for \'rarity\', got \'{type(rarity).__name__}\''
                     break
 
                 try:

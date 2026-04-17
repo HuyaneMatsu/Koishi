@@ -3,15 +3,15 @@ __all__ = ()
 from datetime import datetime as DateTime, timezone as TimeZone
 
 from hata import (
-    ButtonStyle, InteractionForm, create_button, create_row, create_section, create_separator, create_text_display,
-    create_thumbnail_media
+    ButtonStyle, InteractionForm, create_button, create_label, create_row, create_section, create_separator,
+    create_text_display, create_text_input, create_thumbnail_media
 )
 
 from ..item_core import get_item_group_nullable, get_item_nullable
 from ..quest_core import (
     LINKED_QUEST_COMPLETION_STATE_ACTIVE, LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY,
     QUEST_REQUIREMENT_TYPE_ITEM_EXACT, QUEST_REQUIREMENT_TYPE_ITEM_GROUP, get_guild_adventurer_rank_info,
-    get_quest_template, get_user_adventurer_rank_info
+    get_quest_template_nullable, get_user_adventurer_rank_info
 )
 
 from .constants import (
@@ -25,10 +25,11 @@ from .content_building import (
     produce_linked_quest_submission_item_select_header, produce_linked_quest_submit_success,
     produce_linked_quest_submit_success_completed_description, produce_nullable_item_description,
     produce_nullable_item_group_description, produce_quest_board_header_description, produce_quest_detailed_description,
-    produce_quest_short_description, produce_submission_requirements_entry_description
+    produce_quest_details_base_section, produce_quest_short_description,
+    produce_submission_requirements_entry_description
 )
 from .custom_ids import (
-    CUSTOM_ID_LINKED_QUEST_ABANDON_BUILDER, CUSTOM_ID_LINKED_QUEST_ITEM_INFO_BUILDER,
+    CUSTOM_ID_COMPLETION_COUNT, CUSTOM_ID_LINKED_QUEST_ABANDON_BUILDER, CUSTOM_ID_LINKED_QUEST_ITEM_INFO_BUILDER,
     CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_DECREMENT_DISABLED, CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_INCREMENT_DISABLED,
     CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_NAVIGATE_BUILDER, CUSTOM_ID_LINKED_QUEST_SUBMIT_AUTO_BUILDER,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_EXECUTE_ITEM_NESTED_BUILDER, CUSTOM_ID_LINKED_QUEST_SUBMIT_EXECUTE_ITEM_TOP_BUILDER,
@@ -41,17 +42,18 @@ from .custom_ids import (
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_ITEM_TOP_BUILDER, CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_REQUIREMENT_BUILDER,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_REQUIREMENT_PAGE_INDEX_DECREMENT_DISABLED,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_REQUIREMENT_PAGE_INDEX_INCREMENT_DISABLED, CUSTOM_ID_QUEST_ACCEPT_BUILDER,
-    CUSTOM_ID_QUEST_ACCEPT_DISABLED, CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_DECREMENT_DISABLED,
-    CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_INCREMENT_DISABLED, CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_BUILDER,
-    CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_BUILDER, CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_GROUP_REQUIREMENT_BUILDER,
-    CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_REQUIREMENT_BUILDER, CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_BUILDER,
+    CUSTOM_ID_QUEST_ACCEPT_DISABLED, CUSTOM_ID_QUEST_BOARD_COMPLETE_BUILDER,
+    CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_DECREMENT_DISABLED, CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_INCREMENT_DISABLED,
+    CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_BUILDER, CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_BUILDER,
+    CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_GROUP_REQUIREMENT_BUILDER, CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_REQUIREMENT_BUILDER,
+    CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_BUILDER,
     CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PAGE_INDEX_DECREMENT_DISABLED,
     CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PAGE_INDEX_INCREMENT_DISABLED
 )
 from .helpers import (
-    get_linked_quest_expiration, get_linked_quest_for_deduplication,
-    get_linked_quest_submission_requirements_normalised, get_quest_submission_requirements_normalised,
-    iter_submission_requirement_item_entries_of_normalised
+    get_allowed_completion_count, get_linked_quest_expiration, get_linked_quest_for_deduplication,
+    get_linked_quest_submission_requirements_normalised, get_quest_in_possession_count,
+    get_quest_submission_requirements_normalised, iter_submission_requirement_item_entries_of_normalised
 )
 
 
@@ -106,7 +108,7 @@ def build_quest_board_quest_listing_components(guild, guild_stats, user_stats, l
     quest_slice = quest_batch.quests[page_index * PAGE_SIZE : (page_index + 1) * PAGE_SIZE]
     if quest_slice:
         for quest in quest_slice:
-            quest_template = get_quest_template(quest.template_id)
+            quest_template = get_quest_template_nullable(quest.template_id)
             linked_quest = get_linked_quest_for_deduplication(
                 linked_quest_listing, guild.id, quest_batch.id, quest.template_id
             )
@@ -197,7 +199,9 @@ def build_quest_board_quest_listing_components(guild, guild_stats, user_stats, l
     return components
 
 
-def build_quest_details_components(user_id, guild_id, local_guild_id, page_index, quest, linked_quest, user_stats):
+def build_quest_details_components(
+    user_id, guild_id, local_guild_id, page_index, quest, linked_quest, inventory, user_stats
+):
     """
     Builds quest details components describing a quest of a quest board with more details.
     
@@ -231,15 +235,16 @@ def build_quest_details_components(user_id, guild_id, local_guild_id, page_index
     components = []
     
     # Add quest description.
-    quest_template = get_quest_template(quest.template_id)
+    quest_template = get_quest_template_nullable(quest.template_id)
     user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
     
     completion_count = (0 if linked_quest is None else linked_quest.completion_count)
+    possession_count = get_quest_in_possession_count(quest, inventory)
     
     components.append(
         create_text_display(
             ''.join([*produce_quest_detailed_description(
-                quest, quest_template, user_adventurer_rank_info.level, completion_count
+                quest, quest_template, user_adventurer_rank_info.level, completion_count, possession_count
             )]),
         ),
     )
@@ -250,6 +255,7 @@ def build_quest_details_components(user_id, guild_id, local_guild_id, page_index
         (quest_template.level > user_adventurer_rank_info.level + 1)
     ):
         accept_enabled = False
+    
     else:
         repeat_count = quest_template.repeat_count
         if repeat_count and (completion_count >= repeat_count):
@@ -257,7 +263,7 @@ def build_quest_details_components(user_id, guild_id, local_guild_id, page_index
         else:
             accept_enabled = True
     
-    
+    # Extra requirement
     has_submission_requirement = False
     requirements = quest.requirements
     if (requirements is not None):
@@ -272,10 +278,10 @@ def build_quest_details_components(user_id, guild_id, local_guild_id, page_index
     
     
     if not has_submission_requirement:
-        extra_control_components = ()
+        extra_requirement_components = ()
     
     else:
-        extra_control_components = (
+        extra_requirement_components = (
             create_button(
                 'Select requirement to inspect',
                 custom_id = CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_BUILDER(
@@ -284,6 +290,18 @@ def build_quest_details_components(user_id, guild_id, local_guild_id, page_index
             ),
         )
     
+    # Extra complete
+    if not (accept_enabled and possession_count):
+        extra_accept_components = ()
+    
+    else:
+        extra_accept_components = (
+            create_button(
+                'Complete',
+                custom_id = CUSTOM_ID_QUEST_BOARD_COMPLETE_BUILDER(user_id, guild_id, page_index, quest_template.id),
+                style = ButtonStyle.green,
+            ),
+        )
     
     # Add interactive components.
     components.append(
@@ -303,7 +321,8 @@ def build_quest_details_components(user_id, guild_id, local_guild_id, page_index
                 enabled = accept_enabled,
                 style = (ButtonStyle.green if accept_enabled else ButtonStyle.gray),
             ),
-            *extra_control_components,
+            *extra_requirement_components,
+            *extra_accept_components,
         ),
     )
     
@@ -367,7 +386,7 @@ def _linked_quest_sort_key_getter(linked_quest):
     completion_count = linked_quest.completion_count
     completion_state = linked_quest.completion_state
     
-    quest_template = get_quest_template(linked_quest.template_id)
+    quest_template = get_quest_template_nullable(linked_quest.template_id)
     if quest_template is None:
         repeat_count = -1
     else:
@@ -488,7 +507,7 @@ def build_linked_quests_listing_components(user, guild_id, user_stats, linked_qu
             now = DateTime.now(tz = TimeZone.utc)
             
             for linked_quest in linked_quest_slice:
-                quest_template = get_quest_template(linked_quest.template_id)
+                quest_template = get_quest_template_nullable(linked_quest.template_id)
                 
                 while True:
                     expiration = get_linked_quest_expiration(linked_quest)
@@ -606,7 +625,7 @@ def build_linked_quest_details_components(linked_quest, user_stats, page_index):
     components = []
     
     # Add quest description.
-    quest_template = get_quest_template(linked_quest.template_id)
+    quest_template = get_quest_template_nullable(linked_quest.template_id)
     user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
     
     components.append(
@@ -696,7 +715,7 @@ def build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_
     -------
     form : ``InteractionForm``
     """
-    quest_template = get_quest_template(linked_quest.template_id)
+    quest_template = get_quest_template_nullable(linked_quest.template_id)
     user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
     
     # Build components
@@ -951,7 +970,8 @@ def build_linked_quest_submit_success(
 def build_linked_quest_submit_success_completed_components(
     client_id,
     user_id,
-    page_index,
+    page_index_quest_board,
+    page_index_linked_quests,
     local_guild_id,
     linked_quest,
     quest_template,
@@ -959,6 +979,7 @@ def build_linked_quest_submit_success_completed_components(
     user_level_old,
     submissions_normalised,
     rewards_normalised,
+    executed_completion_count,
 ):
     """
     Builds successful item submission components when all the required items were submitted.
@@ -971,7 +992,10 @@ def build_linked_quest_submit_success_completed_components(
     user_id : `int`
         The invoking user's identifier.
     
-    page_index : `int`
+    page_index_quest_board : `int`
+        The quest board's current page's index.
+    
+    page_index_linked_quests : `int`
         The linked quests' current page's index.
     
     local_guild_id : `int`
@@ -995,6 +1019,9 @@ def build_linked_quest_submit_success_completed_components(
     rewards_normalised : `None | list<(int, int, int)>`
         The rewards given by the quest in a normalised form.
     
+    executed_completion_count : `int`
+        How much times completion was executed.
+    
     Returns
     -------
     components : ``list<Component>``
@@ -1009,6 +1036,7 @@ def build_linked_quest_submit_success_completed_components(
             client_id,
             submissions_normalised,
             rewards_normalised,
+            executed_completion_count,
             user_level_old,
             user_level_new,
         )]),
@@ -1042,12 +1070,12 @@ def build_linked_quest_submit_success_completed_components(
         create_row(
             create_button(
                 'View quest board',
-                custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_BUILDER(user_id, 0),
+                custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_BUILDER(user_id, page_index_quest_board),
                 enabled = (linked_quest.guild_id  == local_guild_id),
             ),
             create_button(
                 'View my quests',
-                custom_id = CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_NAVIGATE_BUILDER(user_id, page_index),
+                custom_id = CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_NAVIGATE_BUILDER(user_id, page_index_linked_quests),
             ),
             create_button(
                 'Repeat',
@@ -1889,3 +1917,76 @@ def build_quest_select_requirement_components(
     ))
     
     return components
+
+
+def build_quest_complete_confirmation_form(
+    user_id, guild_id, page_index, quest, linked_quest, quest_template, user_stats, possession_count
+):
+    """
+    Builds quest complete confirmation form.
+    
+    Parameters
+    ----------
+    user_id : `int`
+        The invoking user's identifier.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
+    page_index : `int`
+        The linked quests' current page's index.
+    
+    quest : ``Quest``
+        The quest to describe.
+    
+    linked_quest : : ``None | LinkedQuest``
+        The linked quest if the user already completed this quest before.
+    
+    quest_template : ``QuestTemplate``
+        The quest's template.
+    
+    user_stats : ``UserStats``
+        The user's stats.
+    
+    possession_count : `int`
+        How much times the required items are possessed by the user.
+    
+    Returns
+    -------
+    interaction_form : ``InteractionForm``
+    """
+    components = []
+    
+    user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
+    
+    # Description
+    description = ''.join([*produce_quest_details_base_section(
+        None, quest, quest_template, user_adventurer_rank_info.level
+    )])
+    if description:
+        components.append(create_text_display(description))
+    
+    # Count input
+    allowed_completion_count_string = str(get_allowed_completion_count(linked_quest, quest_template, possession_count))
+    
+    components.append(
+        create_label(
+            'How much times do you wish to complete it?',
+            f'Up to {allowed_completion_count_string} times.',
+            create_text_input(
+                custom_id = CUSTOM_ID_COMPLETION_COUNT,
+                placeholder = allowed_completion_count_string,
+                required = False,
+                max_length = len(allowed_completion_count_string),
+                min_length = 1,
+                value = allowed_completion_count_string,
+            ),
+        ),
+    )
+    
+    # Build form
+    return InteractionForm(
+        'Please confirm completion',
+        components,
+        CUSTOM_ID_QUEST_BOARD_COMPLETE_BUILDER(user_id, guild_id, page_index, quest_template.id),
+    )

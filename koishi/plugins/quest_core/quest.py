@@ -4,7 +4,7 @@ from scarletio import RichAttributeErrorBaseType
 
 from ..item_core import produce_item_id_with_name
 
-from .helpers import get_quest_template
+from .helpers import get_quest_template_nullable
 
 
 class Quest(RichAttributeErrorBaseType):
@@ -60,7 +60,7 @@ class Quest(RichAttributeErrorBaseType):
         template_id = self.template_id
         repr_parts.append(repr(template_id))
         
-        quest_template = get_quest_template(template_id)
+        quest_template = get_quest_template_nullable(template_id)
         
         # quest_template / level
         if (quest_template is None):

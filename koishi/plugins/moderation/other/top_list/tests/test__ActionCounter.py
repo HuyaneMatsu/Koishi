@@ -92,7 +92,7 @@ def test__ActionCounter__repr():
     output = repr(action_counter)
     vampytest.assert_instance(output, str)
     
-    vampytest.assert_in(action_counter.__class__.__name__, output)
+    vampytest.assert_in(type(action_counter).__name__, output)
     
     vampytest.assert_in('all = 6', output)
     vampytest.assert_in('ban = 1', output)

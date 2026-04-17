@@ -317,7 +317,6 @@ def _produce_item_exact_name(item_id):
         yield ' '
     
     yield item.name
-    
 
 
 def _produce_item_group_name(item_group_id):
@@ -596,7 +595,7 @@ def _produce_quest_rewards_listing(title, rewards_normalised):
             yield ITEM_NAME_DEFAULT
     
     
-def _produce_quest_details_base_section(linked_quest, quest, quest_template, user_level):
+def produce_quest_details_base_section(linked_quest, quest, quest_template, user_level):
     """
     Builds the base of a quest's details section.
     
@@ -640,33 +639,33 @@ def _produce_quest_details_base_section(linked_quest, quest, quest_template, use
         yield from _produce_quest_summary_line(submission_requirements_normalised, quest_template.requester_id)
         yield '**'
     
-    description = quest_template.description
-    if (description is not None):
-        if field_added:
-            yield '\n\n'
-        else:
-            field_added = True
-        
-        yield description
+    if (quest_template is not None):
+        description = quest_template.description
+        if (description is not None):
+            if field_added:
+                yield '\n\n'
+            else:
+                field_added = True
+            
+            yield description
+    
+    quest_level = (0 if quest_template is None else quest_template.level)
     
     if (linked_quest is not None):
-        rewards_normalised = get_linked_quest_rewards_normalised(
-            linked_quest, quest_template.level, user_level
-        )
+        rewards_normalised = get_linked_quest_rewards_normalised(linked_quest, quest_level, user_level)
     elif (quest is not None):
-        rewards_normalised = get_quest_rewards_normalised(
-            quest, quest_template.level, user_level
-        )
+        rewards_normalised = get_quest_rewards_normalised(quest, quest_level, user_level)
     else:
         rewards_normalised = None
     
     if (rewards_normalised is not None):
         if field_added:
             yield '\n\n'
+        # Do not set `field_added` to `True` here.
         yield from _produce_quest_rewards_listing('Rewards', rewards_normalised)
         return False
     
-    return True
+    return field_added
 
 
 def _produce_time_available(duration_delta, expiration):
@@ -727,7 +726,7 @@ def _produce_time_left(expiration):
     yield '**'
 
 
-def produce_quest_detailed_description(quest, quest_template, user_level, completion_count):
+def produce_quest_detailed_description(quest, quest_template, user_level, completion_count, possession_count):
     """
     Produces a quest's detailed description.
     
@@ -745,7 +744,10 @@ def produce_quest_detailed_description(quest, quest_template, user_level, comple
         The user's adventurer rank.
     
     completion_count : `int`
-        HHow much times was the quest already completed.
+        How much times was the quest already completed.
+    
+    possession_count : `int`
+        How much times the required items are possessed by the user.
     
     Yields
     ------
@@ -755,7 +757,7 @@ def produce_quest_detailed_description(quest, quest_template, user_level, comple
         yield BROKEN_QUEST_DESCRIPTION
         return
     
-    add_extra_line_break_after = yield from _produce_quest_details_base_section(
+    add_extra_line_break_after = yield from produce_quest_details_base_section(
         None,
         quest,
         quest_template,
@@ -782,11 +784,29 @@ def produce_quest_detailed_description(quest, quest_template, user_level, comple
         yield '**'
         yield str(repeat_count)
         yield '** times'
+    
+    # The brackets will take a few bits
+    bracket_flags = (
+        (1 if (repeat_count and completion_count) else 0) |
+        (2 if possession_count else 0)
+    )
+    if bracket_flags:
+        yield ' ('
         
-        if completion_count:
-            yield ' ('
+        if bracket_flags & 1:
+            yield '**'
             yield str(max(repeat_count - completion_count, 0))
-            yield ' left)'
+            yield '** left'
+        
+        if bracket_flags & 2:
+            if bracket_flags & 1:
+                yield '; '
+            
+            yield '**'
+            yield str(possession_count)
+            yield '** times in possession'
+        
+        yield ')'
 
 
 def produce_linked_quest_detailed_description(linked_quest, quest_template, user_level):
@@ -814,7 +834,7 @@ def produce_linked_quest_detailed_description(linked_quest, quest_template, user
         yield BROKEN_QUEST_DESCRIPTION
         return
     
-    add_extra_line_break_after = yield from _produce_quest_details_base_section(
+    add_extra_line_break_after = yield from produce_quest_details_base_section(
         linked_quest,
         None,
         quest_template,
@@ -1061,6 +1081,7 @@ def produce_linked_quest_submit_success_completed_description(
     client_id,
     submissions_normalised,
     rewards_normalised,
+    executed_completion_count,
     user_level_old,
     user_level_new,
 ):
@@ -1080,6 +1101,9 @@ def produce_linked_quest_submit_success_completed_description(
     rewards_normalised : `None | list<(int, int, int)>`
         The rewards given by the quest in a normalised form.
     
+    executed_completion_count : `int`
+        How much times completion was executed.
+    
     user_level_old : `int`
         The user's adventurer rank before completing the quest.
     
@@ -1091,7 +1115,14 @@ def produce_linked_quest_submit_success_completed_description(
     part : `str`
     """
     yield from produce_linked_quest_submit_success(submissions_normalised)
-    yield '\nBy doing so, you finished the quest.'
+    yield '\nBy doing so, you completed the quest'
+    
+    if executed_completion_count > 1:
+        yield ' '
+        yield str(executed_completion_count)
+        yield ' times'
+    
+    yield '.'
     
     if (rewards_normalised is not None):
         yield '\n\n'

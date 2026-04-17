@@ -85,7 +85,7 @@ class Detail:
     
     
     def __repr__(self):
-        return f'<{self.__class__.__name__} name = {self.name!r}>'
+        return f'<{type(self).__name__} name = {self.name!r}>'
     
     
     def __eq__(self, other):
@@ -214,7 +214,7 @@ class DescribedObject:
     
     
     def __repr__(self):
-        return f'<{self.__class__.__name__} name = {self.object.name}, details = {self.details!r}>'
+        return f'<{type(self).__name__} name = {self.object.name}, details = {self.details!r}>'
 
 
 class Object:
@@ -262,7 +262,7 @@ class Object:
     
     
     def __repr__(self):
-        return f'<{self.__class__.__name__} name = {self.name!r}>'
+        return f'<{type(self).__name__} name = {self.name!r}>'
     
     
     def __eq__(self, other):
@@ -622,7 +622,7 @@ class Question:
         return self
     
     def __repr__(self):
-        return f'<{self.__class__.__name__} type={get_question_type_name(self.type)}, detail={self.detail!r}>'
+        return f'<{type(self).__name__} type={get_question_type_name(self.type)}, detail={self.detail!r}>'
     
     def ask(self):
         return self.detail.get_question_for(self.type)
@@ -650,7 +650,7 @@ class Answer(Question):
     
     def __repr__(self):
         return (
-            f'<{self.__class__.__name__} '
+            f'<{type(self).__name__} '
                 f'type={get_question_type_name(self.type)}, '
                 f'detail={self.detail!r}, '
                 f'response={self.response!r}'

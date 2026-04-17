@@ -4,7 +4,7 @@ from random import Random
 from math import floor
 
 from .constants import QUEST_TEMPLATES
-from .helpers import get_quest_template
+from .helpers import get_quest_template_nullable
 from .quest import Quest
 from .quest_batch import QuestBatch
 from .quest_reward_types import QUEST_REWARD_TYPE_CREDIBILITY
@@ -125,7 +125,7 @@ def _quest_sort_key_getter(quest):
     -------
     sort_key : `(int, int, int)`
     """
-    quest_template = get_quest_template(quest.template_id)
+    quest_template = get_quest_template_nullable(quest.template_id)
     if quest_template is None:
         return (-1, quest.reward_credibility, -1)
     

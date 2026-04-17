@@ -1,23 +1,29 @@
 from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 
 import vampytest
-from hata import BUILTIN_EMOJIS
-
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...item_core import ITEM_ID_PEACH, ITEM_ID_SCARLET_ONION, ITEM_ID_STRAWBERRY
+from ...item_core import ITEM_ID_PEACH, ITEM_ID_SCARLET_ONION, ITEM_ID_STRAWBERRY, get_item_nullable
 from ...quest_core import (
     AMOUNT_TYPE_COUNT, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QuestRequirementSerialisableDuration,
     QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
-    QuestRewardSerialisableCredibility, get_quest_template
+    QuestRewardSerialisableCredibility, get_quest_template_nullable
 )
 
 from ..content_building import produce_linked_quest_detailed_description
 
 
 def _iter_options():
-    quest_template_id = QUEST_TEMPLATE_ID_MYSTIA_PEACH
-    quest_template = get_quest_template(quest_template_id)
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
+    
+    item_strawberry = get_item_nullable(ITEM_ID_STRAWBERRY)
+    assert item_strawberry is not None
+    
+    item_scarlet_onion = get_item_nullable(ITEM_ID_SCARLET_ONION)
+    assert item_scarlet_onion is not None
+    
+    quest_template = get_quest_template_nullable(QUEST_TEMPLATE_ID_MYSTIA_PEACH)
     assert quest_template is not None
     
     user_id = 202505230020
@@ -29,7 +35,7 @@ def _iter_options():
             user_id,
             guild_id,
             batch_id,
-            quest_template_id,
+            QUEST_TEMPLATE_ID_MYSTIA_PEACH,
             (
                 QuestRequirementSerialisableDuration(3600 * 24),
                 QuestRequirementSerialisableExpiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600 * 24)),
@@ -43,7 +49,7 @@ def _iter_options():
         quest_template,
         1,
         (
-            f'**Task: Submit 0 / 20 {BUILTIN_EMOJIS["peach"]} Peach to Mystia.**\n'
+            f'**Task: Submit 0 / 20 {item_peach.emoji} {item_peach.name} to Mystia.**\n'
             f'\n'
             f'{quest_template.description}\n'
             f'\n'
@@ -64,7 +70,7 @@ def _iter_options():
             user_id,
             guild_id,
             batch_id,
-            quest_template_id,
+            QUEST_TEMPLATE_ID_MYSTIA_PEACH,
             (
                 QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20, 0),
                 QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 19, 0),
@@ -75,8 +81,9 @@ def _iter_options():
         quest_template,
         1,
         (
-            f'**Task: Submit 0 / 20 {BUILTIN_EMOJIS["peach"]} Peach, 0 / 19 {BUILTIN_EMOJIS["strawberry"]} Strawberry '
-            f'and 2 / 18 {BUILTIN_EMOJIS["onion"]} Scarlet onion to Mystia.**\n'
+            f'**Task: Submit 0 / 20 {item_peach.emoji} {item_peach.name}, '
+            f'0 / 19 {item_strawberry.emoji} {item_strawberry.name} and '
+            f'2 / 18 {item_scarlet_onion.emoji} {item_scarlet_onion.name} to Mystia.**\n'
             f'\n'
             f'{quest_template.description}\n'
             f'\n'
@@ -100,7 +107,7 @@ def test__produce_linked_quest_detailed_description(linked_quest, quest_template
     linked_quest : ``LinkedQuest``
         The linked quest in context.
     
-    quest_template : `int`
+    quest_template : ``None | QuestTemplate``
         The quest's template.
     
     user_level : `int`

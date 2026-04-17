@@ -16,15 +16,15 @@ from .item_ids import (
     ITEM_ID_ACHING_AFFECTION_S_HEART_PIERCER, ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO, ITEM_ID_BAMBOO_SHOOT,
     ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_BOUGH, ITEM_ID_BROOM, ITEM_ID_BUNNY_SUIT,
     ITEM_ID_CARROT, ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS, ITEM_ID_CHIRUNO, ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRESS,
-    ITEM_ID_DAI, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_EIRIN, ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT,
-    ITEM_ID_CUT_WOOD, ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC,
-    ITEM_ID_GOTHIC_ATTIRE, ITEM_ID_HAND_FAN, ITEM_ID_HELL_CAT_S_BIG_BRAIDS, ITEM_ID_HIKING_SET, ITEM_ID_JUNKO,
-    ITEM_ID_KIMONO, ITEM_ID_KINGS_NEW_CLOTHES, ITEM_ID_KITCHEN_KNIFE, ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_LOG,
-    ITEM_ID_MAID_DRESS, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_ORIN, ITEM_ID_PARASOL, ITEM_ID_PEACH,
-    ITEM_ID_PLUSHIE_BEAR, ITEM_ID_POKING_KNIFE, ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT, ITEM_ID_REIMU,
-    ITEM_ID_RIBBON_BOW, ITEM_ID_RULER, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS,
-    ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA, ITEM_ID_TEWI, ITEM_ID_TWIGS,
-    ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YUKARI, ITEM_ID_YUUKA
+    ITEM_ID_CUT_WOOD, ITEM_ID_DAI, ITEM_ID_DANGO, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_EIRIN,
+    ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT, ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG,
+    ITEM_ID_GARLIC, ITEM_ID_GOTHIC_ATTIRE, ITEM_ID_HAND_FAN, ITEM_ID_HELL_CAT_S_BIG_BRAIDS, ITEM_ID_HIKING_SET,
+    ITEM_ID_JUNKO, ITEM_ID_KAGEROU, ITEM_ID_KIMONO, ITEM_ID_KINGS_NEW_CLOTHES, ITEM_ID_KITCHEN_KNIFE, ITEM_ID_KOISHI,
+    ITEM_ID_KOKORO, ITEM_ID_LOG, ITEM_ID_MAID_DRESS, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_ORIN,
+    ITEM_ID_PARASOL, ITEM_ID_PEACH, ITEM_ID_PLUSHIE_BEAR, ITEM_ID_POKING_KNIFE, ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT,
+    ITEM_ID_REIMU, ITEM_ID_RIBBON_BOW, ITEM_ID_RULER, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION,
+    ITEM_ID_SCISSORS, ITEM_ID_SEIRAN, ITEM_ID_SEKIBANKI, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA,
+    ITEM_ID_TEWI, ITEM_ID_TWIGS, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YUKARI, ITEM_ID_YUUKA
 )
 
 
@@ -85,7 +85,7 @@ ITEM_DEVILCART_OYSTER = ITEMS[ITEM_ID_DEVILCART_OYSTER] = Item(
     BUILTIN_EMOJIS['brown_mushroom'],
     (
         'An edible mushroom, the largest one in its genus. It has a thick, meaty white stem and a small tan cap. '
-        'Tasteless raw, but has rich umami flavor when cooked.\n'
+        'Tasteless raw, but has rich umami flavour when cooked.\n'
         '\n'
         'Can be found in any forest.'
     ),
@@ -365,7 +365,7 @@ ITEM_ANGELROOT = ITEMS[ITEM_ID_ANGELROOT] = Item(
     BUILTIN_EMOJIS['herb'],
     (
         'An aromatic herb with hollow stems and large round clusters of white or greenish flowers. '
-        'Its roots and seeds are prized for their sweet, musky scent and bittersweet flavor. '
+        'Its roots and seeds are prized for their sweet, musky scent and bittersweet flavour. '
         'Its a biennial, sometimes perennial plant. '
         'Used to spice liqueurs, foods, and due to its pleasant odor perfumes as well. '
         'As medicine it is used to treat numerous medical issues, '
@@ -1144,5 +1144,61 @@ ITEM_SUIKA = ITEMS[ITEM_ID_SUIKA] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
+)
+
+
+ITEM_SEKIBANKI = ITEMS[ITEM_ID_SEKIBANKI] = Item(
+    ITEM_ID_SEKIBANKI,
+    'Sekibanki',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_KAGEROU = ITEMS[ITEM_ID_KAGEROU] = Item(
+    ITEM_ID_KAGEROU,
+    'Kagerou',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_SEIRAN = ITEMS[ITEM_ID_SEIRAN] = Item(
+    ITEM_ID_SEIRAN,
+    'Seiran',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+
+ITEM_DANGO = ITEMS[ITEM_ID_DANGO] = Item(
+    ITEM_ID_DANGO,
+    'Dango',
+    BUILTIN_EMOJIS['dango'],
+    (
+        'Dango is an kind dumpling made out of rice flour. They are usually round and are served on skewers.\n'
+        'They are commonly covered or flavoured with sugar, syrup, red bean paste, green tea or and other sweeteners. '
+        'It is often served with Tea\n'
+        'Dango falls under the general category of confectionery, but has many traditional varieties. '
+        'One of these varieties is the pink, white and green coloured one, '
+        'which one may identify as the flagship dango. '
+        'This exact variety is traditionally made during cherry blossom viewing season.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    150, # value (hearts)
+    46, # weight (grams), including the skewers, ofc
     None,
 )

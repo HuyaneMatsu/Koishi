@@ -50,7 +50,7 @@ async def threads(client, message):
     
     for thread in list_threads():
         thread_count += 1
-        thread_type = thread.__class__
+        thread_type = type(thread)
         thread_count_by_type[thread_type] = thread_count_by_type.get(thread_type,0) + 1
     
     description = []

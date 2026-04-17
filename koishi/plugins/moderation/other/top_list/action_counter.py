@@ -65,7 +65,7 @@ class ActionCounter(RichAttributeErrorBaseType):
     
     def __repr__(self):
         """Returns the action counter's representation."""
-        repr_parts = ['<', self.__class__.__name__]
+        repr_parts = ['<', type(self).__name__]
         
         repr_parts.append(' all = ')
         repr_parts.append(repr(self.all))

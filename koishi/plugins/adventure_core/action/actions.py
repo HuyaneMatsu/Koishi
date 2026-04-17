@@ -331,7 +331,7 @@ ACTIONS[TARGET_ID_HUMAN_VILLAGE_VINEYARDS_GARDENING_GRAPE_PRUNING] = Action(
     1,
     None,
     (
-        OptionLoot(False, 1, 1, True, 5, 20, ITEM_ID_TWIGS, 0, 300, 0, 1),
+        OptionLoot(False, 1, 1, True, 5, 20, ITEM_ID_TWIGS, 0, 300, 0, 3),
         OptionLoot(False, 1, 36, False, 1, 1, ITEM_ID_BOUGH, 120, 480, 2, 3),
         OptionLoot(True, 1, 1000, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
@@ -343,10 +343,10 @@ ACTIONS[ACTION_ID_HAKUGYOKUROU_MANSION_GARDENING_TREE_PRUNING] = Action(
     ACTION_ID_HAKUGYOKUROU_MANSION_GARDENING_TREE_PRUNING,
     ACTION_TYPE_GARDENING,
     1200,
-    2,
+    1,
     None,
     (
-        OptionLoot(False, 1, 2, True, 4, 20, ITEM_ID_TWIGS, 0, 300, 0, 1),
+        OptionLoot(False, 1, 2, True, 4, 20, ITEM_ID_TWIGS, 0, 300, 0, 3),
         OptionLoot(False, 1, 12, True, 1, 3, ITEM_ID_BOUGH, 120, 480, 2, 3),
         OptionLoot(True, 1, 1000, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),

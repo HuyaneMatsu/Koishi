@@ -1,21 +1,22 @@
 from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
-from hata import (
-    BUILTIN_EMOJIS, Component, create_button, create_row, create_section, create_separator, create_text_display
-)
+from hata import Component, create_button, create_row, create_section, create_separator, create_text_display
 
 from ...adventure_core import (
     ACTION_ID_SYSTEM_CANCELLATION, ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, ADVENTURE_STATE_ACTIONING,
     ADVENTURE_STATE_CANCELLED, Adventure, AdventureAction, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS,
     LOOT_STATE_SUCCESS, TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS, build_loot_data
 )
-from ...item_core import ITEM_ID_PEACH
+from ...item_core import ITEM_ID_PEACH, get_item_nullable
 
 from ..component_building import build_adventure_view_active_components
 
 
 def _iter_options():
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
+    
     adventure_entry_id = 9999
     user_id = 202508040004
     adventure_action_entry_id_0 = 8888
@@ -272,7 +273,7 @@ def _iter_options():
             create_separator(),
             create_text_display(
                 f'### Loot:\n'
-                f'- {BUILTIN_EMOJIS["peach"]} Peach x5'
+                f'- {item_peach.emoji} {item_peach.name} x5 ({item_peach.weight * 5 / 1000:.03f} kg)'
             ),
             create_separator(),
             create_text_display('+ 2 truncated (showing latest 5)'),

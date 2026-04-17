@@ -92,6 +92,7 @@ def _iter_options():
     guild_1.clients.append(user_1)
     
     yield (
+        'emoji (new)',
         user_0,
         Emoji,
         None,
@@ -157,6 +158,7 @@ def _iter_options():
     )
     
     yield (
+        'sticker (new)',
         user_0,
         Sticker,
         None,
@@ -233,6 +235,7 @@ def _iter_options():
     )
     
     yield (
+        'soundboard sound (new)',
         user_0,
         SoundboardSound,
         None,
@@ -308,6 +311,7 @@ def _iter_options():
     )
     
     yield (
+        'emoji',
         user_0,
         Emoji,
         emoji_0,
@@ -368,6 +372,7 @@ def _iter_options():
     )
     
     yield (
+        'sticker',
         user_0,
         Sticker,
         sticker_0,
@@ -437,6 +442,7 @@ def _iter_options():
     )
     
     yield (
+        'soundboard sound',
         user_0,
         SoundboardSound,
         soundboard_sound_0,
@@ -503,9 +509,76 @@ def _iter_options():
             f'snipe.add.{pack_entity(soundboard_sound_0)}',
         ),
     )
+    
+    yield (
+        'emoji (new) (outside of guild)',
+        user_0,
+        Emoji,
+        None,
+        0,
+        [
+            guild_0,
+            guild_1,
+        ],
+        InteractionForm(
+            'Add emoji',
+            [
+                create_label(
+                    'Guild',
+                    'Select the guild to add the emoji to.',
+                    create_string_select(
+                        [
+                            StringSelectOption(format(guild_id_0, 'x'), guild_name_0, default = False),
+                            StringSelectOption(format(guild_id_1, 'x'), guild_name_1, default = False),
+                        ],
+                        custom_id = 'guild',
+                    ),
+                ),
+                create_label(
+                    'Name',
+                    'The name to add the emoji with.',
+                    create_text_input(
+                        min_length = 2,
+                        max_length = 32,
+                        custom_id = 'name',
+                        value = None,
+                    ),
+                ),
+                # create_label(
+                #     'Roles',
+                #     'Limits the Emoji\'s usage only to users with any of the specified roles, current guild only.',
+                #     create_role_select(
+                #         'roles',
+                #         default_values = None,
+                #         max_values = 25,
+                #         min_values = 0,
+                #     ),
+                # ),
+                create_label(
+                    'File',
+                    'Select the file to be used.',
+                    create_attachment_input(
+                        custom_id = 'file',
+                    ),
+                ),
+                # create_label(
+                #     'Reason',
+                #     'Additional reason that will show up in the guild\'s audit logs.',
+                #     create_text_input(
+                #         custom_id = 'reason',
+                #         min_length = 0,
+                #         max_length = 400,
+                #         style = TextInputStyle.paragraph,
+                #     ),
+                # ),
+            ],
+            f'snipe.add.{pack_entity_type(Emoji)}',
+        ),
+    )
+    
 
 
-@vampytest._(vampytest.call_from(_iter_options()).returning_last())
+@vampytest._(vampytest.call_from(_iter_options()).named_first().returning_last())
 def test__build_add_form(user, entity_type, entity, guild_id, entity_cache):
     """
     Tests whether ``build_add_form`` works as intended.

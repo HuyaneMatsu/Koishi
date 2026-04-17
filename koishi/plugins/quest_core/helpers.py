@@ -1,9 +1,9 @@
-__all__ = ('get_quest_template',)
+__all__ = ('get_quest_template_nullable',)
 
 from .constants import QUEST_TEMPLATES
 
 
-def get_quest_template(quest_template_id):
+def get_quest_template_nullable(quest_template_id):
     """
     Returns the quest template with the given identifier.
     

@@ -702,7 +702,7 @@ class Guesser(RichAttributeErrorBaseType):
     
     def __repr__(self):
         """Returns the guesser's representation."""
-        repr_parts = ['<', self.__class__.__name__]
+        repr_parts = ['<', type(self).__name__]
         
         repr_parts.append(' name = ')
         repr_parts.append(repr(self.name))
@@ -1173,7 +1173,7 @@ class FrozenDict(RichAttributeErrorBaseType):
     
     def __repr__(self):
         """Returns the object's representation."""
-        return f'{self.__class__.__name__}({self.value!r})'
+        return f'{type(self).__name__}({self.value!r})'
 
 
 class GuesserStateNode(RichAttributeErrorBaseType):

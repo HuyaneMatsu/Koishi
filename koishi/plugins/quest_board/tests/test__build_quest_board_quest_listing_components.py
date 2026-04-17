@@ -13,7 +13,7 @@ from ...quest_core import (
     QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, Quest, QuestBatch, QuestRequirementInstantiableDuration,
     QuestRequirementInstantiableItemExact, QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration,
     QuestRequirementSerialisableItemExact, QuestRewardInstantiableBalance, QuestRewardInstantiableCredibility,
-    QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility, get_quest_template
+    QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility, get_quest_template_nullable
 )
 from ...user_stats_core import UserStats
 
@@ -27,17 +27,17 @@ def _iter_options():
     batch_id = 4666
     
     quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_CARROT
-    quest_template_0 = get_quest_template(quest_template_id_0)
+    quest_template_0 = get_quest_template_nullable(quest_template_id_0)
     assert quest_template_0 is not None
     quest_amount_0 = 3600
     
     quest_template_id_1 = QUEST_TEMPLATE_ID_MYSTIA_PEACH
-    quest_template_1 = get_quest_template(quest_template_id_1)
+    quest_template_1 = get_quest_template_nullable(quest_template_id_1)
     assert quest_template_1 is not None
     quest_amount_1 = 18
     
     quest_template_id_2 = QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH
-    quest_template_2 = get_quest_template(quest_template_id_2)
+    quest_template_2 = get_quest_template_nullable(quest_template_id_2)
     assert quest_template_2 is not None
     quest_amount_2 = 174000
     
@@ -270,7 +270,7 @@ def test__build_quest_board_quest_listing_components(
         The page's index to show.
     
     quest_batch : ``QuestBatch``
-        Quest batch to return when requested.
+        Quest batch to get the quest from.
     
     Returns
     -------

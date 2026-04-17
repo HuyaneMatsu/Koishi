@@ -1,3 +1,24 @@
+- Fix `/relationships info listing-mode:Legacy` preferred secondary relationships coming first instead of primary ones.
+    (chaos3326)
+- Fix `/adventure view` displayed finished adventures as active. (ayahiya)
+- `/adventure view` (and other commands) now display loot weight next to the amount. (ayahiya)
+- When resetting an over-submitted quest, the overflow is kept.
+- Fix `/snipe add` tried to use `role select` in private channels, which turned out to be disallowed.
+- Add new `complete` button under `/quest board` quest views.
+    The button is hidden if you cannot execute the action for the quest for any reason.
+    This new option allows completing quests from zero, directly from the quest details.
+    It not only bypasses accepting and submission completely, but also does not require you to have a free quest spot.
+    Currently limited for quests requiring the submission of exact items only.
+    The amount times you possess the requirements is displayed in quest details.
+    In confirmation, one may define how much times they wish to complete the quest;
+    defaults to the maximal allowed amount.
+
+- Add new items:
+    - Dango
+
+- Balance adventure locations & targets:
+    - Hakugyokurou mansion - gardening -> Tree pruning chance weight 2 -> 1 (-17% chance).
+
 ### 2026-04-03
 
 - Fix submitting multiple items at once could fail submission due to the length of items the user owns changing.
@@ -25,7 +46,7 @@
     `current or previous` (new default) adventure.
 - Improve `/user quests` ordering by also taking quest expiration into account.
 
-- Add new adventure locations & targets:
+- Balance adventure locations & targets:
     - Magic forest - Collect firewood
 
 - Balance quests:

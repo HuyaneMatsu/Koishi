@@ -310,7 +310,7 @@ class OJEntityBase:
         return self.id < other.id
     
     def __repr__(self):
-        return f'<{self.__class__.__name__} id = {self.id}, name = {self.name!r}>'
+        return f'<{type(self).__name__} id = {self.id}, name = {self.name!r}>'
 
 
 class OJOrigin(OJEntityBase):

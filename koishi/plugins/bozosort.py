@@ -66,7 +66,7 @@ class TokenBase:
         return 0
     
     def _cursed_repr_builder(self):
-        repr_parts = ['<', self.__class__.__name__, ' type = ', repr(get_token_name(self.type))]
+        repr_parts = ['<', type(self).__name__, ' type = ', repr(get_token_name(self.type))]
         yield repr_parts
         repr_parts.append('>')
     

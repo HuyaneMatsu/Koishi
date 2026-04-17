@@ -8,7 +8,7 @@ from ...quest_core import (
     AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
     QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, Quest,
     QuestRequirementInstantiableDuration, QuestRequirementInstantiableItemExact, QuestRequirementSerialisableDuration,
-    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, get_quest_template
+    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, get_quest_template_nullable
 )
 
 from ..content_building import produce_quest_short_description
@@ -16,13 +16,13 @@ from ..content_building import produce_quest_short_description
 
 def _iter_options():
     quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_PEACH
-    quest_template_0 = get_quest_template(quest_template_id_0)
+    quest_template_0 = get_quest_template_nullable(quest_template_id_0)
     
     quest_template_id_1 = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
-    quest_template_1 = get_quest_template(quest_template_id_1)
+    quest_template_1 = get_quest_template_nullable(quest_template_id_1)
     
     quest_template_id_2 = QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH
-    quest_template_2 = get_quest_template(quest_template_id_2)
+    quest_template_2 = get_quest_template_nullable(quest_template_id_2)
     
     user_id = 202510130002
     guild_id = 202510130003

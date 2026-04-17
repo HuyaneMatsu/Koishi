@@ -43,4 +43,4 @@ class ChatInteraction(RichAttributeErrorBaseType):
     
     def __repr__(self):
         """Returns the chat interaction's representation."""
-        return ''.join(['<', self.__class__.__name__, ' name = ', repr(self.name), '>'])
+        return ''.join(['<', type(self).__name__, ' name = ', repr(self.name), '>'])

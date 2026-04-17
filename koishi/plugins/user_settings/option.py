@@ -56,7 +56,7 @@ class UserSettingsOption(RichAttributeErrorBaseType):
     
     def __repr__(self):
         """Returns the user option's representation."""
-        repr_parts = ['<', self.__class__.__name__]
+        repr_parts = ['<', type(self).__name__]
         
         repr_parts.append(' system_name = ')
         repr_parts.append(self.system_name)

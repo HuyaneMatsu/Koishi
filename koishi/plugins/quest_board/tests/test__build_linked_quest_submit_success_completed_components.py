@@ -9,7 +9,7 @@ from ...item_core import ITEM_ID_FROG, get_item_nullable
 from ...quest_core import (
     AMOUNT_TYPE_COUNT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest, QUEST_REWARD_TYPE_BALANCE,
     QUEST_TEMPLATE_ID_CHIRUNO_FROG, QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration,
-    QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance, get_quest_template
+    QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance, get_quest_template_nullable
 )
 from ...user_stats_core import UserStats
 
@@ -20,7 +20,7 @@ def _iter_options():
     item = get_item_nullable(ITEM_ID_FROG)
     assert item is not None
     
-    quest_template_0 = get_quest_template(QUEST_TEMPLATE_ID_CHIRUNO_FROG)
+    quest_template_0 = get_quest_template_nullable(QUEST_TEMPLATE_ID_CHIRUNO_FROG)
     assert quest_template_0 is not None
     
     user_id = 202510140000
@@ -52,6 +52,7 @@ def _iter_options():
     yield (
         0,
         user_id,
+        0,
         1,
         guild_id_0,
         linked_quest_0,
@@ -64,11 +65,12 @@ def _iter_options():
         [
             (QUEST_REWARD_TYPE_BALANCE, 0, 2600),
         ],
+        1,
         [
             create_text_display(
                 f'You have submitted **12** {item.emoji} {item.name}.\n'
                 f'For a total of **50**.\n'
-                f'By doing so, you finished the quest.\n'
+                f'By doing so, you completed the quest.\n'
                 f'\n'
                 f'**You received:**\n'
                 f'- **2600** {EMOJI__HEART_CURRENCY}'
@@ -99,6 +101,7 @@ def _iter_options():
     yield (
         0,
         user_id,
+        0,
         1,
         guild_id_1,
         linked_quest_0,
@@ -111,11 +114,12 @@ def _iter_options():
         [
             (QUEST_REWARD_TYPE_BALANCE, 0, 2600),
         ],
+        1,
         [
             create_text_display(
                 f'You have submitted **12** {item.emoji} {item.name}.\n'
                 f'For a total of **50**.\n'
-                f'By doing so, you finished the quest.\n'
+                f'By doing so, you completed the quest.\n'
                 f'\n'
                 f'**You received:**\n'
                 f'- **2600** {EMOJI__HEART_CURRENCY}'
@@ -148,7 +152,8 @@ def _iter_options():
 def test__build_linked_quest_submit_success_completed_components(
     client_id,
     user_id,
-    page_index,
+    page_index_quest_board,
+    page_index_linked_quests,
     local_guild_id,
     linked_quest,
     quest_template,
@@ -156,6 +161,7 @@ def test__build_linked_quest_submit_success_completed_components(
     user_level_old,
     submissions_normalised,
     rewards_normalised,
+    executed_completion_count,
 ):
     """
     Tests whether ``build_linked_quest_submit_success_completed_components`` works as intended.
@@ -165,7 +171,13 @@ def test__build_linked_quest_submit_success_completed_components(
     client_id : `int`
         The client's identifier who is rendering this message.
     
-    page_index : `int`
+    user_id : `int`
+        The invoking user's identifier.
+    
+    page_index_quest_board : `int`
+        The quest board's current page's index.
+    
+    page_index_linked_quests : `int`
         The linked quests' current page's index.
     
     local_guild_id : `int`
@@ -189,6 +201,9 @@ def test__build_linked_quest_submit_success_completed_components(
     rewards_normalised : `None | list<(int, int, int)>`
         The rewards given by the quest in a normalised form.
     
+    executed_completion_count : `int`
+        How much times completion was executed.
+    
     Returns
     -------
     output : ``list<Component>``
@@ -199,7 +214,8 @@ def test__build_linked_quest_submit_success_completed_components(
     output = build_linked_quest_submit_success_completed_components(
         client_id,
         user_id,
-        page_index,
+        page_index_quest_board,
+        page_index_linked_quests,
         local_guild_id,
         linked_quest,
         quest_template,
@@ -207,6 +223,7 @@ def test__build_linked_quest_submit_success_completed_components(
         user_level_old,
         submissions_normalised,
         rewards_normalised,
+        executed_completion_count,
     )
     
     vampytest.assert_instance(output, list)

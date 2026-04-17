@@ -24,7 +24,7 @@ async def request_bans(client, guild, after, actions):
         The guild to request the actions at.
     after : `DateTime`
         The date to get the logs after.
-    actions : `set` of `tuple` (`int`, ``ClientUserBase``, ``ClientUserBase``)
+    actions : ``set<(int, ClientUserBase, ClientUserBase)>``
         The executed actions to extend.
     """
     async for audit_log_entry in (await client.audit_log_iterator(guild, entry_type = AuditLogEntryType.user_ban_add)):
@@ -64,7 +64,7 @@ async def request_kicks(client, guild, after, actions):
         The guild to request the actions at.
     after : `DateTime`
         The date to get the logs after.
-    actions : `set` of `tuple` (`int`, ``ClientUserBase``, ``ClientUserBase``)
+    actions : ``set<(int, ClientUserBase, ClientUserBase)>``
         The executed actions to extend.
     """
     async for audit_log_entry in (await client.audit_log_iterator(guild, entry_type = AuditLogEntryType.user_kick)):
@@ -104,7 +104,7 @@ async def request_mutes(client, guild, after, actions):
         The guild to request the actions at.
     after : `DateTime`
         The date to get the logs after.
-    actions : `set` of `tuple` (`int`, ``ClientUserBase``, ``ClientUserBase``)
+    actions : ``set<(int, ClientUserBase, ClientUserBase)>``
         The executed actions to extend.
     """
     async for audit_log_entry in (await client.audit_log_iterator(guild, entry_type = AuditLogEntryType.user_update)):
@@ -154,7 +154,7 @@ async def request_actions(client, guild, after):
     
     Returns
     -------
-    actions : `set` of `tuple` (`int`, ``ClientUserBase``, ``ClientUserBase``)
+    actions : ``set<(int, ClientUserBase, ClientUserBase)>``
         A set of `action type` - `source user` - `target user` tuples.
     """
     actions = set()

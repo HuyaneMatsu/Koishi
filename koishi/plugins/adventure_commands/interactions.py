@@ -467,6 +467,55 @@ async def cancel(
     )
 
 
+async def _build_adventure_components_common(
+    adventure, allow_switching_to_adventure_listing_view, adventure_listing_page_index
+):
+    """
+    Generic function to build adventure components.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    adventure : ``Adventure``
+        Adventure to build components for.
+    
+    allow_switching_to_adventure_listing_view : `bool`
+        Whether switching to adventure listing is allowed from adventure view.
+    
+    adventure_listing_page_index : `int`
+        Adventure listing page index to direct to from adventure view.
+    
+    Returns
+    -------
+    components : ``list<Component>``
+    """
+    adventure_action_listing = await get_adventure_action_listing(adventure.entry_id)
+    
+    if adventure.state == ADVENTURE_STATE_FINALIZED:
+        components = build_adventure_view_finalized_components(
+            adventure,
+            adventure_action_listing,
+            allow_switching_to_adventure_listing_view,
+            adventure_listing_page_index,
+        )
+    else:
+        user_stats = await get_user_stats(adventure.user_id)
+        inventory = await get_inventory(adventure.user_id)
+        
+        components = build_adventure_view_active_components(
+            adventure,
+            adventure_action_listing,
+            allow_switching_to_adventure_listing_view,
+            adventure_listing_page_index,
+            DateTime.now(tz = TimeZone.utc),
+            user_stats.stats_calculated.extra_inventory,
+            inventory.weight,
+        )
+    
+    return components
+
+
 ADVENTURE_VIEW_OPTION_CURRENT = 1 << 0
 ADVENTURE_VIEW_OPTION_PREVIOUS = 1 << 1
 ADVENTURE_VIEW_OPTION_CURRENT_OR_PREVIOUS = ADVENTURE_VIEW_OPTION_CURRENT | ADVENTURE_VIEW_OPTION_PREVIOUS
@@ -544,24 +593,14 @@ async def view(
         if (error_message is not None):
             break
         
-        adventure_action_listing = await get_adventure_action_listing(adventure.entry_id)
-        user_stats = await get_user_stats(interaction_event.user_id)
-        inventory = await get_inventory(adventure.user_id)
+        components = await _build_adventure_components_common(adventure, False, 0)
         
         await client.interaction_response_message_edit(interaction_event, '-# _ _ ')
         await client.interaction_response_message_delete(interaction_event)
         
         await client.interaction_followup_message_create(
             interaction_event,
-            components = build_adventure_view_active_components(
-                adventure,
-                adventure_action_listing,
-                False,
-                0,
-                DateTime.now(tz = TimeZone.utc),
-                user_stats.stats_calculated.extra_inventory,
-                inventory.weight,
-            ),
+            components = components,
         )
         return
     
@@ -760,29 +799,9 @@ async def handle_adventure_view(
             error_message = 'Could not resolve adventure.'
             break
         
-        adventure_action_listing = await get_adventure_action_listing(adventure_entry_id)
-        
-        if adventure.state == ADVENTURE_STATE_FINALIZED:
-            components = build_adventure_view_finalized_components(
-                adventure,
-                adventure_action_listing,
-                allow_switching_to_adventure_listing_view,
-                adventure_listing_page_index,
-            )
-        
-        else:
-            user_stats = await get_user_stats(interaction_event.user_id)
-            inventory = await get_inventory(adventure.user_id)
-            
-            components = build_adventure_view_active_components(
-                adventure,
-                adventure_action_listing,
-                allow_switching_to_adventure_listing_view,
-                adventure_listing_page_index,
-                DateTime.now(tz = TimeZone.utc),
-                user_stats.stats_calculated.extra_inventory,
-                inventory.weight,
-            )
+        components = await _build_adventure_components_common(
+            adventure, allow_switching_to_adventure_listing_view, adventure_listing_page_index
+        )
         
         await client.interaction_response_message_edit(
             interaction_event,

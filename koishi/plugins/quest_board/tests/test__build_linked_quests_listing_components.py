@@ -11,7 +11,7 @@ from ...quest_core import (
     AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest,
     QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QuestRequirementSerialisableDuration,
     QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
-    QuestRewardSerialisableCredibility, get_quest_template
+    QuestRewardSerialisableCredibility, get_quest_template_nullable
 )
 from ...user_stats_core import UserStats
 
@@ -32,12 +32,12 @@ def _iter_options():
     now = DateTime(2016, 5, 14, 0, 0, 20, tzinfo = TimeZone.utc)
     
     quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_CARROT
-    quest_template_0 = get_quest_template(quest_template_id_0)
+    quest_template_0 = get_quest_template_nullable(quest_template_id_0)
     assert quest_template_0 is not None
     quest_amount_0 = 3600
     
     quest_template_id_1 = QUEST_TEMPLATE_ID_MYSTIA_PEACH
-    quest_template_1 = get_quest_template(quest_template_id_1)
+    quest_template_1 = get_quest_template_nullable(quest_template_id_1)
     assert quest_template_1 is not None
     quest_amount_1 = 18
     

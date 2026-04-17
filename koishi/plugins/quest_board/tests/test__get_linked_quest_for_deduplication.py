@@ -2,7 +2,7 @@ import vampytest
 
 from ...quest_core import (
     LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
-    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, get_quest_template
+    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, get_quest_template_nullable
 )
 
 from ..helpers import get_linked_quest_for_deduplication
@@ -13,7 +13,7 @@ def _iter_options():
     guild_id = 202505240041
     
     quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_CARROT
-    quest_template_0 = get_quest_template(quest_template_id_0)
+    quest_template_0 = get_quest_template_nullable(quest_template_id_0)
     assert quest_template_0 is not None
     
     linked_quest_entry_id_0 = 533
@@ -30,7 +30,7 @@ def _iter_options():
     linked_quest_0.entry_id = linked_quest_entry_id_0
     
     quest_template_id_1 = QUEST_TEMPLATE_ID_MYSTIA_PEACH
-    quest_template_1 = get_quest_template(quest_template_id_1)
+    quest_template_1 = get_quest_template_nullable(quest_template_id_1)
     assert quest_template_1 is not None
     quest_amount_1 = 18
     linked_quest_entry_id_1 = 534
@@ -47,7 +47,7 @@ def _iter_options():
     linked_quest_1.entry_id = linked_quest_entry_id_1
     
     quest_template_id_2 = QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH
-    quest_template_2 = get_quest_template(quest_template_id_2)
+    quest_template_2 = get_quest_template_nullable(quest_template_id_2)
     assert quest_template_2 is not None
     quest_amount_2 = 174000
     linked_quest_entry_id_2 = 535

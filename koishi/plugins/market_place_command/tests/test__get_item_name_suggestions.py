@@ -21,6 +21,7 @@ def _iter_options():
             ('Carrot', '8'),
             ('Chief maid\'s Elegant dress', '23'),
             ('Corpse voyager\'s Roguish dress', '29'),
+            ('Dango', '40'),
             ('Devilcart oyster', '4'),
             ('Electrostatical discharge protective coat', '26'),
             ('Fishing rod', '6'),
@@ -34,9 +35,9 @@ def _iter_options():
             ('Kimono', '33'),
             ('King\'s new clothes', '21'),
             ('Kitchen knife', '2a'),
-            ('Maid dress', '22'),
         ],
     )
+    
     yield (
         0,
         'peach',
@@ -44,6 +45,7 @@ def _iter_options():
             (get_item(ITEM_ID_PEACH).name, format(ITEM_ID_PEACH, 'x')),
         ],
     )
+    
     yield (
         0,
         format(ITEM_ID_PEACH, 'x'),
@@ -51,6 +53,7 @@ def _iter_options():
             (get_item(ITEM_ID_PEACH).name, format(ITEM_ID_PEACH, 'x')),
         ],
     )
+    
     yield (
         ITEM_FLAG_EDIBLE,
         None,
@@ -61,6 +64,7 @@ def _iter_options():
             ('Blueberries', '3'),
             ('Bluefrankish', '7'),
             ('Carrot', '8'),
+            ('Dango', '40'),
             ('Devilcart oyster', '4'),
             ('Flykiller amanita', '5'),
             ('Frog', '12'),
@@ -71,6 +75,7 @@ def _iter_options():
             ('Strawberry', '1'),
         ],
     )
+    
     yield (
         ITEM_FLAG_EDIBLE,
         'peach',
@@ -78,6 +83,7 @@ def _iter_options():
             (get_item(ITEM_ID_PEACH).name, format(ITEM_ID_PEACH, 'x')),
         ],
     )
+    
     yield (
         ITEM_FLAG_EDIBLE,
         format(ITEM_ID_PEACH, 'x'),
@@ -85,6 +91,7 @@ def _iter_options():
             (get_item(ITEM_ID_PEACH).name, format(ITEM_ID_PEACH, 'x')),
         ],
     )
+    
     yield (
         ITEM_FLAG_COSTUME,
         None,
@@ -101,11 +108,13 @@ def _iter_options():
             ('Maid dress', '22'),
         ],
     )
+    
     yield (
         ITEM_FLAG_COSTUME,
         'peach',
         None,
     )
+    
     yield (
         ITEM_FLAG_COSTUME,
         format(ITEM_ID_PEACH, 'x'),

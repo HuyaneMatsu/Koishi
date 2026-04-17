@@ -7,13 +7,11 @@ from ...bots import FEATURE_CLIENTS
 from ..adventure_core import get_active_adventure
 from ..guild_stats import get_guild_stats
 from ..inventory_core import get_inventory, save_inventory
-from ..item_core import get_item
 from ..quest_core import (
-    LINKED_QUEST_COMPLETION_STATE_ACTIVE, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest,
-    QUEST_REWARD_TYPE_BALANCE, QUEST_REWARD_TYPE_CREDIBILITY, QUEST_REWARD_TYPE_ITEM_EXACT, add_linked_quest,
-    calculate_received_reward_credibility, delete_linked_quest, get_current_batch_id, get_guild_adventurer_rank_info,
-    get_linked_quest_abandon_credibility_penalty, get_linked_quest_completion_ratio, get_linked_quest_listing,
-    get_quest_template, get_user_adventurer_rank_info, instantiate_quest, reset_linked_quest, update_linked_quest
+    LINKED_QUEST_COMPLETION_STATE_ACTIVE, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest, add_linked_quest,
+    delete_linked_quest, get_current_batch_id, get_linked_quest_abandon_credibility_penalty,
+    get_linked_quest_completion_ratio, get_linked_quest_listing, get_quest_template_nullable,
+    get_user_adventurer_rank_info, instantiate_quest, reset_linked_quest, update_linked_quest
 )
 from ..user_balance import get_user_balance, save_user_balance
 from ..user_stats_core import get_user_stats, save_user_stats
@@ -23,8 +21,9 @@ from .component_building import (
     build_linked_quest_details_components, build_linked_quest_item_components, build_linked_quest_item_group_components,
     build_linked_quest_submit_select_item_components, build_linked_quest_submit_select_requirement_components,
     build_linked_quest_submit_success, build_linked_quest_submit_success_completed_components,
-    build_linked_quests_listing_components, build_quest_accept_success_components, build_quest_board_item_components,
-    build_quest_board_item_group_components, build_quest_board_quest_listing_components, build_quest_details_components,
+    build_linked_quests_listing_components, build_quest_accept_success_components,
+    build_quest_complete_confirmation_form, build_quest_board_item_components, build_quest_board_item_group_components,
+    build_quest_board_quest_listing_components, build_quest_details_components,
     build_quest_select_requirement_components
 )
 from .constants import (
@@ -32,7 +31,7 @@ from .constants import (
     BACK_DIRECT_LOCATION_SELECT_REQUIREMENT, BROKEN_QUEST_DESCRIPTION
 )
 from .custom_ids import (
-    CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN, CUSTOM_ID_LINKED_QUEST_INFO_ITEM_DISABLED,
+    CUSTOM_ID_COMPLETION_COUNT, CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN, CUSTOM_ID_LINKED_QUEST_INFO_ITEM_DISABLED,
     CUSTOM_ID_LINKED_QUEST_INFO_ITEM_PATTERN, CUSTOM_ID_LINKED_QUEST_ITEM_INFO_PATTERN,
     CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_DECREMENT_DISABLED, CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_INCREMENT_DISABLED,
     CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_NAVIGATE_PATTERN, CUSTOM_ID_LINKED_QUEST_SUBMIT_AUTO_PATTERN,
@@ -47,18 +46,20 @@ from .custom_ids import (
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_REQUIREMENT_PAGE_INDEX_DECREMENT_DISABLED,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_REQUIREMENT_PAGE_INDEX_INCREMENT_DISABLED,
     CUSTOM_ID_LINKED_QUEST_SUBMIT_SELECT_REQUIREMENT_PATTERN, CUSTOM_ID_QUEST_ACCEPT_DISABLED,
-    CUSTOM_ID_QUEST_ACCEPT_PATTERN, CUSTOM_ID_QUEST_BOARD_ITEM_DISABLED, CUSTOM_ID_QUEST_BOARD_ITEM_PATTERN,
-    CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_DECREMENT_DISABLED, CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_INCREMENT_DISABLED,
-    CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_PATTERN, CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_PATTERN,
-    CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_GROUP_REQUIREMENT_PATTERN, CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_REQUIREMENT_PATTERN,
+    CUSTOM_ID_QUEST_ACCEPT_PATTERN, CUSTOM_ID_QUEST_BOARD_COMPLETE_PATTERN, CUSTOM_ID_QUEST_BOARD_ITEM_DISABLED,
+    CUSTOM_ID_QUEST_BOARD_ITEM_PATTERN, CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_DECREMENT_DISABLED,
+    CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_INCREMENT_DISABLED, CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_PATTERN,
+    CUSTOM_ID_QUEST_BOARD_QUEST_DETAILS_PATTERN, CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_GROUP_REQUIREMENT_PATTERN,
+    CUSTOM_ID_QUEST_BOARD_SELECT_ITEM_REQUIREMENT_PATTERN,
     CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PAGE_INDEX_DECREMENT_DISABLED,
     CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PAGE_INDEX_INCREMENT_DISABLED,
     CUSTOM_ID_QUEST_BOARD_SELECT_REQUIREMENT_PATTERN
 )
 from .helpers import (
-    get_linked_quest_expiration, get_linked_quest_for_deduplication, get_linked_quest_submission_requirement_at_index,
-    get_linked_quest_with_entry_id, get_quest_with_template_id, get_submit_amount,
-    iter_submission_requirement_item_entries_of_requirement
+    do_reward_user, do_submit_complete_item, get_allowed_completion_count, get_linked_quest_expiration,
+    get_linked_quest_for_deduplication, get_linked_quest_submission_requirement_at_index,
+    get_linked_quest_with_entry_id, get_quest_in_possession_count, get_quest_with_template_id,
+    iter_submission_requirement_item_entries_of_requirement, try_submit_item
 )
 
 
@@ -149,11 +150,15 @@ async def quest_board_quest_details(client, interaction_event, user_id, guild_id
         linked_quest = get_linked_quest_for_deduplication(
             linked_quest_listing, guild_id, quest_batch.id, quest_template_id
         )
+        
         if (linked_quest is not None) and (linked_quest.completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE):
             components = build_linked_quest_details_components(linked_quest, user_stats, 0)
+        
         else:
+            inventory = await get_inventory(user_id)
+            
             components = build_quest_details_components(
-                user_id, guild_id, interaction_event.guild_id, page_index, quest, linked_quest, user_stats
+                user_id, guild_id, interaction_event.guild_id, page_index, quest, linked_quest, inventory, user_stats
             )
         
         await client.interaction_response_message_edit(
@@ -229,49 +234,32 @@ async def quest_board_quest_listing_page_index_navigate(client, interaction_even
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_ACCEPT_PATTERN)
-async def quest_accept(client, interaction_event, user_id, guild_id, page_index, quest_template_id):
+async def _check_quest_accept_conditions_common(
+    user_id, guild_id, quest_template_id, check_for_empty_quest_slot
+):
     """
-    Handles a quest accept component interaction.
+    Common check to execute when accepting a quest.
     
     This function is a coroutine.
     
     Parameters
     ----------
-    client : ``Client``
-        The client who received the interaction.
-    
-    interaction_event : ``InteractionEvent``
-        The received interaction event.
-    
     user_id : `str`
-        The invoking user's identifier as a string representing a hexadecimal integer.
+        The invoking user's identifier.
     
     guild_id : `int`
-        The guild's identifier where the quest belongs to as a string representing a hexadecimal integer.
-    
-    page_index : `int`
-        The current page's index in hexadecimal number.
+        The guild's identifier where the quest belongs to.
     
     quest_template_id : `str`
-        The quest's template identifier as a string representing a hexadecimal integer.
+        The quest's template identifier.
+    
+    check_for_empty_quest_slot : `int`
+        Whether should check for empty quest slot.
+    
+    Returns
+    -------
+    error_message_or_fields : ``(None | str, None | (QuestBatch, Quest, None | LinkedQuest, QuestTemplate, UserStats))``
     """
-    try:
-        user_id = int(user_id, 16)
-        guild_id = int(guild_id, 16)
-        page_index = int(page_index, 16)
-        quest_template_id = int(quest_template_id, 16)
-    except ValueError:
-        return
-    
-    if user_id != interaction_event.user_id:
-        return
-    
-    await client.interaction_component_acknowledge(
-        interaction_event,
-        False,
-    )
-    
     while True:
         adventure = await get_active_adventure(user_id)
         if (adventure is not None):
@@ -298,10 +286,11 @@ async def quest_accept(client, interaction_event, user_id, guild_id, page_index,
             error_message = 'You already have this quest currently accepted.'
             break
         
-        # Check whether the user has enough slots.
         user_stats = await get_user_stats(user_id)
         user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
+        # Check whether the user has enough slots.
         if (
+            check_for_empty_quest_slot and
             (linked_quest_listing is not None) and
             sum(
                 looped_linked_quest.completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE
@@ -312,7 +301,7 @@ async def quest_accept(client, interaction_event, user_id, guild_id, page_index,
             break
         
         # Check whether the user's level is sufficient.
-        quest_template = get_quest_template(quest_template_id)
+        quest_template = get_quest_template_nullable(quest_template_id)
         if quest_template is None:
             error_message = BROKEN_QUEST_DESCRIPTION
             break
@@ -327,6 +316,63 @@ async def quest_accept(client, interaction_event, user_id, guild_id, page_index,
             if repeat_count and (linked_quest.completion_count >= repeat_count):
                 error_message = 'You already completed this quest the maximal amount of times.'
                 break
+        
+        return None, (quest_batch, quest, linked_quest, quest_template, user_stats)
+    
+    return error_message, None
+
+
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_ACCEPT_PATTERN)
+async def quest_accept(client, interaction_event, user_id, guild_id, page_index, quest_template_id):
+    """
+    Handles a quest accept component interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The invoking user's identifier as a string representing a hexadecimal integer.
+    
+    guild_id : `int`
+        The guild's identifier where the quest belongs to as a string representing a hexadecimal integer.
+    
+    page_index : `int`
+        The current page's index as a string representing a hexadecimal integer.
+    
+    quest_template_id : `str`
+        The quest's template identifier as a string representing a hexadecimal integer.
+    """
+    try:
+        user_id = int(user_id, 16)
+        guild_id = int(guild_id, 16)
+        page_index = int(page_index, 16)
+        quest_template_id = int(quest_template_id, 16)
+    except ValueError:
+        return
+    
+    if user_id != interaction_event.user_id:
+        return
+    
+    await client.interaction_component_acknowledge(
+        interaction_event,
+        False,
+    )
+    
+    while True:
+        error_message, fields = await _check_quest_accept_conditions_common(
+            user_id, guild_id, quest_template_id, False
+        )
+        if (error_message is not None):
+            break
+        
+        quest_batch, quest, linked_quest, quest_template, user_stats = fields
         
         # Add quest.
         if linked_quest is None:
@@ -348,6 +394,83 @@ async def quest_accept(client, interaction_event, user_id, guild_id, page_index,
         show_for_invoking_user_only = True,
     )
 
+
+
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_BOARD_COMPLETE_PATTERN)
+async def handle_quest_board_complete(
+    client, interaction_event, user_id, guild_id, page_index, quest_template_id
+):
+    """
+    Handles a quest board complete component interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The invoking user's identifier as a string representing a hexadecimal integer.
+    
+    guild_id : `str`
+        The parent quest's guild's identifier as a string representing a hexadecimal integer.
+    
+    page_index : `str`
+        The quest board's current page's index as a string representing a hexadecimal integer.
+    
+    quest_template_id : `str`
+        The quest's template identifier as a string representing a hexadecimal integer.
+    """
+    try:
+        user_id = int(user_id, 16)
+        guild_id = int(guild_id, 16)
+        page_index = int(page_index, 16)
+        quest_template_id = int(quest_template_id, 16)
+    except ValueError:
+        return
+    
+    if user_id != interaction_event.user_id:
+        return
+    
+    # Cannot acknowledge since we may respond with a form.
+    
+    while True:
+        error_message, fields = await _check_quest_accept_conditions_common(
+            user_id, guild_id, quest_template_id, False
+        )
+        if (error_message is not None):
+            break
+        
+        quest_batch, quest, linked_quest, quest_template, user_stats = fields
+        inventory = await get_inventory(user_id)
+        possession_count = get_quest_in_possession_count(quest, inventory)
+        if not possession_count:
+            error_message = 'You do not have enough items in possession to complete this quest.'
+            break
+        
+        await client.interaction_form_send(
+            interaction_event,
+            build_quest_complete_confirmation_form(
+                user_id, guild_id, page_index, quest, linked_quest, quest_template, user_stats, possession_count
+            ),
+        )
+        return
+    
+    await client.interaction_component_acknowledge(
+        interaction_event,
+    )
+    await client.interaction_followup_message_create(
+        interaction_event,
+        content = error_message,
+        show_for_invoking_user_only = True,
+    )
+
+    
+    
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_PAGE_INDEX_NAVIGATE_PATTERN)
 async def page_linked_quest_listing_page_index_navigate(client, interaction_event, user_id, page_index):
@@ -460,139 +583,6 @@ async def linked_quest_details(client, interaction_event, user_id, page_index, l
     )
 
 
-def _try_submit_item(requirement, inventory, item_entry, submissions_normalised):
-    """
-    Tries to submit the given item
-    
-    Parameters
-    ----------
-    requirement : ``QuestRequirementSerialisableItemExact | QuestRequirementSerialisableItemGroup | QuestRequirementSerialisable``
-        Requirement to submit to.
-    
-    inventory : ``Inventory``
-        The user's inventory.
-    
-    item_entry : ``ItemEntry``
-        Specific item entry to submit from.
-    
-    submissions_normalised : ``None | list<(Item, int, int, int, int)>``
-        Already done submissions.
-    
-    Returns
-    -------
-    submissions_normalised : ``list<(Item, int, int, int, int)>``
-    """
-    amount_required = requirement.amount_required
-    amount_submitted = requirement.amount_submitted
-    
-    # Do not submit 0 if all is already submitted
-    if (amount_submitted >= amount_required):
-        return submissions_normalised
-    
-    current_amount_count = item_entry.amount
-    item = item_entry.item
-    
-    amount_type = requirement.amount_type
-    amount_to_be_used = amount_required - amount_submitted
-    amount_used, amount_used_count = get_submit_amount(
-        item, amount_type, amount_to_be_used, current_amount_count
-    )
-    requirement.amount_submitted = amount_submitted + amount_used
-    inventory.modify_item_amount(item, -amount_used_count)
-    
-    if (submissions_normalised is None):
-        submissions_normalised = []
-    
-    submissions_normalised.append((
-        item, amount_type, amount_required, amount_submitted, amount_used
-    ))
-    return submissions_normalised
-
-
-async def _reward_user(linked_quest, inventory, user_stats, quest_level, user_level):
-    """
-    Rewards the user.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    linked_quest : ``LinkedQuest``
-        Linked quest to distribute the awards from..
-    
-    inventory : ``Inventory``
-        The user's inventory.
-    
-    user_stats : ``UserStats``
-        The user's stats.
-    
-    quest_level : `int`
-        The quest's level.
-    
-    user_level : `int`
-        The user's level.
-    
-    Returns
-    -------
-    rewards_normalised : ``None | list<(int, int, int)>``
-    """
-    rewards_normalised = None
-    
-    rewards = linked_quest.rewards
-    if (rewards is not None):
-        for reward in rewards:
-            reward_type = reward.TYPE
-            if reward_type == QUEST_REWARD_TYPE_BALANCE:
-                balance_given = reward.balance
-                
-                user_balance = await get_user_balance(linked_quest.user_id)
-                user_balance.modify_balance_by(balance_given)
-                await save_user_balance(user_balance)
-                
-                if (rewards_normalised is None):
-                    rewards_normalised = []
-                
-                rewards_normalised.append((QUEST_REWARD_TYPE_BALANCE, 0, balance_given))
-            
-            elif reward_type == QUEST_REWARD_TYPE_CREDIBILITY:
-                credibility_given = reward.credibility
-                
-                user_reward_credibility = calculate_received_reward_credibility(
-                    credibility_given, quest_level, user_level
-                )
-                user_stats.modify_credibility_by(user_reward_credibility)
-                await save_user_stats(user_stats)
-                
-                guild_stats = await get_guild_stats(linked_quest.guild_id)
-                guild_adventurer_rank_info = get_guild_adventurer_rank_info(guild_stats.credibility)
-                guild_reward_credibility = calculate_received_reward_credibility(
-                    credibility_given, quest_level, guild_adventurer_rank_info.level
-                )
-                guild_stats.set('credibility', guild_stats.credibility + guild_reward_credibility)
-                await guild_stats.save()
-                
-                if (rewards_normalised is None):
-                    rewards_normalised = []
-                
-                rewards_normalised.append((QUEST_REWARD_TYPE_CREDIBILITY, 0, user_reward_credibility))
-            
-            elif reward_type == QUEST_REWARD_TYPE_ITEM_EXACT:
-                amount_given = reward.amount_given
-                item_id = reward.item_id
-                inventory.modify_item_amount(get_item(item_id), amount_given)
-                
-                if (rewards_normalised is None):
-                    rewards_normalised = []
-                
-                rewards_normalised.append((QUEST_REWARD_TYPE_ITEM_EXACT, item_id, amount_given))
-            
-            else:
-                # No other cases
-                pass
-    
-    return rewards_normalised
-
-
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_SUBMIT_AUTO_PATTERN)
 async def handle_linked_quest_submit_item_auto(client, interaction_event, user_id, page_index, linked_quest_entry_id):
     """
@@ -654,7 +644,7 @@ async def handle_linked_quest_submit_item_auto(client, interaction_event, user_i
             error_message = 'The quest expired, you cannot interact with it anymore.'
             break
         
-        quest_template = get_quest_template(linked_quest.template_id)
+        quest_template = get_quest_template_nullable(linked_quest.template_id)
         if (quest_template is None):
             error_message = BROKEN_QUEST_DESCRIPTION
             break
@@ -666,7 +656,7 @@ async def handle_linked_quest_submit_item_auto(client, interaction_event, user_i
         if (requirements is not None):
             for requirement in requirements:
                 for item_entry in [*iter_submission_requirement_item_entries_of_requirement(inventory, requirement)]:
-                    submissions_normalised = _try_submit_item(
+                    submissions_normalised = try_submit_item(
                         requirement, inventory, item_entry, submissions_normalised
                     )
         
@@ -691,10 +681,18 @@ async def handle_linked_quest_submit_item_auto(client, interaction_event, user_i
         
         else:
             user_stats = await get_user_stats(user_id)
+            user_balance = await get_user_balance(linked_quest.user_id)
+            guild_stats = await get_guild_stats(linked_quest.guild_id)
             user_level = get_user_adventurer_rank_info(user_stats.credibility).level
-            rewards_normalised = await _reward_user(
-                linked_quest, inventory, user_stats, quest_template.level, user_level
+            
+            rewards_normalised = do_reward_user(
+                linked_quest, inventory, user_stats, user_balance, guild_stats, quest_template.level, user_level, 1
             )
+            
+            await save_user_stats(user_stats)
+            await save_user_balance(user_balance)
+            await save_inventory(inventory)
+            await guild_stats.save()
             
             if linked_quest.batch_id != get_current_batch_id():
                 await delete_linked_quest(linked_quest)
@@ -706,6 +704,7 @@ async def handle_linked_quest_submit_item_auto(client, interaction_event, user_i
             components = build_linked_quest_submit_success_completed_components(
                 client.id,
                 user_id,
+                0,
                 page_index,
                 interaction_event.guild_id,
                 linked_quest,
@@ -714,6 +713,7 @@ async def handle_linked_quest_submit_item_auto(client, interaction_event, user_i
                 user_level,
                 submissions_normalised,
                 rewards_normalised,
+                1,
             )
         
         await client.interaction_response_message_edit(
@@ -815,7 +815,7 @@ async def _handle_submit_item_common(
             error_message = 'The quest expired, you cannot interact with it anymore.'
             break
         
-        quest_template = get_quest_template(linked_quest.template_id)
+        quest_template = get_quest_template_nullable(linked_quest.template_id)
         if (quest_template is None):
             error_message = BROKEN_QUEST_DESCRIPTION
             break
@@ -831,7 +831,7 @@ async def _handle_submit_item_common(
         
         item_entry = inventory.get_item_entry_by_id(item_id)
         if (item_entry is not None):
-            submissions_normalised = _try_submit_item(
+            submissions_normalised = try_submit_item(
                 requirement, inventory, item_entry, submissions_normalised
             )
         
@@ -856,10 +856,18 @@ async def _handle_submit_item_common(
         
         else:
             user_stats = await get_user_stats(user_id)
+            user_balance = await get_user_balance(linked_quest.user_id)
+            guild_stats = await get_guild_stats(linked_quest.guild_id)
             user_level = get_user_adventurer_rank_info(user_stats.credibility).level
-            rewards_normalised = await _reward_user(
-                linked_quest, inventory, user_stats, quest_template.level, user_level
+            
+            rewards_normalised = do_reward_user(
+                linked_quest, inventory, user_stats, user_balance, guild_stats, quest_template.level, user_level, 1
             )
+            
+            await save_user_stats(user_stats)
+            await save_user_balance(user_balance)
+            await save_inventory(inventory)
+            await guild_stats.save()
             
             if linked_quest.batch_id != get_current_batch_id():
                 await delete_linked_quest(linked_quest)
@@ -871,6 +879,7 @@ async def _handle_submit_item_common(
             components = build_linked_quest_submit_success_completed_components(
                 client.id,
                 user_id,
+                0,
                 page_index,
                 interaction_event.guild_id,
                 linked_quest,
@@ -879,6 +888,7 @@ async def _handle_submit_item_common(
                 user_level,
                 submissions_normalised,
                 rewards_normalised,
+                1,
             )
         
         await client.interaction_response_message_edit(
@@ -1030,6 +1040,182 @@ async def handle_linked_quest_submit_execute_item_nested(
         item_page_index,
         item_id,
         BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED,
+    )
+
+
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_QUEST_BOARD_COMPLETE_PATTERN, target = 'form')
+async def handle_quest_board_complete_execute(
+    client,
+    interaction_event,
+    user_id,
+    guild_id,
+    page_index,
+    quest_template_id,
+    *,
+    completion_count_string : CUSTOM_ID_COMPLETION_COUNT = None,
+):
+    """
+    Handles a user linked quest item submission component interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The invoking user's identifier as a string representing a hexadecimal integer.
+    
+    guild_id : `str`
+        The parent quest's guild's identifier as a string representing a hexadecimal integer.
+    
+    page_index : `str`
+        The quest board's current page's index as a string representing a hexadecimal integer.
+    
+    quest_template_id : `str`
+        The quest's template identifier as a string representing a hexadecimal integer.
+    
+    completion_count_string : `None | str` = `None`, Optional (Keyword only)
+        How much times to complete the quest.
+    """
+    try:
+        user_id = int(user_id, 16)
+        guild_id = int(guild_id, 16)
+        page_index = int(page_index, 16)
+        quest_template_id = int(quest_template_id, 16)
+    except ValueError:
+        return
+    
+    if user_id != interaction_event.user_id:
+        return
+    
+    await client.interaction_component_acknowledge(
+        interaction_event,
+        False,
+    )
+    
+    while True:
+        # Convert `completion_count_string`.
+        if (
+            (completion_count_string is None) or
+            (not completion_count_string.isdecimal()) or
+            (len(completion_count_string) > 22)
+        ):
+            completion_count = -1
+        else:
+            try:
+                completion_count = int(completion_count_string)
+            except ValueError:
+                completion_count = -1
+        
+        if not completion_count:
+            error_message = 'Cannot complete a quest zero times'
+            break
+        
+        error_message, fields = await _check_quest_accept_conditions_common(
+            user_id, guild_id, quest_template_id, False
+        )
+        if (error_message is not None):
+            break
+        
+        quest_batch, quest, linked_quest, quest_template, user_stats = fields
+        inventory = await get_inventory(user_id)
+        possession_count = get_quest_in_possession_count(quest, inventory)
+        if not possession_count:
+            error_message = 'You do not own enough items to complete the quest any times.'
+            break
+        
+        if completion_count == -1:
+            completion_count = possession_count
+        
+        allowed_completion_count = get_allowed_completion_count(linked_quest, quest_template, completion_count)
+        if not allowed_completion_count:
+            error_message = 'You cannot complete this quest more times.'
+            break
+        
+        # Create the linked quest if it does not exist yet.
+        if linked_quest is not None:
+            linked_quest_created = False
+        else:
+            linked_quest = instantiate_quest(user_id, guild_id, quest_batch.id, quest)
+            linked_quest_created = True
+        
+        # Submit items.
+        submissions_normalised = None
+        
+        requirements = linked_quest.requirements
+        if (requirements is not None):
+            for requirement in requirements:
+                for item_entry in [*iter_submission_requirement_item_entries_of_requirement(inventory, requirement)]:
+                    submissions_normalised = do_submit_complete_item(
+                        requirement, inventory, item_entry, submissions_normalised, allowed_completion_count
+                    )
+        
+        # Reward user
+        user_stats = await get_user_stats(user_id)
+        user_balance = await get_user_balance(linked_quest.user_id)
+        guild_stats = await get_guild_stats(linked_quest.guild_id)
+        user_level = get_user_adventurer_rank_info(user_stats.credibility).level
+        
+        rewards_normalised = do_reward_user(
+            linked_quest,
+            inventory,
+            user_stats,
+            user_balance,
+            guild_stats,
+            quest_template.level,
+            user_level,
+            allowed_completion_count,
+        )
+        
+        await save_user_stats(user_stats)
+        await save_user_balance(user_balance)
+        await save_inventory(inventory)
+        await guild_stats.save()
+        
+        # Update quest.
+        linked_quest.completion_count += allowed_completion_count
+        linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
+        
+        if linked_quest_created:
+            await add_linked_quest(linked_quest)
+        else:
+            await update_linked_quest(linked_quest)
+        
+        # Respond.
+        components = build_linked_quest_submit_success_completed_components(
+            client.id,
+            user_id,
+            page_index,
+            0,
+            interaction_event.guild_id,
+            linked_quest,
+            quest_template,
+            user_stats,
+            user_level,
+            submissions_normalised,
+            rewards_normalised,
+            allowed_completion_count,
+        )
+    
+        await client.interaction_response_message_edit(
+            interaction_event,
+            components = components,
+        )
+        return
+    
+    
+    await client.interaction_component_acknowledge(
+        interaction_event,
+    )
+    await client.interaction_followup_message_create(
+        interaction_event,
+        content = error_message,
+        show_for_invoking_user_only = True,
     )
 
 

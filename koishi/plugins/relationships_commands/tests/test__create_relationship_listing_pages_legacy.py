@@ -5,10 +5,11 @@ from hata import User
 
 from ...relationships_core import (
     RELATIONSHIP_TYPE_AUNTIE, RELATIONSHIP_TYPE_CONNECTION_MODIFIER_SHIFT_ANCESTORSHIP,
-    RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_IN_LAW, RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_NONE,
-    RELATIONSHIP_TYPE_CO_WORKER, RELATIONSHIP_TYPE_DAUGHTER, RELATIONSHIP_TYPE_GRANDDAUGHTER, RELATIONSHIP_TYPE_MAID,
-    RELATIONSHIP_TYPE_MAMA, RELATIONSHIP_TYPE_MISTRESS, RELATIONSHIP_TYPE_NIECE, RELATIONSHIP_TYPE_SISTER_BIG,
-    RELATIONSHIP_TYPE_SISTER_LIL, RELATIONSHIP_TYPE_WAIFU, Relationship, RelationshipExtensionTrace
+    RELATIONSHIP_TYPE_CONNECTION_MODIFIER_SHIFT_SISTERSHIP, RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_IN_LAW,
+    RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_NONE, RELATIONSHIP_TYPE_CO_WORKER, RELATIONSHIP_TYPE_DAUGHTER,
+    RELATIONSHIP_TYPE_GRANDDAUGHTER, RELATIONSHIP_TYPE_MAID, RELATIONSHIP_TYPE_MAMA, RELATIONSHIP_TYPE_MISTRESS,
+    RELATIONSHIP_TYPE_NIECE, RELATIONSHIP_TYPE_SISTER_BIG, RELATIONSHIP_TYPE_SISTER_LIL, RELATIONSHIP_TYPE_WAIFU,
+    Relationship, RelationshipExtensionTrace
 )
 
 from ..relationship_listing_rendering_legacy import create_relationship_listing_pages_legacy
@@ -119,7 +120,7 @@ def _iter_options():
                 user_id_01,
                 RELATIONSHIP_TYPE_MAMA,
                 (relationship_00,),
-           )
+           ),
         },
         [
             user_01,
@@ -1024,6 +1025,67 @@ def _iter_options():
                     RELATIONSHIP_TYPE_MAID,
                     [
                         (RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_NONE, 'Mayumi'),
+                    ],
+                ),
+            ],
+        ],
+    )
+    
+    relationship_00 = Relationship(
+        user_id_00,
+        user_id_01,
+        RELATIONSHIP_TYPE_WAIFU,
+        1000,
+        now,
+    )
+    
+    relationship_1 = Relationship(
+        user_id_01,
+        user_id_02,
+        RELATIONSHIP_TYPE_SISTER_BIG,
+        1000,
+        now,
+    )
+    
+    relationship_02 = Relationship(
+        user_id_00,
+        user_id_02,
+        RELATIONSHIP_TYPE_MAMA,
+        1000,
+        now,
+    )
+    
+    yield (
+        'User has a direct relationship, but indirect is hit first',
+        {
+            user_id_01 : RelationshipExtensionTrace(
+                user_id_01,
+                RELATIONSHIP_TYPE_WAIFU,
+                (relationship_00,),
+           ),
+            user_id_02 : RelationshipExtensionTrace(
+                user_id_02,
+                RELATIONSHIP_TYPE_MAMA | RELATIONSHIP_TYPE_SISTER_BIG | (RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_IN_LAW << RELATIONSHIP_TYPE_CONNECTION_MODIFIER_SHIFT_SISTERSHIP),
+                (relationship_02),
+           ),
+        },
+        [
+            user_01,
+            user_02,
+        ],
+        0,
+        [
+            [
+                (
+                    RELATIONSHIP_TYPE_WAIFU,
+                    [
+                        (RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_NONE, 'Reisen'),
+                    ],
+                ),
+                (
+                    RELATIONSHIP_TYPE_MAMA,
+                    [
+                        (RELATIONSHIP_TYPE_CONNECTION_MODIFIER_TYPE_NONE, 'Koishi'),
                     ],
                 ),
             ],

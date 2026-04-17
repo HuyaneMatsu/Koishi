@@ -1,15 +1,19 @@
 import vampytest
-from hata import BUILTIN_EMOJIS
 
 from ...adventure_core import (
     LOOT_STATE_SUCCESS, LOOT_STATE_LOST_DUE_FULL_INVENTORY, LOOT_STATE_LOST_DUE_LOW_ENERGY,
 )
-from ...item_core import ITEM_ID_PEACH, ITEM_ID_STRAWBERRY
+from ...item_core import ITEM_ID_PEACH, ITEM_ID_STRAWBERRY, get_item_nullable
 
 from ..component_building import produce_loot_listing
 
 
 def _iter_options():
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    item_strawberry = get_item_nullable(ITEM_ID_STRAWBERRY)
+    assert item_peach is not None
+    assert item_strawberry is not None
+    
     yield (
         {},
         '',
@@ -23,7 +27,7 @@ def _iter_options():
         },
         (
             f'### Loot:\n'
-            f'- {BUILTIN_EMOJIS["peach"]} Peach x11'
+            f'- {item_peach.emoji} {item_peach.name} x11 ({item_peach.weight * 11 / 1000:.03f} kg)'
         ),
     )
     
@@ -42,12 +46,12 @@ def _iter_options():
         },
         (
             f'### Loot:\n'
-            f'- {BUILTIN_EMOJIS["peach"]} Peach x11\n'
+            f'- {item_peach.emoji} {item_peach.name} x11 ({item_peach.weight * 11 / 1000:.03f} kg)\n'
             f'### Loot lost due to low energy:\n'
-            f'- {BUILTIN_EMOJIS["peach"]} Peach x3\n'
+            f'- {item_peach.emoji} {item_peach.name} x3 ({item_peach.weight * 3 / 1000:.03f} kg)\n'
             f'### Loot lost due to full inventory:\n'
-            f'- {BUILTIN_EMOJIS["peach"]} Peach x4\n'
-            f'- {BUILTIN_EMOJIS["strawberry"]} Strawberry x7'
+            f'- {item_peach.emoji} {item_peach.name} x4 ({item_peach.weight * 4 / 1000:.03f} kg)\n'
+            f'- {item_strawberry.emoji} {item_strawberry.name} x7 ({item_strawberry.weight * 7 / 1000:.03f} kg)'
         ),
     )
 

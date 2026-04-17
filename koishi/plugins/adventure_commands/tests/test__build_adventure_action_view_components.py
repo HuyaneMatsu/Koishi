@@ -2,15 +2,18 @@ from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
 
-from hata import BUILTIN_EMOJIS, Component, create_button, create_row, create_separator, create_text_display
+from hata import Component, create_button, create_row, create_separator, create_text_display
 
 from ...adventure_core import ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, AdventureAction, LOOT_STATE_SUCCESS, build_loot_data
-from ...item_core import ITEM_ID_PEACH
+from ...item_core import ITEM_ID_PEACH, get_item_nullable
 
 from ..component_building import build_adventure_action_view_components
 
 
 def _iter_options():
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
+    
     adventure_entry_id = 9998
     user_id = 202508050000
     adventure_action_entry_id = 8889
@@ -56,7 +59,9 @@ def _iter_options():
                 create_button(
                     'View battle logs',
                     enabled = False,
-                    custom_id = f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{adventure_action_entry_id:x}',
+                    custom_id = (
+                        f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{adventure_action_entry_id:x}'
+                    ),
                 ),
             ),
         ],
@@ -97,7 +102,7 @@ def _iter_options():
             create_separator(),
             create_text_display(
                 f'### Loot:\n'
-                f'- {BUILTIN_EMOJIS["peach"]} Peach x5'
+                f'- {item_peach.emoji} {item_peach.name} x5 ({item_peach.weight * 5 / 1000:.03f} kg)'
             ),
             create_separator(),
             create_row(
@@ -114,7 +119,9 @@ def _iter_options():
                 create_button(
                     'View battle logs',
                     enabled = False,
-                    custom_id = f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{adventure_action_entry_id:x}',
+                    custom_id = (
+                        f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{adventure_action_entry_id:x}'
+                    ),
                 ),
             ),
         ],

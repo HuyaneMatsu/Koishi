@@ -182,7 +182,7 @@ class RLTCTX:
     def __enter__(self):
         active_ctx = type(self).active_ctx
         if (active_ctx is not None):
-            raise RuntimeError(f'There is an already active {self.__class__.__name__} right now.')
+            raise RuntimeError(f'There is an already active {type(self).__name__} right now.')
         
         type(self).active_ctx = self
         return self
@@ -1057,7 +1057,7 @@ async def channel_move(
         if category.guild is not guild:
             raise ValueError('Can not move channel between guilds!')
     else:
-        raise TypeError(f'Invalid type {channel.__class__.__name__}')
+        raise TypeError(f'Invalid type {type(channel).__name__}')
     
     if type(channel) is type(category):
         raise ValueError('Cant move category under category!')
@@ -3743,12 +3743,14 @@ async def scheduled_event_occasion_overwrite_delete(client, scheduled_event, tim
         f'{API_ENDPOINT}/guilds/{scheduled_event.guild_id}/scheduled-events/{scheduled_event.id}/exceptions/{datetime_to_id(timestamp)}',
     )
 
+
 async def scheduled_event_occasion_user_get_chunk(client, scheduled_event, timestamp):
     return await bypass_request(
         client,
         METHOD_GET,
         f'{API_ENDPOINT}/guilds/{scheduled_event.guild_id}/scheduled-events/{scheduled_event.id}/exceptions/{datetime_to_id(timestamp)}/users',
     )
+
 
 async def scheduled_event_user_counts_get(client, scheduled_event, timestamps):
     return await bypass_request(
@@ -3758,6 +3760,47 @@ async def scheduled_event_user_counts_get(client, scheduled_event, timestamps):
         query = {
             'timestamps': [datetime_to_id(timestamp) for timestamp in timestamps],
         },
+    )
+
+
+async def guild_role_user_counts_get(client, guild_id):
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/roles/member-counts',
+    )
+
+
+async def invite_allowed_user_ids_get(client, invite_code):
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/invites/{invite_code}/target-users',
+    )
+
+
+async def invite_allowed_user_ids_edit(client, invite_code, allowed_user_ids):
+    form_data = FormData()
+    form_data.add_field(
+        'target_users_file',
+        '\n'.join(str(user_id) for user_id in sorted(allowed_user_ids)),
+        content_type = 'text/csv',
+        file_name = f'file.csv',
+    )
+    
+    return await bypass_request(
+        client,
+        METHOD_PUT,
+        f'{API_ENDPOINT}/invites/{invite_code}/target-users',
+        form_data,
+    )
+
+
+async def invite_allowed_user_ids_get_status(client, invite_code):
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/invites/{invite_code}/target-users/job-status',
     )
 
 
@@ -9074,7 +9117,7 @@ async def rate_limit_test_0243(client, message, cancelled : str = None):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0244(client, message, guild_1 : Guild = None,  cancelled : str = None):
+async def rate_limit_test_0244(client, message, guild_1 : Guild = None, cancelled : str = None):
     """
     scheduled_event_occasion_overwrite_create | 2 guilds
     """
@@ -9366,7 +9409,7 @@ async def rate_limit_test_0249(client, message):
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0250(client, message):
     """
-    scheduled_event_user_counts_get | 1 guild twice
+    scheduled_event_user_counts_get | 1 guild twice.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0250') as RLT:
@@ -9400,3 +9443,231 @@ async def rate_limit_test_0250(client, message):
         
         await task_0
         await task_1
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0251(client, message):
+    """
+    guild_role_user_counts_get | 1 guild twice
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0251') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        task_0 = Task(
+            KOKORO,
+            guild_role_user_counts_get(client, guild.id),
+        )
+        task_1 = Task(
+            KOKORO,
+            guild_role_user_counts_get(client, guild.id),
+        )
+        
+        await task_0
+        await task_1
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0252(client, message, guild_1 : Guild = None,):
+    """
+    guild_role_user_counts_get | 2 guild once
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0252') as RLT:
+        guild_0 = channel.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if guild_1 is None:
+            await RLT.send('Second guild unknown.')
+        
+        task_0 = Task(
+            KOKORO,
+            guild_role_user_counts_get(client, guild_0.id),
+        )
+        task_1 = Task(
+            KOKORO,
+            guild_role_user_counts_get(client, guild_1.id),
+        )
+        
+        await task_0
+        await task_1
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0253(client, message):
+    """
+    invite_allowed_user_ids_get
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0253') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        invite = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        await sleep(2.0, KOKORO)
+        
+        await invite_allowed_user_ids_get(client, invite.code)
+        
+        await client.invite_delete(invite)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0254(client, message):
+    """
+    invite_allowed_user_ids_get | 2 separate
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0254') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        invite_0 = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        invite_1 = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        
+        await sleep(2.0, KOKORO)
+        
+        task_0 = Task(
+            KOKORO,
+            invite_allowed_user_ids_get(client, invite_0.code),
+        )
+        task_1 = Task(
+            KOKORO,
+            invite_allowed_user_ids_get(client, invite_1.code),
+        )
+        
+        await task_0
+        await task_1
+        
+        await client.invite_delete(invite_0)
+        await client.invite_delete(invite_1)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0255(client, message):
+    """
+    invite_allowed_user_ids_edit | 2 separate
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0255') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        invite_0 = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        invite_1 = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        
+        await sleep(2.0, KOKORO)
+        
+        task_0 = Task(
+            KOKORO,
+            invite_allowed_user_ids_edit(client, invite_0.code, [message.author.id]),
+        )
+        task_1 = Task(
+            KOKORO,
+            invite_allowed_user_ids_edit(client, invite_1.code, [message.author.id]),
+        )
+        
+        await task_0
+        await task_1
+        
+        await client.invite_delete(invite_0)
+        await client.invite_delete(invite_1)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0256(client, message):
+    """
+    invite_allowed_user_ids_get_status | 2 separate
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0256') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        invite_0 = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        invite_1 = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        
+        await sleep(2.0, KOKORO)
+        
+        task_0 = Task(
+            KOKORO,
+            invite_allowed_user_ids_get_status(client, invite_0.code),
+        )
+        task_1 = Task(
+            KOKORO,
+            invite_allowed_user_ids_get_status(client, invite_1.code),
+        )
+        
+        await task_0
+        await task_1
+        
+        await client.invite_delete(invite_0)
+        await client.invite_delete(invite_1)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0257(client, message):
+    """
+    invite_allowed_user_ids_get + invite_allowed_user_ids_get_status
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0257') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        invite = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        
+        await sleep(2.0, KOKORO)
+        
+        task_0 = Task(
+            KOKORO,
+            invite_allowed_user_ids_get(client, invite.code),
+        )
+        task_1 = Task(
+            KOKORO,
+            invite_allowed_user_ids_get_status(client, invite.code),
+        )
+        
+        await task_0
+        await task_1
+        
+        await client.invite_delete(invite)

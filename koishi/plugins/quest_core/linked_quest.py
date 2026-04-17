@@ -5,7 +5,7 @@ from scarletio import RichAttributeErrorBaseType
 from ..item_core import produce_item_id_with_name
 
 from .flags import QUEST_FLAG_INITIALISATION_FAILURE
-from .helpers import get_quest_template
+from .helpers import get_quest_template_nullable
 from .linked_quest_completion_states import LINKED_QUEST_COMPLETION_STATE_ACTIVE
 from .serialisation import (
     QUEST_REQUIREMENT_SERIALISATION_RESOLUTION, QUEST_REWARD_SERIALISATION_RESOLUTION, quest_serialisable_deserialise
@@ -29,7 +29,6 @@ class LinkedQuest(RichAttributeErrorBaseType):
     
     entry_id : `int`
         The database entry identifier of the quest.
-    
     
     guild_id : `int`
         The source guild's identifier.
@@ -121,7 +120,7 @@ class LinkedQuest(RichAttributeErrorBaseType):
         template_id = self.template_id
         repr_parts.append(repr(template_id))
         
-        quest_template = get_quest_template(template_id)
+        quest_template = get_quest_template_nullable(template_id)
         
         # quest_template / level
         if (quest_template is None):
