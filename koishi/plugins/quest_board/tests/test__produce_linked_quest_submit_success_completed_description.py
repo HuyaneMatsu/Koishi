@@ -117,6 +117,24 @@ def _iter_options():
         ),
     )
 
+    yield (
+        'No submission',
+        0,
+        None,
+        [
+            (QUEST_REWARD_TYPE_BALANCE, 0, 900),
+        ],
+        1,
+        0,
+        0,
+        (
+            f'You completed the quest.\n'
+            f'\n'
+            f'**You received:**\n'
+            f'- **900** {EMOJI__HEART_CURRENCY}'
+        ),
+    )
+
 
 @vampytest._(vampytest.call_from(_iter_options()).named_first().returning_last())
 def test__produce_linked_quest_submit_success_completed_description(

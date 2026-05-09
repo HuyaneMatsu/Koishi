@@ -2,8 +2,8 @@ __all__ = (
     'autocomplete_user_settings_preferred_client', 'handle_user_settings_change',
     'handle_user_settings_set_preferred_client', 'handle_user_settings_set_preferred_image_source',
     'get_preferred_client_for_user', 'get_preferred_client_in_channel',
-    'get_preferred_image_source_weight_map', 'is_preferred_image_source_weight_map_valuable',
-    'set_user_settings_option',
+    'get_preferred_image_source_weight_map', 'get_user_settings_preferred_client',
+    'is_preferred_image_source_weight_map_valuable', 'set_user_settings_option',
 )
 
 from hata import CLIENTS, Client, InteractionType, Permission
@@ -11,9 +11,9 @@ from hata import CLIENTS, Client, InteractionType, Permission
 from ...bots import FEATURE_CLIENTS, MAIN_CLIENT
 
 from .constants import PREFERRED_CLIENT_NAME_DEFAULT, PREFERRED_IMAGE_SOURCE_NAMES, PREFERRED_IMAGE_SOURCE_NONE
-from .builders import (
-    build_user_settings_notification_change_components, build_user_settings_preferred_client_change_components,
-    build_user_settings_preferred_image_source_change_components,
+from .component_building import (
+    build_notification_settings_change_components, build_preferred_client_change_components,
+    build_preferred_image_source_change_components,
 )
 from .options import OPTION_PREFERRED_CLIENT_ID, OPTION_PREFERRED_IMAGE_SOURCE
 from .queries import get_one_user_settings, get_more_user_settings, save_one_user_settings
@@ -91,7 +91,7 @@ async def handle_user_settings_change(client, interaction_event, option, value):
     
     await client.interaction_followup_message_create(
         interaction_event,
-        components = build_user_settings_notification_change_components(option, value, changed),
+        components = build_notification_settings_change_components(option, value, changed),
     )
 
 
@@ -309,7 +309,7 @@ async def handle_user_settings_set_preferred_client(client, interaction_event, v
     await function(
         client,
         interaction_event,
-        components = build_user_settings_preferred_client_change_components(
+        components = build_preferred_client_change_components(
             chosen_client, interaction_event.guild_id, hit, changed
         ),
     )
@@ -338,7 +338,11 @@ async def handle_user_settings_set_preferred_image_source(client, interaction_ev
         function = Client.interaction_component_acknowledge
     await function(client, interaction_event, False)
     
-    if value in PREFERRED_IMAGE_SOURCE_NAMES.keys():
+    if value not in PREFERRED_IMAGE_SOURCE_NAMES.keys():
+        hit = False
+        changed = False
+    
+    else:
         hit = True
         user_settings = await get_one_user_settings(interaction_event.user_id)
         changed = await set_user_settings_option(
@@ -346,10 +350,6 @@ async def handle_user_settings_set_preferred_image_source(client, interaction_ev
             OPTION_PREFERRED_IMAGE_SOURCE,
             value,
         )
-        
-    else:
-        hit = False
-        changed = False
     
     
     if interaction_event.type is InteractionType.application_command:
@@ -359,7 +359,7 @@ async def handle_user_settings_set_preferred_image_source(client, interaction_ev
     await function(
         client,
         interaction_event,
-        components = build_user_settings_preferred_image_source_change_components(value, hit, changed),
+        components = build_preferred_image_source_change_components(value, hit, changed),
     )
 
 

@@ -12,7 +12,10 @@ def test__put_none_to_cache__value():
     """
     user_id = 202309240040
     
-    user_settings = UserSettings(user_id, notification_daily_by_waifu = False)
+    user_settings = UserSettings.create_with_specification(
+        user_id,
+        notification_daily_by_waifu = 0,
+    )
     
     try:
         USER_SETTINGS_CACHE[user_id] = user_settings

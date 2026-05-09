@@ -39,7 +39,8 @@ def _iter_options():
             create_text_display(
                 'You successfully placed your bid.\n'
                 '\n'
-                'Keep a keen eye on it, it is up to you to see whether others up you.'
+                'Keep a keen eye on it, it is up to you to see whether others up you.\n'
+                'In case you win the bid, make sure to claim it within 7 days!'
             ),
             create_separator(),
             create_row(

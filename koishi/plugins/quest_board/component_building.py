@@ -85,11 +85,14 @@ def build_quest_board_quest_listing_components(guild, guild_stats, user_stats, l
     components = []
     
     # Add header.
-    guild_adventurer_rank_info = get_guild_adventurer_rank_info(guild_stats.credibility)
     quest_batch = guild_stats.get_quest_batch()
+    credibility = guild_stats.credibility
+    guild_adventurer_rank_info = get_guild_adventurer_rank_info(credibility)
     
     header_content_component = create_text_display(
-        ''.join([*produce_quest_board_header_description(guild, guild_adventurer_rank_info, len(quest_batch.quests))]),
+        ''.join([*produce_quest_board_header_description(
+            guild, credibility, guild_adventurer_rank_info, len(quest_batch.quests)
+        )]),
     )
     
     icon_url = guild.icon_url
@@ -477,13 +480,15 @@ def build_linked_quests_listing_components(user, guild_id, user_stats, linked_qu
     components = []
     
     # Add header.
-    user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
+    credibility = user_stats.credibility
+    user_adventurer_rank_info = get_user_adventurer_rank_info(credibility)
     components.append(
         create_section(
             create_text_display(
                 ''.join([*produce_linked_quest_header_description(
                     user,
                     guild_id,
+                    credibility,
                     user_adventurer_rank_info,
                     (
                         0
@@ -504,7 +509,7 @@ def build_linked_quests_listing_components(user, guild_id, user_stats, linked_qu
     if (linked_quest_listing is not None):
         linked_quest_slice = linked_quest_listing_sorted[page_index * PAGE_SIZE : (page_index + 1) * PAGE_SIZE]
         if linked_quest_slice:
-            now = DateTime.now(tz = TimeZone.utc)
+            now = DateTime.now(TimeZone.utc)
             
             for linked_quest in linked_quest_slice:
                 quest_template = get_quest_template_nullable(linked_quest.template_id)
@@ -934,7 +939,7 @@ def build_linked_quest_submit_success(
     back_direct_location : `int`
         Where to back-direct to.
     
-    submissions_normalised : ``list<(Item, int, int, int, int)>``
+    submissions_normalised : ``None | list<(Item, int, int, int, int)>``
         The submitted amounts normalised.
     
     Returns
@@ -1013,7 +1018,7 @@ def build_linked_quest_submit_success_completed_components(
     user_level_old : `int`
         The user's adventurer rank before completing the quest.
     
-    submissions_normalised : ``list<(Item, int, int, int, int)>``
+    submissions_normalised : ``None | list<(Item, int, int, int, int)>``
         The submitted amounts normalised.
     
     rewards_normalised : `None | list<(int, int, int)>`

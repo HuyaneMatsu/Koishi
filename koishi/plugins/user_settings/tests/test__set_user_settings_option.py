@@ -1,7 +1,8 @@
 import vampytest
 
+from ..constants import USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_BY_WAIFU
+from ..option_bit import UserSettingsOptionBit
 from ..user_settings import UserSettings
-from ..option import UserSettingsOption
 from ..utils import set_user_settings_option
 
 
@@ -20,8 +21,13 @@ async def test__set_user_settings_option__no_change():
         saver_called = True
     
     
-    option = UserSettingsOption(UserSettings.notification_daily_by_waifu, '', '')
-    user_settings = UserSettings(202309260002, notification_daily_by_waifu = False)
+    option = UserSettingsOptionBit(
+        UserSettings.notification_flags, '', '', USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_BY_WAIFU
+    )
+    user_settings = UserSettings.create_with_specification(
+        202309260002,
+        notification_daily_by_waifu = 0,
+    )
     
     mocked = vampytest.mock_globals(
         set_user_settings_option,
@@ -52,8 +58,13 @@ async def test__set_user_settings_option__with_change():
         saver_called = True
         saver_called_with_user_settings = user_settings.copy()
     
-    option = UserSettingsOption(UserSettings.notification_daily_by_waifu, '', '')
-    user_settings = UserSettings(202309260002, notification_daily_by_waifu = False)
+    option = UserSettingsOptionBit(
+        UserSettings.notification_flags, '', '', USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_BY_WAIFU
+    )
+    user_settings = UserSettings.create_with_specification(
+        202309260002,
+        notification_daily_by_waifu = 0,
+    )
     
     mocked = vampytest.mock_globals(
         set_user_settings_option,
@@ -65,5 +76,8 @@ async def test__set_user_settings_option__with_change():
     vampytest.assert_true(saver_called)
     vampytest.assert_instance(output, bool)
     vampytest.assert_eq(output, True)
-    vampytest.assert_eq(user_settings.notification_daily_by_waifu, True)
+    vampytest.assert_eq(
+        (user_settings.notification_flags >> USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_BY_WAIFU) & 1,
+        1,
+    )
     vampytest.assert_eq(saver_called_with_user_settings, user_settings)

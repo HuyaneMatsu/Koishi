@@ -75,6 +75,7 @@ def test__UserStatsCalculated__new():
         
         'credibility': credibility,
         'recovering_until': recovering_until.replace(tzinfo = None),
+        'recovering_until_notification_at': recovering_until.replace(tzinfo = None),
         
         'item_id_costume': item_id_costume,
         'item_id_head': item_id_head,
@@ -143,6 +144,7 @@ def test__UserStatsCalculated__repr():
         
         'credibility': credibility,
         'recovering_until': recovering_until.replace(tzinfo = None),
+        'recovering_until_notification_at': recovering_until.replace(tzinfo = None),
         
         'item_id_costume': item_id_costume,
         'item_id_head': item_id_head,

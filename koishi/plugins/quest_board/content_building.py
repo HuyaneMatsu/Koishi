@@ -12,7 +12,8 @@ from ..quest_core import (
     AMOUNT_TYPE_COUNT, AMOUNT_TYPE_NAME_DEFAULT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT,
     LINKED_QUEST_COMPLETION_STATE_ACTIVE, QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY, QUEST_REQUIREMENT_TYPE_ITEM_EXACT,
     QUEST_REQUIREMENT_TYPE_ITEM_GROUP, QUEST_REWARD_TYPE_BALANCE, QUEST_REWARD_TYPE_CREDIBILITY,
-    QUEST_REWARD_TYPE_ITEM_EXACT, get_adventurer_level_name, get_current_batch_id, get_quest_board_resets_at
+    QUEST_REWARD_TYPE_ITEM_EXACT, get_adventurer_level_name, get_current_batch_id, get_quest_board_resets_at,
+    get_user_adventurer_rank_up_credibility, get_guild_adventurer_rank_up_credibility
 )
 
 from .constants import BROKEN_QUEST_DESCRIPTION
@@ -25,7 +26,7 @@ from .helpers import (
 from config import ORIN_ID
 
 
-def produce_quest_board_header_description(guild, adventurer_info, quest_count):
+def produce_quest_board_header_description(guild, credibility, adventurer_info, quest_count):
     """
     Produces a guild's quest board's header component's content.
     
@@ -35,6 +36,9 @@ def produce_quest_board_header_description(guild, adventurer_info, quest_count):
     ----------
     guild : ``Guild``
         The respective guild the quest board is bound to.
+    
+    credibility : `int`
+        The amount of credibility the user has.
     
     adventurer_info : ``AdventurerRankInfo``
         Information about the guild's adventurer rank.
@@ -50,7 +54,11 @@ def produce_quest_board_header_description(guild, adventurer_info, quest_count):
     yield guild.name
     yield '\'s quest board\n\nGuild rank: '
     yield get_adventurer_level_name(adventurer_info.level)
-    yield '\nQuest count: '
+    yield ' ('
+    yield str(credibility)
+    yield ' / '
+    yield str(get_guild_adventurer_rank_up_credibility(adventurer_info.level))
+    yield ')\nQuest count: '
     
     quest_limit = adventurer_info.quest_limit
     if quest_count != quest_limit:
@@ -60,7 +68,7 @@ def produce_quest_board_header_description(guild, adventurer_info, quest_count):
     yield str(quest_limit)
 
 
-def produce_linked_quest_header_description(user, guild_id, adventurer_info, quest_count):
+def produce_linked_quest_header_description(user, guild_id, credibility, adventurer_info, quest_count):
     """
     Produces a user's linked quest listing's header component's content.
     
@@ -73,6 +81,9 @@ def produce_linked_quest_header_description(user, guild_id, adventurer_info, que
     
     guild_id : `int`
         The respective guild's identifier the command is used.
+    
+    credibility : `int`
+        The amount of credibility the user has.
     
     adventurer_info : ``AdventurerRankInfo``
         Information about the guild's adventurer rank.
@@ -88,7 +99,11 @@ def produce_linked_quest_header_description(user, guild_id, adventurer_info, que
     yield user.name_at(guild_id)
     yield '\'s quests\n\nUser rank: '
     yield get_adventurer_level_name(adventurer_info.level)
-    yield '\nActive quest count: '
+    yield ' ('
+    yield str(credibility)
+    yield ' / '
+    yield str(get_user_adventurer_rank_up_credibility(adventurer_info.level))
+    yield ')\nActive quest count: '
     
     yield str(quest_count)
     yield ' / '
@@ -519,7 +534,7 @@ def produce_linked_quest_short_description(linked_quest, quest_template):
         yield BROKEN_QUEST_DESCRIPTION
         return
     
-    now = DateTime.now(tz = TimeZone.utc)
+    now = DateTime.now(TimeZone.utc)
     
     completion_state = linked_quest.completion_state
     if completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE:
@@ -718,7 +733,7 @@ def _produce_time_left(expiration):
     if expiration is None:
         yield 'unlimited'
     else:
-        now = DateTime.now(tz = TimeZone.utc)
+        now = DateTime.now(TimeZone.utc)
         if expiration > now:
             yield elapsed_time(RelativeDelta(expiration, now))
         else:
@@ -865,7 +880,7 @@ def produce_linked_quest_detailed_description(linked_quest, quest_template, user
         yield ', '
         if (linked_quest.batch_id == get_current_batch_id()):
             yield 're-acceptable if completed within '
-            yield elapsed_time(RelativeDelta(get_quest_board_resets_at(), DateTime.now(tz = TimeZone.utc)))
+            yield elapsed_time(RelativeDelta(get_quest_board_resets_at(), DateTime.now(TimeZone.utc)))
         
         else:
             yield 'cannot be re-accepted anymore'
@@ -1056,25 +1071,32 @@ def produce_linked_quest_submit_success(submissions_normalised):
     
     Parameters
     ----------
-    submissions_normalised : ``list<(Item, int, int, int, int)>``
+    submissions_normalised : ``None | list<(Item, int, int, int, int)>``
         The submitted amounts normalised.
+    
+    Returns
+    -------
+    add_extra_line_break_after : `bool`
     
     Yields
     ------
     part : `str`
     """
     field_added = False
-    for item, amount_type, amount_required, amount_submitted, amount_used in submissions_normalised:
-        if field_added:
-            yield '\n'
-        else:
-            field_added = True
-        
-        amount_left = amount_required - amount_submitted - amount_used
-        if amount_left > 0:
-            yield from _produce_submit_success_n_left_single(item, amount_type, amount_used, amount_left)
-        else:
-            yield from _produce_submit_success_zero_left_single(item, amount_type, amount_required, amount_used)
+    if (submissions_normalised is not None):
+        for item, amount_type, amount_required, amount_submitted, amount_used in submissions_normalised:
+            if field_added:
+                yield '\n'
+            else:
+                field_added = True
+            
+            amount_left = amount_required - amount_submitted - amount_used
+            if amount_left > 0:
+                yield from _produce_submit_success_n_left_single(item, amount_type, amount_used, amount_left)
+            else:
+                yield from _produce_submit_success_zero_left_single(item, amount_type, amount_required, amount_used)
+    
+    return field_added
 
 
 def produce_linked_quest_submit_success_completed_description(
@@ -1095,7 +1117,7 @@ def produce_linked_quest_submit_success_completed_description(
     client_id : `int`
         The client's identifier who is rendering this message.
     
-    submissions_normalised : ``list<(Item, int, int, int, int)>``
+    submissions_normalised : ``None | list<(Item, int, int, int, int)>``
         The submitted amounts normalised.
     
     rewards_normalised : `None | list<(int, int, int)>`
@@ -1114,8 +1136,12 @@ def produce_linked_quest_submit_success_completed_description(
     ------
     part : `str`
     """
-    yield from produce_linked_quest_submit_success(submissions_normalised)
-    yield '\nBy doing so, you completed the quest'
+    add_extra_line_break_after = yield from produce_linked_quest_submit_success(submissions_normalised)
+    if add_extra_line_break_after:
+        yield '\nBy doing so, y'
+    else:
+        yield 'Y'
+    yield 'ou completed the quest'
     
     if executed_completion_count > 1:
         yield ' '

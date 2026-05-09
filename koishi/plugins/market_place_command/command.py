@@ -14,6 +14,7 @@ from ..market_place_core import (
     get_market_place_item_listing_active, get_market_place_item_listing_inbox, get_market_place_item_listing_own_offers
 )
 from ..user_balance import get_user_balance
+from ..user_settings import USER_SETTINGS_FEATURE_FLAG_SHIFT_MARKET_PLACE_INBOX, get_one_user_settings
 
 from .component_building import (
     build_inbox_view_components, build_own_offers_view_components, build_purchase_view_components,
@@ -262,11 +263,17 @@ async def command_inbox(
         False,
     )
     
+    user_settings = await get_one_user_settings(interaction_event.user_id)
+    
     now = DateTime.now(TimeZone.utc)
     
-    market_place_item_listing, has_more = await get_market_place_item_listing_inbox(
-        interaction_event.user_id, now, 0, PAGE_SIZE_DEFAULT
-    )
+    if (user_settings.feature_flags >> USER_SETTINGS_FEATURE_FLAG_SHIFT_MARKET_PLACE_INBOX) & 1:
+        market_place_item_listing, has_more = await get_market_place_item_listing_inbox(
+            interaction_event.user_id, now, 0, PAGE_SIZE_DEFAULT
+        )
+    else:
+        market_place_item_listing = []
+        has_more = False
     
     await client.interaction_response_message_edit(
         interaction_event,

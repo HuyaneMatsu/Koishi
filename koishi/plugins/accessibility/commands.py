@@ -177,8 +177,8 @@ async def preference_settings_set_preferred_image_source(
     interaction_event : ``InteractionEvent``
         The received event.
     
-    client_name : `str`
-        The client's name.
+    value : `int`
+        Image source identifier.
     """
     await handle_user_settings_set_preferred_image_source(client, interaction_event, value)
 

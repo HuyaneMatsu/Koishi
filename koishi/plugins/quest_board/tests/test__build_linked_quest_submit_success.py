@@ -172,7 +172,7 @@ def test__build_linked_quest_submit_success(
     back_direct_location : `int`
         Where to back-direct to.
     
-    submissions_normalised : ``list<(Item, int, int, int, int)>``
+    submissions_normalised : ``None | list<(Item, int, int, int, int)>``
         The submitted amounts normalised.
     
     Returns

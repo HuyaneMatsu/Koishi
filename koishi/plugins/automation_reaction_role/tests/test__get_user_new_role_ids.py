@@ -1,5 +1,5 @@
 import vampytest
-from hata import BUILTIN_EMOJIS, GuildProfile, ReactionAddEvent, ReactionDeleteEvent, Role, Message, User
+from hata import BUILTIN_EMOJIS, GuildProfile, ReactionAddEvent, ReactionDeleteEvent, Message, User
 
 from ..automation_reaction_role_entry import AutomationReactionRoleEntry
 from ..automation_reaction_role_item import AutomationReactionRoleItem
@@ -9,7 +9,7 @@ from ..events import get_user_new_role_ids
 
 
 def _iter_options():
-    # The reaction adds and removes roles (reaction add evnet)
+    # The reaction adds and removes roles (reaction add event)
     guild_id = 202510010170
     channel_id = 202510010171
     message_id = 202510010172
@@ -82,7 +82,7 @@ def _iter_options():
         ),
     )
     
-    # The reaction adds and removes roles (reaction remove evnet)
+    # The reaction adds and removes roles (reaction remove event)
     guild_id = 202510010180
     channel_id = 202510010181
     message_id = 202510010182

@@ -9,30 +9,32 @@ from ..content_building import produce_linked_quest_header_description
 def _iter_options():
     yield (
         202505230001,
-        'Fonsered',
+        'Koishi',
         202505230002,
-        'Fons',
+        'Koi',
+        300,
         AdventurerRankInfo(1, 1),
         1,
         (
-            '# Fons\'s quests\n'
+            '# Koi\'s quests\n'
             '\n'
-            'User rank: G\n'
+            'User rank: G (300 / 512)\n'
             'Active quest count: 1 / 1'
         ),
     )
     
     yield (
         202505230003,
-        'Fonsered',
+        'Koishi',
         0,
         None,
+        300,
         AdventurerRankInfo(1, 1),
         0,
         (
-            '# Fonsered\'s quests\n'
+            '# Koishi\'s quests\n'
             '\n'
-            'User rank: G\n'
+            'User rank: G (300 / 512)\n'
             'Active quest count: 0 / 1'
         ),
     )
@@ -40,7 +42,7 @@ def _iter_options():
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__produce_linked_quest_header_description(
-    user_id, user_name, guild_id, user_nick, adventurer_info, quest_count
+    user_id, user_name, guild_id, user_nick, credibility, adventurer_info, quest_count
 ):
     """
     Tests whether ``produce_linked_quest_header_description`` works as intended.
@@ -59,6 +61,9 @@ def test__produce_linked_quest_header_description(
     user_nick : `None | str`
         The user's nick name in the guild.
     
+    credibility : `int`
+        The amount of credibility the user has.
+    
     adventurer_info : ``AdventurerRankInfo``
         Information about the user's adventurer rank.
     
@@ -74,7 +79,7 @@ def test__produce_linked_quest_header_description(
     if guild_id and (user_nick is not None):
         user.guild_profiles[guild_id] = GuildProfile(nick = user_nick)
     
-    output = [*produce_linked_quest_header_description(user, guild_id, adventurer_info, quest_count)]
+    output = [*produce_linked_quest_header_description(user, guild_id, credibility, adventurer_info, quest_count)]
     
     for element in output:
         vampytest.assert_instance(element, str)

@@ -10,7 +10,7 @@ from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ...item_core import ITEM_ID_PEACH, get_item
 from ...market_place_core import (
-    MARKET_PLACE_ITEM_FLAG_BUYER_RETRIEVED, MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED, MarketPlaceItem
+    MARKET_PLACE_ITEM_FLAG_PURCHASER_RETRIEVED, MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED, MarketPlaceItem
 )
 from ..component_building import build_inbox_view_components
 from ..constants import EMOJI_CLOSE, EMOJI_LEFT, EMOJI_RIGHT
@@ -99,7 +99,7 @@ def _iter_options():
     )
     market_place_item_5.purchaser_user_id = user_id_0
     market_place_item_5.purchaser_balance_amount = 533
-    market_place_item_5.flags = MARKET_PLACE_ITEM_FLAG_BUYER_RETRIEVED
+    market_place_item_5.flags = MARKET_PLACE_ITEM_FLAG_PURCHASER_RETRIEVED
     market_place_item_5.entry_id = 25
     
     yield (

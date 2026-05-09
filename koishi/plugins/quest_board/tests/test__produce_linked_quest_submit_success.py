@@ -18,8 +18,11 @@ def _iter_options():
             (item, AMOUNT_TYPE_COUNT, 50, 20, 12),
         ],
         (
-            f'You have submitted **12** {item.emoji} {item.name}.\n'
-            f'**18** more to submit.'
+            (
+                f'You have submitted **12** {item.emoji} {item.name}.\n'
+                f'**18** more to submit.'
+            ),
+            True,
         ),
     )
     
@@ -28,8 +31,11 @@ def _iter_options():
             (item, AMOUNT_TYPE_WEIGHT, 50, 20, 13),
         ],
         (
-            f'You have submitted **0.013 kg** {item.emoji} {item.name}.\n'
-            f'**0.017 kg** more to submit.'
+            (
+                f'You have submitted **0.013 kg** {item.emoji} {item.name}.\n'
+                f'**0.017 kg** more to submit.'
+            ),
+            True,
         ),
     )
     
@@ -38,8 +44,19 @@ def _iter_options():
             (item, AMOUNT_TYPE_VALUE, 50, 20, 14),
         ],
         (
-            f'You have submitted **14** {EMOJI__HEART_CURRENCY} worth of {item.emoji} {item.name}.\n'
-            f'**16** {EMOJI__HEART_CURRENCY} worth of more to submit.'
+            (
+                f'You have submitted **14** {EMOJI__HEART_CURRENCY} worth of {item.emoji} {item.name}.\n'
+                f'**16** {EMOJI__HEART_CURRENCY} worth of more to submit.'
+            ),
+            True,
+        ),
+    )
+    
+    yield (
+        None,
+        (
+            '',
+            False,
         ),
     )
 
@@ -51,16 +68,29 @@ def test__produce_linked_quest_submit_success(submissions_normalised):
     
     Parameters
     ----------
-    submissions_normalised : ``list<(Item, int, int, int, int)>``
+    submissions_normalised : ``None | list<(Item, int, int, int, int)>``
         The submitted amounts normalised.
     
     Returns
     -------
-    output : `str`
+    output : `(str, bool)`
     """
-    output = [*produce_linked_quest_submit_success(submissions_normalised)]
+    output = []
+    generator = produce_linked_quest_submit_success(submissions_normalised)
+    
+    while True:
+        try:
+            part = generator.send(None)
+        except StopIteration as exception:
+            add_extra_line_break_after = exception.value
+            break
+        
+        output.append(part)
+        continue
     
     for element in output:
         vampytest.assert_instance(element, str)
     
-    return ''.join(output)
+    vampytest.assert_instance(add_extra_line_break_after, bool)
+    
+    return ''.join(output), add_extra_line_break_after

@@ -1,10 +1,20 @@
 __all__ = ('UserSettings',)
 
-from warnings import warn
-
 from scarletio import RichAttributeErrorBaseType
 
-from .constants import PREFERRED_IMAGE_SOURCE_NONE
+from .constants import (
+    PREFERRED_IMAGE_SOURCE_NONE, USER_SETTINGS_FEATURE_FLAG_DEFAULT,
+    USER_SETTINGS_FEATURE_FLAG_DEFAULT_MARKET_PLACE_INBOX, USER_SETTINGS_FEATURE_FLAG_SHIFT_MARKET_PLACE_INBOX,
+    USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT, USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_ADVENTURE_RECOVERY_OVER,
+    USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_DAILY_BY_WAIFU, USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_DAILY_REMINDER,
+    USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_GIFT,
+    USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_MARKET_PLACE_ITEM_FINALISATION,
+    USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_PROPOSAL, USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_VOTE,
+    USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_ADVENTURE_RECOVERY_OVER, USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_BY_WAIFU,
+    USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_REMINDER, USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_GIFT,
+    USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_MARKET_PLACE_ITEM_FINALISATION,
+    USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_PROPOSAL, USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_VOTE
+)
 
 
 class UserSettings(RichAttributeErrorBaseType):
@@ -16,46 +26,28 @@ class UserSettings(RichAttributeErrorBaseType):
     entry_id : `int`
         The entry's identifier in the database.
     
-    user_id : `int`
-        The user's identifier.
-        
-    notification_daily_by_waifu : `bool`
-        Whether daily notification should be delivered.
-        
-    notification_daily_reminder : `bool`
-        Whether the user should get reminder about that they forgot to claim their daily reward.
+    feature_flags : `int`
+        Feature flags describing what features the user has access to.
     
-    notification_gift : `bool`
-        Whether the user should get gift notifications.
-    
-    notification_proposal : `bool`
-        Whether proposal notification should be delivered.
-    
-    notification_vote : `bool`
-        Whether vote notification should be delivered.
+    notification_flags : `int`
+        Notification flags.
     
     preferred_client_id : `int`
         The client's identifier who should deliver the notifications.
     
     preferred_image_source : `int`
         The image source the user prefers if multiple choices are available.
+    
+    user_id : `int`
+        The user's identifier.
     """
     __slots__ = (
-        'entry_id', 'user_id', 'notification_daily_by_waifu', 'notification_daily_reminder', 'notification_gift',
-        'notification_proposal', 'notification_vote', 'preferred_client_id', 'preferred_image_source'
+        'entry_id', 'feature_flags', 'notification_flags', 'preferred_client_id', 'preferred_image_source', 'user_id'
     )
     
     def __new__(
         cls,
         user_id,
-        *,
-        notification_daily_by_waifu = True,
-        notification_daily_reminder = False,
-        notification_gift = True,
-        notification_proposal = True,
-        notification_vote = True,
-        preferred_client_id = 0,
-        preferred_image_source = PREFERRED_IMAGE_SOURCE_NONE,
     ):
         """
         Creates a new user settings object.
@@ -64,20 +56,63 @@ class UserSettings(RichAttributeErrorBaseType):
         ----------
         user_id : `int`
             The user's identifier.
+        """
+        self = object.__new__(cls)
+        self.entry_id = 0
+        self.feature_flags = USER_SETTINGS_FEATURE_FLAG_DEFAULT
+        self.notification_flags = USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT
+        self.preferred_client_id = 0
+        self.preferred_image_source = PREFERRED_IMAGE_SOURCE_NONE
+        self.user_id = user_id
+        return self
+    
+    
+    @classmethod
+    def create_with_specification(
+        cls,
+        user_id,
+        *,
+        feature_market_place_inbox = USER_SETTINGS_FEATURE_FLAG_DEFAULT_MARKET_PLACE_INBOX,
+        notification_adventure_recovery_over = USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_ADVENTURE_RECOVERY_OVER,
+        notification_daily_by_waifu = USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_DAILY_BY_WAIFU,
+        notification_daily_reminder = USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_DAILY_REMINDER,
+        notification_gift = USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_GIFT,
+        notification_market_place_item_finalisation = USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_MARKET_PLACE_ITEM_FINALISATION,
+        notification_proposal = USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_PROPOSAL,
+        notification_vote = USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_VOTE,
+        preferred_client_id = 0,
+        preferred_image_source = PREFERRED_IMAGE_SOURCE_NONE,
+    ):
+        """
+        Creates user settings with the given specifications.
         
-        notification_daily_by_waifu : `bool` = `True`, Optional (Keyword only)
+        Parameters
+        ----------
+        user_id : `int`
+            The user's identifier.
+        
+        feature_market_place_inbox : `int` = `USER_SETTINGS_FEATURE_FLAG_DEFAULT_MARKET_PLACE_INBOX`, Optional (Keyword only)
+            Whether the user has access to market place inbox.
+        
+        notification_adventure_recovery_over : `int` = `USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_ADVENTURE_RECOVERY_OVER`, Optional (Keyword only)
+            Whether notification should be delivered when a user's recovered and can engage on a new adventure.
+        
+        notification_daily_by_waifu : `int` = `USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_DAILY_BY_WAIFU`, Optional (Keyword only)
             Whether daily notification should be delivered.
         
-        notification_daily_reminder : `bool` = `False`, Optional (Keyword only)
+        notification_daily_reminder : `int` = `USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_DAILY_REMINDER`, Optional (Keyword only)
             Whether the user should get reminder about that they forgot to claim their daily reward.
         
-        notification_gift : `bool` = `True`, Optional (Keyword only)
+        notification_gift : `int` = `USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_GIFT`, Optional (Keyword only)
             Whether the user should get gift notifications.
         
-        notification_proposal : `bool` = `True`, Optional (Keyword only)
+        notification_market_place_item_finalisation : `int` = `USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_MARKET_PLACE_ITEM_FINALISATION`, Optional (Keyword only)
+            Whether market place item finalisation should be delivered.
+        
+        notification_proposal : `int` = `USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_PROPOSAL`, Optional (Keyword only)
             Whether notification_proposal notification should be delivered.
         
-        notification_vote : `bool` = `True`, Optional (Keyword only)
+        notification_vote : `int` = `USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_VOTE`, Optional (Keyword only)
             Whether vote notification should be delivered.
         
         preferred_client_id : `int` = `0`, Optional (Keyword only)
@@ -88,14 +123,21 @@ class UserSettings(RichAttributeErrorBaseType):
         """
         self = object.__new__(cls)
         self.entry_id = 0
-        self.user_id = user_id
-        self.notification_daily_by_waifu = notification_daily_by_waifu
-        self.notification_daily_reminder = notification_daily_reminder
-        self.notification_gift = notification_gift
-        self.notification_proposal = notification_proposal
-        self.notification_vote = notification_vote
+        self.feature_flags = (
+             (feature_market_place_inbox << USER_SETTINGS_FEATURE_FLAG_SHIFT_MARKET_PLACE_INBOX)
+        )
+        self.notification_flags = (
+            (notification_adventure_recovery_over << USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_ADVENTURE_RECOVERY_OVER) |
+            (notification_daily_by_waifu << USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_BY_WAIFU) |
+            (notification_daily_reminder << USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_REMINDER) |
+            (notification_gift << USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_GIFT) |
+            (notification_market_place_item_finalisation << USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_MARKET_PLACE_ITEM_FINALISATION) |
+            (notification_proposal << USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_PROPOSAL) |
+            (notification_vote << USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_VOTE)
+        )
         self.preferred_client_id = preferred_client_id
         self.preferred_image_source = preferred_image_source
+        self.user_id = user_id
         return self
     
     
@@ -115,14 +157,11 @@ class UserSettings(RichAttributeErrorBaseType):
         """
         self = object.__new__(cls)
         self.entry_id = entry['id']
-        self.user_id = entry['user_id']
-        self.notification_daily_by_waifu = entry['notification_daily_by_waifu']
-        self.notification_daily_reminder = entry['notification_daily_reminder']
-        self.notification_gift = entry['notification_gift']
-        self.notification_proposal = entry['notification_proposal']
-        self.notification_vote = entry['notification_vote']
+        self.feature_flags = entry['feature_flags']
+        self.notification_flags = entry['notification_flags']
         self.preferred_client_id = entry['preferred_client_id']
         self.preferred_image_source = entry['preferred_image_source']
+        self.user_id = entry['user_id']
         return self
     
     
@@ -139,21 +178,13 @@ class UserSettings(RichAttributeErrorBaseType):
         repr_parts.append(' user_id = ')
         repr_parts.append(repr(self.user_id))
         
-        repr_parts.append(', notification_daily_by_waifu = ')
-        repr_parts.append(repr(self.notification_daily_by_waifu))
+        # feature_flags
+        repr_parts.append(', feature_flags = ')
+        repr_parts.append(repr(self.feature_flags))
         
-        repr_parts.append(', notification_daily_reminder = ')
-        repr_parts.append(repr(self.notification_daily_reminder))
-        
-        # notification_gift
-        repr_parts.append(', notification_gift = ')
-        repr_parts.append(repr(self.notification_gift))
-        
-        repr_parts.append(', notification_proposal = ')
-        repr_parts.append(repr(self.notification_proposal))
-        
-        repr_parts.append(', notification_vote = ')
-        repr_parts.append(repr(self.notification_vote))
+        # notification_flags
+        repr_parts.append(', notification_flags = ')
+        repr_parts.append(repr(self.notification_flags))
         
         repr_parts.append(', preferred_client_id = ')
         repr_parts.append(repr(self.preferred_client_id))
@@ -170,28 +201,23 @@ class UserSettings(RichAttributeErrorBaseType):
         if type(self) is not type(other):
             return NotImplemented
         
+        # user_id
         if self.user_id != other.user_id:
             return False
         
-        if self.notification_daily_by_waifu != other.notification_daily_by_waifu:
+        # feature_flags
+        if self.feature_flags != other.feature_flags:
             return False
         
-        if self.notification_daily_reminder != other.notification_daily_reminder:
+        # notification_flags
+        if self.notification_flags != other.notification_flags:
             return False
         
-        # notification_gift
-        if self.notification_gift != other.notification_gift:
-            return False
-        
-        if self.notification_proposal != other.notification_proposal:
-            return False
-        
-        if self.notification_vote != other.notification_vote:
-            return False
-        
+        # preferred_client_id
         if self.preferred_client_id != other.preferred_client_id:
             return False
         
+        # preferred_image_source
         if self.preferred_image_source != other.preferred_image_source:
             return False
         
@@ -200,25 +226,19 @@ class UserSettings(RichAttributeErrorBaseType):
     
     def __bool__(self):
         """Returns whether the notification setting has anything modified."""
-        if self.notification_daily_by_waifu != True:
+        # feature_flags
+        if self.feature_flags != USER_SETTINGS_FEATURE_FLAG_DEFAULT:
             return True
         
-        if self.notification_daily_reminder != False:
+        # notification_flags
+        if self.notification_flags != USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT:
             return True
         
-        # notification_gift
-        if self.notification_gift != True:
-            return True
-        
-        if self.notification_proposal != True:
-            return True
-        
-        if self.notification_vote != True:
-            return True
-        
+        # preferred_client_id
         if self.preferred_client_id != 0:
             return True
         
+        # preferred_image_source
         if self.preferred_image_source != PREFERRED_IMAGE_SOURCE_NONE:
             return True
         
@@ -235,52 +255,9 @@ class UserSettings(RichAttributeErrorBaseType):
         """
         new = object.__new__(type(self))
         new.entry_id = self.entry_id
-        new.user_id = self.user_id
-        new.notification_daily_by_waifu = self.notification_daily_by_waifu
-        new.notification_daily_reminder = self.notification_daily_reminder
-        new.notification_gift = self.notification_gift
-        new.notification_proposal = self.notification_proposal
-        new.notification_vote = self.notification_vote
+        new.feature_flags = self.feature_flags
+        new.notification_flags = self.notification_flags
         new.preferred_client_id = self.preferred_client_id
         new.preferred_image_source = self.preferred_image_source
+        new.user_id = self.user_id
         return new
-    
-    
-    @property
-    def daily(self):
-        warn(
-            f'`{type(self).__name__}.daily` has been removed. Use `.notification_daily_by_waifu` instead.',
-            FutureWarning,
-            stacklevel = 2,
-        )
-        return self.notification_daily_by_waifu
-
-    
-    @property
-    def daily_by_waifu(self):
-        warn(
-            f'`{type(self).__name__}.daily_by_waifu` has been removed. Use `.notification_daily_by_waifu` instead.',
-            FutureWarning,
-            stacklevel = 2,
-        )
-        return self.notification_daily_by_waifu
-
-
-    @property
-    def daily_reminder(self):
-        warn(
-            f'`{type(self).__name__}.daily_reminder` has been removed. Use `.notification_daily_reminder` instead.',
-            FutureWarning,
-            stacklevel = 2,
-        )
-        return self.notification_daily_reminder
-
-    
-    @property
-    def proposal(self):
-        warn(
-            f'`{type(self).__name__}.proposal` has been removed. Use `.notification_proposal` instead.',
-            FutureWarning,
-            stacklevel = 2,
-        )
-        return self.notification_proposal

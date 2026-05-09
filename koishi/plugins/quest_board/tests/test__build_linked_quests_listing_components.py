@@ -160,7 +160,7 @@ def _iter_options():
                 create_text_display(
                     f'# {user_nick}\'s quests\n'
                     f'\n'
-                    f'User rank: D\n'
+                    f'User rank: D ({1 << 11} / {1 << 12})\n'
                     f'Active quest count: 3 / 3'
                 ),
                 thumbnail = create_thumbnail_media(

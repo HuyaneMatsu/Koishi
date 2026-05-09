@@ -6,6 +6,8 @@ from math import ceil
 
 from scarletio import Task, get_event_loop
 
+from config import MARISA_MODE
+
 from ...inventory_core import get_inventory, save_inventory
 from ...user_stats_core import get_user_stats, save_user_stats
 
@@ -23,6 +25,16 @@ from .helpers import (
 )
 from .loot_accumulation_logic import accumulate_action_loot
 from .seed_stepping import step_seed, step_seed_initial
+
+
+try:
+    from ...adventure_recovery_over_reminder_hook import set_closest_adventure_recovery_over_reminder
+except ImportError:
+    if not MARISA_MODE:
+        raise
+    
+    async def set_closest_adventure_recovery_over_reminder(user_id, date_time):
+        return
 
 
 LOOP = get_event_loop()
@@ -77,7 +89,7 @@ async def scheduled_adventure_arrival(adventure):
     travel_duration = get_location_distance_travel_duration(adventure, user_stats)
     
     adventure.handle = LOOP.call_after(
-        (adventure.updated_at + TimeDelta(seconds = travel_duration) - DateTime.now(tz = TimeZone.utc)).total_seconds(),
+        (adventure.updated_at + TimeDelta(seconds = travel_duration) - DateTime.now(TimeZone.utc)).total_seconds(),
         invoke_adventure_arrival,
         adventure,
     )
@@ -142,7 +154,7 @@ async def adventure_arrival(adventure):
     
     # Schedule new handle.
     adventure.handle = LOOP.call_after(
-        (arrival_date + TimeDelta(seconds = duration) - DateTime.now(tz = TimeZone.utc)).total_seconds(),
+        (arrival_date + TimeDelta(seconds = duration) - DateTime.now(TimeZone.utc)).total_seconds(),
         invoke_adventure_action_step,
         adventure,
     )
@@ -173,7 +185,7 @@ async def schedule_adventure_action(adventure):
     
     # Schedule new handle.
     adventure.handle = LOOP.call_after(
-        (adventure.updated_at + TimeDelta(seconds = duration) - DateTime.now(tz = TimeZone.utc)).total_seconds(),
+        (adventure.updated_at + TimeDelta(seconds = duration) - DateTime.now(TimeZone.utc)).total_seconds(),
         invoke_adventure_action_step,
         adventure,
     )
@@ -304,7 +316,7 @@ async def adventure_action_step(adventure):
     
     # Schedule new handle
     adventure.handle = LOOP.call_after(
-        (action_date + TimeDelta(seconds = duration) - DateTime.now(tz = TimeZone.utc)).total_seconds(),
+        (action_date + TimeDelta(seconds = duration) - DateTime.now(TimeZone.utc)).total_seconds(),
         callback,
         adventure,
     )
@@ -334,7 +346,7 @@ async def adventure_cancel(adventure):
     if (handle is not None):
         handle.cancel()
     
-    now = DateTime.now(tz = TimeZone.utc)
+    now = DateTime.now(TimeZone.utc)
     
     # Update the adventure.
     adventure.state = ADVENTURE_STATE_CANCELLED
@@ -416,8 +428,11 @@ async def adventure_return(adventure):
     # Calculate for how long the user is eeping after the adventure.
     duration_till_recovery_end = get_duration_till_recovery_end(adventure)
     if duration_till_recovery_end:
-        user_stats.set_recovering_until(return_date + TimeDelta(seconds = duration_till_recovery_end))
+        recovering_until = return_date + TimeDelta(seconds = duration_till_recovery_end)
+        user_stats.set_recovering_until(recovering_until)
         await save_user_stats(user_stats)
+        await set_closest_adventure_recovery_over_reminder(user_stats, recovering_until)
+    
     
     # Notify
     notifier = get_adventure_return_notifier()
@@ -444,7 +459,7 @@ async def schedule_adventure_return(adventure):
         duration = min(duration, (adventure.updated_at - adventure.created_at).total_seconds())
     
     adventure.handle = LOOP.call_after(
-        (adventure.updated_at + TimeDelta(seconds = duration) - DateTime.now(tz = TimeZone.utc)).total_seconds(),
+        (adventure.updated_at + TimeDelta(seconds = duration) - DateTime.now(TimeZone.utc)).total_seconds(),
         invoke_adventure_return,
         adventure,
     )
@@ -475,7 +490,7 @@ async def adventure_unknown(adventure):
         The adventure to update.
     """
     user_stats = await get_user_stats(adventure.user_id)
-    now = DateTime.now(tz = TimeZone.utc)
+    now = DateTime.now(TimeZone.utc)
     
     # Update the adventure.
     adventure.state = ADVENTURE_STATE_RETURNING

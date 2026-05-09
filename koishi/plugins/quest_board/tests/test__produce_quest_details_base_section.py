@@ -175,7 +175,7 @@ def test__produce_quest_details_base_section(linked_quest, quest, quest_template
     
     Returns
     -------
-    output : `(str, add_extra_line_break_after)`
+    output : `(str, bool)`
     """
     output = []
     

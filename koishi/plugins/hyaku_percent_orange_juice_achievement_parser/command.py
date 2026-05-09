@@ -22,7 +22,7 @@ async def orange_juice_achievement_parse(client, interaction_event, target):
         The client who received this interaction.
     
     interaction_event : ``InteractionEvent``
-        The received interaction evnet.
+        The received interaction event.
     
     target : ``Message``
         The targeted message.

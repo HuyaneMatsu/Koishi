@@ -42,24 +42,12 @@ class UserSettingsOption(RichAttributeErrorBaseType):
         return self
     
     
-    @property
-    def system_name(self):
-        """
-        Returns the option's system name-
-        
-        Returns
-        -------
-        system_name : `str`
-        """
-        return self.field_descriptor.__name__
-    
-    
     def __repr__(self):
         """Returns the user option's representation."""
         repr_parts = ['<', type(self).__name__]
         
-        repr_parts.append(' system_name = ')
-        repr_parts.append(self.system_name)
+        repr_parts.append(' name = ')
+        repr_parts.append(self.name)
         
         repr_parts.append('>')
         return ''.join(repr_parts)
@@ -76,7 +64,7 @@ class UserSettingsOption(RichAttributeErrorBaseType):
         
         Returns
         -------
-        value : `bool`
+        value : `object`
         """
         return self.field_descriptor.__get__(user_settings, type(user_settings))
     
@@ -89,7 +77,8 @@ class UserSettingsOption(RichAttributeErrorBaseType):
         ----------
         user_settings : ``UserSettings``
             The user settings to get value of.
-        value : `bool`
+        
+        value : `object`
             The value to set.
         """
         self.field_descriptor.__set__(user_settings, value)

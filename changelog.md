@@ -1,3 +1,23 @@
+### 2026-06-09
+
+- Fix `/snipe` force define sticker size, due to Discord now resizing stickers to a really small size,
+    when size is omitted. This made them be displayed in small and adding them in really bad quality.
+- Fix `/quest board` quest details' possession count reset the counter if there was a `0` times possessed requirement.
+    This affected quests only with more than 1 requirement.
+- Fix `/quest board` quest detail's quest completion did not respect overflow.
+- Fix `/market-place` successful biddings now mentions to claim the items within 7 days. (2vio2vieevie)
+- Fix `/quest board`'s `complete` feature did not reset the quest's state if it was previously completed,
+    requiring the user to submit less resources on continuous completions.
+    (Since overflow was respected.) (yumeirusynthesis)
+- Fix `/quest board` `accept` allowed over-accepting quests. (Since previous update.) (2vio2vieevie)
+- Fix action commands, such as `/hug` fail to respond when they are trying to use a `waifu.pics` pool; The api is down.
+- `/user quests` and `/guild quest-board` now displays credibility requirements.
+- Add new notifications: `adventure-recovery-over`, `market-place-item-finalisation`.
+- Add a new `/user-settings-management` command; owner only.
+- Add new option to toggle features: `market-place-inbox`, part of `/user-settings-management`. (ayahiya)
+
+### 2026-04-17
+
 - Fix `/relationships info listing-mode:Legacy` preferred secondary relationships coming first instead of primary ones.
     (chaos3326)
 - Fix `/adventure view` displayed finished adventures as active. (ayahiya)

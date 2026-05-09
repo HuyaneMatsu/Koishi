@@ -5,7 +5,7 @@ from hata import (
     create_text_display, create_text_input, create_thumbnail_media
 )
 
-from ..market_place_core import MARKET_PLACE_ITEM_FLAG_BUYER_RETRIEVED, MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED
+from ..market_place_core import MARKET_PLACE_ITEM_FLAG_PURCHASER_RETRIEVED, MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED
 
 from .constants import BID_INCREASE_LOWER_THRESHOLD, EMOJI_CLOSE, EMOJI_LEFT, EMOJI_RIGHT, PAGE_SIZE_DEFAULT
 from .content_building import (
@@ -316,7 +316,7 @@ def build_inbox_view_components(
                 
             elif purchaser_user_id == user.id:
                 function = produce_inbox_purchased_market_place_item_description
-                flag_mask = MARKET_PLACE_ITEM_FLAG_BUYER_RETRIEVED
+                flag_mask = MARKET_PLACE_ITEM_FLAG_PURCHASER_RETRIEVED
                 
             else:
                 function = produce_inbox_sold_market_place_item_description
@@ -856,7 +856,8 @@ def build_bid_success_components(
     components.append(create_text_display(
         'You successfully placed your bid.\n'
         '\n'
-        'Keep a keen eye on it, it is up to you to see whether others up you.'
+        'Keep a keen eye on it, it is up to you to see whether others up you.\n'
+        'In case you win the bid, make sure to claim it within 7 days!'
     ))
     components.append(create_separator())
     

@@ -34,8 +34,14 @@ def test__put_more_to_cache__value():
     user_id_0 = 202309240032
     user_id_1 = 202309240033
     
-    user_settings_0 = UserSettings(user_id_0, notification_daily_by_waifu = False)
-    user_settings_1 = UserSettings(user_id_1, notification_proposal = False)
+    user_settings_0 = UserSettings.create_with_specification(
+        user_id_0,
+        notification_daily_by_waifu = 0,
+    )
+    user_settings_1 = UserSettings.create_with_specification(
+        user_id_1,
+        notification_proposal = 0,
+    )
     
     try:
         put_more_to_cache([user_settings_0, user_settings_1])

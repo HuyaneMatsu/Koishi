@@ -12,7 +12,7 @@ from ..adventure_core import get_active_adventure
 from ..inventory_core import get_inventory, save_inventory
 from ..item_core import get_item, get_item_nullable
 from ..market_place_core import (
-    CUSTOM_ID_MARKET_PLACE_OFFER_RP, MARKET_PLACE_ITEM_FLAG_BUYER_RETRIEVED, MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED,
+    CUSTOM_ID_MARKET_PLACE_OFFER_RP, MARKET_PLACE_ITEM_FLAG_PURCHASER_RETRIEVED, MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED,
     MarketPlaceItem, get_market_place_item, get_market_place_item_listing_active, get_market_place_item_listing_inbox,
     get_market_place_item_listing_own_offers, insert_market_place_item, update_market_place_item
 )
@@ -422,7 +422,7 @@ async def handle_inbox_claim(
         
         purchaser_user_id = market_place_item.purchaser_user_id
         if purchaser_user_id == user_id:
-            flag_mask = MARKET_PLACE_ITEM_FLAG_BUYER_RETRIEVED
+            flag_mask = MARKET_PLACE_ITEM_FLAG_PURCHASER_RETRIEVED
         else:
             flag_mask = MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED
         

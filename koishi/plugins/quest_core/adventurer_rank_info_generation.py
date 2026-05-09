@@ -1,4 +1,7 @@
-__all__ = ('get_guild_adventurer_rank_info', 'get_user_adventurer_rank_info')
+__all__ = (
+    'get_guild_adventurer_rank_info', 'get_guild_adventurer_rank_up_credibility', 'get_user_adventurer_rank_info',
+    'get_user_adventurer_rank_up_credibility'
+)
 
 from .adventurer_rank_info import AdventurerRankInfo
 
@@ -55,3 +58,35 @@ def get_guild_adventurer_rank_info(credibility):
         continue
     
     return AdventurerRankInfo(rank, rank + ((rank + 6) >> 1))
+
+
+def get_user_adventurer_rank_up_credibility(level):
+    """
+    Returns how much credibility is required for the user for the next adventurer rank.
+    
+    Parameters
+    ----------
+    level : `int`
+        The user's current level.
+    
+    Returns
+    -------
+    credibility : `int`
+    """
+    return 1 << (8 + level)
+
+
+def get_guild_adventurer_rank_up_credibility(level):
+    """
+    Returns how much credibility is required for the guild for the next adventurer rank.
+    
+    Parameters
+    ----------
+    level : `int`
+        The guild's current level.
+    
+    Returns
+    -------
+    credibility : `int`
+    """
+    return 1 << (10 + level)

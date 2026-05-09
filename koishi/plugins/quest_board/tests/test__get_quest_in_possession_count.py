@@ -276,6 +276,23 @@ def _iter_options():
         inventory,
         0,
     )
+    
+    
+    quest_15 = Quest(
+        QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
+        [
+            QuestRequirementInstantiableItemExact(ITEM_ID_FISHING_ROD, AMOUNT_TYPE_COUNT, 100),
+            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 1),
+        ],
+        None,
+    )
+    
+    yield (
+        'Item exact, multi requirement, first unsatisfied, last satisfied',
+        quest_15,
+        inventory,
+        0,
+    )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).named_first().returning_last())

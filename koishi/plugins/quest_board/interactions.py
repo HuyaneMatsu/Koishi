@@ -367,7 +367,7 @@ async def quest_accept(client, interaction_event, user_id, guild_id, page_index,
     
     while True:
         error_message, fields = await _check_quest_accept_conditions_common(
-            user_id, guild_id, quest_template_id, False
+            user_id, guild_id, quest_template_id, True
         )
         if (error_message is not None):
             break
@@ -1138,11 +1138,12 @@ async def handle_quest_board_complete_execute(
             break
         
         # Create the linked quest if it does not exist yet.
-        if linked_quest is not None:
-            linked_quest_created = False
-        else:
+        if linked_quest is None:
             linked_quest = instantiate_quest(user_id, guild_id, quest_batch.id, quest)
             linked_quest_created = True
+        else:
+            reset_linked_quest(linked_quest)
+            linked_quest_created = False
         
         # Submit items.
         submissions_normalised = None
@@ -1299,7 +1300,7 @@ async def linked_quest_abandon_invoke(client, interaction_event, user_id, page_i
         
         # Ask the user for confirmation if the quest is still alive.
         expiration = get_linked_quest_expiration(linked_quest)
-        if (expiration is None) or (expiration > DateTime.now(tz = TimeZone.utc)):
+        if (expiration is None) or (expiration > DateTime.now(TimeZone.utc)):
             await client.interaction_form_send(
                 interaction_event,
                 build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_index, credibility_penalty),

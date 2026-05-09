@@ -199,6 +199,7 @@ async def query_save_user_stats_loop(user_stats):
                         
                         credibility = user_stats.credibility,
                         recovering_until = user_stats.recovering_until,
+                        set_recovering_until_notification_at = user_stats.set_recovering_until_notification_at,
                         
                         item_id_costume = user_stats.item_id_costume,
                         item_id_head = user_stats.item_id_head,

@@ -195,7 +195,7 @@ def test__build_linked_quest_submit_success_completed_components(
     user_level_old : `int`
         The user's adventurer rank before completing the quest.
     
-    submissions_normalised : ``list<(Item, int, int, int, int)>``
+    submissions_normalised : ``None | list<(Item, int, int, int, int)>``
         The submitted amounts normalised.
     
     rewards_normalised : `None | list<(int, int, int)>`

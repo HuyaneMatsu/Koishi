@@ -10,6 +10,7 @@ from .image_handlers import (
     IMAGE_HANDLER_POCKY_KISS_SELF, IMAGE_HANDLER_POKE, IMAGE_HANDLER_SLAP, IMAGE_HANDLER_SMILE, IMAGE_HANDLER_SMUG,
     IMAGE_HANDLER_STARE, IMAGE_HANDLER_WAVE, IMAGE_HANDLER_WINK, IMAGE_HANDLER_YEET
 )
+from ..image_handling_core import ImageHandlerWaifuPics, exclude_handler_types
 
 
 ACTIONS = [
@@ -217,3 +218,19 @@ ACTIONS = [
         'yeets',
     )
 ]
+
+# Exclude some type of handlers and remove those actions using only those.
+EXCLUDED_HANDLERS = (ImageHandlerWaifuPics,)
+
+for index in reversed(range(len(ACTIONS))):
+    action = ACTIONS[index]
+    handler = exclude_handler_types(action.handler, EXCLUDED_HANDLERS)
+    handler_self = exclude_handler_types(action.handler_self, EXCLUDED_HANDLERS)
+    
+    if handler is None:
+        del ACTIONS[index]
+    else:
+        action.handler = handler
+        action.handler_self = handler_self
+
+del index, action, handler, handler_self

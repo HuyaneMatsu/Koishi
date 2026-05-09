@@ -17,7 +17,8 @@ from ..relationships_core import (
 )
 from ..user_balance import get_user_balance, get_user_balances
 from ..user_settings import (
-    USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_BY_WAIFU_DISABLE, get_one_user_settings, get_preferred_client_for_user
+    USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_BY_WAIFU_DISABLE, USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_BY_WAIFU,
+    get_one_user_settings, get_preferred_client_for_user
 )
 
 from .embed_builders import (
@@ -299,7 +300,7 @@ async def claim_daily_for_other(client, interaction_event, extender_relationship
     
     if (not target_user.bot):
         target_user_settings = await get_one_user_settings(target_user.id)
-        if target_user_settings.notification_daily_by_waifu:
+        if (target_user_settings.notification_flags >> USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_BY_WAIFU) & 1:
             await send_embed_to(
                 get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
                 target_user.id,

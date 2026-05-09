@@ -1,4 +1,4 @@
-__all__ = ()
+__all__ = ('USER_SETTINGS_CACHE',)
 
 from collections import OrderedDict
 

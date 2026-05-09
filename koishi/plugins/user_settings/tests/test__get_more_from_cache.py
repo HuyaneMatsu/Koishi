@@ -62,8 +62,14 @@ def test__get_more_from_cache__hit_value():
     user_id_0 = 202309240010
     user_id_1 = 202309240011
     
-    user_settings_0 = UserSettings(user_id_0, notification_daily_by_waifu = False)
-    user_settings_1 = UserSettings(user_id_0, notification_proposal = False)
+    user_settings_0 = UserSettings.create_with_specification(
+        user_id_0,
+        notification_daily_by_waifu = 0,
+    )
+    user_settings_1 = UserSettings.create_with_specification(
+        user_id_0,
+        notification_proposal = 0,
+    )
     
     try:
         USER_SETTINGS_CACHE[user_id_0] = user_settings_0
@@ -90,7 +96,10 @@ def test__get_more_from_cache__hit_and_value():
     user_id_0 = 202309240014
     user_id_1 = 202309240015
     
-    user_settings_0 = UserSettings(user_id_0, notification_daily_by_waifu = False)
+    user_settings_0 = UserSettings.create_with_specification(
+        user_id_0,
+        notification_daily_by_waifu = 0,
+    )
     
     try:
         USER_SETTINGS_CACHE[user_id_0] = user_settings_0

@@ -1,42 +1,14 @@
-__all__ = ('end_remind_loop', 'start_remind_loop')
-
-from hata import KOKORO
-
-from .reminding import remind_forgot_daily
+__all__ = ('REMINDER_LOOPER',)
 
 
-REMIND_INTERVAL = 30 * 60 # half hour
+from ..reminder_notification_delivery_core import ReminderLooper
 
-handle = None
-
-
-def end_remind_loop():
-    """
-    Ends the remind loop.
-    """
-    global handle
-    if handle is None:
-        return
-    
-    handle.cancel()
-    handle = None
+from .notifier import notify_user
+from .queries import get_entries_to_notify_with_connector
 
 
-def start_remind_loop():
-    """
-    Begins the remind loop.
-    """
-    global handle
-    if handle is not None:
-        return
-    
-    step_remind_loop()
-
-
-def step_remind_loop():
-    """
-    Steps the remind loop.
-    """
-    global handle
-    handle = KOKORO.call_after(REMIND_INTERVAL, step_remind_loop)
-    KOKORO.create_task(remind_forgot_daily())
+REMINDER_LOOPER = ReminderLooper(
+    'daily_reminder',
+    get_entries_to_notify_with_connector,
+    notify_user,
+)

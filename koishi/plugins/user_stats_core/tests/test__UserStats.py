@@ -25,6 +25,7 @@ def _assert_fields_set(user_stats):
     vampytest.assert_instance(user_stats.item_id_weapon, int)
     vampytest.assert_instance(user_stats.modified_fields, dict, nullable = True)
     vampytest.assert_instance(user_stats.recovering_until, DateTime, nullable = True)
+    vampytest.assert_instance(user_stats.recovering_until_notification_at, DateTime, nullable = True)
     vampytest.assert_instance(user_stats.stat_bedroom, int)
     vampytest.assert_instance(user_stats.stat_charm, int)
     vampytest.assert_instance(user_stats.stat_cuteness, int)
@@ -77,6 +78,7 @@ def test__UserStats__from_entry():
     
     credibility = 12222
     recovering_until = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    recovering_until_notification_at = DateTime(2016, 5, 14, 1, 0, 0, tzinfo = TimeZone.utc)
     
     item_id_costume = 2
     item_id_head = 3
@@ -97,6 +99,7 @@ def test__UserStats__from_entry():
         
         'credibility': credibility,
         'recovering_until': recovering_until.replace(tzinfo = None),
+        'recovering_until_notification_at': recovering_until_notification_at.replace(tzinfo = None),
         
         'item_id_costume': item_id_costume,
         'item_id_head': item_id_head,
@@ -118,6 +121,7 @@ def test__UserStats__from_entry():
     
     vampytest.assert_eq(user_stats.credibility, credibility)
     vampytest.assert_eq(user_stats.recovering_until, recovering_until)
+    vampytest.assert_eq(user_stats.recovering_until_notification_at, recovering_until_notification_at)
     
     vampytest.assert_eq(user_stats.item_id_costume, item_id_costume)
     vampytest.assert_eq(user_stats.item_id_head, item_id_head)
@@ -261,6 +265,27 @@ def test__UserStats__set_recovering_until():
         user_stats.modified_fields,
         {
             'recovering_until': user_stats.recovering_until,
+        },
+    )
+
+
+def test__UserStats__set_set_recovering_until_notification_at():
+    """
+    Tests whether ``UserStats.set_set_recovering_until_notification_at`` works as intended.
+    """
+    current = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    amount = DateTime(2016, 5, 15, tzinfo = TimeZone.utc)
+    
+    user_stats = UserStats(202511290005)
+    user_stats.recovering_until_notification_at = current
+    user_stats.set_recovering_until_notification_at(amount)
+    
+    vampytest.assert_eq(user_stats.recovering_until_notification_at, amount)
+    
+    vampytest.assert_eq(
+        user_stats.modified_fields,
+        {
+            'recovering_until_notification_at': user_stats.recovering_until_notification_at,
         },
     )
 

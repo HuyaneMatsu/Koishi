@@ -41,6 +41,9 @@ class UserStats(RichAttributeErrorBaseType):
     recovering_until : `None | DateTime`
         Until when the user is in recovery.
     
+    recovering_until_notification_at : `None | DateTime`
+        When the recovery notification should be delivered at. Set upon delivering the original notification fails.
+    
     stat_bedroom : `int`
         The user's bedroom skills.
     
@@ -61,8 +64,9 @@ class UserStats(RichAttributeErrorBaseType):
     """
     __slots__ = (
         '__weakref__', '_cache_user_stats_calculated', 'credibility', 'entry_id', 'item_id_costume', 'item_id_head',
-        'item_id_species', 'item_id_weapon', 'modified_fields', 'recovering_until', 'stat_bedroom', 'stat_charm',
-        'stat_cuteness', 'stat_housewife', 'stat_loyalty', 'user_id',
+        'item_id_species', 'item_id_weapon', 'modified_fields', 'recovering_until',
+        'recovering_until_notification_at', 'stat_bedroom', 'stat_charm', 'stat_cuteness', 'stat_housewife',
+        'stat_loyalty', 'user_id',
     )
     
     def __new__(cls, user_id):
@@ -83,6 +87,7 @@ class UserStats(RichAttributeErrorBaseType):
         
         self.credibility = 0
         self.recovering_until = None
+        self.recovering_until_notification_at = None
         
         self.item_id_costume = 0
         self.item_id_head = 0
@@ -151,6 +156,13 @@ class UserStats(RichAttributeErrorBaseType):
         if (recovering_until is not None):
             recovering_until = recovering_until.replace(tzinfo = TimeZone.utc)
         self.recovering_until = recovering_until
+        
+        recovering_until_notification_at = entry['recovering_until_notification_at']
+        if (recovering_until_notification_at is not None):
+            recovering_until_notification_at = recovering_until_notification_at.replace(
+                tzinfo = TimeZone.utc
+            )
+        self.recovering_until_notification_at = recovering_until_notification_at
         
         self.item_id_costume = entry['item_id_costume']
         self.item_id_head = entry['item_id_head']
@@ -273,6 +285,17 @@ class UserStats(RichAttributeErrorBaseType):
         """
         self.recovering_until = date_time
         self._mark_modification('recovering_until', date_time)
+    
+    
+    def set_recovering_until_notification_at(self, date_time):
+        """
+        Sets when the recovery notification should be delivered at.
+        
+        Parameters
+        ----------
+        """
+        self.recovering_until_notification_at = date_time
+        self._mark_modification('recovering_until_notification_at', date_time)
     
     
     def modify_credibility_by(self, value):

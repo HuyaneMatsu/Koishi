@@ -1,6 +1,8 @@
 __all__ = ()
 
-from hata import Client, DiscordException, ERROR_CODES, Emoji, GUILDS, InteractionType, SoundboardSound, Sticker
+from hata import (
+    Client, DiscordException, ERROR_CODES, Emoji, GUILDS, InteractionType, SoundboardSound, Sticker, StickerFormat
+)
 
 from ...bots import FEATURE_CLIENTS
 
@@ -529,7 +531,21 @@ async def handle_snipe_add(
             data = await client.download_attachment(attachment)
         
         elif (entity is not None):
-            async with client.http.get(entity.url) as response:
+            while True:
+                if type(entity) is Sticker:
+                    sticker_format = entity.format
+                    if (
+                        (sticker_format is StickerFormat.png) or
+                        (sticker_format is StickerFormat.apng) or
+                        (sticker_format is StickerFormat.gif)
+                    ):
+                        url = entity.url_as(size = 320)
+                        break
+                
+                url = entity.url
+                break
+            
+            async with client.http.get(url) as response:
                 data = await response.read()
         
         else:

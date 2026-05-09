@@ -665,11 +665,15 @@ def get_quest_in_possession_count(quest, inventory):
                     # AMOUNT_TYPE_COUNT and else
                     multiplier = 1
                 
-                # DO not calculate it by completion to allow the user submitting it multiple times.
+                # Do not calculate it by completion to allow the user submitting it multiple times.
                 amount_owned = inventory.get_item_amount(item) * multiplier
                 amount_required = requirement.amount_required
                 
                 completable_count = amount_owned // amount_required
+                if not completable_count:
+                    possession_count = 0
+                    break
+                
                 if (not possession_count) or (completable_count < possession_count):
                     possession_count = completable_count
                 continue
@@ -742,13 +746,10 @@ def try_submit_item(requirement, inventory, item_entry, submissions_normalised):
     if (amount_submitted >= amount_required):
         return submissions_normalised
     
-    current_amount_count = item_entry.amount
     item = item_entry.item
-    
     amount_type = requirement.amount_type
-    amount_to_be_used = amount_required - amount_submitted
     amount_used, amount_used_count = get_submit_amount(
-        item, amount_type, amount_to_be_used, current_amount_count
+        item, amount_type, amount_required - amount_submitted, item_entry.amount
     )
     requirement.amount_submitted = amount_submitted + amount_used
     inventory.modify_item_amount(item, -amount_used_count)
@@ -786,29 +787,34 @@ def do_submit_complete_item(requirement, inventory, item_entry, submissions_norm
     
     Returns
     -------
-    submissions_normalised : ``list<(Item, int, int, int, int)>``
+    submissions_normalised : ``None | list<(Item, int, int, int, int)>``
     """
     amount_required = requirement.amount_required
+    amount_submitted = requirement.amount_submitted
     
-    current_amount_count = item_entry.amount
-    item = item_entry.item
     amount_required_total = amount_required * submission_count
+    if (amount_submitted >= amount_required_total):
+        return submissions_normalised
     
+    item = item_entry.item
     amount_type = requirement.amount_type
     amount_used, amount_used_count = get_submit_amount(
-        item, amount_type, amount_required_total, current_amount_count
+        item, amount_type, amount_required_total - amount_submitted, item_entry.amount
     )
     inventory.modify_item_amount(item, -amount_used_count)
     
     # If you submit extra items, keep the extra in `.amount_submitted`.
     # If you submitted less for whatever reason, do not point out that you indeed submitted less.
-    requirement.amount_submitted = max(amount_required, amount_required + amount_used - amount_required_total)
+    requirement.amount_submitted = max(
+        amount_required,
+        amount_submitted + amount_required + amount_used - amount_required_total
+    )
     
     if (submissions_normalised is None):
         submissions_normalised = []
     
     submissions_normalised.append((
-        item, amount_type, amount_required_total, 0, amount_used
+        item, amount_type, amount_required_total, amount_submitted, amount_used
     ))
     return submissions_normalised
 

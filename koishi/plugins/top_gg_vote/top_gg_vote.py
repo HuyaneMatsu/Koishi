@@ -12,7 +12,8 @@ from ...bots import MAIN_CLIENT
 
 from ..user_balance import get_user_balance, save_user_balance
 from ..user_settings import (
-    USER_SETTINGS_CUSTOM_ID_NOTIFICATION_VOTE_DISABLE, get_one_user_settings, get_preferred_client_for_user
+    USER_SETTINGS_CUSTOM_ID_NOTIFICATION_VOTE_DISABLE, USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_VOTE,
+    get_one_user_settings, get_preferred_client_for_user
 )
 
 DELTA_BETWEEN_VOTES_MIN = TimeDelta(minutes = 1)
@@ -51,7 +52,7 @@ async def handle_top_gg_vote(external_event):
     
 
     target_user_settings = await get_one_user_settings(external_event.user_id)
-    if target_user_settings.notification_vote:
+    if (target_user_settings.notification_flags >> USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_VOTE) & 1:
         await send_embed_to(
             get_preferred_client_for_user(user, target_user_settings.preferred_client_id, MAIN_CLIENT),
             user.id,

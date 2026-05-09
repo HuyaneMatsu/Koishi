@@ -15,7 +15,7 @@ from ..adventure_core import (
 )
 from ..inventory_core import get_inventory
 from ..quest_core import get_user_adventurer_rank_info
-from ..user_stats_core import get_user_stats
+from ..user_stats_core import get_user_stats, save_user_stats
 
 from .component_building import (
     ADVENTURE_LISTING_PAGE_SIZE, build_adventure_action_listing_view_components, build_adventure_action_view_components,
@@ -96,7 +96,7 @@ async def depart(
         
         user_stats = await get_user_stats(interaction_event.user_id)
         recovering_until = user_stats.recovering_until
-        now = DateTime.now(tz = TimeZone.utc)
+        now = DateTime.now(TimeZone.utc)
         if (recovering_until is not None) and (recovering_until > now):
             error_message = ''.join([*produce_adventure_depart_failure_recovery_description(recovering_until, now)])
             break
@@ -375,9 +375,15 @@ async def handle_adventure_create_confirm(
         
         user_stats = await get_user_stats(user_id)
         recovering_until = user_stats.recovering_until
-        if (recovering_until is not None) and (recovering_until > DateTime.now(tz = TimeZone.utc)):
-            error_message = 'You are currently recovering, cannot go on an adventure.'
-            break
+        if (recovering_until is not None):
+            if (recovering_until > DateTime.now(TimeZone.utc)):
+                error_message = 'You are currently recovering, cannot go on an adventure.'
+                break
+            
+            # If we are not recovering currently, set recovery until to `None`,
+            # so when notifying, we know that we know that we should not be do it anymore.
+            user_stats.set_recovering_until_notification_at(None)
+            await save_user_stats(user_stats)
         
         stats_calculated = user_stats.stats_calculated
         
@@ -508,7 +514,7 @@ async def _build_adventure_components_common(
             adventure_action_listing,
             allow_switching_to_adventure_listing_view,
             adventure_listing_page_index,
-            DateTime.now(tz = TimeZone.utc),
+            DateTime.now(TimeZone.utc),
             user_stats.stats_calculated.extra_inventory,
             inventory.weight,
         )

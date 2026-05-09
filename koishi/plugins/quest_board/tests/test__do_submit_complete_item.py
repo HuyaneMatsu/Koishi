@@ -33,6 +33,42 @@ def _iter_options():
     )
     
     yield (
+        'some -> full submit x1',
+        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 2),
+        [
+            (item_strawberry, 24)
+        ],
+        item_strawberry,
+        1,
+        (
+            [
+                (item_strawberry, AMOUNT_TYPE_COUNT, 20, 2, 18)
+            ],
+            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 20),
+            [
+                (item_strawberry, 6)
+            ],
+        ),
+    )
+    
+    yield (
+        'some -> none to submit',
+        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 20),
+        [
+            (item_strawberry, 24)
+        ],
+        item_strawberry,
+        1,
+        (
+            None,
+            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 20),
+            [
+                (item_strawberry, 24)
+            ],
+        ),
+    )
+    
+    yield (
         'none -> full submit, no item left x1',
         QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 0),
         [
@@ -130,6 +166,32 @@ def _iter_options():
             ],
         ),
     )
+    
+    yield (
+        'some -> full submit (weight) x3',
+        QuestRequirementSerialisableItemExact(
+            ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 20 * item_strawberry.weight + 1, 1
+        ),
+        [
+            (item_strawberry, 64)
+        ],
+        item_strawberry,
+        3,
+        (
+            [
+                (item_strawberry, AMOUNT_TYPE_WEIGHT, 60 * item_strawberry.weight + 3, 1, 61 * item_strawberry.weight)
+            ],
+            QuestRequirementSerialisableItemExact(
+                ITEM_ID_STRAWBERRY,
+                AMOUNT_TYPE_WEIGHT,
+                20 * item_strawberry.weight + 1,
+                21 * item_strawberry.weight - 2 + 1
+            ),
+            [
+                (item_strawberry, 3)
+            ],
+        ),
+    )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).named_first().returning_last())
@@ -153,7 +215,7 @@ def test__do_submit_complete_item(requirement, item_amount_pairs, submitted_item
     
     Returns
     -------
-    output : ``(list<(Item, int, int, int, int)>, QuestRequirementSerialisableItemExact | QuestRequirementSerialisableItemGroup | QuestRequirementSerialisable, list<(Item, int)>)``
+    output : ``(None | list<(Item, int, int, int, int)>, QuestRequirementSerialisableItemExact | QuestRequirementSerialisableItemGroup | QuestRequirementSerialisable, list<(Item, int)>)``
     """
     requirement, index = type(requirement).deserialise(b''.join([*requirement.serialise()]), 0)
     assert requirement is not None

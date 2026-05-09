@@ -76,6 +76,7 @@ async def test__get_stats__request():
     
     credibility = 12222
     recovering_until = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    recovering_until_notification_at = recovering_until
     
     item_id_costume = 2
     item_id_head = 3
@@ -96,6 +97,7 @@ async def test__get_stats__request():
         
         'credibility': credibility,
         'recovering_until': recovering_until.replace(tzinfo = None),
+        'recovering_until_notification_at': recovering_until_notification_at.replace(tzinfo = None),
         
         'item_id_costume': item_id_costume,
         'item_id_head': item_id_head,

@@ -16,7 +16,10 @@ async def test__get_one_user_settings__cache_hit():
     query_called = False
     
     user_id = 202309240050
-    user_settings = UserSettings(user_id, notification_daily_by_waifu = False)
+    user_settings = UserSettings.create_with_specification(
+        user_id,
+        notification_daily_by_waifu = 0,
+    )
     
     async def query(user_id):
         nonlocal query_called
@@ -52,7 +55,10 @@ async def test__get_one_user_settings__database_hit_value():
     called_with_user_id = 0
     
     user_id = 202309240051
-    user_settings = UserSettings(user_id, notification_daily_by_waifu = False)
+    user_settings = UserSettings.create_with_specification(
+        user_id,
+        notification_daily_by_waifu = 0,
+    )
     
     async def query(user_id):
         nonlocal query_called

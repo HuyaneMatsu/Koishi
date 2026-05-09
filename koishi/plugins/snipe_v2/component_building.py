@@ -86,7 +86,7 @@ def build_view_components(
                 (sticker_format is StickerFormat.apng) or
                 (sticker_format is StickerFormat.gif)
             ):
-                asset_component = create_media_gallery(entity.url)
+                asset_component = create_media_gallery(entity.url_as(size = 320))
             
             elif (sticker_format is StickerFormat.lottie):
                 asset_component = create_attachment_media('attachment://structure.json')

@@ -19,8 +19,14 @@ async def test__get_more_user_settings_with_connector__cache_hit():
     user_id_0 = 202309250070
     user_id_1 = 202309250071
     
-    user_settings_0 = UserSettings(user_id_0, notification_daily_by_waifu = False)
-    user_settings_1 = UserSettings(user_id_1, notification_proposal = False)
+    user_settings_0 = UserSettings.create_with_specification(
+        user_id_0,
+        notification_daily_by_waifu = 0,
+    )
+    user_settings_1 = UserSettings.create_with_specification(
+        user_id_1,
+        notification_proposal = 0,
+    )
     
     async def query(user_ids, connector):
         nonlocal query_called
@@ -63,8 +69,14 @@ async def test__get_more_user_settings_with_connector__database_hit_value():
     user_id_0 = 202309250072
     user_id_1 = 202309250073
     
-    user_settings_0 = UserSettings(user_id_0, notification_daily_by_waifu = False)
-    user_settings_1 = UserSettings(user_id_1, notification_proposal = False)
+    user_settings_0 = UserSettings.create_with_specification(
+        user_id_0,
+        notification_daily_by_waifu = 0,
+    )
+    user_settings_1 = UserSettings.create_with_specification(
+        user_id_1,
+        notification_proposal = 0,
+    )
     
     async def query(user_ids, connector):
         nonlocal query_called
@@ -170,8 +182,14 @@ async def test__get_more_user_settings_with_connector__mixed_hit_value():
     user_id_0 = 202309250076
     user_id_1 = 202309250077
     
-    user_settings_0 = UserSettings(user_id_0, notification_daily_by_waifu = False)
-    user_settings_1 = UserSettings(user_id_1, notification_proposal = False)
+    user_settings_0 = UserSettings.create_with_specification(
+        user_id_0,
+        notification_daily_by_waifu = 0,
+    )
+    user_settings_1 = UserSettings.create_with_specification(
+        user_id_1,
+        notification_proposal = 0,
+    )
     
     async def query(user_ids, connector):
         nonlocal query_called

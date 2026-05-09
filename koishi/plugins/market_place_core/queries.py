@@ -575,7 +575,7 @@ async def query_get_market_place_item_listing_active(item_id, item_flags, now, p
         elif item_flags:
             condition = and_(
                 condition,
-                market_place_item_model.item_flags.op('&')(item_flags) == item_flags
+                market_place_item_model.item_flags.op('&')(item_flags) != 0
             )
         
         response = await connector.execute(

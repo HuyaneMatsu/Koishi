@@ -77,7 +77,7 @@ class AdventureAction(RichAttributeErrorBaseType):
             The amount of energy used while completing the action.
         """
         if action_id is None:
-            action_id = DateTime.now(tz = TimeZone.utc)
+            action_id = DateTime.now(TimeZone.utc)
         
         self = object.__new__(cls)
         self.action_id = action_id

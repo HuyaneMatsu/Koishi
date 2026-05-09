@@ -121,7 +121,7 @@ def _iter_options():
                 create_text_display(
                     f'# Orin\'s dance house\'s quest board\n'
                     f'\n'
-                    f'Guild rank: G\n'
+                    f'Guild rank: G ({1 << 10} / {1 << 11})\n'
                     f'Quest count: 3 / 4'
                 ),
                 thumbnail = create_thumbnail_media(
@@ -202,7 +202,7 @@ def _iter_options():
             create_text_display(
                 f'# Orin\'s dance house\'s quest board\n'
                 f'\n'
-                f'Guild rank: G\n'
+                f'Guild rank: G ({1 << 10} / {1 << 11})\n'
                 f'Quest count: 0 / 4'
             ),
             create_separator(),

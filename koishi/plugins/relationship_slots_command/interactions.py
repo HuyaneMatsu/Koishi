@@ -11,7 +11,9 @@ from ..gift_common import can_gift, produce_gift_requirements_unsatisfied_error_
 from ..relationship_slots_core import CUSTOM_ID_BUY_RELATIONSHIP_SLOT_INVOKE_RP
 from ..relationships_core import deepen_and_boost_relationship, get_relationship_to_deepen
 from ..user_balance import get_user_balance
-from ..user_settings import get_one_user_settings, get_preferred_client_for_user
+from ..user_settings import (
+    USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_GIFT, get_one_user_settings, get_preferred_client_for_user
+)
 
 from .component_building import build_confirmation_form
 from .content_building import (
@@ -249,7 +251,7 @@ async def handle_buy_relationship_slot_confirmation(
         
         if (target_user is not None) and (not target_user.bot):
             target_user_settings = await get_one_user_settings(target_user.id)
-            if target_user_settings.notification_gift:
+            if (target_user_settings.notification_flags >> USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_GIFT) & 1:
                 await send_embed_to(
                     get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
                     target_user,

@@ -199,7 +199,7 @@ async def to_time(
     output : `str`
     """
     time = id_to_datetime(snowflake)
-    now = DateTime.now(tz = TimeZone.utc)
+    now = DateTime.now(TimeZone.utc)
     
     if time > now:
         delta = RelativeDelta(time, now)

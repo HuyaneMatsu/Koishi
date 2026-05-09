@@ -21,7 +21,7 @@ def test__get_preferred_client_for_user__notifier_client_set():
     
     user = User.precreate(user_id)
     
-    user_settings = UserSettings(
+    user_settings = UserSettings.create_with_specification(
         user_id,
         preferred_client_id = client_id_0,
     )
@@ -52,7 +52,7 @@ def test__get_preferred_client_for_user__default_client_given():
     
     user = User.precreate(user_id)
     
-    user_settings = UserSettings(
+    user_settings = UserSettings.create_with_specification(
         user_id,
         preferred_client_id = 0,
     )
@@ -81,7 +81,7 @@ def test__get_preferred_client_for_user__available_clients():
     
     user = User.precreate(user_id)
     
-    user_settings = UserSettings(
+    user_settings = UserSettings.create_with_specification(
         user_id,
         preferred_client_id = 0,
     )
@@ -112,7 +112,7 @@ def test__get_preferred_client_for_user__available_clients():
     mocked = vampytest.mock_globals(get_preferred_client_for_user, 2, FEATURE_CLIENTS = FEATURE_CLIENTS)
     
     try:
-        output = mocked(user, user_settings, None)
+        output = mocked(user, user_settings.preferred_client_id, None)
         
         vampytest.assert_instance(output, Client)
         vampytest.assert_in(output, {client_0, client_1})
@@ -135,7 +135,7 @@ def test__get_preferred_client_for_user__main_client():
     
     user = User.precreate(user_id)
     
-    user_settings = UserSettings(
+    user_settings = UserSettings.create_with_specification(
         user_id,
         preferred_client_id = 0,
     )
@@ -148,7 +148,7 @@ def test__get_preferred_client_for_user__main_client():
     mocked = vampytest.mock_globals(get_preferred_client_for_user, MAIN_CLIENT = client_0)
     
     try:
-        output = mocked(user, user_settings, None)
+        output = mocked(user, user_settings.preferred_client_id, None)
         
         vampytest.assert_instance(output, Client)
         vampytest.assert_is(output, client_0)

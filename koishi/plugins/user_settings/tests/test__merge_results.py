@@ -12,15 +12,47 @@ def _iter_options():
     user_id_2 = 202309220042
     user_id_3 = 202309220043
     
-    user_settings_0 = UserSettings(user_id_0, notification_daily_by_waifu = False)
-    user_settings_1 = UserSettings(user_id_1, notification_daily_by_waifu = False)
-    user_settings_2 = UserSettings(user_id_2, notification_proposal = False)
-    user_settings_3 = UserSettings(user_id_3, notification_daily_by_waifu = False, notification_proposal = False)
+    user_settings_0 = UserSettings.create_with_specification(
+        user_id_0,
+        notification_daily_by_waifu = 0,
+    )
+    user_settings_1 = UserSettings.create_with_specification(
+        user_id_1,
+        notification_daily_by_waifu = 0,
+    )
+    user_settings_2 = UserSettings.create_with_specification(
+        user_id_2,
+        notification_proposal = 0,
+    )
+    user_settings_3 = UserSettings.create_with_specification(
+        user_id_3,
+        notification_daily_by_waifu = 0,
+        notification_proposal = 0,
+    )
     
-    yield None, None, None
-    yield [user_settings_0], None, [user_settings_0]
-    yield None, [user_settings_0], [user_settings_0]
-    yield [user_settings_0], [user_settings_1], [user_settings_0, user_settings_1]
+    yield (
+        None,
+        None,
+        None,
+    )
+    
+    yield (
+        [user_settings_0],
+        None,
+        [user_settings_0],
+    )
+    
+    yield (
+        None,
+        [user_settings_0],
+        [user_settings_0],
+    )
+    
+    yield (
+        [user_settings_0],
+        [user_settings_1],
+        [user_settings_0, user_settings_1],
+    )
     
     yield (
         [user_settings_0, user_settings_1],

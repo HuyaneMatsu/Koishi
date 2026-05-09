@@ -17,7 +17,10 @@ async def test__get_one_user_settings_with_connector__cache_hit():
     connector = object()
     
     user_id = 202309240060
-    user_settings = UserSettings(user_id, notification_daily_by_waifu = False)
+    user_settings = UserSettings.create_with_specification(
+        user_id,
+        notification_daily_by_waifu = 0,
+    )
     
     async def query(user_id, connector):
         nonlocal query_called
@@ -57,7 +60,10 @@ async def test__get_one_user_settings_with_connector__database_hit_value():
     called_connector_with = None
     
     user_id = 202309240061
-    user_settings = UserSettings(user_id, notification_daily_by_waifu = False)
+    user_settings = UserSettings.create_with_specification(
+        user_id,
+        notification_daily_by_waifu = 0,
+    )
     
     async def query(user_id, connector):
         nonlocal query_called

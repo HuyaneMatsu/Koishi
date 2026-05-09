@@ -1,6 +1,6 @@
 __all__ = ('build_character_preference_change_components', 'build_character_preference_components',)
 
-from hata import Embed, create_text_display
+from hata import create_text_display
 
 
 def produce_character_listing(character_preferences):
@@ -96,9 +96,6 @@ def build_character_preference_change_components(character, added):
     
     Parameters
     ----------
-    user : ``ClientUserBase``
-        The user who's character preference were changed.
-    
     character : ``TouhouCharacter``
         The touhou character added / removed.
     

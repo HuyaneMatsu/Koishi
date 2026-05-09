@@ -16,7 +16,10 @@ async def test__save_one_user_settings__save_and_move():
     query_called = False
     user_id_0 = 202309250000
     user_id_1 = 202309250001
-    user_settings = UserSettings(user_id_0, notification_daily_by_waifu = False)
+    user_settings = UserSettings.create_with_specification(
+        user_id_0,
+        notification_daily_by_waifu = 0,
+    )
     called_with_user_settings = None
     
     async def query(user_settings):
@@ -62,7 +65,10 @@ async def test__save_one_user_settings__delete_and_move():
     query_called = False
     user_id_0 = 202309250002
     user_id_1 = 202309250003
-    user_settings = UserSettings(user_id_0, notification_daily_by_waifu = False)
+    user_settings = UserSettings.create_with_specification(
+        user_id_0,
+        notification_daily_by_waifu = 0,
+    )
     called_with_user_settings = None
     
     async def query(user_settings):

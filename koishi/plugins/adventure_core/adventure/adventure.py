@@ -127,7 +127,7 @@ class Adventure(RichAttributeErrorBaseType):
         self.state = ADVENTURE_STATE_DEPARTING
         
         self.initial_duration = initial_duration
-        self.created_at = self.updated_at = DateTime.now(tz = TimeZone.utc)
+        self.created_at = self.updated_at = DateTime.now(TimeZone.utc)
         self.action_count = 0
         self.seed = floor(random() * (1 << 63))
         

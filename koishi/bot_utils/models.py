@@ -173,6 +173,7 @@ if (DB_ENGINE is not None):
         
         credibility = Column(Int64, default = 0, nullable = False)
         recovering_until = Column(DateTime, nullable = True)
+        recovering_until_notification_at = Column(DateTime, nullable = True)
         
         item_id_costume = Column(Int32, default = 0, nullable = False)
         item_id_head = Column(Int32, default = 0, nullable = False)
@@ -249,11 +250,8 @@ if (DB_ENGINE is not None):
         __tablename__ = 'USER_SETTINGS'
         id = Column(Int64, nullable = False, primary_key = True)
         user_id = Column(Int64, nullable = False)
-        notification_daily_by_waifu = Column(Boolean, default = True, nullable = False)
-        notification_daily_reminder = Column(Boolean, default = False, nullable = False)
-        notification_gift = Column(Boolean, default = True, nullable = False)
-        notification_proposal = Column(Boolean, default = True, nullable = False)
-        notification_vote = Column(Boolean, default = True, nullable = False)
+        feature_flags = Column(Int64, default = 0, nullable = False)
+        notification_flags = Column(Int64, default = 0, nullable = False)
         preferred_client_id = Column(Int64, default = 0, nullable = False)
         preferred_image_source = Column(Int16, default = 0, nullable = False)
     

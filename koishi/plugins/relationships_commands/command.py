@@ -21,7 +21,9 @@ from ..relationships_core import (
 from ..user_balance import (
     ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST, get_user_balance, get_user_balances, save_user_balance
 )
-from ..user_settings import get_one_user_settings, get_preferred_client_for_user
+from ..user_settings import (
+    USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_PROPOSAL, get_one_user_settings, get_preferred_client_for_user
+)
 
 from .checks import (
     async_check_can_propose_to_bot, async_check_source_already_has_waifu, async_check_source_already_has_waifu_request,
@@ -452,7 +454,7 @@ async def proposal_create(
             
             if current_relationship is None:
                 current_relationship = Relationship(
-                    source_user.id, target_user.id, relationship_type, investment, DateTime.now(tz = TimeZone.utc)
+                    source_user.id, target_user.id, relationship_type, investment, DateTime.now(TimeZone.utc)
                 )
             else:
                 new_relationship_type = current_relationship.relationship_type
@@ -508,7 +510,7 @@ async def proposal_create(
             
             else:
                 target_user_settings = await get_one_user_settings(target_user.id)
-                if target_user_settings.notification_proposal:
+                if (target_user_settings.notification_flags >> USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_PROPOSAL) & 1:
                     await send_embed_to(
                         get_preferred_client_for_user(target_user, target_user_settings.preferred_client_id, client),
                         target_user,
