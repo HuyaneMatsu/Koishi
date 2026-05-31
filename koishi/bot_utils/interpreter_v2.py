@@ -12,7 +12,7 @@ from scarletio import (
 from scarletio.utils.trace.rendering import _produce_exception_representation_syntax_error
 from scarletio.utils.trace.exception_representation import ExceptionRepresentationSyntaxError
 from scarletio.utils.trace.exception_representation.syntax_error_helpers import (
-    fixup_syntax_error_line_from_buffer, is_syntax_error
+    fix_up_syntax_error_line_from_buffer, is_syntax_error
 )
 
 try:
@@ -206,7 +206,7 @@ class Interpreter:
                         render_exception_into(syntax_error, into, filter = _ignore_console_frames)
                     
                     else:
-                        fixup_syntax_error_line_from_buffer(syntax_error, source.splitlines())
+                        fix_up_syntax_error_line_from_buffer(syntax_error, source.splitlines())
                         
                         highlighter_stream = get_highlight_streamer(None)
                         for item in _produce_exception_representation_syntax_error(

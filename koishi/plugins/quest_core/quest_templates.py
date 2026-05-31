@@ -1,12 +1,14 @@
 __all__ = ()
 
 from ..item_core import (
-    ITEM_GROUP_ID_FIREWOOD, ITEM_GROUP_ID_KNIFE, ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT,
-    ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_CHIRUNO, ITEM_ID_DAI,
-    ITEM_ID_DEVILCART_OYSTER, ITEM_ID_EIRIN, ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG,
-    ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_NINA,
-    ITEM_ID_PEACH, ITEM_ID_REIMU, ITEM_ID_RULER, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS,
-    ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA, ITEM_ID_TEWI, ITEM_ID_YUKARI, ITEM_ID_YUUKA
+    ITEM_GROUP_ID_FIREWOOD, ITEM_GROUP_ID_KNIFE, ITEM_GROUP_ID_SWEETS, ITEM_ID_ALICE, ITEM_ID_ANGELROOT,
+    ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_CHIRUNO,
+    ITEM_ID_DAI, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_EIRIN, ITEM_ID_FISHING_ROD, ITEM_ID_FLANDRE,
+    ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_KOISHI, ITEM_ID_KOKORO,
+    ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_PEACH, ITEM_ID_PUDDING, ITEM_ID_REIMU, ITEM_ID_REMILIA,
+    ITEM_ID_RIBBON_BOW, ITEM_ID_RULER, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SATORI, ITEM_ID_SCARLET_ONION,
+    ITEM_ID_SCISSORS, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA, ITEM_ID_TEWI, ITEM_ID_TEA_LEAVES,
+    ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YUKARI, ITEM_ID_YUUKA
 )
 
 from .amount_types import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT
@@ -17,21 +19,23 @@ from .quest_requirement_generators import (
 )
 from .quest_reward_generators import (
     QuestRewardGeneratorBalance, QuestRewardGeneratorCredibility, QuestRewardGeneratorCredibilityFix,
-    QuestRewardGeneratorItemExactFix
+    QuestRewardGeneratorItemExact, QuestRewardGeneratorItemExactFix
 )
 from .quest_template import QuestTemplate
 from .quest_template_ids import (
     QUEST_TEMPLATE_ID_ALICE_ANGELROOT, QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_CHIRUNO_FROG,
-    QUEST_TEMPLATE_ID_DAI_FROG, QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT, QUEST_TEMPLATE_ID_JUNKO_ANGELROOT,
-    QUEST_TEMPLATE_ID_KOISHI_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT, QUEST_TEMPLATE_ID_KOISHI_GARLIC,
-    QUEST_TEMPLATE_ID_KOISHI_KNIFE, QUEST_TEMPLATE_ID_KOISHI_RULER, QUEST_TEMPLATE_ID_KOKORO_SCISSORS,
-    QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_MYSTIA_BAMBOO_SHOOT, QUEST_TEMPLATE_ID_MYSTIA_CARROT,
-    QUEST_TEMPLATE_ID_MYSTIA_DEVILCART_OYSTER, QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD, QUEST_TEMPLATE_ID_MYSTIA_GARLIC,
-    QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_MYSTIA_SCARLET_ONION, QUEST_TEMPLATE_ID_NINA_STRAWBERRY,
-    QUEST_TEMPLATE_ID_REIMU_BANQUET, QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH,
-    QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER, QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD,
-    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QUEST_TEMPLATE_ID_SUIKA_SAKE, QUEST_TEMPLATE_ID_TEWI_BISHOPHAT,
-    QUEST_TEMPLATE_ID_YUKARI_RULER, QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT
+    QUEST_TEMPLATE_ID_DAI_FROG, QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW, QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT,
+    QUEST_TEMPLATE_ID_JUNKO_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT,
+    QUEST_TEMPLATE_ID_KOISHI_GARLIC, QUEST_TEMPLATE_ID_KOISHI_KNIFE, QUEST_TEMPLATE_ID_KOISHI_PUDDING,
+    QUEST_TEMPLATE_ID_KOISHI_RULER, QUEST_TEMPLATE_ID_KOKORO_SCISSORS, QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA,
+    QUEST_TEMPLATE_ID_MYSTIA_BAMBOO_SHOOT, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_DEVILCART_OYSTER,
+    QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD, QUEST_TEMPLATE_ID_MYSTIA_GARLIC, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
+    QUEST_TEMPLATE_ID_MYSTIA_SCARLET_ONION, QUEST_TEMPLATE_ID_NINA_STRAWBERRY, QUEST_TEMPLATE_ID_REIMU_BANQUET,
+    QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING, QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW, QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY,
+    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER, 
+    QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QUEST_TEMPLATE_ID_SATORI_PUDDING,
+    QUEST_TEMPLATE_ID_SUIKA_SAKE, QUEST_TEMPLATE_ID_TEWI_BISHOPHAT, QUEST_TEMPLATE_ID_YUKARI_RULER,
+    QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT
 )
 
 
@@ -576,7 +580,7 @@ QUEST_TEMPLATE_KOISHI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BISHO
 
 # - Koishi +1 level
 # - Magic forest + 1 level
-# - rare drop +3 level
+# - Rare drop +3 level
 # Reward is around 2.5x of the value
 QUEST_TEMPLATE_KOISHI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_RULER] = QuestTemplate(
     QUEST_TEMPLATE_ID_KOISHI_RULER,
@@ -606,7 +610,7 @@ QUEST_TEMPLATE_KOISHI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_RULER] = 
 
 
 # - Yukari +3 level
-# - rare drop +3 level
+# - Rare drop +3 level
 # Reward is around 3x of the value
 QUEST_TEMPLATE_YUKARI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YUKARI_RULER] = QuestTemplate(
     QUEST_TEMPLATE_ID_YUKARI_RULER,
@@ -641,7 +645,7 @@ QUEST_TEMPLATE_YUKARI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YUKARI_RULER] = 
 )
 
 # - Yuuka +2 level
-# - rare drop +3 level
+# - Rare drop +3 level
 # Reward is around 2x of the value
 QUEST_TEMPLATE_YUUKA_STRAW_HAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT] = QuestTemplate(
     QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT,
@@ -786,7 +790,7 @@ QUEST_NINA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NINA_STRAWBERRY] = Que
 
 # - Koishi +1 level
 # - Moriya shrine +2 level
-# - rare drop +3 level
+# - Rare drop +3 level
 # Reward is around 2x of the value
 QUEST_TEMPLATE_KOISHI_KNIFE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_KNIFE] = QuestTemplate(
     QUEST_TEMPLATE_ID_KOISHI_KNIFE,
@@ -919,6 +923,7 @@ QUEST_TEMPLATE_REIMU_BANQUET = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REIMU_BANQUET] 
     ),
 )
 
+
 # - Suika +2 level
 # - Requires reward +1 level
 # Reward around 2x the value
@@ -946,5 +951,166 @@ QUEST_TEMPLATE_SUIKA_SAKE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SUIKA_SAKE] = Ques
     (
         QuestRewardGeneratorBalance(13600, 400, 80, 120),
         QuestRewardGeneratorCredibility(10),
+    ),
+)
+
+
+# - Flandre +4
+# - Ruins +1 level
+# - Rare drop +3 level
+QUEST_TEMPLATE_FLANDRE_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW] = QuestTemplate(
+    QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW,
+    (
+        QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW,
+        QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING,
+    ),
+    4, # Target: 1
+    34,
+    (
+        'I played outside lots today!!! But when I came back home, my onee-sama asked me where my ribbon went? '
+        'I said "I don\'t know!!!"\n'
+        'The ribbon is a gift from my onee-sama, I don\'t want to make her sad by losing it... I should find it...\n'
+        'Oh I know! How about YOU find it? I will offer you a reward most fitting of the '
+        'little sister of the Scarlet Devil herself!'
+    ),
+    8,
+    1,
+    ITEM_ID_FLANDRE,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 16, DAY_IN_SECONDS, 90, 110),
+        QuestRequirementGeneratorItemExact(ITEM_ID_RIBBON_BOW, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorItemExactFix(ITEM_ID_PUDDING, 1),
+        QuestRewardGeneratorCredibilityFix(240),
+    ),
+)
+
+
+# - Remilia +3
+# - Ruins +1 level
+# - Rare drop +3 level
+QUEST_TEMPLATE_REMILIA_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW] = QuestTemplate(
+    QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW,
+    (
+        QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW,
+    ),
+    4, # Target: 1
+    44,
+    (
+        'I like to go on long walks when the day is pleasant, but when I returned to my mansion and looked at myself '
+        'in the mirror today; my beautiful ribbon was nowhere to be seen!\n'
+        'Since I prefer to wear my ribbon a little loose (for comfort, of course), '
+        'it may have come off on the way back...\n'
+        'I am already feeling a little weak from my walk outside, therefore I request that whoever finds my beautiful '
+        'ribbon shall return it at once! Naturally, I would reward that person with a reward most fitting of the '
+        'Scarlet Devil herself~'
+    ),
+    7,
+    1,
+    ITEM_ID_REMILIA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 32, DAY_IN_SECONDS, 90, 110),
+        QuestRequirementGeneratorItemExact(ITEM_ID_RIBBON_BOW, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(1000, 100, 70, 130),
+        QuestRewardGeneratorItemExactFix(ITEM_ID_PUDDING, 4),
+        QuestRewardGeneratorCredibilityFix(160),
+    ),
+)
+
+
+# - Koishi +1
+# - Requires reward of rare drop quest +4 level
+# - Gives unique items +2 level
+QUEST_TEMPLATE_KOISHI_PUDDING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_PUDDING] = QuestTemplate(
+    QUEST_TEMPLATE_ID_KOISHI_PUDDING,
+    (
+        QUEST_TEMPLATE_ID_SATORI_PUDDING,
+        QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING,
+    ),
+    4, # Target: 1
+    56,
+    (
+        'Hello!\n'
+        'I\'m just wanted to open tea party at Palace of the Earth Spirits with my sister. '
+        'But, my sister said "If doing the tea party, then need some sweets." '
+        'I think Scarlet Devil Mansion\'s sweets is good for tea party, you can give it for me?'
+    ),
+    7,
+    1,
+    ITEM_ID_KOISHI,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 38, DAY_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_PUDDING, AMOUNT_TYPE_COUNT, 2, 2, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorItemExactFix(ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, 1),
+        QuestRewardGeneratorCredibility(10),
+    ),
+)
+
+# - Satori +2
+# - Requires reward of rare drop quest +4 level
+# - Balance +1 level
+QUEST_TEMPLATE_SATORI_PUDDING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SATORI_PUDDING] = QuestTemplate(
+    QUEST_TEMPLATE_ID_SATORI_PUDDING,
+    (
+        QUEST_TEMPLATE_ID_KOISHI_PUDDING,
+    ),
+    4, # Target: 1
+    28,
+    (
+        'Dear Reader, I am Komeiji Satori, the master of the Palace of the Earth Spirits.\n'
+        '\n'
+        'Recently my little sister, Koishi was pleading for some sweets. '
+        'Since she joined the Scarlet Devil mansion\'s tea party recently, '
+        'she says, that her friends, Flandre likes pudding and cake.\n'
+        '\n'
+        'Please bring some Scarlet Devil Mansion\'s sweets for me. It would make my little sister really happy.'
+    ),
+    7,
+    1,
+    ITEM_ID_SATORI,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 16, DAY_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_PUDDING, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_SWEETS, AMOUNT_TYPE_WEIGHT, 200, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(1000, 100, 80, 120),
+        QuestRewardGeneratorItemExact(ITEM_ID_TEA_LEAVES, 5, 1, 80, 120),
+        QuestRewardGeneratorCredibility(20),
+    ),
+)
+
+
+# - Remilia +3
+# - Requires reward of unique drop quest +5 level
+QUEST_TEMPLATE_REMILIA_FLANDRE_WING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING] = QuestTemplate(
+    QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING,
+    (
+        QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW,
+        QUEST_TEMPLATE_ID_KOISHI_PUDDING,
+    ),
+    4, # Target: 1
+    48,
+    (
+        'Today when my little sister Flandre came to greet me, I saw that she was missing a wing! '
+        'She doesn\'t even seem to notice that it\'s gone...\n'
+        'But this is a very troubling matter! I demand that her wing is returned at once before she realises '
+        '~~wreaking havoc on Gensoukyou~~ and goes looking for it herself!!'
+    ),
+    8,
+    1,
+    ITEM_ID_REMILIA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 8, 1, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(138000, 100, 90, 110),
+        QuestRewardGeneratorCredibilityFix(200),
     ),
 )

@@ -59,9 +59,9 @@ CATEGORIES = (
         'Actions',
         EMOJI_MASKS,
         (
-            'action', 'bite', 'blush', 'bully', 'cringe', 'cry', 'dance', 'feed', 'fluff', 'glomp', 'handhold',
-            'happy', 'highfive', 'hug', 'kick', 'kiss', 'kon', 'lap-sleep', 'lick', 'like', 'murder', 'nom', 'pat',
-            'peg', 'pocky-kiss', 'poke', 'slap', 'smile', 'smug', 'stare', 'wave', 'wink', 'yeet',
+            'action', 'bite', 'blush', 'bully', 'carry', 'cry', 'feed', 'fluff', 'handhold', 'happy', 'hug', 'kiss',
+            'kon', 'lap-sleep', 'lick', 'like', 'moon', 'murder', 'nom', 'pat', 'peg', 'pocky-kiss', 'poke', 'smug',
+            'stare', 'wave', 'wink',
         ),
         (),
     ), (

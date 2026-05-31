@@ -1,4 +1,57 @@
-### 2026-06-09
+### 2026-05-30
+
+- Fix `market-place-item-finalisation` notification message confused the seller and the purchaser. (Since last update.)
+   (2vio2vieevie)
+- Fix `adventure-recovery-over` were being triggered repeatedly. (Since last update.) (2vio2vieevie)
+- Fix `user-stats` were failing to be saved for the first time. (Since last update.)
+- Fix `adventure-recovery-over` reminder notification reminding scheduling triggered when the user had `waifu-by-waifu`
+    notification enabled instead of the intended `adventure-recovery-over`. (Since last update.)
+- Fix `adventure-recovery-over` notification date time was set after it was saved, so commonly it did not trigger.
+- Fix `/todo edit`, `/todo list` navigation not showing, `/todo list` not supporting query by rewriting the whole
+    command.
+- Fix `/guild quest-baord` could be accessed through other means in guilds where the bot is not in. (chaos3326)
+- Add missing touhou character `Unzan`.
+- `/color` command is now available when user installed.
+- Add **72** new images to `/stare`.
+- Add **5** new images to `/fluff`.
+- Add **7** new images to `/kon`.
+- Add **7** new images to `/kiss`.
+- Add **17** new images to `/handhold`.
+- Add **8** new images to `/hug`.
+- Add **4** new images to `/feed`.
+- Add **6** new images to `/pat`.
+- Add **1** new images to `/lick`.
+- Add touhou pool for `/bite` command with **5** images.
+- Add touhou pool for `/bully` command with **18** images.
+- Add touhou pool for `/cry` command with **8** images.
+- Add touhou pool for `/happy` command with **104** images.
+- Add touhou pool for `/murder` command with **22** images.
+- Add touhou pool for `/nom` command with **15** images.
+- Add touhou pool for `/wave` command with **9** images.
+- Add touhou pool for `/poke` command with **9** images.
+- Add touhou pool for `/wink` command with **24** images.
+- Add touhou pool for `/smug` command with **7** images.
+- Add touhou pool for `/blush` command with **30** images.
+- Add new `/carry` command with **26** images.
+- Add new `/moon` command with **20** images.
+- Un-list `cringe`, `cuddle`, `dance`, `glomp`, `highfive`, `kick`, `slap`, `smile`, `yeet`
+  commands since they are no longer available.
+
+- Add new quests:
+    - Flandre - Ribbon bow (2vio2vieevie)
+    - Remilia - Ribbon bow (2vio2vieevie)
+    - Koishi - Pudding (yumeirusynthesis)
+    - Satori - Pudding (yumeirusynthesis)
+    - Remilia - Flandre wing (2vio2vieevie)
+
+- Add new items:
+    - Pudding
+    - Tea leaves
+
+- Add new item groups:
+    - Sweets
+
+### 2026-05-09
 
 - Fix `/snipe` force define sticker size, due to Discord now resizing stickers to a really small size,
     when size is omitted. This made them be displayed in small and adding them in really bad quality.
@@ -100,7 +153,7 @@
     - fix item exact reward
 
 - Add new quests:
-    - Koishi - knife (yumeirusynthesis).
+    - Koishi - knife (yumeirusynthesis)
     - Eirin - Angelroot & bishophat (2vio2vieevie)
     - Reimu - Banquet (chaos3326)
     - Suika - Sake (2vio2vieevie)

@@ -4,10 +4,10 @@ from hata import BUILTIN_EMOJIS
 
 from .constants import ITEM_GROUPS
 from .item_group import ItemGroup
-from .item_group_ids import ITEM_GROUP_ID_FIREWOOD, ITEM_GROUP_ID_KNIFE
+from .item_group_ids import ITEM_GROUP_ID_FIREWOOD, ITEM_GROUP_ID_KNIFE, ITEM_GROUP_ID_SWEETS
 from .item_ids import (
-    ITEM_ID_ACHING_AFFECTION_S_HEART_PIERCER, ITEM_ID_BAMBOO, ITEM_ID_BOUGH, ITEM_ID_CUT_WOOD, ITEM_ID_KITCHEN_KNIFE,
-    ITEM_ID_LOG, ITEM_ID_POKING_KNIFE, ITEM_ID_TWIGS
+    ITEM_ID_ACHING_AFFECTION_S_HEART_PIERCER, ITEM_ID_BAMBOO, ITEM_ID_BOUGH, ITEM_ID_CUT_WOOD, ITEM_ID_DANGO,
+    ITEM_ID_KITCHEN_KNIFE, ITEM_ID_LOG, ITEM_ID_POKING_KNIFE, ITEM_ID_PUDDING, ITEM_ID_TWIGS
 )
 
 
@@ -41,5 +41,20 @@ ITEM_GROUP_FIREWOOD = ITEM_GROUPS[ITEM_GROUP_ID_FIREWOOD] = ItemGroup(
         ITEM_ID_LOG,
         ITEM_ID_BAMBOO,
         ITEM_ID_CUT_WOOD,
+    ),
+)
+
+
+ITEM_GROUP_SWEETS = ITEM_GROUPS[ITEM_GROUP_ID_SWEETS] = ItemGroup(
+    ITEM_GROUP_ID_SWEETS,
+    'Sweets',
+    BUILTIN_EMOJIS['cake'],
+    (
+        'Sweets are such a food category, which usually has high sugar content. '
+        'They are commonly used as desserts, cakes, ice cream, chocolates and sweet pies.'
+    ),
+    (
+        ITEM_ID_DANGO,
+        ITEM_ID_PUDDING,
     ),
 )

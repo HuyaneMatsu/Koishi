@@ -31,11 +31,11 @@ def _iter_options():
         REIUJI_UTSUHO.name,
         None,
         (
-            next((action for action in ACTIONS if action.name == 'hug'), None),
+            next((action for action in ACTIONS if action.name == 'handhold'), None),
             next(
                 (
                     image_detail for image_detail in TOUHOU_ACTION_ALL.iter_character_filterable()
-                    if image_detail.url.endswith('okuu-orin-hug-0002.png')
+                    if image_detail.url.endswith('okuu-orin-handhold-sleep-0000.png')
                 ),
                 None,
             ),

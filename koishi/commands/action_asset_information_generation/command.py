@@ -3,8 +3,9 @@ __all__ = ()
 from os import remove as delete_file
 from os.path import exists, isfile as is_file, join as join_paths
 
-from hata.ext.plugin_loader import import_plugin
+from hata.ext.plugin_loader import frame_filter, import_plugin
 from hata.main import register
+from scarletio import write_exception_sync
 
 from .building import _build_asset_information_for
 from .constants import SOURCE_PATH
@@ -16,7 +17,11 @@ def generate_action_assets():
     Generates asset information README.md file for action commands such as /hug.
     """
     # import plugins
-    import_plugin(__package__[: __package__.find('.')] + '.plugins')
+    try:
+        import_plugin(__package__[: __package__.find('.')] + '.plugins')
+    except BaseException as exception:
+        write_exception_sync(exception, filter = frame_filter)
+        return
     
     # import actions
     from ...plugins.image_commands_actions import TOUHOU_ACTION_ALL

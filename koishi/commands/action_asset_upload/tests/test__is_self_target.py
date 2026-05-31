@@ -42,7 +42,7 @@ def _iter_options():
             False,
         )
     
-    for tag in ('feed_self', 'pocky_self'):
+    for tag in ('pocky_self', ):
         yield (
             {CHEN},
             {tag},

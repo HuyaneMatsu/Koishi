@@ -151,10 +151,10 @@ if (DB_ENGINE is not None):
     class todo_model(BASE):
         __tablename__ = 'TODO'
         id = Column(Int64, primary_key = True)
-        name = Column(Unicode)
-        description = Column(Unicode)
-        created_at = Column(DateTime)
-        creator_id = Column(Int64)
+        name = Column(Unicode, nullable = False)
+        description = Column(Unicode, nullable = True)
+        created_at = Column(DateTime, nullable = False)
+        creator_id = Column(Int64, nullable = False)
     
     TODO_TABLE = todo_model.__table__
     

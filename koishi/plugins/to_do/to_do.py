@@ -3,15 +3,10 @@ __all__ = ()
 from datetime import timezone as TimeZone
 
 from hata import DATETIME_FORMAT_CODE
-from scarletio import copy_docs
-
-from ...bot_utils.entry_proxy import EntryProxy
-
-from .constants import TO_DOS
-from .to_do_saver import ToDoSaver
+from scarletio import RichAttributeErrorBaseType
 
 
-class ToDo(EntryProxy):
+class ToDo(RichAttributeErrorBaseType):
     """
     Represents a cached to do.
     
@@ -31,13 +26,8 @@ class ToDo(EntryProxy):
     
     name : `str`
         The entry's name.
-    
-    saver : `None | ToDoSaver`
-        Saver responsible for save synchronization.
     """
-    __slots__ = ('created_at', 'creator_id', 'description', 'name',)
-    
-    saver_type = ToDoSaver
+    __slots__ = ('created_at', 'creator_id', 'description', 'entry_id', 'name')
     
     def __new__(cls, name, description, created_at, creator_id):
         """
@@ -64,14 +54,19 @@ class ToDo(EntryProxy):
         self.description = description
         self.entry_id = 0
         self.name = name
-        self.saver = None
         
         return self
     
     
-    @copy_docs(EntryProxy._put_repr_parts)
-    def _put_repr_parts(self, repr_parts, field_added):
-        if field_added:
+    def __repr__(self):
+        """Returns repr(self)."""
+        repr_parts = ['<', type(self).__name__]
+        
+        # entry_id
+        entry_id = self.entry_id
+        if entry_id:
+            repr_parts.append(' entry_id = ')
+            repr_parts.append(repr(entry_id))
             repr_parts.append(',')
         
         # name
@@ -89,48 +84,29 @@ class ToDo(EntryProxy):
         # creator_id
         repr_parts.append(', creator_id = ')
         repr_parts.append(repr(self.creator_id))
-    
-    
-    async def save(self):
-        """
-        Saves the entry and then caches it.
         
-        This function is a coroutine.
-        """
-        saver = self.get_saver()
-        await saver.begin()
-        self._store_in_cache()
-    
-    
-    @copy_docs(EntryProxy._store_in_cache)
-    def _store_in_cache(self):
-        TO_DOS[self.entry_id] = self
-    
-    
-    @copy_docs(EntryProxy._pop_from_cache)
-    def _pop_from_cache(self):
-        try:
-            del TO_DOS[self.entry_id]
-        except KeyError:
-            pass
+        repr_parts.append('>')
+        return ''.join(repr_parts)
     
     
     @classmethod
-    @copy_docs(EntryProxy.from_entry)
     def from_entry(cls, entry):
-        entry_id = entry['id']
+        """
+        Creates an to do instance from the given entry.
         
-        try:
-            self = TO_DOS[entry_id]
-        except KeyError:
-            self = object.__new__(cls)
-            self.entry_id = entry_id
-            self.saver = None
-            TO_DOS[entry_id] = self
+        Parameters
+        ----------
+        entry : `sqlalchemy.engine.result.RowProxy`
+            The entry to create the instance based on.
         
+        Returns
+        -------
+        self : `instance<cls>`
+        """
+        self = object.__new__(cls)
+        self.entry_id = entry['id']
         self.created_at = entry['created_at'].replace(tzinfo = TimeZone.utc)
         self.creator_id = entry['creator_id']
         self.description = entry['description']
         self.name = entry['name']
-        
         return self

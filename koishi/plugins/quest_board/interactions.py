@@ -511,7 +511,7 @@ async def page_linked_quest_listing_page_index_navigate(client, interaction_even
     
     user_stats = await get_user_stats(user_id)
     components = build_linked_quests_listing_components(
-        interaction_event.user, interaction_event.guild_id, user_stats, linked_quest_listing, page_index
+        interaction_event.user, interaction_event.guild, user_stats, linked_quest_listing, page_index
     )
     
     await client.interaction_response_message_edit(
@@ -1316,7 +1316,7 @@ async def linked_quest_abandon_invoke(client, interaction_event, user_id, page_i
         await client.interaction_response_message_edit(
             interaction_event,
             components = build_linked_quest_abandon_success_components(
-                user_id, page_index, interaction_event.guild_id, credibility_penalty
+                user_id, page_index, interaction_event.guild, credibility_penalty
             ),
         )
         return
@@ -1390,7 +1390,7 @@ async def handle_linked_quest_abandon_confirm(client, interaction_event, user_id
         await client.interaction_response_message_edit(
             interaction_event,
             components = build_linked_quest_abandon_success_components(
-                user_id, page_index, interaction_event.guild_id, credibility_penalty
+                user_id, page_index, interaction_event.guild, credibility_penalty
             ),
         )
         return

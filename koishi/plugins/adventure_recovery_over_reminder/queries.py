@@ -6,7 +6,7 @@ from scarletio import copy_docs
 from sqlalchemy import and_
 from sqlalchemy.sql import asc, select
 
-from ...bot_utils.models import DB_ENGINE, USER_BALANCE_TABLE, user_stats_model, user_settings_model
+from ...bot_utils.models import DB_ENGINE, USER_STATS_TABLE, user_stats_model, user_settings_model
 
 from ..user_settings import USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_ADVENTURE_RECOVERY_OVER
 
@@ -41,7 +41,6 @@ async def get_next_notification_date_time():
                 and_(
                     user_stats_model.user_id == user_settings_model.user_id,
                     user_stats_model.recovering_until_notification_at != None,
-                    user_stats_model.recovering_until_notification_at <= DateTime.now(TimeZone.utc),
                     user_settings_model.notification_flags.op('&')(NOTIFICATION_FLAG_MASK) != 0,
                 )
             ).order_by(
@@ -66,9 +65,6 @@ if DB_ENGINE is None:
         for user_stats in USER_STATS_CACHE.values():
             recovering_until_notification_at = user_stats.recovering_until_notification_at
             if not (recovering_until_notification_at is not None):
-                continue
-            
-            if not (recovering_until_notification_at <= remind_before):
                 continue
             
             user_settings = USER_SETTINGS_CACHE.get(user_stats.user_id, None)
@@ -170,7 +166,7 @@ async def set_entry_as_notified_with_connector(connector, entry_id):
         The entry's id to interact with.
     """
     await connector.execute(
-        USER_BALANCE_TABLE.update(
+        USER_STATS_TABLE.update(
             user_stats_model.id == entry_id,
         ).values(
             recovering_until_notification_at = None,
@@ -202,7 +198,7 @@ async def set_entry_as_delayed_with_connector(connector, entry_id):
         The entry's id to interact with.
     """
     await connector.execute(
-        USER_BALANCE_TABLE.update(
+        USER_STATS_TABLE.update(
             user_stats_model.id == entry_id,
         ).values(
             recovering_until_notification_at = DateTime.now(TimeZone.utc) + RETRY_DELAY,

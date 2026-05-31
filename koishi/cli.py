@@ -11,7 +11,7 @@ from .commands import *
 
 def load_plugins():
     from hata import KOKORO
-    from hata.ext.plugin_loader import add_default_plugin_variables, load_all_plugin, frame_filter, register_plugin
+    from hata.ext.plugin_loader import add_default_plugin_variables, frame_filter, load_all_plugin, register_plugin
     from scarletio import write_exception_sync
     
     from .bots import COMMAND_CLIENT, FEATURE_CLIENTS, MAIN_CLIENT
@@ -45,8 +45,8 @@ def load_plugins():
     
     try:
         load_all_plugin()
-    except BaseException as err:
-        write_exception_sync(err, filter = frame_filter)
+    except BaseException as exception:
+        write_exception_sync(exception, filter = frame_filter)
         
         KOKORO.stop()
         raise SystemExit(1) from None

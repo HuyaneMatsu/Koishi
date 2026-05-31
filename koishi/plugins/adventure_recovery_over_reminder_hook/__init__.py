@@ -16,7 +16,7 @@ except ImportError:
 
 try:
     from ..user_settings import (
-        OPTION_NOTIFICATION_ADVENTURE_RECOVERY_OVER, USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_ADVENTURE_RECOVERY_OVER,
+        OPTION_NOTIFICATION_ADVENTURE_RECOVERY_OVER, USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_ADVENTURE_RECOVERY_OVER,
         get_one_user_settings
     )
 except ImportError:
@@ -24,7 +24,7 @@ except ImportError:
         raise
     
     OPTION_NOTIFICATION_ADVENTURE_RECOVERY_OVER = None
-    USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_ADVENTURE_RECOVERY_OVER = 0
+    USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_ADVENTURE_RECOVERY_OVER = 0
     get_one_user_settings = None
 
 
@@ -56,7 +56,7 @@ async def set_closest_adventure_recovery_over_reminder(user_stats, date_time):
         Date time to set.
     """
     user_settings = await get_one_user_settings(user_stats.user_id)
-    if (user_settings.notification_flags >> USER_SETTINGS_NOTIFICATION_FLAG_DEFAULT_ADVENTURE_RECOVERY_OVER) & 1:
+    if (user_settings.notification_flags >> USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_ADVENTURE_RECOVERY_OVER) & 1:
         ADVENTURE_RECOVERY_OVER_REMINDER_LOOPER.ensure_step_at_date_time(date_time)
         user_stats.set_recovering_until_notification_at(date_time)
 

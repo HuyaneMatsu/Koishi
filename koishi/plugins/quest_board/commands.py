@@ -74,6 +74,6 @@ async def command_user_quests(client, interaction_event):
     await client.interaction_response_message_edit(
         interaction_event,
         components = build_linked_quests_listing_components(
-            interaction_event.user, interaction_event.guild_id, user_stats, linked_quest_listing, 0
+            interaction_event.user, interaction_event.guild, user_stats, linked_quest_listing, 0
         )
     )

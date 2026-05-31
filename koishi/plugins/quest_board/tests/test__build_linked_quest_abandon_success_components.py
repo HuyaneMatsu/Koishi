@@ -1,6 +1,6 @@
 import vampytest
 
-from hata import Component, create_button, create_row, create_separator, create_text_display
+from hata import Client, Component, Guild, create_button, create_row, create_separator, create_text_display
 
 from ..component_building import build_linked_quest_abandon_success_components
 
@@ -11,8 +11,9 @@ def _iter_options():
     yield (
         user_id,
         1,
-        6556655656,
+        202605300000,
         0,
+        202605300001,
         [
             create_text_display('You successfully abandoned the quest.'),
             create_separator(),
@@ -35,6 +36,7 @@ def _iter_options():
         1,
         0,
         20,
+        0,
         [
             create_text_display('You successfully abandoned the quest, losing 20 credibility.'),
             create_separator(),
@@ -54,7 +56,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__build_linked_quest_abandon_success_components(user_id, page_index, guild_id, credibility_penalty):
+def test__build_linked_quest_abandon_success_components(user_id, page_index, guild_id, credibility_penalty, client_id):
     """
     Tests whether ``build_linked_quest_abandon_success_components`` works as intended.
     
@@ -72,14 +74,35 @@ def test__build_linked_quest_abandon_success_components(user_id, page_index, gui
     credibility_penalty : `int`
         Abandon credibility penalty.
     
+    client_id : `int`
+        Client to insert into the guild.
+    
     Returns
     -------
     output : ``list<Component>``
     """
-    output = build_linked_quest_abandon_success_components(user_id, page_index, guild_id, credibility_penalty)
+    client = None
+    guild = None
     
-    vampytest.assert_instance(output, list)
-    for element in output:
-        vampytest.assert_instance(element, Component)
+    try:
+        if guild_id:
+            guild = Guild.precreate(guild_id)
+            if client_id:
+                client = Client(
+                    client_id = client_id,
+                    token = 'token_' + str(client_id),
+                )
+                guild.clients.append(client)
+        
+        output = build_linked_quest_abandon_success_components(user_id, page_index, guild, credibility_penalty)
+        
+        vampytest.assert_instance(output, list)
+        for element in output:
+            vampytest.assert_instance(element, Component)
+        
+        return output
     
-    return output
+    finally:
+        if (client is not None):
+            client._delete()
+            client = None

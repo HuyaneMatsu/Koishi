@@ -84,7 +84,13 @@ def _iter_options():
             ],
         ),
         'ran',
-        ['ran-kon-0000', 'ran-kon-0001', 'ran-kon-0002', 'ran-kon-0003', 'ran-kon-0004'],
+        [
+            'ran-blush-0000',
+            'ran-blush-0001',
+            'ran-happy-0000',
+            'ran-kon-0000',
+            'ran-kon-0001',
+        ],
     )
     
     yield (
@@ -118,7 +124,9 @@ def _iter_options():
             ],
         ),
         'okuu-orin-hug-0002',
-        ['okuu-orin-hug-0002'],
+        [
+            'okuu-orin-hug-0002',
+        ],
     )
 
 

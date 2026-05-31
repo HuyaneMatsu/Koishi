@@ -70,9 +70,11 @@ def _iter_options():
             ('Frog', '12'),
             ('Garlic', '9'),
             ('Peach', '2'),
+            ('Pudding', '43'),
             ('Sake', '3b'),
             ('Scarlet onion', 'a'),
             ('Strawberry', '1'),
+            ('Tea leaves', '44'),
         ],
     )
     

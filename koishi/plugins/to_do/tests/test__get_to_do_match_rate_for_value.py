@@ -14,14 +14,23 @@ def _iter_options():
     
     entry_id = 127
     
-    to_do = ToDo(name, description, created_at, creator_id)
-    to_do.entry_id = entry_id
+    to_do_0 = ToDo(name, description, created_at, creator_id)
+    to_do_0.entry_id = entry_id
     
-    yield to_do, 'nyan', (1, 0, entry_id)
-    yield to_do, 'miau', (0, 0, entry_id)
-    yield to_do, 'orin', (1, 5, entry_id)
-    yield to_do, 'au', (0, 2, entry_id)
-    yield to_do, 'mister', None
+    yield to_do_0, 'nyan', (1, 0, entry_id)
+    yield to_do_0, 'miau', (0, 0, entry_id)
+    yield to_do_0, 'orin', (1, 5, entry_id)
+    yield to_do_0, 'au', (0, 2, entry_id)
+    yield to_do_0, 'mister', None
+    
+    to_do_1 = ToDo(name, None, created_at, creator_id)
+    to_do_1.entry_id = entry_id
+    
+    yield to_do_1, 'nyan', None
+    yield to_do_1, 'miau', (0, 0, entry_id)
+    yield to_do_1, 'orin', None
+    yield to_do_1, 'au', (0, 2, entry_id)
+    yield to_do_1, 'mister', None
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())

@@ -430,8 +430,8 @@ async def adventure_return(adventure):
     if duration_till_recovery_end:
         recovering_until = return_date + TimeDelta(seconds = duration_till_recovery_end)
         user_stats.set_recovering_until(recovering_until)
-        await save_user_stats(user_stats)
         await set_closest_adventure_recovery_over_reminder(user_stats, recovering_until)
+        await save_user_stats(user_stats)
     
     
     # Notify

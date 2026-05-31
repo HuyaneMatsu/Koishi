@@ -39,7 +39,10 @@ def _iter_options():
             ],
         ),
         'f',
-        ['feed', 'fluff'],
+        [
+            'feed',
+            'fluff',
+        ],
     )
     
     yield (
@@ -67,7 +70,11 @@ def _iter_options():
             ],
         ),
         None,
-        [PARAMETER_WILD_CARD, 'hug'],
+        [
+            PARAMETER_WILD_CARD,
+            'handhold',
+            'hug',
+        ],
     )
     
     yield (
@@ -95,7 +102,10 @@ def _iter_options():
             ],
         ),
         'h',
-        ['hug'],
+        [
+            'handhold',
+            'hug',
+        ],
     )
     
 

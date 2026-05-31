@@ -17,14 +17,16 @@ from .item_ids import (
     ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_BOUGH, ITEM_ID_BROOM, ITEM_ID_BUNNY_SUIT,
     ITEM_ID_CARROT, ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS, ITEM_ID_CHIRUNO, ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRESS,
     ITEM_ID_CUT_WOOD, ITEM_ID_DAI, ITEM_ID_DANGO, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_EIRIN,
-    ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT, ITEM_ID_FISHING_ROD, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG,
-    ITEM_ID_GARLIC, ITEM_ID_GOTHIC_ATTIRE, ITEM_ID_HAND_FAN, ITEM_ID_HELL_CAT_S_BIG_BRAIDS, ITEM_ID_HIKING_SET,
-    ITEM_ID_JUNKO, ITEM_ID_KAGEROU, ITEM_ID_KIMONO, ITEM_ID_KINGS_NEW_CLOTHES, ITEM_ID_KITCHEN_KNIFE, ITEM_ID_KOISHI,
-    ITEM_ID_KOKORO, ITEM_ID_LOG, ITEM_ID_MAID_DRESS, ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_ORIN,
-    ITEM_ID_PARASOL, ITEM_ID_PEACH, ITEM_ID_PLUSHIE_BEAR, ITEM_ID_POKING_KNIFE, ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT,
-    ITEM_ID_REIMU, ITEM_ID_RIBBON_BOW, ITEM_ID_RULER, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SCARLET_ONION,
+    ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT, ITEM_ID_FISHING_ROD, ITEM_ID_FLANDRE, ITEM_ID_FLYKILLER_AMANITA,
+    ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_GOTHIC_ATTIRE, ITEM_ID_HAND_FAN, ITEM_ID_HELL_CAT_S_BIG_BRAIDS,
+    ITEM_ID_HIKING_SET, ITEM_ID_JUNKO, ITEM_ID_KAGEROU, ITEM_ID_KIMONO, ITEM_ID_KINGS_NEW_CLOTHES,
+    ITEM_ID_KITCHEN_KNIFE, ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_LOG, ITEM_ID_MAID_DRESS, ITEM_ID_MARISA,
+    ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_ORIN, ITEM_ID_PARASOL, ITEM_ID_PEACH, ITEM_ID_PLUSHIE_BEAR,
+    ITEM_ID_POKING_KNIFE, ITEM_ID_PUDDING, ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT, ITEM_ID_REIMU, ITEM_ID_REMILIA,
+    ITEM_ID_RIBBON_BOW, ITEM_ID_RULER, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SATORI, ITEM_ID_SCARLET_ONION,
     ITEM_ID_SCISSORS, ITEM_ID_SEIRAN, ITEM_ID_SEKIBANKI, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA,
-    ITEM_ID_TEWI, ITEM_ID_TWIGS, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YUKARI, ITEM_ID_YUUKA
+    ITEM_ID_TEA_LEAVES, ITEM_ID_TEWI, ITEM_ID_TWIGS, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YUKARI,
+    ITEM_ID_YUUKA
 )
 
 
@@ -654,7 +656,7 @@ ITEM_UNKNOWN_OVEN_S_TORN_OUT_WING = ITEMS[ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING] 
         'Its shape may be interpreted as a fishing rod, only a cord and a hook is missing.'
     ),
     ITEM_FLAG_WEAPON,
-    1380000, # value (hearts)
+    138000, # value (hearts)
     3650, # weight (grams)
     (
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__PERCENT), +4),
@@ -1200,5 +1202,74 @@ ITEM_DANGO = ITEMS[ITEM_ID_DANGO] = Item(
     ITEM_FLAG_EDIBLE,
     150, # value (hearts)
     46, # weight (grams), including the skewers, ofc
+    None,
+)
+
+
+ITEM_FLANDRE = ITEMS[ITEM_ID_FLANDRE] = Item(
+    ITEM_ID_FLANDRE,
+    'Flandre',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+ITEM_REMILIA = ITEMS[ITEM_ID_REMILIA] = Item(
+    ITEM_ID_REMILIA,
+    'Remilia',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+)
+
+ITEM_PUDDING = ITEMS[ITEM_ID_PUDDING] = Item(
+    ITEM_ID_PUDDING,
+    'Pudding',
+    BUILTIN_EMOJIS['custard'],
+    (
+        'Pudding is mainly a sweet, although it has salty, meaty and doughy versions as well around the world.\n'
+        'As a sweet, it usually describes something that has gelatinous, spongy or creamy consistency. '
+        'Made from milk or fruit juice, with the usage of some kind of thickener, like starch, flour, rice, egg, etc.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    175, # value (hearts)
+    190, # weight (grams), including the skewers, ofc
+    None,
+)
+
+
+ITEM_TEA_LEAVES = ITEMS[ITEM_ID_TEA_LEAVES] = Item(
+    ITEM_ID_TEA_LEAVES,
+    'Tea leaves',
+    BUILTIN_EMOJIS['leaves'],
+    (
+        'Tea leaves grow on Tea trees, which are usually raised to become shrubs. '
+        'From the trees\' leaves or other parts an identically named cooked drink is made, tea.\n'
+        'The tea bush is native to Asia, as the tea drink made from it. '
+        'Cooking teas have plenty of physiological effect. '
+        'Although different types may have different effects, so before drinking, '
+        'it is recommended to read up their effects.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    90, # value (hearts)
+    30, # weight (grams), including the skewers, ofc
+    None,
+)
+
+
+ITEM_SATORI = ITEMS[ITEM_ID_SATORI] = Item(
+    ITEM_ID_SATORI,
+    'Satori',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
     None,
 )

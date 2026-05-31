@@ -1,20 +1,16 @@
 __all__ = ()
 
-from hata import InteractionForm, create_label, create_row
-from hata.ext.slash import InteractionResponse, P, abort
+from hata.ext.slash import P
 
 from ...bot_utils.constants import GUILD__SUPPORT
 from ...bot_utils.user_getter import get_user
 from ...bots import MAIN_CLIENT
 
-from .constants import (
-    ADD_TO_DO_FORM, CUSTOM_ID_TO_DO_DELETE_BASE, CUSTOM_ID_TO_DO_EDIT_BASE, DELETE_TO_DO_APPROVE, DELETE_TO_DO_CANCEL,
-    TEXT_INPUT_DESCRIPTION, TEXT_INPUT_NAME
+from .component_building import (
+    build_to_do_create_form, build_to_do_delete_form, build_to_do_edit_form, build_to_do_listing, build_to_do_view
 )
-from .helpers import (
-    check_permission, create_to_do_embed, create_to_do_page_components, get_to_do_suggestions, render_to_do_page,
-    request_to_dos, resolve_to_do, resolve_to_dos
-)
+from .helpers import check_for_required_role, get_to_do_suggestions, match_to_do, match_to_do_listing
+from .queries import get_to_do_listing
 
 
 TO_DO = MAIN_CLIENT.interactions(
@@ -26,7 +22,7 @@ TO_DO = MAIN_CLIENT.interactions(
 
 
 @TO_DO.autocomplete('name')
-async def autocomplete_to_do_name(value):
+async def autocomplete_to_do_name(client, interaction_event, value):
     """
     Autocompletes a to-do command's name.
     
@@ -34,18 +30,44 @@ async def autocomplete_to_do_name(value):
     
     Parameters
     ----------
+    client : ``Client``
+        The client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
     value : `None | str`
         Value to match.
-    
-    Returns
-    -------
-    suggestions : `list<(str, str)>`
     """
-    return get_to_do_suggestions(value)
+    while True:
+        error_message = check_for_required_role(interaction_event)
+        if (error_message is not None):
+            break
+        
+        to_do_listing = await get_to_do_listing()
+        await client.interaction_application_command_autocomplete(
+            interaction_event,
+            get_to_do_suggestions(to_do_listing, value),
+        )
+        return
+    
+    await client.interaction_application_command_autocomplete(
+        interaction_event,
+        None,
+    )
+    await client.interaction_followup_message_create(
+        interaction_event,
+        allowed_mentions = None,
+        content = error_message,
+        show_for_invoking_user_only = False,
+    )
 
 
 @TO_DO.interactions
-async def add(event):
+async def add(
+    client,
+    interaction_event,
+):
     """
     Adds a new to-do!
     
@@ -53,20 +75,35 @@ async def add(event):
     
     Parameters
     ----------
-    event : ``InteractionEvent``
-        The received interaction event.
+    client : ``Client``
+        The client receiving this interaction.
     
-    Returns
-    -------
-    form : ``InteractionForm``
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
     """
-    check_permission(event)
-    return ADD_TO_DO_FORM
+    while True:
+        error_message = check_for_required_role(interaction_event)
+        if (error_message is not None):
+            break
+        
+        await client.interaction_form_send(
+            interaction_event,
+            build_to_do_create_form(),
+        )
+        return
+    
+    await client.interaction_response_message_create(
+        interaction_event,
+        allowed_mentions = None,
+        content = error_message,
+        show_for_invoking_user_only = False,
+    )
 
 
 @TO_DO.interactions
 async def get(
-    event,
+    client,
+    interaction_event,
     name: (str, 'The entry\'s name | Use # to search by id.'),
 ):
     """
@@ -76,29 +113,53 @@ async def get(
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    client : ``Client``
+        The client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
     name : `str`
         The to-do's name to get.
-    
-    Returns
-    -------
-    response : ``Embed``
     """
-    check_permission(event)
-    await request_to_dos()
-    to_do = resolve_to_do(name)
-    if (to_do is None):
-        abort('Could not match any to-do.')
+    await client.interaction_application_command_acknowledge(
+        interaction_event,
+        show_for_invoking_user_only = True,
+    )
     
-    user = await get_user(to_do.creator_id)
-    return create_to_do_embed(to_do, user)
+    while True:
+        error_message = check_for_required_role(interaction_event)
+        if (error_message is not None):
+            break
+        
+        to_do_listing = await get_to_do_listing()
+        to_do = match_to_do(to_do_listing, name)
+        if (to_do is None):
+            error_message = 'Could not match any to-do.'
+            break
+        
+        user = await get_user(to_do.creator_id)
+        
+        await client.interaction_response_message_edit(interaction_event, '-# _ _')
+        await client.interaction_response_message_delete(interaction_event)
+        await client.interaction_followup_message_create(
+            interaction_event,
+            allowed_mentions = None,
+            components = build_to_do_view(to_do, user, interaction_event.guild_id),
+        )
+        return
+    
+    await client.interaction_response_message_edit(
+        interaction_event,
+        allowed_mentions = None,
+        content = error_message,
+    )
 
 
 @TO_DO.interactions
 async def list_(
-    event,
+    client,
+    interaction_event,
     page: P(int, 'Select a page.', min_value = 1, max_value = 10000) = 1,
     query: P(str, 'The entry\'s name', min_length = 2, max_length = 30) = None,
 ):
@@ -109,7 +170,10 @@ async def list_(
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    client : ``Client``
+        The client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
     page : `int` = `1`, Optional
@@ -117,23 +181,42 @@ async def list_(
     
     query : `None | str` = `None`, Optional
         The to-do's name to get.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
     """
-    check_permission(event)
-    await request_to_dos()
-    to_dos_list = resolve_to_dos(query)
-    return InteractionResponse(
-        content = render_to_do_page(to_dos_list, page, query),
-        components = create_to_do_page_components(to_dos_list, page, query),
+    await client.interaction_application_command_acknowledge(
+        interaction_event,
+        show_for_invoking_user_only = True,
+    )
+    
+    page_index = max(0, page - 1)
+    
+    while True:
+        error_message = check_for_required_role(interaction_event)
+        if (error_message is not None):
+            break
+        
+        to_do_listing = await get_to_do_listing()
+        to_do_listing = match_to_do_listing(to_do_listing, query)
+        
+        await client.interaction_response_message_edit(interaction_event, '-# _ _')
+        await client.interaction_response_message_delete(interaction_event)
+        await client.interaction_followup_message_create(
+            interaction_event,
+            allowed_mentions = None,
+            components = build_to_do_listing(to_do_listing, page_index, query),
+        )
+        return
+    
+    await client.interaction_response_message_edit(
+        interaction_event,
+        allowed_mentions = None,
+        content = error_message,
     )
 
 
 @TO_DO.interactions
 async def edit(
-    event,
+    client,
+    interaction_event,
     name: (str, 'The entry\'s name | Use # to search by id.'),
 ):
     """
@@ -141,43 +224,44 @@ async def edit(
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    client : ``Client``
+        The client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
         The received interaction event.
+    
     name : `str`
         The to-do's name to get.
-    
-    Returns
-    -------
-    form : ``InteractionForm``
     """
-    check_permission(event)
-    await request_to_dos()
-    to_do = resolve_to_do(name)
-    if (to_do is None):
-        abort('Could not match any to-do.')
+    while True:
+        error_message = check_for_required_role(interaction_event)
+        if (error_message is not None):
+            break
+        
+        to_do_listing = await get_to_do_listing()
+        to_do = match_to_do(to_do_listing, name)
+        if (to_do is None):
+            error_message = 'Could not match any to-do.'
+            break
+        
+        await client.interaction_form_send(
+            interaction_event,
+            build_to_do_edit_form(to_do),
+        )
+        return
     
-    if to_do.creator_id != event.user.id:
-        abort('You can edit only your own to-dos.')
-    
-    return InteractionForm(
-        f'Editing todo entry #{to_do.entry_id}',
-        [
-            create_label(
-                'name',
-                component = TEXT_INPUT_NAME.copy_with(value = to_do.name),
-            ),
-            create_label(
-                'description',
-                component = TEXT_INPUT_DESCRIPTION.copy_with(value = to_do.description),
-            ),
-        ],
-        custom_id = f'{CUSTOM_ID_TO_DO_EDIT_BASE}.{to_do.entry_id}.form',
+    await client.interaction_response_message_create(
+        interaction_event,
+        allowed_mentions = None,
+        content = error_message,
+        show_for_invoking_user_only = False,
     )
 
 
 @TO_DO.interactions
 async def del_(
-    event,
+    client,
+    interaction_event,
     name: (str, 'The entry\'s name | Use # to search by id.'),
 ):
     """
@@ -185,30 +269,35 @@ async def del_(
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    client : ``Client``
+        The client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
     name : `str`
         The to-do's name to get.
-    
-    Returns
-    -------
-    response : ``InteractionResponse``
     """
-    check_permission(event)
-    await request_to_dos()
-    to_do = resolve_to_do(name)
-    if (to_do is None):
-        abort('Could not match any to-do.')
-    
-    user = await get_user(to_do.creator_id)
-    embed = create_to_do_embed(to_do, user)
-    embed.add_author('Are you sure to delete this entry?')
-    
-    return InteractionResponse(
-        embed = embed,
-        components = create_row(
-            DELETE_TO_DO_APPROVE.copy_with(custom_id = f'{CUSTOM_ID_TO_DO_DELETE_BASE}.{to_do.entry_id}.1'),
-            DELETE_TO_DO_CANCEL.copy_with(custom_id = f'{CUSTOM_ID_TO_DO_DELETE_BASE}.{to_do.entry_id}.0'),
+    while True:
+        error_message = check_for_required_role(interaction_event)
+        if (error_message is not None):
+            break
+        
+        to_do_listing = await get_to_do_listing()
+        to_do = match_to_do(to_do_listing, name)
+        if (to_do is None):
+            error_message = 'Could not match any to-do.'
+            break
+        
+        await client.interaction_form_send(
+            interaction_event,
+            build_to_do_delete_form(to_do),
         )
+        return
+    
+    await client.interaction_response_message_create(
+        interaction_event,
+        allowed_mentions = None,
+        content = error_message,
+        show_for_invoking_user_only = False,
     )

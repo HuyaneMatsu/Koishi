@@ -3,77 +3,118 @@ __all__ = ()
 from base64 import b64decode as base64_decode
 from binascii import Error as BinasciiError
 
-from hata.ext.slash import InteractionResponse, abort
+from hata.ext.slash import InteractionResponse
 
 from ...bot_utils.user_getter import get_user
 from ...bots import MAIN_CLIENT
 
-from .constants import (
-    CUSTOM_ID_TO_DO_ADD, CUSTOM_ID_TO_DO_CHANGE_PAGE_RP, CUSTOM_ID_TO_DO_LIST_CLOSE, CUSTOM_ID_TO_DO_DELETE_RP,
-    CUSTOM_ID_TO_DO_EDIT_RP, TO_DOS
-)
-from .helpers import (
-    check_permission, create_to_do_embed, create_to_do_page_components, render_to_do_page, request_to_dos,
-    resolve_to_dos
-)
+from .custom_ids import CUSTOM_ID_TO_DO_LISTING_PAGE_DECREMENT_DISABLED, CUSTOM_ID_TO_DO_LISTING_PAGE_INCREMENT_DISABLED, \
+    CUSTOM_ID_TO_DO_LISTING_CLOSE, CUSTOM_ID_TO_DO_LISTING_PAGE_PATTERN, CUSTOM_ID_TO_DO_EDIT_PATTERN, \
+    CUSTOM_ID_TO_DO_DELETE_PATTERN, CUSTOM_ID_TO_DO_CREATE, CUSTOM_ID_NAME, CUSTOM_ID_DESCRIPTION
 from .to_do import ToDo
+from .helpers import check_for_required_role, match_to_do_listing
+from .queries import get_to_do_listing, insert_to_do, update_to_do, delete_to_do
+from .component_building import build_to_do_view, build_to_do_listing
 
 
-@MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_TO_DO_ADD, target = 'form')
-async def to_do_add_form_submit(
-    event,
+@MAIN_CLIENT.interactions(
+    custom_id = [
+        CUSTOM_ID_TO_DO_LISTING_PAGE_DECREMENT_DISABLED,
+        CUSTOM_ID_TO_DO_LISTING_PAGE_INCREMENT_DISABLED,
+    ],
+)
+async def to_do_handle_dummy():
+    """
+    Dummy interactions handler.
+    
+    This function is a coroutine.
+    """
+
+
+@MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_TO_DO_CREATE, target = 'form')
+async def handle_to_do_create(
+    client,
+    interaction_event,
     *,
-    name,
-    description,
+    name : CUSTOM_ID_NAME,
+    description : CUSTOM_ID_DESCRIPTION,
 ):
     """
-    Handles a `to-do add` form submit.
+    handles a to do creation.
     
     Parameters
     ----------
-    event : ``InteractionEvent``
-        The received event.
+    client : ``Client``
+        The client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
     
     name : `str` (Keyword only)
         Name for the to-do.
     
-    description : `str`
-        Description for the to-od.`
-    
-    Returns
-    -------
-    response : ``Embed``
+    description : `None | str` (Keyword only)
+        Description for the to-do.`
     """
-    check_permission(event)
-    created_at = event.created_at
-    creator_id = event.user.id
+    await client.interaction_application_command_acknowledge(
+        interaction_event,
+        show_for_invoking_user_only = True,
+    )
+    while True:
+        error_message = check_for_required_role(interaction_event)
+        if (error_message is not None):
+            break
+        
+        name = name.replace('`', '').replace('\n', '').strip()
+        if not name:
+            error_message = 'Name became empty after sanitisation.'
+            break
+        
+        # Make sure we are already cached.
+        await get_to_do_listing()
+        
+        created_at = interaction_event.created_at
+        creator_id = interaction_event.user_id
+        
+        to_do = ToDo(name, description, created_at, creator_id)
+        await insert_to_do(to_do)
+        
+        await client.interaction_response_message_edit(interaction_event, '-# _ _')
+        await client.interaction_response_message_delete(interaction_event)
+        await client.interaction_followup_message_create(
+            interaction_event,
+            allowed_mentions = None,
+            components = build_to_do_view(to_do, interaction_event.user, interaction_event.guild_id),
+        )
+        return
     
-    name = name.replace('`', '')
-    description = description.replace('`', '')
-    
-    to_do = ToDo(name, description, created_at, creator_id)
-    await to_do.save()
-    
-    embed = create_to_do_embed(to_do, event.user)
-    embed.add_author('Entry created')
-    return embed
+    await client.interaction_response_message_edit(
+        interaction_event,
+        allowed_mentions = None,
+        content = error_message,
+    )
 
 
-@MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_TO_DO_EDIT_RP, target = 'form')
-async def to_do_edit_form_submit(
-    event,
+
+@MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_TO_DO_EDIT_PATTERN, target = 'form')
+async def handle_to_do_edit(
+    client,
+    interaction_event,
     entry_id,
     *,
-    name,
-    description,
+    name : CUSTOM_ID_NAME,
+    description : CUSTOM_ID_DESCRIPTION,
 ):
     """
     Handles a `to-do edit` form submit.
     
     Parameters
     ----------
-    event : ``InteractionEvent``
-        The received event.
+    client : ``Client``
+        The client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
     
     entry_id : `str`
         The entry's identifier. Later converted to `int`.
@@ -82,40 +123,67 @@ async def to_do_edit_form_submit(
         Name for the to-do.
     
     description : `str`
-        Description for the to-od.`
+        Description for the to-do.`
     
     Returns
     -------
     response : ``Embed``
     """
-    check_permission(event)
-    await request_to_dos()
-    
-    entry_id = int(entry_id)
-    name = name.replace('`', '')
-    description = description.replace('`', '')
-    
     try:
-        to_do = TO_DOS[entry_id]
-    except KeyError:
-        return abort('The to-do was deleted meanwhile.')
+        entry_id = int(entry_id, 16)
+    except ValueError:
+        return
     
-    to_do.set('name', name)
-    to_do.set('description', description)
-    to_do.get_saver().begin()
+    await client.interaction_application_command_acknowledge(
+        interaction_event,
+        show_for_invoking_user_only = True,
+    )
+    while True:
+        error_message = check_for_required_role(interaction_event)
+        if (error_message is not None):
+            break
+        
+        name = name.replace('`', '').replace('\n', '').strip()
+        if not name:
+            error_message = 'Name became empty after sanitisation.'
+            break
+        
+        # Make sure we are already cached.
+        to_do_listing = await get_to_do_listing()
+        for to_do in to_do_listing:
+            if to_do.entry_id == entry_id:
+                break
+        else:
+            error_message = 'Could not match any to-do.'
+            break
+        
+        to_do.name = name
+        to_do.description = description
+        
+        await update_to_do(to_do)
+        user = await get_user(to_do.creator_id)
+        
+        await client.interaction_response_message_edit(interaction_event, '-# _ _')
+        await client.interaction_response_message_delete(interaction_event)
+        await client.interaction_followup_message_create(
+            interaction_event,
+            allowed_mentions = None,
+            components = build_to_do_view(to_do, user, interaction_event.guild_id),
+        )
+        return
     
-    user = await get_user(to_do.creator_id)
-    embed = create_to_do_embed(to_do, user)
-    embed.add_author('Entry edited')
-    return embed
+    await client.interaction_response_message_edit(
+        interaction_event,
+        allowed_mentions = None,
+        content = error_message,
+    )
 
 
-@MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_TO_DO_DELETE_RP)
-async def to_do_del_approve(
+@MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_TO_DO_DELETE_PATTERN, target = 'form')
+async def handle_to_do_delete(
     client,
-    event,
+    interaction_event,
     entry_id,
-    state,
 ):
     """
     Handles a `to-do delete` component click.
@@ -123,50 +191,64 @@ async def to_do_del_approve(
     Parameters
     ----------
     client : ``Client``
-        The client who received the interaction.
+        The client receiving this interaction.
     
-    event : ``InteractionEvent``
-        The received event.
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
     
     entry_id : `str`
         The entry's identifier. Later converted to `int`.
-    
-    state : `str`
-        Whether the deletion was confirmed. Later converted to itn.
     
     Returns
     -------
     response : ``InteractionResponse``
     """
-    check_permission(event)
-    await request_to_dos()
-    
-    entry_id = int(entry_id)
-    state = int(state)
-    
     try:
-        to_do = TO_DOS[entry_id]
-    except KeyError:
-        await client.interaction_component_message_edit(event, components = None)
-        return abort('The to-do was deleted meanwhile.')
+        entry_id = int(entry_id, 16)
+    except ValueError:
+        return
     
-    if state:
-        to_do.delete()
+    await client.interaction_application_command_acknowledge(
+        interaction_event,
+        show_for_invoking_user_only = True,
+    )
+    while True:
+        error_message = check_for_required_role(interaction_event)
+        if (error_message is not None):
+            break
+        
+        # Make sure we are already cached.
+        to_do_listing = await get_to_do_listing()
+        for to_do in to_do_listing:
+            if to_do.entry_id == entry_id:
+                break
+        else:
+            error_message = 'Could not match any to-do.'
+            break
+        
+        await delete_to_do(to_do)
+        
+        await client.interaction_response_message_edit(interaction_event, '-# _ _')
+        await client.interaction_response_message_delete(interaction_event)
+        await client.interaction_followup_message_create(
+            interaction_event,
+            content = 'To-do deleted.',
+        )
+        return
     
-    user = await get_user(to_do.creator_id)
-    embed = create_to_do_embed(to_do, user)
-    embed.add_author('Entry deleted' if state else 'Deleting entry cancelled')
-    return InteractionResponse(
-        embed = embed,
-        components = None,
+    await client.interaction_response_message_edit(
+        interaction_event,
+        allowed_mentions = None,
+        content = error_message,
     )
 
 
-@MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_TO_DO_CHANGE_PAGE_RP)
-async def page_switch(
-    event,
-    value,
-    page,
+@MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_TO_DO_LISTING_PAGE_PATTERN)
+async def handle_page_change(
+    client,
+    interaction_event,
+    page_index,
+    query,
 ):
     """
     Lists to-dos.
@@ -175,51 +257,68 @@ async def page_switch(
     
     Parameters
     ----------
-    event : ``InteractionEvent``
+    client : ``Client``
+        The client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     
-    value : `None | str`
-        Query value.
+    page_index : `str`
+        The pages index to show encoded as a hexadecimal.
     
-    page : `str`
-        The page to show. Later converted to `int`.
+    query : `None | str`
+        Query value.
     
     Returns
     -------
     response : ``InteractionResponse``
     """
-    check_permission(event)
-    await request_to_dos()
+    try:
+        page_index = int(page_index, 16)
+    except ValueError:
+        return
+    
+    if (query is not None):
+        try:
+            query = base64_decode(query)
+        except BinasciiError:
+            return
+        
+        try:
+            query = query.decode()
+        except UnicodeDecodeError:
+            return
+    
+    await client.interaction_component_acknowledge(interaction_event)
     
     while True:
-        if value is None:
+        error_message = check_for_required_role(interaction_event)
+        if (error_message is not None):
             break
         
-        try:
-            value = base64_decode(value)
-        except BinasciiError:
-            value = None
-            break
+        to_do_listing = await get_to_do_listing()
+        to_do_listing = match_to_do_listing(to_do_listing, query)
         
-        try:
-            value = value.decode()
-        except UnicodeDecodeError:
-            value = None
-            break
-        
-        break
+        await client.interaction_response_message_edit(
+            interaction_event,
+            allowed_mentions = None,
+            components = build_to_do_listing(to_do_listing, page_index, query),
+        )
+        return
     
-    page = int(page)
-    
-    to_dos_list = resolve_to_dos(value)
-    return InteractionResponse(
-        content = render_to_do_page(to_dos_list, page, value),
-        components = create_to_do_page_components(to_dos_list, page, value),
+    await client.interaction_followup_message_create(
+        interaction_event,
+        allowed_mentions = None,
+        content = error_message,
+        show_for_invoking_user_only = True,
     )
 
 
-@MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_TO_DO_LIST_CLOSE)
-async def page_close(client, event):
+@MAIN_CLIENT.interactions(custom_id = CUSTOM_ID_TO_DO_LISTING_CLOSE)
+async def page_close(
+    client,
+    interaction_event,
+):
     """
     Closes the to-do page.
     
@@ -228,12 +327,24 @@ async def page_close(client, event):
     Parameters
     ----------
     client : ``Client``
-        The client who received the event.
+        The client receiving this interaction.
     
-    event : ``InteractionEvent``
-        The received event.
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
     """
-    check_permission(event)
+    await client.interaction_component_acknowledge(interaction_event)
     
-    await client.interaction_component_acknowledge(event)
-    await client.interaction_response_message_delete(event)
+    while True:
+        error_message = check_for_required_role(interaction_event)
+        if (error_message is not None):
+            break
+        
+        await client.interaction_response_message_delete(interaction_event)
+        return
+    
+    await client.interaction_followup_message_create(
+        interaction_event,
+        allowed_mentions = None,
+        content = error_message,
+        show_for_invoking_user_only = True,
+    )

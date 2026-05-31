@@ -15,6 +15,7 @@ def _iter_options():
     
     yield (
         RELATIONSHIP_TYPE_WAIFU,
+        RELATIONSHIP_TYPE_WAIFU,
     )
     
     yield (
@@ -54,7 +55,7 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def tets__do_relationship_type_flip_basic(relationship_type):
+def test__do_relationship_type_flip_basic(relationship_type):
     """
     Tests whether ``do_relationship_type_flip_basic`` works as intended.
     

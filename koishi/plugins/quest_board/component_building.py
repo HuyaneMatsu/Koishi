@@ -446,7 +446,7 @@ def _linked_quest_sort_key_getter(linked_quest):
     )
 
 
-def build_linked_quests_listing_components(user, guild_id, user_stats, linked_quest_listing, page_index):
+def build_linked_quests_listing_components(user, guild, user_stats, linked_quest_listing, page_index):
     """
     Builds linked quest listing.
     
@@ -456,7 +456,7 @@ def build_linked_quests_listing_components(user, guild_id, user_stats, linked_qu
         The respective user.
     
     guild_id : `int`
-        The respective guild's identifier the command was invoked at.
+        The local guild.
     
     user_stats : ``UserStats``
         The user's stats.
@@ -487,7 +487,7 @@ def build_linked_quests_listing_components(user, guild_id, user_stats, linked_qu
             create_text_display(
                 ''.join([*produce_linked_quest_header_description(
                     user,
-                    guild_id,
+                    (0 if guild is None else guild.id),
                     credibility,
                     user_adventurer_rank_info,
                     (
@@ -500,7 +500,7 @@ def build_linked_quests_listing_components(user, guild_id, user_stats, linked_qu
                     ),
                 )])
             ),
-            thumbnail = create_thumbnail_media(user.avatar_url_at(guild_id)),
+            thumbnail = create_thumbnail_media(user.avatar_url_at(guild)),
         ),
     )
     components.append(create_separator())
@@ -600,7 +600,7 @@ def build_linked_quests_listing_components(user, guild_id, user_stats, linked_qu
             create_button(
                 'View quest board',
                 custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_BUILDER(user.id, 0),
-                enabled = (True if guild_id else False),
+                enabled = (True if (guild is not None and guild.clients) else False),
             ),
         ),
     )
@@ -753,7 +753,7 @@ def build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_
     )
 
 
-def build_linked_quest_abandon_success_components(user_id, page_index, guild_id, credibility_penalty):
+def build_linked_quest_abandon_success_components(user_id, page_index, guild, credibility_penalty):
     """
     Builds successfully abandoning response components.
     
@@ -765,8 +765,8 @@ def build_linked_quest_abandon_success_components(user_id, page_index, guild_id,
     page_index : `int`
         The linked quests' current page's index.
     
-    guild_id : `int`
-        The local guild's identifier.
+    guild : ``None | Guild``
+        The local guild if any.
     
     credibility_penalty : `int`
         Abandon credibility penalty.
@@ -787,7 +787,7 @@ def build_linked_quest_abandon_success_components(user_id, page_index, guild_id,
             create_button(
                 'View quest board',
                 custom_id = CUSTOM_ID_QUEST_BOARD_PAGE_INDEX_NAVIGATE_BUILDER(user_id, 0),
-                enabled = (True if guild_id else False),
+                enabled = (True if (guild is not None and guild.clients) else False),
             ),
             create_button(
                 'View my quests',

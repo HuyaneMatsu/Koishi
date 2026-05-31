@@ -2,8 +2,8 @@ from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as T
 
 import vampytest
 from hata import (
-    BUILTIN_EMOJIS, ButtonStyle, CDN_ENDPOINT, Component, GuildProfile, Icon, IconType, User, create_button, create_row,
-    create_section, create_separator, create_text_display, create_thumbnail_media
+    BUILTIN_EMOJIS, ButtonStyle, CDN_ENDPOINT, Client, Component, Guild, GuildProfile, Icon, IconType, User,
+    create_button, create_row, create_section, create_separator, create_text_display, create_thumbnail_media
 )
 
 from ...item_core import ITEM_ID_CARROT, ITEM_ID_PEACH
@@ -93,6 +93,7 @@ def _iter_options():
             QuestRewardSerialisableCredibility(2),
         ),
     )
+    
     linked_quest_entry_id_2 = 124
     linked_quest_2.entry_id = linked_quest_entry_id_2
     linked_quest_2.completion_count = 1
@@ -155,6 +156,7 @@ def _iter_options():
         ],
         page_index,
         now,
+        202605300001,
         [
             create_section(
                 create_text_display(
@@ -261,13 +263,14 @@ def test__build_linked_quests_listing_components(
     user_id,
     user_name,
     user_avatar,
-    guild_id_0,
+    guild_id,
     user_nick,
     user_guild_avatar,
     user_credibility,
     linked_quest_listing,
     page_index,
     current_date_time,
+    client_id,
 ):
     """
     Tests whether ``build_linked_quests_listing_components`` works as intended.
@@ -283,8 +286,8 @@ def test__build_linked_quests_listing_components(
     user_avatar : ``None | Icon``
         The user's avatar.
     
-    guild_id_0 : `int`
-        The respective guild's identifier the command was invoked at.
+    guild_id : `int`
+        The local guild's identifier.
     
     user_nick : `int`
         The user's nick name.
@@ -308,26 +311,43 @@ def test__build_linked_quests_listing_components(
     -------
     output : ``list<Component>``
     """
-    user = User.precreate(user_id, avatar = user_avatar, name = user_name)
+    client = None
+    guild = None
     
-    if guild_id_0 and ((user_nick is not None) or (user_guild_avatar is not None)):
-        user.guild_profiles[guild_id_0] = GuildProfile(avatar = user_guild_avatar, nick = user_nick)
-    
-    user_stats = UserStats(user_id)
-    user_stats.modify_credibility_by(user_credibility)
-    
-    DateTimeMock.set_current(current_date_time)
-    
-    mocked = vampytest.mock_globals(
-        build_linked_quests_listing_components,
-        DateTime = DateTimeMock,
-        recursion = 3,
-    )
-    
-    output = mocked(user, guild_id_0, user_stats, linked_quest_listing, page_index)
-    
-    vampytest.assert_instance(output, list)
-    for element in output:
-        vampytest.assert_instance(element, Component)
-    
-    return output
+    try:
+        if guild_id:
+            guild = Guild.precreate(guild_id)
+            if client_id:
+                client = Client(
+                    client_id = client_id,
+                    token = 'token_' + str(client_id),
+                )
+                guild.clients.append(client)
+        
+        user = User.precreate(user_id, avatar = user_avatar, name = user_name)
+        
+        if guild_id and ((user_nick is not None) or (user_guild_avatar is not None)):
+            user.guild_profiles[guild_id] = GuildProfile(avatar = user_guild_avatar, nick = user_nick)
+        
+        user_stats = UserStats(user_id)
+        user_stats.modify_credibility_by(user_credibility)
+        
+        DateTimeMock.set_current(current_date_time)
+        
+        mocked = vampytest.mock_globals(
+            build_linked_quests_listing_components,
+            DateTime = DateTimeMock,
+            recursion = 3,
+        )
+        
+        output = mocked(user, guild, user_stats, linked_quest_listing, page_index)
+        
+        vampytest.assert_instance(output, list)
+        for element in output:
+            vampytest.assert_instance(element, Component)
+        
+        return output
+    finally:
+        if (client is not None):
+            client._delete()
+            client = None

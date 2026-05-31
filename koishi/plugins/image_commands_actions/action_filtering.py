@@ -400,8 +400,15 @@ def get_action_and_image_detail(action_tag_name, source_character_name, target_c
         image_detail = image_details[0]
         
         if action is None:
-            for action in image_detail.iter_actions():
-                action = ACTION_TAG_TO_ACTION.get(action.tag, None)
+            for image_detail_action in image_detail.iter_actions():
+                try:
+                    action = ACTION_TAG_TO_ACTION[image_detail_action.tag]
+                except KeyError:
+                    continue
+                
                 break
+                
+            else:
+                action = None
     
     return action, image_detail

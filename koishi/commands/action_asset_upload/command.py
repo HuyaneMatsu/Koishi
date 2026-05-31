@@ -4,9 +4,9 @@ import sys
 from os.path import join as join_paths
 
 from hata import KOKORO, parse_signed_url
-from hata.ext.plugin_loader import import_plugin
+from hata.ext.plugin_loader import frame_filter, import_plugin
 from hata.main import register
-from scarletio import ReuAsyncIO
+from scarletio import ReuAsyncIO, write_exception_sync
 
 from ..action_asset_format_converter.constants import ASSETS_DIRECTORY
 from ..action_asset_format_converter.grouping import read_asset_entries
@@ -50,7 +50,11 @@ def upload_action_assets(
     Produces a long a text that can be copy pasted. Entries not known how to handled will get a `TODO` mark.
     """
     # import plugins
-    import_plugin(__package__[: __package__.find('.')] + '.plugins')
+    try:
+        import_plugin(__package__[: __package__.find('.')] + '.plugins')
+    except BaseException as exception:
+        write_exception_sync(exception, filter = frame_filter)
+        return
     
     from ...bots.koishi import Koishi
     from ...plugins.image_commands_actions import TOUHOU_ACTION_ALL

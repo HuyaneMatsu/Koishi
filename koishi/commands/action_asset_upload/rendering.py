@@ -1,9 +1,12 @@
 __all__ = ()
 
 
-ACTION_TAGS_SINGLE_SOURCE = ('awoo', 'blush', 'cry', 'happy', 'kon', 'moon', 'murder', 'rawr', 'stare', 'wave', 'wink')
-ACTION_TAGS_SELF_TARGET = ('pocky_self', 'feed_self')
-ACTION_TAGS_CROSS_TARGET = ('handhold',)
+ACTION_TAGS_SINGLE_SOURCE = (
+    'awoo', 'blush', 'cook', 'cry', 'drink', 'eat', 'fish', 'happy', 'hungry', 'kon', 'kyun', 'moon', 'murder', 'nyan',
+    'pyon', 'rawr', 'sleepy', 'smug', 'stare', 'wave', 'wink',
+)
+ACTION_TAGS_SELF_TARGET = ('pocky_self',)
+ACTION_TAGS_CROSS_TARGET = ('dance_with', 'handhold',)
 
 
 def _produce_url(url):

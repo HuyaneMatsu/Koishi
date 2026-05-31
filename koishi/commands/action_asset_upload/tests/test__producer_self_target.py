@@ -8,14 +8,14 @@ from ..rendering import producer_self_target
 def _iter_options():
     yield (
         CHEN,
-        'feed_self',
+        'pocky_self',
         'sister',
         'https://orindance.party/miau',
         (
             'TOUHOU_ACTION_ALL.add(\n'
             '    \'https://orindance.party/miau\',\n'
             ').with_action(\n'
-            '    ACTION_TAG_FEED_SELF, CHEN, CHEN,\n'
+            '    ACTION_TAG_POCKY_SELF, CHEN, CHEN,\n'
             ').with_creator(\n'
             '    \'sister\',\n'
             ')\n'
