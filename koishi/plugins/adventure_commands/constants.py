@@ -1,0 +1,11 @@
+__all__ = ()
+
+from struct import Struct
+
+
+ACTIVE_ADVENTURE_ACTION_LIMIT = 5
+ADVENTURE_ACTION_LISTING_PAGE_SIZE = 10
+ADVENTURE_LISTING_PAGE_SIZE = 10
+
+
+FLOAT_STRUCT = Struct('d')

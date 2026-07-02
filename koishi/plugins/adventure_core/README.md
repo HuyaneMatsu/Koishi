@@ -56,6 +56,11 @@ Each action offers their own cost, battles and loot.
             - Carrot (rare)
             - Frog (epic)
             - Straw hat (mythical)
+    - Gardening (Rice)
+        - Gardening
+            - Rice (certain)
+            - Frog (common)
+            - Straw hat (mythical)
     - Gardening (Garlic)
         - Gardening
             - Garlic (certain)
@@ -95,6 +100,9 @@ Each action offers their own cost, battles and loot.
             - Ribbon bow (mythical)
             - Plushie bear (mythical)
             - Gothic attire (mythical)
+            - Human arm (mythical)
+            - Human leg (mythical)
+            - Human body chewed (mythical)
 
 - Eientei mansion (level 1)
     - Gardening
@@ -151,3 +159,14 @@ Each action offers their own cost, battles and loot.
             - Angelroot (basic)
             - Fishing rod (rare)
             - Hiking set (mythical)
+            - Human bone (Rare)
+            - Human skull (mythical)
+            - Human body (mythical)
+            - Human body bottom half (mythical)
+            - Human body top half (mythical)
+            - Human body chewed (mythical)
+            - Human body arm (mythical)
+            - Human body leg (mythical)
+            - Human body head (mythical)
+            - Human body hand (mythical)
+            - Human body foot (mythical)

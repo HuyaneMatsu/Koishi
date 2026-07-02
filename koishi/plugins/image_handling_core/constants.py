@@ -50,6 +50,9 @@ TOUHOU_TAGS_BANNED = frozenset((
     'pokemon',
     'furry',
     'large_variant_set',
+    'torashiro_beimu',
+    
+    'xen0moonz', # cant write dates and uses flags
 ))
 
 

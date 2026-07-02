@@ -1,6 +1,6 @@
 import vampytest
 
-from ..component_building import produce_adventure_listing_view_header
+from ..content_building import produce_adventure_listing_view_header
 
 
 def _iter_options():

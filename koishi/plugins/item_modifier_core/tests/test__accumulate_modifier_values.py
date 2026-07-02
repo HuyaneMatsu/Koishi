@@ -29,6 +29,7 @@ def test__accumulate_modifier_values():
             modifier_0,
             modifier_1,
         ),
+        None,
     )
     
     item_1 = Item(
@@ -42,6 +43,7 @@ def test__accumulate_modifier_values():
         (
             modifier_0,
         ),
+        None,
     )
     
     output = accumulate_modifier_values(None, item_0, item_1, None)

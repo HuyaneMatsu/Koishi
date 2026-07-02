@@ -27,15 +27,18 @@ class Item(RichAttributeErrorBaseType):
     modifiers : ``None | tuple<StatModifier>``
         Modifiers of the item.
     
+    options_butcher : ``None | tuple<OptionButcher>``
+        Options for butchering.
+    
     value : `int`
         The default value of the item.
     
     weight : `int`
         The weight of the item in grams.
     """
-    __slots__ = ('description', 'modifiers', 'emoji', 'flags', 'id', 'name', 'value', 'weight')
+    __slots__ = ('description', 'modifiers', 'emoji', 'flags', 'id', 'name', 'options_butcher', 'value', 'weight')
     
-    def __new__(cls, item_id, name, emoji, description, flags, value, weight, modifiers):
+    def __new__(cls, item_id, name, emoji, description, flags, value, weight, modifiers, options_butcher):
         """
         Creates a new item.
         
@@ -64,6 +67,9 @@ class Item(RichAttributeErrorBaseType):
         
         modifiers : ``None | tuple<StatModifier>``
             Effects of the item.
+        
+        options_butcher : ``None | tuple<OptionButcher>``
+            Options for butchering.
         """
         self = object.__new__(cls)
         self.description = description
@@ -72,6 +78,7 @@ class Item(RichAttributeErrorBaseType):
         self.id = item_id
         self.name = name
         self.modifiers = modifiers
+        self.options_butcher = options_butcher
         self.value = value
         self.weight = weight
         return self
@@ -82,7 +89,7 @@ class Item(RichAttributeErrorBaseType):
         repr_parts = ['<', type(self).__name__]
         
         # id
-        repr_parts.append('id = ')
+        repr_parts.append(' id = ')
         repr_parts.append(repr(self.id))
         
         # name

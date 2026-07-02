@@ -10,6 +10,7 @@ from config import MARISA_MODE
 
 from ...inventory_core import get_inventory, save_inventory
 from ...user_stats_core import get_user_stats, save_user_stats
+from ...seeding import step_seed, step_seed_initial
 
 from ..action import ACTION_ID_SYSTEM_ARRIVAL, ACTION_ID_SYSTEM_CANCELLATION, ACTION_ID_SYSTEM_UNKNOWN
 from ..adventure import (
@@ -24,7 +25,6 @@ from .helpers import (
     get_duration_till_recovery_end, get_location_distance_travel_duration, get_should_cancel_adventure
 )
 from .loot_accumulation_logic import accumulate_action_loot
-from .seed_stepping import step_seed, step_seed_initial
 
 
 try:

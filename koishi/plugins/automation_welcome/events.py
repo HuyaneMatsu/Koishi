@@ -51,7 +51,7 @@ async def welcome_user(client, guild, user, welcome_style, welcome_channel, welc
     client_id = welcome_style.client_id
     if client_id and client_id != client.id:
         preferred_client = CLIENTS.get(client_id, None)
-        if (preferred_client is not None) and has_client_message_create_permissions(welcome_channel, client):
+        if (preferred_client is not None) and has_client_message_create_permissions(welcome_channel, preferred_client):
             client = preferred_client
     
     # build content @ embed & components

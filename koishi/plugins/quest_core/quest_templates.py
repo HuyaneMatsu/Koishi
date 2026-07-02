@@ -1,14 +1,19 @@
 __all__ = ()
 
 from ..item_core import (
-    ITEM_GROUP_ID_FIREWOOD, ITEM_GROUP_ID_KNIFE, ITEM_GROUP_ID_SWEETS, ITEM_ID_ALICE, ITEM_ID_ANGELROOT,
-    ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_CHIRUNO,
-    ITEM_ID_DAI, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_EIRIN, ITEM_ID_FISHING_ROD, ITEM_ID_FLANDRE,
-    ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_JUNKO, ITEM_ID_KOISHI, ITEM_ID_KOKORO,
-    ITEM_ID_MARISA, ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_PEACH, ITEM_ID_PUDDING, ITEM_ID_REIMU, ITEM_ID_REMILIA,
-    ITEM_ID_RIBBON_BOW, ITEM_ID_RULER, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SATORI, ITEM_ID_SCARLET_ONION,
-    ITEM_ID_SCISSORS, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA, ITEM_ID_TEWI, ITEM_ID_TEA_LEAVES,
-    ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YUKARI, ITEM_ID_YUUKA
+    ITEM_GROUP_ID_BLOOD_SAUSAGE_MEAT, ITEM_GROUP_ID_BOILED_SAUSAGE, ITEM_GROUP_ID_FIREWOOD, ITEM_GROUP_ID_KNIFE,
+    ITEM_GROUP_ID_LIVER_SAUSAGE_MEAT, ITEM_GROUP_ID_MEAT_SAUSAGE_MEAT, ITEM_GROUP_ID_SWEETS, ITEM_ID_ALICE,
+    ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLOOD_SAUSAGE, ITEM_ID_BLUEBERRY,
+    ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DANGO, ITEM_ID_DEVILCART_OYSTER,
+    ITEM_ID_EIRIN, ITEM_ID_FISHING_ROD, ITEM_ID_FLANDRE, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC,
+    ITEM_ID_HUMAN_BLOOD, ITEM_ID_HUMAN_BODY_PART_SKULL, ITEM_ID_HUMAN_BRAIN, ITEM_ID_HUMAN_EAR, ITEM_ID_HUMAN_EYE,
+    ITEM_ID_HUMAN_FAT, ITEM_ID_HUMAN_INTESTINES, ITEM_ID_HUMAN_LIVER, ITEM_ID_HUMAN_LUNG, ITEM_ID_HUMAN_MUSCLE,
+    ITEM_ID_HUMAN_SKIN, ITEM_ID_JUNKO, ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_LIVER_SAUSAGE, ITEM_ID_MARISA,
+    ITEM_ID_MEAT_SAUSAGE, ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_ORIN, ITEM_ID_PATCHOULI, ITEM_ID_PEACH, ITEM_ID_PUDDING,
+    ITEM_ID_REIMU, ITEM_ID_REMILIA, ITEM_ID_RIBBON_BOW, ITEM_ID_RICE, ITEM_ID_RULER, ITEM_ID_RUMIA, ITEM_ID_SAKE,
+    ITEM_ID_SAKUYA, ITEM_ID_SATORI, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT,
+    ITEM_ID_SUIKA, ITEM_ID_TEA_LEAVES, ITEM_ID_TEWI, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YUKARI,
+    ITEM_ID_YUUKA
 )
 
 from .amount_types import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT
@@ -23,19 +28,23 @@ from .quest_reward_generators import (
 )
 from .quest_template import QuestTemplate
 from .quest_template_ids import (
-    QUEST_TEMPLATE_ID_ALICE_ANGELROOT, QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_CHIRUNO_FROG,
-    QUEST_TEMPLATE_ID_DAI_FROG, QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW, QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT,
-    QUEST_TEMPLATE_ID_JUNKO_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT,
-    QUEST_TEMPLATE_ID_KOISHI_GARLIC, QUEST_TEMPLATE_ID_KOISHI_KNIFE, QUEST_TEMPLATE_ID_KOISHI_PUDDING,
-    QUEST_TEMPLATE_ID_KOISHI_RULER, QUEST_TEMPLATE_ID_KOKORO_SCISSORS, QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA,
+    QUEST_TEMPLATE_ID_ALICE_ANGELROOT, QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_ALICE_SKIN,
+    QUEST_TEMPLATE_ID_CHIRUNO_FROG, QUEST_TEMPLATE_ID_DAI_FROG, QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT,
+    QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW, QUEST_TEMPLATE_ID_JUNKO_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_ANGELROOT,
+    QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT, QUEST_TEMPLATE_ID_KOISHI_BRAIN, QUEST_TEMPLATE_ID_KOISHI_GARLIC,
+    QUEST_TEMPLATE_ID_KOISHI_KNIFE, QUEST_TEMPLATE_ID_KOISHI_PUDDING, QUEST_TEMPLATE_ID_KOISHI_RULER,
+    QUEST_TEMPLATE_ID_KOKORO_SCISSORS, QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA,
     QUEST_TEMPLATE_ID_MYSTIA_BAMBOO_SHOOT, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_DEVILCART_OYSTER,
-    QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD, QUEST_TEMPLATE_ID_MYSTIA_GARLIC, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
-    QUEST_TEMPLATE_ID_MYSTIA_SCARLET_ONION, QUEST_TEMPLATE_ID_NINA_STRAWBERRY, QUEST_TEMPLATE_ID_REIMU_BANQUET,
-    QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING, QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW, QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY,
-    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER, 
-    QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QUEST_TEMPLATE_ID_SATORI_PUDDING,
-    QUEST_TEMPLATE_ID_SUIKA_SAKE, QUEST_TEMPLATE_ID_TEWI_BISHOPHAT, QUEST_TEMPLATE_ID_YUKARI_RULER,
-    QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT
+    QUEST_TEMPLATE_ID_MYSTIA_FAT, QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD, QUEST_TEMPLATE_ID_MYSTIA_GARLIC,
+    QUEST_TEMPLATE_ID_MYSTIA_MEAT, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_MYSTIA_RICE,
+    QUEST_TEMPLATE_ID_MYSTIA_SCARLET_ONION, QUEST_TEMPLATE_ID_NINA_SKULL, QUEST_TEMPLATE_ID_NINA_STRAWBERRY,
+    QUEST_TEMPLATE_ID_ORIN_FISHING_ROD, QUEST_TEMPLATE_ID_PATCHOULI_EYE, QUEST_TEMPLATE_ID_REIMU_BANQUET,
+    QUEST_TEMPLATE_ID_REIMU_EAR, QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING, QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW,
+    QUEST_TEMPLATE_ID_RUMIA_BLOOD_SAUSAGE, QUEST_TEMPLATE_ID_RUMIA_LIVER_SAUSAGE, QUEST_TEMPLATE_ID_RUMIA_MEAT_SAUSAGE,
+    QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QUEST_TEMPLATE_ID_SAKUYA_BOILED_SAUSAGE,
+    QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER, QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD,
+    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QUEST_TEMPLATE_ID_SATORI_PUDDING, QUEST_TEMPLATE_ID_SUIKA_SAKE,
+    QUEST_TEMPLATE_ID_TEWI_BISHOPHAT, QUEST_TEMPLATE_ID_YUKARI_RULER, QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT
 )
 
 
@@ -70,6 +79,7 @@ QUEST_SAKUYA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY] =
 )
 
 
+# - Mystia +0 level
 # - Balancing +1 level
 # - Hakugyokurou mansion +2 level
 # Reward is around 2.0x of the value
@@ -124,6 +134,7 @@ QUEST_TEMPLATE_SAKUYA_BLUEBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BLUEB
 )
 
 
+# - Mystia +0 level
 # - non-village collection +1 level
 # Reward is around 2.0x of the value
 QUEST_TEMPLATE_MYSTIA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_DEVILCART_OYSTER] = QuestTemplate(
@@ -150,6 +161,7 @@ QUEST_TEMPLATE_MYSTIA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTI
 )
 
 
+# - Mystia +0 level
 # - non-village collection +1 level
 # Reward is around 2.5x of the value
 #
@@ -239,6 +251,7 @@ QUEST_TEMPLATE_SAKUYA_BLUEFRANKISH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BL
 )
 
 
+# - Mystia +0 level
 # Reward is around 2.0x of the value
 #
 # This is a pretty easy quest. Since carrots have low value this quest is not worth much.
@@ -266,6 +279,7 @@ QUEST_TEMPLATE_MYSTIA_CARROT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_CARROT] 
 )
 
 
+# - Mystia +0 level
 # Reward is around 2.0x of the value
 QUEST_TEMPLATE_MYSTIA_GARLIC = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_GARLIC] = QuestTemplate(
     QUEST_TEMPLATE_ID_MYSTIA_GARLIC,
@@ -291,6 +305,7 @@ QUEST_TEMPLATE_MYSTIA_GARLIC = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_GARLIC] 
 )
 
 
+# - Mystia +0 level
 # Reward is around 2.0x of the value
 QUEST_TEMPLATE_MYSTIA_SCARLET_ONION = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_SCARLET_ONION] = QuestTemplate(
     QUEST_TEMPLATE_ID_MYSTIA_SCARLET_ONION,
@@ -345,7 +360,7 @@ QUEST_TEMPLATE_ALICE_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE
 
 
 # - Sakuya +2 level
-# - misty lake +2 level
+# - Misty lake +2 level
 # - equipment +1 level
 # Reward is around 2.0x of the value
 QUEST_TEMPLATE_SAKUYA_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD] = QuestTemplate(
@@ -406,7 +421,7 @@ QUEST_TEMPLATE_CHIRUNO_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_CHIRUNO_FROG] = 
 
 
 # - Dai +3 level
-# - misty lake +2 level
+# - Misty lake +2 level
 # Reward is around 2.0x of the value
 QUEST_TEMPLATE_DAI_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_DAI_FROG] = QuestTemplate(
     QUEST_TEMPLATE_ID_DAI_FROG,
@@ -817,8 +832,9 @@ QUEST_TEMPLATE_KOISHI_KNIFE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_KNIFE] = 
 )
 
 
-# - Mystia +1 level
-# - Uncommon drop + 1 level
+# - Mystia +0 level
+# - Magic forest +1 level
+# - Balance +1 level
 # Reward is around 1.0x of the value
 QUEST_TEMPLATE_MYSTIA_FIREWOOD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD] = QuestTemplate(
     QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD,
@@ -1112,5 +1128,391 @@ QUEST_TEMPLATE_REMILIA_FLANDRE_WING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REMILIA_
     (
         QuestRewardGeneratorBalance(138000, 100, 90, 110),
         QuestRewardGeneratorCredibilityFix(200),
+    ),
+)
+
+
+# - Rumia +2
+# - Requires meat +3
+QUEST_TEMPLATE_RUMIA_LIVER_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_LIVER_SAUSAGE] = QuestTemplate(
+    QUEST_TEMPLATE_ID_RUMIA_LIVER_SAUSAGE,
+    (
+        QUEST_TEMPLATE_ID_RUMIA_BLOOD_SAUSAGE,
+        QUEST_TEMPLATE_ID_RUMIA_MEAT_SAUSAGE,
+    ),
+    2, # Target: 1
+    14,
+    (
+        'I am feeling like making some homemade flavours; are you interested perhaps?\n'
+        '\n'
+        'I will want to make some liver flavoured boiled sausage. '
+        'If you bring me the ingredients, I will also tell you the wonderful boiled sausage\'s recipe.'
+    ),
+    5,
+    1,
+    ITEM_ID_RUMIA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, DAY_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_LUNG, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_LIVER, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_FAT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_LIVER_SAUSAGE_MEAT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_MUSCLE, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_INTESTINES, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(5000, 100, 90, 110),
+        QuestRewardGeneratorItemExactFix(ITEM_ID_LIVER_SAUSAGE, 2),
+        QuestRewardGeneratorCredibility(20),
+    ),
+)
+
+
+# - Rumia +2
+# - Requires meat +3
+QUEST_TEMPLATE_RUMIA_BLOOD_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_BLOOD_SAUSAGE] = QuestTemplate(
+    QUEST_TEMPLATE_ID_RUMIA_BLOOD_SAUSAGE,
+    (
+        QUEST_TEMPLATE_ID_RUMIA_LIVER_SAUSAGE,
+        QUEST_TEMPLATE_ID_RUMIA_MEAT_SAUSAGE,
+    ),
+    2, # Target: 1
+    14,
+    (
+        'I am feeling like making some homemade flavours; are you interested perhaps?\n'
+        '\n'
+        'I will want to make some blood flavoured boiled sausage. '
+        'If you bring me the ingredients, I will also tell you the wonderful boiled sausage\'s recipe.'
+    ),
+    5,
+    1,
+    ITEM_ID_RUMIA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, DAY_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_LUNG, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_BLOOD, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_FAT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_BLOOD_SAUSAGE_MEAT, AMOUNT_TYPE_WEIGHT, 1400, 1000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_MUSCLE, AMOUNT_TYPE_WEIGHT, 2000, 1000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_INTESTINES, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_WEIGHT, 1000, 2000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_GARLIC, AMOUNT_TYPE_WEIGHT, 400, 400, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(5000, 100, 90, 110),
+        QuestRewardGeneratorItemExactFix(ITEM_ID_BLOOD_SAUSAGE, 2),
+        QuestRewardGeneratorCredibility(20),
+    ),
+)
+
+
+# - Rumia +2
+# - Requires meat +3
+QUEST_TEMPLATE_RUMIA_MEAT_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_MEAT_SAUSAGE] = QuestTemplate(
+    QUEST_TEMPLATE_ID_RUMIA_MEAT_SAUSAGE,
+    (
+        QUEST_TEMPLATE_ID_RUMIA_LIVER_SAUSAGE,
+        QUEST_TEMPLATE_ID_RUMIA_BLOOD_SAUSAGE,
+    ),
+    2, # Target: 1
+    14,
+    (
+        'I am feeling like making some homemade flavours; are you interested perhaps?\n'
+        '\n'
+        'I will want to make some meat flavoured boiled sausage. '
+        'If you bring me the ingredients, I will also tell you the wonderful boiled sausage\'s recipe.'
+    ),
+    5,
+    1,
+    ITEM_ID_RUMIA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, DAY_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_FAT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_MEAT_SAUSAGE_MEAT, AMOUNT_TYPE_WEIGHT, 2000, 1000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_MUSCLE, AMOUNT_TYPE_WEIGHT, 4000, 1000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_INTESTINES, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_WEIGHT, 1000, 2000, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(5000, 100, 90, 110),
+        QuestRewardGeneratorItemExactFix(ITEM_ID_MEAT_SAUSAGE, 2),
+        QuestRewardGeneratorCredibility(20),
+    ),
+)
+
+# - Orin +1 level
+# - Misty lake +2 level
+# - equipment +1 level
+# Reward is around 3x of the value
+QUEST_TEMPLATE_ORIN_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ORIN_FISHING_ROD] = QuestTemplate(
+    QUEST_TEMPLATE_ID_ORIN_FISHING_ROD,
+    None,
+    4, # Target: 1
+    14,
+    (
+        'hey, Its me, your favourite catgirl!!!!\n'
+        '\n'
+        'Please bring me a fishing rod; '
+        'I think the goblin shamans burt mine while I was in the mines looking for some nice corpses!'
+    ),
+    4,
+    1,
+    ITEM_ID_ORIN,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 100, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_FISHING_ROD, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(9000, 1000, 100, 120),
+        QuestRewardGeneratorCredibilityFix(25),
+    ),
+)
+
+
+# - Sakuya +2 level
+# - Requires meat +3 level
+# Reward around 2.5x the value in Sake
+QUEST_TEMPLATE_SAKUYA_BOILED_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BOILED_SAUSAGE] = QuestTemplate(
+    QUEST_TEMPLATE_ID_SAKUYA_BOILED_SAUSAGE,
+    None,
+    2, # Target: 1
+    7,
+    (
+        'My mistress is wishing to consume some all famous boiled sausage of the Rumia butchery.\n'
+        '\n'
+        'Please bring us a feastful.'
+    ),
+    5,
+    1,
+    ITEM_ID_SAKUYA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 12, HOUR_IN_SECONDS, 70, 120),
+        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_BOILED_SAUSAGE, AMOUNT_TYPE_WEIGHT, 2000, 2000, 65, 135),
+    ),
+    (
+        QuestRewardGeneratorBalance(2500, 100, 80, 120),
+        QuestRewardGeneratorCredibility(20),
+    ),
+)
+
+
+# - Alice +2 level
+# - Requires meat +3 level
+# Reward around 2x the value in Sake
+QUEST_TEMPLATE_ALICE_SKIN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_SKIN] = QuestTemplate(
+    QUEST_TEMPLATE_ID_ALICE_SKIN,
+    None,
+    2, # Target: 1
+    10,
+    (
+        'I am running low on some supplies for my dolls. I would like to restock on some skin for them.\n'
+        '\n'
+        'Could you please bring me some?'
+    ),
+    5,
+    1,
+    ITEM_ID_ALICE,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 6, HOUR_IN_SECONDS, 70, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_SKIN, AMOUNT_TYPE_COUNT, 16, 2, 50, 150),
+    ),
+    (
+        QuestRewardGeneratorBalance(800, 100, 80, 120),
+        QuestRewardGeneratorCredibility(10),
+    ),
+)
+
+
+# - Mystia +0 level
+# - Requires meat +3 level
+# Reward around 2x the value in Sake
+QUEST_TEMPLATE_MYSTIA_MEAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_MEAT] = QuestTemplate(
+    QUEST_TEMPLATE_ID_MYSTIA_MEAT,
+    None,
+    1,
+    3,
+    (
+        'I am running severely low on meat.\n'
+        '\n'
+        'Any regular meat is fine, could you please bring me some?'
+    ),
+    5,
+    3,
+    ITEM_ID_MYSTIA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 4, HOUR_IN_SECONDS, 70, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_MUSCLE, AMOUNT_TYPE_WEIGHT, 8000, 1000, 80, 120),
+    ),
+    (
+        QuestRewardGeneratorBalance(8000, 1000, 80, 120),
+        QuestRewardGeneratorCredibility(10),
+    ),
+)
+
+
+# - Mystia +0 level
+# - Requires meat +3 level
+QUEST_TEMPLATE_MYSTIA_FAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FAT] = QuestTemplate(
+    QUEST_TEMPLATE_ID_MYSTIA_FAT,
+    None,
+    1,
+    4,
+    (
+        'I am running severely low on fat.\n'
+        '\n'
+        'One can\'t cook without fat, please bring me some as soo nas possible.'
+    ),
+    3,
+    1,
+    ITEM_ID_MYSTIA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2 + HOUR_IN_SECONDS * 6, HOUR_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_FAT, AMOUNT_TYPE_WEIGHT, 2000, 100, 80, 120),
+    ),
+    (
+        QuestRewardGeneratorBalance(1150, 50, 80, 120),
+        QuestRewardGeneratorCredibility(20),
+    ),
+)
+
+
+# - Patchouli +2 level
+# - Requires meat +3 level
+# Reward around 3x the value
+QUEST_TEMPLATE_PATCHOULI_EYE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_PATCHOULI_EYE] = QuestTemplate(
+    QUEST_TEMPLATE_ID_PATCHOULI_EYE,
+    None,
+    4, # Target: 1
+    28,
+    (
+        'We would like to perform some eye research in the Scarlet Devil Mansion.\n'
+        '\n'
+        'Please bring me a few eyes.'
+    ),
+    5,
+    1,
+    ITEM_ID_PATCHOULI,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 32, DAY_IN_SECONDS, 90, 110),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_EYE, AMOUNT_TYPE_COUNT, 6, 6, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(100, 1, 100, 100),
+        QuestRewardGeneratorCredibility(30),
+    ),
+)
+
+
+# - Patchouli +1 level
+# - Requires meat +3 level
+# Reward around 1x the value
+QUEST_TEMPLATE_ID_BRAIN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BRAIN] = QuestTemplate(
+    QUEST_TEMPLATE_ID_KOISHI_BRAIN,
+    None,
+    4, # Target: 1
+    56,
+    (
+        'Flan ask why I brain dead after woke up.\n'
+        '\n'
+        'She says it\'s because I need a a RAM upgrade\n'
+        'But how can Ran upgrade me?'
+    ),
+    4,
+    1,
+    ITEM_ID_KOISHI,
+    (
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_BRAIN, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(900, 1, 100, 100),
+        QuestRewardGeneratorCredibility(10),
+    ),
+)
+
+
+# - Nina +3 level
+# - Requires meat +3 level
+# - Requires large amount +1 level
+# Reward is around 1.5x of the value
+QUEST_NINA_SKULL = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NINA_SKULL] = QuestTemplate(
+    QUEST_TEMPLATE_ID_NINA_SKULL,
+    None,
+    2, # Target: 1
+    72,
+    (
+        'HAAAA!!\n'
+        'I heard Reimu Is working on touching up the Hakurei shrine!!\n'
+        '\n'
+        'I had a great idea today, a new altar could really spruce up the place, what about that?\n'
+        'Since she is dealing with a lot of evil beings I thought of a skull rack would be a great choice!!! '
+        'It would definitely help deter all crimes!!!!'
+    ),
+    7,
+    1,
+    ITEM_ID_NINA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 120, DAY_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_BODY_PART_SKULL, AMOUNT_TYPE_COUNT, 60, 1, 90, 110),
+    ),
+    (
+        QuestRewardGeneratorBalance(15000, 100, 90, 110),
+        QuestRewardGeneratorCredibility(90),
+    ),
+)
+
+
+# - Reimu +1 level
+# - Requires meat +3 level
+# Reward is around 3x of the value
+QUEST_REIMU_EAR = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REIMU_EAR] = QuestTemplate(
+    QUEST_TEMPLATE_ID_REIMU_EAR,
+    None,
+    4, # Target: 1
+    16,
+    (
+        'As a good pet owner, I wish to praise, pamper and reward my cutie. '
+        'I heard from Yukari that some people use dried ears as rewards, therefore I would like to request some to try.'
+    ),
+    4,
+    1,
+    ITEM_ID_REIMU,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS * 12, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_EAR, AMOUNT_TYPE_COUNT, 10, 1, 80, 120),
+    ),
+    (
+        QuestRewardGeneratorItemExactFix(ITEM_ID_DANGO, 1),
+        QuestRewardGeneratorCredibility(20),
+    ),
+)
+
+# - Mystia +0 level
+# - Human village outskirts +0 level
+# - Requires large amount.
+# Reward is around 2.0x of the value
+QUEST_TEMPLATE_MYSTIA_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_RICE] = QuestTemplate(
+    QUEST_TEMPLATE_ID_MYSTIA_RICE,
+    None,
+    1,
+    4,
+    (
+        'As the owner of the izakaya, I am always in need of rice to serve.\n'
+        '\n'
+        'Please resupply me.'
+    ),
+    1,
+    2,
+    ITEM_ID_MYSTIA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS * 12, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 10000, 5, 80, 120),
+    ),
+    (
+        QuestRewardGeneratorBalance(11000, 100, 80, 120),
+        QuestRewardGeneratorCredibility(30),
     ),
 )

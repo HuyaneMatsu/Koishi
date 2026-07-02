@@ -212,7 +212,7 @@ async def delete_to_do(to_do):
 
 async def query_delete_to_do(to_do):
     """
-    Executes a query to delete teh entry from the data base.
+    Executes a query to delete the entry from the data base.
     
     This function is a coroutine.
     

@@ -81,6 +81,7 @@ def get_item(item_id):
         0,
         0,
         None,
+        None,
     )
     
     ITEMS[item_id] = item

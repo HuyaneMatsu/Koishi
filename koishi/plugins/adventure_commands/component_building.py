@@ -1,102 +1,33 @@
 __all__ = ()
 
-from datetime import timedelta as TimeDelta
+from itertools import islice
 
-from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import (
-    DATETIME_FORMAT_CODE, InteractionForm, create_button, create_row, create_section, create_separator,
-    create_text_display, elapsed_time, format_datetime
+    InteractionForm, create_button, create_row, create_section, create_separator, create_text_display,
+    create_thumbnail_media, format_datetime
 )
 
-from ..adventure_core import (
-    ACTIONS, ACTION_TYPE_ARRIVAL, ACTION_TYPE_BUTCHERING, ACTION_TYPE_CANCELLATION, ACTION_TYPE_ENCOUNTER,
-    ACTION_TYPE_FATALITY, ACTION_TYPE_FISHING, ACTION_TYPE_FORAGING, ACTION_TYPE_GARDENING, ACTION_TYPE_HUNT,
-    ACTION_TYPE_NONE, ACTION_TYPE_TRAP, ACTION_TYPE_UNKNOWN, ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_CANCELLED,
-    ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_FINALIZED, ADVENTURE_STATE_RETURNING, LOCATIONS,
-    LOOT_STATE_LOST_DUE_FULL_INVENTORY, LOOT_STATE_LOST_DUE_LOW_ENERGY, LOOT_STATE_SUCCESS, TARGETS,
-    can_cancel_adventure, get_duration_till_recovery_end, iter_loot_data, produce_auto_cancellation_conditions,
-    produce_duration_suggestion
-)
-from ..item_core import get_item
-from ..unit_core import produce_kilogram, produce_kilogram_ratio
+from ..adventure_core import ADVENTURE_STATE_FINALIZED, can_cancel_adventure, iter_loot_data
+from ..item_core import butcher_estimate_energy_cost, butcher_estimate_loot_chance_and_amounts
 
+from .constants import ACTIVE_ADVENTURE_ACTION_LIMIT, ADVENTURE_ACTION_LISTING_PAGE_SIZE
+from .content_building import (
+    produce_adventure_action_listing_view_header, produce_adventure_action_short_representation,
+    produce_adventure_action_view_description, produce_adventure_action_view_header,
+    produce_adventure_cancellation_confirmation_description, produce_adventure_initial_representation,
+    produce_adventure_listing_view_header, produce_adventure_return_notification_description,
+    produce_adventure_return_notification_header, produce_adventure_short_representation,
+    produce_adventure_view_description_active, produce_adventure_view_description_finalized,
+    produce_adventure_view_header, produce_butcher_done_description, produce_butcher_header,
+    produce_butcher_item_description, produce_butcher_recovering_until_footer, produce_butcher_step_description,
+    produce_loot_listing
+)
 from .custom_ids import (
     ADVENTURE_ACTION_BATTLE_LOGS_BUILDER, ADVENTURE_ACTION_LISTING_VIEW_BUILDER, ADVENTURE_ACTION_VIEW_BUILDER,
-    ADVENTURE_ACTION_VIEW_DEPART, ADVENTURE_ACTION_VIEW_RETURN, ADVENTURE_CANCEL_BUILDER,
+    ADVENTURE_ACTION_VIEW_DEPART, ADVENTURE_ACTION_VIEW_RETURN, ADVENTURE_BUTCHER_CONTINUOUS_BUILDER,
+    ADVENTURE_BUTCHER_DISABLED_BUILDER, ADVENTURE_BUTCHER_INITIAL_BUILDER, ADVENTURE_CANCEL_BUILDER,
     ADVENTURE_CREATE_CONFIRM_BUILDER, ADVENTURE_LISTING_VIEW_BUILDER, ADVENTURE_VIEW_BUILDER
 )
-
-
-ACTION_TYPE_NAME_DEFAULT = 'Unknown'
-
-ACTION_TYPE_TO_NAME = {
-    ACTION_TYPE_NONE : 'Nothing',
-    ACTION_TYPE_CANCELLATION : 'Cancellation',
-    ACTION_TYPE_ARRIVAL : 'Arrival',
-    ACTION_TYPE_FATALITY : 'Fatality',
-    ACTION_TYPE_UNKNOWN : ACTION_TYPE_NAME_DEFAULT,
-    
-    ACTION_TYPE_GARDENING : 'Gardening',
-    ACTION_TYPE_FORAGING : 'Foraging',
-    ACTION_TYPE_BUTCHERING : 'Butchering',
-    
-    ACTION_TYPE_FISHING : 'Fishing',
-    ACTION_TYPE_ENCOUNTER : 'Encounter',
-    ACTION_TYPE_HUNT : 'Hunt',
-    
-    ACTION_TYPE_TRAP : 'Trapped',
-}
-
-
-ACTIVE_ADVENTURE_ACTION_LIMIT = 5
-ADVENTURE_ACTION_LISTING_PAGE_SIZE = 10
-ADVENTURE_LISTING_PAGE_SIZE = 10
-
-
-def produce_adventure_initial_representation(location, target, duration, return_, auto_cancellation):
-    """
-    Produces an adventure's initial representation.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    location : ``Location``
-        Target duration.
-    
-    target : ``Target``
-        Target action set.
-    
-    duration : `int`
-        Duration.
-    
-    return_ : ``Return``
-        Return logic identifier.
-    
-    auto_cancellation : ``AutoCancellation``
-        Auto cancellation.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield 'Location: '
-    yield location.name
-    
-    yield '\nTarget: '
-    yield target.name
-    
-    yield '\nDuration: '
-    yield from produce_duration_suggestion(duration)
-    
-    yield '\nReturn: '
-    yield return_.name
-    
-    yield '\nAuto-cancellation: '
-    yield auto_cancellation.name
-    yield ' ('
-    yield from produce_auto_cancellation_conditions(auto_cancellation)
-    yield ')'
 
 
 def build_adventure_create_confirmation_form(
@@ -199,26 +130,6 @@ def build_adventure_create_confirm_components(
     ]
 
 
-def produce_adventure_cancellation_confirmation_description(adventure):
-    """
-    Produces an adventure cancellation confirmation description.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure : ``Adventure``
-        Adventure to produce description for.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield 'Are you sure to cancel your adventure towards '
-    yield from _produce_adventure_location_for_headers(adventure)
-    yield '?'
-
-
 def build_adventure_cancellation_confirmation_form(adventure):
     """
     Builds adventure cancellation confirmation form.
@@ -253,368 +164,6 @@ def build_adventure_cancellation_components():
         create_text_display('You successfully cancelled your adventure.'),
         create_text_display('You head back home immediately.'),
     ]
-
-
-def _produce_adventure_location_for_headers(adventure):
-    """
-    Helper function to produce adventure location for headers.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure : ``Adventure``
-        Adventure to produce for.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    try:
-        location = LOCATIONS[adventure.location_id]
-    except KeyError:
-        location_name = 'unknown'
-    else:
-        location_name = location.name
-    
-    try:
-        target = TARGETS[adventure.target_id]
-    except KeyError:
-        target_name = 'unknown'
-    else:
-        target_name = target.name
-    
-    yield location_name
-    yield ' for '
-    yield target_name
-
-
-def produce_adventure_view_header(adventure):
-    """
-    Produces an adventure view header.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure : ``Adventure``
-        Adventure to produce header for.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield '### Adventure to '
-    yield from _produce_adventure_location_for_headers(adventure)
-
-
-def produce_adventure_return_notification_header(adventure):
-    """
-    Produces an adventure return notification header.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure : ``Adventure``
-        Adventure to produce header for.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield '### You have returned from adventure at '
-    yield from _produce_adventure_location_for_headers(adventure)
-
-
-def produce_adventure_return_notification_description(adventure):
-    """
-    Produces an adventure return notification description.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure : ``Adventure``
-        Adventure to produce description for.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    duration = get_duration_till_recovery_end(adventure)
-    until = adventure.updated_at + TimeDelta(seconds = duration)
-    
-    yield 'You are recovering for '
-    yield elapsed_time(RelativeDelta(seconds = duration))
-    yield ', until '
-    yield format_datetime(until, 'T')
-    yield '.'
-
-
-def produce_adventure_action_listing_view_header(adventure, page_index):
-    """
-    Produces an adventure action listing view header.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure : ``Adventure``
-        Adventure to produce header for.
-    
-    page_index : `int`
-        The shown page's index.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield '### Actions of '
-    yield from _produce_adventure_location_for_headers(adventure)
-    yield ' (page '
-    yield str(page_index + 1)
-    yield ')'
-
-
-def produce_adventure_listing_view_header(page_index):
-    """
-    Produces adventure listing view header.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    page_index : `int`
-        The shown page's index.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield '### Adventures (page '
-    yield str(page_index + 1)
-    yield ')'
-
-
-def produce_adventure_short_representation(adventure):
-    """
-    Produces short representation of an adventure for adventure listing view.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure : ``Adventure``
-        Adventure to produce representation for.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield format(adventure.created_at, DATETIME_FORMAT_CODE)
-    yield ' UTC '
-    yield from _produce_adventure_location_for_headers(adventure)
-
-
-def produce_used(name, initial, exhausted):
-    """
-    Produces a generic used value without unit.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    name : `str`
-        The name of the used value.
-    
-    initial : `int`
-        Initial value.
-    
-    exhausted : `int`
-        The exhausted amount.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield 'Used '
-    yield name
-    yield ': '
-    yield str(exhausted)
-    yield ' / '
-    yield str(initial)
-
-
-def produce_adventure_view_description_active(adventure, now, inventory_total, inventory_exhausted):
-    """
-    Produces adventure description for an active adventure.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure : ``Adventure``
-        Adventure to produce description for.
-    
-    now : `DateTime`
-        The current time.
-    
-    inventory_total : `int`
-        The user's total inventory.
-    
-    inventory_exhausted : `int`
-        The user's used inventory.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield 'Departed at: '
-    yield format(adventure.created_at, DATETIME_FORMAT_CODE)
-    yield ' UTC\n'
-    yield from produce_used('health', adventure.health_initial, adventure.health_exhausted)
-    yield '\n'
-    yield from produce_used('energy', adventure.energy_initial, adventure.energy_exhausted)
-    yield '\nUsed inventory: '
-    yield from produce_kilogram_ratio(inventory_exhausted, inventory_total)
-    yield '\nElapsed time: '
-    yield elapsed_time(RelativeDelta(adventure.created_at, now))
-    
-    adventure_state = adventure.state
-    if adventure_state == ADVENTURE_STATE_DEPARTING:
-        next_step_description = 'departing to the location'
-    
-    elif adventure_state == ADVENTURE_STATE_ACTIONING:
-        next_step_description = 'working on your target task'
-    
-    elif adventure_state == ADVENTURE_STATE_CANCELLED or adventure_state == ADVENTURE_STATE_RETURNING:
-        next_step_description = 'returning home'
-    
-    elif adventure_state == ADVENTURE_STATE_FINALIZED:
-        next_step_description = None
-    
-    else:
-        next_step_description = None
-    
-    if (next_step_description is not None):
-        yield '\nYou are currently '
-        yield next_step_description
-        yield '.'
-
-
-def produce_adventure_view_description_finalized(adventure):
-    """
-    Produces adventure description for an active adventure.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure : ``Adventure``
-        Adventure to produce description for.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield 'Departed at: '
-    yield format(adventure.created_at, DATETIME_FORMAT_CODE)
-    yield ' UTC\n'
-    yield from produce_used('health', adventure.health_initial, adventure.health_exhausted)
-    yield '\n'
-    yield from produce_used('energy', adventure.energy_initial, adventure.energy_exhausted)
-    yield '\nTotal duration: '
-    yield elapsed_time(RelativeDelta(adventure.created_at, adventure.updated_at))
-    yield '\nRecovery time: '
-    yield elapsed_time(RelativeDelta(seconds = get_duration_till_recovery_end(adventure)))
-
-
-def _produce_adventure_action_type_for_headers(adventure_action):
-    """
-    Helper function to produce adventure action type for headers.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure_action : ``AdventureAction``
-        Adventure action to produce for.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    try:
-        action = ACTIONS[adventure_action.action_id]
-    except KeyError:
-        action_name = ACTION_TYPE_NAME_DEFAULT
-    else:
-        action_name = ACTION_TYPE_TO_NAME.get(action.type, ACTION_TYPE_NAME_DEFAULT)
-    
-    yield action_name
-
-
-def produce_adventure_action_short_representation(adventure_action):
-    """
-    Produces an adventure action's header.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure_action : ``AdventureAction``
-        Adventure action to produce header for.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield format_datetime(adventure_action.created_at, 'T')
-    yield ' '
-    yield from _produce_adventure_action_type_for_headers(adventure_action)
-
-
-def produce_adventure_action_view_header(adventure_action):
-    """
-    Produces an adventure action's header.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure_action : ``AdventureAction``
-        Adventure action to produce header for.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield '### Action '
-    yield from _produce_adventure_action_type_for_headers(adventure_action)
-
-
-def produce_adventure_action_view_description(adventure_action):
-    """
-    Produces an adventure action's description.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure_action : ``AdventureAction``
-        Adventure action to produce description for.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield 'Occurred at: '
-    yield format_datetime(adventure_action.created_at, 'T')
-    yield '\nUsed health: '
-    yield str(adventure_action.health_exhausted)
-    yield '\nUsed energy: '
-    yield str(adventure_action.energy_exhausted)
 
 
 def _accumulate_group_adventure_action_loot(adventure_action, grouped_loot):
@@ -680,76 +229,6 @@ def group_adventure_action_loot_by_state(adventure_action):
     _accumulate_group_adventure_action_loot(adventure_action, grouped_loot)
     return grouped_loot
 
-
-def _item_and_amount_pair_sort_key_getter(item):
-    """
-    Sort key getter for item and amount pair items.
-    
-    Parameters
-    ----------
-    item : ``(Item, int)``
-        Item to get sort key for.
-    
-    Returns
-    -------
-    key : `str`
-    """
-    return item[0].name
-
-
-def produce_loot_listing(grouped_loot):
-    """
-    Produces loot listing.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    grouped_loot : `dict<int, dict<int, int>>`
-        Grouped loot by state.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    group_added = False
-    
-    for loot_state, title in (
-        (LOOT_STATE_SUCCESS, 'Loot'),
-        (LOOT_STATE_LOST_DUE_LOW_ENERGY, 'Loot lost due to low energy'),
-        (LOOT_STATE_LOST_DUE_FULL_INVENTORY, 'Loot lost due to full inventory'),
-    ):
-        try:
-            group = grouped_loot[loot_state]
-        except KeyError:
-            continue
-        
-        if group_added:
-            yield '\n'
-        else:
-            group_added = True
-        
-        yield '### '
-        yield title
-        yield ':'
-        
-        for item, amount in sorted(
-            ((get_item(item_id), amount) for (item_id, amount) in group.items()),
-            key = _item_and_amount_pair_sort_key_getter,
-        ):
-            yield '\n- '
-            
-            emoji = item.emoji
-            if (emoji is not None):
-                yield emoji.as_emoji
-                yield ' '
-            
-            yield item.name
-            yield ' x'
-            yield str(amount)
-            yield ' ('
-            yield from produce_kilogram(item.weight * amount)
-            yield ')'
 
 
 def iter_build_adventure_action_components(
@@ -1449,26 +928,162 @@ def build_adventure_return_notification_components(adventure):
     return components
 
 
-def produce_adventure_depart_failure_recovery_description(recovering_until, now):
+def build_butcher_option_component(
+    user_id, initial_item, butchered_item, seed, butcher_flags, multiplier, index
+):
     """
-    Produces adventure depart failure message for the case when the user is recovering.
-    
-    This function is an iterable generator.
+    Builds a butcher option component (section).
     
     Parameters
     ----------
-    recovering_until : `DateTine`
-        Until when the user is recovering.
+    user_id : `int`
+        The invoking user's identifier.
+    
+    initial_item : ``Item`
+        The item initially butchered.
+    
+    butchered_item : ``None | Item``
+        The just butchered item-
+    
+    seed : `int`
+        Seed to use for butchering.
+    
+    butcher_flags : `int`
+        Flags described which body parts were already butchered.
+    
+    multiplier : `float`
+        Multiplier of the user for this given action.
+    
+    index : `int`
+        The index of the item.
+    
+    Returns
+    -------
+    component : ``Component``
+    """
+    options_butcher = (initial_item if butchered_item is None else butchered_item).options_butcher
+    if (options_butcher is None):
+        loot_chance_and_amounts = None
+        energy_cost = 0
+        custom_id = ADVENTURE_BUTCHER_DISABLED_BUILDER(user_id, initial_item.id, index)
+        enabled = False
+    else:
+        loot_chance_and_amounts = butcher_estimate_loot_chance_and_amounts(options_butcher, multiplier)
+        energy_cost = butcher_estimate_energy_cost(options_butcher, multiplier)
+        if butchered_item is None:
+            custom_id = ADVENTURE_BUTCHER_INITIAL_BUILDER(user_id, initial_item.id)
+        else:
+            custom_id = ADVENTURE_BUTCHER_CONTINUOUS_BUILDER(
+                user_id, initial_item.id, seed, butcher_flags, index, multiplier
+            )
+        enabled = True
+    
+    return create_section(
+        create_text_display(
+            ''.join([*produce_butcher_item_description(
+                (initial_item if butchered_item is None else butchered_item), loot_chance_and_amounts, energy_cost)]
+            )
+        ),
+        thumbnail = create_button('Butcher', custom_id = custom_id, enabled = enabled),
+    )
+
+
+def build_butcher_components(
+    user,
+    guild_id,
+    initial_item,
+    seed,
+    butcher_flags,
+    multiplier,
+    butcher_amounts_accumulated,
+    energy_cost_accumulated,
+    butcherables,
+    butchered_item,
+    butcher_amounts,
+    energy_cost,
+    now,
+    recovering_until,
+):
+    """
+    Builds butcher components.
+    
+    Parameters
+    ----------
+    user : ``ClientUserBase``
+        The user invoking the interaction.
+    
+    guild_id : `int`
+        The local guild's identifier.
+    
+    initial_item : ``Item``
+        Item to butcher.
+    
+    seed : `int`
+        Seed to use for butchering.
+    
+    butcher_flags : `int`
+        Flags described which body parts were already butchered.
+    
+    multiplier : `float`
+        Multiplier of the user for this given action.
     
     now : `DateTime`
-        The current time.
+        The current date time.
     
-    Yields
-    ------
-    part : `str`
+    recovering_until : `None | DateTime`
+        Until when the user is recovering for.
+    
+    Returns
+    -------
+    components : ``list<Component>``
     """
-    yield 'You are currently recovering for '
-    yield elapsed_time(RelativeDelta(recovering_until, now))
-    yield ', until '
-    yield format_datetime(recovering_until, 'T')
-    yield '.\nYou cannot go on an adventure in the meantime.'
+    components = []
+    
+    # ---- Header ----
+    
+    components.append(
+        create_section(
+            create_text_display(''.join([*produce_butcher_header(initial_item)])),
+            thumbnail = create_thumbnail_media(user.avatar_url_at(guild_id)),
+        ),
+    )
+    
+    # --- Body ----
+    
+    if butchered_item is None:
+        # If the user did not butcher anything yet, just offer them to butcher the initial item.
+        components.append(
+            build_butcher_option_component(user.id, initial_item, None, seed, butcher_flags, multiplier, 0)
+        )
+    
+    else:
+        # Add what the user just butchered.
+        components.append(create_text_display(
+            ''.join([*produce_butcher_step_description(butchered_item, butcher_amounts, energy_cost)])
+        ))
+        
+        # Offer the user to further butcher additional parts.
+        # Show only the first 10, so we do not pass the component limit.
+        if (butcherables is not None):
+            for nested_item, index in islice(butcherables, 0, 10):
+                components.append(
+                    build_butcher_option_component(
+                        user.id, initial_item, nested_item, seed, butcher_flags, multiplier, index
+                    )
+                )
+        
+        # Summarise how much the user already butchered if it is not the first butcher.
+        if (butcher_amounts_accumulated != butcher_amounts) or (energy_cost_accumulated != energy_cost):
+            components.append(create_text_display(
+                ''.join([*produce_butcher_done_description(butcher_amounts_accumulated, energy_cost_accumulated)])
+            ))
+    
+    # ---- Footer ----
+    
+    if (recovering_until is not None):
+        components.append(create_separator())
+        components.append(create_text_display(
+            ''.join([*produce_butcher_recovering_until_footer(now, recovering_until)])
+        ))
+    
+    return components

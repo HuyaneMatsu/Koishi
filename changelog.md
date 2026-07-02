@@ -1,3 +1,84 @@
+### 2026-07-02
+
+- Fix `automation welcome` tried to use a wrong client to welcome if the welcome style had preferred client configured.
+    Due to checking permissions for the the wrong client when deciding to switch it up, 
+  always resulting in a wrong decision. (yumeirusynthesis)
+- Fix `automation farewell` had the same issue as `automation welcome`.
+- Add new `/adventure butcher` command.
+
+- Add new items:
+    - Human muscle
+    - Human eye
+    - Human brain
+    - Human lung
+    - Human heart
+    - Human liver
+    - Human intestines
+    - Human tripe
+    - Human pancreas
+    - Human spleen
+    - Human kidney
+    - Human blood
+    - Human cartilage
+    - Human fat
+    - Human hair
+    - Human nail
+    - Human nervous tissue
+    - Human skin
+    - Human bone
+    - Human tooth
+    - Human ear
+    - Human tongue
+    - Human hand
+    - Human arm
+    - Human foot
+    - Human leg
+    - Human skull
+    - Human digestive organs
+    - Human internals
+    - Human torso
+    - Human body
+    - Human body bottom half
+    - Human body top half
+    - Human body chewed
+    - Rice
+    - Liver sausage
+    - Blood sausage
+    - Meat sausage
+
+- Add new item groups:
+    - Liver sausage meat
+    - Blood sausage meat
+    - Meat sausage meat
+    - Boiled sausage
+
+- Balance adventure locations & targets:
+    - Misty lake - foraging -> Angelroot chance 60% -> 57%.
+    - Misty lake - foraging -> Human bone (~1% chance)
+    - Misty lake - foraging -> Human skull (~0.05% chance)
+    - Misty lake - foraging -> Human various parts (~0.03% chance)
+    - Ruins - foraging -> Human arm / leg (~0.07% chance)
+    - Ruins - foraging -> Human body chewed (~0.06 chance; do not scale)
+
+- Add new adventure locations & targets:
+    - Youkai forest - firewood -> Firewood (~60%), Mushrooms (~5.9%), Bishophat (2.3%), Various body parts (~2%).
+    - Human village outskirts - Gardening (rice)
+
+- Add new quests:
+    - Rumia - Liver sausage
+    - Rumia - Blood sausage
+    - Rumia - Meat sausage
+    - Orin - Fishing rod
+    - Sakuya - Boiled sausage
+    - Alice - Skin (aspecialguest)
+    - Mystia - Meat
+    - Mystia - Fat
+    - Patchouli - Eye (aspecialguest)
+    - Koishi - Brain (simplyarandomcross)
+    - Nina - Skull
+    - Reimu - Ear
+    - Mystia - Rice
+
 ### 2026-05-30
 
 - Fix `market-place-item-finalisation` notification message confused the seller and the purchaser. (Since last update.)

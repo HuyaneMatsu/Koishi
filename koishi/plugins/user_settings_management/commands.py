@@ -30,7 +30,7 @@ async def command_list(
     user : (ClientUserBase, 'Whom?'),
 ):
     """
-    Lists the user settings of teh selected user.
+    Lists the user settings of the selected user.
     
     This function is a coroutine.
     

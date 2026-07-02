@@ -10,24 +10,36 @@ from ..item_modifier_core import (
 )
 
 from .constants import ITEMS
-from .flags import ITEM_FLAG_COSTUME, ITEM_FLAG_EDIBLE, ITEM_FLAG_HEAD, ITEM_FLAG_NPC, ITEM_FLAG_WEAPON
+from .flags import (
+    ITEM_FLAG_BUTCHERABLE, ITEM_FLAG_COSTUME, ITEM_FLAG_EDIBLE, ITEM_FLAG_HEAD, ITEM_FLAG_NPC, ITEM_FLAG_WEAPON
+)
 from .item import Item
 from .item_ids import (
     ITEM_ID_ACHING_AFFECTION_S_HEART_PIERCER, ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO, ITEM_ID_BAMBOO_SHOOT,
-    ITEM_ID_BISHOPHAT, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_BOUGH, ITEM_ID_BROOM, ITEM_ID_BUNNY_SUIT,
-    ITEM_ID_CARROT, ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS, ITEM_ID_CHIRUNO, ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRESS,
-    ITEM_ID_CUT_WOOD, ITEM_ID_DAI, ITEM_ID_DANGO, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_EIRIN,
-    ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT, ITEM_ID_FISHING_ROD, ITEM_ID_FLANDRE, ITEM_ID_FLYKILLER_AMANITA,
-    ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_GOTHIC_ATTIRE, ITEM_ID_HAND_FAN, ITEM_ID_HELL_CAT_S_BIG_BRAIDS,
-    ITEM_ID_HIKING_SET, ITEM_ID_JUNKO, ITEM_ID_KAGEROU, ITEM_ID_KIMONO, ITEM_ID_KINGS_NEW_CLOTHES,
-    ITEM_ID_KITCHEN_KNIFE, ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_LOG, ITEM_ID_MAID_DRESS, ITEM_ID_MARISA,
-    ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_ORIN, ITEM_ID_PARASOL, ITEM_ID_PEACH, ITEM_ID_PLUSHIE_BEAR,
-    ITEM_ID_POKING_KNIFE, ITEM_ID_PUDDING, ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT, ITEM_ID_REIMU, ITEM_ID_REMILIA,
-    ITEM_ID_RIBBON_BOW, ITEM_ID_RULER, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SATORI, ITEM_ID_SCARLET_ONION,
-    ITEM_ID_SCISSORS, ITEM_ID_SEIRAN, ITEM_ID_SEKIBANKI, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA,
-    ITEM_ID_TEA_LEAVES, ITEM_ID_TEWI, ITEM_ID_TWIGS, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YUKARI,
-    ITEM_ID_YUUKA
+    ITEM_ID_BISHOPHAT, ITEM_ID_BLOOD_SAUSAGE, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_BOUGH, ITEM_ID_BROOM,
+    ITEM_ID_BUNNY_SUIT, ITEM_ID_CARROT, ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS, ITEM_ID_CHIRUNO,
+    ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRESS, ITEM_ID_CUT_WOOD, ITEM_ID_DAI, ITEM_ID_DANGO, ITEM_ID_DEVILCART_OYSTER,
+    ITEM_ID_EIRIN, ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT, ITEM_ID_FISHING_ROD, ITEM_ID_FLANDRE,
+    ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_GOTHIC_ATTIRE, ITEM_ID_HAND_FAN,
+    ITEM_ID_HELL_CAT_S_BIG_BRAIDS, ITEM_ID_HIKING_SET, ITEM_ID_HUMAN_BLOOD, ITEM_ID_HUMAN_BODY,
+    ITEM_ID_HUMAN_BODY_PART_ARM, ITEM_ID_HUMAN_BODY_PART_DIGESTIVE_ORGANS, ITEM_ID_HUMAN_BODY_PART_FOOT,
+    ITEM_ID_HUMAN_BODY_PART_HAND, ITEM_ID_HUMAN_BODY_PART_HEAD, ITEM_ID_HUMAN_BODY_PART_INTERNALS,
+    ITEM_ID_HUMAN_BODY_PART_LEG, ITEM_ID_HUMAN_BODY_PART_SKULL, ITEM_ID_HUMAN_BODY_PART_TORSO,
+    ITEM_ID_HUMAN_BODY_SHARD_BOTTOM_HALF, ITEM_ID_HUMAN_BODY_SHARD_CHEWED, ITEM_ID_HUMAN_BODY_SHARD_TOP_HALF,
+    ITEM_ID_HUMAN_BONE, ITEM_ID_HUMAN_BRAIN, ITEM_ID_HUMAN_CARTILAGE, ITEM_ID_HUMAN_EAR, ITEM_ID_HUMAN_EYE,
+    ITEM_ID_HUMAN_FAT, ITEM_ID_HUMAN_HAIR, ITEM_ID_HUMAN_HEART, ITEM_ID_HUMAN_INTESTINES, ITEM_ID_HUMAN_KIDNEY,
+    ITEM_ID_HUMAN_LIVER, ITEM_ID_HUMAN_LUNG, ITEM_ID_HUMAN_MUSCLE, ITEM_ID_HUMAN_NAIL, ITEM_ID_HUMAN_NERVOUS_TISSUE,
+    ITEM_ID_HUMAN_PANCREAS, ITEM_ID_HUMAN_SKIN, ITEM_ID_HUMAN_SPLEEN, ITEM_ID_HUMAN_TONGUE, ITEM_ID_HUMAN_TOOTH,
+    ITEM_ID_HUMAN_TRIPE, ITEM_ID_JUNKO, ITEM_ID_KAGEROU, ITEM_ID_KIMONO, ITEM_ID_KINGS_NEW_CLOTHES,
+    ITEM_ID_KITCHEN_KNIFE, ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_LIVER_SAUSAGE, ITEM_ID_LOG, ITEM_ID_MAID_DRESS,
+    ITEM_ID_MARISA, ITEM_ID_MEAT_SAUSAGE, ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_ORIN, ITEM_ID_PARASOL,
+    ITEM_ID_PATCHOULI, ITEM_ID_PEACH, ITEM_ID_PLUSHIE_BEAR, ITEM_ID_POKING_KNIFE, ITEM_ID_PUDDING,
+    ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT, ITEM_ID_REIMU, ITEM_ID_REMILIA, ITEM_ID_RIBBON_BOW, ITEM_ID_RICE,
+    ITEM_ID_RULER, ITEM_ID_RUMIA, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SATORI, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS,
+    ITEM_ID_SEIRAN, ITEM_ID_SEKIBANKI, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA, ITEM_ID_TEA_LEAVES,
+    ITEM_ID_TEWI, ITEM_ID_TWIGS, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YUKARI, ITEM_ID_YUUKA
 )
+from .option_butcher import OptionButcher
 
 
 ITEM_STRAWBERRY = ITEMS[ITEM_ID_STRAWBERRY] = Item(
@@ -42,6 +54,7 @@ ITEM_STRAWBERRY = ITEMS[ITEM_ID_STRAWBERRY] = Item(
     ITEM_FLAG_EDIBLE,
     16, # value (hearts)
     18, # weight (grams)
+    None,
     None,
 )
 
@@ -61,6 +74,7 @@ ITEM_PEACH = ITEMS[ITEM_ID_PEACH] = Item(
     40, # value (hearts)
     216, # weight (grams)
     None,
+    None,
 )
 
 
@@ -77,6 +91,7 @@ ITEM_BLUEBERRY = ITEMS[ITEM_ID_BLUEBERRY] = Item(
     ITEM_FLAG_EDIBLE,
     4, # value (hearts)
     3, # weight (grams)
+    None,
     None,
 )
 
@@ -95,6 +110,7 @@ ITEM_DEVILCART_OYSTER = ITEMS[ITEM_ID_DEVILCART_OYSTER] = Item(
     83, # value (hearts)
     148, # weight (grams)
     None,
+    None,
 )
 
 
@@ -111,6 +127,7 @@ ITEM_FLYKILLER_AMANITA = ITEMS[ITEM_ID_FLYKILLER_AMANITA] = Item(
     ITEM_FLAG_EDIBLE,
     179, # value (hearts) # Note: in irl markets it can be 100x - 400x more
     342, # weight (grams)
+    None,
     None,
 )
 
@@ -135,6 +152,7 @@ ITEM_FISHING_ROD = ITEMS[ITEM_ID_FISHING_ROD] = Item(
         
         Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__PERCENT), -20),
     ),
+    None,
 )
 
 
@@ -156,6 +174,7 @@ ITEM_BLUEFRANKISH = ITEMS[ITEM_ID_BLUEFRANKISH] = Item(
     19, # value (hearts) # Its a whine grape, so costs barely anything. Although grape is made of water and sugar. heh
     180, # weight (grams)
     None,
+    None,
 )
 
 
@@ -173,6 +192,7 @@ ITEM_CARROT = ITEMS[ITEM_ID_CARROT] = Item(
     ITEM_FLAG_EDIBLE,
     36, # value (hearts)
     240, # weight (grams)
+    None,
     None,
 )
 
@@ -193,6 +213,7 @@ ITEM_GARLIC = ITEMS[ITEM_ID_GARLIC] = Item(
     33, # value (hearts)
     60, # weight (grams)
     None,
+    None,
 )
 
 
@@ -211,6 +232,7 @@ ITEM_SCARLET_ONION = ITEMS[ITEM_ID_SCARLET_ONION] = Item(
     23, # value (hearts)
     170, # weight (grams)
     None,
+    None,
 )
 
 
@@ -222,6 +244,7 @@ ITEM_MYSTIA = ITEMS[ITEM_ID_MYSTIA] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
     None,
 )
 
@@ -235,6 +258,7 @@ ITEM_SAKUYA = ITEMS[ITEM_ID_SAKUYA] = Item(
     0, # value (hearts)
     0, # weight (grams)
     None,
+    None,
 )
 
 
@@ -246,6 +270,7 @@ ITEM_MARISA = ITEMS[ITEM_ID_MARISA] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
     None,
 )
 
@@ -259,6 +284,7 @@ ITEM_ALICE = ITEMS[ITEM_ID_ALICE] = Item(
     0, # value (hearts)
     0, # weight (grams)
     None,
+    None,
 )
 
 
@@ -271,6 +297,7 @@ ITEM_KOISHI = ITEMS[ITEM_ID_KOISHI] = Item(
     0, # value (hearts)
     0, # weight (grams)
     None,
+    None,
 )
 
 
@@ -282,6 +309,7 @@ ITEM_ORIN = ITEMS[ITEM_ID_ORIN] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
     None,
 )
 
@@ -309,6 +337,7 @@ ITEM_SCISSORS = ITEMS[ITEM_ID_SCISSORS] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__GARDENING, MODIFIER_KIND__PERCENT), +10),
         Modifier(construct_modifier_type(MODIFIER_ID__FORAGING, MODIFIER_KIND__PERCENT), +20),
     ),
+    None,
 )
 
 
@@ -330,9 +359,10 @@ ITEM_FROG = ITEMS[ITEM_ID_FROG] = Item(
         '\n'
         'They can be most commonly found around wetlands, like the **Misty Lake**.'
     ),
-    ITEM_FLAG_EDIBLE,
+    0,
     69, # value (hearts)
     48, # weight (grams)
+    None,
     None,
 )
 
@@ -346,6 +376,7 @@ ITEM_CHIRUNO = ITEMS[ITEM_ID_CHIRUNO] = Item(
     0, # value (hearts)
     0, # weight (grams)
     None,
+    None,
 )
 
 
@@ -357,6 +388,7 @@ ITEM_DAI = ITEMS[ITEM_ID_DAI] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
     None,
 )
 
@@ -378,6 +410,7 @@ ITEM_ANGELROOT = ITEMS[ITEM_ID_ANGELROOT] = Item(
     ITEM_FLAG_EDIBLE,
     160, # value (hearts)
     130, # weight (grams)
+    None,
     None,
 )
 
@@ -401,6 +434,7 @@ ITEM_BISHOPHAT = ITEMS[ITEM_ID_BISHOPHAT] = Item(
     63, # value (hearts)
     22, # weight (grams)
     None,
+    None,
 )
 
 
@@ -412,6 +446,7 @@ ITEM_JUNKO = ITEMS[ITEM_ID_JUNKO] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
     None,
 )
 
@@ -425,6 +460,7 @@ ITEM_TEWI = ITEMS[ITEM_ID_TEWI] = Item(
     0, # value (hearts)
     0, # weight (grams)
     None,
+    None,
 )
 
 
@@ -436,6 +472,7 @@ ITEM_KOKORO = ITEMS[ITEM_ID_KOKORO] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
     None,
 )
 
@@ -458,6 +495,7 @@ ITEM_RIBBON_BOW = ITEMS[ITEM_ID_RIBBON_BOW] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +3),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +1),
     ),
+    None,
 )
 
 
@@ -481,6 +519,7 @@ ITEM_STRAW_HAT = ITEMS[ITEM_ID_STRAW_HAT] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__GARDENING, MODIFIER_KIND__PERCENT), +25),
         Modifier(construct_modifier_type(MODIFIER_ID__FORAGING, MODIFIER_KIND__PERCENT), +10),
     ),
+    None,
 )
 
 ITEM_RULER = ITEMS[ITEM_ID_RULER] = Item(
@@ -504,6 +543,7 @@ ITEM_RULER = ITEMS[ITEM_ID_RULER] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__GARDENING, MODIFIER_KIND__PERCENT), +5),
         Modifier(construct_modifier_type(MODIFIER_ID__FORAGING, MODIFIER_KIND__PERCENT), +25),
     ),
+    None,
 )
 
 
@@ -516,6 +556,7 @@ ITEM_YUKARI = ITEMS[ITEM_ID_YUKARI] = Item(
     0, # value (hearts)
     0, # weight (grams)
     None,
+    None,
 )
 
 
@@ -527,6 +568,7 @@ ITEM_YUUKA = ITEMS[ITEM_ID_YUUKA] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
     None,
 )
 
@@ -546,6 +588,7 @@ ITEM_BAMBOO_SHOOT = ITEMS[ITEM_ID_BAMBOO_SHOOT] = Item(
     ITEM_FLAG_EDIBLE,
     88, # value (hearts)
     525, # weight (grams)
+    None,
     None,
 )
 
@@ -568,6 +611,7 @@ ITEM_PLUSHIE_BEAR = ITEMS[ITEM_ID_PLUSHIE_BEAR] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +1),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +3),
     ),
+    None,
 )
 
 
@@ -589,6 +633,7 @@ ITEM_KINGS_NEW_CLOTHES = ITEMS[ITEM_ID_KINGS_NEW_CLOTHES] = Item(
         
         Modifier(construct_modifier_type(MODIFIER_ID__MOVEMENT, MODIFIER_KIND__PERCENT), +4),
     ),
+    None,
 )
 
 
@@ -613,6 +658,7 @@ ITEM_MAID_DRESS = ITEMS[ITEM_ID_MAID_DRESS] = Item(
         
         Modifier(construct_modifier_type(MODIFIER_ID__BUTCHERING, MODIFIER_KIND__PERCENT), +10),
     ),
+    None,
 )
 
 
@@ -644,6 +690,7 @@ ITEM_CHIEF_MAID_S_ELEGANT_DRESS = ITEMS[ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS] = It
         Modifier(construct_modifier_type(MODIFIER_ID__BUTCHERING, MODIFIER_KIND__PERCENT), +10),
         Modifier(construct_modifier_type(MODIFIER_ID__HUNTING, MODIFIER_KIND__PERCENT), +20),
     ),
+    None,
 )
 
 
@@ -665,6 +712,7 @@ ITEM_UNKNOWN_OVEN_S_TORN_OUT_WING = ITEMS[ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING] 
         
         Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__PERCENT), -40),
     ),
+    None,
 )
 
 
@@ -686,6 +734,7 @@ ITEM_BUNNY_SUIT = ITEMS[ITEM_ID_BUNNY_SUIT] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +5),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), -2),
     ),
+    None,
 )
 
 
@@ -705,6 +754,7 @@ ITEM_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT = ITEMS[ITEM_ID_ELECTROSTATIC_DISCH
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +3),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +3),
     ),
+    None,
 )
 
 
@@ -728,6 +778,7 @@ ITEM_HELL_CAT_S_BIG_BRAIDS = ITEMS[ITEM_ID_HELL_CAT_S_BIG_BRAIDS] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__PERCENT), +20),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +3),
     ),
+    None,
 )
 
 
@@ -752,6 +803,7 @@ ITEM_RED_EYED_KASHA_S_FIERY_CHARIOT = ITEMS[ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARI
         Modifier(construct_modifier_type(MODIFIER_ID__INVENTORY, MODIFIER_KIND__FLAT), +56000),
         Modifier(construct_modifier_type(MODIFIER_ID__INVENTORY, MODIFIER_KIND__PERCENT), +70),
     ),
+    None,
 )
 
 
@@ -779,6 +831,7 @@ ITEM_CORPSE_VOYAGER_S_ROGUISH_DRESS = ITEMS[ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRE
         Modifier(construct_modifier_type(MODIFIER_ID__HEALTH, MODIFIER_KIND__PERCENT), +10),
         Modifier(construct_modifier_type(MODIFIER_ID__ENERGY, MODIFIER_KIND__PERCENT), +10),
     ),
+    None,
 )
 
 
@@ -807,6 +860,7 @@ ITEM_KITCHEN_KNIFE = ITEMS[ITEM_ID_KITCHEN_KNIFE] = Item(
         
         Modifier(construct_modifier_type(MODIFIER_ID__BUTCHERING, MODIFIER_KIND__PERCENT), +15),
     ),
+    None,
 )
 
 
@@ -837,6 +891,7 @@ ITEM_POKING_KNIFE = ITEMS[ITEM_ID_POKING_KNIFE] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__HUNTING, MODIFIER_KIND__FLAT), 4),
         Modifier(construct_modifier_type(MODIFIER_ID__HUNTING, MODIFIER_KIND__PERCENT), +10),
     ),
+    None,
 )
 
 
@@ -862,6 +917,7 @@ ITEM_ACHING_AFFECTION_S_HEART_PIERCER = ITEMS[ITEM_ID_ACHING_AFFECTION_S_HEART_P
         Modifier(construct_modifier_type(MODIFIER_ID__BUTCHERING, MODIFIER_KIND__PERCENT), +15),
         Modifier(construct_modifier_type(MODIFIER_ID__HUNTING, MODIFIER_KIND__PERCENT), +10),
     ),
+    None,
 )
 
 
@@ -873,6 +929,7 @@ ITEM_NINA = ITEMS[ITEM_ID_NINA] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
     None,
 )
 
@@ -896,6 +953,7 @@ ITEM_BROOM = ITEMS[ITEM_ID_BROOM] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +1),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_LOYALTY, MODIFIER_KIND__FLAT), +4),
     ),
+    None,
 )
 
 
@@ -920,6 +978,7 @@ ITEM_HAND_FAN = ITEMS[ITEM_ID_HAND_FAN] = Item(
         
         Modifier(construct_modifier_type(MODIFIER_ID__HUNTING, MODIFIER_KIND__PERCENT), +20),
     ),
+    None,
 )
 
 
@@ -946,6 +1005,7 @@ ITEM_PARASOL = ITEMS[ITEM_ID_PARASOL] = Item(
         
         Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__PERCENT), +20),
     ),
+    None,
 )
 
 
@@ -964,6 +1024,7 @@ ITEM_GOTHIC_ATTIRE = ITEMS[ITEM_ID_GOTHIC_ATTIRE] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_CUTENESS, MODIFIER_KIND__FLAT), +8),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +5),
     ),
+    None,
 )
 
 
@@ -992,6 +1053,7 @@ ITEM_HIKING_SET = ITEMS[ITEM_ID_HIKING_SET] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__FORAGING, MODIFIER_KIND__FLAT), +2),
         Modifier(construct_modifier_type(MODIFIER_ID__HUNTING, MODIFIER_KIND__FLAT), +2),
     ),
+    None,
 )
 
 
@@ -1015,6 +1077,7 @@ ITEM_KIMONO = ITEMS[ITEM_ID_KIMONO] = Item(
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +1),
         Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +2),
     ),
+    None,
 )
 
 
@@ -1031,6 +1094,7 @@ ITEM_TWIGS = ITEMS[ITEM_ID_TWIGS] = Item(
     5, # value (hearts)
     134, # weight (grams)
     None,
+    None,
 )
 
 
@@ -1046,6 +1110,7 @@ ITEM_BOUGH = ITEMS[ITEM_ID_BOUGH] = Item(
     50, # value (hearts)
     1206, # weight (grams)
     None,
+    None,
 )
 
 
@@ -1060,6 +1125,7 @@ ITEM_LOG = ITEMS[ITEM_ID_LOG] = Item(
     0,
     250, # value (hearts)
     5427, # weight (grams)
+    None,
     None,
 )
 
@@ -1079,6 +1145,7 @@ ITEM_BAMBOO = ITEMS[ITEM_ID_BAMBOO] = Item(
     200, # value (hearts)
     5360, # weight (grams)
     None,
+    None,
 )
 
 
@@ -1093,6 +1160,7 @@ ITEM_CUT_WOOD = ITEMS[ITEM_ID_CUT_WOOD] = Item(
     250, # value (hearts)
     4824, # weight (grams)
     None,
+    None,
 )
 
 
@@ -1105,6 +1173,7 @@ ITEM_EIRIN = ITEMS[ITEM_ID_EIRIN] = Item(
     0, # value (hearts)
     0, # weight (grams)
     None,
+    None,
 )
 
 
@@ -1116,6 +1185,7 @@ ITEM_REIMU = ITEMS[ITEM_ID_REIMU] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
     None,
 )
 
@@ -1135,6 +1205,7 @@ ITEM_SAKE = ITEMS[ITEM_ID_SAKE] = Item(
     1715, # value (hearts)
     880, # weight (grams), including the bottle, ofc
     None,
+    None,
 )
 
 
@@ -1146,6 +1217,7 @@ ITEM_SUIKA = ITEMS[ITEM_ID_SUIKA] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
     None,
 )
 
@@ -1159,6 +1231,7 @@ ITEM_SEKIBANKI = ITEMS[ITEM_ID_SEKIBANKI] = Item(
     0, # value (hearts)
     0, # weight (grams)
     None,
+    None,
 )
 
 
@@ -1171,6 +1244,7 @@ ITEM_KAGEROU = ITEMS[ITEM_ID_KAGEROU] = Item(
     0, # value (hearts)
     0, # weight (grams)
     None,
+    None,
 )
 
 
@@ -1182,6 +1256,7 @@ ITEM_SEIRAN = ITEMS[ITEM_ID_SEIRAN] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
     None,
 )
 
@@ -1203,6 +1278,7 @@ ITEM_DANGO = ITEMS[ITEM_ID_DANGO] = Item(
     150, # value (hearts)
     46, # weight (grams), including the skewers, ofc
     None,
+    None,
 )
 
 
@@ -1215,7 +1291,9 @@ ITEM_FLANDRE = ITEMS[ITEM_ID_FLANDRE] = Item(
     0, # value (hearts)
     0, # weight (grams)
     None,
+    None,
 )
+
 
 ITEM_REMILIA = ITEMS[ITEM_ID_REMILIA] = Item(
     ITEM_ID_REMILIA,
@@ -1226,7 +1304,9 @@ ITEM_REMILIA = ITEMS[ITEM_ID_REMILIA] = Item(
     0, # value (hearts)
     0, # weight (grams)
     None,
+    None,
 )
+
 
 ITEM_PUDDING = ITEMS[ITEM_ID_PUDDING] = Item(
     ITEM_ID_PUDDING,
@@ -1240,6 +1320,7 @@ ITEM_PUDDING = ITEMS[ITEM_ID_PUDDING] = Item(
     ITEM_FLAG_EDIBLE,
     175, # value (hearts)
     190, # weight (grams), including the skewers, ofc
+    None,
     None,
 )
 
@@ -1260,6 +1341,7 @@ ITEM_TEA_LEAVES = ITEMS[ITEM_ID_TEA_LEAVES] = Item(
     90, # value (hearts)
     30, # weight (grams), including the skewers, ofc
     None,
+    None,
 )
 
 
@@ -1271,5 +1353,807 @@ ITEM_SATORI = ITEMS[ITEM_ID_SATORI] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
+    None,
+)
+
+
+# 35 kg / human
+ITEM_HUMAN_MUSCLE = ITEMS[ITEM_ID_HUMAN_MUSCLE] = Item(
+    ITEM_ID_HUMAN_MUSCLE,
+    'Human Muscle',
+    BUILTIN_EMOJIS['cut_of_meat'],
+    (
+        'Muscles are organs made out of tissues which specialise for retraction. '
+        'To retract, they are converting chemical energy to mechanical energy.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    50, # value (hearts)
+    100, # weight (grams)
+    None,
+    None,
+)
+
+
+# 2 / human
+ITEM_HUMAN_EYE = ITEMS[ITEM_ID_HUMAN_EYE] = Item(
+    ITEM_ID_HUMAN_EYE,
+    'Human Eye',
+    BUILTIN_EMOJIS['eye'],
+    (
+        'An eye is a sensory organ which captures possible stimulus\' from electromagnetic radiation of the range '
+        'of light.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    7, # value (hearts)
+    57, # weight (grams)
+    None,
+    None,
+)
+
+
+# 1 / human
+ITEM_HUMAN_BRAIN = ITEMS[ITEM_ID_HUMAN_BRAIN] = Item(
+    ITEM_ID_HUMAN_BRAIN,
+    'Human brain',
+    BUILTIN_EMOJIS['brain'],
+    (
+        'The brain is an the central nervous system of vertebrates located in their cranial cavity. '
+        'This organ is responsible for receiving information from other sensory organs, for processing these signals, '
+        'for the cognitive functions and the coordination of motor control.' 
+    ),
+    ITEM_FLAG_EDIBLE,
+    894, # value (hearts)
+    1300, # weight (grams)
+    None,
+    None,
+)
+
+
+# 2 / human
+ITEM_HUMAN_LUNG = ITEMS[ITEM_ID_HUMAN_LUNG] = Item(
+    ITEM_ID_HUMAN_LUNG,
+    'Human lung',
+    BUILTIN_EMOJIS['lungs'],
+    (
+        'The lung is the most important part of the respiratory system of vertebrates. '
+        'It is responsible for capturing oxygen from the atmosphere into the bloodstream, '
+        'and to release carbon-dioxide into the atmosphere from the bloodstream through exhaling.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    160, # value (hearts)
+    550, # weight (grams)
+    None,
+    None,
+)
+
+
+# 1 / human
+ITEM_HUMAN_HEART = ITEMS[ITEM_ID_HUMAN_HEART] = Item(
+    ITEM_ID_HUMAN_HEART,
+    'Human heart',
+    BUILTIN_EMOJIS['anatomical_heart'],
+    (
+        'The heart is the central organ of the blood circulatory system. '
+        'For vertebrates it is a hollow, muscular-walled tube, which pumps blood with rhythmic contractions.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    125, # value (hearts)
+    325, # weight (grams)
+    None,
+    None,
+)
+
+
+# 1 / human
+ITEM_HUMAN_LIVER = ITEMS[ITEM_ID_HUMAN_LIVER] = Item(
+    ITEM_ID_HUMAN_LIVER,
+    'Human liver',
+    BUILTIN_EMOJIS['cut_of_meat'],
+    (
+        'Liver has an important role in the metabolic processes, in detoxification and in production and '
+        'storage of certain compounds.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    441, # value (hearts)
+    1400, # weight (grams)
+    None,
+    None,
+)
+
+
+# 1 / human
+ITEM_HUMAN_INTESTINES = ITEMS[ITEM_ID_HUMAN_INTESTINES] = Item(
+    ITEM_ID_HUMAN_INTESTINES,
+    'Human intestines',
+    BUILTIN_EMOJIS['worm'],
+    (
+        'Animal organism use their intestines to capture necessary substances, '
+        'to build, maintain themselves and to satisfy their energy demands.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    30, # value (hearts)
+    200, # weight (grams)
+    None,
+    None,
+)
+
+
+# 1 / human
+ITEM_HUMAN_TRIPE = ITEMS[ITEM_ID_HUMAN_TRIPE] = Item(
+    ITEM_ID_HUMAN_TRIPE,
+    'Human tripe',
+    BUILTIN_EMOJIS['rock'],
+    (
+        'Tripe is a food product, mainly made out of cattle\'s pre-stomach used for ruminanting.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    465, # value (hearts)
+    910, # weight (grams)
+    None,
+    None,
+)
+
+
+# 1 / human
+ITEM_HUMAN_PANCREAS = ITEMS[ITEM_ID_HUMAN_PANCREAS] = Item(
+    ITEM_ID_HUMAN_PANCREAS,
+    'Human pancreas',
+    BUILTIN_EMOJIS['dumpling'],
+    (
+        'Pancreas is both an exocrine and an endocrine glad of vertebrates.'
+        'As as exocrine, it produces stomach saliva produced by the pancreas consist of many important digestive '
+        'ensime. '
+        'As endocrine, it produces highly important hormones, like insulin, glucagon and somatostatin.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    25, # value (hearts)
+    100, # weight (grams)
+    None,
+    None,
+)
+
+
+# 1 / human
+ITEM_HUMAN_SPLEEN = ITEMS[ITEM_ID_HUMAN_SPLEEN] = Item(
+    ITEM_ID_HUMAN_SPLEEN,
+    'Human spleen',
+    BUILTIN_EMOJIS['potato'],
+    (
+        'The spleen is a sponge like lymphatic organ. '
+        'Its function is to destruct aged red blood cells, to produce lymphocytes, immune substance, '
+        'and store various other substances.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    42, # value (hearts)
+    170, # weight (grams)
+    None,
+    None,
+)
+
+
+# 2 / human
+ITEM_HUMAN_KIDNEY = ITEMS[ITEM_ID_HUMAN_KIDNEY] = Item(
+    ITEM_ID_HUMAN_KIDNEY,
+    'Human kidney',
+    BUILTIN_EMOJIS['ballet_shoes'],
+    (
+        'The kidney is the excretory organ of the vertebrates. '
+        'It is responsible for eliminating end-metabolism water-soluble products. '
+        'Additionally it has elementary role in salt and water keeping and in homeostasis.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    45, # value (hearts)
+    150, # weight (grams)
+    None,
+    None,
+)
+
+
+# 5 kg / human
+ITEM_HUMAN_BLOOD = ITEMS[ITEM_ID_HUMAN_BLOOD] = Item(
+    ITEM_ID_HUMAN_BLOOD,
+    'Human blood',
+    BUILTIN_EMOJIS['wine_glass'],
+    (
+        'Blood is mainly red coloured, the body liquid of secondary body cavity invertebrate and vertebrates. '
+        'Its main purpose is to transport carbon-dioxide, nutrients, water and the dissolved metabolism products. '
+        'Additionally it has an important role in immune responses, transferring hormones and in regulating body '
+        'temperature.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    6, # value (hearts)
+    100, # weight (grams)
+    None,
+    None,
+)
+
+
+# 1 kg / human
+ITEM_HUMAN_CARTILAGE = ITEMS[ITEM_ID_HUMAN_CARTILAGE] = Item(
+    ITEM_ID_HUMAN_CARTILAGE,
+    'Human cartilage',
+    BUILTIN_EMOJIS['fish_cake'],
+    (
+        'Cartilage is a medium solid, flexible supporting tissues. The cartilage of vertebrates slowly ossifies. '
+        'It consists of cells and the base substance surrounding them. '
+        'From the outside it is covered with membrane consisting of connective tissues, blood vessels and nervous '
+        'tissue. '
+        'Inside of the cartilage there are no blood vessels, therefore its metabolism is slow.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    1, # value (hearts)
+    20, # weight (grams)
+    None,
+    None,
+)
+
+
+# 10.5 kg / human
+ITEM_HUMAN_FAT = ITEMS[ITEM_ID_HUMAN_FAT] = Item(
+    ITEM_ID_HUMAN_FAT,
+    'Human fat',
+    BUILTIN_EMOJIS['rock'],
+    (
+        'The fat tissue is a tissue of animals, mainly built out of fat cells. '
+        'It\'s main purpose is to store energy, to protect the organism from physical effects and to '
+        'pillow out specific organs. It has two types, yellow or white and brown. '
+        'The brown one can be found in animals which hibernate, producing significant amount heat.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    28, # value (hearts)
+    100, # weight (grams)
+    None,
+    None,
+)
+
+
+# 17 g / human
+ITEM_HUMAN_HAIR = ITEMS[ITEM_ID_HUMAN_HAIR] = Item(
+    ITEM_ID_HUMAN_HAIR,
+    'Human hair',
+    BUILTIN_EMOJIS['thread'],
+    (
+        'Hair is the fur located on the human head which is protecting the skull. '
+        'Alongside this, it also a determining factor of their outlook.'
+    ),
+    0,
+    1, # value (hearts)
+    17, # weight (grams)
+    None,
+    None,
+)
+
+
+# 20 / human
+ITEM_HUMAN_NAIL = ITEMS[ITEM_ID_HUMAN_NAIL] = Item(
+    ITEM_ID_HUMAN_NAIL,
+    'Human nail',
+    BUILTIN_EMOJIS['nail_care_tone1'],
+    (
+        'Nail is protective plate found at the back side of the last digit of fingers. '
+        'It is slightly is slightly convex in the middle.'
+    ),
+    0,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+    None,
+)
+
+
+# 180g / human (Could not find any info about it, so made it up)
+ITEM_HUMAN_NERVOUS_TISSUE = ITEMS[ITEM_ID_HUMAN_NERVOUS_TISSUE] = Item(
+    ITEM_ID_HUMAN_NERVOUS_TISSUE,
+    'Human nervous tissue',
+    BUILTIN_EMOJIS['knot'],
+    (
+        'Nervous tissue is a bundle of nerves in the peripheral nervous system. '
+        'Nervous tissues are used as nervous fibers, transferring action potentials to peripheral organs; '
+        'or at the case of receptor nerves, from the receptors to the central nervous system.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    1, # value (hearts)
+    20, # weight (grams)
+    None,
+    None,
+)
+
+
+# 6 kg / human (Can be more)
+ITEM_HUMAN_SKIN = ITEMS[ITEM_ID_HUMAN_SKIN] = Item(
+    ITEM_ID_HUMAN_SKIN,
+    'Human skin',
+    BUILTIN_EMOJIS['full_moon'],
+    (
+        'Skin is the tissue covering the eumetazoas, it is their biggest organ. '
+        'The most important function of skin is to protect the body from external impacts. '
+        'It does not provide only physical protection, but it also has an active immunology function containing '
+        'special immune cells, which recognise pathogen and in starting the immune response against them.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    25, # value (hearts)
+    100, # weight (grams)
+    None,
+    None,
+)
+
+
+# 7 kg / human
+ITEM_HUMAN_BONE = ITEMS[ITEM_ID_HUMAN_BONE] = Item(
+    ITEM_ID_HUMAN_BONE,
+    'Human bone',
+    BUILTIN_EMOJIS['bone'],
+    (
+        'Bones are a hard organ found in vertebrates. Bones are made out of highly mineralized tissues. '
+        'The skeleton gives the body\'s shape and is protecting it from external impacts.'
+    ),
+    0,
+    13, # value (hearts)
+    100, # weight (grams)
+    None,
+    None,
+)
+
+
+# 32 / human
+ITEM_HUMAN_TOOTH = ITEMS[ITEM_ID_HUMAN_TOOTH] = Item(
+    ITEM_ID_HUMAN_TOOTH,
+    'Human tooth',
+    BUILTIN_EMOJIS['tooth'],
+    (
+        'The tooth is a a hard organ consisting of a visible crown, and root being fixated into the jaw. '
+        'Teeth were developed by vertebrates. '
+        'The dentition\'s consisting of teeth, main function is for grabbing food, '
+        'while for mammals also to easy the digestion by chewing the food into smaller pieces.'
+    ),
+    0,
+    1, # value (hearts)
+    1, # weight (grams)
+    None,
+    None,
+)
+
+
+# 2 / human
+ITEM_HUMAN_EAR = ITEMS[ITEM_ID_HUMAN_EAR] = Item(
+    ITEM_ID_HUMAN_EAR,
+    'Human ear',
+    BUILTIN_EMOJIS['ear_tone1'],
+    (
+        'The auricle part of the outer auditory sense organ. It surrounds the ear canal in a cone shape.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    5, # value (hearts)
+    14, # weight (grams)
+    None,
+    None,
+)
+
+
+# 1 / human
+ITEM_HUMAN_TONGUE = ITEMS[ITEM_ID_HUMAN_TONGUE] = Item(
+    ITEM_ID_HUMAN_TONGUE,
+    'Human tongue',
+    BUILTIN_EMOJIS['tongue'],
+    (
+        'Tongue is located in the oral cavity. '
+        'It is a muscle with a characteristic shape, covered with mucous membrane. '
+        'It has a determinative function in chewing, morsel-creation, speak and in forming specific facial expressions.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    33, # value (hearts)
+    65, # weight (grams)
+    None,
+    None,
+)
+
+
+ITEM_HUMAN_BODY_PART_HAND = ITEMS[ITEM_ID_HUMAN_BODY_PART_HAND] = Item(
+    ITEM_ID_HUMAN_BODY_PART_HAND,
+    'Human hand',
+    BUILTIN_EMOJIS['palm_up_hand_tone1'],
+    (
+        'Hand is the holding organ of the upper limbs of primates. The thumb helps most primates to have a better grip. '
+        'Other terrestrial animals\' corresponding organ is usually called front leg or paw.'
+    ),
+    ITEM_FLAG_BUTCHERABLE,
+    89, # value (hearts)
+    400, # weight (grams)
+    None,
+    (
+        OptionButcher(True, 1, 2, 1, ITEM_ID_HUMAN_CARTILAGE, 8, 0, 4),
+        OptionButcher(True, 7, 10, 1, ITEM_ID_HUMAN_BONE, 6, 0, 0),
+        OptionButcher(True, 3, 6, 1, ITEM_ID_HUMAN_MUSCLE, 10, 0, 4),
+        OptionButcher(True, 1, 2, 1, ITEM_ID_HUMAN_SKIN, 5, 0, 3),
+        OptionButcher(True, 3, 4, 5, ITEM_ID_HUMAN_NAIL, 0, 1, 1),
+    ),
+)
+
+
+ITEM_HUMAN_BODY_PART_ARM = ITEMS[ITEM_ID_HUMAN_BODY_PART_ARM] = Item(
+    ITEM_ID_HUMAN_BODY_PART_ARM,
+    'Human arm',
+    BUILTIN_EMOJIS['muscle_tone1'],
+    (
+        'Arm is the upper limb of primates.'
+    ),
+    ITEM_FLAG_BUTCHERABLE,
+    791, # value (hearts)
+    3500, # weight (grams)
+    None,
+    (
+        OptionButcher(True, 9, 8, 1, ITEM_ID_HUMAN_BODY_PART_HAND, 2, 0, 4),
+        OptionButcher(True, 1, 2, 3, ITEM_ID_HUMAN_CARTILAGE, 0, 1, 4),
+        OptionButcher(True, 2, 5, 1, ITEM_ID_HUMAN_NERVOUS_TISSUE, 5, 0, 0),
+        OptionButcher(True, 7, 10, 6, ITEM_ID_HUMAN_BONE, 6, 0, 0),
+        OptionButcher(True, 4, 5, 10, ITEM_ID_HUMAN_MUSCLE, 3, 0, 1),
+        OptionButcher(False, 1, 4, 12, ITEM_ID_HUMAN_MUSCLE, 0, 1, 0),
+        OptionButcher(True, 4, 5, 4, ITEM_ID_HUMAN_SKIN, 3, 0, 1),
+        OptionButcher(False, 1, 4, 3, ITEM_ID_HUMAN_SKIN, 0, 1, 1),
+        OptionButcher(True, 4, 5, 1, ITEM_ID_HUMAN_FAT, 4, 0, 0),
+        OptionButcher(False, 1, 4, 10, ITEM_ID_HUMAN_FAT, 0, 2, 0),
+    ),
+)
+
+
+ITEM_HUMAN_BODY_PART_FOOT = ITEMS[ITEM_ID_HUMAN_BODY_PART_FOOT] = Item(
+    ITEM_ID_HUMAN_BODY_PART_FOOT,
+    'Human foot',
+    BUILTIN_EMOJIS['foot_tone1'],
+    (
+        'Foot is an anatomical structure of many vertebrates located at the end of their limbs, '
+        'allowing them locomotion.'
+    ),
+    ITEM_FLAG_BUTCHERABLE,
+    204, # value (hearts)
+    1000, # weight (grams)
+    None,
+    (
+        OptionButcher(True, 1, 2, 2, ITEM_ID_HUMAN_CARTILAGE, 8, 0, 4),
+        OptionButcher(True, 7, 10, 4, ITEM_ID_HUMAN_BONE, 6, 0, 0),
+        OptionButcher(True, 3, 6, 2, ITEM_ID_HUMAN_MUSCLE, 10, 0, 4),
+        OptionButcher(True, 1, 2, 2, ITEM_ID_HUMAN_SKIN, 5, 0, 3),
+        OptionButcher(True, 3, 4, 5, ITEM_ID_HUMAN_NAIL, 0, 1, 1),
+    ),
+)
+
+
+ITEM_HUMAN_BODY_PART_LEG = ITEMS[ITEM_ID_HUMAN_BODY_PART_LEG] = Item(
+    ITEM_ID_HUMAN_BODY_PART_LEG,
+    'Human leg',
+    BUILTIN_EMOJIS['leg_tone1'],
+    (
+        'Leg is a part of animals that allows them to change their position on solid floor. '
+        'It is called motion organ or limb.'
+    ),
+    ITEM_FLAG_BUTCHERABLE,
+    1645, # value (hearts)
+    5000, # weight (grams)
+    None,
+    (
+        OptionButcher(True, 9, 8, 1, ITEM_ID_HUMAN_BODY_PART_FOOT, 2, 0, 4),
+        OptionButcher(True, 1, 2, 4, ITEM_ID_HUMAN_CARTILAGE, 0, 1, 4),
+        OptionButcher(True, 2, 5, 1, ITEM_ID_HUMAN_NERVOUS_TISSUE, 5, 0, 0),
+        OptionButcher(True, 7, 10, 7, ITEM_ID_HUMAN_BONE, 6, 0, 0),
+        OptionButcher(True, 4, 5, 23, ITEM_ID_HUMAN_MUSCLE, 6, 0, 1),
+        OptionButcher(False, 1, 4, 10, ITEM_ID_HUMAN_MUSCLE, 0, 1, 0),
+        OptionButcher(True, 4, 5, 7, ITEM_ID_HUMAN_SKIN, 6, 0, 1),
+        OptionButcher(False, 1, 4, 6, ITEM_ID_HUMAN_SKIN, 0, 1, 1),
+        OptionButcher(True, 4, 5, 1, ITEM_ID_HUMAN_FAT, 4, 0, 0),
+        OptionButcher(False, 1, 4, 20, ITEM_ID_HUMAN_FAT, 0, 2, 0),
+    ),
+)
+
+
+ITEM_HUMAN_BODY_PART_SKULL = ITEMS[ITEM_ID_HUMAN_BODY_PART_SKULL] = Item(
+    ITEM_ID_HUMAN_BODY_PART_SKULL,
+    'Human skull',
+    BUILTIN_EMOJIS['skull'],
+    (
+        'Skull a bony part of many animals which servers as the base of their head. '
+        'The face skull creates the base of the face\'s structure, the brain skull servers to protect the brain.'
+    ),
+    ITEM_FLAG_BUTCHERABLE,
+    168, # value (hearts)
+    1200, # weight (grams)
+    None,
+    (
+        OptionButcher(True, 4, 5, 12, ITEM_ID_HUMAN_BONE, 12, 0, 0),
+        OptionButcher(True, 4, 5, 12, ITEM_ID_HUMAN_TOOTH, 0, 1, 2),
+        OptionButcher(True, 3, 5, 8, ITEM_ID_HUMAN_TOOTH, 0, 1, 3),
+        OptionButcher(True, 2, 5, 8, ITEM_ID_HUMAN_TOOTH, 0, 2, 6),
+        OptionButcher(False, 1, 5, 4, ITEM_ID_HUMAN_TOOTH, 0, 3, 0),
+    ),
+)
+
+
+ITEM_HUMAN_BODY_PART_HEAD = ITEMS[ITEM_ID_HUMAN_BODY_PART_HEAD] = Item(
+    ITEM_ID_HUMAN_BODY_PART_HEAD,
+    'Human head',
+    BUILTIN_EMOJIS['adult_tone1'],
+    (
+        'The head of an animal is usually located at its rostral part. It usually holds eyes, ears, nose and mouth.'
+    ),
+    ITEM_FLAG_BUTCHERABLE,
+    1670, # value (hearts)
+    5200, # weight (grams)
+    None,
+    (
+        OptionButcher(True, 9, 8, 1, ITEM_ID_HUMAN_BODY_PART_SKULL, 8, 0, 4),
+        OptionButcher(True, 1, 2, 2, ITEM_ID_HUMAN_CARTILAGE, 0, 3, 4),
+        OptionButcher(True, 3, 4, 1, ITEM_ID_HUMAN_BRAIN, 4, 0, 4),
+        OptionButcher(True, 4, 5, 1, ITEM_ID_HUMAN_TONGUE, 3, 0, 4),
+        OptionButcher(True, 9, 10, 1, ITEM_ID_HUMAN_EAR, 1, 0, 0),
+        OptionButcher(True, 4, 5, 1, ITEM_ID_HUMAN_EYE, 2, 0, 4), 
+        OptionButcher(True, 3, 5, 1, ITEM_ID_HUMAN_EYE, 2, 0, 4),
+        OptionButcher(True, 9, 10, 1, ITEM_ID_HUMAN_HAIR, 2, 0, 2),
+        OptionButcher(False, 1, 2, 1, ITEM_ID_HUMAN_HAIR, 0, 2, 0),
+        OptionButcher(True, 4, 2, 1, ITEM_ID_HUMAN_BONE, 1, 0, 0),
+        OptionButcher(True, 7, 10, 7, ITEM_ID_HUMAN_MUSCLE, 0, 1, 0),
+        OptionButcher(True, 4, 5, 5, ITEM_ID_HUMAN_SKIN, 0, 2, 3), 
+        OptionButcher(True, 4, 5, 3, ITEM_ID_HUMAN_FAT, 4, 0, 0),
+    ),
+)
+
+
+ITEM_HUMAN_BODY_PART_DIGESTIVE_ORGANS = ITEMS[ITEM_ID_HUMAN_BODY_PART_DIGESTIVE_ORGANS] = Item(
+    ITEM_ID_HUMAN_BODY_PART_DIGESTIVE_ORGANS,
+    'Human digestive organs',
+    BUILTIN_EMOJIS['worm'],
+    (
+        'At the case of animal bodies, it is responsible for capturing necessary substances, '
+        'for building, maintaining themselves and for satisfying their energy demands.'
+    ),
+    ITEM_FLAG_BUTCHERABLE,
+    790, # value (hearts)
+    4700, # weight (grams)
+    None,
+    (
+        OptionButcher(True, 3, 4, 10, ITEM_ID_HUMAN_INTESTINES, 0, 2, 3),
+        OptionButcher(True, 3, 4, 1, ITEM_ID_HUMAN_TRIPE, 5, 0, 5),
+        OptionButcher(True, 4, 5, 1, ITEM_ID_HUMAN_PANCREAS, 1, 0, 4),
+        OptionButcher(False, 1, 2, 2, ITEM_ID_HUMAN_FAT, 0, 1, 0),
+    ),
+)
+
+
+ITEM_HUMAN_BODY_PART_INTERNALS = ITEMS[ITEM_ID_HUMAN_BODY_PART_INTERNALS] = Item(
+    ITEM_ID_HUMAN_BODY_PART_INTERNALS,
+    'Human internals',
+    BUILTIN_EMOJIS['ballet_shoes'],
+    (
+        'A collection of organs.'
+    ),
+    ITEM_FLAG_BUTCHERABLE,
+    958, # value (hearts)
+    3200, # weight (grams)
+    None,
+    (
+        OptionButcher(True, 3, 4, 2, ITEM_ID_HUMAN_LUNG, 0, 1, 0),
+        OptionButcher(True, 9, 10, 1, ITEM_ID_HUMAN_HEART, 0, 1, 2),
+        OptionButcher(True, 9, 10, 1, ITEM_ID_HUMAN_LIVER, 0, 1, 0),
+        OptionButcher(True, 9, 10, 1, ITEM_ID_HUMAN_SPLEEN, 0, 1, 0),
+        OptionButcher(True, 4, 5, 2, ITEM_ID_HUMAN_KIDNEY, 0, 1, 0),
+        OptionButcher(True, 3, 4, 2, ITEM_ID_HUMAN_MUSCLE, 0, 1, 0),
+        OptionButcher(False, 1, 2, 3, ITEM_ID_HUMAN_MUSCLE, 0, 1, 0),
+        OptionButcher(False, 1, 2, 3, ITEM_ID_HUMAN_FAT, 0, 1, 0),
+    ),
+)
+
+
+ITEM_HUMAN_BODY_PART_TORSO = ITEMS[ITEM_ID_HUMAN_BODY_PART_TORSO] = Item(
+    ITEM_ID_HUMAN_BODY_PART_TORSO,
+    'Human torso',
+    BUILTIN_EMOJIS['running_shirt_with_sash'],
+    (
+        'Torso is the central part of animals from which other parts; head, limbs, tail and other attachment grow out.'
+    ),
+    ITEM_FLAG_BUTCHERABLE,
+    11822, # value (hearts)
+    35000, # weight (grams)
+    None,
+    (
+        OptionButcher(True, 7, 10, 34, ITEM_ID_HUMAN_BONE, 6, 0, 0),
+        OptionButcher(True, 4, 5, 100, ITEM_ID_HUMAN_MUSCLE, 20, 0, 0),
+        OptionButcher(True, 3, 5, 100, ITEM_ID_HUMAN_MUSCLE, 0, 1, 2),
+        OptionButcher(False, 1, 2, 40, ITEM_ID_HUMAN_MUSCLE, 0, 1, 0),
+        OptionButcher(True, 4, 5, 24, ITEM_ID_HUMAN_SKIN, 20, 0, 1),
+        OptionButcher(False, 1, 2, 14, ITEM_ID_HUMAN_SKIN, 0, 1, 0),
+        OptionButcher(True, 1, 2, 60, ITEM_ID_HUMAN_CARTILAGE, 20, 0, 2),
+        OptionButcher(False, 1, 2, 18, ITEM_ID_HUMAN_CARTILAGE, 0, 1, 0),
+        OptionButcher(True, 1, 2, 36, ITEM_ID_HUMAN_FAT, 20, 0, 1),
+        OptionButcher(False, 1, 2, 20, ITEM_ID_HUMAN_FAT, 0, 1, 0),
+    ),
+)
+
+
+ITEM_HUMAN_BODY = ITEMS[ITEM_ID_HUMAN_BODY] = Item(
+    ITEM_ID_HUMAN_BODY,
+    'Human body',
+    BUILTIN_EMOJIS['person_doing_cartwheel_tone1'],
+    (
+        'The most abundant and widespread species of primates. '
+        'They can be characterised by minimal body-hair, sweating, body structure allowing throwing '
+        'and large complex brains.'
+    ),
+    ITEM_FLAG_BUTCHERABLE,
+    20344, # value (hearts)
+    68000, # weight (grams)
+    None,
+    (
+        OptionButcher(True, 9, 10, 40, ITEM_ID_HUMAN_BLOOD, 6, 0, 0),
+        OptionButcher(False, 1, 2, 10, ITEM_ID_HUMAN_BLOOD, 0, 1, 0),
+        OptionButcher(True, 9, 10, 1, ITEM_ID_HUMAN_BODY_PART_HEAD, 6, 0, 0),
+        OptionButcher(True, 9, 10, 1, ITEM_ID_HUMAN_BODY_PART_LEG, 6, 0, 0),
+        OptionButcher(True, 4, 5, 1, ITEM_ID_HUMAN_BODY_PART_LEG, 6, 0, 0),
+        OptionButcher(True, 9, 10, 1, ITEM_ID_HUMAN_BODY_PART_ARM, 4, 0, 0),
+        OptionButcher(True, 4, 5, 1, ITEM_ID_HUMAN_BODY_PART_ARM, 4, 0, 0),
+        OptionButcher(True, 9, 10, 1, ITEM_ID_HUMAN_BODY_PART_INTERNALS, 6, 0, 0),
+        OptionButcher(True, 4, 5, 1, ITEM_ID_HUMAN_BODY_PART_DIGESTIVE_ORGANS, 6, 0, 30),
+        OptionButcher(True, 9, 10, 1, ITEM_ID_HUMAN_BODY_PART_TORSO, 0, 0, 0),
+    ),
+)
+
+
+ITEM_HUMAN_BODY_SHARD_BOTTOM_HALF = ITEMS[ITEM_ID_HUMAN_BODY_SHARD_BOTTOM_HALF] = Item(
+    ITEM_ID_HUMAN_BODY_SHARD_BOTTOM_HALF,
+    'Human body (bottom part)',
+    BUILTIN_EMOJIS['person_kneeling_tone1'],
+    (
+        'A greatly damaged body of a human, where only the bottom parts are usable.'
+    ),
+    ITEM_FLAG_BUTCHERABLE,
+    6399, # value (hearts)
+    23000, # weight (grams)
+    None,
+    (
+        OptionButcher(False, 1, 2, 10, ITEM_ID_HUMAN_BLOOD, 0, 1, 0),
+        OptionButcher(True, 9, 10, 1, ITEM_ID_HUMAN_BODY_PART_LEG, 6, 0, 0),
+        OptionButcher(True, 4, 5, 1, ITEM_ID_HUMAN_BODY_PART_LEG, 6, 0, 0),
+            
+        OptionButcher(True, 7, 10, 8, ITEM_ID_HUMAN_BONE, 6, 0, 0),
+        OptionButcher(True, 4, 5, 50, ITEM_ID_HUMAN_MUSCLE, 0, 2, 1),
+        OptionButcher(True, 4, 5, 7, ITEM_ID_HUMAN_SKIN, 0, 2, 3),
+        OptionButcher(True, 1, 2, 10, ITEM_ID_HUMAN_CARTILAGE, 0, 2, 4),
+        OptionButcher(True, 1, 2, 13, ITEM_ID_HUMAN_FAT, 0, 2, 1),
+    ),
+)
+
+
+ITEM_HUMAN_BODY_SHARD_TOP_HALF = ITEMS[ITEM_ID_HUMAN_BODY_SHARD_TOP_HALF] = Item(
+    ITEM_ID_HUMAN_BODY_SHARD_TOP_HALF,
+    'Human body (top part)',
+    BUILTIN_EMOJIS['person_kneeling_tone1'],
+    (
+        'A greatly damaged body of a human, where only the top parts are usable.'
+    ),
+    ITEM_FLAG_BUTCHERABLE,
+    6361, # value (hearts)
+    23000, # weight (grams)
+    None,
+    (
+        OptionButcher(False, 1, 2, 10, ITEM_ID_HUMAN_BLOOD, 0, 1, 0),
+        OptionButcher(True, 9, 10, 1, ITEM_ID_HUMAN_BODY_PART_HEAD, 6, 0, 0),
+        OptionButcher(True, 9, 10, 1, ITEM_ID_HUMAN_BODY_PART_ARM, 6, 0, 0),
+        OptionButcher(True, 4, 5, 1, ITEM_ID_HUMAN_BODY_PART_ARM, 6, 0, 0),
+        
+        OptionButcher(True, 7, 10, 8, ITEM_ID_HUMAN_BONE, 6, 0, 0),
+        OptionButcher(True, 4, 5, 50, ITEM_ID_HUMAN_MUSCLE, 0, 2, 1),
+        OptionButcher(True, 4, 5, 7, ITEM_ID_HUMAN_SKIN, 0, 2, 3),
+        OptionButcher(True, 1, 2, 10, ITEM_ID_HUMAN_CARTILAGE, 0, 2, 4),
+        OptionButcher(True, 1, 2, 13, ITEM_ID_HUMAN_FAT, 0, 2, 1),
+    ),
+)
+
+
+ITEM_HUMAN_BODY_SHARD_CHEWED = ITEMS[ITEM_ID_HUMAN_BODY_SHARD_CHEWED] = Item(
+    ITEM_ID_HUMAN_BODY_SHARD_CHEWED,
+    'Human body chewed',
+    BUILTIN_EMOJIS['dancer_tone1'],
+    (
+        'A medium damaged body of a human, where parts appear to be chewed on.'
+    ),
+    ITEM_FLAG_BUTCHERABLE,
+    16179, # value (hearts)
+    54400, # weight (grams)
+    None,
+    (
+        OptionButcher(True, 4, 5, 20, ITEM_ID_HUMAN_BLOOD, 6, 0, 0),
+        OptionButcher(False, 1, 2, 5, ITEM_ID_HUMAN_BLOOD, 0, 1, 0),
+        OptionButcher(True, 2, 5, 1, ITEM_ID_HUMAN_BODY_PART_HEAD, 6, 0, 0),
+        OptionButcher(True, 2, 5, 1, ITEM_ID_HUMAN_BODY_PART_LEG, 5, 0, 0),
+        OptionButcher(False, 3, 5, 1, ITEM_ID_HUMAN_BODY_PART_LEG, 5, 0, 0),
+        OptionButcher(True, 2, 5, 1, ITEM_ID_HUMAN_BODY_PART_ARM, 3, 0, 0),
+        OptionButcher(False, 3, 5, 1, ITEM_ID_HUMAN_BODY_PART_ARM, 3, 0, 0),
+        OptionButcher(True, 2, 5, 1, ITEM_ID_HUMAN_BODY_PART_INTERNALS, 6, 0, 0),
+        OptionButcher(True, 2, 5, 1, ITEM_ID_HUMAN_BODY_PART_DIGESTIVE_ORGANS, 6, 0, 30),
+        OptionButcher(True, 2, 5, 1, ITEM_ID_HUMAN_BODY_PART_TORSO, 0, 0, 0),
+    ),
+)
+
+
+ITEM_RICE = ITEMS[ITEM_ID_RICE] = Item(
+    ITEM_ID_RICE,
+    'Rice',
+    BUILTIN_EMOJIS['rice'],
+    (
+        'A domesticated cereal grain, it is the staple food of over half of humanity.\n'
+        'The plant itself grows to over a meter tall. It takes around half a year for it to be sown.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    55, # value (hearts)
+    100, # weight (grams)
+    None,
+    None,
+)
+
+
+ITEM_RUMIA = ITEMS[ITEM_ID_RUMIA] = Item(
+    ITEM_ID_RUMIA,
+    'Rumia',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+    None,
+)
+
+
+ITEM_LIVER_SAUSAGE = ITEMS[ITEM_ID_LIVER_SAUSAGE] = Item(
+    ITEM_ID_LIVER_SAUSAGE,
+    'Liver sausage',
+    BUILTIN_EMOJIS['worm'],
+    (
+        'Boiled sausage is a stuffed good which should be eaten after cooked or fried. '
+        'It may be made out of meats or various organs of slaughter animals. '
+        'It is made of of spiced filling stuffed into a natural or artificial cover.\n'
+        'It has multiple popular versions, like blood, liver, rice and lung.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    250, # value (hearts)
+    500, # weight (grams)
+    None,
+    None,
+)
+
+
+ITEM_BLOOD_SAUSAGE = ITEMS[ITEM_ID_BLOOD_SAUSAGE] = Item(
+    ITEM_ID_BLOOD_SAUSAGE,
+    'Blood sausage',
+    ITEM_LIVER_SAUSAGE.emoji,
+    ITEM_LIVER_SAUSAGE.description,
+    ITEM_LIVER_SAUSAGE.flags,
+    ITEM_LIVER_SAUSAGE.value,
+    ITEM_LIVER_SAUSAGE.weight,
+    None,
+    None
+)
+
+
+ITEM_MEAT_SAUSAGE = ITEMS[ITEM_ID_MEAT_SAUSAGE] = Item(
+    ITEM_ID_MEAT_SAUSAGE,
+    'Meat sausage',
+    ITEM_LIVER_SAUSAGE.emoji,
+    ITEM_LIVER_SAUSAGE.description,
+    ITEM_LIVER_SAUSAGE.flags,
+    ITEM_LIVER_SAUSAGE.value,
+    ITEM_LIVER_SAUSAGE.weight,
+    None,
+    None
+)
+
+
+ITEM_PATCHOULI = ITEMS[ITEM_ID_PATCHOULI] = Item(
+    ITEM_ID_PATCHOULI,
+    'Rumia',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
     None,
 )

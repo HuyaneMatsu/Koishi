@@ -1,4 +1,7 @@
-__all__ = ('can_cancel_adventure', 'get_duration_till_recovery_end', 'get_location_distance_travel_duration',)
+__all__ = (
+    'can_cancel_adventure', 'get_action_type_multiplier', 'get_duration_till_recovery_end',
+    'get_duration_till_recovery_end_of_energy_cost', 'get_location_distance_travel_duration',
+)
 
 
 from datetime import datetime as DateTime
@@ -469,6 +472,22 @@ def get_duration_till_recovery_end(adventure):
     return duration
 
 
+def get_duration_till_recovery_end_of_energy_cost(energy_exhausted):
+    """
+    Gets the duration till the user recovery using energy.
+    
+    Parameters
+    ----------
+    energy_exhausted : `int`
+        The amount of used energy.
+    
+    Returns
+    -------
+    duration : `int`
+    """
+    return energy_exhausted * RECOVERY_DURATION_BY_LOST_ENERGY
+
+
 def can_cancel_adventure(adventure):
     """
     Returns whether the adventure can be cancelled.
@@ -508,3 +527,9 @@ if MARISA_MODE and ('vampytest' not in modules):
     @copy_docs(get_duration_till_recovery_end)
     def get_duration_till_recovery_end(adventure):
         return _get_duration_till_recovery_end(adventure) // TEST_MODE_DURATION_DIVIDER
+    
+    _get_duration_till_recovery_end_of_energy_cost = get_duration_till_recovery_end_of_energy_cost
+    
+    @copy_docs(get_duration_till_recovery_end_of_energy_cost)
+    def get_duration_till_recovery_end_of_energy_cost(energy_exhausted):
+        return _get_duration_till_recovery_end_of_energy_cost(energy_exhausted) // TEST_MODE_DURATION_DIVIDER

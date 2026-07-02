@@ -1,7 +1,5 @@
 __all__ = ()
 
-from math import floor
-
 from .loot_accumulation import LootAccumulation
 
 

@@ -1,9 +1,15 @@
 __all__ = ()
 
+from base64 import b64encode as base_64_encode
 from re import compile as re_compile
 
+from .constants import FLOAT_STRUCT
 
-ADVENTURE_CREATE_CONFIRM_RP = re_compile(
+
+BASE_64_CHARACTERS = '[A-Za-z0-9\\+\\/]+\\=*'
+
+
+ADVENTURE_CREATE_CONFIRM_PATTERN = re_compile(
     'adventure\\.create\\.1\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)'
 )
 ADVENTURE_CREATE_CONFIRM_BUILDER = (
@@ -12,7 +18,7 @@ ADVENTURE_CREATE_CONFIRM_BUILDER = (
 )
 
 
-ADVENTURE_ACTION_VIEW_RP = re_compile(
+ADVENTURE_ACTION_VIEW_PATTERN = re_compile(
     'adventure\\.action\\.view\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)'
 )
 ADVENTURE_ACTION_VIEW_BUILDER = (
@@ -36,7 +42,7 @@ ADVENTURE_ACTION_VIEW_DEPART = 'adventure.action.view.depart'
 ADVENTURE_ACTION_VIEW_RETURN = 'adventure.action.view.return'
 
 
-ADVENTURE_ACTION_LISTING_VIEW_RP = re_compile(
+ADVENTURE_ACTION_LISTING_VIEW_PATTERN = re_compile(
     f'adventure\\.action_listing\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)\\.([0-9a-f]+)'
 )
 ADVENTURE_ACTION_LISTING_VIEW_BUILDER = (
@@ -54,7 +60,7 @@ ADVENTURE_ACTION_LISTING_VIEW_BUILDER = (
 )
 
 
-ADVENTURE_CANCEL_RP = re_compile(
+ADVENTURE_CANCEL_PATTERN = re_compile(
     'adventure\\.cancel\\.([0-9a-f]+)\\.([0-9a-f]+)'
 )
 ADVENTURE_CANCEL_BUILDER = (
@@ -63,7 +69,7 @@ ADVENTURE_CANCEL_BUILDER = (
 )
 
 
-ADVENTURE_VIEW_RP = re_compile(
+ADVENTURE_VIEW_PATTERN = re_compile(
     'adventure\\.view\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)'
 )
 ADVENTURE_VIEW_BUILDER = (
@@ -79,7 +85,7 @@ ADVENTURE_VIEW_BUILDER = (
 )
 
 
-ADVENTURE_ACTION_BATTLE_LOGS_RP = re_compile(
+ADVENTURE_ACTION_BATTLE_LOGS_PATTERN = re_compile(
     'adventure\\.action\\.battle\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)'
 )
 ADVENTURE_ACTION_BATTLE_LOGS_BUILDER = (
@@ -88,10 +94,28 @@ ADVENTURE_ACTION_BATTLE_LOGS_BUILDER = (
 )
 
 
-ADVENTURE_LISTING_VIEW_RP = re_compile(
+ADVENTURE_LISTING_VIEW_PATTERN = re_compile(
     'adventure\\.listing\\.([0-9a-f]+)\\.([0-9a-f]+)'
 )
 ADVENTURE_LISTING_VIEW_BUILDER = (
     lambda user_id, page_index :
     f'adventure.listing.{user_id:x}.{page_index:x}'
+)
+
+
+ADVENTURE_BUTCHER_INITIAL_PATTERN = re_compile('adventure\\.butcher\\.i\\.([0-9a-f]+)\\.([0-9a-f]+)')
+ADVENTURE_BUTCHER_INITIAL_BUILDER = lambda user_id, item_id: f'adventure.butcher.i.{user_id:x}.{item_id:x}'
+ADVENTURE_BUTCHER_CONTINUOUS_PATTERN = re_compile(
+    f'adventure\\.butcher\\.c\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.'
+    f'({BASE_64_CHARACTERS})'
+)
+ADVENTURE_BUTCHER_CONTINUOUS_BUILDER = (
+    lambda user_id, item_id, seed, butcher_flags, index, multiplier : (
+        f'adventure.butcher.c.{user_id:x}.{item_id:x}.{seed:x}.{butcher_flags:x}.{index:x}.'
+        f'{base_64_encode(FLOAT_STRUCT.pack(multiplier)).decode("ascii")!s}'
+    )
+)
+ADVENTURE_BUTCHER_DISABLED_PATTERN = re_compile('adventure\\.butcher\\.d\\.[0-9a-f]+\\.[0-9a-f]+\\.[0-9a-f]+')
+ADVENTURE_BUTCHER_DISABLED_BUILDER = (
+    lambda user_id, item_id, index: f'adventure.butcher.d.{user_id:x}.{item_id:x}.{index:x}'
 )

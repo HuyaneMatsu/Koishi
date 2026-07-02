@@ -14602,7 +14602,7 @@ Some creators may be unknown. If you know them please create a PR with it.
 
 ---
 
-### chen-nazrin-fluff-0000
+### chen-nazrin-fluff-nom-0000
 
 - Creator: **yohane**
 - Editor: *none*
@@ -18477,15 +18477,6 @@ Some creators may be unknown. If you know them please create a PR with it.
 - Creator: **Haruwaka 064**
 - Editor: *none*
 - Characters: **Imaizumi Kagerou**, **Inaba Tewi**
-- Source: **Touhou**
-
----
-
-### tewi-blush-0000
-
-- Creator: **Haruwaka 064**
-- Editor: *none*
-- Characters: **Inaba Tewi**
 - Source: **Touhou**
 
 ---

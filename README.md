@@ -75,9 +75,9 @@ Although here is a "short" description for all of her commands by category:
 
 ### Actions
 
-- `/action`, `/bite`, `/blush`, `/bully`, `/carry`, `/cry`, `/feed`, `/fluff`, `/handhold`,
-    `happy`, `hug`, `kiss`, `kon`, `lap-sleep`, `like`, `lick`, `moon`, `murder`, `nom`, `pat`, `peg`,
-    `pocky-kiss`, `poke`, `smug`, `stare`, `wave`, `wink`, (with / for / at) someone.
+- `/action`, `/bite`, `/blush`, `/bully`, `/carry`, `/cry`, `/feed`, `/fluff`, `/handhold`, `/happy`, `/hug`, `/kiss`,
+  `/kon`, `/lap-sleep`, `/like`, `/lick`, `/moon`, `/murder`, `/nom`, `/pat`, `/peg`, `/pocky-kiss`, `/poke`, `/smug`,
+  `/stare`, `/wave`, `/wink`, (with / for / at) someone.
 - `/action` - Wildcard command to invoke any other action with selecting an exact (touhou only) image.
 
 ### Fun

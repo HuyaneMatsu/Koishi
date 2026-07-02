@@ -18,7 +18,8 @@ def test__accumulate_item_weight():
         ITEM_FLAG_EDIBLE,
         1,
         1000,
-        None
+        None,
+        None,
     )
     
     item_1 = Item(
@@ -29,6 +30,7 @@ def test__accumulate_item_weight():
         ITEM_FLAG_EDIBLE,
         1,
         300,
+        None,
         None,
     )
     

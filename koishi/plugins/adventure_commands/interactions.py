@@ -1,37 +1,60 @@
 __all__ = ()
 
-from datetime import datetime as DateTime, timezone as TimeZone
+from base64 import b64decode as base_64_decode
+from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
+from math import isnan as is_nan
 
-from hata import InteractionType, Client
+from hata import Client, InteractionType
 
 from ...bots import FEATURE_CLIENTS
 
 from ..adventure_core import (
-    ADVENTURE_STATE_FINALIZED, AUTO_CANCELLATION_ID_DEFAULT, AUTO_CANCELLATIONS, AUTO_CANCELLATIONS_ALLOWED, Adventure,
-    DURATION_MAX, DURATION_MIN, DURATION_SUGGESTION_SETS, LOCATIONS, RETURN_ID_AFTER, RETURNS, RETURNS_ALLOWED, TARGETS,
-    adventure_cancel, build_duration_suggestion, can_cancel_adventure, get_active_adventure, get_adventure,
-    get_adventure_action_listing, get_adventure_listing_page, parse_duration_hexadecimal, parse_duration_suggestion,
-    scheduled_adventure_arrival, store_adventure
+    ACTION_TYPE_BUTCHERING, ADVENTURE_STATE_FINALIZED, AUTO_CANCELLATIONS, AUTO_CANCELLATIONS_ALLOWED,
+    AUTO_CANCELLATION_ID_DEFAULT, Adventure, DURATION_MAX, DURATION_MIN, DURATION_SUGGESTION_SETS, LOCATIONS, RETURNS,
+    RETURNS_ALLOWED, RETURN_ID_AFTER, TARGETS, adventure_cancel, build_duration_suggestion, can_cancel_adventure,
+    get_action_type_multiplier, get_active_adventure, get_adventure, get_adventure_action_listing,
+    get_adventure_listing_page, get_duration_till_recovery_end_of_energy_cost, parse_duration_hexadecimal,
+    parse_duration_suggestion, scheduled_adventure_arrival, store_adventure
 )
-from ..inventory_core import get_inventory
+from ..inventory_core import create_item_suggestions, get_inventory, save_inventory, select_item
+from ..item_core import (
+    ITEM_FLAG_BUTCHERABLE, butcher_calculate_done, butcher_calculate_step, butcher_done_append, get_item,
+    get_item_nullable
+)
 from ..quest_core import get_user_adventurer_rank_info
+from ..seeding import create_seed
 from ..user_stats_core import get_user_stats, save_user_stats
 
 from .component_building import (
-    ADVENTURE_LISTING_PAGE_SIZE, build_adventure_action_listing_view_components, build_adventure_action_view_components,
+    build_adventure_action_listing_view_components, build_adventure_action_view_components,
     build_adventure_cancellation_components, build_adventure_cancellation_confirmation_form,
     build_adventure_create_confirm_components, build_adventure_create_confirmation_form,
     build_adventure_listing_view_components, build_adventure_view_active_components,
-    build_adventure_view_finalized_components, produce_adventure_depart_failure_recovery_description
+    build_adventure_view_finalized_components, build_butcher_components
 )
+from .constants import ADVENTURE_LISTING_PAGE_SIZE, FLOAT_STRUCT
+from .content_building import produce_adventure_depart_failure_recovery_description
 from .custom_ids import (
-    ADVENTURE_ACTION_BATTLE_LOGS_RP, ADVENTURE_ACTION_VIEW_DEPART, ADVENTURE_ACTION_VIEW_RETURN,
-    ADVENTURE_ACTION_LISTING_VIEW_RP, ADVENTURE_ACTION_VIEW_RP, ADVENTURE_CANCEL_RP, ADVENTURE_CREATE_CONFIRM_RP,
-    ADVENTURE_LISTING_VIEW_RP, ADVENTURE_VIEW_RP
+    ADVENTURE_ACTION_BATTLE_LOGS_PATTERN, ADVENTURE_ACTION_LISTING_VIEW_PATTERN, ADVENTURE_ACTION_VIEW_DEPART,
+    ADVENTURE_ACTION_VIEW_PATTERN, ADVENTURE_ACTION_VIEW_RETURN, ADVENTURE_BUTCHER_CONTINUOUS_PATTERN,
+    ADVENTURE_BUTCHER_DISABLED_PATTERN, ADVENTURE_BUTCHER_INITIAL_PATTERN, ADVENTURE_CANCEL_PATTERN,
+    ADVENTURE_CREATE_CONFIRM_PATTERN, ADVENTURE_LISTING_VIEW_PATTERN, ADVENTURE_VIEW_PATTERN
 )
 from .duration_suggesting import get_duration_suggestions
 from .location_suggesting import get_best_matching_location, get_location_suggestions
 from .target_suggesting import get_best_matching_target, get_target_suggestions
+
+from config import MARISA_MODE
+
+
+try:
+    from ..adventure_recovery_over_reminder_hook import set_closest_adventure_recovery_over_reminder
+except ImportError:
+    if not MARISA_MODE:
+        raise
+    
+    async def set_closest_adventure_recovery_over_reminder(user_id, date_time):
+        return
 
 
 ADVENTURE_COMMANDS = FEATURE_CLIENTS.interactions(
@@ -304,7 +327,7 @@ async def autocomplete_depart_duration(interaction_event, duration_string):
     return get_duration_suggestions(duration_suggestion_set.durations, duration_string)
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CREATE_CONFIRM_RP, target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CREATE_CONFIRM_PATTERN, target = 'form')
 async def handle_adventure_create_confirm(
     client,
     interaction_event,
@@ -617,7 +640,7 @@ async def view(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CANCEL_RP)
+@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CANCEL_PATTERN)
 async def handle_active_adventure_cancellation_invoke(
     client,
     interaction_event,
@@ -677,7 +700,7 @@ async def handle_active_adventure_cancellation_invoke(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CANCEL_RP, target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CANCEL_PATTERN, target = 'form')
 async def handle_active_adventure_cancellation_confirmation(
     client,
     interaction_event,
@@ -750,7 +773,7 @@ async def handle_active_adventure_cancellation_confirmation(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_VIEW_RP)
+@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_VIEW_PATTERN)
 async def handle_adventure_view(
     client,
     interaction_event,
@@ -823,7 +846,13 @@ async def handle_adventure_view(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = [ADVENTURE_ACTION_VIEW_DEPART, ADVENTURE_ACTION_VIEW_RETURN])
+@FEATURE_CLIENTS.interactions(
+    custom_id = [
+        ADVENTURE_ACTION_VIEW_DEPART,
+        ADVENTURE_ACTION_VIEW_RETURN,
+        ADVENTURE_BUTCHER_DISABLED_PATTERN,
+    ],
+)
 async def handle_adventure_action_disabled():
     """
     Dummy handler for disabled adventure action views.
@@ -832,7 +861,7 @@ async def handle_adventure_action_disabled():
     """
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_ACTION_VIEW_RP)
+@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_ACTION_VIEW_PATTERN)
 async def handle_adventure_action_view(
     client,
     interaction_event,
@@ -929,7 +958,7 @@ async def handle_adventure_action_view(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_ACTION_BATTLE_LOGS_RP)
+@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_ACTION_BATTLE_LOGS_PATTERN)
 async def handle_adventure_action_battle_logs_view(
     client,
     interaction_event,
@@ -971,7 +1000,7 @@ async def handle_adventure_action_battle_logs_view(
     # Battles are not implemented yet.
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_ACTION_LISTING_VIEW_RP)
+@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_ACTION_LISTING_VIEW_PATTERN)
 async def handle_adventure_action_listing_view(
     client,
     interaction_event,
@@ -1092,7 +1121,7 @@ async def history(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_LISTING_VIEW_RP)
+@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_LISTING_VIEW_PATTERN)
 async def handle_adventure_listing_view(
     client,
     interaction_event,
@@ -1138,4 +1167,401 @@ async def handle_adventure_listing_view(
         components = build_adventure_listing_view_components(
             interaction_event.user_id, adventure_listing, page_index, page_count
         ),
+    )
+
+
+@ADVENTURE_COMMANDS.interactions
+async def butcher(
+    client,
+    interaction_event,
+    item_name : (str, 'Body or body part', 'body'),
+):
+    """
+    Butcher a body or body part you have already collected.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    item_name : `str`
+        The item's name to butcher.
+    """
+    await client.interaction_application_command_acknowledge(
+        interaction_event,
+        False,
+        show_for_invoking_user_only = True,
+    )
+    
+    while True:
+        adventure = await get_active_adventure(interaction_event.user_id)
+        if (adventure is not None):
+            error_message = 'You cannot butcher while on adventure.'
+            break
+        
+        inventory = await get_inventory(interaction_event.user_id)
+        item = select_item(inventory, ITEM_FLAG_BUTCHERABLE, item_name)
+        if item is None:
+            error_message = f'You cannot butcher {item_name!s}, you do not have such an item.'
+            break
+        
+        user_stats = await get_user_stats(interaction_event.user_id)
+        multiplier = get_action_type_multiplier(ACTION_TYPE_BUTCHERING, user_stats)
+        
+        now = DateTime.now(TimeZone.utc)
+        recovering_until = user_stats.recovering_until
+        if (recovering_until is None) or (recovering_until < now):
+            recovering_until = None
+        
+        
+        await client.interaction_response_message_edit(interaction_event, '-# _ _ ')
+        await client.interaction_response_message_delete(interaction_event)
+        
+        await client.interaction_followup_message_create(
+            interaction_event,
+            components = build_butcher_components(
+                interaction_event.user,
+                interaction_event.guild_id,
+                item,
+                0,
+                0,
+                multiplier,
+                None,
+                0,
+                None,
+                None,
+                None,
+                0,
+                now,
+                recovering_until,
+            ),
+        )
+        return
+    
+    await client.interaction_response_message_edit(
+        interaction_event,
+        content = error_message,
+    )
+
+
+@butcher.autocomplete('item_name')
+async def command_butcher_autocomplete_item_name(interaction_event, value):
+    """
+    Gets item suggestions for the given value.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    value : `None | str`
+        Value to filter for.
+    
+    Returns
+    -------
+    suggestions : `None | list<(str, int)>`
+    """
+    inventory = await get_inventory(interaction_event.user_id)
+    return create_item_suggestions(inventory, ITEM_FLAG_BUTCHERABLE, value)
+
+
+@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_BUTCHER_INITIAL_PATTERN)
+async def handle_butcher_initial(
+    client,
+    interaction_event,
+    user_id,
+    item_id,
+):
+    """
+    handles a butcher initial interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The invoking user's identifier in hexadecimal. Later converted to int.
+    
+    item_id : `str`
+        The butchered item's identifier in hexadecimal. Later converted to int.
+    """
+    try:
+        user_id = int(user_id, 16)
+        item_id = int(item_id, 16)
+    except ValueError:
+        return
+    
+    await client.interaction_component_acknowledge(
+        interaction_event,
+        False,
+    )
+    
+    if interaction_event.user_id != user_id:
+        return
+    
+    while True:
+        adventure = await get_active_adventure(interaction_event.user_id)
+        if (adventure is not None):
+            error_message = 'You cannot butcher while on adventure.'
+            break
+        
+        initial_item = get_item_nullable(item_id)
+        if initial_item is None:
+            error_message = f'Such item does not exist.'
+            break
+        
+        inventory = await get_inventory(interaction_event.user_id)
+        amount = inventory.get_item_amount(initial_item)
+        if amount <= 0:
+            error_message = f'You do not have any {initial_item.name}-s.'
+            break
+        
+        user_stats = await get_user_stats(interaction_event.user_id)
+        multiplier = get_action_type_multiplier(ACTION_TYPE_BUTCHERING, user_stats)
+        
+        seed = create_seed()
+        butcher_amounts, energy_cost, butcherables = butcher_calculate_done(
+            initial_item, seed, 0, multiplier
+        )
+        
+        # Update inventory and stats.
+        
+        inventory.modify_item_amount(initial_item, -1)
+        if (butcher_amounts is not None):
+            for item_id, amount in butcher_amounts:
+                inventory.modify_item_amount(get_item(item_id), amount)
+        
+        await save_inventory(inventory)
+        
+        now = DateTime.now(TimeZone.utc)
+        recovering_until = user_stats.recovering_until
+        if (recovering_until is None) or (recovering_until < now):
+            recovering_until = None
+        
+        if energy_cost:
+            recovering_until = (
+                (now if recovering_until is None else recovering_until) +
+                TimeDelta(seconds = get_duration_till_recovery_end_of_energy_cost(energy_cost))
+            )
+            user_stats.set_recovering_until(recovering_until)
+            await set_closest_adventure_recovery_over_reminder(user_stats, recovering_until)
+            await save_user_stats(user_stats)
+        
+        # Respond.
+        
+        await client.interaction_response_message_edit(
+            interaction_event,
+            components = build_butcher_components(
+                interaction_event.user,
+                interaction_event.guild_id,
+                initial_item,
+                seed,
+                0,
+                multiplier,
+                butcher_amounts,
+                energy_cost,
+                butcherables,
+                initial_item,
+                butcher_amounts,
+                energy_cost,
+                now,
+                recovering_until,
+            ),
+        )
+        return
+    
+    await client.interaction_followup_message_create(
+        interaction_event,
+        content = error_message,
+        show_for_invoking_user_only = True,
+    )
+
+
+@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_BUTCHER_CONTINUOUS_PATTERN)
+async def handle_butcher_continuous(
+    client,
+    interaction_event,
+    user_id,
+    item_id,
+    seed,
+    butcher_flags,
+    butchered_index,
+    multiplier,
+):
+    """
+    handles a butcher continuous interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The invoking user's identifier in hexadecimal. Later converted to int.
+    
+    item_id : `str`
+        The butchered item's identifier in hexadecimal. Later converted to int.
+    
+    seed : `str`
+        Seed to use for butchering in hexadecimal. Later converted to int.
+    
+    butcher_flags : `str`
+        Flags described which body parts were already butchered in hexadecimal. Later converted to int.
+    
+    butchered_index : `str`
+        The index of the item to butcher in hexadecimal. Later converted to int.
+    
+    multiplier : `str`
+        The initial multiplier in hexadecimal. Later converted to float.
+    """
+    try:
+        user_id = int(user_id, 16)
+        item_id = int(item_id, 16)
+        seed = int(seed, 16)
+        butcher_flags = int(butcher_flags, 16)
+        butchered_index = int(butchered_index, 16)
+    except ValueError:
+        return
+    
+    try:
+        multiplier = base_64_decode(multiplier)
+    except ValueError:
+        return
+    
+    if len(multiplier) != 8:
+        return
+    
+    multiplier = FLOAT_STRUCT.unpack(multiplier)[0]
+    
+    if is_nan(multiplier):
+        multiplier = 1.0
+    elif multiplier < 0.05:
+        multiplier = 0.05
+    elif multiplier > 1000.0:
+        multiplier = 1000.0
+    
+    await client.interaction_component_acknowledge(
+        interaction_event,
+        False,
+    )
+    
+    if interaction_event.user_id != user_id:
+        return
+    
+    while True:
+        adventure = await get_active_adventure(interaction_event.user_id)
+        if (adventure is not None):
+            error_message = 'You cannot butcher while on adventure.'
+            break
+        
+        initial_item = get_item_nullable(item_id)
+        if initial_item is None:
+            error_message = f'Such item does not exist.'
+            break
+        
+        butcher_amounts_accumulated, energy_cost_accumulated, butcherables = butcher_calculate_done(
+            initial_item, seed, butcher_flags, multiplier
+        )
+        
+        if butcherables is None:
+            butchered_item = None
+        else:
+            for butchered_item, index in butcherables:
+                if index == butchered_index:
+                    break
+            else:
+                butchered_item = None
+        
+        if (butchered_item is None):
+            error_message = f'Such body part does not exist.'
+            break
+        
+        inventory = await get_inventory(interaction_event.user_id)
+        amount = inventory.get_item_amount(butchered_item)
+        if amount <= 0:
+            error_message = f'You do not have any {butchered_item.name}-s.'
+            break
+        
+        butcher_amounts, energy_cost = butcher_calculate_step(butchered_item, butchered_index, seed, multiplier)
+        
+        # Update inventory and stats.
+        
+        inventory.modify_item_amount(butchered_item, -1)
+        if (butcher_amounts is not None):
+            for item_id, amount in butcher_amounts:
+                inventory.modify_item_amount(get_item(item_id), amount)
+        
+        await save_inventory(inventory)
+        
+        user_stats = await get_user_stats(interaction_event.user_id)
+        
+        now = DateTime.now(TimeZone.utc)
+        recovering_until = user_stats.recovering_until
+        if (recovering_until is None) or (recovering_until < now):
+            recovering_until = None
+        
+        if energy_cost:
+            recovering_until = (
+                (now if recovering_until is None else recovering_until) +
+                TimeDelta(seconds = get_duration_till_recovery_end_of_energy_cost(energy_cost))
+            )
+            user_stats.set_recovering_until(recovering_until)
+            await set_closest_adventure_recovery_over_reminder(user_stats, recovering_until)
+            await save_user_stats(user_stats)
+        
+        # Respond.
+        
+        butcher_amounts_accumulated, energy_cost_accumulated, butcherables = butcher_done_append(
+            butcher_amounts_accumulated,
+            energy_cost_accumulated,
+            butcherables,
+            butchered_item,
+            butchered_index,
+            butcher_amounts,
+            energy_cost,
+        )
+        
+        await client.interaction_response_message_edit(
+            interaction_event,
+            components = build_butcher_components(
+                interaction_event.user,
+                interaction_event.guild_id,
+                initial_item,
+                seed,
+                butcher_flags | (1 << butchered_index),
+                multiplier,
+                butcher_amounts_accumulated,
+                energy_cost_accumulated,
+                butcherables,
+                butchered_item,
+                butcher_amounts,
+                energy_cost,
+                now,
+                recovering_until,
+            ),
+        )
+        return
+    
+    await client.interaction_followup_message_create(
+        interaction_event,
+        content = error_message,
+        show_for_invoking_user_only = True,
     )

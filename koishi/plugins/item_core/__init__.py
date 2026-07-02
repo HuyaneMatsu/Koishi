@@ -7,6 +7,8 @@ from .item_group_ids import *
 from .item_groups import *
 from .item_ids import *
 from .items import *
+from .logic_butcher import *
+from .option_butcher import *
 from .utils import *
 
 
@@ -19,6 +21,8 @@ __all__ = (
     *item_group_ids.__all__,
     *item_groups.__all__,
     *item_ids.__all__,
+    *logic_butcher.__all__,
+    *option_butcher.__all__,
     *items.__all__,
     *utils.__all__,
 )

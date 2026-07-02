@@ -1,11 +1,10 @@
 __all__ = ('Adventure',)
 
-
 from datetime import datetime as DateTime, timezone as TimeZone
-from random import random
-from math import floor
 
 from scarletio import RichAttributeErrorBaseType
+
+from ...seeding import create_seed
 
 from .adventure_states import ADVENTURE_STATE_DEPARTING
 
@@ -129,7 +128,7 @@ class Adventure(RichAttributeErrorBaseType):
         self.initial_duration = initial_duration
         self.created_at = self.updated_at = DateTime.now(TimeZone.utc)
         self.action_count = 0
-        self.seed = floor(random() * (1 << 63))
+        self.seed = create_seed()
         
         self.health_initial = health_initial
         self.health_exhausted = 0

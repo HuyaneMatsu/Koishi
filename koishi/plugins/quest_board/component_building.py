@@ -409,7 +409,7 @@ def _linked_quest_sort_key_getter(linked_quest):
     else:
         completion_state_weight = 3
     
-    # Second sort: when teh quest expires
+    # Second sort: when the quest expires
     # - active with expiration
     # - other
     if (completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE) and (expiration is not None):

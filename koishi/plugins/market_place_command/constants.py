@@ -5,7 +5,8 @@ from datetime import timedelta as TimeDelta
 from hata import BUILTIN_EMOJIS
 
 from ..item_core import (
-    ITEM_FLAG_COSTUME, ITEM_FLAG_EDIBLE, ITEM_FLAG_HEAD, ITEM_FLAG_NPC, ITEM_FLAG_SPECIES, ITEM_FLAG_WEAPON
+    ITEM_FLAG_BUTCHERABLE, ITEM_FLAG_COSTUME, ITEM_FLAG_EDIBLE, ITEM_FLAG_HEAD, ITEM_FLAG_NPC, ITEM_FLAG_SPECIES,
+    ITEM_FLAG_WEAPON
 )
 
 from config import MARISA_MODE
@@ -13,6 +14,7 @@ from config import MARISA_MODE
 
 ITEM_CATEGORY_CHOICES = [
     ('all', 0),
+    ('butcherable', ITEM_FLAG_BUTCHERABLE),
     ('costume', ITEM_FLAG_COSTUME),
     ('edible', ITEM_FLAG_EDIBLE),
     ('head accessory', ITEM_FLAG_HEAD),

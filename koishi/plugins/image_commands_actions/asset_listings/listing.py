@@ -13697,7 +13697,7 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1447675918855438409/chen-nazrin-fluff-0000.png',
+    'https://cdn.discordapp.com/attachments/568837922288173058/1511318847196627034/chen-nazrin-fluff-nom-0000.png',
 ).with_action(
     ACTION_TAG_FLUFF, CHEN, NAZRIN,
 ).with_creator(
@@ -16883,14 +16883,6 @@ TOUHOU_ACTION_ALL.add(
 )
 
 TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1508039890921590834/alice-kiss-0000.png',
-).with_action(
-    ACTION_TAG_KISS, MARGATROID_ALICE, None,
-).with_creator(
-    'Kemo Chiharu',
-)
-
-TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1508039895166222457/kagerou-blush-0000.png',
 ).with_action(
     ACTION_TAG_BLUSH, IMAIZUMI_KAGEROU, None,
@@ -17279,14 +17271,6 @@ TOUHOU_ACTION_ALL.add(
     (ACTION_TAG_BLUSH, INABA_TEWI, IMAIZUMI_KAGEROU),
     (ACTION_TAG_HANDHOLD, IMAIZUMI_KAGEROU, INABA_TEWI),
     (ACTION_TAG_HANDHOLD, INABA_TEWI, IMAIZUMI_KAGEROU),
-).with_creator(
-    'Haruwaka 064',
-)
-
-TOUHOU_ACTION_ALL.add(
-    'https://cdn.discordapp.com/attachments/568837922288173058/1508451624761163877/tewi-blush-0000.png',
-).with_action(
-    ACTION_TAG_BLUSH, INABA_TEWI, None,
 ).with_creator(
     'Haruwaka 064',
 )

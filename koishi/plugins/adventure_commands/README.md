@@ -15,6 +15,7 @@ This plugin contains the commands and other interactions related to adventuring.
     - `view`
     - `cancel`
     - `history`
+    - `butcher`
 
 
 The built messages are the following:
@@ -22,6 +23,7 @@ The built messages are the following:
 - `/adventure view` -> `adventure view active`
 - `/adventure cancel` -> `adventure cancellation`
 - `/adventure history` -> `adventure listing view`
+- `/adventure butcher` -> `butcher` (standalone)
 
 Each message also may contain links to other ones:
 
