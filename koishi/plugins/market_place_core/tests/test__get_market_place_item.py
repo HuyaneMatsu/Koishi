@@ -82,7 +82,7 @@ async def test__get_market_place_item(
         Market place items patched.
     
     market_place_items_cache_patched : ``Deque<MarketPlaceItem>``
-        Market place items cace patched.
+        Market place items cache patched.
     
     Returns
     -------

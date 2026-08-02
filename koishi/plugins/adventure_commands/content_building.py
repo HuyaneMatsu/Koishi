@@ -11,10 +11,10 @@ from ..adventure_core import (
     ACTION_TYPE_NONE, ACTION_TYPE_TRAP, ACTION_TYPE_UNKNOWN, ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_CANCELLED,
     ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_FINALIZED, ADVENTURE_STATE_RETURNING, LOCATIONS,
     LOOT_STATE_LOST_DUE_FULL_INVENTORY, LOOT_STATE_LOST_DUE_LOW_ENERGY, LOOT_STATE_SUCCESS, TARGETS,
-    get_duration_till_recovery_end, produce_auto_cancellation_conditions, produce_duration_suggestion
+    get_duration_till_recovery_end, produce_auto_cancellation_conditions
 )
 from ..item_core import get_item
-from ..unit_core import produce_kilogram, produce_kilogram_ratio
+from ..unit_core import produce_duration, produce_kilogram, produce_kilogram_ratio
 
 
 ACTION_TYPE_NAME_DEFAULT = 'Unknown'
@@ -72,7 +72,7 @@ def produce_adventure_initial_representation(location, target, duration, return_
     yield target.name
     
     yield '\nDuration: '
-    yield from produce_duration_suggestion(duration)
+    yield from produce_duration(duration)
     
     yield '\nReturn: '
     yield return_.name

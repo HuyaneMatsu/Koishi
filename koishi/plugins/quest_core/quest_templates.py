@@ -41,10 +41,11 @@ from .quest_template_ids import (
     QUEST_TEMPLATE_ID_ORIN_FISHING_ROD, QUEST_TEMPLATE_ID_PATCHOULI_EYE, QUEST_TEMPLATE_ID_REIMU_BANQUET,
     QUEST_TEMPLATE_ID_REIMU_EAR, QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING, QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW,
     QUEST_TEMPLATE_ID_RUMIA_BLOOD_SAUSAGE, QUEST_TEMPLATE_ID_RUMIA_LIVER_SAUSAGE, QUEST_TEMPLATE_ID_RUMIA_MEAT_SAUSAGE,
-    QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QUEST_TEMPLATE_ID_SAKUYA_BOILED_SAUSAGE,
-    QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER, QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD,
-    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QUEST_TEMPLATE_ID_SATORI_PUDDING, QUEST_TEMPLATE_ID_SUIKA_SAKE,
-    QUEST_TEMPLATE_ID_TEWI_BISHOPHAT, QUEST_TEMPLATE_ID_YUKARI_RULER, QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT
+    QUEST_TEMPLATE_ID_RUMIA_SWEETS, QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH,
+    QUEST_TEMPLATE_ID_SAKUYA_BOILED_SAUSAGE, QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER,
+    QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QUEST_TEMPLATE_ID_SATORI_PUDDING,
+    QUEST_TEMPLATE_ID_SUIKA_SAKE, QUEST_TEMPLATE_ID_TEWI_BISHOPHAT, QUEST_TEMPLATE_ID_TEWI_RICE,
+    QUEST_TEMPLATE_ID_YUKARI_RULER, QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT
 )
 
 
@@ -1244,6 +1245,7 @@ QUEST_TEMPLATE_RUMIA_MEAT_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_MEAT
     ),
 )
 
+
 # - Orin +1 level
 # - Misty lake +2 level
 # - equipment +1 level
@@ -1364,7 +1366,7 @@ QUEST_TEMPLATE_MYSTIA_FAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FAT] = Ques
     (
         'I am running severely low on fat.\n'
         '\n'
-        'One can\'t cook without fat, please bring me some as soo nas possible.'
+        'One can\'t cook without fat, please bring me some as soon as possible.'
     ),
     3,
     1,
@@ -1490,6 +1492,7 @@ QUEST_REIMU_EAR = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REIMU_EAR] = QuestTemplate(
     ),
 )
 
+
 # - Mystia +0 level
 # - Human village outskirts +0 level
 # - Requires large amount.
@@ -1509,10 +1512,69 @@ QUEST_TEMPLATE_MYSTIA_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_RICE] = Qu
     ITEM_ID_MYSTIA,
     (
         QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS * 12, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 10000, 5, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 10000, 100, 80, 120),
     ),
     (
         QuestRewardGeneratorBalance(11000, 100, 80, 120),
         QuestRewardGeneratorCredibility(30),
+    ),
+)
+
+
+# - Tewi +3 level
+# - Human village outskirts +0 level
+# - Requires large amount.
+# Reward is around 1.5x of the value
+QUEST_TEMPLATE_TEWI_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_RICE] = QuestTemplate(
+    QUEST_TEMPLATE_ID_TEWI_RICE,
+    None,
+    4, # target 1
+    28,
+    (
+        'It is that time of the month again.\n'
+        '\n'
+        'Exactly! We need a large amount of rice supply to make mochi. '
+        'Unfortunately, the supply at this time is a little bit short. '
+        'I hope to see someone who can supply the remaining.\n'
+        '\n'
+        'Please bring the rice at least a few days before the full moon.'
+    ),
+    3,
+    1,
+    ITEM_ID_TEWI,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 10, DAY_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 32000, 1000, 80, 120),
+    ),
+    (
+        QuestRewardGeneratorBalance(26000, 1000, 80, 120),
+        QuestRewardGeneratorItemExactFix(ITEM_ID_DANGO, 3),
+        QuestRewardGeneratorCredibility(10),
+    ),
+)
+
+
+# - Rumia +2
+# - Requires quest reward +1
+# Reward is around 2x of the value
+QUEST_TEMPLATE_RUMIA_SWEETS = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_SWEETS] = QuestTemplate(
+    QUEST_TEMPLATE_ID_RUMIA_SWEETS,
+    None,
+    2, # Target: 1
+    14,
+    (
+        'I am in the mood for something sweet! I accidentally ate a vegetable, I do not like vegetables, '
+        'I like CANDIES and CAKES and I want this horrible taste gone!! Please, could you bring me some sweets?'
+    ),
+    3,
+    1,
+    ITEM_ID_RUMIA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 5, HOUR_IN_SECONDS * 6, 80, 120),
+        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_SWEETS, AMOUNT_TYPE_WEIGHT, 200, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(1200, 100, 90, 110),
+        QuestRewardGeneratorCredibility(20),
     ),
 )

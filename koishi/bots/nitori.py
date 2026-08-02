@@ -8,9 +8,9 @@ from time import perf_counter
 from hata import (
     BUILTIN_EMOJIS, ButtonStyle, Channel, Client, Color, DATETIME_FORMAT_CODE, DiscordException, ERROR_CODES, Embed,
     Emoji, InteractionForm, Permission, Role, SeparatorSpacingSize, StringSelectOption, TextInputStyle,
-    create_attachment_media, create_button, create_container, create_label, create_media_gallery, create_row,
-    create_section, create_separator, create_string_select, create_text_display, create_text_input,
-    create_thumbnail_media, create_user_select, elapsed_time, id_to_datetime, parse_emoji
+    attachment_request_create_regular_create, create_attachment_media, create_button, create_container, create_label,
+    create_media_gallery, create_row, create_section, create_separator, create_string_select, create_text_display,
+    create_text_input, create_thumbnail_media, create_user_select, elapsed_time, id_to_datetime, parse_emoji
 )
 from hata.ext.slash import (
     InteractionResponse, P, abort, configure_parameter, iter_component_interactions, wait_for_component_interaction
@@ -301,8 +301,12 @@ async def resend(
     attachment: ('attachment', 'File!'),
 ):
     yield
-    file = await client.download_attachment(attachment)
-    yield InteractionResponse(file = (attachment.name, file))
+    data = await client.download_attachment(attachment)
+    yield InteractionResponse(
+        attachments = [
+            attachment_request_create_regular_create(attachment.name, data),
+        ],
+    )
 
 # command end
 # command start slash collect-reactions

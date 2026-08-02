@@ -2148,7 +2148,7 @@ ITEM_MEAT_SAUSAGE = ITEMS[ITEM_ID_MEAT_SAUSAGE] = Item(
 
 ITEM_PATCHOULI = ITEMS[ITEM_ID_PATCHOULI] = Item(
     ITEM_ID_PATCHOULI,
-    'Rumia',
+    'Patchouli',
     None,
     None,
     ITEM_FLAG_NPC,

@@ -16,11 +16,11 @@ def _iter_options():
         ),
         None,
         [
-            ('4h', format(hour * 4, 'x')),
-            ('6h', format(hour * 6, 'x')),
-            ('8h', format(hour * 8, 'x')),
-            ('12h', format(hour * 12, 'x')),
-            ('16h', format(hour * 16, 'x')),
+            ('4h', '4h'),
+            ('6h', '6h'),
+            ('8h', '8h'),
+            ('12h', '12h'),
+            ('16h', '16h'),
         ],
     )
     
@@ -34,8 +34,8 @@ def _iter_options():
         ),
         '1h',
         [
-            ('12h', format(hour * 12, 'x')),
-            ('16h', format(hour * 16, 'x')),
+            ('12h', '12h'),
+            ('16h', '16h'),
         ],
     )
     

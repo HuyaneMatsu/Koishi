@@ -1278,7 +1278,7 @@ class ReceivedValueSorter(RichAttributeErrorBaseType):
     
     def __new__(cls, value):
         """
-        Creates a new ``ReceivedValueSorter`` with the given `value`.
+        Creates a new instance with the given `value`.
         
         Parameters
         ----------

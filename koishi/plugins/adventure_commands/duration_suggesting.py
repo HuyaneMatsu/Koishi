@@ -1,6 +1,6 @@
 __all__ = ()
 
-from ..adventure_core import build_duration_suggestion
+from ..unit_core import produce_duration
 
 from re import I as re_ignore_case, compile as re_compile, escape as re_escape
 
@@ -37,7 +37,11 @@ def get_duration_suggestions(durations, value):
     -------
     suggestions : `list<(str, str)>`
     """
-    duration_suggestions = [(build_duration_suggestion(duration), format(duration, 'x')) for duration in durations]
+    duration_suggestions = []
+    for duration in durations:
+        suggestion = ''.join([*produce_duration(duration)])
+        duration_suggestions.append((suggestion, suggestion))
+    
     if value is None:
         return duration_suggestions
     

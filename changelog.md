@@ -1,3 +1,19 @@
+### 2026-08-02
+
+- Rewrite `/mod` and `/self-mod` commands.
+- `/mod` commands now do check for the user's actual permissions and for the received one, since that is affected
+    by specific guild settings that nobody likes. (alpha_514)
+- Make `/mod` command select the client with the highest position and permissions to execute the action. (2vio2vieevie)
+- Make `/mod` command to select clients with shared guilds to deliver notification.
+- Remove `/mod regret-un-ban` and `/mod regret-un-kick`, Add `/mod invites-disable` and `/mod invites-enable`.
+  
+- Fix `/market-place own-offers` always showing the first page. (pichu0357)
+- Fix typo on `mystia - fat` quest. (.wakasagihime)
+
+- Add new quests:
+    - Tewi - Rice  (chaos3326)
+    - Rumia - Sweets (2vio2vieevie)
+
 ### 2026-07-02
 
 - Fix `automation welcome` tried to use a wrong client to welcome if the welcome style had preferred client configured.

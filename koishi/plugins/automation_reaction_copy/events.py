@@ -12,7 +12,7 @@ from ..automation_core import get_reaction_copy_fields
 from ..blacklist_core import is_user_id_in_blacklist
 from ..move_message_core import create_webhook_message, get_files, get_message, get_webhook
 
-from .constants import MASK_PARSE_ANY_CUSTOM, MAKS_PARSE_ANY_UNICODE
+from .constants import MASK_PARSE_ANY_CUSTOM, MASK_PARSE_ANY_UNICODE
 from .list_channels import collect_channel_emojis
 
 ACTION_QUEUE = deque(maxlen = 100)
@@ -37,7 +37,7 @@ def check_is_emoji_allowed(emoji, flags):
     allowed : `bool`
     """
     if emoji.is_unicode_emoji():
-        if flags & MAKS_PARSE_ANY_UNICODE:
+        if flags & MASK_PARSE_ANY_UNICODE:
             return True
     
     elif emoji.is_custom_emoji():

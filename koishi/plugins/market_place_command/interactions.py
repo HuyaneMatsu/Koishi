@@ -267,7 +267,7 @@ async def handle_own_offers_view(
     now = DateTime.now(TimeZone.utc)
     
     market_place_item_listing, has_more = await get_market_place_item_listing_own_offers(
-        interaction_event.user_id, now, 0, page_size
+        interaction_event.user_id, now, page_index, page_size
     )
     
     await client.interaction_response_message_edit(

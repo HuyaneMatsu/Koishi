@@ -11,10 +11,9 @@ from ...bots import FEATURE_CLIENTS
 from ..adventure_core import (
     ACTION_TYPE_BUTCHERING, ADVENTURE_STATE_FINALIZED, AUTO_CANCELLATIONS, AUTO_CANCELLATIONS_ALLOWED,
     AUTO_CANCELLATION_ID_DEFAULT, Adventure, DURATION_MAX, DURATION_MIN, DURATION_SUGGESTION_SETS, LOCATIONS, RETURNS,
-    RETURNS_ALLOWED, RETURN_ID_AFTER, TARGETS, adventure_cancel, build_duration_suggestion, can_cancel_adventure,
-    get_action_type_multiplier, get_active_adventure, get_adventure, get_adventure_action_listing,
-    get_adventure_listing_page, get_duration_till_recovery_end_of_energy_cost, parse_duration_hexadecimal,
-    parse_duration_suggestion, scheduled_adventure_arrival, store_adventure
+    RETURNS_ALLOWED, RETURN_ID_AFTER, TARGETS, adventure_cancel, can_cancel_adventure, get_action_type_multiplier,
+    get_active_adventure, get_adventure, get_adventure_action_listing, get_adventure_listing_page,
+    get_duration_till_recovery_end_of_energy_cost, scheduled_adventure_arrival, store_adventure
 )
 from ..inventory_core import create_item_suggestions, get_inventory, save_inventory, select_item
 from ..item_core import (
@@ -23,6 +22,7 @@ from ..item_core import (
 )
 from ..quest_core import get_user_adventurer_rank_info
 from ..seeding import create_seed
+from ..unit_core import parse_duration, produce_duration
 from ..user_stats_core import get_user_stats, save_user_stats
 
 from .component_building import (
@@ -144,25 +144,29 @@ async def depart(
             error_message = f'Unknown target: {target_name}.'
             break
         
-        duration = parse_duration_hexadecimal(duration_string)
+        duration = parse_duration(duration_string)
         if not duration:
-            duration = parse_duration_suggestion(duration_string)
-            if not duration:
-                error_message = f'Could not recognize duration: {duration_string}.'
-                break
+            error_message = f'No or unrecognized duration: {duration_string}.'
+            break
         
         if duration < DURATION_MIN:
-            error_message = (
-                f'Duration under lower threshold: '
-                f'{build_duration_suggestion(duration)} < {build_duration_suggestion(DURATION_MIN)}.'
-            )
+            error_message = ''.join([
+                f'Duration under lower threshold: ',
+                *produce_duration(duration),
+                ' < '
+                *produce_duration(DURATION_MIN),
+                '.'
+            ])
             break
         
         if duration > DURATION_MAX:
-            error_message = (
-                f'Duration over upper threshold: '
-                f'{build_duration_suggestion(duration)} > {build_duration_suggestion(DURATION_MAX)}.'
-            )
+            error_message = ''.join([
+                f'Duration over upper threshold: ',
+                *produce_duration(duration),
+                ' > '
+                *produce_duration(DURATION_MAX),
+                '.'
+            ])
             break
         
         # Use goto
@@ -297,10 +301,11 @@ async def autocomplete_depart_duration(interaction_event, duration_string):
     suggestions : `None | list<(str, str)>`
     """
     if (duration_string is not None):
-        duration = parse_duration_hexadecimal(duration_string)
+        duration = parse_duration(duration_string)
         if duration:
+            duration_string = ''.join([*produce_duration(duration)])
             return [
-                (build_duration_suggestion(duration), format(duration, 'x')),
+                (duration_string, duration_string),
             ]
     
     location_name = interaction_event.get_value_of('depart', 'location')
