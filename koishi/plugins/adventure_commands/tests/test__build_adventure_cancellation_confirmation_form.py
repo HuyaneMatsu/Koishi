@@ -1,9 +1,9 @@
 import vampytest
 
-from hata import InteractionForm, create_text_display
+from hata import InteractionForm, StringSelectOption, create_label, create_string_select, create_text_display
 
 from ...adventure_core import (
-    Adventure, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS,
+    ADVENTURE_STATE_ACTIONING, Adventure, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS,
     TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS
 )
 
@@ -34,6 +34,44 @@ def _iter_options():
                 create_text_display(
                     f'Are you sure to cancel your adventure towards {LOCATIONS[LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS].name} for '
                     f'{TARGETS[TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION].name}?'
+                ),
+            ],
+            f'adventure.cancel.{user_id:x}.{entry_id:x}'
+        ),
+    )
+    
+    adventure = Adventure(
+        user_id,
+        LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
+        TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
+        0,
+        0,
+        0,
+        0,
+        0,
+    )
+    adventure.entry_id = entry_id
+    adventure.state = ADVENTURE_STATE_ACTIONING
+    
+    yield (
+        adventure,
+        InteractionForm(
+            'Confirm adventure cancellation',
+            [
+                create_text_display(
+                    f'Are you sure to cancel your adventure towards {LOCATIONS[LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS].name} for '
+                    f'{TARGETS[TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION].name}?'
+                ),
+                create_label(
+                    'Cancellation mode',
+                    'Do you want to cancel the adventure immediately or only after the next action if finished?',
+                    create_string_select(
+                        [
+                            StringSelectOption('1', 'Immediately', default = True),
+                            StringSelectOption('2', 'After'),
+                        ],
+                        custom_id = 'cancellation_mode',
+                    ),
                 ),
             ],
             f'adventure.cancel.{user_id:x}.{entry_id:x}'

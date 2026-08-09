@@ -11,8 +11,9 @@ from ...bots import FEATURE_CLIENTS
 from ..adventure_core import (
     ACTION_TYPE_BUTCHERING, ADVENTURE_STATE_FINALIZED, AUTO_CANCELLATIONS, AUTO_CANCELLATIONS_ALLOWED,
     AUTO_CANCELLATION_ID_DEFAULT, Adventure, DURATION_MAX, DURATION_MIN, DURATION_SUGGESTION_SETS, LOCATIONS, RETURNS,
-    RETURNS_ALLOWED, RETURN_ID_AFTER, TARGETS, adventure_cancel, can_cancel_adventure, get_action_type_multiplier,
-    get_active_adventure, get_adventure, get_adventure_action_listing, get_adventure_listing_page,
+    RETURNS_ALLOWED, RETURN_ID_AFTER, TARGETS, adventure_cancel_after, can_cancel_adventure_any, adventure_cancel_now,
+    can_cancel_adventure_after, can_cancel_adventure_now, get_action_type_multiplier, get_active_adventure,
+    get_adventure, get_adventure_action_listing, get_adventure_listing_page,
     get_duration_till_recovery_end_of_energy_cost, scheduled_adventure_arrival, store_adventure
 )
 from ..inventory_core import create_item_suggestions, get_inventory, save_inventory, select_item
@@ -32,13 +33,24 @@ from .component_building import (
     build_adventure_listing_view_components, build_adventure_view_active_components,
     build_adventure_view_finalized_components, build_butcher_components
 )
-from .constants import ADVENTURE_LISTING_PAGE_SIZE, FLOAT_STRUCT
-from .content_building import produce_adventure_depart_failure_recovery_description
+from .constants import (
+    ADVENTURE_CANCELLATION_MODE_AFTER, ADVENTURE_CANCELLATION_MODE_NONE, ADVENTURE_CANCELLATION_MODE_NOW,
+    ADVENTURE_LISTING_PAGE_SIZE, ERROR_MESSAGE_ADVENTURE_DEPART_ALREADY_ON_ADVENTURE,
+    ERROR_MESSAGE_ADVENTURE_DEPART_INVENTORY_OVERLOADED, ERROR_MESSAGE_ADVENTURE_NOT_ON_ADVENTURE,
+    ERROR_MESSAGE_ADVENTURE_UNKNOWN_ADVENTURE, FLOAT_STRUCT
+)
+from .content_building import (
+    produce_error_message_adventure_cannot_cancel, produce_error_message_adventure_depart_on_recovery,
+    produce_error_message_adventure_duration_out_of_threshold
+)
 from .custom_ids import (
-    ADVENTURE_ACTION_BATTLE_LOGS_PATTERN, ADVENTURE_ACTION_LISTING_VIEW_PATTERN, ADVENTURE_ACTION_VIEW_DEPART,
-    ADVENTURE_ACTION_VIEW_PATTERN, ADVENTURE_ACTION_VIEW_RETURN, ADVENTURE_BUTCHER_CONTINUOUS_PATTERN,
-    ADVENTURE_BUTCHER_DISABLED_PATTERN, ADVENTURE_BUTCHER_INITIAL_PATTERN, ADVENTURE_CANCEL_PATTERN,
-    ADVENTURE_CREATE_CONFIRM_PATTERN, ADVENTURE_LISTING_VIEW_PATTERN, ADVENTURE_VIEW_PATTERN
+    CUSTOM_ID_ADVENTURE_ACTION_BATTLE_LOGS_PATTERN, CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_PATTERN,
+    CUSTOM_ID_ADVENTURE_ACTION_VIEW_DEPART, CUSTOM_ID_ADVENTURE_ACTION_VIEW_PATTERN,
+    CUSTOM_ID_ADVENTURE_ACTION_VIEW_RETURN, CUSTOM_ID_ADVENTURE_BUTCHER_CONTINUOUS_PATTERN,
+    CUSTOM_ID_ADVENTURE_BUTCHER_DISABLED_PATTERN, CUSTOM_ID_ADVENTURE_BUTCHER_INITIAL_PATTERN,
+    CUSTOM_ID_ADVENTURE_CANCELLATION_MODE, CUSTOM_ID_ADVENTURE_CANCEL_PATTERN,
+    CUSTOM_ID_ADVENTURE_CREATE_CONFIRM_PATTERN, CUSTOM_ID_ADVENTURE_LISTING_VIEW_PATTERN,
+    CUSTOM_ID_ADVENTURE_VIEW_PATTERN
 )
 from .duration_suggesting import get_duration_suggestions
 from .location_suggesting import get_best_matching_location, get_location_suggestions
@@ -114,20 +126,20 @@ async def depart(
     while True:
         adventure = await get_active_adventure(interaction_event.user_id)
         if (adventure is not None):
-            error_message = 'You are already on an adventure.'
+            error_message = ERROR_MESSAGE_ADVENTURE_DEPART_ALREADY_ON_ADVENTURE
             break
         
         user_stats = await get_user_stats(interaction_event.user_id)
         recovering_until = user_stats.recovering_until
         now = DateTime.now(TimeZone.utc)
         if (recovering_until is not None) and (recovering_until > now):
-            error_message = ''.join([*produce_adventure_depart_failure_recovery_description(recovering_until, now)])
+            error_message = ''.join([*produce_error_message_adventure_depart_on_recovery(recovering_until, now)])
             break
         
         # Check whether the inventory weight is greater than the available.
         inventory = await get_inventory(interaction_event.user_id)
         if inventory.weight > user_stats.stats_calculated.extra_inventory:
-            error_message = f'Your inventory is overloaded, cannot go on an adventure like this.'
+            error_message = ERROR_MESSAGE_ADVENTURE_DEPART_INVENTORY_OVERLOADED
             break
         
          
@@ -150,23 +162,15 @@ async def depart(
             break
         
         if duration < DURATION_MIN:
-            error_message = ''.join([
-                f'Duration under lower threshold: ',
-                *produce_duration(duration),
-                ' < '
-                *produce_duration(DURATION_MIN),
-                '.'
-            ])
+            error_message = ''.join([*produce_error_message_adventure_duration_out_of_threshold(
+                True, duration, DURATION_MIN
+            )])
             break
         
         if duration > DURATION_MAX:
-            error_message = ''.join([
-                f'Duration over upper threshold: ',
-                *produce_duration(duration),
-                ' > '
-                *produce_duration(DURATION_MAX),
-                '.'
-            ])
+            error_message = ''.join([*produce_error_message_adventure_duration_out_of_threshold(
+                False, duration, DURATION_MAX
+            )])
             break
         
         # Use goto
@@ -332,7 +336,7 @@ async def autocomplete_depart_duration(interaction_event, duration_string):
     return get_duration_suggestions(duration_suggestion_set.durations, duration_string)
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CREATE_CONFIRM_PATTERN, target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ADVENTURE_CREATE_CONFIRM_PATTERN, target = 'form')
 async def handle_adventure_create_confirm(
     client,
     interaction_event,
@@ -418,12 +422,12 @@ async def handle_adventure_create_confirm(
         # Check whether the inventory weight is greater than the available.
         inventory = await get_inventory(interaction_event.user_id)
         if inventory.weight > stats_calculated.extra_inventory:
-            error_message = f'Your inventory is overloaded, cannot go on an adventure like this.'
+            error_message = ERROR_MESSAGE_ADVENTURE_DEPART_INVENTORY_OVERLOADED
             break
         
         adventure = await get_active_adventure(user_id)
         if (adventure is not None):
-            error_message = 'You are already on an adventure.'
+            error_message = ERROR_MESSAGE_ADVENTURE_DEPART_ALREADY_ON_ADVENTURE
             break
         
         adventure = Adventure(
@@ -481,11 +485,13 @@ async def cancel(
     while True:
         adventure = await get_active_adventure(interaction_event.user_id)
         if (adventure is None):
-            error_message = 'You are not on an adventure.'
+            error_message = ERROR_MESSAGE_ADVENTURE_NOT_ON_ADVENTURE
             break
         
-        if not can_cancel_adventure(adventure):
-            error_message = 'You are heading back home already.'
+        if not can_cancel_adventure_any(adventure):
+            error_message = ''.join([*produce_error_message_adventure_cannot_cancel(
+                adventure.state, ADVENTURE_CANCELLATION_MODE_NONE
+            )])
             break
         
         await client.interaction_form_send(
@@ -608,7 +614,7 @@ async def view(
                     break
                 
                 if (option == ADVENTURE_VIEW_OPTION_CURRENT):
-                    error_message = 'You are not on an adventure.'
+                    error_message = ERROR_MESSAGE_ADVENTURE_NOT_ON_ADVENTURE
                     break
             
             if (option & ADVENTURE_VIEW_OPTION_PREVIOUS):
@@ -645,7 +651,7 @@ async def view(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CANCEL_PATTERN)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ADVENTURE_CANCEL_PATTERN)
 async def handle_active_adventure_cancellation_invoke(
     client,
     interaction_event,
@@ -681,11 +687,13 @@ async def handle_active_adventure_cancellation_invoke(
     while True:
         adventure = await get_adventure(adventure_entry_id)
         if (adventure is None):
-            error_message = 'Could not resolve adventure.'
+            error_message = ERROR_MESSAGE_ADVENTURE_UNKNOWN_ADVENTURE
             break
         
-        if not can_cancel_adventure(adventure):
-            error_message = 'You are heading back home already or the adventure already finished.'
+        if not can_cancel_adventure_any(adventure):
+            error_message = ''.join([*produce_error_message_adventure_cannot_cancel(
+                adventure.state, ADVENTURE_CANCELLATION_MODE_NONE
+            )])
             break
         
         await client.interaction_form_send(
@@ -705,12 +713,14 @@ async def handle_active_adventure_cancellation_invoke(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_CANCEL_PATTERN, target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ADVENTURE_CANCEL_PATTERN, target = 'form')
 async def handle_active_adventure_cancellation_confirmation(
     client,
     interaction_event,
     user_id,
     adventure_entry_id,
+    *,
+    cancellation_mode : CUSTOM_ID_ADVENTURE_CANCELLATION_MODE = None,
 ):
     """
     Handles an active adventure cancellation confirmation.
@@ -730,9 +740,32 @@ async def handle_active_adventure_cancellation_confirmation(
     
     adventure_entry_id : `str`
         The adventure's entry's identifier as hexadecimal. Later converted back to integer.
+    
+    cancellation_mode : `None | str`
+        Adventure cancellation mode as hexadecimal. Later converted back to integer.
     """
-    user_id = int(user_id, 16)
-    adventure_entry_id = int(adventure_entry_id, 16)
+    try:
+        user_id = int(user_id, 16)
+        adventure_entry_id = int(adventure_entry_id, 16)
+    except ValueError:
+        return
+    
+    # If `cancellation_mode` is `None`, means we select the first available cancellation method,
+    # else we use the selected one.
+    if cancellation_mode is None:
+        cancellation_mode = ADVENTURE_CANCELLATION_MODE_NONE
+    else:
+        try:
+            cancellation_mode = int(cancellation_mode[0], 16)
+        except ValueError:
+            return
+        
+        if (
+            (cancellation_mode != ADVENTURE_CANCELLATION_MODE_NOW) and
+            (cancellation_mode != ADVENTURE_CANCELLATION_MODE_AFTER)
+        ):
+            return
+    
     
     if interaction_event.type is InteractionType.application_command:
         function = Client.interaction_application_command_acknowledge
@@ -746,14 +779,42 @@ async def handle_active_adventure_cancellation_confirmation(
     while True:
         adventure = await get_adventure(adventure_entry_id)
         if (adventure is None):
-            error_message = 'Could not resolve adventure.'
+            error_message = ERROR_MESSAGE_ADVENTURE_UNKNOWN_ADVENTURE
             break
         
-        if not can_cancel_adventure(adventure):
-            error_message = 'You are heading back home already or the adventure already finished.'
+        while True:
+            if cancellation_mode == ADVENTURE_CANCELLATION_MODE_NOW:
+                can_cancel = can_cancel_adventure_now(adventure)
+                break
+            
+            if cancellation_mode == ADVENTURE_CANCELLATION_MODE_AFTER:
+                can_cancel = can_cancel_adventure_after(adventure)
+                break
+            
+            # No cancellation mode specified, prefer the one with stricter condition.
+            if can_cancel_adventure_after(adventure):
+                cancellation_mode = ADVENTURE_CANCELLATION_MODE_AFTER
+                can_cancel = True
+                break
+            
+            if can_cancel_adventure_now(adventure):
+                cancellation_mode = ADVENTURE_CANCELLATION_MODE_NOW
+                can_cancel = True
+                break
+            
+            can_cancel = False
             break
         
-        await adventure_cancel(adventure)
+        if not can_cancel:
+            error_message = ''.join([*produce_error_message_adventure_cannot_cancel(
+                adventure.state, cancellation_mode
+            )])
+            break
+        
+        if cancellation_mode == ADVENTURE_CANCELLATION_MODE_NOW:
+            await adventure_cancel_now(adventure)
+        else:
+            await adventure_cancel_after(adventure)
         
         if interaction_event.type is InteractionType.application_command:
             await client.interaction_response_message_edit(interaction_event, '-# _ _')
@@ -761,7 +822,7 @@ async def handle_active_adventure_cancellation_confirmation(
         
         await client.interaction_followup_message_create(
             interaction_event,
-            components = build_adventure_cancellation_components(),
+            components = build_adventure_cancellation_components(cancellation_mode),
         )
         return
     
@@ -778,7 +839,7 @@ async def handle_active_adventure_cancellation_confirmation(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_VIEW_PATTERN)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ADVENTURE_VIEW_PATTERN)
 async def handle_adventure_view(
     client,
     interaction_event,
@@ -830,7 +891,7 @@ async def handle_adventure_view(
     while True:
         adventure = await get_adventure(adventure_entry_id)
         if (adventure is None):
-            error_message = 'Could not resolve adventure.'
+            error_message = ERROR_MESSAGE_ADVENTURE_UNKNOWN_ADVENTURE
             break
         
         components = await _build_adventure_components_common(
@@ -853,9 +914,9 @@ async def handle_adventure_view(
 
 @FEATURE_CLIENTS.interactions(
     custom_id = [
-        ADVENTURE_ACTION_VIEW_DEPART,
-        ADVENTURE_ACTION_VIEW_RETURN,
-        ADVENTURE_BUTCHER_DISABLED_PATTERN,
+        CUSTOM_ID_ADVENTURE_ACTION_VIEW_DEPART,
+        CUSTOM_ID_ADVENTURE_ACTION_VIEW_RETURN,
+        CUSTOM_ID_ADVENTURE_BUTCHER_DISABLED_PATTERN,
     ],
 )
 async def handle_adventure_action_disabled():
@@ -866,7 +927,7 @@ async def handle_adventure_action_disabled():
     """
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_ACTION_VIEW_PATTERN)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ADVENTURE_ACTION_VIEW_PATTERN)
 async def handle_adventure_action_view(
     client,
     interaction_event,
@@ -963,7 +1024,7 @@ async def handle_adventure_action_view(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_ACTION_BATTLE_LOGS_PATTERN)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ADVENTURE_ACTION_BATTLE_LOGS_PATTERN)
 async def handle_adventure_action_battle_logs_view(
     client,
     interaction_event,
@@ -1005,7 +1066,7 @@ async def handle_adventure_action_battle_logs_view(
     # Battles are not implemented yet.
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_ACTION_LISTING_VIEW_PATTERN)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_PATTERN)
 async def handle_adventure_action_listing_view(
     client,
     interaction_event,
@@ -1062,7 +1123,7 @@ async def handle_adventure_action_listing_view(
     while True:
         adventure = await get_adventure(adventure_entry_id)
         if (adventure is None):
-            error_message = 'Could not resolve adventure.'
+            error_message = ERROR_MESSAGE_ADVENTURE_UNKNOWN_ADVENTURE
             break
         
         adventure_action_listing = await get_adventure_action_listing(adventure_entry_id)
@@ -1126,7 +1187,7 @@ async def history(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_LISTING_VIEW_PATTERN)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ADVENTURE_LISTING_VIEW_PATTERN)
 async def handle_adventure_listing_view(
     client,
     interaction_event,
@@ -1277,7 +1338,7 @@ async def command_butcher_autocomplete_item_name(interaction_event, value):
     return create_item_suggestions(inventory, ITEM_FLAG_BUTCHERABLE, value)
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_BUTCHER_INITIAL_PATTERN)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ADVENTURE_BUTCHER_INITIAL_PATTERN)
 async def handle_butcher_initial(
     client,
     interaction_event,
@@ -1325,7 +1386,7 @@ async def handle_butcher_initial(
         
         initial_item = get_item_nullable(item_id)
         if initial_item is None:
-            error_message = f'Such item does not exist.'
+            error_message = 'Such item does not exist.'
             break
         
         inventory = await get_inventory(interaction_event.user_id)
@@ -1395,7 +1456,7 @@ async def handle_butcher_initial(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = ADVENTURE_BUTCHER_CONTINUOUS_PATTERN)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ADVENTURE_BUTCHER_CONTINUOUS_PATTERN)
 async def handle_butcher_continuous(
     client,
     interaction_event,
@@ -1479,7 +1540,7 @@ async def handle_butcher_continuous(
         
         initial_item = get_item_nullable(item_id)
         if initial_item is None:
-            error_message = f'Such item does not exist.'
+            error_message = 'Such item does not exist.'
             break
         
         butcher_amounts_accumulated, energy_cost_accumulated, butcherables = butcher_calculate_done(
@@ -1496,7 +1557,7 @@ async def handle_butcher_continuous(
                 butchered_item = None
         
         if (butchered_item is None):
-            error_message = f'Such body part does not exist.'
+            error_message = 'Such body part does not exist.'
             break
         
         inventory = await get_inventory(interaction_event.user_id)

@@ -1,72 +1,78 @@
 import vampytest
-from hata import DiscordException, ERROR_CODES, User, ZEROUSER
+from hata import User
 
 from ..queries import process_entries
-from ..constants import PAGE_SIZE
 
 
-async def test__process_entries():
+def _iter_options():
+    yield (
+        10,
+        [
+            (202608090000, 1112),
+            (202608090001, 1111),
+        ],
+        20,
+        (
+            [
+                (User.precreate(202608090000), 1112),
+                (User.precreate(202608090001), 1111),
+            ],
+            False,
+        ),
+    )
+    
+    yield (
+        10,
+        [
+            (202608090002, 1113),
+            (202608090003, 1112),
+            (202608090004, 1111),
+        ],
+        2,
+        (
+            [
+                (User.precreate(202608090002), 1113),
+                (User.precreate(202608090003), 1112),
+            ],
+            True,
+        ),
+    )
+
+
+@vampytest._(vampytest.call_from(_iter_options()).returning_last())
+async def test__process_entries(page_index, entries, page_size):
     """
     Tests whether ``process_entries`` works as intended.
     
     This function is a coroutine.
+    
+    Parameters
+    ----------
+    page_index : `int`
+        Page index (0 based).
+    
+    entries : `list<sqlalchemy.engine.result.RowProxy>`
+        Raw entries to process.
+    
+    page_size : `int`
+        Custom page site to use.
+    
+    Returns
+    -------
+    output : ``(list<(ClientUserBase, int)>, bool)``
     """
     async def get_user(user_id):
         return User.precreate(user_id)
     
-    mocked = vampytest.mock_globals(process_entries, get_user = get_user)
+    mocked = vampytest.mock_globals(process_entries, get_user = get_user, PAGE_SIZE = page_size)
+    
+    output = await mocked(page_index, entries)
     
     
-    input = [
-        (202308230000, 1111),
-        (202308230001, 1112),
-    ]
+    vampytest.assert_instance(output, tuple)
+    vampytest.assert_eq(len(output), 2)
+    processed_entries, has_more = output
+    vampytest.assert_instance(processed_entries, list)
+    vampytest.assert_instance(has_more, bool)
     
-    page_index = 10
-    
-    output = await mocked(page_index, input)
-    
-    vampytest.assert_eq(
-        output,
-        [
-            (page_index * PAGE_SIZE + 1, 1111, User.precreate(202308230000)),
-            (page_index * PAGE_SIZE + 2, 1112, User.precreate(202308230001)),
-        ],
-    )
-
-
-async def test__process_entries__user_deleted():
-    """
-    Tests whether ``process_entries`` works as intended.
-    
-    This function is a coroutine.
-    
-    Case: User deleted.
-    """
-    async def get_user(user_id):
-        if user_id == 202308230002:
-            exception = DiscordException(None, None, None, None)
-            exception._code = ERROR_CODES.unknown_user
-            raise exception
-        
-        return User.precreate(user_id)
-    
-    mocked = vampytest.mock_globals(process_entries, get_user = get_user)
-    
-    
-    input = [
-        (202308230002, 1111),
-        (202308230003, 1112),
-    ]
-    
-    page_index = 10
-    
-    output = await mocked(page_index, input)
-    
-    vampytest.assert_eq(
-        output,
-        [
-            (page_index * PAGE_SIZE + 1, 1111, ZEROUSER),
-            (page_index * PAGE_SIZE + 2, 1112, User.precreate(202308230003)),
-        ],
-    )
+    return output

@@ -1,5 +1,5 @@
 import vampytest
-from hata import Component, create_button, create_row, create_text_display
+from hata import ButtonStyle, Component, create_button, create_row, create_text_display
 
 from config import FLANDRE_ID
 
@@ -20,6 +20,7 @@ def _iter_options():
     yield (
         0,
         user_id_0,
+        230,
         user_id_1,
         user_id_0,
         item_peach.id,
@@ -33,6 +34,11 @@ def _iter_options():
             ),
             create_row(
                 create_button(
+                    'Claim',
+                    custom_id = f'market_place.inbox.claim_one.{user_id_0:x}.{0:x}.{9:x}.{230:x}.{1:x}',
+                    style = ButtonStyle.green,
+                ),
+                create_button(
                     'I don\'t want notifs, nya!!',
                     custom_id = 'user_settings.market_place_item_finalisation.disable',
                 ),
@@ -43,6 +49,7 @@ def _iter_options():
     yield (
         FLANDRE_ID,
         user_id_0,
+        230,
         user_id_1,
         user_id_0,
         item_peach.id,
@@ -56,6 +63,11 @@ def _iter_options():
             ),
             create_row(
                 create_button(
+                    'Claim',
+                    custom_id = f'market_place.inbox.claim_one.{user_id_0:x}.{0:x}.{9:x}.{230:x}.{1:x}',
+                    style = ButtonStyle.green,
+                ),
+                create_button(
                     'Go back to your basement!!',
                     custom_id = 'user_settings.market_place_item_finalisation.disable',
                 ),
@@ -68,6 +80,7 @@ def _iter_options():
 def test__build_notification_components(
     preferred_client_id,
     user_id,
+    entry_id,
     seller_user_id,
     purchaser_user_id,
     item_id,
@@ -85,6 +98,9 @@ def test__build_notification_components(
     
     user_id : `int`
         The point of view user's identifier.
+    
+    entry_id : `int`
+        The entry's identifier.
     
     seller_user_id : `int`
         The seller user's identifier.
@@ -111,6 +127,7 @@ def test__build_notification_components(
     output = build_notification_components(
         preferred_client_id,
         user_id,
+        entry_id,
         seller_user_id,
         purchaser_user_id,
         item_id,

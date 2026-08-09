@@ -1,5 +1,5 @@
 import vampytest
-from hata import Guild, InteractionForm, TextInputStyle, create_label, create_text_input
+from hata import Guild, InteractionForm, TextInputStyle, create_label, create_text_display, create_text_input
 
 from ..component_building import build_mod_self_form
 from ..constants import (
@@ -15,8 +15,11 @@ def _iter_options():
         guild,
         3600,
         InteractionForm(
-            f'Banning yourself from Moriya shrine.',
+            'Confirmation',
             [
+                create_text_display(
+                    '### Banning yourself from Moriya shrine.',
+                ),
                 create_label(
                     'Reason',
                     None,
@@ -37,8 +40,11 @@ def _iter_options():
         guild,
         7200,
         InteractionForm(
-            f'Muting yourself in Moriya shrine.',
+            'Confirmation',
             [
+                create_text_display(
+                    '### Muting yourself in Moriya shrine.',
+                ),
                 create_label(
                     'Reason',
                     None,

@@ -1,3 +1,17 @@
+### 2026-08-09
+
+- Fix `/adventure depart` duration limit check error message failed to be built (since previous update).
+- `/market-place inbox` now has a new `Claim all on page` option.
+- `market-place finalisation` notifications now come with a `Claim` option.
+- `/adventure cancel` and other cancellation options now allow the user to select cancellation mode if multiple one is
+    available. Add new `After` cancellation mode. (chaos3326)
+- Fix `/mod` and `/self-mod` command could fail to send forms if a user or/and the guild had long names. (fardan0986)
+- Rewrite `/top-list` command. The old heart top-list is now `/top-list heart`.
+- Add a new `/top-list credibility` command. (chaos3326)
+
+- Balance quests:
+    - Tewi - Rice -> Rank D -> C; Reward credibility 10 -> 60.
+
 ### 2026-08-02
 
 - Rewrite `/mod` and `/self-mod` commands.
@@ -11,7 +25,7 @@
 - Fix typo on `mystia - fat` quest. (.wakasagihime)
 
 - Add new quests:
-    - Tewi - Rice  (chaos3326)
+    - Tewi - Rice (chaos3326)
     - Rumia - Sweets (2vio2vieevie)
 
 ### 2026-07-02

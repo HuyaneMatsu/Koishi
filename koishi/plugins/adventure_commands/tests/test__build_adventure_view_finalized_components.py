@@ -4,7 +4,7 @@ import vampytest
 from hata import Component, create_button, create_row, create_separator, create_text_display
 
 from ...adventure_core import (
-    ACTION_ID_SYSTEM_CANCELLATION, ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, ADVENTURE_STATE_FINALIZED,
+    ACTION_ID_SYSTEM_CANCELLATION_NOW, ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, ADVENTURE_STATE_FINALIZED,
     Adventure, AdventureAction, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS, LOOT_STATE_SUCCESS,
     TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS, build_loot_data
 )
@@ -54,7 +54,7 @@ def _iter_options():
     
     adventure_action_1 = AdventureAction(
         adventure_entry_id,
-        ACTION_ID_SYSTEM_CANCELLATION,
+        ACTION_ID_SYSTEM_CANCELLATION_NOW,
         DateTime(2016, 5, 15, tzinfo = TimeZone.utc),
         None,
         None,

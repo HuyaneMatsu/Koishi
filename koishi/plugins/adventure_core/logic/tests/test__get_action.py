@@ -62,19 +62,6 @@ def _iter_options():
     )
     adventure_0.action_count = 3
     
-    
-    adventure_1 = Adventure(
-        202507300011,
-        9999,
-        target_id_1,
-        0,
-        0,
-        0,
-        0,
-        0,
-    )
-    adventure_1.action_count = 3
-
     # generic hit
     yield (
         adventure_0,

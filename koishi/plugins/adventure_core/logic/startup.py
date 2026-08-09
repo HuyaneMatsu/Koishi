@@ -3,7 +3,8 @@ __all__ = ('abort_active_adventures', 'resume_active_adventures',)
 from scarletio import Task, sleep
 
 from ..adventure import (
-    ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_CANCELLED, ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_RETURNING
+    ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_ACTIONING_CANCEL_AFTER, ADVENTURE_STATE_CANCELLED,
+    ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_RETURNING
 )
 from ..constants import ADVENTURES_ACTIVE
 from ..queries import get_active_adventures
@@ -23,9 +24,12 @@ async def resume_active_adventures():
         adventure_state = adventure.state
         if adventure_state == ADVENTURE_STATE_DEPARTING:
             scheduler = scheduled_adventure_arrival
-        elif adventure_state == ADVENTURE_STATE_ACTIONING:
+        elif (
+            (adventure_state == ADVENTURE_STATE_ACTIONING) or
+            (adventure_state == ADVENTURE_STATE_ACTIONING_CANCEL_AFTER)
+        ):
             scheduler = schedule_adventure_action
-        elif adventure_state == ADVENTURE_STATE_RETURNING or adventure_state == ADVENTURE_STATE_CANCELLED:
+        elif (adventure_state == ADVENTURE_STATE_RETURNING) or (adventure_state == ADVENTURE_STATE_CANCELLED):
             scheduler = schedule_adventure_return
         else:
             continue

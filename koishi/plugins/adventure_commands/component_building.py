@@ -3,14 +3,19 @@ __all__ = ()
 from itertools import islice
 
 from hata import (
-    InteractionForm, create_button, create_row, create_section, create_separator, create_text_display,
-    create_thumbnail_media, format_datetime
+    InteractionForm, StringSelectOption, create_button, create_label, create_row, create_section, create_separator,
+    create_string_select, create_text_display, create_thumbnail_media, format_datetime
 )
 
-from ..adventure_core import ADVENTURE_STATE_FINALIZED, can_cancel_adventure, iter_loot_data
+from ..adventure_core import (
+    ADVENTURE_STATE_FINALIZED, can_cancel_adventure_after, can_cancel_adventure_now, iter_loot_data
+)
 from ..item_core import butcher_estimate_energy_cost, butcher_estimate_loot_chance_and_amounts
 
-from .constants import ACTIVE_ADVENTURE_ACTION_LIMIT, ADVENTURE_ACTION_LISTING_PAGE_SIZE
+from .constants import (
+    ACTIVE_ADVENTURE_ACTION_LIMIT, ADVENTURE_ACTION_LISTING_PAGE_SIZE, ADVENTURE_CANCELLATION_MODE_AFTER,
+    ADVENTURE_CANCELLATION_MODE_NOW,
+)
 from .content_building import (
     produce_adventure_action_listing_view_header, produce_adventure_action_short_representation,
     produce_adventure_action_view_description, produce_adventure_action_view_header,
@@ -23,10 +28,13 @@ from .content_building import (
     produce_loot_listing
 )
 from .custom_ids import (
-    ADVENTURE_ACTION_BATTLE_LOGS_BUILDER, ADVENTURE_ACTION_LISTING_VIEW_BUILDER, ADVENTURE_ACTION_VIEW_BUILDER,
-    ADVENTURE_ACTION_VIEW_DEPART, ADVENTURE_ACTION_VIEW_RETURN, ADVENTURE_BUTCHER_CONTINUOUS_BUILDER,
-    ADVENTURE_BUTCHER_DISABLED_BUILDER, ADVENTURE_BUTCHER_INITIAL_BUILDER, ADVENTURE_CANCEL_BUILDER,
-    ADVENTURE_CREATE_CONFIRM_BUILDER, ADVENTURE_LISTING_VIEW_BUILDER, ADVENTURE_VIEW_BUILDER
+    CUSTOM_ID_ADVENTURE_ACTION_BATTLE_LOGS_BUILDER, CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER,
+    CUSTOM_ID_ADVENTURE_ACTION_VIEW_BUILDER, CUSTOM_ID_ADVENTURE_ACTION_VIEW_DEPART,
+    CUSTOM_ID_ADVENTURE_ACTION_VIEW_RETURN, CUSTOM_ID_ADVENTURE_BUTCHER_CONTINUOUS_BUILDER,
+    CUSTOM_ID_ADVENTURE_BUTCHER_DISABLED_BUILDER, CUSTOM_ID_ADVENTURE_BUTCHER_INITIAL_BUILDER,
+    CUSTOM_ID_ADVENTURE_CANCEL_BUILDER, CUSTOM_ID_ADVENTURE_CANCELLATION_MODE,
+    CUSTOM_ID_ADVENTURE_CREATE_CONFIRM_BUILDER, CUSTOM_ID_ADVENTURE_LISTING_VIEW_BUILDER,
+    CUSTOM_ID_ADVENTURE_VIEW_BUILDER
 )
 
 
@@ -70,7 +78,7 @@ def build_adventure_create_confirmation_form(
                 produce_adventure_initial_representation(location, target, duration, return_, auto_cancellation),
             ])),
         ],
-        ADVENTURE_CREATE_CONFIRM_BUILDER(
+        CUSTOM_ID_ADVENTURE_CREATE_CONFIRM_BUILDER(
             user_id, location.id, target.id, duration, return_.id, auto_cancellation.id
         ),
     )
@@ -119,7 +127,7 @@ def build_adventure_create_confirm_components(
         create_row(
             create_button(
                 'View adventure',
-                custom_id = ADVENTURE_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
                     user_id,
                     adventure_entry_id, 
                     False,
@@ -143,26 +151,53 @@ def build_adventure_cancellation_confirmation_form(adventure):
     -------
     form : ``InteractionForm``
     """
+    components = [
+        create_text_display(''.join([*produce_adventure_cancellation_confirmation_description(adventure)]))
+    ]
+    
+    # If the adventure can be cancelled both after the next action and now,
+    # allow the user to chose between the two options.
+    if can_cancel_adventure_after(adventure) and can_cancel_adventure_now(adventure):
+        components.append(create_label(
+            'Cancellation mode',
+            'Do you want to cancel the adventure immediately or only after the next action if finished?',
+            create_string_select(
+                [
+                    StringSelectOption(format(ADVENTURE_CANCELLATION_MODE_NOW, 'x'), 'Immediately', default = True),
+                    StringSelectOption(format(ADVENTURE_CANCELLATION_MODE_AFTER, 'x'), 'After'),
+                ],
+                custom_id = CUSTOM_ID_ADVENTURE_CANCELLATION_MODE,
+            ),
+        ))
+    
     return InteractionForm(
         'Confirm adventure cancellation',
-        [
-            create_text_display(''.join([*produce_adventure_cancellation_confirmation_description(adventure)]))
-        ],
-        ADVENTURE_CANCEL_BUILDER(adventure.user_id, adventure.entry_id),
+        components,
+        CUSTOM_ID_ADVENTURE_CANCEL_BUILDER(adventure.user_id, adventure.entry_id),
     )
 
 
-def build_adventure_cancellation_components():
+def build_adventure_cancellation_components(cancellation_mode):
     """
     Builds adventure successful cancellation components.
+    
+    Parameters
+    ----------
+    cancellation_mode : `int`
+        How the adventure was cancelled.
     
     Returns
     -------
     components : ``list<Component>``
     """
+    if cancellation_mode == ADVENTURE_CANCELLATION_MODE_NOW:
+        next_action_description = 'You head back home immediately.'
+    else:
+        next_action_description = 'You will head back after the next action is completed.'
+    
     return [
         create_text_display('You successfully cancelled your adventure.'),
-        create_text_display('You head back home immediately.'),
+        create_text_display(next_action_description),
     ]
 
 
@@ -283,7 +318,7 @@ def iter_build_adventure_action_components(
             ),
             thumbnail = create_button(
                 'View',
-                custom_id = ADVENTURE_ACTION_VIEW_DEPART,
+                custom_id = CUSTOM_ID_ADVENTURE_ACTION_VIEW_DEPART,
                 enabled = False,
             ),
         )
@@ -298,7 +333,7 @@ def iter_build_adventure_action_components(
                 text_display,
                 thumbnail = create_button(
                     'View',
-                    custom_id = ADVENTURE_ACTION_VIEW_BUILDER(
+                    custom_id = CUSTOM_ID_ADVENTURE_ACTION_VIEW_BUILDER(
                         adventure.user_id,
                         adventure.entry_id,
                         adventure_action.entry_id,
@@ -323,7 +358,7 @@ def iter_build_adventure_action_components(
             ),
             thumbnail = create_button(
                 'View',
-                custom_id = ADVENTURE_ACTION_VIEW_RETURN,
+                custom_id = CUSTOM_ID_ADVENTURE_ACTION_VIEW_RETURN,
                 enabled = False,
             ),
         )
@@ -444,7 +479,7 @@ def build_adventure_view_active_components(
         create_row(
             create_button(
                 'Refresh',
-                custom_id = ADVENTURE_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
                     adventure.user_id,
                     adventure.entry_id, 
                     allow_switching_to_adventure_listing_view,
@@ -454,7 +489,7 @@ def build_adventure_view_active_components(
             create_button(
                 'Back to adventures',
                 enabled = allow_switching_to_adventure_listing_view,
-                custom_id = ADVENTURE_LISTING_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_LISTING_VIEW_BUILDER(
                     adventure.user_id,
                     adventure_listing_page_index,
                 ),
@@ -462,7 +497,7 @@ def build_adventure_view_active_components(
             create_button(
                 'View all action',
                 enabled = (True if truncated_count else False),
-                custom_id = ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
                     adventure.user_id,
                     adventure.entry_id,
                     allow_switching_to_adventure_listing_view,
@@ -472,8 +507,8 @@ def build_adventure_view_active_components(
             ),
             create_button(
                 'Cancel',
-                enabled = can_cancel_adventure(adventure),
-                custom_id = ADVENTURE_CANCEL_BUILDER(adventure.user_id, adventure.entry_id),
+                enabled = (can_cancel_adventure_now(adventure) or can_cancel_adventure_after(adventure)),
+                custom_id = CUSTOM_ID_ADVENTURE_CANCEL_BUILDER(adventure.user_id, adventure.entry_id),
             ),
         )
     )
@@ -546,7 +581,7 @@ def build_adventure_view_finalized_components(
             create_button(
                 'Refresh',
                 enabled = False,
-                custom_id = ADVENTURE_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
                     adventure.user_id,
                     adventure.entry_id, 
                     allow_switching_to_adventure_listing_view,
@@ -556,14 +591,14 @@ def build_adventure_view_finalized_components(
             create_button(
                 'Back to adventures',
                 enabled = allow_switching_to_adventure_listing_view,
-                custom_id = ADVENTURE_LISTING_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_LISTING_VIEW_BUILDER(
                     adventure.user_id,
                     adventure_listing_page_index,
                 ),
             ),
             create_button(
                 'View all action',
-                custom_id = ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
                     adventure.user_id,
                     adventure.entry_id, 
                     allow_switching_to_adventure_listing_view,
@@ -574,7 +609,7 @@ def build_adventure_view_finalized_components(
             create_button(
                 'Cancel',
                 enabled = False,
-                custom_id = ADVENTURE_CANCEL_BUILDER(adventure.user_id, adventure.entry_id),
+                custom_id = CUSTOM_ID_ADVENTURE_CANCEL_BUILDER(adventure.user_id, adventure.entry_id),
             ),
         )
     )
@@ -653,7 +688,7 @@ def build_adventure_action_view_components(
         create_row(
             create_button(
                 'View adventure',
-                custom_id = ADVENTURE_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
                     user_id,
                     adventure_action.adventure_entry_id,
                     allow_switching_to_adventure_listing_view,
@@ -663,7 +698,7 @@ def build_adventure_action_view_components(
             create_button(
                 'Back to actions',
                 enabled = allow_switching_to_adventure_action_listing_view,
-                custom_id = ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
                     user_id,
                     adventure_action.adventure_entry_id, 
                     allow_switching_to_adventure_listing_view,
@@ -674,7 +709,7 @@ def build_adventure_action_view_components(
             create_button(
                 'View battle logs',
                 enabled = False, # Battles are not implemented yet.
-                custom_id = ADVENTURE_ACTION_BATTLE_LOGS_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_ACTION_BATTLE_LOGS_BUILDER(
                     user_id, adventure_action.adventure_entry_id, adventure_action.entry_id
                 ),
             ),
@@ -764,7 +799,7 @@ def build_adventure_action_listing_view_components(
         create_row(
             create_button(
                 'View adventure',
-                custom_id = ADVENTURE_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
                     adventure.user_id,
                     adventure.entry_id,
                     allow_switching_to_adventure_listing_view,
@@ -773,7 +808,7 @@ def build_adventure_action_listing_view_components(
             ),
             create_button(
                 f'Page {adventure_action_listing_page_index}',
-                custom_id = ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
                     adventure.user_id,
                     adventure.entry_id,
                     allow_switching_to_adventure_listing_view,
@@ -784,7 +819,7 @@ def build_adventure_action_listing_view_components(
             ),
             create_button(
                 f'Page {adventure_action_listing_page_index + 2}',
-                custom_id = ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
                     adventure.user_id,
                     adventure.entry_id,
                     allow_switching_to_adventure_listing_view,
@@ -839,7 +874,7 @@ def build_adventure_listing_view_components(user_id, adventure_listing, adventur
                     create_text_display(''.join([*produce_adventure_short_representation(adventure)])),
                     thumbnail = create_button(
                         'View',
-                        custom_id = ADVENTURE_VIEW_BUILDER(
+                        custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
                             user_id,
                             adventure.entry_id,
                             True,
@@ -857,14 +892,14 @@ def build_adventure_listing_view_components(user_id, adventure_listing, adventur
         create_row(
             create_button(
                 f'Page {adventure_listing_page_index}',
-                custom_id = ADVENTURE_LISTING_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_LISTING_VIEW_BUILDER(
                     user_id, max(0, adventure_listing_page_index - 1),
                 ),
                 enabled = (adventure_listing_page_index > 0),
             ),
             create_button(
                 f'Page {adventure_listing_page_index + 2}',
-                custom_id = ADVENTURE_LISTING_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_LISTING_VIEW_BUILDER(
                     user_id, adventure_listing_page_index + 1,
                 ),
                 enabled = (adventure_listing_page_index < (page_count - 1)),
@@ -915,7 +950,7 @@ def build_adventure_return_notification_components(adventure):
         create_row(
             create_button(
                 'View adventure',
-                custom_id = ADVENTURE_VIEW_BUILDER(
+                custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
                     adventure.user_id,
                     adventure.entry_id,
                     False,
@@ -965,15 +1000,15 @@ def build_butcher_option_component(
     if (options_butcher is None):
         loot_chance_and_amounts = None
         energy_cost = 0
-        custom_id = ADVENTURE_BUTCHER_DISABLED_BUILDER(user_id, initial_item.id, index)
+        custom_id = CUSTOM_ID_ADVENTURE_BUTCHER_DISABLED_BUILDER(user_id, initial_item.id, index)
         enabled = False
     else:
         loot_chance_and_amounts = butcher_estimate_loot_chance_and_amounts(options_butcher, multiplier)
         energy_cost = butcher_estimate_energy_cost(options_butcher, multiplier)
         if butchered_item is None:
-            custom_id = ADVENTURE_BUTCHER_INITIAL_BUILDER(user_id, initial_item.id)
+            custom_id = CUSTOM_ID_ADVENTURE_BUTCHER_INITIAL_BUILDER(user_id, initial_item.id)
         else:
-            custom_id = ADVENTURE_BUTCHER_CONTINUOUS_BUILDER(
+            custom_id = CUSTOM_ID_ADVENTURE_BUTCHER_CONTINUOUS_BUILDER(
                 user_id, initial_item.id, seed, butcher_flags, index, multiplier
             )
         enabled = True

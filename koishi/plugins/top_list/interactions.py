@@ -1,107 +1,190 @@
 __all__ = ()
 
-from re import compile as re_compile, escape as re_escape
-
 from ...bots import FEATURE_CLIENTS
 
-from .builders import build_top_list_response
-from .constants import (
-    CUSTOM_ID_CLOSE, CUSTOM_ID_PAGE_BASE, CUSTOM_ID_PAGE_NEXT_DISABLED, CUSTOM_ID_PAGE_PREVIOUS_DISABLED
+from .component_building import build_top_list_components
+from .constants import TOP_LIST_TYPE_BALANCE, TOP_LIST_TYPE_CREDIBILITY
+from .custom_ids import (
+    CUSTOM_ID_TOP_LIST_CLOSE_PATTERN, CUSTOM_ID_TOP_LIST_PAGE_INDEX_DECREMENT_DISABLED,
+    CUSTOM_ID_TOP_LIST_PAGE_INDEX_INCREMENT_DISABLED, CUSTOM_ID_TOP_LIST_PAGE_INDEX_PATTERN
 )
 from .queries import get_top_list_entries
 
 
-@FEATURE_CLIENTS.interactions(is_global = True)
-async def top_list(
-    event,
-    page : ('number', 'page?') = 1,
+TOP_LIST_COMMAND = FEATURE_CLIENTS.interactions(
+    None,
+    name = 'top-list',
+    is_global = True,
+    description = 'A list of my best simps',
+)
+
+
+async def handle_top_list_command_common(
+    client,
+    interaction_event,
+    top_list_type,
 ):
     """
-    A list of my best simps.
-    
-    This function is a coroutine generator.
-    
-    Parameters
-    ----------
-    event : ``InteractionEvent``
-        The received interaction event.
-    
-    page : `int` = `1`, Optional
-        Page number (1 based).
-    
-    Yields
-    ------
-    acknowledge / response : `None` / ``InteractionResponse``
-    """
-    if page <= 1:
-        page_index = 0
-    else:
-        page_index = page - 1
-    
-    yield
-    entries = await get_top_list_entries(page_index)
-    yield build_top_list_response(page_index, entries, event.guild_id)
-
-
-@FEATURE_CLIENTS.interactions(custom_id = re_compile(f'{re_escape(CUSTOM_ID_PAGE_BASE)}(\d+)'))
-async def top_list_page(event, page_index):
-    """
-    Gets the top list for the given page.
-    
-    This function is a coroutine generator.
-    
-    Parameters
-    ----------
-    event : ``InteractionEvent``
-        The received interaction event.
-    
-    page_index : `str`
-        The page's index to make the response for. Later converted to `int`.
-    
-    Yields
-    ------
-    acknowledge / response : `None` / ``InteractionResponse``
-    """
-    page_index = int(page_index)
-    
-    yield
-    entries = await get_top_list_entries(page_index)
-    yield build_top_list_response(page_index, entries, event.guild_id)
-
-
-
-@FEATURE_CLIENTS.interactions(custom_id = [CUSTOM_ID_PAGE_PREVIOUS_DISABLED, CUSTOM_ID_PAGE_NEXT_DISABLED])
-async def disabled_page_move():
-    """
-    Called when a disabled page-move is clicked. Does nothing.
-    
-    This function is a coroutine.
-    """
-    pass
-
-
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_CLOSE)
-async def top_list_close(client, event):
-    """
-    Deletes the top-list if applicable.
+    Common top list command handlers.
     
     This function is a coroutine.
     
     Parameters
     ----------
     client : ``Client``
-        The client who received the event.
-    event : ``InteractionEvent``
+        Client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    top_list_type : `int`
+        Top list's type.
+    """
+    await client.interaction_application_command_acknowledge(
+        interaction_event,
+        False,
+    )
+    
+    processed_entries_and_has_more = await get_top_list_entries(top_list_type, 0)
+    
+    await client.interaction_response_message_edit(
+        interaction_event,
+        components = build_top_list_components(
+            interaction_event.user_id, top_list_type, 0, *processed_entries_and_has_more, interaction_event.guild_id
+        ),
+    )
+
+
+@TOP_LIST_COMMAND.interactions(name = 'heart')
+async def top_list_balance(
+    client,
+    interaction_event,
+):
+    """
+    Heart top list.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        Client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
         The received interaction event.
     """
-    await client.interaction_component_acknowledge(event)
+    await handle_top_list_command_common(client, interaction_event, TOP_LIST_TYPE_BALANCE)
+
+
+@TOP_LIST_COMMAND.interactions(name = 'credibility')
+async def top_list_credibility(
+    client,
+    interaction_event,
+):
+    """
+    Credibility top list.
     
-    if event.user_permissions.manage_messages or event.message.interaction.user_id == event.user_id:
-        await client.interaction_response_message_delete(event)
+    This function is a coroutine.
     
-    else:
-        await client.interaction_followup_message_create(
-            event,
-            'You must be the invoker of the interaction, or have manage messages permission to do this.',
-            show_for_invoking_user_only = True,
-        )
+    Parameters
+    ----------
+    client : ``Client``
+        Client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    """
+    await handle_top_list_command_common(client, interaction_event, TOP_LIST_TYPE_CREDIBILITY)
+
+
+@FEATURE_CLIENTS.interactions(custom_id = [
+    CUSTOM_ID_TOP_LIST_PAGE_INDEX_INCREMENT_DISABLED,
+    CUSTOM_ID_TOP_LIST_PAGE_INDEX_DECREMENT_DISABLED,
+])
+async def handle_top_list_dummy():
+    """
+    Handles a dummy top list interaction.
+    
+    This function is a coroutine.
+    """
+
+
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_TOP_LIST_PAGE_INDEX_PATTERN)
+async def handle_top_list_page(client, interaction_event, user_id, top_list_type, page_index):
+    """
+    Handles a top list page component interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        Client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The original invoking user's identifier encoded as a string representing a hexadecimal integer.
+    
+    top_list_type : `str`
+        The list's type encoded as a string representing a hexadecimal integer.
+    
+    page_index : `int`
+        The page's index to show encoded as a string representing a hexadecimal integer.
+    """
+    try:
+        user_id = int(user_id, 16)
+        top_list_type = int(top_list_type, 16)
+        page_index = int(page_index, 16)
+    except ValueError:
+        return
+    
+    if interaction_event.user_id != user_id:
+        return
+    
+    await client.interaction_component_acknowledge(
+        interaction_event,
+        False,
+    )
+    
+    processed_entries_and_has_more = await get_top_list_entries(top_list_type, 0)
+    
+    await client.interaction_response_message_edit(
+        interaction_event,
+        components = build_top_list_components(
+            user_id, top_list_type, page_index, *processed_entries_and_has_more, interaction_event.guild_id
+        ),
+    )
+
+
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_TOP_LIST_CLOSE_PATTERN)
+async def top_list_close(client, interaction_event, user_id):
+    """
+    Handles a top list close component interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        Client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        The original invoking user's identifier encoded as a string representing a hexadecimal integer.
+    """
+    
+    try:
+        user_id = int(user_id, 16)
+    except ValueError:
+        return
+    
+    if interaction_event.user_id != user_id:
+        return
+    
+    await client.interaction_component_acknowledge(interaction_event)
+    await client.interaction_response_message_delete(interaction_event)

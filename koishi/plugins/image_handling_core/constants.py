@@ -53,6 +53,7 @@ TOUHOU_TAGS_BANNED = frozenset((
     'torashiro_beimu',
     
     'xen0moonz', # cant write dates and uses flags
+    'dreamysuite', # uses flags
 ))
 
 

@@ -1,11 +1,11 @@
 import vampytest
 
 from ...adventure import (
-    ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_CANCELLED, ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_RETURNING,
-    ADVENTURE_STATE_FINALIZED, Adventure,
+    ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_ACTIONING_CANCEL_AFTER, ADVENTURE_STATE_CANCELLED,
+    ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_RETURNING, ADVENTURE_STATE_FINALIZED, Adventure,
 )
 
-from ..helpers import can_cancel_adventure
+from ..helpers import can_cancel_adventure_now
 
 
 def _iter_options():
@@ -93,12 +93,29 @@ def _iter_options():
         adventure,
         False,
     )
+    
+    adventure = Adventure(
+        202507290005,
+        9999,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    )
+    adventure.state = ADVENTURE_STATE_ACTIONING_CANCEL_AFTER
+    
+    yield (
+        adventure,
+        True,
+    )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__can_cancel_adventure(adventure):
+def test__can_cancel_adventure_now(adventure):
     """
-    Tests whether ``can_cancel_adventure`` works as intended.
+    Tests whether ``can_cancel_adventure_now`` works as intended.
     
     Parameters
     ----------
@@ -109,6 +126,6 @@ def test__can_cancel_adventure(adventure):
     -------
     output : `bool`
     """
-    output = can_cancel_adventure(adventure)
+    output = can_cancel_adventure_now(adventure)
     vampytest.assert_instance(output, bool)
     return output

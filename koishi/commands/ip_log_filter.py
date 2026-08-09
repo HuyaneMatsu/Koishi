@@ -56,6 +56,14 @@ def filter_ip_logs(
     
     output_lines.sort()
     
+    previous_line = output_lines[-1]
+    for index in reversed(range(len(output_lines) - 1)):
+        line = output_lines[index]
+        if line == previous_line:
+            del output_lines[index]
+        else:
+            previous_line = line
+    
     with open(input_file_path, 'w') as file:
         file.write(''.join(output_lines))
     

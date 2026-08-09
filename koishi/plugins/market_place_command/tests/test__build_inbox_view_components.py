@@ -8,7 +8,7 @@ from hata import (
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...item_core import ITEM_ID_PEACH, get_item
+from ...item_core import ITEM_ID_PEACH, get_item_nullable
 from ...market_place_core import (
     MARKET_PLACE_ITEM_FLAG_PURCHASER_RETRIEVED, MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED, MarketPlaceItem
 )
@@ -27,7 +27,8 @@ def _iter_options():
         name = 'Nue',
     )
     
-    item = get_item(ITEM_ID_PEACH)
+    item = get_item_nullable(ITEM_ID_PEACH)
+    assert item is not None
     
     market_place_item_0 = MarketPlaceItem(
         item,
@@ -110,6 +111,7 @@ def _iter_options():
         10,
         [],
         False,
+        None,
         [
             create_section(
                 create_text_display(
@@ -140,6 +142,12 @@ def _iter_options():
                     EMOJI_CLOSE,
                     custom_id = f'market_place.close.{user_id_0:x}',
                 ),
+                create_button(
+                    'Claim all on page',
+                    custom_id = f'market_place.inbox.claim_page.{user_id_0:x}.{1:x}.{10:x}',
+                    enabled = False,
+                    style = ButtonStyle.gray,
+                ),
             ),
         ],
     )
@@ -161,6 +169,9 @@ def _iter_options():
         ],
         True,
         [
+            (True, item, 56, 1000, 0),
+        ],
+        [
             create_section(
                 create_text_display(
                     '# Nue\'s inbox\n'
@@ -172,6 +183,11 @@ def _iter_options():
                 ),
             ),
             create_separator(),
+            create_text_display(
+                f'You received the 56 {item.emoji} {item.name} ({item.weight * 56 / 1000:.03f} kg), '
+                f'that you purchased for 1000 {EMOJI__HEART_CURRENCY}.'
+            ),
+            create_separator(),
             create_section(
                 create_text_display(
                     f'Your 5 {item.emoji} {item.name} ({item.weight * 5 / 1000:.03f} kg) offer\n'
@@ -180,7 +196,7 @@ def _iter_options():
                 ),
                 thumbnail = create_button(
                     'Claim',
-                    custom_id = f'market_place.inbox.claim.{user_id_0:x}.{0:x}.{10:x}.{20:x}',
+                    custom_id = f'market_place.inbox.claim_one.{user_id_0:x}.{0:x}.{10:x}.{20:x}.{0:x}',
                     enabled = True,
                     style = ButtonStyle.green,
                 ),
@@ -193,7 +209,7 @@ def _iter_options():
                 ),
                 thumbnail = create_button(
                     'Claim',
-                    custom_id = f'market_place.inbox.claim.{user_id_0:x}.{0:x}.{10:x}.{21:x}',
+                    custom_id = f'market_place.inbox.claim_one.{user_id_0:x}.{0:x}.{10:x}.{21:x}.{0:x}',
                     enabled = True,
                     style = ButtonStyle.green,
                 ),
@@ -206,7 +222,7 @@ def _iter_options():
                 ),
                 thumbnail = create_button(
                     'Claim',
-                    custom_id = f'market_place.inbox.claim.{user_id_0:x}.{0:x}.{10:x}.{22:x}',
+                    custom_id = f'market_place.inbox.claim_one.{user_id_0:x}.{0:x}.{10:x}.{22:x}.{0:x}',
                     enabled = True,
                     style = ButtonStyle.green,
                 ),
@@ -219,7 +235,7 @@ def _iter_options():
                 ),
                 thumbnail = create_button(
                     'Claim',
-                    custom_id = f'market_place.inbox.claim.{user_id_0:x}.{0:x}.{10:x}.{23:x}',
+                    custom_id = f'market_place.inbox.claim_one.{user_id_0:x}.{0:x}.{10:x}.{23:x}.{0:x}',
                     enabled = False,
                     style = ButtonStyle.gray,
                 ),
@@ -232,7 +248,7 @@ def _iter_options():
                 ),
                 thumbnail = create_button(
                     'Claim',
-                    custom_id = f'market_place.inbox.claim.{user_id_0:x}.{0:x}.{10:x}.{24:x}',
+                    custom_id = f'market_place.inbox.claim_one.{user_id_0:x}.{0:x}.{10:x}.{24:x}.{0:x}',
                     enabled = False,
                     style = ButtonStyle.gray,
                 ),
@@ -245,7 +261,7 @@ def _iter_options():
                 ),
                 thumbnail = create_button(
                     'Claim',
-                    custom_id = f'market_place.inbox.claim.{user_id_0:x}.{0:x}.{10:x}.{25:x}',
+                    custom_id = f'market_place.inbox.claim_one.{user_id_0:x}.{0:x}.{10:x}.{25:x}.{0:x}',
                     enabled = False,
                     style = ButtonStyle.gray,
                 ),
@@ -269,6 +285,12 @@ def _iter_options():
                     EMOJI_CLOSE,
                     custom_id = f'market_place.close.{user_id_0:x}',
                 ),
+                create_button(
+                    'Claim all on page',
+                    custom_id = f'market_place.inbox.claim_page.{user_id_0:x}.{0:x}.{10:x}',
+                    enabled = True,
+                    style = ButtonStyle.green,
+                ),
             ),
         ],
     )
@@ -283,6 +305,7 @@ def test__build_inbox_view_components(
     page_size,
     market_place_item_listing,
     has_more,
+    claim_elements,
 ):
     """
     Tests whether ``build_inbox_view_components`` works as intended.
@@ -310,6 +333,9 @@ def test__build_inbox_view_components(
     has_more : `bool`
         Whether there are more items to show.
     
+    claim_elements : ``list<(bool, Item, int, int, int)>``
+        Claimed elements.
+    
     Returns
     -------
     output : ``list<Component>``
@@ -322,6 +348,7 @@ def test__build_inbox_view_components(
         page_size,
         market_place_item_listing,
         has_more,
+        claim_elements,
     )
     
     vampytest.assert_instance(output, list)

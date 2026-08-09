@@ -425,6 +425,37 @@ def produce_claim_sold_description(
     yield '.'
 
 
+def produce_claim_many_listing_description(claim_elements):
+    """
+    Produces a claim many listing description.
+    
+    This function is an iterable coroutine.
+    
+    Parameters
+    ----------
+    claim_elements : ``list<(bool, Item, int, int, int)>``
+        Elements to produce through.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    for index in range(len(claim_elements)):
+        receive_items, item, item_amount, reward_balance, fee = claim_elements[index]
+        if index:
+            yield '\n'
+        
+        # Description
+        if not receive_items:
+            function = produce_claim_sold_description
+        elif reward_balance:
+            function = produce_claim_purchased_description
+        else:
+            function = produce_claim_unsold_description
+        
+        yield from function(item, item_amount, reward_balance, fee)
+
+
 def produce_purchase_view_header(item, required_flags, page_index):
     """
     Produces purchase view header.

@@ -1,4 +1,4 @@
-__all__ = ('adventure_cancel', 'scheduled_adventure_arrival', 'set_adventure_return_notifier')
+__all__ = ('adventure_cancel_after', 'adventure_cancel_now', 'scheduled_adventure_arrival', 'set_adventure_return_notifier')
 
 from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from random import Random
@@ -12,10 +12,13 @@ from ...inventory_core import get_inventory, save_inventory
 from ...user_stats_core import get_user_stats, save_user_stats
 from ...seeding import step_seed, step_seed_initial
 
-from ..action import ACTION_ID_SYSTEM_ARRIVAL, ACTION_ID_SYSTEM_CANCELLATION, ACTION_ID_SYSTEM_UNKNOWN
+from ..action import (
+    ACTION_ID_SYSTEM_ARRIVAL, ACTION_ID_SYSTEM_CANCELLATION_NOW, ACTION_ID_SYSTEM_CANCELLATION_AFTER,
+    ACTION_ID_SYSTEM_UNKNOWN
+)
 from ..adventure import (
-    ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_CANCELLED, ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_FINALIZED,
-    ADVENTURE_STATE_RETURNING, AdventureAction, build_loot_data
+    ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_ACTIONING_CANCEL_AFTER, ADVENTURE_STATE_CANCELLED,
+    ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_FINALIZED, ADVENTURE_STATE_RETURNING, AdventureAction, build_loot_data
 )
 from ..constants import ADVENTURES_ACTIVE
 from ..queries import store_adventure_action, update_adventure
@@ -118,7 +121,7 @@ async def adventure_arrival(adventure):
     adventure : ``Adventure``
         The adventure to update.
     """
-    initial_seed = step_seed_initial(adventure.seed, adventure.action_count)
+    initial_seed = step_seed_initial(adventure.seed, 0)
     random = Random(initial_seed)
     action = get_action(adventure, random)
     if action is None:
@@ -171,7 +174,10 @@ async def schedule_adventure_action(adventure):
     adventure : ``Adventure``
         The adventure to update.
     """
-    initial_seed = step_seed_initial(adventure.seed, adventure.action_count)
+    initial_seed = step_seed_initial(
+        adventure.seed,
+        adventure.action_count - 1 - (adventure.state == ADVENTURE_STATE_ACTIONING_CANCEL_AFTER),
+    )
     random = Random(initial_seed)
     action = get_action(adventure, random)
     if action is None:
@@ -214,7 +220,10 @@ async def adventure_action_step(adventure):
     adventure : ``Adventure``
         The adventure to update.
     """
-    initial_seed = step_seed_initial(adventure.seed, adventure.action_count)
+    initial_seed = step_seed_initial(
+        adventure.seed,
+        adventure.action_count - 1 - (adventure.state == ADVENTURE_STATE_ACTIONING_CANCEL_AFTER),
+    )
     random = Random(initial_seed)
     action = get_action(adventure, random)
     if action is None:
@@ -250,8 +259,13 @@ async def adventure_action_step(adventure):
     travel_duration = get_location_distance_travel_duration(adventure, user_stats)
     
     next_initial_seed = step_seed(initial_seed)
-    next_random = Random(next_initial_seed)
-    next_action = get_action(adventure, next_random)
+    
+    cancelling_after = adventure.state == ADVENTURE_STATE_ACTIONING_CANCEL_AFTER
+    if cancelling_after:
+        next_action = None
+    else:
+        next_random = Random(next_initial_seed)
+        next_action = get_action(adventure, next_random)
     
     if next_action is None:
         should_return = True
@@ -278,7 +292,7 @@ async def adventure_action_step(adventure):
     # Finish modifying the adventure.
     
     # If next step is unknown we will insert +1 action
-    if next_action is None:
+    if (not cancelling_after) and (next_action is None):
         adventure.action_count += 1
     
     if should_return:
@@ -301,7 +315,7 @@ async def adventure_action_step(adventure):
     await store_adventure_action(adventure_action)
     
     # Insert a lost entry if we are lost.
-    if next_action is None:
+    if (not cancelling_after) and (next_action is None):
         adventure_action = AdventureAction(
             adventure.entry_id,
             ACTION_ID_SYSTEM_UNKNOWN,
@@ -322,7 +336,7 @@ async def adventure_action_step(adventure):
     )
 
 
-async def adventure_cancel(adventure):
+async def adventure_cancel_now(adventure):
     """
     Cancels the adventure and schedules return.
     
@@ -338,7 +352,11 @@ async def adventure_cancel(adventure):
     
     # Skip if the adventure is in an invalid state.
     adventure_state = adventure.state
-    if adventure_state not in (ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_DEPARTING):
+    if adventure_state not in (
+        ADVENTURE_STATE_ACTIONING,
+        ADVENTURE_STATE_ACTIONING_CANCEL_AFTER,
+        ADVENTURE_STATE_DEPARTING,
+    ):
         return
     
     # Cancel current handle.
@@ -357,7 +375,7 @@ async def adventure_cancel(adventure):
     # Create action for the cancellation.
     adventure_action = AdventureAction(
         adventure.entry_id,
-        ACTION_ID_SYSTEM_CANCELLATION,
+        ACTION_ID_SYSTEM_CANCELLATION_NOW,
         now,
         None,
         None,
@@ -368,7 +386,7 @@ async def adventure_cancel(adventure):
     
     # Schedule new handle.
     duration = get_location_distance_travel_duration(adventure, user_stats)
-    if adventure_state != ADVENTURE_STATE_ACTIONING:
+    if adventure_state == ADVENTURE_STATE_DEPARTING:
         # Take the lowest in case we accumulated offset.
         duration = min(duration, (now - adventure.created_at).total_seconds())
     
@@ -377,6 +395,40 @@ async def adventure_cancel(adventure):
         invoke_adventure_return,
         adventure,
     )
+
+
+async def adventure_cancel_after(adventure):
+    """
+    Cancels the adventure after the next action is done.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    adventure : ``Adventure``
+        The adventure to depart.
+    """
+    # Skip if the adventure is in an invalid state.
+    adventure_state = adventure.state
+    if adventure_state != ADVENTURE_STATE_ACTIONING:
+        return
+    
+    # Update the adventure.
+    adventure.state = ADVENTURE_STATE_ACTIONING_CANCEL_AFTER
+    adventure.action_count += 1
+    await update_adventure(adventure)
+    
+    # Create action for the cancellation.
+    adventure_action = AdventureAction(
+        adventure.entry_id,
+        ACTION_ID_SYSTEM_CANCELLATION_AFTER,
+        DateTime.now(TimeZone.utc),
+        None,
+        None,
+        0,
+        0,
+    )
+    await store_adventure_action(adventure_action)
 
 
 def invoke_adventure_return(adventure):

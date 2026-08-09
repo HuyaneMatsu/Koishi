@@ -1,10 +1,12 @@
 __all__ = ()
 
-from hata import create_button, create_row, create_text_display
+from hata import ButtonStyle, create_button, create_row, create_text_display
 
 from config import FLANDRE_ID
 
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
+
+from ..market_place_core import MARKET_PLACE_INBOX_PAGE_SIZE_DEFAULT, CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_ONE_BUILDER
 
 from ..item_core import get_item
 from ..unit_core import produce_kilogram
@@ -104,173 +106,10 @@ def produce_notification_content(
     yield '.'
 
 
-def _notification_builder_common(
-    user_id,
-    seller_user_id,
-    purchaser_user_id,
-    item_id,
-    item_amount,
-    seller_balance_amount,
-    purchaser_balance_amount,
-    notification_content_prefix,
-    disable_notification_button_text,
-):
-    """
-    Common notification component builder.
-    
-    Parameters
-    ----------
-    user_id : `int`
-        The point of view user's identifier.
-    
-    seller_user_id : `int`
-        The seller user's identifier.
-    
-    purchaser_user_id : `int`
-        The purchaser user's identifier.
-    
-    item_id : `int`
-        The item's identifier.
-    
-    item_amount : ``int`
-        The sold items' amount.
-    
-    seller_balance_amount : `int`
-        The minimal amount of balance the seller requested.
-    
-    purchaser_balance_amount : `int`
-        The amount of balance the purchaser bid with.
-    
-    notification_content_prefix : `str`
-        Value to prefix notification content with.
-    
-    disable_notification_button_text : `str`
-        Text to use on the disable notification button.
-    
-    Returns
-    -------
-    components : ``list<Component>``
-    """
-    return [
-        create_text_display(''.join([*produce_notification_content(
-            user_id,
-            seller_user_id,
-            purchaser_user_id,
-            item_id,
-            item_amount,
-            seller_balance_amount,
-            purchaser_balance_amount,
-            notification_content_prefix,
-        )])),
-        create_row(
-            create_button(
-                disable_notification_button_text,
-                custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_MARKET_PLACE_ITEM_FINALISATION_DISABLE,
-            ),
-        ),
-    ]
-
-
-def _notification_builder_default(
-    user_id, seller_user_id, purchaser_user_id, item_id, item_amount, seller_balance_amount, purchaser_balance_amount
-):
-    """
-    Default notification builder.
-    
-    Parameters
-    ----------
-    user_id : `int`
-        The point of view user's identifier.
-    
-    seller_user_id : `int`
-        The seller user's identifier.
-    
-    purchaser_user_id : `int`
-        The purchaser user's identifier.
-    
-    item_id : `int`
-        The item's identifier.
-    
-    item_amount : ``int`
-        The sold items' amount.
-    
-    
-    seller_balance_amount : `int`
-        The minimal amount of balance the seller requested.
-    purchaser_balance_amount : `int`
-        The amount of balance the purchaser bid with.
-    
-    Returns
-    -------
-    components : ``list<Component>``
-    """
-    return _notification_builder_common(
-        user_id,
-        seller_user_id,
-        purchaser_user_id,
-        item_id,
-        item_amount,
-        seller_balance_amount,
-        purchaser_balance_amount,
-        'Hey mister',
-        'I don\'t want notifs, nya!!',
-    )
-
-
-def _notification_builder_flandre(
-    user_id, seller_user_id, purchaser_user_id, item_id, item_amount, seller_balance_amount, purchaser_balance_amount
-):
-    """
-    Flandre styled notification builder.
-    
-    Parameters
-    ----------
-    user_id : `int`
-        The point of view user's identifier.
-    
-    seller_user_id : `int`
-        The seller user's identifier.
-    
-    purchaser_user_id : `int`
-        The purchaser user's identifier.
-    
-    item_id : `int`
-        The item's identifier.
-    
-    item_amount : ``int`
-        The sold items' amount.
-    
-    seller_balance_amount : `int`
-        The minimal amount of balance the seller requested.
-    
-    purchaser_balance_amount : `int`
-        The amount of balance the purchaser bid with.
-    
-    Returns
-    -------
-    components : ``list<Component>``
-    """
-    return _notification_builder_common(
-        user_id,
-        seller_user_id,
-        purchaser_user_id,
-        item_id,
-        item_amount,
-        seller_balance_amount,
-        purchaser_balance_amount,
-        'Nee-sama',
-        'Go back to your basement!!',
-    )
-
-
-NOTIFICATION_BUILDERS_DAILY_REMINDER = {
-    FLANDRE_ID: _notification_builder_flandre,
-}
-
-
 def build_notification_components(
     preferred_client_id,
     user_id,
+    entry_id,
     seller_user_id,
     purchaser_user_id,
     item_id,
@@ -289,6 +128,9 @@ def build_notification_components(
     user_id : `int`
         The point of view user's identifier.
     
+    entry_id : `int`
+        The entry's identifier.
+    
     seller_user_id : `int`
         The seller user's identifier.
     
@@ -311,12 +153,35 @@ def build_notification_components(
     -------
     components : ``list<Component>``
     """
-    return NOTIFICATION_BUILDERS_DAILY_REMINDER.get(preferred_client_id, _notification_builder_default)(
-        user_id,
-        seller_user_id,
-        purchaser_user_id,
-        item_id,
-        item_amount,
-        seller_balance_amount,
-        purchaser_balance_amount,
-    )
+    if preferred_client_id == FLANDRE_ID:
+        notification_content_prefix = 'Nee-sama'
+        disable_notification_button_text = 'Go back to your basement!!'
+    else:
+        notification_content_prefix = 'Hey mister'
+        disable_notification_button_text = 'I don\'t want notifs, nya!!'
+    
+    return [
+        create_text_display(''.join([*produce_notification_content(
+            user_id,
+            seller_user_id,
+            purchaser_user_id,
+            item_id,
+            item_amount,
+            seller_balance_amount,
+            purchaser_balance_amount,
+            notification_content_prefix,
+        )])),
+        create_row(
+            create_button(
+                'Claim',
+                custom_id = CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_ONE_BUILDER(
+                    user_id, 0, MARKET_PLACE_INBOX_PAGE_SIZE_DEFAULT, entry_id, True
+                ),
+                style = ButtonStyle.green,
+            ),
+            create_button(
+                disable_notification_button_text,
+                custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_MARKET_PLACE_ITEM_FINALISATION_DISABLE,
+            ),
+        ),
+    ]

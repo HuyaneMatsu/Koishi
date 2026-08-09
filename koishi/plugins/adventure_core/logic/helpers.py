@@ -1,6 +1,7 @@
 __all__ = (
-    'can_cancel_adventure', 'get_action_type_multiplier', 'get_duration_till_recovery_end',
-    'get_duration_till_recovery_end_of_energy_cost', 'get_location_distance_travel_duration',
+    'can_cancel_adventure_after', 'can_cancel_adventure_any', 'can_cancel_adventure_now', 'get_action_type_multiplier',
+    'get_duration_till_recovery_end', 'get_duration_till_recovery_end_of_energy_cost',
+    'get_location_distance_travel_duration',
 )
 
 
@@ -19,8 +20,8 @@ from ..action import (
     ACTION_TYPE_HUNT, ACTION_TYPE_TRAP
 )
 from ..adventure import (
-    ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_DEPARTING, LOOT_STATE_LOST_DUE_FULL_INVENTORY,
-    LOOT_STATE_LOST_DUE_LOW_ENERGY, LOOT_STATE_SUCCESS
+    ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_ACTIONING_CANCEL_AFTER, ADVENTURE_STATE_DEPARTING,
+    LOOT_STATE_LOST_DUE_FULL_INVENTORY, LOOT_STATE_LOST_DUE_LOW_ENERGY, LOOT_STATE_SUCCESS
 )
 from ..auto_cancellation import check_auto_cancellation_conditions
 from ..constants import (
@@ -488,9 +489,9 @@ def get_duration_till_recovery_end_of_energy_cost(energy_exhausted):
     return energy_exhausted * RECOVERY_DURATION_BY_LOST_ENERGY
 
 
-def can_cancel_adventure(adventure):
+def can_cancel_adventure_now(adventure):
     """
-    Returns whether the adventure can be cancelled.
+    Returns whether the adventure can be cancelled immediately.
     
     Parameters
     ----------
@@ -501,7 +502,48 @@ def can_cancel_adventure(adventure):
     -------
     can_cancel : `bool`
     """
-    return adventure.state in (ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_DEPARTING)
+    return adventure.state in (
+        ADVENTURE_STATE_ACTIONING,
+        ADVENTURE_STATE_ACTIONING_CANCEL_AFTER,
+        ADVENTURE_STATE_DEPARTING,
+    )
+
+
+def can_cancel_adventure_after(adventure):
+    """
+    Returns whether the adventure can be cancelled after the next action.
+    
+    Parameters
+    ----------
+    adventure : ``Adventure``
+        The adventure to check.
+    
+    Returns
+    -------
+    can_cancel : `bool`
+    """
+    return adventure.state == ADVENTURE_STATE_ACTIONING
+
+
+def can_cancel_adventure_any(adventure):
+    """
+    Returns whether the adventure can be cancelled in any ways.
+    
+    Parameters
+    ----------
+    adventure : ``Adventure``
+        The adventure to check.
+    
+    Returns
+    -------
+    can_cancel : `bool`
+    """
+    return adventure.state in (
+        ADVENTURE_STATE_ACTIONING,
+        ADVENTURE_STATE_ACTIONING_CANCEL_AFTER,
+        ADVENTURE_STATE_DEPARTING,
+    )
+    
 
 
 # Reduce the durations if the plugin is ran in test mode.

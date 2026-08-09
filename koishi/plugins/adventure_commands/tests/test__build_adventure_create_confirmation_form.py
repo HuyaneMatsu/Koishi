@@ -31,7 +31,7 @@ def _iter_options():
                 create_text_display(
                     'Location: Human village outskirts\n'
                     'Target: Gardening (Scarlet onions)\n'
-                    'Duration: 4h\n'
+                    'Duration: 4 hours\n'
                     'Return: After\n'
                     'Auto-cancellation: Never (none)'
                 ),

@@ -55,6 +55,7 @@ async def notify_user(entry, connector):
         components = build_notification_components(
             preferred_client_id,
             user_id,
+            entry_id,
             seller_user_id,
             purchaser_user_id,
             item_id,

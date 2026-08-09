@@ -1,7 +1,7 @@
 import vampytest
 from hata import (
     Guild, InteractionForm, StringSelectOption, TextInputStyle, User, create_label, create_string_select,
-    create_text_input, create_user_select
+    create_text_display, create_text_input, create_user_select
 )
 
 from ..component_building import build_mod_other_form
@@ -23,8 +23,11 @@ def _iter_options():
         3600,
         3600,
         InteractionForm(
-            f'Banning user(s) from Moriya shrine.',
+            'Confirmation',
             [
+                create_text_display(
+                    '### Banning user(s) from Moriya shrine.'
+                ),
                 create_label(
                     'Select users',
                     None,
@@ -77,8 +80,11 @@ def _iter_options():
         7200,
         3600,
         InteractionForm(
-            f'Banning Suwako from Moriya shrine.',
+            'Confirmation',
             [
+                create_text_display(
+                    '### Banning Suwako from Moriya shrine.',
+                ),
                 create_label(
                     'Reason',
                     None,
@@ -122,8 +128,11 @@ def _iter_options():
         3600,
         7200,
         InteractionForm(
-            f'Muting Suwako in Moriya shrine.',
+            'Confirmation',
             [
+                create_text_display(
+                    '### Muting Suwako in Moriya shrine.',
+                ),
                 create_label(
                     'Reason',
                     None,
@@ -167,8 +176,11 @@ def _iter_options():
         3600,
         7200,
         InteractionForm(
-            f'Disabling invites of Moriya shrine.',
+            'Confirmation',
             [
+                create_text_display(
+                    '### Disabling invites of Moriya shrine.',
+                ),
                 create_label(
                     'Reason',
                     None,

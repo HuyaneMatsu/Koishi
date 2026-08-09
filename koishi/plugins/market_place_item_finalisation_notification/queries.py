@@ -40,7 +40,7 @@ async def get_entries_to_notify_with_connector(connector):
     ----------
     connector : ``AsyncConnection``
         Database connector.
-    FV
+    
     Returns
     -------
     results : `list<sqlalchemy.engine.result.RowProxy<int, int, int, int, int, int, int, int, int, int>>`

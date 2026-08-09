@@ -8,13 +8,15 @@ from hata import DATETIME_FORMAT_CODE, elapsed_time, format_datetime
 from ..adventure_core import (
     ACTIONS, ACTION_TYPE_ARRIVAL, ACTION_TYPE_BUTCHERING, ACTION_TYPE_CANCELLATION, ACTION_TYPE_ENCOUNTER,
     ACTION_TYPE_FATALITY, ACTION_TYPE_FISHING, ACTION_TYPE_FORAGING, ACTION_TYPE_GARDENING, ACTION_TYPE_HUNT,
-    ACTION_TYPE_NONE, ACTION_TYPE_TRAP, ACTION_TYPE_UNKNOWN, ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_CANCELLED,
-    ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_FINALIZED, ADVENTURE_STATE_RETURNING, LOCATIONS,
-    LOOT_STATE_LOST_DUE_FULL_INVENTORY, LOOT_STATE_LOST_DUE_LOW_ENERGY, LOOT_STATE_SUCCESS, TARGETS,
-    get_duration_till_recovery_end, produce_auto_cancellation_conditions
+    ACTION_TYPE_NONE, ACTION_TYPE_TRAP, ACTION_TYPE_UNKNOWN, ADVENTURE_STATE_ACTIONING,
+    ADVENTURE_STATE_ACTIONING_CANCEL_AFTER, ADVENTURE_STATE_CANCELLED, ADVENTURE_STATE_DEPARTING,
+    ADVENTURE_STATE_RETURNING, LOCATIONS, LOOT_STATE_LOST_DUE_FULL_INVENTORY, LOOT_STATE_LOST_DUE_LOW_ENERGY,
+    LOOT_STATE_SUCCESS, TARGETS, get_duration_till_recovery_end, produce_auto_cancellation_conditions
 )
 from ..item_core import get_item
-from ..unit_core import produce_duration, produce_kilogram, produce_kilogram_ratio
+from ..unit_core import produce_duration_sophisticated, produce_kilogram, produce_kilogram_ratio
+
+from .constants import ADVENTURE_CANCELLATION_MODE_AFTER, ADVENTURE_CANCELLATION_MODE_NOW
 
 
 ACTION_TYPE_NAME_DEFAULT = 'Unknown'
@@ -72,7 +74,7 @@ def produce_adventure_initial_representation(location, target, duration, return_
     yield target.name
     
     yield '\nDuration: '
-    yield from produce_duration(duration)
+    yield from produce_duration_sophisticated(duration)
     
     yield '\nReturn: '
     yield return_.name
@@ -362,11 +364,11 @@ def produce_adventure_view_description_active(adventure, now, inventory_total, i
     elif adventure_state == ADVENTURE_STATE_ACTIONING:
         next_step_description = 'working on your target task'
     
+    elif adventure_state == ADVENTURE_STATE_ACTIONING_CANCEL_AFTER:
+        next_step_description = 'working on your target task, then will return after'
+    
     elif adventure_state == ADVENTURE_STATE_CANCELLED or adventure_state == ADVENTURE_STATE_RETURNING:
         next_step_description = 'returning home'
-    
-    elif adventure_state == ADVENTURE_STATE_FINALIZED:
-        next_step_description = None
     
     else:
         next_step_description = None
@@ -562,7 +564,7 @@ def produce_loot_listing(grouped_loot):
             yield ')'
 
 
-def produce_adventure_depart_failure_recovery_description(recovering_until, now):
+def produce_error_message_adventure_depart_on_recovery(recovering_until, now):
     """
     Produces adventure depart failure message for the case when the user is recovering.
     
@@ -585,6 +587,85 @@ def produce_adventure_depart_failure_recovery_description(recovering_until, now)
     yield ', until '
     yield format_datetime(recovering_until, 'T')
     yield '.\nYou cannot go on an adventure in the meantime.'
+
+
+def produce_error_message_adventure_cannot_cancel(adventure_state, cancellation_mode):
+    """
+    Produces adventure cancellation error message, when the user cannot cancel it.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    adventure_state : `int`
+        The adventure's state.
+    
+    cancellation_mode : `int`
+        Cancellation mode.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    yield 'You cannot cancel your adventure'
+    
+    if cancellation_mode == ADVENTURE_CANCELLATION_MODE_NOW:
+        when_description = 'immediately'
+    elif cancellation_mode == ADVENTURE_CANCELLATION_MODE_AFTER:
+        when_description = 'after the next action'
+    else:
+        when_description = None
+    
+    if (when_description is not None):
+        yield ' '
+        yield when_description
+    
+    if adventure_state == ADVENTURE_STATE_DEPARTING:
+        adventure_state_description = 'while you are departing'
+    elif adventure_state == ADVENTURE_STATE_ACTIONING_CANCEL_AFTER:
+        adventure_state_description = 'if it is already being cancelled after the next action'
+    elif (adventure_state == ADVENTURE_STATE_CANCELLED) or (adventure_state == ADVENTURE_STATE_RETURNING):
+        adventure_state_description = 'while you are returning home'
+    else:
+        adventure_state_description = None
+    
+    if (adventure_state_description is not None):
+        yield ' '
+        yield adventure_state_description
+    
+    yield '.'
+
+
+def produce_error_message_adventure_duration_out_of_threshold(lower, duration, threshold):
+    """
+    Produces adventure depart error message, when the given duration is out of the expected range.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    lower : `bool`
+        Whether it is the lower threshold the duration is out of.
+    
+    duration : `int`
+        Give duration.
+    
+    threshold : `int`
+        Threshold.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    yield 'Duration '
+    yield ('under lower' if lower else 'over upper')
+    yield ' threshold: '
+    yield from produce_duration_sophisticated(duration)
+    yield ' '
+    yield ('<' if lower else '>')
+    yield ' '
+    yield from produce_duration_sophisticated(threshold)
+    yield '.'
 
 
 def produce_butcher_item_description(item, loot_chance_and_amount, energy_cost):

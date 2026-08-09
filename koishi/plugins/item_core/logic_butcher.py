@@ -200,7 +200,7 @@ def butcher_calculate_step(item, index, seed, multiplier):
     if (options_butcher is None):
         return None, 0
     
-    seed = step_seed_initial(seed, index + 2)
+    seed = step_seed_initial(seed, index + 1)
     
     return butcher_calculate_amounts_and_energy_cost(
         options_butcher, Random(seed), multiplier,

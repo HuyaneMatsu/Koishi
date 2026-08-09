@@ -5,19 +5,23 @@ from hata import (
     create_text_display, create_text_input, create_thumbnail_media
 )
 
-from ..market_place_core import MARKET_PLACE_ITEM_FLAG_PURCHASER_RETRIEVED, MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED
+from ..market_place_core import (
+    MARKET_PLACE_ITEM_FLAG_PURCHASER_RETRIEVED, MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED,
+    MARKET_PLACE_OWN_OFFERS_PAGE_SIZE_DEFAULT, CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_ONE_BUILDER
+)
 
-from .constants import BID_INCREASE_LOWER_THRESHOLD, EMOJI_CLOSE, EMOJI_LEFT, EMOJI_RIGHT, PAGE_SIZE_DEFAULT
+from .constants import BID_INCREASE_LOWER_THRESHOLD, EMOJI_CLOSE, EMOJI_LEFT, EMOJI_RIGHT
 from .content_building import (
     produce_claim_purchased_description, produce_claim_sold_description, produce_claim_unsold_description,
     produce_inbox_purchased_market_place_item_description, produce_inbox_sold_market_place_item_description,
     produce_inbox_unsold_market_place_item_description, produce_item_description,
     produce_offer_market_place_item_description, produce_purchase_view_header, produce_sell_confirmation_description,
-    produce_sell_success_description
+    produce_sell_success_description, produce_claim_many_listing_description
 )
 from .custom_ids import (
     CUSTOM_ID_BID_BALANCE_AMOUNT, CUSTOM_ID_MARKET_PLACE_BID_BUILDER, CUSTOM_ID_MARKET_PLACE_BID_DISABLED,
-    CUSTOM_ID_MARKET_PLACE_CLOSE_BUILDER, CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_BUILDER,
+    CUSTOM_ID_MARKET_PLACE_CLOSE_BUILDER,
+    CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_PAGE_BUILDER,
     CUSTOM_ID_MARKET_PLACE_INBOX_VIEW_BUILDER, CUSTOM_ID_MARKET_PLACE_INBOX_VIEW_PAGE_INDEX_DECREMENT_DISABLED,
     CUSTOM_ID_MARKET_PLACE_INBOX_VIEW_PAGE_INDEX_INCREMENT_DISABLED, CUSTOM_ID_MARKET_PLACE_OWN_OFFERS_VIEW_BUILDER,
     CUSTOM_ID_MARKET_PLACE_OWN_OFFERS_VIEW_PAGE_INDEX_DECREMENT_DISABLED,
@@ -129,7 +133,7 @@ def build_sell_success_components(
         create_button(
             'View own offers',
             custom_id = CUSTOM_ID_MARKET_PLACE_OWN_OFFERS_VIEW_BUILDER(
-                user_id, 0, PAGE_SIZE_DEFAULT
+                user_id, 0, MARKET_PLACE_OWN_OFFERS_PAGE_SIZE_DEFAULT
             ),
         ),
         create_button(
@@ -259,6 +263,7 @@ def build_inbox_view_components(
     page_size,
     market_place_item_listing,
     has_more,
+    claim_elements,
 ):
     """
     Builds a my offers view components.
@@ -286,6 +291,9 @@ def build_inbox_view_components(
     has_more : `bool`
         Whether there are more items to show.
     
+    claim_elements : ``list<(bool, Item, int, int, int)>``
+        Claimed elements.
+    
     Returns
     -------
     components : ``list<Component>``
@@ -305,8 +313,15 @@ def build_inbox_view_components(
     
     components.append(create_separator())
     
+    # Claimed
+    
+    if (claim_elements is not None):
+        components.append(create_text_display(''.join([*produce_claim_many_listing_description(claim_elements)])))
+        components.append(create_separator())
+    
     # Listing
     
+    any_enabled_on_page = False
     if market_place_item_listing:
         for market_place_item in market_place_item_listing:
             purchaser_user_id = market_place_item.purchaser_user_id
@@ -335,13 +350,14 @@ def build_inbox_view_components(
                 ),
                 thumbnail = create_button(
                     'Claim',
-                    custom_id = CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_BUILDER(
-                        user.id, page_index, page_size, market_place_item.entry_id
+                    custom_id = CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_ONE_BUILDER(
+                        user.id, page_index, page_size, market_place_item.entry_id, False
                     ),
                     enabled = enabled,
                     style = style,
-                )
+                ),
             ))
+            any_enabled_on_page = any_enabled_on_page or enabled
         
         components.append(create_separator())
     
@@ -385,11 +401,18 @@ def build_inbox_view_components(
             EMOJI_CLOSE,
             custom_id = CUSTOM_ID_MARKET_PLACE_CLOSE_BUILDER(user.id),
         ),
+        create_button(
+            'Claim all on page',
+            custom_id = CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_PAGE_BUILDER(user.id, page_index, page_size),
+            enabled = any_enabled_on_page,
+            style = (ButtonStyle.green if any_enabled_on_page else ButtonStyle.gray),
+        ),
     ))
     
     return components
 
 
+# Currently unused
 def build_claim_success_components(
     user_id,
     receive_items,

@@ -2,7 +2,7 @@ from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
 
-from ..content_building import produce_adventure_depart_failure_recovery_description
+from ..content_building import produce_error_message_adventure_depart_on_recovery
 
 
 def _iter_options():
@@ -20,9 +20,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__produce_adventure_depart_failure_recovery_description(recovering_until, now):
+def test__produce_error_message_adventure_depart_on_recovery(recovering_until, now):
     """
-    Tests whether ``produce_adventure_depart_failure_recovery_description`` works as intended.
+    Tests whether ``produce_error_message_adventure_depart_on_recovery`` works as intended.
     
     Parameters
     ----------
@@ -36,7 +36,7 @@ def test__produce_adventure_depart_failure_recovery_description(recovering_until
     -------
     output : `str`
     """
-    output = [*produce_adventure_depart_failure_recovery_description(recovering_until, now)]
+    output = [*produce_error_message_adventure_depart_on_recovery(recovering_until, now)]
     
     for element in output:
         vampytest.assert_instance(element, str)

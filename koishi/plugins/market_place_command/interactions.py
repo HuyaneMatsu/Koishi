@@ -12,28 +12,29 @@ from ..adventure_core import get_active_adventure
 from ..inventory_core import get_inventory, save_inventory
 from ..item_core import get_item, get_item_nullable
 from ..market_place_core import (
-    CUSTOM_ID_MARKET_PLACE_OFFER_RP, MARKET_PLACE_ITEM_FLAG_PURCHASER_RETRIEVED, MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED,
+    CUSTOM_ID_MARKET_PLACE_OFFER_PATTERN, MARKET_PLACE_ITEM_FLAG_PURCHASER_RETRIEVED, MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED,
     MarketPlaceItem, get_market_place_item, get_market_place_item_listing_active, get_market_place_item_listing_inbox,
-    get_market_place_item_listing_own_offers, insert_market_place_item, update_market_place_item
+    get_market_place_item_listing_own_offers, insert_market_place_item, update_market_place_item,
+    MARKET_PLACE_VIEW_PAGE_SIZE_DEFAULT, CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_ONE_PATTERN
 )
 from ..user_balance import ALLOCATION_FEATURE_ID_MARKET_PLACE, get_user_balance, save_user_balance
 
 from .component_building import (
-    build_bid_form, build_bid_success_components, build_claim_success_components, build_inbox_view_components,
+    build_bid_form, build_bid_success_components, build_inbox_view_components,
     build_own_offers_view_components, build_purchase_details_components, build_purchase_view_components,
     build_sell_success_components
 )
-from .constants import BID_INCREASE_LOWER_THRESHOLD, FINALISATION_DELAY_AFTER_BID, PAGE_SIZE_DEFAULT
+from .constants import BID_INCREASE_LOWER_THRESHOLD, FINALISATION_DELAY_AFTER_BID
 from .custom_ids import (
-    CUSTOM_ID_BID_BALANCE_AMOUNT, CUSTOM_ID_MARKET_PLACE_BID_DISABLED, CUSTOM_ID_MARKET_PLACE_BID_RP,
-    CUSTOM_ID_MARKET_PLACE_CLOSE_RP, CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_RP,
+    CUSTOM_ID_BID_BALANCE_AMOUNT, CUSTOM_ID_MARKET_PLACE_BID_DISABLED, CUSTOM_ID_MARKET_PLACE_BID_PATTERN,
+    CUSTOM_ID_MARKET_PLACE_CLOSE_PATTERN,
     CUSTOM_ID_MARKET_PLACE_INBOX_VIEW_PAGE_INDEX_DECREMENT_DISABLED,
-    CUSTOM_ID_MARKET_PLACE_INBOX_VIEW_PAGE_INDEX_INCREMENT_DISABLED, CUSTOM_ID_MARKET_PLACE_INBOX_VIEW_RP,
+    CUSTOM_ID_MARKET_PLACE_INBOX_VIEW_PAGE_INDEX_INCREMENT_DISABLED, CUSTOM_ID_MARKET_PLACE_INBOX_VIEW_PATTERN,
     CUSTOM_ID_MARKET_PLACE_OWN_OFFERS_VIEW_PAGE_INDEX_DECREMENT_DISABLED,
-    CUSTOM_ID_MARKET_PLACE_OWN_OFFERS_VIEW_PAGE_INDEX_INCREMENT_DISABLED, CUSTOM_ID_MARKET_PLACE_OWN_OFFERS_VIEW_RP,
-    CUSTOM_ID_MARKET_PLACE_PURCHASE_DETAILS_RP, CUSTOM_ID_MARKET_PLACE_PURCHASE_VIEW_PAGE_INDEX_DECREMENT_DISABLED,
-    CUSTOM_ID_MARKET_PLACE_PURCHASE_VIEW_PAGE_INDEX_INCREMENT_DISABLED, CUSTOM_ID_MARKET_PLACE_PURCHASE_VIEW_RP,
-    CUSTOM_ID_MARKET_PLACE_SELL_RP
+    CUSTOM_ID_MARKET_PLACE_OWN_OFFERS_VIEW_PAGE_INDEX_INCREMENT_DISABLED, CUSTOM_ID_MARKET_PLACE_OWN_OFFERS_VIEW_PATTERN,
+    CUSTOM_ID_MARKET_PLACE_PURCHASE_DETAILS_PATTERN, CUSTOM_ID_MARKET_PLACE_PURCHASE_VIEW_PAGE_INDEX_DECREMENT_DISABLED,
+    CUSTOM_ID_MARKET_PLACE_PURCHASE_VIEW_PAGE_INDEX_INCREMENT_DISABLED, CUSTOM_ID_MARKET_PLACE_PURCHASE_VIEW_PATTERN,
+    CUSTOM_ID_MARKET_PLACE_SELL_PATTERN, CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_PAGE_PATTERN
 )
 from .helpers import calculate_duration, calculate_initial_sell_fee, calculate_lowest_required_bid_amount
 
@@ -58,7 +59,7 @@ async def handle_dummy():
     return
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_CLOSE_RP)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_CLOSE_PATTERN)
 async def handle_own_offers_close(
     client,
     interaction_event,
@@ -96,7 +97,7 @@ async def handle_own_offers_close(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_SELL_RP, target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_SELL_PATTERN, target = 'form')
 async def handle_sell_confirmation(
     client,
     interaction_event,
@@ -218,7 +219,7 @@ async def handle_sell_confirmation(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_OWN_OFFERS_VIEW_RP)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_OWN_OFFERS_VIEW_PATTERN)
 async def handle_own_offers_view(
     client,
     interaction_event,
@@ -284,7 +285,7 @@ async def handle_own_offers_view(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_INBOX_VIEW_RP)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_INBOX_VIEW_PATTERN)
 async def handle_inbox_view(
     client,
     interaction_event,
@@ -346,11 +347,12 @@ async def handle_inbox_view(
             page_size,
             market_place_item_listing,
             has_more,
+            None,
         ),
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_RP)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_ONE_PATTERN)
 async def handle_inbox_claim(
     client,
     interaction_event,
@@ -457,20 +459,26 @@ async def handle_inbox_claim(
         
         await update_market_place_item(market_place_item)
         
+        market_place_item_listing, has_more = await get_market_place_item_listing_inbox(
+            interaction_event.user_id, now, page_index, page_size
+        )
         
         await client.interaction_response_message_edit(
             interaction_event,
-            components = build_claim_success_components(
-                user_id,
-                receive_items,
-                item,
-                item_amount,
-                reward_balance,
-                fee,
+            components = build_inbox_view_components(
+                interaction_event.user,
+                interaction_event.guild_id,
+                now,
                 page_index,
                 page_size,
+                market_place_item_listing,
+                has_more,
+                [
+                    (receive_items, item, item_amount, reward_balance, fee),
+                ],
             ),
         )
+        
         return
     
     await client.interaction_followup_message_create(
@@ -480,7 +488,148 @@ async def handle_inbox_claim(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_PURCHASE_VIEW_RP)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_PAGE_PATTERN)
+async def handle_inbox_claim_page(
+    client,
+    interaction_event,
+    user_id,
+    page_index,
+    page_size,
+):
+    """
+    Handles an inbox view interaction.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        Client receiving this interaction.
+    
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    user_id : `str`
+        THe source user's identifier as a string representing a hexadecimal integer.
+    
+    page_index : `str`
+        The page's index to redirect back to as a string representing a hexadecimal integer.
+    
+    page_size : `str`
+        The page's size to redirect back to as a string representing a hexadecimal integer.
+    """
+    try:
+        user_id = int(user_id, 16)
+        page_index = int(page_index, 16)
+        page_size = int(page_size, 16)
+    except ValueError:
+        return
+    
+    if interaction_event.user_id != user_id:
+        return
+    
+    await client.interaction_component_acknowledge(
+        interaction_event,
+        False,
+    )
+    
+    while True:
+        adventure = await get_active_adventure(user_id)
+        if (adventure is not None):
+            error_message = 'You cannot claim while on adventure.'
+            break
+        
+        now = DateTime.now(TimeZone.utc)
+        market_place_item_listing, has_more = await get_market_place_item_listing_inbox(
+            interaction_event.user_id, now, page_index, page_size
+        )
+        
+        # Collect changes.
+        claim_elements_and_market_place_items = None
+        
+        for market_place_item in market_place_item_listing:
+            purchaser_user_id = market_place_item.purchaser_user_id
+            if purchaser_user_id == user_id:
+                flag_mask = MARKET_PLACE_ITEM_FLAG_PURCHASER_RETRIEVED
+            else:
+                flag_mask = MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED
+            
+            flags = market_place_item.flags
+            if flags & flag_mask:
+                continue
+            
+            item = get_item(market_place_item.item_id)
+            item_amount = market_place_item.item_amount
+            reward_balance = market_place_item.purchaser_balance_amount
+            
+            # Modify the flags at the start to avoid multi retrieval
+            market_place_item.flags = flags | flag_mask
+            
+            if (not purchaser_user_id) or (purchaser_user_id == user_id):
+                receive_items = True
+                fee = 0
+            
+            else:
+                receive_items = False
+                fee = (reward_balance // 100) - market_place_item.initial_sell_fee
+                if fee > 0:
+                    reward_balance -= fee
+            
+            if claim_elements_and_market_place_items is None:
+                claim_elements = []
+                market_place_items = []
+                claim_elements_and_market_place_items = (claim_elements, market_place_items)
+            else:
+                claim_elements, market_place_items = claim_elements_and_market_place_items
+            
+            claim_elements.append((receive_items, item, item_amount, reward_balance, fee),)
+            market_place_items.append(market_place_item)
+        
+        # Apply changes as required.
+        if (claim_elements_and_market_place_items is not None):
+            claim_elements, market_place_items = claim_elements_and_market_place_items
+            
+            reward_balance = sum(claim_element[3] for claim_element in claim_elements)
+            if reward_balance:
+                user_balance = await get_user_balance(user_id)
+                user_balance.modify_balance_by(reward_balance)
+                await save_user_balance(user_balance)
+            
+            if any(claim_element[0] for claim_element in claim_elements):
+                inventory = await get_inventory(user_id)
+                for claim_element in claim_elements:
+                    if claim_element[0]:
+                        inventory.modify_item_amount(claim_element[1], claim_element[2])
+                await save_inventory(inventory)
+           
+            for market_place_item in market_place_items:
+                await update_market_place_item(market_place_item)
+        
+        
+        await client.interaction_response_message_edit(
+            interaction_event,
+            components = build_inbox_view_components(
+                interaction_event.user,
+                interaction_event.guild_id,
+                now,
+                page_index,
+                page_size,
+                market_place_item_listing,
+                has_more,
+                (None if claim_elements_and_market_place_items is None else claim_elements_and_market_place_items[0]),
+            ),
+        )
+        
+        return
+    
+    await client.interaction_followup_message_create(
+        interaction_event,
+        content = error_message,
+        show_for_invoking_user_only = True,
+    )
+
+
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_PURCHASE_VIEW_PATTERN)
 async def handle_purchase_view(
     client,
     interaction_event,
@@ -558,7 +707,7 @@ async def handle_purchase_view(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_OFFER_RP)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_OFFER_PATTERN)
 async def handle_purchase_details_external(
     client,
     interaction_event,
@@ -627,7 +776,7 @@ async def handle_purchase_details_external(
                 0,
                 now,
                 0,
-                PAGE_SIZE_DEFAULT,
+                MARKET_PLACE_VIEW_PAGE_SIZE_DEFAULT,
                 False,
                 market_place_item,
             ),
@@ -641,7 +790,7 @@ async def handle_purchase_details_external(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_PURCHASE_DETAILS_RP)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_PURCHASE_DETAILS_PATTERN)
 async def handle_purchase_details(
     client,
     interaction_event,
@@ -736,7 +885,7 @@ async def handle_purchase_details(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_BID_RP)
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_BID_PATTERN)
 async def handle_bid_invocation(
     client,
     interaction_event,
@@ -845,7 +994,7 @@ async def handle_bid_invocation(
     )
 
 
-@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_BID_RP, target = 'form')
+@FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_MARKET_PLACE_BID_PATTERN, target = 'form')
 async def handle_bid_confirmation(
     client,
     interaction_event,

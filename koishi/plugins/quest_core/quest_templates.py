@@ -1539,7 +1539,7 @@ QUEST_TEMPLATE_TEWI_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_RICE] = QuestT
         '\n'
         'Please bring the rice at least a few days before the full moon.'
     ),
-    3,
+    4,
     1,
     ITEM_ID_TEWI,
     (
@@ -1549,7 +1549,7 @@ QUEST_TEMPLATE_TEWI_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_RICE] = QuestT
     (
         QuestRewardGeneratorBalance(26000, 1000, 80, 120),
         QuestRewardGeneratorItemExactFix(ITEM_ID_DANGO, 3),
-        QuestRewardGeneratorCredibility(10),
+        QuestRewardGeneratorCredibility(60),
     ),
 )
 

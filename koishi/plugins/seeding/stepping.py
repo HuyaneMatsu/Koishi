@@ -22,11 +22,9 @@ def step_seed_initial(seed, action_count):
     -------
     seed : `int`
     """
-    if action_count <= 1:
+    if action_count <= 0:
         return seed
     
-    # Reduce it by one since the first step is arrival.
-    action_count -= 1
     # After the 31th stepping we repeat, so reduce the amount of steps.
     action_count &= 31
     

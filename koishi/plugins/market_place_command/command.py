@@ -11,7 +11,9 @@ from ...bots import FEATURE_CLIENTS
 from ..adventure_core import get_active_adventure
 from ..inventory_core import create_item_suggestions, get_inventory, select_item
 from ..market_place_core import (
-    get_market_place_item_listing_active, get_market_place_item_listing_inbox, get_market_place_item_listing_own_offers
+    get_market_place_item_listing_active, get_market_place_item_listing_inbox, get_market_place_item_listing_own_offers,
+    MARKET_PLACE_INBOX_PAGE_SIZE_DEFAULT, MARKET_PLACE_OWN_OFFERS_PAGE_SIZE_DEFAULT,
+    MARKET_PLACE_VIEW_PAGE_SIZE_DEFAULT
 )
 from ..user_balance import get_user_balance
 from ..user_settings import USER_SETTINGS_FEATURE_FLAG_SHIFT_MARKET_PLACE_INBOX, get_one_user_settings
@@ -22,7 +24,6 @@ from .component_building import (
 )
 from .constants import (
     DURATION_DAYS_DEFAULT, DURATION_DAYS_THRESHOLD_LOWER, DURATION_DAYS_THRESHOLD_UPPER, ITEM_CATEGORY_CHOICES,
-    PAGE_SIZE_DEFAULT
 )
 from .helpers import calculate_initial_sell_fee
 from .item_name_auto_completion import (
@@ -221,7 +222,7 @@ async def command_own_offers(
     now = DateTime.now(TimeZone.utc)
     
     market_place_item_listing, has_more = await get_market_place_item_listing_own_offers(
-        interaction_event.user_id, now, 0, PAGE_SIZE_DEFAULT
+        interaction_event.user_id, now, 0, MARKET_PLACE_OWN_OFFERS_PAGE_SIZE_DEFAULT
     )
     
     await client.interaction_response_message_edit(
@@ -231,7 +232,7 @@ async def command_own_offers(
             interaction_event.guild_id,
             now,
             0,
-            PAGE_SIZE_DEFAULT,
+            MARKET_PLACE_OWN_OFFERS_PAGE_SIZE_DEFAULT,
             market_place_item_listing,
             has_more,
         ),
@@ -269,7 +270,7 @@ async def command_inbox(
     
     if (user_settings.feature_flags >> USER_SETTINGS_FEATURE_FLAG_SHIFT_MARKET_PLACE_INBOX) & 1:
         market_place_item_listing, has_more = await get_market_place_item_listing_inbox(
-            interaction_event.user_id, now, 0, PAGE_SIZE_DEFAULT
+            interaction_event.user_id, now, 0, MARKET_PLACE_INBOX_PAGE_SIZE_DEFAULT
         )
     else:
         market_place_item_listing = []
@@ -282,9 +283,10 @@ async def command_inbox(
             interaction_event.guild_id,
             now,
             0,
-            PAGE_SIZE_DEFAULT,
+            MARKET_PLACE_INBOX_PAGE_SIZE_DEFAULT,
             market_place_item_listing,
             has_more,
+            None,
         ),
     )
 
@@ -332,7 +334,7 @@ async def command_purchase(
     now = DateTime.now(TimeZone.utc)
     
     market_place_item_listing, has_more = await get_market_place_item_listing_active(
-        (0 if item is None else item.id), required_flags, now, 0, PAGE_SIZE_DEFAULT
+        (0 if item is None else item.id), required_flags, now, 0, MARKET_PLACE_VIEW_PAGE_SIZE_DEFAULT
     )
     
     await client.interaction_response_message_edit(
@@ -343,7 +345,7 @@ async def command_purchase(
             required_flags,
             now,
             0,
-            PAGE_SIZE_DEFAULT,
+            MARKET_PLACE_VIEW_PAGE_SIZE_DEFAULT,
             market_place_item_listing,
             has_more,
         ),

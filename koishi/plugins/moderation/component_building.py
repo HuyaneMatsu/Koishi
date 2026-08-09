@@ -14,9 +14,9 @@ from .constants import (
     EMOJI_PAGE_PREVIOUS, REASON_ALLOWED_LENGTH_THRESHOLD, TOP_LIST_PAGE_SIZE
 )
 from .content_building import (
-    produce_mod_other_completion_header, produce_mod_other_form_title, produce_mod_other_notification_header,
-    produce_mod_self_completion_header, produce_mod_self_form_title, produce_top_list_content, produce_top_list_header,
-    produce_user_banned
+    produce_mod_other_completion_header, produce_mod_other_form_description, produce_mod_other_notification_header,
+    produce_mod_self_completion_header, produce_mod_self_form_description, produce_top_list_content,
+    produce_top_list_header, produce_user_banned
 )
 from .custom_ids import (
     CUSTOM_ID_DELETE_MESSAGE_DURATION, CUSTOM_ID_DURATION, CUSTOM_ID_MOD_OTHER_BUILDER, CUSTOM_ID_MOD_SELF_BUILDER,
@@ -170,7 +170,9 @@ def build_mod_other_form(
     -------
     interaction_form : ``InteractionForm``
     """
-    components = []
+    components = [
+        create_text_display(''.join([*produce_mod_other_form_description(action_type, target, guild)])),
+    ]
     
     if (action_type & ACTION_TYPE_MASK_BOUND_USER) and (target is None):
         components.append(build_users_input_component())
@@ -187,7 +189,7 @@ def build_mod_other_form(
         components.append(build_duration_input_component(duration_default))
     
     return InteractionForm(
-        ''.join([*produce_mod_other_form_title(action_type, target, guild)]),
+        'Confirmation',
         components,
         custom_id = CUSTOM_ID_MOD_OTHER_BUILDER(action_type, (0 if target is None else target.id)),
     )
@@ -214,7 +216,9 @@ def build_mod_self_form(
     -------
     interaction_form : ``InteractionForm``
     """
-    components = []
+    components = [
+        create_text_display(''.join([*produce_mod_self_form_description(action_type, guild)])),
+    ]
     
     components.append(build_reason_input_component(None))
     
@@ -222,7 +226,7 @@ def build_mod_self_form(
         components.append(build_duration_input_component(duration_default))
     
     return InteractionForm(
-        ''.join([*produce_mod_self_form_title(action_type, guild)]),
+        'Confirmation',
         components,
         custom_id = CUSTOM_ID_MOD_SELF_BUILDER(action_type),
     )

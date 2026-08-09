@@ -6,6 +6,7 @@ from .link import *
 from .migrate import *
 
 from .ip_log_filter import *
+from .ip_log_filter_likely_non_bots import *
 from .webapp import *
 
 
@@ -18,5 +19,6 @@ __all__ = (
     *migrate.__all__,
     
     *ip_log_filter.__all__,
+    *ip_log_filter_likely_non_bots.__all__,
     *webapp.__all__,
 )

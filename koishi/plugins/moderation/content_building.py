@@ -191,9 +191,9 @@ def produce_error_message_mod_self_need_higher_role_than(action_type):
     yield ' you.'
 
 
-def produce_mod_other_form_title(action_type, target, guild):
+def produce_mod_other_form_description(action_type, target, guild):
     """
-    Produces mod other form title.
+    Produces mod other form description.
     
     This function is an iterable generator.
     
@@ -212,6 +212,7 @@ def produce_mod_other_form_title(action_type, target, guild):
     -------
     part : `str`
     """
+    yield '### '
     if action_type & ACTION_TYPE_MASK_BOUND_GUILD:
         if (action_type == ACTION_TYPE_INVITES_DISABLE) or (action_type == ACTION_TYPE_INVITES_ENABLE):
             yield ('Disabling' if action_type == ACTION_TYPE_INVITES_DISABLE else 'Enabling')
@@ -253,7 +254,7 @@ def produce_mod_other_form_title(action_type, target, guild):
     yield '.'
 
 
-def produce_mod_self_form_title(action_type, guild):
+def produce_mod_self_form_description(action_type, guild):
     """
     Produces mod self form title.
     
@@ -271,6 +272,7 @@ def produce_mod_self_form_title(action_type, guild):
     -------
     part : `str`
     """
+    yield '### '
     if (action_type == ACTION_TYPE_BAN):
         action_name = 'Banning'
     elif (action_type == ACTION_TYPE_MUTE):
