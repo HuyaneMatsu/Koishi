@@ -7,10 +7,10 @@ from ...item_core import (
     get_item_nullable
 )
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD, QUEST_TEMPLATE_ID_MYSTIA_PEACH, Quest,
+    AMOUNT_TYPE_COUNT, QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD, QUEST_TEMPLATE_ID_MYSTIA_PEACH, Quest,
     QuestRequirementInstantiableDuration, QuestRequirementInstantiableItemExact, QuestRequirementInstantiableItemGroup,
     QuestRequirementSerialisableItemExact, QuestRewardInstantiableBalance, QuestRewardInstantiableCredibility,
-    get_quest_template_nullable
+    get_quest_template_nullable, linked_quest_create
 )
 
 from ..content_building import produce_quest_details_base_section
@@ -55,6 +55,7 @@ def _iter_options():
         ),
         quest_template_mystia_peach,
         1,
+        False,
         (
             (
                 f'**Task: Submit 20 {item_peach.emoji} {item_peach.name} to Mystia.**\n'
@@ -79,6 +80,7 @@ def _iter_options():
         ),
         None,
         1,
+        False,
         (
             '',
             False,
@@ -95,6 +97,7 @@ def _iter_options():
         ),
         quest_template_mystia_firewood,
         1,
+        False,
         (
             f'{quest_template_mystia_firewood.description}',
             True,
@@ -114,6 +117,7 @@ def _iter_options():
         ),
         quest_template_mystia_firewood,
         1,
+        False,
         (
             (
                 f'**Task: Submit 20 {item_group_firewood.emoji} {item_group_firewood.name} to Mystia.**\n'
@@ -126,7 +130,7 @@ def _iter_options():
     
     yield (
         'linked',
-        LinkedQuest(
+        linked_quest_create(
             user_id,
             guild_id,
             batch_id,
@@ -141,6 +145,7 @@ def _iter_options():
         None,
         quest_template_mystia_peach,
         1,
+        False,
         (
             (
                 f'**Task: Submit 0 / 20 {item_peach.emoji} {item_peach.name}, '
@@ -152,10 +157,42 @@ def _iter_options():
             True,
         ),
     )
+    
+    yield (
+        'linked - highlight only missing',
+        linked_quest_create(
+            user_id,
+            guild_id,
+            batch_id,
+            QUEST_TEMPLATE_ID_MYSTIA_PEACH,
+            (
+                QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20, 0),
+                QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 19, 19),
+                QuestRequirementSerialisableItemExact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_COUNT, 18, 2),
+            ),
+            None,
+        ),
+        None,
+        quest_template_mystia_peach,
+        1,
+        True,
+        (
+            (
+                f'**Task:** Submit **0 / 20 {item_peach.emoji} {item_peach.name}**, '
+                f'19 / 19 {item_strawberry.emoji} {item_strawberry.name} and '
+                f'**2 / 18 {item_scarlet_onion.emoji} {item_scarlet_onion.name}** to Mystia.\n'
+                f'\n'
+                f'{quest_template_mystia_peach.description}'
+            ),
+            True,
+        ),
+    )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).named_first().returning_last())
-def test__produce_quest_details_base_section(linked_quest, quest, quest_template, user_level):
+def test__produce_quest_details_base_section(
+    linked_quest, quest, quest_template, user_level, highlight_only_missing_requirements
+):
     """
     Tests whether ``produce_quest_details_base_section`` works as intended.
     
@@ -173,13 +210,18 @@ def test__produce_quest_details_base_section(linked_quest, quest, quest_template
     user_level : `int`
         The user's adventurer rank.
     
+    highlight_only_missing_requirements : `bool`
+        Whether only missing requirements should be highlighted.
+    
     Returns
     -------
     output : `(str, bool)`
     """
     output = []
     
-    generator = produce_quest_details_base_section(linked_quest, quest, quest_template, user_level)
+    generator = produce_quest_details_base_section(
+        linked_quest, quest, quest_template, user_level, highlight_only_missing_requirements
+    )
     
     while True:
         try:

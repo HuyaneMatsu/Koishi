@@ -9,7 +9,7 @@ from math import ceil
 from PIL import Image as PIL
 from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import (
-    BUILTIN_EMOJIS, Color, DATETIME_FORMAT_CODE, DiscordException, Embed, ERROR_CODES, ICON_TYPE_NONE,
+    BUILTIN_EMOJIS, Color, DATETIME_FORMAT_CODE, Embed, ICON_TYPE_NONE,
     InviteTargetType, KOKORO, Permission, Status, cchunkify, elapsed_time, escape_markdown, parse_color
 )
 from hata.discord.application.application.constants import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID

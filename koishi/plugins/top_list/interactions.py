@@ -149,7 +149,7 @@ async def handle_top_list_page(client, interaction_event, user_id, top_list_type
         False,
     )
     
-    processed_entries_and_has_more = await get_top_list_entries(top_list_type, 0)
+    processed_entries_and_has_more = await get_top_list_entries(top_list_type, page_index)
     
     await client.interaction_response_message_edit(
         interaction_event,

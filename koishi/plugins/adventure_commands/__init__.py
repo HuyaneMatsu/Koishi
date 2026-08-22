@@ -22,13 +22,14 @@ __all__ = (
 )
 
 
-from ..adventure_core import set_adventure_return_notifier
+from ..adventure_core import set_adventure_action_notifier, set_adventure_return_notifier
 
 
 def setup(module):
     """
     Called when the plugin is loaded. Sets notifiers.
     """
+    set_adventure_action_notifier(adventure_action_notifier)
     set_adventure_return_notifier(adventure_return_notifier)
 
 
@@ -36,4 +37,5 @@ def teardown(module):
     """
     Called when the plugin is unloaded. Removes the notifiers.
     """
+    set_adventure_action_notifier(None)
     set_adventure_return_notifier(None)

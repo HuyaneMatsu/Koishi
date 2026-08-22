@@ -10,7 +10,7 @@ from ...bot_utils.models import DB_ENGINE, USER_SETTINGS_TABLE, user_settings_mo
 
 from .cache import get_more_from_cache, get_one_from_cache, put_more_to_cache, put_none_to_cache, put_one_to_cache
 from .helpers import merge_results
-from .user_settings import UserSettings
+from .user_settings import user_settings_create, user_settings_create_from_entry
 
 
 async def get_one_user_settings(user_id):
@@ -33,7 +33,7 @@ async def get_one_user_settings(user_id):
         user_settings = await _query_one_user_settings(user_id)
         if user_settings is None:
             put_none_to_cache(user_id)
-            user_settings = UserSettings(user_id)
+            user_settings = user_settings_create(user_id)
         else:
             put_one_to_cache(user_settings)
     
@@ -62,7 +62,7 @@ async def get_one_user_settings_with_connector(user_id, connector):
         user_settings = await _query_one_user_settings_with_connector(user_id, connector)
         if user_settings is None:
             put_none_to_cache(user_id)
-            user_settings = UserSettings(user_id)
+            user_settings = user_settings_create(user_id)
         else:
             put_one_to_cache(user_settings)
     
@@ -123,7 +123,7 @@ async def _query_one_user_settings_with_connector(user_id, connector):
     if entry is None:
         result = None
     else:
-        result = UserSettings.from_entry(entry)
+        result = user_settings_create_from_entry(entry)
     
     return result
 
@@ -159,7 +159,7 @@ async def get_more_user_settings(user_ids):
             to_merge = []
             for user_id in misses:
                 put_none_to_cache(user_id)
-                to_merge.append(UserSettings(user_id))
+                to_merge.append(user_settings_create(user_id))
             
             user_settings = merge_results(user_settings, to_merge)
     
@@ -193,7 +193,7 @@ async def get_more_user_settings_with_connector(user_ids, connector):
             to_merge = []
             for user_id in misses:
                 put_none_to_cache(user_id)
-                to_merge.append(UserSettings(user_id))
+                to_merge.append(user_settings_create(user_id))
             
             user_settings = merge_results(user_settings, to_merge)
     
@@ -254,7 +254,7 @@ async def _query_more_user_settings_with_connector(user_ids, connector):
     
     if response.rowcount:
         entries = await response.fetchall()
-        results = [UserSettings.from_entry(entry) for entry in entries]
+        results = [user_settings_create_from_entry(entry) for entry in entries]
         
         for result in results:
             try:

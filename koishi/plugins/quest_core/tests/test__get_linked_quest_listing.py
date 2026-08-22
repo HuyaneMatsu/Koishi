@@ -2,7 +2,7 @@ import vampytest
 from scarletio import Task, get_event_loop, skip_ready_cycle
 
 from ..constants import LINKED_QUEST_LISTING_CACHE, LINKED_QUEST_LISTING_GET_QUERY_TASKS
-from ..linked_quest import LinkedQuest
+from ..linked_quest import linked_quest_create
 from ..linked_quest_completion_states import LINKED_QUEST_COMPLETION_STATE_COMPLETED
 from ..queries import get_linked_quest_listing
 
@@ -60,7 +60,7 @@ async def test__get_linked_quest_listing__in_cache():
     entry_id_2 = 124
     additional_input_fields_2 = _create_linked_quest_additional_input_fields()
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id_0,
         guild_id_0,
         batch_id_0,
@@ -68,7 +68,7 @@ async def test__get_linked_quest_listing__in_cache():
     )
     linked_quest_0.entry_id = entry_id_0
     
-    linked_quest_1 = LinkedQuest(
+    linked_quest_1 = linked_quest_create(
         user_id_1,
         guild_id_1,
         batch_id_1,
@@ -76,7 +76,7 @@ async def test__get_linked_quest_listing__in_cache():
     )
     linked_quest_1.entry_id = entry_id_1
     
-    linked_quest_2 = LinkedQuest(
+    linked_quest_2 = linked_quest_create(
         user_id_0,
         guild_id_2,
         batch_id_2,
@@ -165,7 +165,7 @@ async def test__get_linked_quest_listing__query():
     entry_id_1 = 124
     additional_input_fields_1 = _create_linked_quest_additional_input_fields()
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id_0,
         guild_id_0,
         batch_id_0,
@@ -173,7 +173,7 @@ async def test__get_linked_quest_listing__query():
     )
     linked_quest_0.entry_id = entry_id_0
     
-    linked_quest_1 = LinkedQuest(
+    linked_quest_1 = linked_quest_create(
         user_id_0,
         guild_id_1,
         batch_id_1,
@@ -254,7 +254,7 @@ async def test__get_linked_quest_listing__double_query():
     entry_id_0 = 125
     additional_input_fields_0 = _create_linked_quest_additional_input_fields()
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id_0,
         guild_id_0,
         batch_id_0,

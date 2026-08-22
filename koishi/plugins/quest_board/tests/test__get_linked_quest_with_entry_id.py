@@ -2,7 +2,7 @@ import vampytest
 
 from ...quest_core import (
     LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
-    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, get_quest_template_nullable
+    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, get_quest_template_nullable, linked_quest_create
 )
 
 from ..helpers import get_linked_quest_with_entry_id
@@ -17,7 +17,7 @@ def _iter_options():
     assert quest_template_0 is not None
     linked_quest_entry_id_0 = 533
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id,
         guild_id,
         123,
@@ -33,7 +33,7 @@ def _iter_options():
     quest_amount_1 = 18
     linked_quest_entry_id_1 = 534
     
-    linked_quest_1 = LinkedQuest(
+    linked_quest_1 = linked_quest_create(
         user_id,
         guild_id,
         124,
@@ -49,7 +49,7 @@ def _iter_options():
     quest_amount_2 = 174000
     linked_quest_entry_id_2 = 535
     
-    linked_quest_2 = LinkedQuest(
+    linked_quest_2 = linked_quest_create(
         user_id,
         guild_id,
         125,

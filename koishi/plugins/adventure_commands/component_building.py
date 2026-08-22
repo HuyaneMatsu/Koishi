@@ -11,21 +11,22 @@ from ..adventure_core import (
     ADVENTURE_STATE_FINALIZED, can_cancel_adventure_after, can_cancel_adventure_now, iter_loot_data
 )
 from ..item_core import butcher_estimate_energy_cost, butcher_estimate_loot_chance_and_amounts
+from ..user_settings import USER_SETTINGS_CUSTOM_ID_NOTIFICATION_ADVENTURE_ACTION_DISABLE
 
 from .constants import (
     ACTIVE_ADVENTURE_ACTION_LIMIT, ADVENTURE_ACTION_LISTING_PAGE_SIZE, ADVENTURE_CANCELLATION_MODE_AFTER,
     ADVENTURE_CANCELLATION_MODE_NOW,
 )
 from .content_building import (
-    produce_adventure_action_listing_view_header, produce_adventure_action_short_representation,
-    produce_adventure_action_view_description, produce_adventure_action_view_header,
-    produce_adventure_cancellation_confirmation_description, produce_adventure_initial_representation,
-    produce_adventure_listing_view_header, produce_adventure_return_notification_description,
-    produce_adventure_return_notification_header, produce_adventure_short_representation,
-    produce_adventure_view_description_active, produce_adventure_view_description_finalized,
-    produce_adventure_view_header, produce_butcher_done_description, produce_butcher_header,
-    produce_butcher_item_description, produce_butcher_recovering_until_footer, produce_butcher_step_description,
-    produce_loot_listing
+    produce_adventure_action_listing_view_header, produce_adventure_action_notification_header,
+    produce_adventure_action_short_representation, produce_adventure_action_view_description,
+    produce_adventure_action_view_header, produce_adventure_cancellation_confirmation_description,
+    produce_adventure_initial_representation, produce_adventure_listing_view_header,
+    produce_adventure_return_notification_description, produce_adventure_return_notification_header,
+    produce_adventure_short_representation, produce_adventure_view_description_active,
+    produce_adventure_view_description_finalized, produce_adventure_view_header, produce_butcher_done_description,
+    produce_butcher_header, produce_butcher_item_description, produce_butcher_recovering_until_footer,
+    produce_butcher_step_description, produce_loot_listing
 )
 from .custom_ids import (
     CUSTOM_ID_ADVENTURE_ACTION_BATTLE_LOGS_BUILDER, CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER,
@@ -956,6 +957,72 @@ def build_adventure_return_notification_components(adventure):
                     False,
                     0,
                 ),
+            ),
+        ),
+    )
+    
+    return components
+
+
+def build_adventure_action_notification_components(adventure, adventure_action):
+    """
+    Builds components showing adventure actions.
+    
+    Parameters
+    ----------
+    adventure : ``Adventure``
+        The adventure the user is on.
+    
+    adventure_action : ``AdventureAction``
+        The adventure action to display.
+    
+    Returns
+    -------
+    components : ``list<Component>``
+    """
+    components = []
+    
+    # ---- Header ----
+    
+    components.append(
+        create_text_display(''.join([*produce_adventure_action_notification_header(adventure, adventure_action)]))
+    )
+    components.append(create_separator())
+    
+    # ---- Battle ----
+    
+    # Battles are not implemented yet.
+    
+    # ---- Loot ----
+    
+    if (adventure_action.loot_data is not None):
+        components.append(
+            create_text_display(''.join([*produce_loot_listing(
+                group_adventure_action_loot_by_state(adventure_action)
+            )])),
+        )
+        components.append(create_separator())
+    
+    # ---- Controls ----
+    
+    components.append(
+        create_row(
+            create_button(
+                'View adventure',
+                custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
+                    adventure.user_id, adventure_action.adventure_entry_id, False, 0,
+                ),
+            ),
+            create_button(
+                'View battle logs',
+                enabled = False, # Battles are not implemented yet.
+                custom_id = CUSTOM_ID_ADVENTURE_ACTION_BATTLE_LOGS_BUILDER(
+                    adventure.user_id, adventure_action.adventure_entry_id, adventure_action.entry_id
+                ),
+            ),
+            create_button(
+                'I don\'t want notifs, nya!!',
+                custom_id = USER_SETTINGS_CUSTOM_ID_NOTIFICATION_ADVENTURE_ACTION_DISABLE,
             ),
         ),
     )

@@ -6,8 +6,6 @@ from .helpers import *
 from .interactions import *
 from .user_settings import *
 from .option import *
-from .option_bit import *
-from .option_bit_with_hook import *
 from .options import *
 from .queries import *
 from .utils import *
@@ -22,8 +20,6 @@ __all__ = (
     *interactions.__all__,
     *user_settings.__all__,
     *option.__all__,
-    *option_bit.__all__,
-    *option_bit_with_hook.__all__,
     *options.__all__,
     *queries.__all__,
     *utils.__all__,

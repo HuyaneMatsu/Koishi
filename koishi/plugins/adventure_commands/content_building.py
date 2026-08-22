@@ -228,6 +228,30 @@ def produce_adventure_return_notification_description(adventure):
     yield '.'
 
 
+def produce_adventure_action_notification_header(adventure, adventure_action):
+    """
+    Produces adventure action notification header.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    adventure : ``Adventure``
+        The adventure the user is on.
+    
+    adventure_action : ``AdventureAction``
+        The adventure action to display.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    yield '### '
+    yield from _produce_adventure_action_type_for_headers(adventure_action)
+    yield ' at '
+    yield from _produce_adventure_location_for_headers(adventure)
+
+
 def produce_adventure_action_listing_view_header(adventure, page_index):
     """
     Produces an adventure action listing view header.

@@ -5,10 +5,10 @@ from hata import BUILTIN_EMOJIS
 
 from ...item_core import ITEM_ID_BLUEFRANKISH, ITEM_ID_PEACH
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest,
+    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED,
     QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QuestRequirementSerialisableDuration,
     QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
-    QuestRewardSerialisableCredibility, get_quest_template_nullable
+    QuestRewardSerialisableCredibility, get_quest_template_nullable, linked_quest_create
 )
 
 from ..content_building import produce_linked_quest_short_description
@@ -35,7 +35,7 @@ def _iter_options():
     reward_balance = 2600
     reward_credibility = 4
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,
@@ -61,7 +61,7 @@ def _iter_options():
         ),
     )
     
-    linked_quest_1 = LinkedQuest(
+    linked_quest_1 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,
@@ -89,7 +89,7 @@ def _iter_options():
         ),
     )
     
-    linked_quest_2 = LinkedQuest(
+    linked_quest_2 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,
@@ -117,7 +117,7 @@ def _iter_options():
         ),
     )
     
-    linked_quest_3 = LinkedQuest(
+    linked_quest_3 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,
@@ -143,7 +143,7 @@ def _iter_options():
         ),
     )
     
-    linked_quest_4 = LinkedQuest(
+    linked_quest_4 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,

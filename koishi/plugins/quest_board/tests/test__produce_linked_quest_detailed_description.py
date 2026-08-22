@@ -5,9 +5,9 @@ from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ...item_core import ITEM_ID_PEACH, ITEM_ID_SCARLET_ONION, ITEM_ID_STRAWBERRY, get_item_nullable
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QuestRequirementSerialisableDuration,
+    AMOUNT_TYPE_COUNT, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QuestRequirementSerialisableDuration,
     QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
-    QuestRewardSerialisableCredibility, get_quest_template_nullable
+    QuestRewardSerialisableCredibility, get_quest_template_nullable, linked_quest_create
 )
 
 from ..content_building import produce_linked_quest_detailed_description
@@ -31,7 +31,7 @@ def _iter_options():
     batch_id = 55555
     
     yield (
-        LinkedQuest(
+        linked_quest_create(
             user_id,
             guild_id,
             batch_id,
@@ -48,6 +48,7 @@ def _iter_options():
         ),
         quest_template,
         1,
+        False,
         (
             f'**Task: Submit 0 / 20 {item_peach.emoji} {item_peach.name} to Mystia.**\n'
             f'\n'
@@ -66,7 +67,7 @@ def _iter_options():
     )
     
     yield (
-        LinkedQuest(
+        linked_quest_create(
             user_id,
             guild_id,
             batch_id,
@@ -80,6 +81,7 @@ def _iter_options():
         ),
         quest_template,
         1,
+        False,
         (
             f'**Task: Submit 0 / 20 {item_peach.emoji} {item_peach.name}, '
             f'0 / 19 {item_strawberry.emoji} {item_strawberry.name} and '
@@ -98,7 +100,9 @@ def _iter_options():
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__produce_linked_quest_detailed_description(linked_quest, quest_template, user_level):
+def test__produce_linked_quest_detailed_description(
+    linked_quest, quest_template, user_level, highlight_only_missing_requirements
+):
     """
     Tests whether ``produce_linked_quest_detailed_description`` works as intended.
     
@@ -113,11 +117,16 @@ def test__produce_linked_quest_detailed_description(linked_quest, quest_template
     user_level : `int`
         The user's adventurer rank.
     
+    highlight_only_missing_requirements : `bool`
+        Whether only missing requirements should be highlighted.
+    
     Returns
     -------
     output : `str`
     """
-    output = [*produce_linked_quest_detailed_description(linked_quest, quest_template, user_level)]
+    output = [*produce_linked_quest_detailed_description(
+        linked_quest, quest_template, user_level, highlight_only_missing_requirements
+    )]
     
     for element in output:
         vampytest.assert_instance(element, str)

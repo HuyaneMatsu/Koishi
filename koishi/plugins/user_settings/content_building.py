@@ -155,7 +155,7 @@ def produce_option_bit_listing_description(user_settings, option_bit_listing):
         else:
             field_added = True
         
-        value = option.get(user_settings)
+        value = option.getter(option, user_settings)
         yield '- '
         yield option.display_name.capitalize()
         yield ': '

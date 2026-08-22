@@ -3,8 +3,8 @@ from datetime import datetime as DateTime, timezone as TimeZone
 import vampytest
 
 from ...quest_core import (
-    LinkedQuest, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QuestRequirementSerialisableBase,
-    QuestRequirementSerialisableExpiration
+    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QuestRequirementSerialisableBase, QuestRequirementSerialisableExpiration,
+    linked_quest_create
 )
 
 from ..helpers import get_linked_quest_expiration
@@ -12,7 +12,7 @@ from ..helpers import get_linked_quest_expiration
 
 def _iter_options():
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,
@@ -24,7 +24,7 @@ def _iter_options():
     )
     
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,
@@ -38,7 +38,7 @@ def _iter_options():
     )
     
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,

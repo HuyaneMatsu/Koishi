@@ -2,7 +2,7 @@ import vampytest
 
 from ...item_core import ITEM_GROUP_ID_KNIFE, ITEM_ID_STRAWBERRY
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest,
+    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, linked_quest_create,
     QUEST_REQUIREMENT_TYPE_ITEM_EXACT, QUEST_REQUIREMENT_TYPE_ITEM_GROUP, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
     QuestRequirementSerialisableBase, QuestRequirementSerialisableItemExact, QuestRequirementSerialisableItemGroup
 )
@@ -12,7 +12,7 @@ from ..helpers import get_linked_quest_submission_requirements_normalised
 
 def _iter_options():
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,
@@ -24,7 +24,7 @@ def _iter_options():
     )
     
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,
@@ -38,7 +38,7 @@ def _iter_options():
     )
     
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,
@@ -56,7 +56,7 @@ def _iter_options():
     )
     
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,
@@ -72,7 +72,7 @@ def _iter_options():
         ],
     )
     
-    linked_quest = LinkedQuest(
+    linked_quest = linked_quest_create(
         0,
         0,
         0,

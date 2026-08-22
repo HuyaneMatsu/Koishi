@@ -5,10 +5,11 @@ from hata import BUILTIN_EMOJIS
 
 from ...item_core import ITEM_ID_BLUEFRANKISH, ITEM_ID_PEACH, ITEM_ID_STRAWBERRY
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
+    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
     QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, Quest,
     QuestRequirementInstantiableDuration, QuestRequirementInstantiableItemExact, QuestRequirementSerialisableDuration,
-    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, get_quest_template_nullable
+    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, get_quest_template_nullable,
+    linked_quest_create
 )
 
 from ..content_building import produce_quest_short_description
@@ -55,7 +56,7 @@ def _iter_options():
         None,
     )
     
-    linked_quest_1 = LinkedQuest(
+    linked_quest_1 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,
@@ -69,7 +70,7 @@ def _iter_options():
     )
     linked_quest_1.completion_count = 1
     
-    linked_quest_2 = LinkedQuest(
+    linked_quest_2 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,

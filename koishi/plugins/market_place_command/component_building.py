@@ -412,7 +412,6 @@ def build_inbox_view_components(
     return components
 
 
-# Currently unused
 def build_claim_success_components(
     user_id,
     receive_items,

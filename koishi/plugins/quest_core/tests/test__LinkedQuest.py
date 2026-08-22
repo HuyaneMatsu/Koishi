@@ -6,7 +6,7 @@ import vampytest
 from ...item_core import ITEM_ID_STRAWBERRY
 
 from ..amount_types import AMOUNT_TYPE_WEIGHT
-from ..linked_quest import LinkedQuest
+from ..linked_quest import LinkedQuest, linked_quest_create, linked_quest_create_from_entry
 from ..linked_quest_completion_states import (
     LINKED_QUEST_COMPLETION_STATE_ACTIVE, LINKED_QUEST_COMPLETION_STATE_COMPLETED
 )
@@ -33,6 +33,7 @@ def _assert_fields_set(linked_quest):
     vampytest.assert_instance(linked_quest.batch_id, int)
     vampytest.assert_instance(linked_quest.completion_count, int)
     vampytest.assert_instance(linked_quest.completion_state, int)
+    vampytest.assert_instance(linked_quest.created_at, int)
     vampytest.assert_instance(linked_quest.entry_id, int)
     vampytest.assert_instance(linked_quest.flags, int)
     vampytest.assert_instance(linked_quest.guild_id, int)
@@ -42,9 +43,9 @@ def _assert_fields_set(linked_quest):
     vampytest.assert_instance(linked_quest.user_id, int)
 
 
-def test__LinkedQuest__new():
+def test__LinkedQuest__repr():
     """
-    Tests whether ``LinkedQuest.__new__`` works as intended.
+    Tests whether ``LinkedQuest.__repr__`` works as intended.
     """
     user_id = 202505090000
     guild_id = 202505090001
@@ -61,7 +62,39 @@ def test__LinkedQuest__new():
         QuestRewardSerialisableCredibility(4),
     )
     
-    linked_quest = LinkedQuest(
+    linked_quest = linked_quest_create(
+        user_id,
+        guild_id,
+        batch_id,
+        template_id,
+        requirements,
+        rewards,
+    )
+    
+    output = repr(linked_quest)
+    vampytest.assert_instance(output, str)
+
+
+def test__linked_quest_create():
+    """
+    Tests whether ``linked_quest_create`` works as intended.
+    """
+    user_id = 202505090000
+    guild_id = 202505090001
+    batch_id = 5666
+    template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
+    
+    requirements = (
+        QuestRequirementSerialisableDuration(3600 * 24 * 3),
+        QuestRequirementSerialisableExpiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
+        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
+    )
+    rewards = (
+        QuestRewardSerialisableBalance(2600),
+        QuestRewardSerialisableCredibility(4),
+    )
+    
+    linked_quest = linked_quest_create(
         user_id,
         guild_id,
         batch_id,
@@ -84,41 +117,9 @@ def test__LinkedQuest__new():
     vampytest.assert_eq(linked_quest.user_id, user_id)
 
 
-def test__LinkedQuest__repr():
+def test__linked_quest_create_from_entry():
     """
-    Tests whether ``LinkedQuest.__repr__`` works as intended.
-    """
-    user_id = 202505090000
-    guild_id = 202505090001
-    batch_id = 5666
-    template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
-    
-    requirements = (
-        QuestRequirementSerialisableDuration(3600 * 24 * 3),
-        QuestRequirementSerialisableExpiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
-        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
-    )
-    rewards = (
-        QuestRewardSerialisableBalance(2600),
-        QuestRewardSerialisableCredibility(4),
-    )
-    
-    linked_quest = LinkedQuest(
-        user_id,
-        guild_id,
-        batch_id,
-        template_id,
-        requirements,
-        rewards,
-    )
-    
-    output = repr(linked_quest)
-    vampytest.assert_instance(output, str)
-
-
-def test__LinkedQuest__from_entry():
-    """
-    Tests whether ``LinkedQuest.from_entry`` works as intended.
+    Tests whether ``linked_quest_create_from_entry`` works as intended.
     """
     user_id = 202505090000
     guild_id = 202505090001
@@ -137,6 +138,7 @@ def test__LinkedQuest__from_entry():
     
     completion_count = 1
     completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
+    created_at = 56666
     entry_id = 1222
     
     
@@ -149,16 +151,18 @@ def test__LinkedQuest__from_entry():
         'rewards': quest_serialisable_serialise(rewards),
         'completion_count': completion_count,
         'completion_state': completion_state,
+        'created_at': created_at,
         'id': entry_id,
     }
     
     
-    linked_quest = LinkedQuest.from_entry(entry)
+    linked_quest = linked_quest_create_from_entry(entry)
     
     _assert_fields_set(linked_quest)
     
     vampytest.assert_eq(linked_quest.completion_count, completion_count)
     vampytest.assert_eq(linked_quest.completion_state, completion_state)
+    vampytest.assert_eq(linked_quest.created_at, created_at)
     vampytest.assert_eq(linked_quest.batch_id, batch_id)
     vampytest.assert_eq(linked_quest.entry_id, entry_id)
     vampytest.assert_eq(linked_quest.flags, 0)

@@ -1,8 +1,8 @@
 import vampytest
 
 from ...quest_core import (
-    LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
-    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, get_quest_template_nullable
+    LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH,
+    get_quest_template_nullable, linked_quest_create
 )
 
 from ..helpers import get_linked_quest_for_deduplication
@@ -19,7 +19,7 @@ def _iter_options():
     linked_quest_entry_id_0 = 533
     linked_quest_batch_id_0 = 123
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id,
         guild_id,
         quest_template_id_0,
@@ -36,7 +36,7 @@ def _iter_options():
     linked_quest_entry_id_1 = 534
     linked_quest_batch_id_1 = 124
     
-    linked_quest_1 = LinkedQuest(
+    linked_quest_1 = linked_quest_create(
         user_id,
         guild_id,
         linked_quest_batch_id_1,
@@ -53,7 +53,7 @@ def _iter_options():
     linked_quest_entry_id_2 = 535
     linked_quest_batch_id_2 = 125
     
-    linked_quest_2 = LinkedQuest(
+    linked_quest_2 = linked_quest_create(
         user_id,
         guild_id,
         linked_quest_batch_id_2,

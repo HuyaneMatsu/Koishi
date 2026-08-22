@@ -24,7 +24,7 @@ def _iter_options():
     
     yield (
         adventure_action,
-        f'<t:{created_at.timestamp():.0f}:T> Gardening'
+        f'<t:{created_at.timestamp():.0f}:T> Gardening',
     )
     
     adventure_entry_id = 9993
@@ -41,7 +41,7 @@ def _iter_options():
     
     yield (
         adventure_action,
-        f'<t:{created_at.timestamp():.0f}:T> Unknown'
+        f'<t:{created_at.timestamp():.0f}:T> Unknown',
     )
 
 

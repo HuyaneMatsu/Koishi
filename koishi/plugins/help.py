@@ -73,7 +73,7 @@ CATEGORIES = (
         'Fun',
         EMOJI_PAPER_DRAGON,
         (
-            '9ball', 'ascii', 'choose', 'imaginary-friend', 'meme', 'minesweeper', 'oj', 'paranoia', 'random', 'rate',
+            '9ball', 'ascii', 'choose', 'imaginary-friend', 'meme', 'minesweeper', 'oj', 'random', 'rate',
             'roll', 'sex', 'trivia', 'urban', 'yuno'
         ),
         (),

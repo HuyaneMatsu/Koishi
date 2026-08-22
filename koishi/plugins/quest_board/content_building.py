@@ -389,7 +389,7 @@ def _produce_item_unknown_name(identifier):
     yield ITEM_NAME_DEFAULT
 
 
-def _produce_submit_summary(submission_requirement_normalised):
+def _produce_submit_summary(submission_requirement_normalised, highlight_only_missing_requirements):
     """
     Produces a single submit summary.
     
@@ -397,6 +397,9 @@ def _produce_submit_summary(submission_requirement_normalised):
     ----------
     submission_requirement_normalised : `(int, int, int, int, int)`
         Submission requirement normalised.
+    
+    highlight_only_missing_requirements : `bool`
+        Whether only missing requirements should be highlighted.
     
     Yields
     ------
@@ -428,12 +431,20 @@ def _produce_submit_summary(submission_requirement_normalised):
     else:
         name_producer = _produce_item_unknown_name
     
+    highlight = highlight_only_missing_requirements and (amount_submitted < amount_required)
+    
+    if highlight:
+        yield '**'
+    
     yield from amount_producer(amount_required, amount_submitted)
     yield ' '
     yield from name_producer(required_identifier)
     
+    if highlight:
+        yield '**'
 
-def _produce_quest_summary_line(submission_requirements_normalised, requester_id):
+
+def _produce_quest_summary_line(submission_requirements_normalised, requester_id, highlight_only_missing_requirements):
     """
     Produces a quest's summary line.
     
@@ -447,6 +458,9 @@ def _produce_quest_summary_line(submission_requirements_normalised, requester_id
     requester_id : `int`
         The quest's requester.
     
+    highlight_only_missing_requirements : `bool`
+        Whether only missing requirements should be highlighted.
+    
     Yields
     ------
     part : `str`
@@ -459,7 +473,7 @@ def _produce_quest_summary_line(submission_requirements_normalised, requester_id
         if index:
             yield (' and ' if (index == last_index) else ', ')
         
-        yield from _produce_submit_summary(submission_requirement_normalised)
+        yield from _produce_submit_summary(submission_requirement_normalised, highlight_only_missing_requirements)
         continue
     
     yield ' to '
@@ -509,7 +523,7 @@ def produce_quest_short_description(linked_quest, quest, quest_template):
     submission_requirements_normalised = get_quest_submission_requirements_normalised(quest)
     if (submission_requirements_normalised is not None):
         yield '\n'
-        yield from _produce_quest_summary_line(submission_requirements_normalised, quest_template.requester_id)
+        yield from _produce_quest_summary_line(submission_requirements_normalised, quest_template.requester_id, False)
 
 
 def produce_linked_quest_short_description(linked_quest, quest_template):
@@ -567,7 +581,7 @@ def produce_linked_quest_short_description(linked_quest, quest_template):
     submission_requirements_normalised = get_linked_quest_submission_requirements_normalised(linked_quest)
     if (submission_requirements_normalised is not None):
         yield '\n'
-        yield from _produce_quest_summary_line(submission_requirements_normalised, quest_template.requester_id)
+        yield from _produce_quest_summary_line(submission_requirements_normalised, quest_template.requester_id, False)
 
 
 def _produce_quest_rewards_listing(title, rewards_normalised):
@@ -610,7 +624,9 @@ def _produce_quest_rewards_listing(title, rewards_normalised):
             yield ITEM_NAME_DEFAULT
     
     
-def produce_quest_details_base_section(linked_quest, quest, quest_template, user_level):
+def produce_quest_details_base_section(
+    linked_quest, quest, quest_template, user_level, highlight_only_missing_requirements
+):
     """
     Builds the base of a quest's details section.
     
@@ -629,6 +645,9 @@ def produce_quest_details_base_section(linked_quest, quest, quest_template, user
     
     user_level : `int`
         The user's adventurer rank.
+    
+    highlight_only_missing_requirements : `bool`
+        Whether only missing requirements should be highlighted.
     
     Yields
     ------
@@ -650,9 +669,18 @@ def produce_quest_details_base_section(linked_quest, quest, quest_template, user
     if (submission_requirements_normalised is not None):
         field_added = True
         
-        yield '**Task: '
-        yield from _produce_quest_summary_line(submission_requirements_normalised, quest_template.requester_id)
-        yield '**'
+        yield '**Task:'
+        
+        if highlight_only_missing_requirements:
+            yield '**'
+        
+        yield ' '
+        yield from _produce_quest_summary_line(
+            submission_requirements_normalised, quest_template.requester_id, highlight_only_missing_requirements
+        )
+        
+        if not highlight_only_missing_requirements:
+            yield '**'
     
     if (quest_template is not None):
         description = quest_template.description
@@ -777,6 +805,7 @@ def produce_quest_detailed_description(quest, quest_template, user_level, comple
         quest,
         quest_template,
         user_level,
+        False,
     )
     if add_extra_line_break_after:
         yield '\n'
@@ -824,7 +853,9 @@ def produce_quest_detailed_description(quest, quest_template, user_level, comple
         yield ')'
 
 
-def produce_linked_quest_detailed_description(linked_quest, quest_template, user_level):
+def produce_linked_quest_detailed_description(
+    linked_quest, quest_template, user_level, highlight_only_missing_requirements
+):
     """
     Produces a linked quest's detailed description.
     
@@ -841,6 +872,9 @@ def produce_linked_quest_detailed_description(linked_quest, quest_template, user
     user_level : `int`
         The user's adventurer rank.
     
+    highlight_only_missing_requirements : `bool`
+        Whether only missing requirements should be highlighted.
+    
     Yields
     ------
     part : `str`
@@ -854,6 +888,7 @@ def produce_linked_quest_detailed_description(linked_quest, quest_template, user
         None,
         quest_template,
         user_level,
+        highlight_only_missing_requirements,
     )
     if add_extra_line_break_after:
         yield '\n'
@@ -1238,7 +1273,7 @@ def produce_submission_requirements_entry_description(
     ------
     part : `str`
     """
-    yield from _produce_submit_summary(submission_requirement_normalised)
+    yield from _produce_submit_summary(submission_requirement_normalised, False)
     yield ', '
     
     if not accumulated_amount:

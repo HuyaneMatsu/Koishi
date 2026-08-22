@@ -14,7 +14,7 @@ from .constants import (
     LINKED_QUEST_LISTING_CACHE, LINKED_QUEST_LISTING_CACHE_SIZE_MAX, LINKED_QUEST_LISTING_GET_QUERY_TASKS
 )
 from .flags import QUEST_FLAG_INITIALISATION_FAILURE
-from .linked_quest import LinkedQuest
+from .linked_quest import linked_quest_create_from_entry
 from .linked_quest_completion_states import LINKED_QUEST_COMPLETION_STATE_COMPLETED
 from .serialisation import quest_serialisable_serialise
 from .utils import get_current_batch_id
@@ -180,7 +180,7 @@ async def query_linked_quest_listing(user_id):
         
         results = await response.fetchall()
         if results:
-            linked_quests = [LinkedQuest.from_entry(result) for result in results]
+            linked_quests = [linked_quest_create_from_entry(result) for result in results]
         else:
             linked_quests = None
     
@@ -332,6 +332,7 @@ async def query_add_linked_quest(linked_quest):
                 completion_state = linked_quest.completion_state,
                 requirements = quest_serialisable_serialise(linked_quest.requirements),
                 rewards = quest_serialisable_serialise(linked_quest.rewards),
+                created_at = linked_quest.created_at,
             ).returning(
                 linked_quest_model.id,
             )
@@ -384,6 +385,7 @@ async def query_update_linked_quest(linked_quest):
             ).values(
                 completion_count = linked_quest.completion_count,
                 completion_state = linked_quest.completion_state,
+                created_at = linked_quest.created_at,
                 requirements = quest_serialisable_serialise(linked_quest.requirements),
             ),
         )

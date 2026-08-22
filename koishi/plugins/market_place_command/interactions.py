@@ -20,7 +20,7 @@ from ..market_place_core import (
 from ..user_balance import ALLOCATION_FEATURE_ID_MARKET_PLACE, get_user_balance, save_user_balance
 
 from .component_building import (
-    build_bid_form, build_bid_success_components, build_inbox_view_components,
+    build_bid_form, build_bid_success_components, build_claim_success_components, build_inbox_view_components,
     build_own_offers_view_components, build_purchase_details_components, build_purchase_view_components,
     build_sell_success_components
 )
@@ -360,6 +360,7 @@ async def handle_inbox_claim(
     page_index,
     page_size,
     entry_id,
+    create_standalone_response,
 ):
     """
     Handles an inbox view interaction.
@@ -385,12 +386,16 @@ async def handle_inbox_claim(
     
     entry_id : `str`
         The entry's identifier as a string representing a hexadecimal integer.
+    
+    create_standalone_response : `str`
+        Whether standalone response should be created as string representing a boolean.
     """
     try:
         user_id = int(user_id, 16)
         page_index = int(page_index, 16)
         page_size = int(page_size, 16)
         entry_id = int(entry_id, 16)
+        create_standalone_response =  int(create_standalone_response, 16)
     except ValueError:
         return
     
@@ -463,8 +468,18 @@ async def handle_inbox_claim(
             interaction_event.user_id, now, page_index, page_size
         )
         
-        await client.interaction_response_message_edit(
-            interaction_event,
+        if create_standalone_response:
+            components = build_claim_success_components(
+                interaction_event.user,
+                receive_items,
+                item,
+                item_amount,
+                reward_balance,
+                fee,
+                page_index,
+                page_size,
+            )
+        else:
             components = build_inbox_view_components(
                 interaction_event.user,
                 interaction_event.guild_id,
@@ -476,7 +491,11 @@ async def handle_inbox_claim(
                 [
                     (receive_items, item, item_amount, reward_balance, fee),
                 ],
-            ),
+            )
+        
+        await client.interaction_response_message_edit(
+            interaction_event,
+            components = components,
         )
         
         return

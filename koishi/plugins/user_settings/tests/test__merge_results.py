@@ -2,7 +2,7 @@ __all__ = ()
 
 import vampytest
 
-from ..user_settings import UserSettings
+from ..user_settings import user_settings_create_with_specification
 from ..helpers import merge_results
 
 
@@ -12,19 +12,19 @@ def _iter_options():
     user_id_2 = 202309220042
     user_id_3 = 202309220043
     
-    user_settings_0 = UserSettings.create_with_specification(
+    user_settings_0 = user_settings_create_with_specification(
         user_id_0,
         notification_daily_by_waifu = 0,
     )
-    user_settings_1 = UserSettings.create_with_specification(
+    user_settings_1 = user_settings_create_with_specification(
         user_id_1,
         notification_daily_by_waifu = 0,
     )
-    user_settings_2 = UserSettings.create_with_specification(
+    user_settings_2 = user_settings_create_with_specification(
         user_id_2,
         notification_proposal = 0,
     )
-    user_settings_3 = UserSettings.create_with_specification(
+    user_settings_3 = user_settings_create_with_specification(
         user_id_3,
         notification_daily_by_waifu = 0,
         notification_proposal = 0,

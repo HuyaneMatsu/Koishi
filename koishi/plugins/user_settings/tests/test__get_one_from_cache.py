@@ -1,7 +1,7 @@
 import vampytest
 
 from ..cache import USER_SETTINGS_CACHE, get_one_from_cache
-from ..user_settings import UserSettings
+from ..user_settings import UserSettings, user_settings_create, user_settings_create_with_specification
 
 
 def test__get_one_from_cache__miss():
@@ -41,7 +41,7 @@ def test__get_one_from_cache__hit_none():
         vampytest.assert_instance(result, UserSettings, nullable = True)
         vampytest.assert_instance(miss, bool)
         
-        vampytest.assert_eq(result, UserSettings(user_id))
+        vampytest.assert_eq(result, user_settings_create(user_id))
         vampytest.assert_eq(miss, False)
     
     finally:
@@ -55,7 +55,7 @@ def test__get_one_from_cache__hit_value():
     Case: hiz, actual values.
     """
     user_id = 202309240002
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
         notification_daily_by_waifu = 0,
     )

@@ -7,9 +7,9 @@ from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ...item_core import ITEM_ID_CARROT
 from ...quest_core import (
-    AMOUNT_TYPE_WEIGHT, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QuestRequirementSerialisableDuration,
+    AMOUNT_TYPE_WEIGHT, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QuestRequirementSerialisableDuration,
     QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
-    QuestRewardSerialisableCredibility
+    QuestRewardSerialisableCredibility, linked_quest_create
 )
 from ...user_stats_core import UserStats
 
@@ -22,7 +22,7 @@ def _iter_options():
     
     quest_amount_0 = 3600
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id,
         guild_id,
         5666,

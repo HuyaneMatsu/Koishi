@@ -8,10 +8,10 @@ from hata import (
 
 from ...item_core import ITEM_ID_CARROT, ITEM_ID_PEACH
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest,
+    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED,
     QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QuestRequirementSerialisableDuration,
     QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
-    QuestRewardSerialisableCredibility, get_quest_template_nullable
+    QuestRewardSerialisableCredibility, get_quest_template_nullable, linked_quest_create
 )
 from ...user_stats_core import UserStats
 
@@ -42,7 +42,7 @@ def _iter_options():
     quest_amount_1 = 18
     
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id,
         guild_id_0,
         5666,
@@ -60,7 +60,7 @@ def _iter_options():
     linked_quest_entry_id_0 = 123
     linked_quest_0.entry_id = linked_quest_entry_id_0
     
-    linked_quest_1 = LinkedQuest(
+    linked_quest_1 = linked_quest_create(
         user_id,
         guild_id_0,
         57777,
@@ -78,7 +78,7 @@ def _iter_options():
     linked_quest_entry_id_1 = 124
     linked_quest_1.entry_id = linked_quest_entry_id_1
     
-    linked_quest_2 = LinkedQuest(
+    linked_quest_2 = linked_quest_create(
         user_id,
         guild_id_1,
         57774,
@@ -99,7 +99,7 @@ def _iter_options():
     linked_quest_2.completion_count = 1
     linked_quest_2.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
     
-    linked_quest_3 = LinkedQuest(
+    linked_quest_3 = linked_quest_create(
         user_id,
         guild_id_0,
         57775,
@@ -119,7 +119,7 @@ def _iter_options():
     linked_quest_3.completion_count = 3
     linked_quest_3.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
     
-    linked_quest_4 = LinkedQuest(
+    linked_quest_4 = linked_quest_create(
         user_id,
         guild_id_0,
         57125,

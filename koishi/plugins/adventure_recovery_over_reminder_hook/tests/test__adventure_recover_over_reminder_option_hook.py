@@ -4,7 +4,7 @@ import vampytest
 from scarletio import skip_ready_cycle
 
 from ...reminder_notification_delivery_core import ReminderLooper
-from ...user_settings import UserSettings
+from ...user_settings import user_settings_create_with_specification
 from ...user_stats_core import UserStats
 
 from .. import adventure_recover_over_reminder_option_hook
@@ -21,7 +21,7 @@ async def test__adventure_recover_over_reminder_option_hook__not_on_recover():
     user_id = 202605080012
     date_time = None
     
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
         notification_adventure_recovery_over = 1,
     )
@@ -89,7 +89,7 @@ async def test__adventure_recover_over_reminder_option_hook__on_recover():
     user_id = 202605080013
     date_time = DateTime.now(TimeZone.utc) + TimeDelta(seconds = 5)
     
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
         notification_adventure_recovery_over = 1,
     )

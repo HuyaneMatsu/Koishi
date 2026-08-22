@@ -1,7 +1,7 @@
 import vampytest
 from hata import Client, ClientWrapper, Guild, GuildProfile, User
 
-from ..user_settings import UserSettings
+from ..user_settings import user_settings_create_with_specification
 from ..utils import get_preferred_client_for_user
 
 
@@ -21,7 +21,7 @@ def test__get_preferred_client_for_user__notifier_client_set():
     
     user = User.precreate(user_id)
     
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
         preferred_client_id = client_id_0,
     )
@@ -52,7 +52,7 @@ def test__get_preferred_client_for_user__default_client_given():
     
     user = User.precreate(user_id)
     
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
         preferred_client_id = 0,
     )
@@ -81,7 +81,7 @@ def test__get_preferred_client_for_user__available_clients():
     
     user = User.precreate(user_id)
     
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
         preferred_client_id = 0,
     )
@@ -135,7 +135,7 @@ def test__get_preferred_client_for_user__main_client():
     
     user = User.precreate(user_id)
     
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
         preferred_client_id = 0,
     )

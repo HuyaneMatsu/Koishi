@@ -2,8 +2,8 @@ import vampytest
 from dateutil.relativedelta import relativedelta as RelativeDelta
 
 from ...quest_core import (
-    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, LinkedQuest, QuestRequirementInstantiableBase,
-    QuestRequirementInstantiableDuration
+    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QuestRequirementInstantiableBase, QuestRequirementInstantiableDuration,
+    linked_quest_create
 )
 
 from ..helpers import get_linked_quest_duration_delta
@@ -11,7 +11,7 @@ from ..helpers import get_linked_quest_duration_delta
 
 def _iter_options():
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,
@@ -23,7 +23,7 @@ def _iter_options():
     )
     
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,
@@ -37,7 +37,7 @@ def _iter_options():
     )
     
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,

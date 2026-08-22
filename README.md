@@ -88,7 +88,6 @@ Although here is a "short" description for all of her commands by category:
 - `/imaginary-friend` - A collection of commands that an imaginary friend would have.
 - `/meme` - A curated list of touhou memes.
 - `/oj` - Lookup commands related the 100% Orange Juice video game.
-- `/paranoia` - Pa-pa-pa-pa-paranoia.
 - `/random` - Chooses a random number in the given range.
 - `/rate` - Rates someone between 0 and 10.
 - `/rolls` - Rolls dices.

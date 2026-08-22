@@ -1,8 +1,8 @@
 import vampytest
 
 from ..constants import USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_BY_WAIFU
-from ..option_bit import UserSettingsOptionBit
-from ..user_settings import UserSettings
+from ..option import user_settings_option_create_bit
+from ..user_settings import UserSettings, user_settings_copy, user_settings_create_with_specification
 from ..utils import set_user_settings_option
 
 
@@ -21,10 +21,10 @@ async def test__set_user_settings_option__no_change():
         saver_called = True
     
     
-    option = UserSettingsOptionBit(
+    option = user_settings_option_create_bit(
         UserSettings.notification_flags, '', '', USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_BY_WAIFU
     )
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         202309260002,
         notification_daily_by_waifu = 0,
     )
@@ -56,12 +56,12 @@ async def test__set_user_settings_option__with_change():
         nonlocal saver_called
         nonlocal saver_called_with_user_settings
         saver_called = True
-        saver_called_with_user_settings = user_settings.copy()
+        saver_called_with_user_settings = user_settings_copy(user_settings)
     
-    option = UserSettingsOptionBit(
+    option = user_settings_option_create_bit(
         UserSettings.notification_flags, '', '', USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_BY_WAIFU
     )
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         202309260002,
         notification_daily_by_waifu = 0,
     )

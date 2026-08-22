@@ -1,7 +1,7 @@
 import vampytest
 
 from ..cache import USER_SETTINGS_CACHE, put_one_to_cache
-from ..user_settings import UserSettings
+from ..user_settings import user_settings_create, user_settings_create_with_specification
 from ..queries import get_one_user_settings_with_connector
 
 
@@ -17,7 +17,7 @@ async def test__get_one_user_settings_with_connector__cache_hit():
     connector = object()
     
     user_id = 202309240060
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
         notification_daily_by_waifu = 0,
     )
@@ -60,7 +60,7 @@ async def test__get_one_user_settings_with_connector__database_hit_value():
     called_connector_with = None
     
     user_id = 202309240061
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
         notification_daily_by_waifu = 0,
     )
@@ -134,7 +134,7 @@ async def test__get_one_user_settings_with_connector__database_hit_none():
     try:
         output = await mocked(user_id, connector)
         
-        vampytest.assert_eq(output, UserSettings(user_id))
+        vampytest.assert_eq(output, user_settings_create(user_id))
         
         vampytest.assert_true(query_called)
         vampytest.assert_eq(called_with_user_id, user_id)

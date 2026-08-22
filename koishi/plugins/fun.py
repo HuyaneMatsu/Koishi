@@ -1,6 +1,6 @@
 __all__ = ()
 
-from random import random, randint
+from random import randint
 
 from hata import Client, Embed, DiscordException, ERROR_CODES
 from hata.ext.slash import P
@@ -28,18 +28,6 @@ async def message_me(client, event):
         raise
     
     yield ':3'
-
-
-@FEATURE_CLIENTS.interactions(is_global = True)
-async def roll(client, event,
-    dice_count: ([(str(v), v) for v in range(1, 7)], 'With how much dice do you wanna roll?') = 1,
-):
-    """Rolls with dices."""
-    amount = 0
-    for _ in range(dice_count):
-        amount += round(1.+(random() * 5.))
-    
-    return str(amount)
 
 
 @FEATURE_CLIENTS.interactions(is_global = True)

@@ -5,7 +5,7 @@ import vampytest
 from ...item_core import ITEM_ID_STRAWBERRY
 
 from ..amount_types import AMOUNT_TYPE_WEIGHT
-from ..linked_quest import LinkedQuest
+from ..linked_quest import LinkedQuest, linked_quest_create
 from ..quest_requirement_serialisables import (
     QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact
 )
@@ -20,7 +20,7 @@ def _iter_options():
     guild_id_0 = 202511080061
     batch_id_0 = 5666
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id_0,
         guild_id_0,
         batch_id_0,
@@ -44,7 +44,7 @@ def _iter_options():
     guild_id_1 = 202511080063
     batch_id_1 = 5666
     
-    linked_quest_1 = LinkedQuest(
+    linked_quest_1 = linked_quest_create(
         user_id_1,
         guild_id_1,
         batch_id_1,
@@ -64,7 +64,7 @@ def _iter_options():
     guild_id_2 = 202511080065
     batch_id_2 = 5666
     
-    linked_quest_2 = LinkedQuest(
+    linked_quest_2 = linked_quest_create(
         user_id_2,
         guild_id_2,
         batch_id_2,
@@ -88,7 +88,7 @@ def _iter_options():
     guild_id_3 = 202602240001
     batch_id_3 = 5666
     
-    linked_quest_3 = LinkedQuest(
+    linked_quest_3 = linked_quest_create(
         user_id_3,
         guild_id_3,
         batch_id_3,
@@ -111,7 +111,7 @@ def _iter_options():
     guild_id_4 = 202602240003
     batch_id_4 = 5666
     
-    linked_quest_4 = LinkedQuest(
+    linked_quest_4 = linked_quest_create(
         user_id_4,
         guild_id_4,
         batch_id_4,

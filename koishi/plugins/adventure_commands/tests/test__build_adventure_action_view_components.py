@@ -4,7 +4,9 @@ import vampytest
 
 from hata import Component, create_button, create_row, create_separator, create_text_display
 
-from ...adventure_core import ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, AdventureAction, LOOT_STATE_SUCCESS, build_loot_data
+from ...adventure_core import (
+    ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, AdventureAction, LOOT_STATE_SUCCESS, build_loot_data
+)
 from ...item_core import ITEM_ID_PEACH, get_item_nullable
 
 from ..component_building import build_adventure_action_view_components

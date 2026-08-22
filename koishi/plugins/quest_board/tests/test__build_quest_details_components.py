@@ -9,11 +9,11 @@ from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 from ...inventory_core import Inventory
 from ...item_core import ITEM_ID_CARROT, get_item_nullable
 from ...quest_core import (
-    AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, Quest,
+    AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_TEMPLATE_ID_MYSTIA_CARROT, Quest,
     QuestRequirementInstantiableDuration, QuestRequirementInstantiableItemExact, QuestRequirementSerialisableDuration,
     QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardInstantiableBalance,
     QuestRewardInstantiableCredibility, QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility,
-    get_quest_template_nullable
+    get_quest_template_nullable, linked_quest_create
 )
 from ...user_stats_core import UserStats
 
@@ -48,7 +48,7 @@ def _iter_options():
         ),
     )
     
-    linked_quest = LinkedQuest(
+    linked_quest = linked_quest_create(
         user_id,
         guild_id_0,
         batch_id,

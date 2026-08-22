@@ -6,13 +6,13 @@ from ..constants import (
     PREFERRED_CLIENT_NAME_DEFAULT, PREFERRED_IMAGE_SOURCE_TOUHOU, PREFERRED_IMAGE_SOURCE_NAME_NONE,
     PREFERRED_IMAGE_SOURCE_NAME_TOUHOU
 )
-from ..user_settings import UserSettings
+from ..user_settings import UserSettings, user_settings_create_with_specification
 
 
 def _iter_options():
     user_id = 202404270001
     
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
         preferred_client_id = 202404270002,
         preferred_image_source = PREFERRED_IMAGE_SOURCE_TOUHOU,
@@ -38,7 +38,7 @@ def _iter_options():
         name = preferred_client_name,
     )
     
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
         preferred_client_id = preferred_client_id,
     )

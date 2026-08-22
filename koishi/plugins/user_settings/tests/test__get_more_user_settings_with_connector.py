@@ -1,7 +1,7 @@
 import vampytest
 
 from ..cache import USER_SETTINGS_CACHE, put_one_to_cache
-from ..user_settings import UserSettings
+from ..user_settings import user_settings_create, user_settings_create_with_specification
 from ..queries import get_more_user_settings_with_connector
 
 
@@ -19,11 +19,11 @@ async def test__get_more_user_settings_with_connector__cache_hit():
     user_id_0 = 202309250070
     user_id_1 = 202309250071
     
-    user_settings_0 = UserSettings.create_with_specification(
+    user_settings_0 = user_settings_create_with_specification(
         user_id_0,
         notification_daily_by_waifu = 0,
     )
-    user_settings_1 = UserSettings.create_with_specification(
+    user_settings_1 = user_settings_create_with_specification(
         user_id_1,
         notification_proposal = 0,
     )
@@ -69,11 +69,11 @@ async def test__get_more_user_settings_with_connector__database_hit_value():
     user_id_0 = 202309250072
     user_id_1 = 202309250073
     
-    user_settings_0 = UserSettings.create_with_specification(
+    user_settings_0 = user_settings_create_with_specification(
         user_id_0,
         notification_daily_by_waifu = 0,
     )
-    user_settings_1 = UserSettings.create_with_specification(
+    user_settings_1 = user_settings_create_with_specification(
         user_id_1,
         notification_proposal = 0,
     )
@@ -152,7 +152,7 @@ async def test__get_more_user_settings_with_connector__database_hit_none():
     try:
         output = await mocked([user_id_0, user_id_1], connector)
         
-        vampytest.assert_eq(output, [UserSettings(user_id_0), UserSettings(user_id_1)])
+        vampytest.assert_eq(output, [user_settings_create(user_id_0), user_settings_create(user_id_1)])
         
         vampytest.assert_true(query_called)
         vampytest.assert_eq(called_with_user_ids, [user_id_0, user_id_1])
@@ -182,11 +182,11 @@ async def test__get_more_user_settings_with_connector__mixed_hit_value():
     user_id_0 = 202309250076
     user_id_1 = 202309250077
     
-    user_settings_0 = UserSettings.create_with_specification(
+    user_settings_0 = user_settings_create_with_specification(
         user_id_0,
         notification_daily_by_waifu = 0,
     )
-    user_settings_1 = UserSettings.create_with_specification(
+    user_settings_1 = user_settings_create_with_specification(
         user_id_1,
         notification_proposal = 0,
     )

@@ -1,19 +1,21 @@
 __all__ = ()
 
 from ..item_core import (
-    ITEM_GROUP_ID_BLOOD_SAUSAGE_MEAT, ITEM_GROUP_ID_BOILED_SAUSAGE, ITEM_GROUP_ID_FIREWOOD, ITEM_GROUP_ID_KNIFE,
-    ITEM_GROUP_ID_LIVER_SAUSAGE_MEAT, ITEM_GROUP_ID_MEAT_SAUSAGE_MEAT, ITEM_GROUP_ID_SWEETS, ITEM_ID_ALICE,
-    ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLOOD_SAUSAGE, ITEM_ID_BLUEBERRY,
-    ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DANGO, ITEM_ID_DEVILCART_OYSTER,
-    ITEM_ID_EIRIN, ITEM_ID_FISHING_ROD, ITEM_ID_FLANDRE, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC,
-    ITEM_ID_HUMAN_BLOOD, ITEM_ID_HUMAN_BODY_PART_SKULL, ITEM_ID_HUMAN_BRAIN, ITEM_ID_HUMAN_EAR, ITEM_ID_HUMAN_EYE,
-    ITEM_ID_HUMAN_FAT, ITEM_ID_HUMAN_INTESTINES, ITEM_ID_HUMAN_LIVER, ITEM_ID_HUMAN_LUNG, ITEM_ID_HUMAN_MUSCLE,
-    ITEM_ID_HUMAN_SKIN, ITEM_ID_JUNKO, ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_LIVER_SAUSAGE, ITEM_ID_MARISA,
-    ITEM_ID_MEAT_SAUSAGE, ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_ORIN, ITEM_ID_PATCHOULI, ITEM_ID_PEACH, ITEM_ID_PUDDING,
-    ITEM_ID_REIMU, ITEM_ID_REMILIA, ITEM_ID_RIBBON_BOW, ITEM_ID_RICE, ITEM_ID_RULER, ITEM_ID_RUMIA, ITEM_ID_SAKE,
-    ITEM_ID_SAKUYA, ITEM_ID_SATORI, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT,
-    ITEM_ID_SUIKA, ITEM_ID_TEA_LEAVES, ITEM_ID_TEWI, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YUKARI,
-    ITEM_ID_YUUKA
+    ITEM_GROUP_ID_BLOOD_SAUSAGE_MEAT, ITEM_GROUP_ID_BOILED_SAUSAGE, ITEM_GROUP_ID_FIREWOOD,
+    ITEM_GROUP_ID_HUMAN_CORPSE_FULL, ITEM_GROUP_ID_KNIFE, ITEM_GROUP_ID_LIVER_SAUSAGE_MEAT,
+    ITEM_GROUP_ID_MEAT_SAUSAGE_MEAT, ITEM_GROUP_ID_SWEETS, ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_AYA,
+    ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLOOD_SAUSAGE, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH,
+    ITEM_ID_CARROT, ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DANGO, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_EIRIN,
+    ITEM_ID_FISHING_ROD, ITEM_ID_FLANDRE, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_HUMAN_BLOOD,
+    ITEM_ID_HUMAN_BODY_PART_SKULL, ITEM_ID_HUMAN_BODY_SHARD_CHEWED, ITEM_ID_HUMAN_BONE, ITEM_ID_HUMAN_BRAIN,
+    ITEM_ID_HUMAN_EAR, ITEM_ID_HUMAN_EYE, ITEM_ID_HUMAN_FAT, ITEM_ID_HUMAN_INTESTINES, ITEM_ID_HUMAN_LIVER,
+    ITEM_ID_HUMAN_LUNG, ITEM_ID_HUMAN_MUSCLE, ITEM_ID_HUMAN_SKIN, ITEM_ID_JUNKO, ITEM_ID_KOISHI, ITEM_ID_KOKORO,
+    ITEM_ID_LIVER_SAUSAGE, ITEM_ID_MARISA, ITEM_ID_MEAT_SAUSAGE, ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_NITORI,
+    ITEM_ID_ORIN, ITEM_ID_PARSEE, ITEM_ID_PATCHOULI, ITEM_ID_PEACH, ITEM_ID_PEN, ITEM_ID_PLUSHIE_BEAR, ITEM_ID_PUDDING,
+    ITEM_ID_RAMEN, ITEM_ID_REIMU, ITEM_ID_REMILIA, ITEM_ID_RIBBON_BOW, ITEM_ID_RICE, ITEM_ID_RULER, ITEM_ID_RUMIA,
+    ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SATORI, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAWBERRY,
+    ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA, ITEM_ID_TEA_LEAVES, ITEM_ID_TEWI, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING,
+    ITEM_ID_YOUMU, ITEM_ID_YUKARI, ITEM_ID_YUUKA,
 )
 
 from .amount_types import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT
@@ -29,23 +31,27 @@ from .quest_reward_generators import (
 from .quest_template import QuestTemplate
 from .quest_template_ids import (
     QUEST_TEMPLATE_ID_ALICE_ANGELROOT, QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_ALICE_SKIN,
-    QUEST_TEMPLATE_ID_CHIRUNO_FROG, QUEST_TEMPLATE_ID_DAI_FROG, QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT,
-    QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW, QUEST_TEMPLATE_ID_JUNKO_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_ANGELROOT,
-    QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT, QUEST_TEMPLATE_ID_KOISHI_BRAIN, QUEST_TEMPLATE_ID_KOISHI_GARLIC,
-    QUEST_TEMPLATE_ID_KOISHI_KNIFE, QUEST_TEMPLATE_ID_KOISHI_PUDDING, QUEST_TEMPLATE_ID_KOISHI_RULER,
-    QUEST_TEMPLATE_ID_KOKORO_SCISSORS, QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA,
+    QUEST_TEMPLATE_ID_AYA_HUMAN_CORPSE, QUEST_TEMPLATE_ID_CHIRUNO_FROG, QUEST_TEMPLATE_ID_DAI_FROG,
+    QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT, QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW,
+    QUEST_TEMPLATE_ID_FLANDRE_PLUSHIE_BEAR,
+    QUEST_TEMPLATE_ID_JUNKO_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT,
+    QUEST_TEMPLATE_ID_KOISHI_BRAIN, QUEST_TEMPLATE_ID_KOISHI_GARLIC, QUEST_TEMPLATE_ID_KOISHI_KNIFE,
+    QUEST_TEMPLATE_ID_KOISHI_PEN, QUEST_TEMPLATE_ID_KOISHI_PUDDING, QUEST_TEMPLATE_ID_KOISHI_RULER,
+    QUEST_TEMPLATE_ID_KOKORO_SCISSORS, QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_MARISA_RAMEN,
     QUEST_TEMPLATE_ID_MYSTIA_BAMBOO_SHOOT, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_DEVILCART_OYSTER,
     QUEST_TEMPLATE_ID_MYSTIA_FAT, QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD, QUEST_TEMPLATE_ID_MYSTIA_GARLIC,
-    QUEST_TEMPLATE_ID_MYSTIA_MEAT, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_MYSTIA_RICE,
+    QUEST_TEMPLATE_ID_MYSTIA_MEAT, QUEST_TEMPLATE_ID_MYSTIA_HUMAN_BONE, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
+    QUEST_TEMPLATE_ID_MYSTIA_RICE,
     QUEST_TEMPLATE_ID_MYSTIA_SCARLET_ONION, QUEST_TEMPLATE_ID_NINA_SKULL, QUEST_TEMPLATE_ID_NINA_STRAWBERRY,
-    QUEST_TEMPLATE_ID_ORIN_FISHING_ROD, QUEST_TEMPLATE_ID_PATCHOULI_EYE, QUEST_TEMPLATE_ID_REIMU_BANQUET,
-    QUEST_TEMPLATE_ID_REIMU_EAR, QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING, QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW,
-    QUEST_TEMPLATE_ID_RUMIA_BLOOD_SAUSAGE, QUEST_TEMPLATE_ID_RUMIA_LIVER_SAUSAGE, QUEST_TEMPLATE_ID_RUMIA_MEAT_SAUSAGE,
-    QUEST_TEMPLATE_ID_RUMIA_SWEETS, QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH,
-    QUEST_TEMPLATE_ID_SAKUYA_BOILED_SAUSAGE, QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER,
-    QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QUEST_TEMPLATE_ID_SATORI_PUDDING,
-    QUEST_TEMPLATE_ID_SUIKA_SAKE, QUEST_TEMPLATE_ID_TEWI_BISHOPHAT, QUEST_TEMPLATE_ID_TEWI_RICE,
-    QUEST_TEMPLATE_ID_YUKARI_RULER, QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT
+    QUEST_TEMPLATE_ID_NITORI_HUMAN_BONE, QUEST_TEMPLATE_ID_ORIN_FISHING_ROD, QUEST_TEMPLATE_ID_PARSEE_RIBBON_BOW,
+    QUEST_TEMPLATE_ID_PATCHOULI_EYE, QUEST_TEMPLATE_ID_REIMU_BANQUET, QUEST_TEMPLATE_ID_REIMU_EAR,
+    QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING, QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW, QUEST_TEMPLATE_ID_RUMIA_BLOOD_SAUSAGE,
+    QUEST_TEMPLATE_ID_RUMIA_LIVER_SAUSAGE, QUEST_TEMPLATE_ID_RUMIA_MEAT_SAUSAGE, QUEST_TEMPLATE_ID_RUMIA_SWEETS,
+    QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QUEST_TEMPLATE_ID_SAKUYA_BOILED_SAUSAGE,
+    QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER, QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD,
+    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QUEST_TEMPLATE_ID_SATORI_PUDDING, QUEST_TEMPLATE_ID_SUIKA_SAKE,
+    QUEST_TEMPLATE_ID_TEWI_BISHOPHAT, QUEST_TEMPLATE_ID_TEWI_RICE, QUEST_TEMPLATE_ID_YOUMU_DANGO_TEA,
+    QUEST_TEMPLATE_ID_YOUMU_RAMEN, QUEST_TEMPLATE_ID_YUKARI_RULER, QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT
 )
 
 
@@ -854,10 +860,10 @@ QUEST_TEMPLATE_MYSTIA_FIREWOOD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FIREWO
     0,
     ITEM_ID_MYSTIA,
     (
-        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_FIREWOOD, AMOUNT_TYPE_VALUE, 1000, 1000, 100, 100),
+        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_FIREWOOD, AMOUNT_TYPE_VALUE, 1000, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(1000, 1000, 100, 100),
+        QuestRewardGeneratorBalance(1000, 1, 100, 100),
         QuestRewardGeneratorCredibilityFix(20),
     ),
 )
@@ -980,6 +986,7 @@ QUEST_TEMPLATE_FLANDRE_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_FLANDRE_RI
     (
         QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW,
         QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING,
+        QUEST_TEMPLATE_ID_FLANDRE_PLUSHIE_BEAR,
     ),
     4, # Target: 1
     34,
@@ -1096,8 +1103,7 @@ QUEST_TEMPLATE_SATORI_PUDDING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SATORI_PUDDING
         QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_SWEETS, AMOUNT_TYPE_WEIGHT, 200, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(1000, 100, 80, 120),
-        QuestRewardGeneratorItemExact(ITEM_ID_TEA_LEAVES, 5, 1, 80, 120),
+        QuestRewardGeneratorItemExact(ITEM_ID_TEA_LEAVES, 16, 1, 80, 120),
         QuestRewardGeneratorCredibility(20),
     ),
 )
@@ -1110,6 +1116,7 @@ QUEST_TEMPLATE_REMILIA_FLANDRE_WING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REMILIA_
     (
         QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW,
         QUEST_TEMPLATE_ID_KOISHI_PUDDING,
+        QUEST_TEMPLATE_ID_FLANDRE_PLUSHIE_BEAR,
     ),
     4, # Target: 1
     48,
@@ -1578,3 +1585,301 @@ QUEST_TEMPLATE_RUMIA_SWEETS = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_SWEETS] = 
         QuestRewardGeneratorCredibility(20),
     ),
 )
+
+# - Aya +0
+# - Requires meat +3
+# - Rare drop +3 level
+# reward is 1.5x the requirement.
+QUEST_TEMPLATE_AYA_HUMAN_CORPSE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_AYA_HUMAN_CORPSE] = QuestTemplate(
+    QUEST_TEMPLATE_ID_AYA_HUMAN_CORPSE,
+    None,
+    2, # Target: 1
+    38,
+    (
+        'I\'d like to ask you about delivery of a dead human body.\n'
+        'A story about the cause of its death would make for an excellent article at the Bunbunmaru Newspapers!'
+    ),
+    6,
+    1,
+    ITEM_ID_AYA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 72, DAY_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_HUMAN_CORPSE_FULL, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(27000, 1000, 90, 110),
+        QuestRewardGeneratorItemExactFix(ITEM_ID_PEN, 1),
+        QuestRewardGeneratorCredibility(60),
+    ),
+)
+
+# - Youmu +0
+# - Requires quest reward + meat +4
+# Reward is around 2.5x the value.
+QUEST_TEMPLATE_YOUMU_RAMEN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YOUMU_RAMEN] = QuestTemplate(
+    QUEST_TEMPLATE_ID_YOUMU_RAMEN,
+    (
+        QUEST_TEMPLATE_ID_YOUMU_DANGO_TEA,
+    ),
+    2, # Target: 1
+    28,
+    (
+        'Pasta, ramen, soba... Yuyuko adores noodles!\n'
+        'She is crawling for a good Ramen, please bring one, so I can feed her.'
+    ),
+    4,
+    2,
+    ITEM_ID_YOUMU,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 4, HOUR_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_RAMEN, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(930, 10, 80, 120),
+        QuestRewardGeneratorCredibility(10),
+    ),
+)
+
+# - Youmu +0
+# - Requires item reward of quest level 7 +8
+# Reward is around 33x the requirements.
+QUEST_TEMPLATE_YOUMU_DANGO_TEA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YOUMU_DANGO_TEA] = QuestTemplate(
+    QUEST_TEMPLATE_ID_YOUMU_DANGO_TEA,
+    (
+        QUEST_TEMPLATE_ID_YOUMU_RAMEN,
+    ),
+    2, # Target: 1
+    28,
+    (
+        'Yuyuko wants dango and tea for tomorrow\'s dessert.\n'
+        'I am busy with other errands today, so please deliver it for me.'
+    ),
+    8,
+    2,
+    ITEM_ID_YOUMU,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2, 1, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_DANGO, AMOUNT_TYPE_COUNT, 3, 1, 100, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_TEA_LEAVES, AMOUNT_TYPE_COUNT, 4, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorItemExact(ITEM_ID_PEACH, 8, 1, 100, 100),
+        QuestRewardGeneratorBalance(400, 10, 80, 120),
+        QuestRewardGeneratorCredibility(30),
+    ),
+)
+
+
+# - Koishi +1
+# - Requires reward of rare drop quest + meat +7 level
+# Reward is around 2x the value.
+QUEST_TEMPLATE_KOISHI_PEN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_PEN] = QuestTemplate(
+    QUEST_TEMPLATE_ID_KOISHI_PEN,
+    None,
+    2, # Target: 1
+    70,
+    (
+        'Satori is soon to die from sleep depri- uhh i forgor what Orin said.\n'
+        'I want her last corporate work days to be memorable!! '
+        'I would like to gift her a top quality pen, so she can do her last paper works with a smile!!'
+    ),
+    8,
+    1,
+    ITEM_ID_KOISHI,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 72, DAY_IN_SECONDS, 80, 100),
+        QuestRequirementGeneratorItemExact(ITEM_ID_PEN, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(5000, 10, 80, 120),
+        QuestRewardGeneratorCredibility(80),
+    ),
+)
+
+
+# - Nitori +0
+# - Requires meat +3
+# Reward is around 1.7x the value.
+QUEST_TEMPLATE_NITORI_HUMAN_BONE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NITORI_HUMAN_BONE] = QuestTemplate(
+    QUEST_TEMPLATE_ID_NITORI_HUMAN_BONE,
+    None,
+    2, # Target: 1
+    23,
+    (
+        'Hey!\n'
+        '\n'
+        'I am trying to cultivate cucumbers in the Genbu Ravine, but the the soil here lacks important nutrients, '
+        'like calcium. Therefore I am thinking on sprinkling the soil with some bone meal.\n'
+        '\n'
+        'Could you please collect a bunch of bones for me?'
+    ),
+    3,
+    0,
+    ITEM_ID_NITORI,
+    (
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_BONE, AMOUNT_TYPE_WEIGHT, 10000, 10000, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(2200, 1, 100, 100),
+        QuestRewardGeneratorCredibilityFix(15),
+    ),
+)
+
+
+# - Parsee +2
+# - Ruins +1 level
+# - Rare drop +3 level
+QUEST_TEMPLATE_PARSEE_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_PARSEE_RIBBON_BOW] = QuestTemplate(
+    QUEST_TEMPLATE_ID_PARSEE_RIBBON_BOW,
+    (
+        QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW,
+        QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW,
+    ),
+    2, # Target: 1
+    71,
+    (
+        'Collecting Ribbons is the rage in Former Hell now!!\n'
+        'I want one too, I want one NOW!!\n'
+        'I need you to bring me one!!'
+    ),
+    6,
+    1,
+    ITEM_ID_PARSEE,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 32, DAY_IN_SECONDS, 90, 110),
+        QuestRequirementGeneratorItemExact(ITEM_ID_RIBBON_BOW, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorCredibilityFix(240),
+    ),
+)
+
+
+# - Requires meat +3
+# Reward is around 2x the requirements
+QUEST_TEMPLATE_MYSTIA_HUMAN_BONE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_HUMAN_BONE] = QuestTemplate(
+    QUEST_TEMPLATE_ID_MYSTIA_HUMAN_BONE,
+    None,
+    1,
+    4,
+    (
+        'I would like to request a key ingredient for my broth.\n'
+        '\n'
+        'Could you please bring me some bones?'
+    ),
+    3,
+    1,
+    ITEM_ID_MYSTIA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 80, 120),
+        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_BONE, AMOUNT_TYPE_WEIGHT, 2000, 100, 80, 120),
+    ),
+    (
+        QuestRewardGeneratorItemExact(ITEM_ID_RAMEN, 1, 1, 100, 100),
+        QuestRewardGeneratorBalance(150, 10, 100, 100),
+        QuestRewardGeneratorCredibility(10),
+    ),
+)
+
+
+# - Flandre +4
+# - Ruins +1 level
+# - Rare drop +3 level
+QUEST_TEMPLATE_FLANDRE_PLUSHIE_BEAR = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_FLANDRE_PLUSHIE_BEAR] = QuestTemplate(
+    QUEST_TEMPLATE_ID_FLANDRE_PLUSHIE_BEAR,
+    (
+        QUEST_TEMPLATE_FLANDRE_RIBBON_BOW,
+        QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW,
+        QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING,
+    ),
+    1,
+    53,
+    (
+        'Today my sister came into my room and demanded me to go take a shower because '
+        'I supposedly smell like dog\'s pile!! They want me to take a shower at least once every two months!!! '
+        'What the HELL?!?!\n'
+        '\n'
+        'I bet it\'s because Sakuya keeps bringing me dirty bodies to play with!! '
+        'They keep squirting their body fluids all over the room as I am indulging myself in the fun!!\n'
+        'I would like to play with something clean instead, like a cute plushie!"'
+    ),
+    8,
+    1,
+    ITEM_ID_FLANDRE,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 72, DAY_IN_SECONDS, 90, 110),
+        QuestRequirementGeneratorItemExact(ITEM_ID_PLUSHIE_BEAR, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorItemExactFix(ITEM_ID_HUMAN_BODY_SHARD_CHEWED, 1),
+        QuestRewardGeneratorCredibilityFix(120),
+    ),
+)
+
+
+# - Marisa +2 level
+# - Requires quest reward + meat +4
+# Reward is around 2x of the value
+QUEST_TEMPLATE_MARISA_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA] = QuestTemplate(
+    QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA,
+    None,
+    1,
+    28,
+    (
+        'Hey there!!\n'
+        'Once again, Reimu is unable to afford any food due to lack of donations to her shrine, '
+        'yet she refuses to eat anything I make her! She is so greedy...'
+        'Could you please just bring Reimu some Ramen? '
+        'Maybe she will see it as a donation if someone else were to offer it.'
+    ),
+    6,
+    1,
+    ITEM_ID_MARISA,
+    (
+        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS, 80, 130),
+        QuestRequirementGeneratorItemExact(ITEM_ID_RAMEN, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        QuestRewardGeneratorBalance(700, 50, 80, 120),
+        QuestRewardGeneratorCredibility(10),
+    ),
+)
+
+# Idea:
+# Yuyuko's stomach is crawling like she is starving to death habitually. Would you please feed a morsel to this beast?
+# Maybe an XXX would do the job? I would reward you plentifully.
+
+# Idea:
+# Oh no!! When i got home I found out that Reimu drank all of my precious sake!
+# Please bring me 3 bottles of Sake urgently!
+
+# Idea:
+# As you know, there is a critical shortage of XXX in XXX tight now. I will pay you well if you can bring me XXX.
+
+# Idea:
+# I am a collector of XXX. Please do not ask why I am collecting such things. 
+# My XXX is already staring at me as Kokoro would if I would have one of her masks. I Promise, I don't!!!.
+# Anyways, can you bring me XXX?
+
+# Idea:
+# I had a fortune recently, therefore I decided to treat myself with XXX.
+# Could you please bring me one?
+
+# Idea:
+# I need XXX for some errand. If you can deliver me one within the deadline, would be great.
+
+# Idea:
+# As you probably know, I am living with the gluttonous Yuyuko. 
+# Today I have seen something so obscure, that I did not even believe my eyes!! She was licking the wall!!! 
+# I don't want her to eat my home!! Please bring me a large amount of supplies, so I can calm her hunger!
+
+
+
+# Quest ideas:
+# Bring satori food for pets
+# Aya heard rumors that something is to do with insert item here, can you bring said item.
+# Sakuya, bring remi tea & blood?
+# Bring suwako a bunch of random things.
+# Bring reimu a ramen, because they are fucking broke as shit.
+
+

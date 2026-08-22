@@ -5,15 +5,16 @@ from ..component_building import build_user_settings_components
 from ..constants import (
     PREFERRED_CLIENT_NAME_DEFAULT, PREFERRED_IMAGE_SOURCE_TOUHOU, PREFERRED_IMAGE_SOURCE_NAME_TOUHOU
 )
-from ..user_settings import UserSettings
+from ..user_settings import user_settings_create_with_specification
 
 
 def _iter_options():
     user_id = 202605040000
     
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
         feature_market_place_inbox = 0,
+        notification_adventure_action = 0,
         notification_adventure_recovery_over = 0,
         notification_daily_by_waifu = 0,
         notification_daily_reminder = 0,
@@ -34,6 +35,7 @@ def _iter_options():
                 '- Market-place-inbox: false'
             ),
             create_text_display(
+                '- Adventure-action: false\n'
                 '- Adventure-recovery-over: false\n'
                 '- Daily-by-waifu: false\n'
                 '- Daily-reminder: false\n'

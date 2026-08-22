@@ -3,8 +3,8 @@ import vampytest
 from ..helpers import get_allowed_completion_count
 
 from ...quest_core import (
-    LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD,
-    QUEST_TEMPLATE_ID_MYSTIA_PEACH, get_quest_template_nullable
+    LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
+    get_quest_template_nullable, linked_quest_create
 )
 
 
@@ -20,7 +20,7 @@ def _iter_options():
     batch_id = 55555
     
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,
@@ -31,7 +31,7 @@ def _iter_options():
     linked_quest_0.completion_count = 1
     linked_quest_0.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
     
-    linked_quest_1 = LinkedQuest(
+    linked_quest_1 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,

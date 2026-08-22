@@ -2,14 +2,15 @@ import vampytest
 
 from ..content_building import produce_option_bit_listing_description
 from ..options import NOTIFICATION_SETTINGS_SORTED
-from ..user_settings import UserSettings
+from ..user_settings import user_settings_create_with_specification
 
 
 def _iter_options():
     user_id = 202510080000
     
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
+        notification_adventure_action = 1,
         notification_adventure_recovery_over = 1,
         notification_daily_by_waifu = 1,
         notification_daily_reminder = 0,
@@ -23,6 +24,7 @@ def _iter_options():
         user_settings,
         NOTIFICATION_SETTINGS_SORTED,
         (
+            '- Adventure-action: true\n'
             '- Adventure-recovery-over: true\n'
             '- Daily-by-waifu: true\n'
             '- Daily-reminder: false\n'

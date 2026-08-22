@@ -2,7 +2,7 @@ __all__ = ('USER_SETTINGS_CACHE',)
 
 from collections import OrderedDict
 
-from .user_settings import UserSettings
+from .user_settings import user_settings_create
 
 
 USER_SETTINGS_CACHE = OrderedDict()
@@ -35,7 +35,7 @@ def get_one_from_cache(user_id):
         USER_SETTINGS_CACHE.move_to_end(user_id)
         
         if result is None:
-            result = UserSettings(user_id)
+            result = user_settings_create(user_id)
     
     return result, miss
 
@@ -53,6 +53,7 @@ def get_more_from_cache(user_ids):
     -------
     results : `None | list<UserSettings>`
         The hit user settings.
+    
     misses : `None | list<int>`
         Missed `user_id`-s.
     """

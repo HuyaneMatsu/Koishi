@@ -4,12 +4,10 @@ from ..helpers import do_reward_user
 
 from ...user_stats_core import UserStats
 from ...inventory_core import Inventory
-from ...item_core import ITEM_GROUP_ID_KNIFE, ITEM_ID_STRAWBERRY, get_item_nullable
+from ...item_core import ITEM_ID_STRAWBERRY, get_item_nullable
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest,
-    QUEST_REQUIREMENT_TYPE_ITEM_EXACT, QUEST_REQUIREMENT_TYPE_ITEM_GROUP, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
-    QuestRewardSerialisableItemExact, QuestRewardSerialisableBalance,
-    get_quest_template_nullable, get_user_adventurer_rank_info, QuestRewardSerialisableCredibility
+    LinkedQuest, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QuestRewardSerialisableItemExact, QuestRewardSerialisableBalance,
+    get_quest_template_nullable, get_user_adventurer_rank_info, QuestRewardSerialisableCredibility, linked_quest_create
 )
 from ...guild_stats import GuildStats
 from ...user_balance import UserBalance
@@ -26,7 +24,7 @@ def _iter_options():
     
     yield (
         'give nothing x1',
-        LinkedQuest(
+        linked_quest_create(
             user_id,
             guild_id,
             batch_id,
@@ -49,7 +47,7 @@ def _iter_options():
     
     yield (
         'give item x1',
-        LinkedQuest(
+        linked_quest_create(
             user_id,
             guild_id,
             batch_id,
@@ -78,7 +76,7 @@ def _iter_options():
     
     yield (
         'give credibility x1',
-        LinkedQuest(
+        linked_quest_create(
             user_id,
             guild_id,
             batch_id,
@@ -105,7 +103,7 @@ def _iter_options():
     
     yield (
         'give balance x1',
-        LinkedQuest(
+        linked_quest_create(
             user_id,
             guild_id,
             batch_id,
@@ -132,7 +130,7 @@ def _iter_options():
     
     yield (
         'give credibility x1 (high level)',
-        LinkedQuest(
+        linked_quest_create(
             user_id,
             guild_id,
             batch_id,
@@ -159,7 +157,7 @@ def _iter_options():
     
     yield (
         'give credibility x10 (high level)',
-        LinkedQuest(
+        linked_quest_create(
             user_id,
             guild_id,
             batch_id,

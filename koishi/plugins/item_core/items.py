@@ -15,12 +15,12 @@ from .flags import (
 )
 from .item import Item
 from .item_ids import (
-    ITEM_ID_ACHING_AFFECTION_S_HEART_PIERCER, ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_BAMBOO, ITEM_ID_BAMBOO_SHOOT,
-    ITEM_ID_BISHOPHAT, ITEM_ID_BLOOD_SAUSAGE, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH, ITEM_ID_BOUGH, ITEM_ID_BROOM,
-    ITEM_ID_BUNNY_SUIT, ITEM_ID_CARROT, ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS, ITEM_ID_CHIRUNO,
-    ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRESS, ITEM_ID_CUT_WOOD, ITEM_ID_DAI, ITEM_ID_DANGO, ITEM_ID_DEVILCART_OYSTER,
-    ITEM_ID_EIRIN, ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT, ITEM_ID_FISHING_ROD, ITEM_ID_FLANDRE,
-    ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_GOTHIC_ATTIRE, ITEM_ID_HAND_FAN,
+    ITEM_ID_ACHING_AFFECTION_S_HEART_PIERCER, ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_AYA, ITEM_ID_BAMBOO,
+    ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLOOD_SAUSAGE, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH,
+    ITEM_ID_BOUGH, ITEM_ID_BROOM, ITEM_ID_BUNNY_SUIT, ITEM_ID_CARROT, ITEM_ID_CHIEF_MAID_S_ELEGANT_DRESS,
+    ITEM_ID_CHIRUNO, ITEM_ID_CORPSE_VOYAGER_S_ROGUISH_DRESS, ITEM_ID_CUT_WOOD, ITEM_ID_DAI, ITEM_ID_DANGO,
+    ITEM_ID_DEVILCART_OYSTER, ITEM_ID_EIRIN, ITEM_ID_ELECTROSTATIC_DISCHARGE_PROTECTIVE_COAT, ITEM_ID_FISHING_ROD,
+    ITEM_ID_FLANDRE, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_GOTHIC_ATTIRE, ITEM_ID_HAND_FAN,
     ITEM_ID_HELL_CAT_S_BIG_BRAIDS, ITEM_ID_HIKING_SET, ITEM_ID_HUMAN_BLOOD, ITEM_ID_HUMAN_BODY,
     ITEM_ID_HUMAN_BODY_PART_ARM, ITEM_ID_HUMAN_BODY_PART_DIGESTIVE_ORGANS, ITEM_ID_HUMAN_BODY_PART_FOOT,
     ITEM_ID_HUMAN_BODY_PART_HAND, ITEM_ID_HUMAN_BODY_PART_HEAD, ITEM_ID_HUMAN_BODY_PART_INTERNALS,
@@ -32,12 +32,13 @@ from .item_ids import (
     ITEM_ID_HUMAN_PANCREAS, ITEM_ID_HUMAN_SKIN, ITEM_ID_HUMAN_SPLEEN, ITEM_ID_HUMAN_TONGUE, ITEM_ID_HUMAN_TOOTH,
     ITEM_ID_HUMAN_TRIPE, ITEM_ID_JUNKO, ITEM_ID_KAGEROU, ITEM_ID_KIMONO, ITEM_ID_KINGS_NEW_CLOTHES,
     ITEM_ID_KITCHEN_KNIFE, ITEM_ID_KOISHI, ITEM_ID_KOKORO, ITEM_ID_LIVER_SAUSAGE, ITEM_ID_LOG, ITEM_ID_MAID_DRESS,
-    ITEM_ID_MARISA, ITEM_ID_MEAT_SAUSAGE, ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_ORIN, ITEM_ID_PARASOL,
-    ITEM_ID_PATCHOULI, ITEM_ID_PEACH, ITEM_ID_PLUSHIE_BEAR, ITEM_ID_POKING_KNIFE, ITEM_ID_PUDDING,
-    ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT, ITEM_ID_REIMU, ITEM_ID_REMILIA, ITEM_ID_RIBBON_BOW, ITEM_ID_RICE,
-    ITEM_ID_RULER, ITEM_ID_RUMIA, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SATORI, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS,
-    ITEM_ID_SEIRAN, ITEM_ID_SEKIBANKI, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA, ITEM_ID_TEA_LEAVES,
-    ITEM_ID_TEWI, ITEM_ID_TWIGS, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YUKARI, ITEM_ID_YUUKA
+    ITEM_ID_MARISA, ITEM_ID_MEAT_SAUSAGE, ITEM_ID_MYSTIA, ITEM_ID_NINA, ITEM_ID_NITORI, ITEM_ID_ORIN, ITEM_ID_PARASOL,
+    ITEM_ID_PARSEE, ITEM_ID_PATCHOULI, ITEM_ID_PEACH, ITEM_ID_PEN, ITEM_ID_PLUSHIE_BEAR, ITEM_ID_POKING_KNIFE,
+    ITEM_ID_PUDDING, ITEM_ID_RAMEN, ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT, ITEM_ID_REIMU, ITEM_ID_REMILIA,
+    ITEM_ID_RIBBON_BOW, ITEM_ID_RICE, ITEM_ID_RULER, ITEM_ID_RUMIA, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SATORI,
+    ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_SEIRAN, ITEM_ID_SEKIBANKI, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT,
+    ITEM_ID_SUIKA, ITEM_ID_TEA_LEAVES, ITEM_ID_TEWI, ITEM_ID_TWIGS, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YOUMU,
+    ITEM_ID_YUKARI, ITEM_ID_YUUKA
 )
 from .option_butcher import OptionButcher
 
@@ -2079,7 +2080,9 @@ ITEM_RICE = ITEMS[ITEM_ID_RICE] = Item(
     BUILTIN_EMOJIS['rice'],
     (
         'A domesticated cereal grain, it is the staple food of over half of humanity.\n'
-        'The plant itself grows to over a meter tall. It takes around half a year for it to be sown.'
+        'The plant itself grows to over a meter tall. It takes around half a year for it to be sown.\n'
+        '\n'
+        'They can be found in the outskirts of **Human Village**.'
     ),
     ITEM_FLAG_EDIBLE,
     55, # value (hearts)
@@ -2149,6 +2152,106 @@ ITEM_MEAT_SAUSAGE = ITEMS[ITEM_ID_MEAT_SAUSAGE] = Item(
 ITEM_PATCHOULI = ITEMS[ITEM_ID_PATCHOULI] = Item(
     ITEM_ID_PATCHOULI,
     'Patchouli',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+    None,
+)
+
+
+ITEM_AYA = ITEMS[ITEM_ID_AYA] = Item(
+    ITEM_ID_AYA,
+    'Aya',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+    None,
+)
+
+
+ITEM_RAMEN = ITEMS[ITEM_ID_RAMEN] = Item(
+    ITEM_ID_RAMEN,
+    'Ramen',
+    BUILTIN_EMOJIS['ramen'],
+    (
+        'Ramen is a Japanese noodle soup. '
+        'It is made out of chinese style wheat flour noodles, broth made out of meat (sometimes fish), '
+        'which is commonly flavoured with soy sauce or miso. '
+        'For topping mostly pork, dried seaweed, kamaboko and green onions are used.\n'
+        'In Japan almost every region has its own variety.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    375, # value (hearts)
+    400, # weight (grams)
+    None,
+    None,
+)
+
+
+ITEM_PEN = ITEMS[ITEM_ID_PEN] = Item(
+    ITEM_ID_PEN,
+    'Pen',
+    BUILTIN_EMOJIS['pen_ballpoint'],
+    (
+        'The pen is a writing tool that in the process of writing or drawing to transport ink '
+        'onto the writing surface (most commonly into paper). '
+        'Through the history humans used writing tools made out of reed or bird feather; '
+        'while writing they submerged the nib into the ink.\n.'
+        'The kind of pens used nowadays are the ballpoint pen, the fountain pen, the felt pen and the rollerball pen.'
+    ),
+    ITEM_FLAG_WEAPON,
+    2424, # value (hearts)
+    30, # weight (grams)
+    (
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_HOUSEWIFE, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_BEDROOM, MODIFIER_KIND__FLAT), +3),
+        Modifier(construct_modifier_type(MODIFIER_ID__STAT_CHARM, MODIFIER_KIND__FLAT), +3),
+        
+        Modifier(construct_modifier_type(MODIFIER_ID__GARDENING, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__GARDENING, MODIFIER_KIND__PERCENT), +5),
+        Modifier(construct_modifier_type(MODIFIER_ID__FORAGING, MODIFIER_KIND__FLAT), +1),
+        Modifier(construct_modifier_type(MODIFIER_ID__FORAGING, MODIFIER_KIND__PERCENT), +10),
+        Modifier(construct_modifier_type(MODIFIER_ID__FISHING, MODIFIER_KIND__FLAT), +1),
+    ),
+    None,
+)
+
+
+ITEM_YOUMU = ITEMS[ITEM_ID_YOUMU] = Item(
+    ITEM_ID_YOUMU,
+    'Youmu',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+    None,
+)
+
+
+ITEM_NITORI = ITEMS[ITEM_ID_NITORI] = Item(
+    ITEM_ID_NITORI,
+    'Nitori',
+    None,
+    None,
+    ITEM_FLAG_NPC,
+    0, # value (hearts)
+    0, # weight (grams)
+    None,
+    None,
+)
+
+
+ITEM_PARSEE = ITEMS[ITEM_ID_PARSEE] = Item(
+    ITEM_ID_PARSEE,
+    'Parsee',
     None,
     None,
     ITEM_FLAG_NPC,

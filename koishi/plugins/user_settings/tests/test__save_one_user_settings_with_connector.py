@@ -1,7 +1,7 @@
 import vampytest
 
 from ..cache import USER_SETTINGS_CACHE, put_none_to_cache, put_one_to_cache
-from ..user_settings import UserSettings
+from ..user_settings import user_settings_create, user_settings_create_with_specification
 from ..queries import save_one_user_settings_with_connector
 
 
@@ -16,7 +16,7 @@ async def test__save_one_user_settings_with_connector__save_and_move():
     query_called = False
     user_id_0 = 202309250010
     user_id_1 = 202309250011
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id_0,
         notification_daily_by_waifu = 0,
     )
@@ -71,7 +71,7 @@ async def test__save_one_user_settings_with_connector__delete_and_move():
     query_called = False
     user_id_0 = 202309250012
     user_id_1 = 202309250013
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id_0,
         notification_daily_by_waifu = 0,
     )
@@ -98,7 +98,7 @@ async def test__save_one_user_settings_with_connector__delete_and_move():
         put_one_to_cache(user_settings)
         put_none_to_cache(user_id_1)
         
-        user_settings = UserSettings(user_id_0)
+        user_settings = user_settings_create(user_id_0)
         
         await mocked(user_settings, connector)
         

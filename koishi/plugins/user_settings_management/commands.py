@@ -98,8 +98,8 @@ async def feature_settings_change(
     user_settings = await get_one_user_settings(user.id)
     
     option = FEATURE_SETTING_RESOLUTION[feature_type]
-    previous = option.get(user_settings)
-    option.set(user_settings, enabled)
+    previous = option.getter(option, user_settings)
+    option.setter(option, user_settings, enabled)
     
     await save_one_user_settings(user_settings)
     
@@ -148,8 +148,8 @@ async def notification_settings_change(
     user_settings = await get_one_user_settings(user.id)
     
     option = NOTIFICATION_SETTING_RESOLUTION[notification_type]
-    previous = option.get(user_settings)
-    option.set(user_settings, enabled)
+    previous = option.getter(option, user_settings)
+    option.setter(option, user_settings, enabled)
     
     await save_one_user_settings(user_settings)
     
@@ -198,9 +198,11 @@ async def preferred_client_set(
         )
         return
     
-    previous = OPTION_PREFERRED_CLIENT_ID.get(user_settings)
+    previous = OPTION_PREFERRED_CLIENT_ID.getter(OPTION_PREFERRED_CLIENT_ID, user_settings)
     previous_client = CLIENTS.get(previous, None)
-    OPTION_PREFERRED_CLIENT_ID.set(user_settings, 0 if chosen_client is None else chosen_client.id)
+    OPTION_PREFERRED_CLIENT_ID.setter(
+        OPTION_PREFERRED_CLIENT_ID, user_settings, 0 if chosen_client is None else chosen_client.id
+    )
     
     await save_one_user_settings(user_settings)
     
@@ -256,8 +258,8 @@ async def preferred_image_source_set(
         )
         return
     
-    previous = OPTION_PREFERRED_IMAGE_SOURCE.get(user_settings)
-    OPTION_PREFERRED_IMAGE_SOURCE.set(user_settings, value)
+    previous = OPTION_PREFERRED_IMAGE_SOURCE.getter(OPTION_PREFERRED_IMAGE_SOURCE, user_settings)
+    OPTION_PREFERRED_IMAGE_SOURCE.setter(OPTION_PREFERRED_IMAGE_SOURCE, user_settings, value)
     
     await save_one_user_settings(user_settings)
     

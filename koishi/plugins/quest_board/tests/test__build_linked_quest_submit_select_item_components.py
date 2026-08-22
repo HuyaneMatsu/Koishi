@@ -8,9 +8,9 @@ from ...item_core import (
     ITEM_ID_SCARLET_ONION, ITEM_ID_STRAWBERRY, get_item_nullable
 )
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, LinkedQuest, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QuestRequirementSerialisableBase,
+    AMOUNT_TYPE_COUNT, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QuestRequirementSerialisableBase,
     QuestRequirementSerialisableItemCategory, QuestRequirementSerialisableItemExact,
-    QuestRequirementSerialisableItemGroup
+    QuestRequirementSerialisableItemGroup, linked_quest_create
 )
 
 from ..component_building import build_linked_quest_submit_select_item_components
@@ -54,7 +54,7 @@ def _iter_options():
     batch_id = 202603060002
     
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,
@@ -113,7 +113,7 @@ def _iter_options():
         ],
     )
     
-    linked_quest_1 = LinkedQuest(
+    linked_quest_1 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,
@@ -282,7 +282,7 @@ def _iter_options():
         ],
     )
     
-    linked_quest_2 = LinkedQuest(
+    linked_quest_2 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,
@@ -340,7 +340,7 @@ def _iter_options():
         ],
     )
     
-    linked_quest_3 = LinkedQuest(
+    linked_quest_3 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,

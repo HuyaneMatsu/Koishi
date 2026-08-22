@@ -2,14 +2,15 @@ import vampytest
 from hata import Component, create_text_display
 
 from ..component_building import build_notification_settings_components
-from ..user_settings import UserSettings
+from ..user_settings import user_settings_create_with_specification
 
 
 def _iter_options():
     user_id = 202309270000
     
-    user_settings = UserSettings.create_with_specification(
+    user_settings = user_settings_create_with_specification(
         user_id,
+        notification_adventure_action = 1,
         notification_adventure_recovery_over = 1,
         notification_daily_by_waifu = 1,
         notification_daily_reminder = 0,
@@ -23,6 +24,7 @@ def _iter_options():
         user_settings,
         [
             create_text_display(
+                '- Adventure-action: true\n'
                 '- Adventure-recovery-over: true\n'
                 '- Daily-by-waifu: true\n'
                 '- Daily-reminder: false\n'

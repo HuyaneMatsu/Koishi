@@ -618,8 +618,12 @@ async def view(
                     break
             
             if (option & ADVENTURE_VIEW_OPTION_PREVIOUS):
-                page_count, adventure_listing = await get_adventure_listing_page(interaction_event.user_id, -1, 1)
-                if adventure_listing is not None:
+                active_adventure = await get_active_adventure(interaction_event.user_id)
+                page_size = 1 + (active_adventure is not None)
+                page_count, adventure_listing = await get_adventure_listing_page(
+                    interaction_event.user_id, -1, page_size
+                )
+                if (adventure_listing is not None) and (len(adventure_listing) == page_size):
                     adventure = adventure_listing[0]
                     break
                 

@@ -8,9 +8,11 @@ __all__ = (
 from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from math import floor
 
+from ...bot_utils.time import get_unix_time_nano_seconds
+
 from .constants import UNIX_EPOCH
 from .helpers import get_quest_template_nullable
-from .linked_quest import LinkedQuest
+from .linked_quest import linked_quest_create
 from .linked_quest_completion_states import LINKED_QUEST_COMPLETION_STATE_ACTIVE
 from .quest_requirement_serialisables import QuestRequirementSerialisableExpiration
 from .quest_requirement_types import (
@@ -187,6 +189,10 @@ def get_linked_quest_abandon_credibility_penalty(linked_quest, entity_rank):
     quest_abandon_penalty : `int`
     """
     while True:
+        if linked_quest.created_at + 1800_000000000 > get_unix_time_nano_seconds():
+            credibility_penalty = 0
+            break
+        
         rewards = linked_quest.rewards
         if (rewards is None):
             credibility_penalty = 0
@@ -273,7 +279,9 @@ def instantiate_quest(user_id, guild_id, batch_id, quest):
         
         reward_serialisables = tuple(reward_serialisables)
     
-    return LinkedQuest(user_id, guild_id, batch_id, quest.template_id, requirement_serialisables, reward_serialisables)
+    return linked_quest_create(
+        user_id, guild_id, batch_id, quest.template_id, requirement_serialisables, reward_serialisables
+    )
     
 
 def reset_linked_quest(linked_quest):
@@ -286,6 +294,7 @@ def reset_linked_quest(linked_quest):
         Linked quest to reset.
     """
     linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_ACTIVE
+    linked_quest.created_at = get_unix_time_nano_seconds()
     duration = -1
     
     requirements = linked_quest.requirements

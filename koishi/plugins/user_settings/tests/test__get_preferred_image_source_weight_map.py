@@ -2,7 +2,7 @@ import vampytest
 
 from ..constants import PREFERRED_IMAGE_SOURCE_NONE, PREFERRED_IMAGE_SOURCE_TOUHOU
 
-from ..user_settings import UserSettings
+from ..user_settings import user_settings_create_with_specification
 from ..utils import get_preferred_image_source_weight_map
 
 
@@ -18,15 +18,15 @@ async def test__get_preferred_image_source_weight_map():
     user_ids = [user_id_0, user_id_1, user_id_2]
     
     user_settings = [
-        UserSettings.create_with_specification(
+        user_settings_create_with_specification(
             user_id_0,
             preferred_image_source = PREFERRED_IMAGE_SOURCE_NONE,
         ),
-        UserSettings.create_with_specification(
+        user_settings_create_with_specification(
             user_id_1,
             preferred_image_source = PREFERRED_IMAGE_SOURCE_TOUHOU,
         ),
-        UserSettings.create_with_specification(
+        user_settings_create_with_specification(
             user_id_2,
             preferred_image_source = PREFERRED_IMAGE_SOURCE_TOUHOU,
         ),

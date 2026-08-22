@@ -1,7 +1,7 @@
 import vampytest
 
 from ..cache import USER_SETTINGS_CACHE, get_more_from_cache
-from ..user_settings import UserSettings
+from ..user_settings import user_settings_create, user_settings_create_with_specification
 
 
 def test__get_more_from_cache__miss():
@@ -46,7 +46,7 @@ def test__get_more_from_cache__hit_none():
         vampytest.assert_instance(results, list, nullable = True)
         vampytest.assert_instance(misses, list, nullable = True)
         
-        vampytest.assert_eq(results, [UserSettings(user_id_0), UserSettings(user_id_1)])
+        vampytest.assert_eq(results, [user_settings_create(user_id_0), user_settings_create(user_id_1)])
         vampytest.assert_eq(misses, None)
     
     finally:
@@ -62,11 +62,11 @@ def test__get_more_from_cache__hit_value():
     user_id_0 = 202309240010
     user_id_1 = 202309240011
     
-    user_settings_0 = UserSettings.create_with_specification(
+    user_settings_0 = user_settings_create_with_specification(
         user_id_0,
         notification_daily_by_waifu = 0,
     )
-    user_settings_1 = UserSettings.create_with_specification(
+    user_settings_1 = user_settings_create_with_specification(
         user_id_0,
         notification_proposal = 0,
     )
@@ -96,7 +96,7 @@ def test__get_more_from_cache__hit_and_value():
     user_id_0 = 202309240014
     user_id_1 = 202309240015
     
-    user_settings_0 = UserSettings.create_with_specification(
+    user_settings_0 = user_settings_create_with_specification(
         user_id_0,
         notification_daily_by_waifu = 0,
     )

@@ -2,7 +2,7 @@ import vampytest
 
 
 from ..cache import USER_SETTINGS_CACHE, put_more_to_cache
-from ..user_settings import UserSettings
+from ..user_settings import user_settings_create, user_settings_create_with_specification
 
 
 def test__put_more_to_cache__none():
@@ -34,11 +34,11 @@ def test__put_more_to_cache__value():
     user_id_0 = 202309240032
     user_id_1 = 202309240033
     
-    user_settings_0 = UserSettings.create_with_specification(
+    user_settings_0 = user_settings_create_with_specification(
         user_id_0,
         notification_daily_by_waifu = 0,
     )
-    user_settings_1 = UserSettings.create_with_specification(
+    user_settings_1 = user_settings_create_with_specification(
         user_id_1,
         notification_proposal = 0,
     )
@@ -64,7 +64,7 @@ def test__put_more_to_cache__move():
     user_id_0 = 202309240035
     user_id_1 = 202309240036
     
-    user_settings_0 = UserSettings(user_id_0)
+    user_settings_0 = user_settings_create(user_id_0)
     
     try:
         USER_SETTINGS_CACHE[user_id_0] = None
@@ -90,7 +90,7 @@ def test__put_more_to_cache__pop():
     user_id_0 = 202309240037
     user_id_1 = 202309240038
     
-    user_settings_1 = UserSettings(user_id_1)
+    user_settings_1 = user_settings_create(user_id_1)
     
     try:
         USER_SETTINGS_CACHE[user_id_0] = None

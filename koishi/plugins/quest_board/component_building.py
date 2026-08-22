@@ -636,7 +636,7 @@ def build_linked_quest_details_components(linked_quest, user_stats, page_index):
     components.append(
         create_text_display(
             ''.join([*produce_linked_quest_detailed_description(
-                linked_quest, quest_template, user_adventurer_rank_info.level
+                linked_quest, quest_template, user_adventurer_rank_info.level, True
             )]),
         ),
     )
@@ -730,7 +730,7 @@ def build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_
     components.append(
         create_text_display(
             ''.join([*produce_linked_quest_detailed_description(
-                linked_quest, quest_template, user_adventurer_rank_info.level
+                linked_quest, quest_template, user_adventurer_rank_info.level, False
             )]),
         ),
     )
@@ -1966,7 +1966,7 @@ def build_quest_complete_confirmation_form(
     
     # Description
     description = ''.join([*produce_quest_details_base_section(
-        None, quest, quest_template, user_adventurer_rank_info.level
+        None, quest, quest_template, user_adventurer_rank_info.level, False
     )])
     if description:
         components.append(create_text_display(description))

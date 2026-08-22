@@ -1,7 +1,7 @@
 import vampytest
 
 from ..constants import LINKED_QUEST_LISTING_CACHE
-from ..linked_quest import LinkedQuest
+from ..linked_quest import linked_quest_create
 from ..queries import delete_linked_quest
 
 from .helpers import _create_linked_quest_additional_input_fields
@@ -41,7 +41,7 @@ async def test__delete_linked_quest__in_cache():
     entry_id_1 = 131
     additional_input_fields_1 = _create_linked_quest_additional_input_fields()
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id_0,
         guild_id_0,
         batch_id_0,
@@ -49,7 +49,7 @@ async def test__delete_linked_quest__in_cache():
     )
     linked_quest_0.entry_id = entry_id_0
     
-    linked_quest_1 = LinkedQuest(
+    linked_quest_1 = linked_quest_create(
         user_id_1,
         guild_id_1,
         batch_id_1,

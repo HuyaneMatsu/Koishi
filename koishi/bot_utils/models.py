@@ -357,6 +357,7 @@ if (DB_ENGINE is not None):
         completion_count   = Column(Int32, default = 0, nullable = False)
         requirements       = Column(Binary(), default = None, nullable = True)
         rewards            = Column(Binary(), default = None, nullable = True)
+        created_at         = Column(Int64, default = 0, nullable = False)
     
     LINKED_QUEST_TABLE = linked_quest_model.__table__
     

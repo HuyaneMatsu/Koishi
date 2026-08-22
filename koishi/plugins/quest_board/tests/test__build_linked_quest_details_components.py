@@ -5,13 +5,13 @@ from hata import (
 )
 from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 
-from ...item_core import ITEM_ID_CARROT, ITEM_ID_PEACH
+from ...item_core import ITEM_ID_CARROT, ITEM_ID_PEACH, get_item_nullable
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT,
-    QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration,
-    QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility
+    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QuestRequirementSerialisableDuration,
+    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
+    QuestRewardSerialisableCredibility, linked_quest_create
 )
 from ...user_stats_core import UserStats
 
@@ -19,10 +19,15 @@ from ..component_building import build_linked_quest_details_components
 
 
 def _iter_options():
+    item_carrot = get_item_nullable(ITEM_ID_CARROT)
+    assert (item_carrot is not None)
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert (item_peach is not None)
+    
     user_id = 202505240020
     guild_id = 202505240021
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id,
         guild_id,
         5666,
@@ -41,8 +46,7 @@ def _iter_options():
     linked_quest_0.entry_id = linked_quest_entry_id_0
     
     
-    
-    linked_quest_1 = LinkedQuest(
+    linked_quest_1 = linked_quest_create(
         user_id,
         guild_id,
         5666,
@@ -70,7 +74,7 @@ def _iter_options():
         page_index,
         [
             create_text_display(
-                f'**Task: Submit 0.00 / {3600 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.**\n'
+                f'**Task:** Submit **0.00 / {3600 / 1000} kg {item_carrot.emoji} {item_carrot.name}** to Mystia.\n'
                 f'\n'
                 f'I am running low on some vegetables for soups.\n'
                 f'\nRequesting a basketful of Carrot.\n'
@@ -120,8 +124,8 @@ def _iter_options():
         page_index,
         [
             create_text_display(
-                f'**Task: Submit 0.00 / {3600 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot and '
-                f'0 / 20 {BUILTIN_EMOJIS["peach"]} Peach to Mystia.**\n'
+                f'**Task:** Submit **0.00 / {3600 / 1000} kg {item_carrot.emoji} {item_carrot.name}** and '
+                f'**0 / 20 {item_peach.emoji} {item_peach.name}** to Mystia.\n'
                 f'\n'
                 f'I am running low on some vegetables for soups.\n'
                 f'\nRequesting a basketful of Carrot.\n'

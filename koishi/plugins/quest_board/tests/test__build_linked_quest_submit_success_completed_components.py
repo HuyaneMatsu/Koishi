@@ -7,9 +7,10 @@ from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ...item_core import ITEM_ID_FROG, get_item_nullable
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest, QUEST_REWARD_TYPE_BALANCE,
+    AMOUNT_TYPE_COUNT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_REWARD_TYPE_BALANCE,
     QUEST_TEMPLATE_ID_CHIRUNO_FROG, QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration,
-    QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance, get_quest_template_nullable
+    QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance, get_quest_template_nullable,
+    linked_quest_create
 )
 from ...user_stats_core import UserStats
 
@@ -30,7 +31,7 @@ def _iter_options():
     
     duration = 3600 * 24 * 3
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id,
         guild_id_0,
         batch_id,

@@ -9,11 +9,12 @@ from hata import (
 from ...guild_stats import GuildStats
 from ...item_core import ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_PEACH
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
+    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
     QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, Quest, QuestBatch, QuestRequirementInstantiableDuration,
     QuestRequirementInstantiableItemExact, QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration,
     QuestRequirementSerialisableItemExact, QuestRewardInstantiableBalance, QuestRewardInstantiableCredibility,
-    QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility, get_quest_template_nullable
+    QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility, get_quest_template_nullable,
+    linked_quest_create
 )
 from ...user_stats_core import UserStats
 
@@ -79,7 +80,7 @@ def _iter_options():
         ),
     )
     
-    linked_quest_0 = LinkedQuest(
+    linked_quest_0 = linked_quest_create(
         user_id,
         guild_id,
         batch_id,

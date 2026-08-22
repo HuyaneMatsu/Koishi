@@ -1,4 +1,7 @@
-__all__ = ('adventure_cancel_after', 'adventure_cancel_now', 'scheduled_adventure_arrival', 'set_adventure_return_notifier')
+__all__ = (
+    'adventure_cancel_after', 'adventure_cancel_now', 'scheduled_adventure_arrival', 'set_adventure_action_notifier',
+    'set_adventure_return_notifier'
+)
 
 from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from random import Random
@@ -7,6 +10,8 @@ from math import ceil
 from scarletio import Task, get_event_loop
 
 from config import MARISA_MODE
+
+from ....bot_utils.getter_setter_pair import getter_setter_pair_create
 
 from ...inventory_core import get_inventory, save_inventory
 from ...user_stats_core import get_user_stats, save_user_stats
@@ -42,38 +47,8 @@ except ImportError:
 
 LOOP = get_event_loop()
 
-
-def _adventure_return_notifier_slot():
-    notifier = None
-    
-    def set_adventure_return_notifier(input_notifier):
-        """
-        Sets a notification deliverer for adventure return.
-        
-        Parameters
-        ----------
-        input_notifier : ``None | async (adventure : Adventure) -> None``
-            Notification deliverer to set.
-        """
-        nonlocal notifier
-        notifier = input_notifier
-        
-    def get_adventure_return_notifier():
-        """
-        Returns the notification deliverer for adventure return.
-        
-        Returns
-        -------
-        notifier : ``None | async (adventure : Adventure) -> None``
-        """
-        nonlocal notifier
-        return notifier
-    
-    return set_adventure_return_notifier, get_adventure_return_notifier
-
-
-set_adventure_return_notifier, get_adventure_return_notifier = _adventure_return_notifier_slot()
-del _adventure_return_notifier_slot
+get_adventure_action_notifier, set_adventure_action_notifier = getter_setter_pair_create()
+get_adventure_return_notifier, set_adventure_return_notifier = getter_setter_pair_create()
 
 
 async def scheduled_adventure_arrival(adventure):
@@ -316,7 +291,7 @@ async def adventure_action_step(adventure):
     
     # Insert a lost entry if we are lost.
     if (not cancelling_after) and (next_action is None):
-        adventure_action = AdventureAction(
+        adventure_action_lost = AdventureAction(
             adventure.entry_id,
             ACTION_ID_SYSTEM_UNKNOWN,
             action_date,
@@ -326,7 +301,7 @@ async def adventure_action_step(adventure):
             0,
         )
         # Save
-        await store_adventure_action(adventure_action)
+        await store_adventure_action(adventure_action_lost)
     
     # Schedule new handle
     adventure.handle = LOOP.call_after(
@@ -334,6 +309,10 @@ async def adventure_action_step(adventure):
         callback,
         adventure,
     )
+    
+    notifier = get_adventure_action_notifier()
+    if (notifier is not None):
+        await notifier(adventure, adventure_action)
 
 
 async def adventure_cancel_now(adventure):

@@ -2,8 +2,9 @@ import vampytest
 
 from ...item_core import ITEM_ID_STRAWBERRY
 from ...quest_core import (
-    QUEST_REWARD_TYPE_CREDIBILITY, QUEST_REWARD_TYPE_ITEM_EXACT, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, LinkedQuest,
-    QuestRewardSerialisableBase, QuestRewardSerialisableCredibility, QuestRewardSerialisableItemExact
+    QUEST_REWARD_TYPE_CREDIBILITY, QUEST_REWARD_TYPE_ITEM_EXACT, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
+    QuestRewardSerialisableBase, QuestRewardSerialisableCredibility, QuestRewardSerialisableItemExact,
+    linked_quest_create
 )
 
 from ..helpers import get_linked_quest_rewards_normalised
@@ -11,7 +12,7 @@ from ..helpers import get_linked_quest_rewards_normalised
 
 def _iter_options():
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,
@@ -25,7 +26,7 @@ def _iter_options():
     )
     
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,
@@ -41,7 +42,7 @@ def _iter_options():
     )
     
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,
@@ -61,7 +62,7 @@ def _iter_options():
     )
     
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,
@@ -80,7 +81,7 @@ def _iter_options():
     )
     
     yield (
-        LinkedQuest(
+        linked_quest_create(
             0,
             0,
             0,

@@ -8,11 +8,11 @@ from ...item_core import (
     get_item_nullable
 )
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest, QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD,
+    AMOUNT_TYPE_COUNT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD,
     QUEST_TEMPLATE_ID_MYSTIA_PEACH, Quest, QuestRequirementInstantiableDuration, QuestRequirementInstantiableItemExact,
     QuestRequirementSerialisableDuration, QuestRequirementSerialisableItemExact, QuestRewardInstantiableBalance,
     QuestRewardInstantiableCredibility, QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility,
-    get_quest_template_nullable
+    get_quest_template_nullable, linked_quest_create
 )
 from ...user_stats_core import UserStats
 
@@ -93,7 +93,7 @@ def _iter_options():
         )
     )
     
-    linked_quest = LinkedQuest(
+    linked_quest = linked_quest_create(
         user_id,
         guild_id,
         batch_id,
@@ -187,7 +187,7 @@ def test__build_quest_complete_confirmation_form(
     quest_template : ``QuestTemplate``
         The quest's template.
     
-    credibility : `int`
+    user_credibility : `int`
         The user's  credibility.
     
     possession_count : `int`

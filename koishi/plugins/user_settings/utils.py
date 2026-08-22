@@ -47,11 +47,11 @@ async def set_user_settings_option(user_settings, option, value):
     -------
     changed : `bool`
     """
-    actual = option.get(user_settings)
+    actual = option.getter(option, user_settings)
     if actual == value:
         return False
     
-    option.set(user_settings, value)
+    option.setter(option, user_settings, value)
     await save_one_user_settings(user_settings)
     return True
 

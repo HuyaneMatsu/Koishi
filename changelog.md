@@ -1,3 +1,40 @@
+### 2026-08-23
+
+- Fix `/top-list` was stuck on page 1. (pichu0357)
+- `market-place finalisation` notification's `Claim` option redirected not to the intended message.
+- Remove `status` and `/paranoia` commands.
+- `/roll` now accepts more advanced patterns, like `2d7+2` (chaos3326)
+- `/roll` now shows the rolled dices. (2vio2vieevie)
+- `/roll` now has a new luck and re-roll options.
+- Add new `adventure-action` notification. It is disabled by default. (ayahiya)
+- Fix `/adventure view option:previous` did not actually shown the previous adventure.
+- Do not apply credibility penalty if a quest is abandoned within 30 minutes. (yumeirusynthesis)
+- Make `linked quest details`'s summary line highlight (bolds) only the missing requirements.
+
+- Update tooltip:
+    - `rice` item now tells where it is found.
+
+- Add new items:
+    - Ramen
+    - Pen
+
+- Add new item groups:
+    - Full human body
+
+- Add new quests:
+    - Aya - Human corpse full (simplyarandomcross)
+    - Youmu - Ramen (simplyarandomcross)
+    - Youmu - Dango & Tea leaves
+    - Koishi - Pen (simplyarandomcross)
+    - Nitori - Human bone
+    - Parsee - Ribbon bow
+    - Mystia - Human bone (simplyarandomcross)
+    - Flandre - Plushie bear
+    - Marisa - Ramen (2vio2vieevie)
+
+- Balance quests:
+    - Satori - Pudding -> Reward balance 1000 -> 0; Reward tea leaves 5 -> 16.
+
 ### 2026-08-09
 
 - Fix `/adventure depart` duration limit check error message failed to be built (since previous update).
