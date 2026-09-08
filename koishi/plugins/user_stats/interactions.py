@@ -3,7 +3,7 @@ __all__ = ()
 from ...bots import FEATURE_CLIENTS
 from ...bot_utils.user_getter import get_user
 
-from ..user_stats_core import get_user_stats
+from ..user_stats_core import user_stats_get
 
 from .component_building import build_user_stats_primary_components, build_user_stats_secondary_components
 from .custom_ids import CUSTOM_ID_USER_STATS_PRIMARY_RP, CUSTOM_ID_USER_STATS_SECONDARY_RP
@@ -53,7 +53,7 @@ async def handle_user_stats_primary(
     if target_user.id != target_user_id:
         target_user = await get_user(target_user_id)
     
-    user_stats = await get_user_stats(target_user_id)
+    user_stats = await user_stats_get(target_user_id)
     
     await client.interaction_response_message_edit(
         interaction_event,
@@ -107,7 +107,7 @@ async def handle_user_stats_secondary(
     if target_user.id != target_user_id:
         target_user = await get_user(target_user_id)
     
-    user_stats = await get_user_stats(target_user_id)
+    user_stats = await user_stats_get(target_user_id)
     
     await client.interaction_response_message_edit(
         interaction_event,

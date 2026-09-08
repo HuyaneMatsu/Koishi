@@ -3,8 +3,8 @@ import vampytest
 from hata import InteractionForm, StringSelectOption, create_label, create_string_select, create_text_display
 
 from ...adventure_core import (
-    ADVENTURE_STATE_ACTIONING, Adventure, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS,
-    TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS
+    ADVENTURE_STATE_ACTIONING, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS,
+    TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS, adventure_create
 )
 
 from ..component_building import build_adventure_cancellation_confirmation_form
@@ -14,7 +14,7 @@ def _iter_options():
     user_id = 202510250000
     entry_id = 56
     
-    adventure = Adventure(
+    adventure = adventure_create(
         user_id,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
@@ -40,7 +40,7 @@ def _iter_options():
         ),
     )
     
-    adventure = Adventure(
+    adventure = adventure_create(
         user_id,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,

@@ -5,7 +5,7 @@ from math import floor
 
 from ...bot_utils.daily import BOOST_INTERVAL
 
-from ..user_balance import save_user_balance
+from ..user_balance import user_balance_save, user_balance_modify_balance_by, user_balance_modify_relationship_value_by
 
 from .relationship_queries import save_relationship
 
@@ -58,7 +58,7 @@ async def deepen_and_boost_relationship(
             if (target_user_balance is not None):
                 relationship_investment_increase >>= 1
             
-            source_user_balance.modify_relationship_value_by(relationship_investment_increase)
+            user_balance_modify_relationship_value_by(source_user_balance, relationship_investment_increase)
             save_source_user_balance += 1
             break
         
@@ -111,18 +111,18 @@ async def deepen_and_boost_relationship(
         else:
             relationship_to_deepen.set_target_can_boost_at(can_boost_at)
         
-        source_user_balance.modify_balance_by(boosted_amount)
-        target_user_balance.modify_balance_by(boosted_amount >> 1)
+        user_balance_modify_balance_by(source_user_balance, boosted_amount)
+        user_balance_modify_balance_by(target_user_balance, boosted_amount >> 1)
         
         save_source_user_balance += 1
         save_target_user_balance += 1
         break
     
     if save_source_user_balance > 1:
-        await save_user_balance(source_user_balance)
+        await user_balance_save(source_user_balance)
     
     if (target_user_balance is not None) and (save_target_user_balance > 1):
-        await save_user_balance(target_user_balance)
+        await user_balance_save(target_user_balance)
     
     if (relationship_to_deepen is not None) and (save_relationship_to_deepen > 1):
         await save_relationship(relationship_to_deepen)

@@ -6,6 +6,7 @@ __all__ = (
 from collections import OrderedDict
 from scarletio import WeakValueDictionary
 
+
 USER_STATS = WeakValueDictionary()
 USER_STATS_CACHE = OrderedDict()
 USER_STATS_CACHE_SIZE = 100

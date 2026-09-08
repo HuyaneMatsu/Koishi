@@ -10,7 +10,9 @@ from ...bots import FEATURE_CLIENTS
 
 from ..gift_common import check_can_gift, identify_targeted_user
 from ..relationships_core import autocomplete_relationship_extended_user_name
-from ..user_balance import get_user_balance, save_user_balance
+from ..user_balance import (
+    user_balance_get, user_balance_save, user_balance_accumulate_allocated_balance, user_balance_modify_balance_by
+)
 from ..user_settings import (
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_GIFT_DISABLE, USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_GIFT,
     get_one_user_settings, get_preferred_client_for_user
@@ -107,14 +109,14 @@ async def gift(
     if not gift_all:
         check_is_amount_valid(amount)
     
-    source_user_balance = await get_user_balance(source_user.id)
+    source_user_balance = await user_balance_get(source_user.id)
     
     source_balance =  source_user_balance.balance
-    source_allocated = source_user_balance.get_cumulative_allocated_balance()
+    source_allocated = user_balance_accumulate_allocated_balance(source_user_balance)
     
     check_is_balance_sufficient(source_balance, source_allocated)
     
-    target_user_balance = await get_user_balance(target_user.id)
+    target_user_balance = await user_balance_get(target_user.id)
     target_balance = target_user_balance.balance
     
     source_available_balance = source_balance - source_allocated
@@ -123,11 +125,11 @@ async def gift(
     else:
         amount = min(source_available_balance, amount)
     
-    source_user_balance.modify_balance_by(-amount)
-    await save_user_balance(source_user_balance)
+    user_balance_modify_balance_by(source_user_balance, -amount)
+    await user_balance_save(source_user_balance)
     
-    target_user_balance.modify_balance_by(amount)
-    await save_user_balance(target_user_balance)
+    user_balance_modify_balance_by(target_user_balance, amount)
+    await user_balance_save(target_user_balance)
     
     await client.interaction_response_message_edit(interaction_event, '-# _ _')
     await client.interaction_response_message_delete(interaction_event)

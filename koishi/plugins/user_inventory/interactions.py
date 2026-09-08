@@ -4,7 +4,7 @@ __all__ = ()
 from ...bots import FEATURE_CLIENTS
 
 from ..inventory_core import get_inventory
-from ..user_stats_core import get_user_stats
+from ..user_stats_core import user_stats_get, user_stats_calculate
 
 from .component_building import build_inventory_view_components
 from .constants import (
@@ -100,7 +100,7 @@ async def inventory_page_n(client, interaction_event, user_id, sort_by, sort_ord
         False,
     )
     
-    stats = await get_user_stats(user_id)
+    user_stats = await user_stats_get(user_id)
     inventory = await get_inventory(user_id)
     item_entries, page_count = get_inventory_page(inventory, sort_by, sort_order, page_index)
     
@@ -115,6 +115,6 @@ async def inventory_page_n(client, interaction_event, user_id, sort_by, sort_ord
             page_index,
             page_count,
             inventory.weight,
-            stats.stats_calculated.extra_inventory,
+            user_stats_calculate(user_stats).extra_inventory,
         ),
     )

@@ -8,14 +8,14 @@ from hata.ext.slash import P
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 from ...bots import FEATURE_CLIENTS
 
-from ..adventure_core import get_active_adventure
+from ..adventure_core import adventure_get_active
 from ..inventory_core import create_item_suggestions, get_inventory, select_item
 from ..market_place_core import (
     get_market_place_item_listing_active, get_market_place_item_listing_inbox, get_market_place_item_listing_own_offers,
     MARKET_PLACE_INBOX_PAGE_SIZE_DEFAULT, MARKET_PLACE_OWN_OFFERS_PAGE_SIZE_DEFAULT,
     MARKET_PLACE_VIEW_PAGE_SIZE_DEFAULT
 )
-from ..user_balance import get_user_balance
+from ..user_balance import user_balance_get, user_balance_accumulate_allocated_balance
 from ..user_settings import USER_SETTINGS_FEATURE_FLAG_SHIFT_MARKET_PLACE_INBOX, get_one_user_settings
 
 from .component_building import (
@@ -80,7 +80,7 @@ async def command_sell(
         Starting sell price.
     """
     while True:
-        adventure = await get_active_adventure(interaction_event.user_id)
+        adventure = await adventure_get_active(interaction_event.user_id)
         if (adventure is not None):
             error_message = 'You cannot sell while on adventure.'
             break
@@ -143,12 +143,12 @@ async def command_sell(
         item_amount = min(inventory.get_item_amount(item), amount)
         
         # Initial sell fee
-        user_balance = await get_user_balance(interaction_event.user_id)
+        user_balance = await user_balance_get(interaction_event.user_id)
         
         initial_sell_fee = calculate_initial_sell_fee(item, item_amount, duration_days, starting_sell_price)
         
         balance = user_balance.balance
-        allocated_balance = user_balance.get_cumulative_allocated_balance()
+        allocated_balance = user_balance_accumulate_allocated_balance(user_balance)
         available_balance = balance - allocated_balance
         if initial_sell_fee > available_balance:
             error_message = (

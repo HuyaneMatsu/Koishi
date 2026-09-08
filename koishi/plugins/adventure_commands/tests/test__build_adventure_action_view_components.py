@@ -1,11 +1,10 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 
 from hata import Component, create_button, create_row, create_separator, create_text_display
 
 from ...adventure_core import (
-    ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, AdventureAction, LOOT_STATE_SUCCESS, build_loot_data
+    ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, LOOT_STATE_SUCCESS, adventure_action_create,
+    loot_data_build
 )
 from ...item_core import ITEM_ID_PEACH, get_item_nullable
 
@@ -18,22 +17,22 @@ def _iter_options():
     
     adventure_entry_id = 9998
     user_id = 202508050000
-    adventure_action_entry_id = 8889
+    adventure_action_index = 5
     
-    adventure_action = AdventureAction(
-        adventure_entry_id,
+    adventure_action = adventure_action_create(
         ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
-        DateTime(2016, 5, 14, tzinfo = TimeZone.utc),
+        1463184000,
         None,
         None,
         0,
         0,
     )
-    adventure_action.entry_id = adventure_action_entry_id
     
     yield (
         user_id,
+        adventure_entry_id,
         adventure_action,
+        adventure_action_index,
         True,
         5,
         False,
@@ -42,7 +41,7 @@ def _iter_options():
             create_text_display('### Action Gardening'),
             create_separator(),
             create_text_display(
-                f'Occurred at: <t:{adventure_action.created_at.timestamp():.0f}:T>\n'
+                f'Occurred at: <t:{adventure_action.created_at}:T>\n'
                 f'Used health: 0\n'
                 f'Used energy: 0'
             ),
@@ -62,7 +61,7 @@ def _iter_options():
                     'View battle logs',
                     enabled = False,
                     custom_id = (
-                        f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{adventure_action_entry_id:x}'
+                        f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{adventure_action_index:x}'
                     ),
                 ),
             ),
@@ -71,24 +70,23 @@ def _iter_options():
     
     adventure_entry_id = 9999
     user_id = 202508050000
-    adventure_action_entry_id = 8881
     
-    adventure_action = AdventureAction(
-        adventure_entry_id,
+    adventure_action = adventure_action_create(
         ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
-        DateTime(2016, 5, 14, tzinfo = TimeZone.utc),
+        1463184000,
         None,
-        build_loot_data([
+        loot_data_build([
             (LOOT_STATE_SUCCESS, ITEM_ID_PEACH, 5),
         ]),
         5,
         10,
     )
-    adventure_action.entry_id = adventure_action_entry_id
     
     yield (
         user_id,
+        adventure_entry_id,
         adventure_action,
+        adventure_action_index,
         False,
         0,
         True,
@@ -97,7 +95,7 @@ def _iter_options():
             create_text_display('### Action Gardening'),
             create_separator(),
             create_text_display(
-                f'Occurred at: <t:{adventure_action.created_at.timestamp():.0f}:T>\n'
+                f'Occurred at: <t:{adventure_action.created_at}:T>\n'
                 f'Used health: 5\n'
                 f'Used energy: 10'
             ),
@@ -122,7 +120,7 @@ def _iter_options():
                     'View battle logs',
                     enabled = False,
                     custom_id = (
-                        f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{adventure_action_entry_id:x}'
+                        f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{adventure_action_index:x}'
                     ),
                 ),
             ),
@@ -133,7 +131,9 @@ def _iter_options():
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__build_adventure_action_view_components(
     user_id,
+    adventure_entry_id,
     adventure_action,
+    adventure_action_index,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     allow_switching_to_adventure_action_listing_view,
@@ -147,8 +147,14 @@ def test__build_adventure_action_view_components(
     user_id : `int`
         The owner user's identifier.
     
+    adventure_entry_id : `int`
+        The owner adventure's identifier.
+    
     adventure_action : ``AdventureAction``
         The adventure action to display.
+    
+    adventure_action_index : `int`
+        The adventure action's index.
     
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
@@ -168,7 +174,9 @@ def test__build_adventure_action_view_components(
     """
     output = build_adventure_action_view_components(
         user_id,
+        adventure_entry_id,
         adventure_action,
+        adventure_action_index,
         allow_switching_to_adventure_listing_view,
         adventure_listing_page_index,
         allow_switching_to_adventure_action_listing_view,

@@ -27,13 +27,13 @@ CUSTOM_ID_ADVENTURE_ACTION_VIEW_BUILDER = (
     lambda
         user_id,
         adventure_entry_id,
-        adventure_action_entry_id,
+        adventure_action_index,
         allow_switching_to_adventure_listing_view,
         adventure_page_index,
         allow_switching_to_adventure_action_listing_view,
         adventure_action_page_index,
     : (
-        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{adventure_action_entry_id:x}.'
+        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{adventure_action_index:x}.'
         f'{allow_switching_to_adventure_listing_view:x}.{adventure_page_index:x}.'
         f'{allow_switching_to_adventure_action_listing_view:x}.{adventure_action_page_index:x}'
     )
@@ -91,8 +91,8 @@ CUSTOM_ID_ADVENTURE_ACTION_BATTLE_LOGS_PATTERN = re_compile(
     'adventure\\.action\\.battle\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)'
 )
 CUSTOM_ID_ADVENTURE_ACTION_BATTLE_LOGS_BUILDER = (
-    lambda user_id, adventure_entry_id, adventure_action_entry_id :
-    f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{adventure_action_entry_id:x}'
+    lambda user_id, adventure_entry_id, adventure_action_index :
+    f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{adventure_action_index:x}'
 )
 
 

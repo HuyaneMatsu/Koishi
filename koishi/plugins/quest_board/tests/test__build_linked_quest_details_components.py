@@ -1,7 +1,7 @@
 import vampytest
 
 from hata import (
-    BUILTIN_EMOJIS, ButtonStyle, Component, create_button, create_row, create_separator, create_text_display
+    ButtonStyle, Component, create_button, create_row, create_separator, create_text_display
 )
 from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 
@@ -13,7 +13,7 @@ from ...quest_core import (
     QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
     QuestRewardSerialisableCredibility, linked_quest_create
 )
-from ...user_stats_core import UserStats
+from ...user_stats_core import user_stats_create, user_stats_modify_credibility_by
 
 from ..component_building import build_linked_quest_details_components
 
@@ -189,8 +189,8 @@ def test__build_linked_quest_details_components(linked_quest, user_id, credibili
     -------
     output : ``list<Component>``
     """
-    user_stats = UserStats(user_id)
-    user_stats.modify_credibility_by(credibility)
+    user_stats = user_stats_create(user_id)
+    user_stats_modify_credibility_by(user_stats, credibility)
 
     output = build_linked_quest_details_components(linked_quest, user_stats, page_index)
     

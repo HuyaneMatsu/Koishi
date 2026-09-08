@@ -4,7 +4,7 @@ from math import log
 
 from ..user_stats_core import (
     USER_STAT_NAME_FULL_BEDROOM, USER_STAT_NAME_FULL_CHARM, USER_STAT_NAME_FULL_CUTENESS, USER_STAT_NAME_FULL_HOUSEWIFE,
-    USER_STAT_NAME_FULL_LOYALTY
+    USER_STAT_NAME_FULL_LOYALTY, user_stats_calculate
 )
 
 from ..unit_core import produce_speed, produce_weight
@@ -70,25 +70,25 @@ def produce_user_stats_primary_description(user_stats):
     ------
     part : `str`
     """
-    stats_calculated = user_stats.stats_calculated
+    user_stats_calculated = user_stats_calculate(user_stats)
     yield from _produce_stat_increase(
-        USER_STAT_NAME_FULL_HOUSEWIFE, user_stats.stat_housewife, stats_calculated.stat_housewife
+        USER_STAT_NAME_FULL_HOUSEWIFE, user_stats.stat_housewife, user_stats_calculated.stat_housewife
     )
     yield '\n'
     yield from _produce_stat_increase(
-        USER_STAT_NAME_FULL_CUTENESS, user_stats.stat_cuteness, stats_calculated.stat_cuteness
+        USER_STAT_NAME_FULL_CUTENESS, user_stats.stat_cuteness, user_stats_calculated.stat_cuteness
     )
     yield '\n'
     yield from _produce_stat_increase(
-        USER_STAT_NAME_FULL_BEDROOM, user_stats.stat_bedroom, stats_calculated.stat_bedroom
+        USER_STAT_NAME_FULL_BEDROOM, user_stats.stat_bedroom, user_stats_calculated.stat_bedroom
     )
     yield '\n'
     yield from _produce_stat_increase(
-        USER_STAT_NAME_FULL_CHARM, user_stats.stat_charm, stats_calculated.stat_charm
+        USER_STAT_NAME_FULL_CHARM, user_stats.stat_charm, user_stats_calculated.stat_charm
     )
     yield '\n'
     yield from _produce_stat_increase(
-        USER_STAT_NAME_FULL_LOYALTY, user_stats.stat_loyalty, stats_calculated.stat_loyalty
+        USER_STAT_NAME_FULL_LOYALTY, user_stats.stat_loyalty, user_stats_calculated.stat_loyalty
     )
 
 
@@ -151,23 +151,23 @@ def produce_user_stats_secondary_description(user_stats):
     ------
     part : `str`
     """
-    stats_calculated = user_stats.stats_calculated
+    user_stats_calculated = user_stats_calculate(user_stats)
     
     yield 'Health: '
-    yield str(stats_calculated.extra_health)
+    yield str(user_stats_calculated.extra_health)
     yield '\nEnergy: '
-    yield str(stats_calculated.extra_energy)
+    yield str(user_stats_calculated.extra_energy)
     yield '\nMovement: '
-    yield from produce_speed(stats_calculated.extra_movement)
+    yield from produce_speed(user_stats_calculated.extra_movement)
     yield ' (m/s)\nInventory: '
-    yield from produce_weight(stats_calculated.extra_inventory)
+    yield from produce_weight(user_stats_calculated.extra_inventory)
     yield ' (kg)\n\n'
-    yield from _produce_stat_with_diminishing_multiplier('Butchering', stats_calculated.extra_butchering)
+    yield from _produce_stat_with_diminishing_multiplier('Butchering', user_stats_calculated.extra_butchering)
     yield '\n'
-    yield from _produce_stat_with_diminishing_multiplier('Fishing', stats_calculated.extra_fishing)
+    yield from _produce_stat_with_diminishing_multiplier('Fishing', user_stats_calculated.extra_fishing)
     yield '\n'
-    yield from _produce_stat_with_diminishing_multiplier('Foraging', stats_calculated.extra_foraging)
+    yield from _produce_stat_with_diminishing_multiplier('Foraging', user_stats_calculated.extra_foraging)
     yield '\n'
-    yield from _produce_stat_with_diminishing_multiplier('Gardening', stats_calculated.extra_gardening)
+    yield from _produce_stat_with_diminishing_multiplier('Gardening', user_stats_calculated.extra_gardening)
     yield '\n'
-    yield from _produce_stat_with_diminishing_multiplier('Hunting', stats_calculated.extra_hunting)
+    yield from _produce_stat_with_diminishing_multiplier('Hunting', user_stats_calculated.extra_hunting)

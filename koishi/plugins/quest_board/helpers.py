@@ -4,12 +4,15 @@ from dateutil.relativedelta import relativedelta as RelativeDelta
 
 from ..item_core import get_item, get_item_group_nullable, get_item_nullable
 
+from ..guild_stats_core import guild_stats_modify_credibility_by
 from ..quest_core import (
     AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_REQUIREMENT_TYPE_DURATION,
     QUEST_REQUIREMENT_TYPE_EXPIRATION, QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY, QUEST_REQUIREMENT_TYPE_ITEM_EXACT,
     QUEST_REQUIREMENT_TYPE_ITEM_GROUP, QUEST_REWARD_TYPE_BALANCE, QUEST_REWARD_TYPE_CREDIBILITY,
     QUEST_REWARD_TYPE_ITEM_EXACT, calculate_received_reward_credibility, get_guild_adventurer_rank_info
 )
+from ..user_balance import user_balance_modify_balance_by
+from ..user_stats_core import user_stats_modify_credibility_by
 
 
 def get_quest_with_template_id(quest_batch, quest_template_id):
@@ -864,7 +867,7 @@ def do_reward_user(
             if reward_type == QUEST_REWARD_TYPE_BALANCE:
                 balance_given = reward.balance * reward_count
                 
-                user_balance.modify_balance_by(balance_given)
+                user_balance_modify_balance_by(user_balance, balance_given)
                 
                 if (rewards_normalised is None):
                     rewards_normalised = []
@@ -877,13 +880,13 @@ def do_reward_user(
                 user_reward_credibility = calculate_received_reward_credibility(
                     credibility_given, quest_level, user_level
                 )
-                user_stats.modify_credibility_by(user_reward_credibility)
+                user_stats_modify_credibility_by(user_stats, user_reward_credibility)
                 
                 guild_adventurer_rank_info = get_guild_adventurer_rank_info(guild_stats.credibility)
                 guild_reward_credibility = calculate_received_reward_credibility(
                     credibility_given, quest_level, guild_adventurer_rank_info.level
                 )
-                guild_stats.set('credibility', guild_stats.credibility + guild_reward_credibility)
+                guild_stats_modify_credibility_by(guild_stats, guild_reward_credibility)
                 
                 if (rewards_normalised is None):
                     rewards_normalised = []

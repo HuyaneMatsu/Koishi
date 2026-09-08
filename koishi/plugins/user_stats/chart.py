@@ -8,7 +8,7 @@ from scarletio.web_common import quote
 
 from ..user_stats_core import (
     USER_STAT_NAME_FULL_BEDROOM, USER_STAT_NAME_FULL_CHARM, USER_STAT_NAME_FULL_CUTENESS, USER_STAT_NAME_FULL_HOUSEWIFE,
-    USER_STAT_NAME_FULL_LOYALTY
+    USER_STAT_NAME_FULL_LOYALTY, user_stats_calculate
 )
 
 from .constants import (
@@ -46,12 +46,12 @@ def get_user_stats_chart_color(user_stats):
     color : ``Color``
     """
     user_id = user_stats.user_id
-    stats_calculated = user_stats.stats_calculated
-    stat_housewife = stats_calculated.stat_housewife
-    stat_cuteness = stats_calculated.stat_cuteness
-    stat_bedroom = stats_calculated.stat_bedroom
-    stat_charm = stats_calculated.stat_charm
-    stat_loyalty = stats_calculated.stat_loyalty
+    user_stats_calculated = user_stats_calculate(user_stats)
+    stat_housewife = user_stats_calculated.stat_housewife
+    stat_cuteness = user_stats_calculated.stat_cuteness
+    stat_bedroom = user_stats_calculated.stat_bedroom
+    stat_charm = user_stats_calculated.stat_charm
+    stat_loyalty = user_stats_calculated.stat_loyalty
     
     stat_max = max(stat_housewife, stat_cuteness, stat_bedroom, stat_charm, stat_loyalty)
     if stat_max == 0:
@@ -105,9 +105,6 @@ def get_chart_suggested_max(stat_housewife, stat_cuteness, stat_bedroom, stat_ch
     
     Parameters
     ----------
-    user_id : `int`
-        The user's identifier.
-    
     stat_housewife : `int`
         The user's housewife stat.
     
@@ -154,12 +151,12 @@ def get_user_stats_chart_url(user_stats, color):
     -------
     url : `str`
     """
-    stats_calculated = user_stats.stats_calculated
-    stat_housewife = stats_calculated.stat_housewife
-    stat_cuteness = stats_calculated.stat_cuteness
-    stat_bedroom = stats_calculated.stat_bedroom
-    stat_charm = stats_calculated.stat_charm
-    stat_loyalty = stats_calculated.stat_loyalty
+    user_stats_calculated = user_stats_calculate(user_stats)
+    stat_housewife = user_stats_calculated.stat_housewife
+    stat_cuteness = user_stats_calculated.stat_cuteness
+    stat_bedroom = user_stats_calculated.stat_bedroom
+    stat_charm = user_stats_calculated.stat_charm
+    stat_loyalty = user_stats_calculated.stat_loyalty
     
     data = to_json({
         'type': 'radar',

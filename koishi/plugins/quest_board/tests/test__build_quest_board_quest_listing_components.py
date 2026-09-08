@@ -6,7 +6,7 @@ from hata import (
     create_section, create_separator, create_text_display, create_thumbnail_media
 )
 
-from ...guild_stats import GuildStats
+from ...guild_stats_core import guild_stats_create, guild_stats_modify_credibility_by
 from ...item_core import ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_PEACH
 from ...quest_core import (
     AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
@@ -16,7 +16,7 @@ from ...quest_core import (
     QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility, get_quest_template_nullable,
     linked_quest_create
 )
-from ...user_stats_core import UserStats
+from ...user_stats_core import user_stats_create, user_stats_modify_credibility_by
 
 from ..component_building import build_quest_board_quest_listing_components
 from ..constants import EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS
@@ -278,26 +278,25 @@ def test__build_quest_board_quest_listing_components(
     output : ``list<Component>``
     """
     guild = Guild.precreate(guild_id, icon = guild_icon, name = guild_name)
-    guild_stats = GuildStats(guild_id)
-    guild_stats.set('credibility', guild_credibility)
+    guild_stats = guild_stats_create(guild_id)
+    guild_stats_modify_credibility_by(guild_stats, guild_credibility)
     
-    user_stats = UserStats(user_id)
-    user_stats.modify_credibility_by(user_credibility)
+    user_stats = user_stats_create(user_id)
+    user_stats_modify_credibility_by(user_stats, user_credibility)
     
-    def _patched_get_quest_batch(self):
+    def guild_stats_generate_quest_batch_mocked(guild_stats):
         nonlocal quest_batch
         return quest_batch
     
     
-    get_quest_batch_original = type(guild_stats).get_quest_batch
-    type(guild_stats).get_quest_batch = _patched_get_quest_batch
-    try:
-        output = build_quest_board_quest_listing_components(
-            guild, guild_stats, user_stats, linked_quest_listing, page_index
-        )
-    finally:
-        type(guild_stats).get_quest_batch = get_quest_batch_original
+    mocked = vampytest.mock_globals(
+        build_quest_board_quest_listing_components,
+        guild_stats_generate_quest_batch = guild_stats_generate_quest_batch_mocked,
+    )
     
+    output = mocked(
+        guild, guild_stats, user_stats, linked_quest_listing, page_index
+    )
     
     vampytest.assert_instance(output, list)
     for element in output:

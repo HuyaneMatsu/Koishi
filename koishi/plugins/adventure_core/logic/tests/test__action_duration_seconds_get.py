@@ -1,0 +1,45 @@
+from random import Random
+
+import vampytest
+
+from ..helpers import action_duration_seconds_get
+from ..loot_accumulation import LootAccumulation
+
+def _iter_options():
+    yield (
+        1000,
+        Random(188),
+        {
+            9999: LootAccumulation(16, 420, 42),
+        },
+        1.25,
+        1369,
+    )
+
+
+@vampytest._(vampytest.call_from(_iter_options()).returning_last())
+def test__action_duration_seconds_get(base_duration, random, loot_accumulations, multiplier):
+    """
+    Tests whether ``action_duration_seconds_get`` works as intended.
+    
+    Parameters
+    ----------
+    base_duration : `int`
+        The action's base duration.
+    
+    random : `random.Random`
+        Random number generator to use.
+    
+    loot_accumulations : ``dict<int, LootAccumulation>``
+        Accumulated loot from the action.
+    
+    multiplier : `float`
+        Multiplier of the user for this given action.
+    
+    Returns
+    -------
+    output : `int`
+    """
+    output = action_duration_seconds_get(base_duration, random, loot_accumulations, multiplier)
+    vampytest.assert_instance(output, int)
+    return output

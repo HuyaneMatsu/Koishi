@@ -1,4 +1,4 @@
-__all__ = ('create_quest_batch',)
+__all__ = ('quest_batch_create',)
 
 from random import Random
 from math import floor
@@ -140,7 +140,7 @@ def _quest_sort_key_getter(quest):
     return (quest_template.level, reward_credibility, quest_template.id)
 
 
-def create_quest_batch(guild_id, batch_id, level_limit, amount):
+def quest_batch_create(guild_id, batch_id, level_limit, amount):
     """
     Generates a quest batch.
     

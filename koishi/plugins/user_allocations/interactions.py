@@ -2,7 +2,7 @@ __all__ = ()
 
 from ...bots import FEATURE_CLIENTS
 
-from ..user_balance import USER_BALANCE_ALLOCATION_HOOKS, get_user_balance
+from ..user_balance import USER_BALANCE_ALLOCATION_HOOKS, user_balance_get, user_balance_iter_allocations
 
 from .component_building import build_details_components, build_view_components
 from .constants import PAGE_SIZE
@@ -70,8 +70,8 @@ async def handle_allocations_view_page(
         interaction_event,
     )
     
-    user_balance = await get_user_balance(user_id)
-    allocations = [*user_balance.iter_allocations()]
+    user_balance = await user_balance_get(user_id)
+    allocations = [*user_balance_iter_allocations(user_balance)]
     page_count = (len(allocations) + PAGE_SIZE - 1) // PAGE_SIZE
     allocations_page = allocations[page_index * PAGE_SIZE : (page_index + 1) * PAGE_SIZE]
     
@@ -136,8 +136,8 @@ async def handle_allocations_details(
     )
     
     while True:
-        user_balance = await get_user_balance(user_id)
-        for feature_id, session_id, amount, data in user_balance.iter_allocations():
+        user_balance = await user_balance_get(user_id)
+        for feature_id, session_id, amount, data in user_balance_iter_allocations(user_balance):
             if (feature_id == allocation_feature_id) and (session_id == allocation_session_id):
                 break
         else:

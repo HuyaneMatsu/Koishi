@@ -4,8 +4,8 @@ import vampytest
 
 from ...item_core import Item
 
-from ..user_stats import UserStats
-from ..user_stats_calculated import UserStatsCalculated
+from ..user_stats import user_stats_create_from_entry
+from ..user_stats_calculated import UserStatsCalculated, user_stats_calculated_create
 
 
 def _assert_fields_set(user_stats_calculated):
@@ -39,75 +39,6 @@ def _assert_fields_set(user_stats_calculated):
     vampytest.assert_instance(user_stats_calculated.stat_cuteness, int)
     vampytest.assert_instance(user_stats_calculated.stat_housewife, int)
     vampytest.assert_instance(user_stats_calculated.stat_loyalty, int)
-
-
-def test__UserStatsCalculated__new():
-    """
-    Tests whether ``UserStatsCalculated.__new__`` works as intended.
-    """
-    user_id = 202503230000
-    
-    stat_housewife = 11
-    stat_cuteness = 12
-    stat_bedroom = 13
-    stat_charm = 14
-    stat_loyalty = 15
-    
-    credibility = 12222
-    recovering_until = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
-    
-    item_id_costume = 0
-    item_id_head = 0
-    item_id_species = 0
-    item_id_weapon = 0
-    
-    entry_id = 3501
-    
-    entry = {
-        'id': entry_id,
-        'user_id': user_id,
-        
-        'stat_housewife': stat_housewife,
-        'stat_cuteness': stat_cuteness,
-        'stat_bedroom': stat_bedroom,
-        'stat_charm': stat_charm,
-        'stat_loyalty': stat_loyalty,
-        
-        'credibility': credibility,
-        'recovering_until': recovering_until.replace(tzinfo = None),
-        'recovering_until_notification_at': recovering_until.replace(tzinfo = None),
-        
-        'item_id_costume': item_id_costume,
-        'item_id_head': item_id_head,
-        'item_id_species': item_id_species,
-        'item_id_weapon': item_id_weapon,
-    }
-    
-    stats = UserStats.from_entry(entry)
-    
-    user_stats_calculated = UserStatsCalculated(stats)
-    _assert_fields_set(user_stats_calculated)
-    
-    vampytest.assert_eq(user_stats_calculated.extra_butchering, 21)
-    vampytest.assert_eq(user_stats_calculated.extra_fishing, 23)
-    vampytest.assert_eq(user_stats_calculated.extra_foraging, 22)
-    vampytest.assert_eq(user_stats_calculated.extra_gardening, 22)
-    vampytest.assert_eq(user_stats_calculated.extra_hunting, 24)
-    
-    vampytest.assert_eq(user_stats_calculated.extra_inventory, 56250)
-    vampytest.assert_eq(user_stats_calculated.extra_movement, 1304)
-    vampytest.assert_eq(user_stats_calculated.extra_health, 236)
-    vampytest.assert_eq(user_stats_calculated.extra_energy, 226)
-    
-    vampytest.assert_is(user_stats_calculated.item_costume, None)
-    vampytest.assert_is(user_stats_calculated.item_head, None)
-    vampytest.assert_is(user_stats_calculated.item_species, None)
-    vampytest.assert_is(user_stats_calculated.item_weapon, None)
-    vampytest.assert_eq(user_stats_calculated.stat_bedroom, stat_bedroom)
-    vampytest.assert_eq(user_stats_calculated.stat_charm, stat_charm)
-    vampytest.assert_eq(user_stats_calculated.stat_cuteness, stat_cuteness)
-    vampytest.assert_eq(user_stats_calculated.stat_housewife, stat_housewife)
-    vampytest.assert_eq(user_stats_calculated.stat_loyalty, stat_loyalty)
 
 
 def test__UserStatsCalculated__repr():
@@ -152,8 +83,77 @@ def test__UserStatsCalculated__repr():
         'item_id_weapon': item_id_weapon,
     }
     
-    stats = UserStats.from_entry(entry)
+    user_stats = user_stats_create_from_entry(entry)
     
-    user_stats_calculated = UserStatsCalculated(stats)
+    user_stats_calculated = user_stats_calculated_create(user_stats)
     output = repr(user_stats_calculated)
     vampytest.assert_instance(output, str)
+
+
+def test__user_stats_calculated_create():
+    """
+    Tests whether ``user_stats_calculated_create`` works as intended.
+    """
+    user_id = 202503230000
+    
+    stat_housewife = 11
+    stat_cuteness = 12
+    stat_bedroom = 13
+    stat_charm = 14
+    stat_loyalty = 15
+    
+    credibility = 12222
+    recovering_until = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    
+    item_id_costume = 0
+    item_id_head = 0
+    item_id_species = 0
+    item_id_weapon = 0
+    
+    entry_id = 3501
+    
+    entry = {
+        'id': entry_id,
+        'user_id': user_id,
+        
+        'stat_housewife': stat_housewife,
+        'stat_cuteness': stat_cuteness,
+        'stat_bedroom': stat_bedroom,
+        'stat_charm': stat_charm,
+        'stat_loyalty': stat_loyalty,
+        
+        'credibility': credibility,
+        'recovering_until': recovering_until.replace(tzinfo = None),
+        'recovering_until_notification_at': recovering_until.replace(tzinfo = None),
+        
+        'item_id_costume': item_id_costume,
+        'item_id_head': item_id_head,
+        'item_id_species': item_id_species,
+        'item_id_weapon': item_id_weapon,
+    }
+    
+    user_stats = user_stats_create_from_entry(entry)
+    
+    user_stats_calculated = user_stats_calculated_create(user_stats)
+    _assert_fields_set(user_stats_calculated)
+    
+    vampytest.assert_eq(user_stats_calculated.extra_butchering, 21)
+    vampytest.assert_eq(user_stats_calculated.extra_fishing, 23)
+    vampytest.assert_eq(user_stats_calculated.extra_foraging, 22)
+    vampytest.assert_eq(user_stats_calculated.extra_gardening, 22)
+    vampytest.assert_eq(user_stats_calculated.extra_hunting, 24)
+    
+    vampytest.assert_eq(user_stats_calculated.extra_inventory, 56250)
+    vampytest.assert_eq(user_stats_calculated.extra_movement, 1304)
+    vampytest.assert_eq(user_stats_calculated.extra_health, 236)
+    vampytest.assert_eq(user_stats_calculated.extra_energy, 226)
+    
+    vampytest.assert_is(user_stats_calculated.item_costume, None)
+    vampytest.assert_is(user_stats_calculated.item_head, None)
+    vampytest.assert_is(user_stats_calculated.item_species, None)
+    vampytest.assert_is(user_stats_calculated.item_weapon, None)
+    vampytest.assert_eq(user_stats_calculated.stat_bedroom, stat_bedroom)
+    vampytest.assert_eq(user_stats_calculated.stat_charm, stat_charm)
+    vampytest.assert_eq(user_stats_calculated.stat_cuteness, stat_cuteness)
+    vampytest.assert_eq(user_stats_calculated.stat_housewife, stat_housewife)
+    vampytest.assert_eq(user_stats_calculated.stat_loyalty, stat_loyalty)

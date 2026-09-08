@@ -4,11 +4,11 @@ from itertools import islice
 
 from hata import (
     InteractionForm, StringSelectOption, create_button, create_label, create_row, create_section, create_separator,
-    create_string_select, create_text_display, create_thumbnail_media, format_datetime
+    create_string_select, create_text_display, create_thumbnail_media, format_unix_time
 )
 
 from ..adventure_core import (
-    ADVENTURE_STATE_FINALIZED, can_cancel_adventure_after, can_cancel_adventure_now, iter_loot_data
+    ADVENTURE_STATE_FINALIZED, can_cancel_adventure_after, can_cancel_adventure_now, loot_data_iter
 )
 from ..item_core import butcher_estimate_energy_cost, butcher_estimate_loot_chance_and_amounts
 from ..user_settings import USER_SETTINGS_CUSTOM_ID_NOTIFICATION_ADVENTURE_ACTION_DISABLE
@@ -214,7 +214,7 @@ def _accumulate_group_adventure_action_loot(adventure_action, grouped_loot):
     grouped_loot : `dict<int, dict<int, int>>`
         Already accumulated loot.
     """
-    for loot_state, item_id, amount in iter_loot_data(adventure_action.loot_data):
+    for loot_state, item_id, amount in loot_data_iter(adventure_action.loot_data):
         try:
             group = grouped_loot[loot_state]
         except KeyError:
@@ -266,10 +266,10 @@ def group_adventure_action_loot_by_state(adventure_action):
     return grouped_loot
 
 
-
 def iter_build_adventure_action_components(
     adventure,
-    adventure_action_listing,
+    adventure_action_listing_start,
+    adventure_action_listing_end,
     produce_depart,
     produce_return,
     allow_switching_to_adventure_listing_view,
@@ -287,8 +287,11 @@ def iter_build_adventure_action_components(
     adventure : ``Adventure``
         The parent adventure.
     
-    adventure_action_listing : ``None | list<AdventureActions>``
-        Adventure actions to render components for.
+    adventure_action_listing_start : `int`
+        Where to start listing the actions (inclusive).
+    
+    adventure_action_listing_end : `int`
+        Where to end listing the actions (exclusive).
     
     produce_depart : `bool`
         Whether to produce depart component.
@@ -315,7 +318,7 @@ def iter_build_adventure_action_components(
     if produce_depart:
         yield create_section(
             create_text_display(
-                f'{format_datetime(adventure.created_at, "T")} Depart'
+                f'{format_unix_time(adventure.created_at, "T")} Depart'
             ),
             thumbnail = create_button(
                 'View',
@@ -324,8 +327,10 @@ def iter_build_adventure_action_components(
             ),
         )
     
+    adventure_action_listing = adventure.action_listing
     if (adventure_action_listing is not None):
-        for adventure_action in adventure_action_listing:
+        for index in range(adventure_action_listing_start, adventure_action_listing_end):
+            adventure_action = adventure_action_listing[index]
             text_display = create_text_display(
                 ''.join([*produce_adventure_action_short_representation(adventure_action)])
             )
@@ -337,7 +342,7 @@ def iter_build_adventure_action_components(
                     custom_id = CUSTOM_ID_ADVENTURE_ACTION_VIEW_BUILDER(
                         adventure.user_id,
                         adventure.entry_id,
-                        adventure_action.entry_id,
+                        index,
                         allow_switching_to_adventure_listing_view,
                         adventure_listing_page_index,
                         allow_switching_to_adventure_action_listing_view,
@@ -355,7 +360,7 @@ def iter_build_adventure_action_components(
     if produce_return:
         yield create_section(
             create_text_display(
-                f'{format_datetime(adventure.updated_at, "T")} Return'
+                f'{format_unix_time(adventure.updated_at, "T")} Return'
             ),
             thumbnail = create_button(
                 'View',
@@ -367,7 +372,6 @@ def iter_build_adventure_action_components(
 
 def build_adventure_view_active_components(
     adventure,
-    adventure_action_listing,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     now,
@@ -381,9 +385,6 @@ def build_adventure_view_active_components(
     ----------
     adventure : ``Adventure``
         The parent adventure.
-    
-    adventure_action_listing : ``None | list<AdventureActions>``
-        The adventure's actions.
     
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
@@ -426,6 +427,7 @@ def build_adventure_view_active_components(
     
     # ---- Loot ----
     
+    adventure_action_listing = adventure.action_listing
     if (
         (adventure_action_listing is not None) and
         any((adventure_action.loot_data is not None) for adventure_action in adventure_action_listing)
@@ -439,31 +441,36 @@ def build_adventure_view_active_components(
     
     # ---- Adventure actions ----
     
-    action_count = adventure.action_count + 1
     if (adventure_action_listing is None):
         truncated_count = 0
         produce_depart = True
-        adventure_action_listing_to_show = None
-    elif action_count <= ACTIVE_ADVENTURE_ACTION_LIMIT:
-        truncated_count = 0
-        produce_depart = True
-        adventure_action_listing_to_show = adventure_action_listing.copy()
+        adventure_action_listing_start = 0
+        adventure_action_listing_end = 0
     else:
-        truncated_count = action_count - ACTIVE_ADVENTURE_ACTION_LIMIT
-        produce_depart = False
-        adventure_action_listing_to_show = adventure_action_listing[-ACTIVE_ADVENTURE_ACTION_LIMIT:]
-    
-    if truncated_count:
-        components.append(
-            create_text_display(
-                f'+ {truncated_count} truncated (showing latest {ACTIVE_ADVENTURE_ACTION_LIMIT})'
+        adventure_action_listing_length = len(adventure_action_listing)
+        if adventure_action_listing_length < ACTIVE_ADVENTURE_ACTION_LIMIT:
+            truncated_count = 0
+            produce_depart = True
+            adventure_action_listing_start = 0
+            adventure_action_listing_end = len(adventure_action_listing)
+        else:
+            truncated_count = adventure_action_listing_length + 1 - ACTIVE_ADVENTURE_ACTION_LIMIT
+            produce_depart = False
+            adventure_action_listing_start = adventure_action_listing_length - ACTIVE_ADVENTURE_ACTION_LIMIT
+            adventure_action_listing_end = adventure_action_listing_length
+        
+        if truncated_count:
+            components.append(
+                create_text_display(
+                    f'+ {truncated_count} truncated (showing latest {ACTIVE_ADVENTURE_ACTION_LIMIT})'
             )
         )
     
     components.extend(
         iter_build_adventure_action_components(
             adventure,
-            adventure_action_listing_to_show,
+            adventure_action_listing_start,
+            adventure_action_listing_end,
             produce_depart,
             False, 
             allow_switching_to_adventure_listing_view,
@@ -519,7 +526,6 @@ def build_adventure_view_active_components(
 
 def build_adventure_view_finalized_components(
     adventure,
-    adventure_action_listing,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
 ):
@@ -530,9 +536,6 @@ def build_adventure_view_finalized_components(
     ----------
     adventure : ``Adventure``
         The parent adventure.
-    
-    adventure_action_listing : ``None | list<AdventureActions>``
-        The adventure's actions.
     
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
@@ -564,6 +567,7 @@ def build_adventure_view_finalized_components(
     
     # ---- Loot ----
     
+    adventure_action_listing = adventure.action_listing
     if (
         (adventure_action_listing is not None) and
         any((adventure_action.loot_data is not None) for adventure_action in adventure_action_listing)
@@ -620,7 +624,9 @@ def build_adventure_view_finalized_components(
 
 def build_adventure_action_view_components(
     user_id,
+    adventure_entry_id,
     adventure_action,
+    adventure_action_index,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     allow_switching_to_adventure_action_listing_view,
@@ -634,8 +640,14 @@ def build_adventure_action_view_components(
     user_id : `int`
         The owner user's identifier.
     
+    adventure_entry_id : `int`
+        The owner adventure's identifier.
+    
     adventure_action : ``AdventureAction``
         The adventure action to display.
+    
+    adventure_action_index : `int`
+        The adventure action's index.
     
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
@@ -691,7 +703,7 @@ def build_adventure_action_view_components(
                 'View adventure',
                 custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
                     user_id,
-                    adventure_action.adventure_entry_id,
+                    adventure_entry_id,
                     allow_switching_to_adventure_listing_view,
                     adventure_listing_page_index,
                 ),
@@ -701,7 +713,7 @@ def build_adventure_action_view_components(
                 enabled = allow_switching_to_adventure_action_listing_view,
                 custom_id = CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
                     user_id,
-                    adventure_action.adventure_entry_id, 
+                    adventure_entry_id, 
                     allow_switching_to_adventure_listing_view,
                     adventure_listing_page_index,
                     adventure_action_listing_page_index,
@@ -711,7 +723,7 @@ def build_adventure_action_view_components(
                 'View battle logs',
                 enabled = False, # Battles are not implemented yet.
                 custom_id = CUSTOM_ID_ADVENTURE_ACTION_BATTLE_LOGS_BUILDER(
-                    user_id, adventure_action.adventure_entry_id, adventure_action.entry_id
+                    user_id, adventure_entry_id, adventure_action_index
                 ),
             ),
         )
@@ -722,7 +734,6 @@ def build_adventure_action_view_components(
 
 def build_adventure_action_listing_view_components(
     adventure,
-    adventure_action_listing,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     adventure_action_listing_page_index,
@@ -734,9 +745,6 @@ def build_adventure_action_listing_view_components(
     ----------
     adventure : ``Adventure``
         The parent adventure.
-    
-    adventure_action_listing : ``None | list<AdventureActions>``
-        The adventure's actions.
     
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
@@ -752,7 +760,10 @@ def build_adventure_action_listing_view_components(
     components : ``list<Component>``
     """
     adventure_finalized = (adventure.state == ADVENTURE_STATE_FINALIZED)
-    action_count = adventure.action_count + 1 + adventure_finalized
+    
+    
+    adventure_action_listing = adventure.action_listing
+    action_count = (0 if adventure_action_listing is None else len(adventure_action_listing)) + 1 + adventure_finalized
     page_count = (action_count + ADVENTURE_ACTION_LISTING_PAGE_SIZE - 1) // ADVENTURE_ACTION_LISTING_PAGE_SIZE
     
     components = []
@@ -773,17 +784,30 @@ def build_adventure_action_listing_view_components(
         produce_return = adventure_finalized and (page_count - adventure_action_listing_page_index == 1)
         
         if adventure_action_listing is None:
-            adventure_action_listing_to_show = None
+            adventure_action_listing_start = 0
+            adventure_action_listing_end = 0
         else:
-            adventure_action_listing_to_show = adventure_action_listing[
-                max(0, adventure_action_listing_page_index * ADVENTURE_ACTION_LISTING_PAGE_SIZE - 1) :
-                (adventure_action_listing_page_index + 1) * ADVENTURE_ACTION_LISTING_PAGE_SIZE - 1
-            ]
+            adventure_listing_length = len(adventure_action_listing)
+            adventure_action_listing_start = adventure_action_listing_page_index * ADVENTURE_ACTION_LISTING_PAGE_SIZE - 1
+            if adventure_action_listing_start < 0:
+                adventure_action_listing_start = 0
+            
+            if adventure_action_listing_start >= adventure_listing_length:
+                adventure_action_listing_start = 0
+                adventure_action_listing_end = 0
+            else:
+                adventure_action_listing_end = (
+                    (adventure_action_listing_page_index + 1) * ADVENTURE_ACTION_LISTING_PAGE_SIZE - 1
+                )
+                if adventure_action_listing_end > adventure_listing_length:
+                    adventure_action_listing_end = adventure_listing_length
+
         
         components.extend(
             iter_build_adventure_action_components(
                 adventure,
-                adventure_action_listing_to_show,
+                adventure_action_listing_start,
+                adventure_action_listing_end,
                 produce_depart,
                 produce_return,
                 allow_switching_to_adventure_listing_view,
@@ -1005,19 +1029,31 @@ def build_adventure_action_notification_components(adventure, adventure_action):
     
     # ---- Controls ----
     
+    # Detect which index this adventure action is at.
+    adventure_action_listing = adventure.action_listing
+    if (adventure_action_listing is None):
+        adventure_action_index = 0
+    else:
+        for adventure_action_index in range(len(adventure_action_listing) -1, -1, -1):
+            if adventure_action_listing[adventure_action_index] is adventure_action:
+                break
+        else:
+            # This is not required, but calms the editor.
+            adventure_action_index = 0
+            
     components.append(
         create_row(
             create_button(
                 'View adventure',
                 custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
-                    adventure.user_id, adventure_action.adventure_entry_id, False, 0,
+                    adventure.user_id, adventure.entry_id, False, 0,
                 ),
             ),
             create_button(
                 'View battle logs',
                 enabled = False, # Battles are not implemented yet.
                 custom_id = CUSTOM_ID_ADVENTURE_ACTION_BATTLE_LOGS_BUILDER(
-                    adventure.user_id, adventure_action.adventure_entry_id, adventure_action.entry_id
+                    adventure.user_id, adventure.entry_id, adventure_action_index
                 ),
             ),
             create_button(

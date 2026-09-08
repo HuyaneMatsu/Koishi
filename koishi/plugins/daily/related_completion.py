@@ -11,7 +11,7 @@ from ...bot_utils.user_getter import get_users_unordered
 from ..relationships_core import (
     get_relationship_extension_traces, looks_like_user_id
 )
-from ..user_balance import get_user_balances
+from ..user_balance import user_balance_get_many
 
 
 USER_NAME_WITH_COMMENT_RP = re_compile('(.*?)(?:\\s*\\(.*\\)\\s*)?')
@@ -87,7 +87,7 @@ async def get_related_users_with_name_and_next_daily(user_id, guild_id, value):
         users = [user for user in users if user.has_name_like_at(value, guild_id)]
         break
     
-    user_balances = await get_user_balances(user.id for user in users)
+    user_balances = await user_balance_get_many(user.id for user in users)
     
     return {user: user_balances[user.id].daily_can_claim_at for user in users}
 

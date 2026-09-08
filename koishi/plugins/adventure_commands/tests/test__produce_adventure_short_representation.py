@@ -1,17 +1,15 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 
 from ...adventure_core import (
-    Adventure, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS,
-    TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS
+    LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS, TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS,
+    adventure_create
 )
 
 from ..content_building import produce_adventure_short_representation
 
 
 def _iter_options():
-    adventure = Adventure(
+    adventure = adventure_create(
         202508060020,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
@@ -21,7 +19,7 @@ def _iter_options():
         0,
         0,
     )
-    adventure.created_at = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    adventure.created_at = 1463184000
     
     yield (
         adventure,
@@ -31,7 +29,7 @@ def _iter_options():
         ),
     )
     
-    adventure = Adventure(
+    adventure = adventure_create(
         202508060021,
         9999,
         9999,
@@ -41,7 +39,7 @@ def _iter_options():
         0,
         0,
     )
-    adventure.created_at = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    adventure.created_at = 1463184000
     
     yield (
         adventure,

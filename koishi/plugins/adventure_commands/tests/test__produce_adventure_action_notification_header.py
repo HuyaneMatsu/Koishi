@@ -1,21 +1,27 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 
 from ...adventure_core import (
-    Adventure, AdventureAction, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS,
-    ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
-    TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS
+    LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS, ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
+    TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS, adventure_action_create, adventure_create
 )
 
 from ..content_building import produce_adventure_action_notification_header
 
 
 def _iter_options():
-    created_at = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    created_at = 1463184000
     adventure_entry_id = 9993
     
-    adventure = Adventure(
+    adventure_action = adventure_action_create(
+        ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
+        created_at,
+        None,
+        None,
+        0,
+        10,
+    )
+    
+    adventure = adventure_create(
         202608190000,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
@@ -26,16 +32,7 @@ def _iter_options():
         0,
     )
     adventure.entry_id = adventure_entry_id
-    
-    adventure_action = AdventureAction(
-        adventure_entry_id,
-        ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
-        created_at,
-        None,
-        None,
-        0,
-        10,
-    )
+    adventure.action_listing = [adventure]
     
     yield (
         adventure,
@@ -48,7 +45,16 @@ def _iter_options():
     
     adventure_entry_id = 9993
     
-    adventure = Adventure(
+    adventure_action = adventure_action_create(
+        999999,
+        created_at,
+        None,
+        None,
+        0,
+        10,
+    )
+    
+    adventure = adventure_create(
         202608190001,
         9999,
         9999,
@@ -59,16 +65,7 @@ def _iter_options():
         0,
     )
     adventure.entry_id = adventure_entry_id
-    
-    adventure_action = AdventureAction(
-        adventure_entry_id,
-        999999,
-        created_at,
-        None,
-        None,
-        0,
-        10,
-    )
+    adventure.action_listing = [adventure]
     
     yield (
         adventure,

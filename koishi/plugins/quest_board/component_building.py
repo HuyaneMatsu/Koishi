@@ -7,6 +7,7 @@ from hata import (
     create_text_display, create_text_input, create_thumbnail_media
 )
 
+from ..guild_stats_core import guild_stats_generate_quest_batch
 from ..item_core import get_item_group_nullable, get_item_nullable
 from ..quest_core import (
     LINKED_QUEST_COMPLETION_STATE_ACTIVE, LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY,
@@ -85,7 +86,7 @@ def build_quest_board_quest_listing_components(guild, guild_stats, user_stats, l
     components = []
     
     # Add header.
-    quest_batch = guild_stats.get_quest_batch()
+    quest_batch = guild_stats_generate_quest_batch(guild_stats)
     credibility = guild_stats.credibility
     guild_adventurer_rank_info = get_guild_adventurer_rank_info(credibility)
     

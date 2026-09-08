@@ -1,17 +1,16 @@
 __all__ = ()
 
-from datetime import timedelta as TimeDelta
-
 from dateutil.relativedelta import relativedelta as RelativeDelta
-from hata import DATETIME_FORMAT_CODE, elapsed_time, format_datetime
-
+from hata import (
+    DATETIME_FORMAT_CODE, TIMESTAMP_STYLES, elapsed_time, format_datetime, format_unix_time, unix_time_to_datetime
+)
 from ..adventure_core import (
     ACTIONS, ACTION_TYPE_ARRIVAL, ACTION_TYPE_BUTCHERING, ACTION_TYPE_CANCELLATION, ACTION_TYPE_ENCOUNTER,
     ACTION_TYPE_FATALITY, ACTION_TYPE_FISHING, ACTION_TYPE_FORAGING, ACTION_TYPE_GARDENING, ACTION_TYPE_HUNT,
     ACTION_TYPE_NONE, ACTION_TYPE_TRAP, ACTION_TYPE_UNKNOWN, ADVENTURE_STATE_ACTIONING,
     ADVENTURE_STATE_ACTIONING_CANCEL_AFTER, ADVENTURE_STATE_CANCELLED, ADVENTURE_STATE_DEPARTING,
     ADVENTURE_STATE_RETURNING, LOCATIONS, LOOT_STATE_LOST_DUE_FULL_INVENTORY, LOOT_STATE_LOST_DUE_LOW_ENERGY,
-    LOOT_STATE_SUCCESS, TARGETS, get_duration_till_recovery_end, produce_auto_cancellation_conditions
+    LOOT_STATE_SUCCESS, TARGETS, recovery_duration_seconds_get, produce_auto_cancellation_conditions
 )
 from ..item_core import get_item
 from ..unit_core import produce_duration_sophisticated, produce_kilogram, produce_kilogram_ratio
@@ -218,13 +217,13 @@ def produce_adventure_return_notification_description(adventure):
     ------
     part : `str`
     """
-    duration = get_duration_till_recovery_end(adventure)
-    until = adventure.updated_at + TimeDelta(seconds = duration)
+    duration_seconds = recovery_duration_seconds_get(adventure)
+    until_seconds = adventure.updated_at + duration_seconds
     
     yield 'You are recovering for '
-    yield elapsed_time(RelativeDelta(seconds = duration))
+    yield elapsed_time(RelativeDelta(seconds = duration_seconds))
     yield ', until '
-    yield format_datetime(until, 'T')
+    yield format_unix_time(until_seconds, TIMESTAMP_STYLES.long_time)
     yield '.'
 
 
@@ -312,7 +311,7 @@ def produce_adventure_short_representation(adventure):
     ------
     part : `str`
     """
-    yield format(adventure.created_at, DATETIME_FORMAT_CODE)
+    yield format(unix_time_to_datetime(adventure.created_at), DATETIME_FORMAT_CODE)
     yield ' UTC '
     yield from _produce_adventure_location_for_headers(adventure)
 
@@ -371,7 +370,7 @@ def produce_adventure_view_description_active(adventure, now, inventory_total, i
     part : `str`
     """
     yield 'Departed at: '
-    yield format(adventure.created_at, DATETIME_FORMAT_CODE)
+    yield format(unix_time_to_datetime(adventure.created_at), DATETIME_FORMAT_CODE)
     yield ' UTC\n'
     yield from produce_used('health', adventure.health_initial, adventure.health_exhausted)
     yield '\n'
@@ -379,7 +378,7 @@ def produce_adventure_view_description_active(adventure, now, inventory_total, i
     yield '\nUsed inventory: '
     yield from produce_kilogram_ratio(inventory_exhausted, inventory_total)
     yield '\nElapsed time: '
-    yield elapsed_time(RelativeDelta(now, adventure.created_at))
+    yield elapsed_time(RelativeDelta(now, unix_time_to_datetime(adventure.created_at)))
     
     adventure_state = adventure.state
     if adventure_state == ADVENTURE_STATE_DEPARTING:
@@ -419,15 +418,18 @@ def produce_adventure_view_description_finalized(adventure):
     part : `str`
     """
     yield 'Departed at: '
-    yield format(adventure.created_at, DATETIME_FORMAT_CODE)
+    yield format(unix_time_to_datetime(adventure.created_at), DATETIME_FORMAT_CODE)
     yield ' UTC\n'
     yield from produce_used('health', adventure.health_initial, adventure.health_exhausted)
     yield '\n'
     yield from produce_used('energy', adventure.energy_initial, adventure.energy_exhausted)
     yield '\nTotal duration: '
-    yield elapsed_time(RelativeDelta(adventure.updated_at, adventure.created_at))
+    yield elapsed_time(RelativeDelta(
+        unix_time_to_datetime(adventure.updated_at),
+        unix_time_to_datetime(adventure.created_at),
+    ))
     yield '\nRecovery time: '
-    yield elapsed_time(RelativeDelta(seconds = get_duration_till_recovery_end(adventure)))
+    yield elapsed_time(RelativeDelta(seconds = recovery_duration_seconds_get(adventure)))
 
 
 def _produce_adventure_action_type_for_headers(adventure_action):
@@ -470,7 +472,7 @@ def produce_adventure_action_short_representation(adventure_action):
     ------
     part : `str`
     """
-    yield format_datetime(adventure_action.created_at, 'T')
+    yield format_unix_time(adventure_action.created_at, TIMESTAMP_STYLES.long_time)
     yield ' '
     yield from _produce_adventure_action_type_for_headers(adventure_action)
 
@@ -510,7 +512,7 @@ def produce_adventure_action_view_description(adventure_action):
     part : `str`
     """
     yield 'Occurred at: '
-    yield format_datetime(adventure_action.created_at, 'T')
+    yield format_unix_time(adventure_action.created_at, TIMESTAMP_STYLES.long_time)
     yield '\nUsed health: '
     yield str(adventure_action.health_exhausted)
     yield '\nUsed energy: '
@@ -609,7 +611,7 @@ def produce_error_message_adventure_depart_on_recovery(recovering_until, now):
     yield 'You are currently recovering for '
     yield elapsed_time(RelativeDelta(recovering_until, now))
     yield ', until '
-    yield format_datetime(recovering_until, 'T')
+    yield format_datetime(recovering_until, TIMESTAMP_STYLES.long_time)
     yield '.\nYou cannot go on an adventure in the meantime.'
 
 
@@ -862,5 +864,5 @@ def produce_butcher_recovering_until_footer(now, recovering_until):
     yield 'You are recovering for '
     yield elapsed_time(RelativeDelta(recovering_until, now))
     yield ', until '
-    yield format_datetime(recovering_until, 'T')
+    yield format_datetime(recovering_until, TIMESTAMP_STYLES.long_time)
     yield '.'

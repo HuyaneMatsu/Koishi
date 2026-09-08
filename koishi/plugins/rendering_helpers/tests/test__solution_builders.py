@@ -397,6 +397,7 @@ def _iter_options__build_user_status_description():
             f'- Desktop: dnd\n'
             f'- Embedded: offline\n'
             f'- Mobile: idle\n'
+            f'- Vr: offline\n'
             f'- Web: online'
         ),
     )

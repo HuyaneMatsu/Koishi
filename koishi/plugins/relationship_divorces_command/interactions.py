@@ -10,7 +10,10 @@ from ...bots import FEATURE_CLIENTS
 from ..gift_common import can_gift, produce_gift_requirements_unsatisfied_error_message
 from ..relationships_core import deepen_and_boost_relationship, get_relationship_to_deepen
 from ..relationship_divorces_core import CUSTOM_ID_BURN_DIVORCE_PAPERS_INVOKE_RP
-from ..user_balance import get_user_balance
+from ..user_balance import (
+    user_balance_get, user_balance_accumulate_allocated_balance, user_balance_modify_balance_by,
+    user_balance_decrement_relationship_divorces
+)
 from ..user_settings import (
     USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_GIFT, get_one_user_settings, get_preferred_client_for_user
 )
@@ -48,12 +51,12 @@ async def burn_divorce_papers_respond(client, interaction_event, target_user, re
             error_message = ''.join([*produce_gift_requirements_unsatisfied_error_message()])
             break
         
-        source_user_balance = await get_user_balance(interaction_event.user_id)
+        source_user_balance = await user_balance_get(interaction_event.user_id)
         
         if target_user is None:
             relationship_divorces = source_user_balance.relationship_divorces
         else:
-            target_user_balance = await get_user_balance(target_user.id)
+            target_user_balance = await user_balance_get(target_user.id)
             relationship_divorces = target_user_balance.relationship_divorces
         
         if not relationship_divorces:
@@ -67,7 +70,9 @@ async def burn_divorce_papers_respond(client, interaction_event, target_user, re
             (interaction_event.user_id if target_user is None else target_user.id),
             relationship_divorces,
         )
-        available_balance = source_user_balance.balance - source_user_balance.get_cumulative_allocated_balance()
+        available_balance = (
+            source_user_balance.balance - user_balance_accumulate_allocated_balance(source_user_balance)
+        )
         
         if available_balance < required_balance:
             error_message = (
@@ -196,13 +201,13 @@ async def handle_burn_divorce_papers_confirmation(
             break
         
         
-        source_user_balance = await get_user_balance(interaction_event.user_id)
+        source_user_balance = await user_balance_get(interaction_event.user_id)
         
         if target_user is None:
             target_user_balance = None
             relationship_divorces = source_user_balance.relationship_divorces
         else:
-            target_user_balance = await get_user_balance(target_user.id)
+            target_user_balance = await user_balance_get(target_user.id)
             relationship_divorces = target_user_balance.relationship_divorces
         
         if not relationship_divorces:
@@ -217,7 +222,7 @@ async def handle_burn_divorce_papers_confirmation(
             relationship_divorces,
         )
         current_balance = source_user_balance.balance
-        available_balance = current_balance - source_user_balance.get_cumulative_allocated_balance()
+        available_balance = current_balance - user_balance_accumulate_allocated_balance(source_user_balance)
         
         if available_balance < required_balance:
             error_message = (
@@ -226,11 +231,11 @@ async def handle_burn_divorce_papers_confirmation(
             )
             break
         
-        source_user_balance.modify_balance_by(-required_balance)
+        user_balance_modify_balance_by(source_user_balance, -required_balance)
         if target_user_balance is None:
-            source_user_balance.decrement_relationship_divorces()
+            user_balance_decrement_relationship_divorces(source_user_balance)
         else:
-            target_user_balance.decrement_relationship_divorces()
+            user_balance_decrement_relationship_divorces(target_user_balance)
         
         await deepen_and_boost_relationship(
             source_user_balance,

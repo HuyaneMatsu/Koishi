@@ -2,7 +2,10 @@ __all__ = ()
 
 from ..inventory_core import get_inventory, save_inventory, select_item
 from ..item_core import ITEM_FLAG_HEAD, ITEM_FLAG_COSTUME, get_item_nullable
-from ..user_stats_core import get_user_stats, save_user_stats
+from ..user_stats_core import (
+    user_stats_get, user_stats_save, user_stats_set_item_id_costume, user_stats_set_item_id_head,
+    user_stats_set_item_id_weapon
+)
 
 
 async def equip_item(user_id, item_flag, value):
@@ -31,7 +34,7 @@ async def equip_item(user_id, item_flag, value):
     if item is None:
         return None, None
     
-    user_stats = await get_user_stats(user_id)
+    user_stats = await user_stats_get(user_id)
     
     if item_flag == ITEM_FLAG_HEAD:
         old_item_id = user_stats.item_id_head
@@ -48,13 +51,13 @@ async def equip_item(user_id, item_flag, value):
         inventory.modify_item_amount(item, -1)
         
         if item_flag == ITEM_FLAG_HEAD:
-            user_stats.set_item_id_head(item.id)
+            user_stats_set_item_id_head(user_stats, item.id)
         elif item_flag == ITEM_FLAG_COSTUME:
-            user_stats.set_item_id_costume(item.id)
+            user_stats_set_item_id_costume(user_stats, item.id)
         else:
-            user_stats.set_item_id_weapon(item.id)
+            user_stats_set_item_id_weapon(user_stats, item.id)
         
-        await save_user_stats(user_stats)
+        await user_stats_save(user_stats)
         await save_inventory(inventory)
     
     return old_item, item
@@ -79,7 +82,7 @@ async def unequip_item(user_id, item_flag):
     old_item : ``None | Item``
     """
     
-    user_stats = await get_user_stats(user_id)
+    user_stats = await user_stats_get(user_id)
     
     if item_flag == ITEM_FLAG_HEAD:
         old_item_id = user_stats.item_id_head
@@ -94,13 +97,13 @@ async def unequip_item(user_id, item_flag):
         inventory.modify_item_amount(old_item, +1)
     
         if item_flag == ITEM_FLAG_HEAD:
-            user_stats.set_item_id_head(0)
+            user_stats_set_item_id_head(user_stats, 0)
         elif item_flag == ITEM_FLAG_COSTUME:
-            user_stats.set_item_id_costume(0)
+            user_stats_set_item_id_costume(user_stats, 0)
         else:
-            user_stats.set_item_id_weapon(0)
+            user_stats_set_item_id_weapon(user_stats, 0)
         
-        await save_user_stats(user_stats)
+        await user_stats_save(user_stats)
         await save_inventory(inventory)
     
     return old_item

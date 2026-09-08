@@ -2,7 +2,7 @@ __all__ = ('LinkedQuest', 'linked_quest_create', 'linked_quest_create_from_entry
 
 from scarletio import RichAttributeErrorBaseType
 
-from ...bot_utils.time import get_unix_time_nano_seconds
+from ...bot_utils.time import unix_time_seconds_get
 
 from ..item_core import produce_item_id_with_name
 
@@ -143,7 +143,7 @@ def linked_quest_create(user_id, guild_id, batch_id, template_id, requirements, 
     linked_quest.batch_id = batch_id
     linked_quest.completion_count = 0
     linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_ACTIVE
-    linked_quest.created_at = get_unix_time_nano_seconds()
+    linked_quest.created_at = unix_time_seconds_get()
     linked_quest.entry_id = 0
     linked_quest.guild_id = guild_id
     linked_quest.flags = 0

@@ -1,4 +1,4 @@
-__all__ = ('get_user_balance', 'get_user_balances', 'save_user_balance')
+__all__ = ('user_balance_get', 'user_balance_get_many', 'user_balance_save')
 
 from itertools import count
 
@@ -12,14 +12,17 @@ from .constants import (
     USER_BALANCE_ALLOCATION_ALIVENESS_DEAD_DELETE, USER_BALANCE_ALLOCATION_HOOKS, USER_BALANCE_CACHE,
     USER_BALANCE_CACHE_SIZE, USER_BALANCE_QUERY_TASKS, USER_BALANCE_SAVE_TASKS
 )
-from .user_balance import UserBalance
+from .user_balance import (
+    UserBalance, user_balance_create, user_balance_create_from_entry, user_balance_iter_allocations,
+    user_balance_remove_allocation, user_balance_modify_balance_by, user_balance_collect_modifications
+)
 
 
 if (DB_ENGINE is None):
     COUNTER = iter(count(1))
 
 
-async def get_user_balance(user_id):
+async def user_balance_get(user_id):
     """
     Gets the balance of the given user for their identifier.
     
@@ -34,18 +37,18 @@ async def get_user_balance(user_id):
     -------
     user_balance : ``UserBalance``
     """
-    user_balance = await _get_user_balance_from_cache(user_id)
+    user_balance = await _user_balance_get_from_cache(user_id)
     if (user_balance is not None):
         return user_balance
     
-    waiter = _get_user_balance_query_waiter(user_id)
+    waiter = _user_balance_get_query_waiter(user_id)
     if waiter is None:
         waiter = _create_user_balance_query_waiter(user_id)
     
     return (await waiter)
 
 
-async def get_user_balances(user_ids):
+async def user_balance_get_many(user_ids):
     """
     Gets the balance of the given user identifiers.
     
@@ -65,13 +68,13 @@ async def get_user_balances(user_ids):
     user_ids_to_request = None
     
     for user_id in user_ids:
-        user_balance = await _get_user_balance_from_cache(user_id)
+        user_balance = await _user_balance_get_from_cache(user_id)
         if (user_balance is not None):
             user_balances[user_id] = user_balance
             continue
         
         # get waiter if available
-        waiter = _get_user_balance_query_waiter(user_id)
+        waiter = _user_balance_get_query_waiter(user_id)
         if (waiter is not None):
             if waiters is None:
                 waiters = []
@@ -101,7 +104,7 @@ async def get_user_balances(user_ids):
     return user_balances
 
 
-async def _get_user_balance_from_cache(user_id):
+async def _user_balance_get_from_cache(user_id):
     """
     Gets the user balance from cache.
     
@@ -133,7 +136,7 @@ async def _get_user_balance_from_cache(user_id):
     return user_balance
 
 
-def _get_user_balance_query_waiter(user_id):
+def _user_balance_get_query_waiter(user_id):
     """
     Returns a user balance waiter. If there is no waiter yet, returns `None`.
     
@@ -158,7 +161,7 @@ def _get_user_balance_query_waiter(user_id):
 
 def _create_user_balance_query_waiter(user_id):
     """
-    Creates a user balance query waiter. Use it after `_get_user_balance_query_waiter`.
+    Creates a user balance query waiter. Use it after `_user_balance_get_query_waiter`.
     
     Parameters
     ----------
@@ -226,9 +229,9 @@ async def query_user_balance(user_id, waiters):
             
             result = await response.fetchone()
             if result is None:
-                user_balance = UserBalance(user_id)
+                user_balance = user_balance_create(user_id)
             else:
-                user_balance = UserBalance.from_entry(result)
+                user_balance = user_balance_create_from_entry(result)
                 await remove_dead_allocations(user_balance)
             
             USER_BALANCES[user_id] = user_balance
@@ -256,7 +259,7 @@ if (DB_ENGINE is None):
     @copy_docs(query_user_balance)
     async def query_user_balance(user_id, waiters):
         try:
-            user_balance = UserBalance(user_id)
+            user_balance = user_balance_create(user_id)
             
             for waiter in waiters:
                 waiter.set_result_if_pending(user_balance)
@@ -295,7 +298,7 @@ async def query_user_balances(items):
             user_balances = {}
             
             for result in results:
-                user_balance = UserBalance.from_entry(result)
+                user_balance = user_balance_create_from_entry(result)
                 user_balances[user_balance.user_id] = user_balance
     
     except BaseException as exception:
@@ -310,7 +313,7 @@ async def query_user_balances(items):
             try:
                 user_balance = user_balances[user_id]
             except KeyError:
-                user_balance = UserBalance(user_id)
+                user_balance = user_balance_create(user_id)
             else:
                 await remove_dead_allocations(user_balance)
             
@@ -336,7 +339,7 @@ if (DB_ENGINE is None):
     async def query_user_balances(items):
         try:
             for user_id, waiters in items:
-                user_balance = UserBalance(user_id)
+                user_balance = user_balance_create(user_id)
                 
                 USER_BALANCES[user_id] = user_balance
                 USER_BALANCE_CACHE[user_id] = user_balance
@@ -367,7 +370,7 @@ async def remove_dead_allocations(user_balance):
     to_remove = None
     to_apply = None
     
-    for allocation_feature_id, allocation_session_id, amount, data in user_balance.iter_allocations():
+    for allocation_feature_id, allocation_session_id, amount, data in user_balance_iter_allocations(user_balance):
         while True:
             try:
                 user_balance_allocation_hook = USER_BALANCE_ALLOCATION_HOOKS[allocation_feature_id]
@@ -404,18 +407,18 @@ async def remove_dead_allocations(user_balance):
     
     if (to_apply is not None):
         for allocation_feature_id, allocation_session_id, amount in reversed(to_apply):
-            user_balance.modify_balance_by(-amount)
-            user_balance.remove_allocation(allocation_feature_id, allocation_session_id)
+            user_balance_modify_balance_by(user_balance, -amount)
+            user_balance_remove_allocation(user_balance, allocation_feature_id, allocation_session_id)
     
     if (to_remove is not None):
         for allocation_feature_id, allocation_session_id in reversed(to_remove):
-            user_balance.remove_allocation(allocation_feature_id, allocation_session_id)
+            user_balance_remove_allocation(user_balance, allocation_feature_id, allocation_session_id)
     
     if (to_apply is not None) or (to_remove is not None):
-        await save_user_balance(user_balance)
+        await user_balance_save(user_balance)
 
 
-async def save_user_balance(user_balance):
+async def user_balance_save(user_balance):
     """
     Saves the user balance.
     
@@ -429,12 +432,12 @@ async def save_user_balance(user_balance):
     try:
         task = USER_BALANCE_SAVE_TASKS[user_balance.user_id]
     except KeyError:
-        USER_BALANCE_SAVE_TASKS[user_balance.user_id] = task = Task(KOKORO, query_save_user_balance_loop(user_balance))
+        USER_BALANCE_SAVE_TASKS[user_balance.user_id] = task = Task(KOKORO, query_user_balance_save_loop(user_balance))
     
     await shield(task, KOKORO)
 
 
-async def query_save_user_balance_loop(user_balance):
+async def query_user_balance_save_loop(user_balance):
     """
     Runs the entry proxy saver.
     
@@ -450,7 +453,7 @@ async def query_save_user_balance_loop(user_balance):
             entry_id = user_balance.entry_id
             # If the entry is new, insert it.
             if (entry_id == 0):
-                user_balance.modified_fields = None
+                user_balance.modification_flags = 0
                 response = await connector.execute(
                     USER_BALANCE_TABLE.insert().values(
                         user_id = user_balance.user_id,
@@ -475,18 +478,18 @@ async def query_save_user_balance_loop(user_balance):
                 result = await response.fetchone()
                 user_balance.entry_id = result[0]
             
-            modified_fields = user_balance.modified_fields
-            while (modified_fields is not None):
-                user_balance.modified_fields = None
+            while True:
+                modifications = user_balance_collect_modifications(user_balance)
+                if (modifications is None):
+                    break
                 
                 await connector.execute(
                     USER_BALANCE_TABLE.update(
                         user_balance_model.id == entry_id,
                     ).values(
-                        **modified_fields
+                        **modifications
                     )
                 )
-                modified_fields = user_balance.modified_fields
                 continue
         
     finally:
@@ -497,10 +500,10 @@ async def query_save_user_balance_loop(user_balance):
 
 
 if (DB_ENGINE is None):
-    @copy_docs(query_save_user_balance_loop)
-    async def query_save_user_balance_loop(user_balance):
+    @copy_docs(query_user_balance_save_loop)
+    async def query_user_balance_save_loop(user_balance):
         try:
-            user_balance.modified_fields = None
+            user_balance.modification_flags = 0
             if not user_balance.entry_id:
                 user_balance.entry_id = next(COUNTER)
         

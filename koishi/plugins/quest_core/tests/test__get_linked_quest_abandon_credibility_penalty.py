@@ -12,7 +12,7 @@ def _iter_options():
     user_id = 202603130000
     guild_id = 202603130001
     batch_id = 5666
-    current_unix_time_nano_seconds = 10000_000000000
+    current_unix_time_seconds = 10000
     
     linked_quest_0 = linked_quest_create(
         user_id,
@@ -22,12 +22,12 @@ def _iter_options():
         None,
         None,
     )
-    linked_quest_0.created_at = 5000_000000000
+    linked_quest_0.created_at = 5000
     
     yield (
         linked_quest_0,
         4,
-        current_unix_time_nano_seconds,
+        current_unix_time_seconds,
         0,
     )
     
@@ -42,12 +42,12 @@ def _iter_options():
             QuestRewardSerialisableBase(),
         ),
     )
-    linked_quest_1.created_at = 5000_000000000
+    linked_quest_1.created_at = 5000
     
     yield (
         linked_quest_1,
         4,
-        current_unix_time_nano_seconds,
+        current_unix_time_seconds,
         0,
     )
     
@@ -62,12 +62,12 @@ def _iter_options():
             QuestRewardSerialisableCredibility(20),
         ),
     )
-    linked_quest_2.created_at = 5000_000000000
+    linked_quest_2.created_at = 5000
     
     yield (
         linked_quest_2,
         4,
-        current_unix_time_nano_seconds,
+        current_unix_time_seconds,
         26,
     )
     
@@ -82,18 +82,18 @@ def _iter_options():
             QuestRewardSerialisableCredibility(20),
         ),
     )
-    linked_quest_2.created_at = current_unix_time_nano_seconds
+    linked_quest_2.created_at = current_unix_time_seconds
     
     yield (
         linked_quest_2,
         4,
-        current_unix_time_nano_seconds,
+        current_unix_time_seconds,
         0,
     )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__get_linked_quest_abandon_credibility_penalty(linked_quest, entity_rank, current_unix_time_nano_seconds):
+def test__get_linked_quest_abandon_credibility_penalty(linked_quest, entity_rank, current_unix_time_seconds):
     """
     Tests whether ``get_linked_quest_abandon_credibility_penalty`` works as intended.
     
@@ -105,20 +105,20 @@ def test__get_linked_quest_abandon_credibility_penalty(linked_quest, entity_rank
     entity_rank : `int`
         The entity's rank to be rewarded.
     
-    current_unix_time_nano_seconds : `int`
+    current_unix_time_seconds : `int`
         The current unix time.
     
     Returns
     -------
     output : `int`
     """
-    def get_unix_time_nano_seconds():
-        nonlocal current_unix_time_nano_seconds
-        return current_unix_time_nano_seconds
+    def unix_time_seconds_get():
+        nonlocal current_unix_time_seconds
+        return current_unix_time_seconds
     
     mocked = vampytest.mock_globals(
         get_linked_quest_abandon_credibility_penalty,
-        get_unix_time_nano_seconds = get_unix_time_nano_seconds,
+        unix_time_seconds_get = unix_time_seconds_get,
     )
     
     output = mocked(linked_quest, entity_rank)

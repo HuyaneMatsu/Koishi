@@ -11,10 +11,10 @@ from ...bots import FEATURE_CLIENTS
 from ..adventure_core import (
     ACTION_TYPE_BUTCHERING, ADVENTURE_STATE_FINALIZED, AUTO_CANCELLATIONS, AUTO_CANCELLATIONS_ALLOWED,
     AUTO_CANCELLATION_ID_DEFAULT, Adventure, DURATION_MAX, DURATION_MIN, DURATION_SUGGESTION_SETS, LOCATIONS, RETURNS,
-    RETURNS_ALLOWED, RETURN_ID_AFTER, TARGETS, adventure_cancel_after, can_cancel_adventure_any, adventure_cancel_now,
-    can_cancel_adventure_after, can_cancel_adventure_now, get_action_type_multiplier, get_active_adventure,
-    get_adventure, get_adventure_action_listing, get_adventure_listing_page,
-    get_duration_till_recovery_end_of_energy_cost, scheduled_adventure_arrival, store_adventure
+    RETURNS_ALLOWED, RETURN_ID_AFTER, TARGETS, adventure_cancel_after, adventure_create, can_cancel_adventure_any,
+    adventure_cancel_now, can_cancel_adventure_after, can_cancel_adventure_now, get_action_type_multiplier,
+    adventure_get_active, adventure_get, adventure_listing_get_page, recovery_duration_seconds_get_of_energy_cost,
+    scheduled_adventure_arrival, adventure_save
 )
 from ..inventory_core import create_item_suggestions, get_inventory, save_inventory, select_item
 from ..item_core import (
@@ -24,7 +24,10 @@ from ..item_core import (
 from ..quest_core import get_user_adventurer_rank_info
 from ..seeding import create_seed
 from ..unit_core import parse_duration, produce_duration
-from ..user_stats_core import get_user_stats, save_user_stats
+from ..user_stats_core import (
+    user_stats_calculate, user_stats_get, user_stats_save, user_stats_set_recovering_until,
+    user_stats_set_recovering_until_notification_at
+)
 
 from .component_building import (
     build_adventure_action_listing_view_components, build_adventure_action_view_components,
@@ -124,12 +127,12 @@ async def depart(
         The auto-cancellation logic's identifier in hexadecimal.
     """
     while True:
-        adventure = await get_active_adventure(interaction_event.user_id)
+        adventure = await adventure_get_active(interaction_event.user_id)
         if (adventure is not None):
             error_message = ERROR_MESSAGE_ADVENTURE_DEPART_ALREADY_ON_ADVENTURE
             break
         
-        user_stats = await get_user_stats(interaction_event.user_id)
+        user_stats = await user_stats_get(interaction_event.user_id)
         recovering_until = user_stats.recovering_until
         now = DateTime.now(TimeZone.utc)
         if (recovering_until is not None) and (recovering_until > now):
@@ -138,7 +141,7 @@ async def depart(
         
         # Check whether the inventory weight is greater than the available.
         inventory = await get_inventory(interaction_event.user_id)
-        if inventory.weight > user_stats.stats_calculated.extra_inventory:
+        if inventory.weight > user_stats_calculate(user_stats).extra_inventory:
             error_message = ERROR_MESSAGE_ADVENTURE_DEPART_INVENTORY_OVERLOADED
             break
         
@@ -244,7 +247,7 @@ async def autocomplete_depart_location(interaction_event, location_name):
     -------
     suggestions : `list<(str, str)>`
     """
-    user_stats = await get_user_stats(interaction_event.user_id)
+    user_stats = await user_stats_get(interaction_event.user_id)
     return get_location_suggestions(
         location_name,
         get_user_adventurer_rank_info(user_stats.credibility).level,
@@ -274,7 +277,7 @@ async def autocomplete_depart_target(interaction_event, target_name):
     if location_name is None:
         return
     
-    user_stats = await get_user_stats(interaction_event.user_id)
+    user_stats = await user_stats_get(interaction_event.user_id)
     location = get_best_matching_location(
         location_name,
         get_user_adventurer_rank_info(user_stats.credibility).level,
@@ -316,7 +319,7 @@ async def autocomplete_depart_duration(interaction_event, duration_string):
     if location_name is None:
         return
     
-    user_stats = await get_user_stats(interaction_event.user_id)
+    user_stats = await user_stats_get(interaction_event.user_id)
     location = get_best_matching_location(
         location_name,
         get_user_adventurer_rank_info(user_stats.credibility).level,
@@ -405,7 +408,7 @@ async def handle_adventure_create_confirm(
             error_message = 'Could not restore the adventure data. Please depart to a new one.'
             break
         
-        user_stats = await get_user_stats(user_id)
+        user_stats = await user_stats_get(user_id)
         recovering_until = user_stats.recovering_until
         if (recovering_until is not None):
             if (recovering_until > DateTime.now(TimeZone.utc)):
@@ -414,23 +417,23 @@ async def handle_adventure_create_confirm(
             
             # If we are not recovering currently, set recovery until to `None`,
             # so when notifying, we know that we know that we should not be do it anymore.
-            user_stats.set_recovering_until_notification_at(None)
-            await save_user_stats(user_stats)
+            user_stats_set_recovering_until_notification_at(user_stats, None)
+            await user_stats_save(user_stats)
         
-        stats_calculated = user_stats.stats_calculated
+        user_stats_calculated = user_stats_calculate(user_stats)
         
         # Check whether the inventory weight is greater than the available.
         inventory = await get_inventory(interaction_event.user_id)
-        if inventory.weight > stats_calculated.extra_inventory:
+        if inventory.weight > user_stats_calculated.extra_inventory:
             error_message = ERROR_MESSAGE_ADVENTURE_DEPART_INVENTORY_OVERLOADED
             break
         
-        adventure = await get_active_adventure(user_id)
+        adventure = await adventure_get_active(user_id)
         if (adventure is not None):
             error_message = ERROR_MESSAGE_ADVENTURE_DEPART_ALREADY_ON_ADVENTURE
             break
         
-        adventure = Adventure(
+        adventure = adventure_create(
             user_id,
             
             location_id,
@@ -439,10 +442,10 @@ async def handle_adventure_create_confirm(
             auto_cancellation_id,
             
             duration,
-            stats_calculated.extra_health,
-            stats_calculated.extra_energy,
+            user_stats_calculated.extra_health,
+            user_stats_calculated.extra_energy,
         )
-        await store_adventure(adventure)
+        await adventure_save(adventure)
         await scheduled_adventure_arrival(adventure)
         
         # Respond
@@ -483,7 +486,7 @@ async def cancel(
         The received interaction event.
     """
     while True:
-        adventure = await get_active_adventure(interaction_event.user_id)
+        adventure = await adventure_get_active(interaction_event.user_id)
         if (adventure is None):
             error_message = ERROR_MESSAGE_ADVENTURE_NOT_ON_ADVENTURE
             break
@@ -530,26 +533,22 @@ async def _build_adventure_components_common(
     -------
     components : ``list<Component>``
     """
-    adventure_action_listing = await get_adventure_action_listing(adventure.entry_id)
-    
     if adventure.state == ADVENTURE_STATE_FINALIZED:
         components = build_adventure_view_finalized_components(
             adventure,
-            adventure_action_listing,
             allow_switching_to_adventure_listing_view,
             adventure_listing_page_index,
         )
     else:
-        user_stats = await get_user_stats(adventure.user_id)
+        user_stats = await user_stats_get(adventure.user_id)
         inventory = await get_inventory(adventure.user_id)
         
         components = build_adventure_view_active_components(
             adventure,
-            adventure_action_listing,
             allow_switching_to_adventure_listing_view,
             adventure_listing_page_index,
             DateTime.now(TimeZone.utc),
-            user_stats.stats_calculated.extra_inventory,
+            user_stats_calculate(user_stats).extra_inventory,
             inventory.weight,
         )
     
@@ -609,7 +608,7 @@ async def view(
         
         while True:
             if (option & ADVENTURE_VIEW_OPTION_CURRENT):
-                adventure = await get_active_adventure(interaction_event.user_id)
+                adventure = await adventure_get_active(interaction_event.user_id)
                 if (adventure is not None):
                     break
                 
@@ -618,9 +617,9 @@ async def view(
                     break
             
             if (option & ADVENTURE_VIEW_OPTION_PREVIOUS):
-                active_adventure = await get_active_adventure(interaction_event.user_id)
+                active_adventure = await adventure_get_active(interaction_event.user_id)
                 page_size = 1 + (active_adventure is not None)
-                page_count, adventure_listing = await get_adventure_listing_page(
+                page_count, adventure_listing = await adventure_listing_get_page(
                     interaction_event.user_id, -1, page_size
                 )
                 if (adventure_listing is not None) and (len(adventure_listing) == page_size):
@@ -689,7 +688,7 @@ async def handle_active_adventure_cancellation_invoke(
         return
     
     while True:
-        adventure = await get_adventure(adventure_entry_id)
+        adventure = await adventure_get(adventure_entry_id)
         if (adventure is None):
             error_message = ERROR_MESSAGE_ADVENTURE_UNKNOWN_ADVENTURE
             break
@@ -781,7 +780,7 @@ async def handle_active_adventure_cancellation_confirmation(
         return
     
     while True:
-        adventure = await get_adventure(adventure_entry_id)
+        adventure = await adventure_get(adventure_entry_id)
         if (adventure is None):
             error_message = ERROR_MESSAGE_ADVENTURE_UNKNOWN_ADVENTURE
             break
@@ -893,7 +892,7 @@ async def handle_adventure_view(
         return
     
     while True:
-        adventure = await get_adventure(adventure_entry_id)
+        adventure = await adventure_get(adventure_entry_id)
         if (adventure is None):
             error_message = ERROR_MESSAGE_ADVENTURE_UNKNOWN_ADVENTURE
             break
@@ -937,7 +936,7 @@ async def handle_adventure_action_view(
     interaction_event,
     user_id,
     adventure_entry_id,
-    adventure_action_entry_id,
+    adventure_action_index,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     allow_switching_to_adventure_action_listing_view,
@@ -962,8 +961,8 @@ async def handle_adventure_action_view(
     adventure_entry_id : `str`
         The adventure's entry's identifier as hexadecimal. Later converted back to integer.
     
-    adventure_action_entry_id : `str`
-        The adventure's action's entry's identifier as hexadecimal. Later converted back to integer.
+    adventure_action_index : `str`
+        The adventure's action's index as hexadecimal. Later converted back to integer.
     
     allow_switching_to_adventure_listing_view : `str`
         Whether switching to adventure listing is allowed from adventure view as hexadecimal.
@@ -983,7 +982,7 @@ async def handle_adventure_action_view(
     """
     user_id = int(user_id, 16)
     adventure_entry_id = int(adventure_entry_id, 16)
-    adventure_action_entry_id = int(adventure_action_entry_id, 16)
+    adventure_action_index = int(adventure_action_index, 16)
     allow_switching_to_adventure_listing_view = True if int(allow_switching_to_adventure_listing_view, 16) else False
     adventure_listing_page_index = int(adventure_listing_page_index, 16)
     allow_switching_to_adventure_action_listing_view = True if int(allow_switching_to_adventure_action_listing_view, 16) else False
@@ -998,11 +997,26 @@ async def handle_adventure_action_view(
         return
     
     while True:
-        adventure_action_listing = await get_adventure_action_listing(adventure_entry_id)
-        for adventure_action in adventure_action_listing:
-            if adventure_action.entry_id == adventure_action_entry_id:
+        adventure = await adventure_get(adventure_entry_id)
+        while True:
+            if adventure is None:
+                adventure_action = None
                 break
-        else:
+            
+            adventure_action_listing = adventure.action_listing
+            if adventure_action_listing is None:
+                adventure_action = None
+                break
+            
+            if adventure_action_index >= len(adventure_action_listing):
+                adventure_action = None
+                break
+            
+            
+            adventure_action = adventure_action_listing[adventure_action_index]
+            break
+        
+        if (adventure_action is None):
             error_message = 'Could not resolve adventure action.'
             break
         
@@ -1011,7 +1025,9 @@ async def handle_adventure_action_view(
             interaction_event,
             components = build_adventure_action_view_components(
                 user_id,
+                adventure_entry_id,
                 adventure_action,
+                adventure_action_index,
                 allow_switching_to_adventure_listing_view,
                 adventure_listing_page_index,
                 allow_switching_to_adventure_action_listing_view,
@@ -1034,7 +1050,7 @@ async def handle_adventure_action_battle_logs_view(
     interaction_event,
     user_id,
     adventure_entry_id,
-    adventure_action_entry_id,
+    adventure_action_index,
 ):
     """
     Shows the selected adventure action's battle logs.
@@ -1055,12 +1071,12 @@ async def handle_adventure_action_battle_logs_view(
     adventure_entry_id : `str`
         The adventure's entry's identifier as hexadecimal. Later converted back to integer.
     
-    adventure_action_entry_id : `str`
-        The adventure's action's entry's identifier as hexadecimal. Later converted back to integer.
+    adventure_action_index : `str`
+        The adventure's action's index as hexadecimal. Later converted back to integer.
     """
     user_id = int(user_id, 16)
     adventure_entry_id = int(adventure_entry_id, 16)
-    adventure_action_entry_id = int(adventure_action_entry_id, 16)
+    adventure_action_index = int(adventure_action_index, 16)
     
     await client.interaction_component_acknowledge(
         interaction_event,
@@ -1125,18 +1141,15 @@ async def handle_adventure_action_listing_view(
         return
     
     while True:
-        adventure = await get_adventure(adventure_entry_id)
+        adventure = await adventure_get(adventure_entry_id)
         if (adventure is None):
             error_message = ERROR_MESSAGE_ADVENTURE_UNKNOWN_ADVENTURE
             break
-        
-        adventure_action_listing = await get_adventure_action_listing(adventure_entry_id)
         
         await client.interaction_response_message_edit(
             interaction_event,
             components = build_adventure_action_listing_view_components(
                 adventure,
-                adventure_action_listing,
                 allow_switching_to_adventure_listing_view,
                 adventure_listing_page_index,
                 adventure_action_listing_page_index,
@@ -1176,7 +1189,7 @@ async def history(
         show_for_invoking_user_only = True
     )
     
-    page_count, adventure_listing = await get_adventure_listing_page(
+    page_count, adventure_listing = await adventure_listing_get_page(
         interaction_event.user_id, -1, ADVENTURE_LISTING_PAGE_SIZE
     )
     
@@ -1228,7 +1241,7 @@ async def handle_adventure_listing_view(
     if interaction_event.user_id != user_id:
         return
     
-    page_count, adventure_listing = await get_adventure_listing_page(
+    page_count, adventure_listing = await adventure_listing_get_page(
         interaction_event.user_id, page_index, ADVENTURE_LISTING_PAGE_SIZE
     )
     
@@ -1269,7 +1282,7 @@ async def butcher(
     )
     
     while True:
-        adventure = await get_active_adventure(interaction_event.user_id)
+        adventure = await adventure_get_active(interaction_event.user_id)
         if (adventure is not None):
             error_message = 'You cannot butcher while on adventure.'
             break
@@ -1280,7 +1293,7 @@ async def butcher(
             error_message = f'You cannot butcher {item_name!s}, you do not have such an item.'
             break
         
-        user_stats = await get_user_stats(interaction_event.user_id)
+        user_stats = await user_stats_get(interaction_event.user_id)
         multiplier = get_action_type_multiplier(ACTION_TYPE_BUTCHERING, user_stats)
         
         now = DateTime.now(TimeZone.utc)
@@ -1383,7 +1396,7 @@ async def handle_butcher_initial(
         return
     
     while True:
-        adventure = await get_active_adventure(interaction_event.user_id)
+        adventure = await adventure_get_active(interaction_event.user_id)
         if (adventure is not None):
             error_message = 'You cannot butcher while on adventure.'
             break
@@ -1399,7 +1412,7 @@ async def handle_butcher_initial(
             error_message = f'You do not have any {initial_item.name}-s.'
             break
         
-        user_stats = await get_user_stats(interaction_event.user_id)
+        user_stats = await user_stats_get(interaction_event.user_id)
         multiplier = get_action_type_multiplier(ACTION_TYPE_BUTCHERING, user_stats)
         
         seed = create_seed()
@@ -1424,11 +1437,11 @@ async def handle_butcher_initial(
         if energy_cost:
             recovering_until = (
                 (now if recovering_until is None else recovering_until) +
-                TimeDelta(seconds = get_duration_till_recovery_end_of_energy_cost(energy_cost))
+                TimeDelta(seconds = recovery_duration_seconds_get_of_energy_cost(energy_cost))
             )
-            user_stats.set_recovering_until(recovering_until)
+            user_stats_set_recovering_until(user_stats, recovering_until)
             await set_closest_adventure_recovery_over_reminder(user_stats, recovering_until)
-            await save_user_stats(user_stats)
+            await user_stats_save(user_stats)
         
         # Respond.
         
@@ -1537,7 +1550,7 @@ async def handle_butcher_continuous(
         return
     
     while True:
-        adventure = await get_active_adventure(interaction_event.user_id)
+        adventure = await adventure_get_active(interaction_event.user_id)
         if (adventure is not None):
             error_message = 'You cannot butcher while on adventure.'
             break
@@ -1581,7 +1594,7 @@ async def handle_butcher_continuous(
         
         await save_inventory(inventory)
         
-        user_stats = await get_user_stats(interaction_event.user_id)
+        user_stats = await user_stats_get(interaction_event.user_id)
         
         now = DateTime.now(TimeZone.utc)
         recovering_until = user_stats.recovering_until
@@ -1591,11 +1604,11 @@ async def handle_butcher_continuous(
         if energy_cost:
             recovering_until = (
                 (now if recovering_until is None else recovering_until) +
-                TimeDelta(seconds = get_duration_till_recovery_end_of_energy_cost(energy_cost))
+                TimeDelta(seconds = recovery_duration_seconds_get_of_energy_cost(energy_cost))
             )
-            user_stats.set_recovering_until(recovering_until)
+            user_stats_set_recovering_until(user_stats, recovering_until)
             await set_closest_adventure_recovery_over_reminder(user_stats, recovering_until)
-            await save_user_stats(user_stats)
+            await user_stats_save(user_stats)
         
         # Respond.
         

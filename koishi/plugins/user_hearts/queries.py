@@ -5,7 +5,7 @@ from datetime import datetime as DateTime, timezone as TimeZone
 from ...bot_utils.constants import IN_GAME_IDS
 from ...bot_utils.daily import TOP_GG_VOTE_INTERVAL, refresh_streak, calculate_daily_new
 
-from ..user_balance import get_user_balance
+from ..user_balance import user_balance_get
 
 
 async def get_generic_heart_fields(target_user_id):
@@ -25,7 +25,7 @@ async def get_generic_heart_fields(target_user_id):
     streak : `int`
     ready_to_claim : `bool`
     """
-    user_balance = await get_user_balance(target_user_id)
+    user_balance = await user_balance_get(target_user_id)
     
     now = DateTime.now(TimeZone.utc)
     streak, daily_can_claim_at = calculate_daily_new(user_balance.streak, user_balance.daily_can_claim_at, now)
@@ -51,7 +51,7 @@ async def get_generic_vote_fields(target_user_id):
     streak : `int`
     ready_to_vote : `bool`
     """
-    user_balance = await get_user_balance(target_user_id)
+    user_balance = await user_balance_get(target_user_id)
     
     now = DateTime.now(TimeZone.utc)
     streak = refresh_streak(user_balance.streak, user_balance.daily_can_claim_at, now)
@@ -79,7 +79,7 @@ async def get_stat_fields(target_user_id):
     count_daily_for_related : `int`
     count_top_gg_vote : `int`
     """
-    user_balance = await get_user_balance(target_user_id)
+    user_balance = await user_balance_get(target_user_id)
     
     now = DateTime.now(TimeZone.utc)
     streak = refresh_streak(user_balance.streak, user_balance.daily_can_claim_at, now)

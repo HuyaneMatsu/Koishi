@@ -7,7 +7,9 @@ from ..constants import (
     USER_BALANCE_ALLOCATION_ALIVENESS_DEAD_DELETE
 )
 from ..queries import remove_dead_allocations
-from ..user_balance import UserBalance
+from ..user_balance import (
+    user_balance_add_allocation, user_balance_create, user_balance_iter_allocations, user_balance_modify_balance_by
+)
 from ..user_balance_allocation_hook import UserBalanceAllocationHook
 
 
@@ -75,12 +77,12 @@ async def test__remove_dead_allocations():
         None,
     )
     
-    user_balance = UserBalance(user_id)
-    user_balance.modify_balance_by(1000)
-    user_balance.add_allocation(*allocation_0)
-    user_balance.add_allocation(*allocation_1)
-    user_balance.add_allocation(*allocation_2)
-    user_balance.add_allocation(*allocation_3)
+    user_balance = user_balance_create(user_id)
+    user_balance_modify_balance_by(user_balance, 1000)
+    user_balance_add_allocation(user_balance, *allocation_0)
+    user_balance_add_allocation(user_balance, *allocation_1)
+    user_balance_add_allocation(user_balance, *allocation_2)
+    user_balance_add_allocation(user_balance, *allocation_3)
     
     mocked = vampytest.mock_globals(
         remove_dead_allocations,
@@ -89,7 +91,7 @@ async def test__remove_dead_allocations():
     await mocked(user_balance)
     
     vampytest.assert_eq(
-        [*user_balance.iter_allocations()],
+        [*user_balance_iter_allocations(user_balance)],
         [
             allocation_1,
         ],

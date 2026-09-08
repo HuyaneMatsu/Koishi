@@ -9,7 +9,9 @@ from ...bots import FEATURE_CLIENTS, MAIN_CLIENT
 
 from ..gift_common import can_gift, produce_gift_requirements_unsatisfied_error_message
 from ..relationships_core import deepen_and_boost_relationship, get_relationship_to_deepen
-from ..user_balance import get_user_balance
+from ..user_balance import (
+    user_balance_get, user_balance_accumulate_allocated_balance, user_balance_modify_balance_by
+)
 from ..user_settings import (
     USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_GIFT, get_one_user_settings, get_preferred_client_for_user
 )
@@ -100,9 +102,9 @@ async def handle_buy_role_confirmation(
             break
         
         
-        source_user_balance = await get_user_balance(interaction_event.user_id)
+        source_user_balance = await user_balance_get(interaction_event.user_id)
         current_balance = source_user_balance.balance
-        available_balance = current_balance - source_user_balance.get_cumulative_allocated_balance()
+        available_balance = current_balance - user_balance_accumulate_allocated_balance(source_user_balance)
         
         if available_balance < required_balance:
             error_message = (
@@ -133,9 +135,9 @@ async def handle_buy_role_confirmation(
         if target_user is None:
             target_user_balance = None
         else:
-            target_user_balance = await get_user_balance(target_user.id)
+            target_user_balance = await user_balance_get(target_user.id)
         
-        source_user_balance.modify_balance_by(-required_balance)
+        user_balance_modify_balance_by(source_user_balance, -required_balance)
         
         await deepen_and_boost_relationship(
             source_user_balance,

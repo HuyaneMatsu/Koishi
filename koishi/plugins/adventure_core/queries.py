@@ -1,6 +1,5 @@
 __all__ = (
-    'get_active_adventure', 'get_active_adventures', 'get_adventure', 'get_adventure_action_listing',
-    'get_adventure_listing_page', 'store_adventure', 'update_adventure', 'store_adventure_action'
+    'adventure_get_active', 'adventure_listing_get_active', 'adventure_get', 'adventure_listing_get_page', 'adventure_save'
 )
 
 from functools import partial as partial_func
@@ -10,14 +9,14 @@ from scarletio import Future, Task, copy_docs, get_event_loop
 from sqlalchemy import func as alchemy_function
 from sqlalchemy.sql import asc, select
 
-from ...bot_utils.models import (
-    ADVENTURE_ACTION_TABLE, ADVENTURE_TABLE, DB_ENGINE, adventure_action_model, adventure_model
-)
+from ...bot_utils.models import ADVENTURE_TABLE, DB_ENGINE, adventure_model
 
-from .adventure import ADVENTURE_STATE_FINALIZED, Adventure, AdventureAction
+from .adventure import (
+    ADVENTURE_STATE_FINALIZED, adventure_action_listing_serialise, adventure_collect_modifications,
+    adventure_create_from_entry
+)
 from .constants import (
-    ADVENTURES, ADVENTURE_ACTION_LISTING_CACHE, ADVENTURE_ACTION_LISTING_CACHE_SIZE_MAX, ADVENTURE_ACTION_LISTING_QUERY_CACHE,
-    ADVENTURES_ACTIVE, ADVENTURE_CACHE, ADVENTURE_CACHE_SIZE_MAX, ADVENTURE_LISTING_CACHE,
+    ADVENTURES, ADVENTURES_ACTIVE, ADVENTURE_CACHE, ADVENTURE_CACHE_SIZE_MAX, ADVENTURE_LISTING_CACHE,
     ADVENTURE_LISTING_CACHE_SIZE_MAX, ADVENTURE_QUERY_CACHE
 )
 
@@ -28,7 +27,7 @@ if (DB_ENGINE is None):
     COUNTER = iter(count(1))
 
 
-async def get_active_adventures():
+async def adventure_listing_get_active():
     """
     Gets all the active (non finished) adventures.
     
@@ -38,7 +37,7 @@ async def get_active_adventures():
     -------
     adventures : ``list<Adventure>>``
     """
-    results = await query_get_active_adventures()
+    results = await query_adventure_listing_get_active()
     
     adventures = []
     
@@ -47,7 +46,7 @@ async def get_active_adventures():
         try:
             adventure = ADVENTURES[entry_id]
         except KeyError:
-            adventure = Adventure.from_entry(result)
+            adventure = adventure_create_from_entry(result)
             ADVENTURES[entry_id] = adventure
             ADVENTURES_ACTIVE[adventure.user_id] = adventure
         
@@ -63,7 +62,7 @@ async def get_active_adventures():
     return adventures
 
 
-async def query_get_active_adventures():
+async def query_adventure_listing_get_active():
     """
     Queries all the active adventures.
     
@@ -85,12 +84,39 @@ async def query_get_active_adventures():
 
 
 if (DB_ENGINE is None):
-    @copy_docs(query_get_active_adventures)
-    async def query_get_active_adventures():
+    @copy_docs(query_adventure_listing_get_active)
+    async def query_adventure_listing_get_active():
         return []
 
 
-async def store_adventure(adventure):
+async def adventure_save(adventure):
+    """
+    Updates the adventure's changeable fields in the database.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    adventure : ``Adventure``
+        The adventure to save.
+    """
+    entry_id = adventure.entry_id
+    if entry_id == 0:
+        await adventure_save_new(adventure)
+        if not adventure.modification_flags:
+            return
+    
+    await query_adventure_save(adventure)
+    
+    try:
+        ADVENTURE_CACHE.move_to_end(entry_id)
+    except KeyError:
+        ADVENTURE_CACHE[entry_id] = adventure
+        if len(ADVENTURE_CACHE) > ADVENTURE_CACHE_SIZE_MAX:
+            del ADVENTURE_CACHE[next(iter(ADVENTURE_CACHE))]
+
+
+async def adventure_save_new(adventure):
     """
     Inserts a new adventure to the database.
     
@@ -104,7 +130,7 @@ async def store_adventure(adventure):
     user_id = adventure.user_id
     ADVENTURES_ACTIVE[user_id] = adventure
     try:
-        entry_id = await query_store_adventure(adventure)
+        entry_id = await query_adventure_save_new(adventure)
         adventure.entry_id = entry_id
     except:
         if ADVENTURES_ACTIVE.get(user_id, None) is adventure:
@@ -133,15 +159,9 @@ async def store_adventure(adventure):
     if (keys_to_delete is not None):
         for key in keys_to_delete:
             del ADVENTURE_LISTING_CACHE[key]
-    
-    # Insert an empty entry into adventure action queries.
-    # This is mainly important when testing without database, or else these entries would be yeaten out.
-    ADVENTURE_ACTION_LISTING_CACHE[entry_id] = None
-    if len(ADVENTURE_ACTION_LISTING_CACHE) > ADVENTURE_ACTION_LISTING_CACHE_SIZE_MAX:
-        del ADVENTURE_ACTION_LISTING_CACHE[next(iter(ADVENTURE_ACTION_LISTING_CACHE))]
 
 
-async def query_store_adventure(adventure):
+async def query_adventure_save_new(adventure):
     """
     Stores the adventure in the database.
     
@@ -158,6 +178,13 @@ async def query_store_adventure(adventure):
         the entry's identifier in the database.
     """
     async with DB_ENGINE.connect() as connector:
+        action_listing = adventure.action_listing
+        if (action_listing is None):
+            action_listing_data = None
+        else:
+            action_listing_data = adventure_action_listing_serialise(action_listing)
+        adventure.modification_flags = 0
+        
         response = await connector.execute(
             ADVENTURE_TABLE.insert().values(
                 user_id = adventure.user_id,
@@ -168,10 +195,10 @@ async def query_store_adventure(adventure):
                 auto_cancellation_id = adventure.auto_cancellation_id,
                 state = adventure.state,
                 
-                initial_duration = adventure.initial_duration,
+                initial_duration_seconds = adventure.initial_duration_seconds,
                 created_at = adventure.created_at,
                 updated_at = adventure.updated_at,
-                action_count = adventure.action_count,
+                action_listing_data = action_listing_data,
                 seed = adventure.seed,
                 
                 energy_exhausted = adventure.energy_exhausted,
@@ -188,12 +215,12 @@ async def query_store_adventure(adventure):
 
 
 if (DB_ENGINE is None):
-    @copy_docs(query_store_adventure)
-    async def query_store_adventure(adventure):
+    @copy_docs(query_adventure_save_new)
+    async def query_adventure_save_new(adventure):
         return next(COUNTER)
 
 
-async def update_adventure(adventure):
+async def query_adventure_save(adventure):
     """
     Updates the adventure's changeable fields in the database.
     
@@ -204,52 +231,28 @@ async def update_adventure(adventure):
     adventure : ``Adventure``
         The adventure to save.
     """
-    entry_id = adventure.entry_id
-    if entry_id == 0:
+    modifications = adventure_collect_modifications(adventure)
+    if (modifications is None):
         return
     
-    await query_update_adventure(adventure)
-    
-    try:
-        ADVENTURE_CACHE.move_to_end(entry_id)
-    except KeyError:
-        ADVENTURE_CACHE[entry_id] = adventure
-        if len(ADVENTURE_CACHE) > ADVENTURE_CACHE_SIZE_MAX:
-            del ADVENTURE_CACHE[next(iter(ADVENTURE_CACHE))]
-
-
-async def query_update_adventure(adventure):
-    """
-    Updates the adventure's changeable fields in the database.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    adventure : ``Adventure``
-        The adventure to save.
-    """
     async with DB_ENGINE.connect() as connector:
         await connector.execute(
             ADVENTURE_TABLE.update(
                 adventure_model.id == adventure.entry_id
             ).values(
-                state = adventure.state,
-                updated_at = adventure.updated_at,
-                action_count = adventure.action_count,
-                energy_exhausted = adventure.energy_exhausted,
-                health_exhausted = adventure.health_exhausted,
+                **modifications
             )
         )
 
 
 if (DB_ENGINE is None):
-    @copy_docs(query_update_adventure)
-    async def query_update_adventure(adventure):
+    @copy_docs(query_adventure_save)
+    async def query_adventure_save(adventure):
+        adventure.modification_flags = 0
         return
 
 
-async def get_active_adventure(user_id):
+async def adventure_get_active(user_id):
     """
     Gets the user's active adventure.
     
@@ -267,203 +270,7 @@ async def get_active_adventure(user_id):
     return ADVENTURES_ACTIVE.get(user_id, None)
 
 
-async def get_adventure_action_listing(adventure_entry_id):
-    """
-    Gets the adventure actions for the given adventure.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    adventure_entry_id : `int`
-        The adventure's entry's identifier in the database.
-    
-    Returns
-    -------
-    adventure_action_listing : ``None | list<AdventureAction>``
-    """
-    try:
-        adventure_action_listing = ADVENTURE_ACTION_LISTING_CACHE[adventure_entry_id]
-    except KeyError:
-        pass
-    else:
-        ADVENTURE_ACTION_LISTING_CACHE.move_to_end(adventure_entry_id)
-        return adventure_action_listing
-    
-    try:
-        task, waiters = ADVENTURE_ACTION_LISTING_QUERY_CACHE[adventure_entry_id]
-    except KeyError:
-        waiters = []
-        task = Task(EVENT_LOOP, execute_get_adventure_action_listing(adventure_entry_id))
-        task.add_done_callback(partial_func(_adventure_action_listing_query_done_callback, adventure_entry_id, waiters))
-        ADVENTURE_ACTION_LISTING_QUERY_CACHE[adventure_entry_id] = (task, waiters)
-    
-    waiter = Future(EVENT_LOOP)
-    waiters.append(waiter)
-    return await waiter
-
-
-def _adventure_action_listing_query_done_callback(key, waiters, task):
-    """
-    Added as a callback of a query to set the result into the waiters and caches the result.
-    
-    Parameters
-    ----------
-    key : `int`
-        The adventure's entry's identifier in the database used as a key.
-    
-    waiters : ``list<Future>``
-        Result waiters.
-    
-    task : ``Future``
-        The ran task.
-    """
-    try:
-        adventure_action_listing = task.get_result()
-    except BaseException as exception:
-        for waiter in waiters:
-            waiter.set_exception_if_pending(exception)
-    else:
-        ADVENTURE_ACTION_LISTING_CACHE[key] = adventure_action_listing
-        if len(ADVENTURE_ACTION_LISTING_CACHE) > ADVENTURE_ACTION_LISTING_CACHE_SIZE_MAX:
-            del ADVENTURE_ACTION_LISTING_CACHE[next(iter(ADVENTURE_ACTION_LISTING_CACHE))]
-        
-        for waiter in waiters:
-            waiter.set_result_if_pending(adventure_action_listing)
-        
-    finally:
-        del ADVENTURE_ACTION_LISTING_QUERY_CACHE[key]
-
-
-async def execute_get_adventure_action_listing(adventure_entry_id):
-    """
-    Queries an adventure's actions.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    adventure_entry_id : `int`
-        The adventure's entries' identifier in the database.
-    
-    Returns
-    -------
-    adventure_action_listing : ``None | list<AdventureAction>``
-    """
-    results = await query_get_adventure_action_listing(adventure_entry_id)
-    
-    if results:
-        adventure_action_listing = [AdventureAction.from_entry(result) for result in results]
-    else:
-        adventure_action_listing = None
-
-    return adventure_action_listing
-
-
-async def query_get_adventure_action_listing(adventure_entry_id):
-    """
-    Queries an adventure's actions.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    adventure_entry_id : `int`
-        The adventure's entries' identifier in the database.
-    
-    Returns
-    -------
-    results : `list<sqlalchemy.engine.result.RowProxy>`
-        The entries in the database.
-    """
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            ADVENTURE_ACTION_TABLE.select().where(
-                adventure_action_model.adventure_entry_id == adventure_entry_id,
-            ).order_by(
-                asc(adventure_action_model.created_at),
-            ),
-        )
-        
-        return await response.fetchall()
-
-
-if DB_ENGINE is None:
-    @copy_docs(query_get_adventure_action_listing)
-    async def query_get_adventure_action_listing(adventure_entry_id):
-        return None
-
-
-async def store_adventure_action(adventure_action):
-    """
-    Inserts a new adventure action to the database.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    adventure_action : ``AdventureAction``
-        The adventure action to insert.
-    """
-    entry_id = await query_store_adventure_action(adventure_action)
-    adventure_action.entry_id = entry_id
-    
-    key = adventure_action.adventure_entry_id
-    try:
-        adventure_action_listing = ADVENTURE_ACTION_LISTING_CACHE[key]
-    except KeyError:
-        pass
-    else:
-        if adventure_action_listing is None:
-            adventure_action_listing = []
-            ADVENTURE_ACTION_LISTING_CACHE[key] = adventure_action_listing
-        
-        adventure_action_listing.append(adventure_action)
-
-
-async def query_store_adventure_action(adventure_action):
-    """
-    Inserts a new adventure action to the database.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    adventure_action : ``AdventureAction``
-        The adventure action to insert.
-    
-    Returns
-    -------
-    entry_id : `int`
-    """
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            ADVENTURE_ACTION_TABLE.insert().values(
-                action_id = adventure_action.action_id,
-                adventure_entry_id = adventure_action.adventure_entry_id,
-                created_at = adventure_action.created_at,
-                
-                battle_data = adventure_action.battle_data,
-                loot_data = adventure_action.loot_data,
-                
-                health_exhausted = adventure_action.health_exhausted,
-                energy_exhausted = adventure_action.energy_exhausted,
-            ).returning(
-                adventure_action_model.id,
-            )
-        )
-        
-        result = await response.fetchone()
-        return result[0]
-
-
-if (DB_ENGINE is None):
-    @copy_docs(query_store_adventure_action)
-    async def query_store_adventure_action(adventure_action):
-        return next(COUNTER)
-
-
-async def get_adventure(adventure_entry_id):
+async def adventure_get(adventure_entry_id):
     """
     Gets the adventure for the given entry identifier.
     
@@ -497,7 +304,7 @@ async def get_adventure(adventure_entry_id):
         task, waiters = ADVENTURE_QUERY_CACHE[adventure_entry_id]
     except KeyError:
         waiters = []
-        task = Task(EVENT_LOOP, execute_get_adventure(adventure_entry_id))
+        task = Task(EVENT_LOOP, execute_adventure_get(adventure_entry_id))
         task.add_done_callback(partial_func(_adventure_query_done_callback, adventure_entry_id, waiters))
         ADVENTURE_QUERY_CACHE[adventure_entry_id] = (task, waiters)
     
@@ -538,7 +345,7 @@ def _adventure_query_done_callback(key, waiters, task):
         del ADVENTURE_QUERY_CACHE[key]
 
 
-async def execute_get_adventure(adventure_entry_id):
+async def execute_adventure_get(adventure_entry_id):
     """
     Queries an adventure's.
     
@@ -553,17 +360,17 @@ async def execute_get_adventure(adventure_entry_id):
     -------
     adventure : ``None | Adventure``
     """
-    result = await query_get_adventure(adventure_entry_id)
+    result = await query_adventure_get(adventure_entry_id)
     if result is None:
         adventure = None
     else:
-        adventure = Adventure.from_entry(result)
+        adventure = adventure_create_from_entry(result)
         ADVENTURES[adventure.entry_id] = adventure
     
     return adventure
 
 
-async def query_get_adventure(adventure_entry_id):
+async def query_adventure_get(adventure_entry_id):
     """
     Queries an adventure's.
     
@@ -589,12 +396,12 @@ async def query_get_adventure(adventure_entry_id):
 
 
 if DB_ENGINE is None:
-    @copy_docs(query_get_adventure)
-    async def query_adventure(query_get_adventure):
+    @copy_docs(query_adventure_get)
+    async def query_adventure(query_adventure_get):
         return None
 
 
-async def get_adventure_listing_page(user_id, page_index, page_size):
+async def adventure_listing_get_page(user_id, page_index, page_size):
     """
     Get the given adventure listing page from the database.
     
@@ -624,7 +431,7 @@ async def get_adventure_listing_page(user_id, page_index, page_size):
         ADVENTURE_LISTING_CACHE.move_to_end(key)
         return page_count_and_adventure_listing
     
-    page_count, results = await query_get_adventure_listing_page(user_id, page_index, page_size)
+    page_count, results = await query_adventure_listing_get_page(user_id, page_index, page_size)
     if not results:
         adventure_listing = None
     
@@ -637,7 +444,7 @@ async def get_adventure_listing_page(user_id, page_index, page_size):
             try:
                 adventure = ADVENTURES[adventure_entry_id]
             except KeyError:
-                adventure = Adventure.from_entry(result)
+                adventure = adventure_create_from_entry(result)
                 ADVENTURES[adventure_entry_id] = adventure
             
             adventure_listing.append(adventure)
@@ -659,7 +466,7 @@ async def get_adventure_listing_page(user_id, page_index, page_size):
     return page_count_and_adventure_listing
 
 
-async def query_get_adventure_listing_page(user_id, page_index, page_size):
+async def query_adventure_listing_get_page(user_id, page_index, page_size):
     """
     Queries the given adventure listing page from the database.
     
@@ -721,6 +528,6 @@ async def query_get_adventure_listing_page(user_id, page_index, page_size):
 
 
 if DB_ENGINE is None:
-    @copy_docs(query_get_adventure_listing_page)
-    async def query_get_adventure_listing_page(user_id, page_index, page_size):
+    @copy_docs(query_adventure_listing_get_page)
+    async def query_adventure_listing_get_page(user_id, page_index, page_size):
         return 1, []

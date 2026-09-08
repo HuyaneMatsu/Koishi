@@ -68,7 +68,7 @@ if (DATABASE_NAME is not None):
     from sqlalchemy import Column, Integer as Int32, BIGINT as Int64, LargeBinary as Binary, create_engine, DateTime, \
         String, Boolean, Unicode, SmallInteger as Int16
     from sqlalchemy.sql.expression import func
-        
+            
     try:
         DB_ENGINE = create_engine(DATABASE_NAME, max_overflow = -1, pool_size = 50)
     except ImportError as err:
@@ -362,25 +362,8 @@ if (DB_ENGINE is not None):
     LINKED_QUEST_TABLE = linked_quest_model.__table__
     
     
-    class adventure_action_model(BASE):
-        __tablename__   = 'ADVENTURE_ACTIONS'
-        id              = Column(Int64, primary_key = True)
-        adventure_entry_id = Column(Int64, nullable = False)
-        action_id       = Column(Int32, nullable = False)
-        created_at      = Column(DateTime, nullable = False)
-        
-        battle_data     = Column(Binary(), nullable = True)
-        loot_data       = Column(Binary(), nullable = True)
-        
-        health_exhausted = Column(Int64, nullable = False)
-        energy_exhausted = Column(Int64, nullable = False)
-    
-    
-    ADVENTURE_ACTION_TABLE = adventure_action_model.__table__
-    
-    
     class adventure_model(BASE):
-        __tablename__   = 'ADVENTURES'
+        __tablename__   = 'ADVENTURES_V2'
         id              = Column(Int64, primary_key = True)
         user_id         = Column(Int64, nullable = False)
         
@@ -390,10 +373,10 @@ if (DB_ENGINE is not None):
         auto_cancellation_id = Column(Int32, nullable = False)
         state           = Column(Int32, nullable = False)
         
-        initial_duration = Column(Int64, nullable = False)
-        created_at      = Column(DateTime, nullable = False)
-        updated_at      = Column(DateTime, nullable = False)
-        action_count    = Column(Int32, nullable = False)
+        initial_duration_seconds = Column(Int64, nullable = False)
+        created_at      = Column(Int64, nullable = False)
+        updated_at      = Column(Int64, nullable = False)
+        action_listing_data = Column(Binary(), nullable = True)
         seed            = Column(Int64, nullable = False)
         
         health_initial = Column(Int64, nullable = False)

@@ -1,19 +1,14 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 
-from ...adventure_core import ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, AdventureAction
+from ...adventure_core import ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, adventure_action_create
 
 from ..content_building import produce_adventure_action_short_representation
 
 
 def _iter_options():
-    adventure_entry_id = 9993
+    created_at = 1463184000
     
-    created_at = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
-    
-    adventure_action = AdventureAction(
-        adventure_entry_id,
+    adventure_action = adventure_action_create(
         ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
         created_at,
         None,
@@ -24,13 +19,10 @@ def _iter_options():
     
     yield (
         adventure_action,
-        f'<t:{created_at.timestamp():.0f}:T> Gardening',
+        f'<t:{created_at}:T> Gardening',
     )
     
-    adventure_entry_id = 9993
-    
-    adventure_action = AdventureAction(
-        adventure_entry_id,
+    adventure_action = adventure_action_create(
         999999,
         created_at,
         None,
@@ -41,7 +33,7 @@ def _iter_options():
     
     yield (
         adventure_action,
-        f'<t:{created_at.timestamp():.0f}:T> Unknown',
+        f'<t:{created_at}:T> Unknown',
     )
 
 

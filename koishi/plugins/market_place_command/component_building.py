@@ -471,8 +471,8 @@ def build_claim_success_components(
             item_amount,
             reward_balance,
             fee,
-        )])),
-    )
+        )])
+    ))
     components.append(create_separator())
     
     # Control

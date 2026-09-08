@@ -7,7 +7,7 @@ from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ..gift_common import can_gift, identify_targeted_user, produce_gift_requirements_unsatisfied_error_message
 from ..relationships_core import autocomplete_relationship_extended_user_name
-from ..user_balance import get_user_balance
+from ..user_balance import user_balance_get, user_balance_accumulate_allocated_balance
 
 from .component_building import build_confirmation_form
 from .constants import PURCHASABLE_ROLES, ROLE_CHOICES
@@ -91,8 +91,10 @@ async def command_buy_role(
             break
         
         
-        source_user_balance = await get_user_balance(interaction_event.user_id)
-        available_balance = source_user_balance.balance - source_user_balance.get_cumulative_allocated_balance()
+        source_user_balance = await user_balance_get(interaction_event.user_id)
+        available_balance = (
+            source_user_balance.balance - user_balance_accumulate_allocated_balance(source_user_balance)
+        )
         
         if available_balance < required_balance:
             error_message = (

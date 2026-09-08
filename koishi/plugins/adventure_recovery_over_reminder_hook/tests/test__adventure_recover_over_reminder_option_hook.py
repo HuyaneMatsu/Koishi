@@ -5,7 +5,7 @@ from scarletio import skip_ready_cycle
 
 from ...reminder_notification_delivery_core import ReminderLooper
 from ...user_settings import user_settings_create_with_specification
-from ...user_stats_core import UserStats
+from ...user_stats_core import user_stats_create, user_stats_set_recovering_until
 
 from .. import adventure_recover_over_reminder_option_hook
 
@@ -26,17 +26,17 @@ async def test__adventure_recover_over_reminder_option_hook__not_on_recover():
         notification_adventure_recovery_over = 1,
     )
     
-    user_stats = UserStats(user_id)
-    user_stats.set_recovering_until(date_time)
+    user_stats = user_stats_create(user_id)
+    user_stats_set_recovering_until(user_stats, date_time)
     
     
-    async def get_user_stats(input_user_id):
+    async def user_stats_get(input_user_id):
         nonlocal user_id
         nonlocal user_stats
         vampytest.assert_eq(input_user_id, user_id)
         return user_stats
     
-    async def save_user_stats(input_user_stats):
+    async def user_stats_save(input_user_stats):
         raise RuntimeError
     
     
@@ -57,8 +57,8 @@ async def test__adventure_recover_over_reminder_option_hook__not_on_recover():
     mocked = vampytest.mock_globals(
         adventure_recover_over_reminder_option_hook,
         2,
-        get_user_stats = get_user_stats,
-        save_user_stats = save_user_stats,
+        user_stats_get = user_stats_get,
+        user_stats_save = user_stats_save,
         ADVENTURE_RECOVERY_OVER_REMINDER_LOOPER = ADVENTURE_RECOVERY_OVER_REMINDER_LOOPER,
     )
     
@@ -94,17 +94,17 @@ async def test__adventure_recover_over_reminder_option_hook__on_recover():
         notification_adventure_recovery_over = 1,
     )
     
-    user_stats = UserStats(user_id)
-    user_stats.set_recovering_until(date_time)
+    user_stats = user_stats_create(user_id)
+    user_stats_set_recovering_until(user_stats, date_time)
     
     
-    async def get_user_stats(input_user_id):
+    async def user_stats_get(input_user_id):
         nonlocal user_id
         nonlocal user_stats
         vampytest.assert_eq(input_user_id, user_id)
         return user_stats
     
-    async def save_user_stats(input_user_stats):
+    async def user_stats_save(input_user_stats):
         nonlocal user_stats
         vampytest.assert_eq(input_user_stats, user_stats)
     
@@ -126,7 +126,7 @@ async def test__adventure_recover_over_reminder_option_hook__on_recover():
     mocked = vampytest.mock_globals(
         adventure_recover_over_reminder_option_hook,
         2,
-        get_user_stats = get_user_stats,
+        user_stats_get = user_stats_get,
         ADVENTURE_RECOVERY_OVER_REMINDER_LOOPER = ADVENTURE_RECOVERY_OVER_REMINDER_LOOPER,
     )
     

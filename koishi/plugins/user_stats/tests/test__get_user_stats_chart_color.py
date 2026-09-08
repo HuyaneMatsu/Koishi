@@ -2,14 +2,14 @@ import vampytest
 
 from hata import Color
 
-from ...user_stats_core import UserStats
+from ...user_stats_core import user_stats_create
 
 from ..chart import get_user_stats_chart_color
 
 
 def _iter_options():
     expected_output = 0x123425
-    user_stats = UserStats((((5566 << 24) | expected_output) << 22) | 4555)
+    user_stats = user_stats_create((((5566 << 24) | expected_output) << 22) | 4555)
     user_stats.stat_housewife = 0
     user_stats.stat_cuteness = 0
     user_stats.stat_bedroom = 0
@@ -21,7 +21,7 @@ def _iter_options():
         Color(expected_output),
     )
     
-    user_stats = UserStats(202503120000)
+    user_stats = user_stats_create(202503120000)
     user_stats.stat_housewife = 10
     user_stats.stat_cuteness = 0
     user_stats.stat_bedroom = 0
@@ -33,7 +33,7 @@ def _iter_options():
         Color(0xff9900),
     )
     
-    user_stats = UserStats(202503120001)
+    user_stats = user_stats_create(202503120001)
     user_stats.stat_housewife = 0
     user_stats.stat_cuteness = 10
     user_stats.stat_bedroom = 0
@@ -45,7 +45,7 @@ def _iter_options():
         Color(0xff0099),
     )
     
-    user_stats = UserStats(202503120002)
+    user_stats = user_stats_create(202503120002)
     user_stats.stat_housewife = 0
     user_stats.stat_cuteness = 0
     user_stats.stat_bedroom = 10
@@ -57,7 +57,7 @@ def _iter_options():
         Color(0x3300ff),
     )
     
-    user_stats = UserStats(202503120003)
+    user_stats = user_stats_create(202503120003)
     user_stats.stat_housewife = 0
     user_stats.stat_cuteness = 0
     user_stats.stat_bedroom = 0
@@ -69,7 +69,7 @@ def _iter_options():
         Color(0x00ffff),
     )
     
-    user_stats = UserStats(202503120004)
+    user_stats = user_stats_create(202503120004)
     user_stats.stat_housewife = 0
     user_stats.stat_cuteness = 0
     user_stats.stat_bedroom = 0
@@ -81,7 +81,7 @@ def _iter_options():
         Color(0x33ff00),
     )
     
-    user_stats = UserStats(202503120005)
+    user_stats = user_stats_create(202503120005)
     user_stats.stat_housewife = 10
     user_stats.stat_cuteness = 10
     user_stats.stat_bedroom = 10

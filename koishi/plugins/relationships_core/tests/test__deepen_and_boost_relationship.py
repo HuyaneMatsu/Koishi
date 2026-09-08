@@ -2,7 +2,7 @@ from datetime import datetime as DateTime, timezone as TimeZone, timedelta as Ti
 
 import vampytest
 
-from ...user_balance import UserBalance
+from ...user_balance import user_balance_create
 
 from ..constants import RELATIONSHIP_LISTING_CACHE
 from ..relationship import Relationship
@@ -18,7 +18,7 @@ async def test__deepen_and_boost_relationship__self():
     """
     source_user_id = 202503070004
     
-    source_user_balance = UserBalance(source_user_id)
+    source_user_balance = user_balance_create(source_user_id)
     
     await deepen_and_boost_relationship(source_user_balance, None, None, 1000)
     
@@ -36,8 +36,8 @@ async def test__deepen_and_boost_relationship__other():
     target_user_id = 202503070006
     
     
-    source_user_balance = UserBalance(source_user_id)
-    target_user_balance = UserBalance(target_user_id)
+    source_user_balance = user_balance_create(source_user_id)
+    target_user_balance = user_balance_create(target_user_id)
     
     await deepen_and_boost_relationship(source_user_balance, target_user_balance, None, 1000)
     
@@ -59,8 +59,8 @@ async def test__deepen_and_boost_relationship__direct_related_without_boost():
     
     now = DateTime.now(TimeZone.utc) + TimeDelta(days = 300)
     
-    source_user_balance = UserBalance(source_user_id)
-    target_user_balance = UserBalance(target_user_id)
+    source_user_balance = user_balance_create(source_user_id)
+    target_user_balance = user_balance_create(target_user_id)
     
     relationship_to_deepen = Relationship(source_user_id, target_user_id, RELATIONSHIP_TYPE_MAMA, 0, now)
     
@@ -93,8 +93,8 @@ async def test__deepen_and_boost_relationship__indirect_related_without_boost():
     
     now = DateTime.now(TimeZone.utc) + TimeDelta(days = 300)
     
-    source_user_balance = UserBalance(source_user_id)
-    target_user_balance = UserBalance(target_user_id)
+    source_user_balance = user_balance_create(source_user_id)
+    target_user_balance = user_balance_create(target_user_id)
     
     relationship_to_deepen = Relationship(source_user_id, middle_user_id, RELATIONSHIP_TYPE_MAMA, 0, now)
     
@@ -126,8 +126,8 @@ async def test__deepen_and_boost_relationship__direct_related_with_boost():
     
     now = DateTime.now(TimeZone.utc) - TimeDelta(days = 300)
     
-    source_user_balance = UserBalance(source_user_id)
-    target_user_balance = UserBalance(target_user_id)
+    source_user_balance = user_balance_create(source_user_id)
+    target_user_balance = user_balance_create(target_user_id)
     
     relationship_to_deepen = Relationship(source_user_id, target_user_id, RELATIONSHIP_TYPE_MAMA, 0, now)
     
@@ -159,8 +159,8 @@ async def test__deepen_and_boost_relationship__inverted_direct_related_with_boos
     
     now = DateTime.now(TimeZone.utc) - TimeDelta(days = 300)
     
-    source_user_balance = UserBalance(source_user_id)
-    target_user_balance = UserBalance(target_user_id)
+    source_user_balance = user_balance_create(source_user_id)
+    target_user_balance = user_balance_create(target_user_id)
     
     relationship_to_deepen = Relationship(target_user_id, source_user_id, RELATIONSHIP_TYPE_MAMA, 0, now)
     
@@ -193,8 +193,8 @@ async def test__deepen_and_boost_relationship__indirect_related_with_boost():
     
     now = DateTime.now(TimeZone.utc) - TimeDelta(days = 300)
     
-    source_user_balance = UserBalance(source_user_id)
-    target_user_balance = UserBalance(target_user_id)
+    source_user_balance = user_balance_create(source_user_id)
+    target_user_balance = user_balance_create(target_user_id)
     
     relationship_to_deepen = Relationship(source_user_id, middle_user_id, RELATIONSHIP_TYPE_MAMA, 0, now)
     
@@ -227,8 +227,8 @@ async def test__deepen_and_boost_relationship__inverted_indirect_related_with_bo
     
     now = DateTime.now(TimeZone.utc) - TimeDelta(days = 300)
     
-    source_user_balance = UserBalance(source_user_id)
-    target_user_balance = UserBalance(target_user_id)
+    source_user_balance = user_balance_create(source_user_id)
+    target_user_balance = user_balance_create(target_user_id)
     
     relationship_to_deepen = Relationship(middle_user_id, source_user_id, RELATIONSHIP_TYPE_MAMA, 0, now)
     

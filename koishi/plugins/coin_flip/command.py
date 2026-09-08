@@ -7,7 +7,9 @@ from hata import DiscordException, ERROR_CODES
 
 from ...bots import FEATURE_CLIENTS
 
-from ..user_balance import get_user_balance, save_user_balance
+from ..user_balance import (
+    user_balance_get, user_balance_save, user_balance_accumulate_allocated_balance, user_balance_modify_balance_by
+)
 
 from .checks import check_sufficient_available_balance, check_sufficient_bet
 from .constants import BET_LARGE_COIN_THRESHOLD
@@ -67,11 +69,13 @@ async def coin_flip(
             raise
         return
     
-    user_balance = await get_user_balance(interaction_event.user_id)
+    user_balance = await user_balance_get(interaction_event.user_id)
     
     check_sufficient_bet(bet_amount)
     balance = user_balance.balance
-    check_sufficient_available_balance(balance - user_balance.get_cumulative_allocated_balance(), bet_amount)
+    check_sufficient_available_balance(
+        balance - user_balance_accumulate_allocated_balance(user_balance), bet_amount
+    )
     
     rolled_side = random() > 0.5
     
@@ -80,8 +84,8 @@ async def coin_flip(
     else:
         change = -bet_amount
     
-    user_balance.modify_balance_by(change)
-    await save_user_balance(user_balance)
+    user_balance_modify_balance_by(user_balance, change)
+    await user_balance_save(user_balance)
     
     try:
         await client.interaction_response_message_edit(interaction_event, '-# _ _')

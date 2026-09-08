@@ -3,7 +3,7 @@ from random import Random
 import vampytest
 
 from ...action import ACTION_TYPE_FORAGING, Action
-from ...adventure import Adventure
+from ...adventure import adventure_action_create, adventure_create
 from ...options import OptionLoot
 from ...target import Target
 
@@ -50,7 +50,7 @@ def _iter_options():
     )
     
     
-    adventure_0 = Adventure(
+    adventure_0 = adventure_create(
         202507300010,
         9999,
         target_id_0,
@@ -60,7 +60,16 @@ def _iter_options():
         0,
         0,
     )
-    adventure_0.action_count = 3
+    adventure_0.action_listing = [
+        adventure_action_create(
+            100,
+            0,
+            None,
+            None,
+            0,
+            0,
+        ) for _ in range(3)
+    ]
     
     # generic hit
     yield (

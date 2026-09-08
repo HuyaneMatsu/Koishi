@@ -8,7 +8,7 @@ __all__ = (
 from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from math import floor
 
-from ...bot_utils.time import get_unix_time_nano_seconds
+from ...bot_utils.time import unix_time_seconds_get
 
 from .constants import UNIX_EPOCH
 from .helpers import get_quest_template_nullable
@@ -189,7 +189,7 @@ def get_linked_quest_abandon_credibility_penalty(linked_quest, entity_rank):
     quest_abandon_penalty : `int`
     """
     while True:
-        if linked_quest.created_at + 1800_000000000 > get_unix_time_nano_seconds():
+        if linked_quest.created_at + 1800 > unix_time_seconds_get():
             credibility_penalty = 0
             break
         
@@ -294,7 +294,7 @@ def reset_linked_quest(linked_quest):
         Linked quest to reset.
     """
     linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_ACTIVE
-    linked_quest.created_at = get_unix_time_nano_seconds()
+    linked_quest.created_at = unix_time_seconds_get()
     duration = -1
     
     requirements = linked_quest.requirements

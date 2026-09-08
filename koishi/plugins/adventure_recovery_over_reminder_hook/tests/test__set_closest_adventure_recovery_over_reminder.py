@@ -5,7 +5,7 @@ from scarletio import skip_ready_cycle
 
 from ...reminder_notification_delivery_core import ReminderLooper
 from ...user_settings import user_settings_create_with_specification
-from ...user_stats_core import UserStats
+from ...user_stats_core import user_stats_create
 
 from .. import set_closest_adventure_recovery_over_reminder
 
@@ -25,7 +25,7 @@ async def test__set_closest_adventure_recovery_over_reminder__disabled():
         user_id,
         notification_adventure_recovery_over = 0,
     )
-    user_stats = UserStats(user_id)
+    user_stats = user_stats_create(user_id)
     
     async def get_one_user_settings(input_user_id):
         nonlocal user_id
@@ -85,7 +85,7 @@ async def test__set_closest_adventure_recovery_over_reminder__enabled():
         user_id,
         notification_adventure_recovery_over = 1,
     )
-    user_stats = UserStats(user_id)
+    user_stats = user_stats_create(user_id)
     
     async def get_one_user_settings(input_user_id):
         nonlocal user_id

@@ -12,7 +12,7 @@ from ...quest_core import (
     QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance, get_quest_template_nullable,
     linked_quest_create
 )
-from ...user_stats_core import UserStats
+from ...user_stats_core import user_stats_create, user_stats_modify_credibility_by
 
 from ..component_building import build_linked_quest_submit_success_completed_components
 
@@ -209,8 +209,8 @@ def test__build_linked_quest_submit_success_completed_components(
     -------
     output : ``list<Component>``
     """
-    user_stats = UserStats(user_id)
-    user_stats.modify_credibility_by(user_credibility)
+    user_stats = user_stats_create(user_id)
+    user_stats_modify_credibility_by(user_stats, user_credibility)
     
     output = build_linked_quest_submit_success_completed_components(
         client_id,

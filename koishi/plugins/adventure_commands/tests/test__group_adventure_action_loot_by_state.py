@@ -1,10 +1,8 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 
 from ...adventure_core import (
-    AdventureAction, LOOT_STATE_SUCCESS, LOOT_STATE_LOST_DUE_FULL_INVENTORY, LOOT_STATE_LOST_DUE_LOW_ENERGY,
-    build_loot_data
+    LOOT_STATE_SUCCESS, LOOT_STATE_LOST_DUE_FULL_INVENTORY, LOOT_STATE_LOST_DUE_LOW_ENERGY,
+    adventure_action_create, loot_data_build
 )
 from ...item_core import ITEM_ID_PEACH, ITEM_ID_STRAWBERRY
 
@@ -12,11 +10,10 @@ from ..component_building import group_adventure_action_loot_by_state
 
 
 def _iter_options():
-    now = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    now = 127000
     
     yield (
-        AdventureAction(
-            0,
+        adventure_action_create(
             0,
             now,
             None,
@@ -28,12 +25,11 @@ def _iter_options():
     )
     
     yield (
-        AdventureAction(
-            0,
+        adventure_action_create(
             0,
             now,
             None,
-            build_loot_data([
+            loot_data_build([
                 (LOOT_STATE_SUCCESS, ITEM_ID_PEACH, 5),
                 (LOOT_STATE_LOST_DUE_FULL_INVENTORY, ITEM_ID_PEACH, 4),
                 (LOOT_STATE_LOST_DUE_LOW_ENERGY, ITEM_ID_PEACH, 3),
@@ -55,12 +51,11 @@ def _iter_options():
     )
     
     yield (
-        AdventureAction(
-            0,
+        adventure_action_create(
             0,
             now,
             None,
-            build_loot_data([
+            loot_data_build([
                 (LOOT_STATE_LOST_DUE_FULL_INVENTORY, ITEM_ID_PEACH, 6),
                 (LOOT_STATE_LOST_DUE_FULL_INVENTORY, ITEM_ID_STRAWBERRY, 7),
             ]),

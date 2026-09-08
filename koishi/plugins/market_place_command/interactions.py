@@ -8,7 +8,7 @@ from hata.ext.slash import EvaluationError, evaluate_text
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 from ...bots import FEATURE_CLIENTS
 
-from ..adventure_core import get_active_adventure
+from ..adventure_core import adventure_get_active
 from ..inventory_core import get_inventory, save_inventory
 from ..item_core import get_item, get_item_nullable
 from ..market_place_core import (
@@ -17,7 +17,10 @@ from ..market_place_core import (
     get_market_place_item_listing_own_offers, insert_market_place_item, update_market_place_item,
     MARKET_PLACE_VIEW_PAGE_SIZE_DEFAULT, CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_ONE_PATTERN
 )
-from ..user_balance import ALLOCATION_FEATURE_ID_MARKET_PLACE, get_user_balance, save_user_balance
+from ..user_balance import (
+    ALLOCATION_FEATURE_ID_MARKET_PLACE, user_balance_get, user_balance_save, user_balance_remove_allocation,
+    user_balance_accumulate_allocated_balance, user_balance_add_allocation, user_balance_modify_balance_by
+)
 
 from .component_building import (
     build_bid_form, build_bid_success_components, build_claim_success_components, build_inbox_view_components,
@@ -149,7 +152,7 @@ async def handle_sell_confirmation(
     )
     
     while True:
-        adventure = await get_active_adventure(interaction_event.user_id)
+        adventure = await adventure_get_active(interaction_event.user_id)
         if (adventure is not None):
             error_message = 'You cannot sell while on adventure.'
             break
@@ -164,12 +167,12 @@ async def handle_sell_confirmation(
             break
         
         # Initial sell fee
-        user_balance = await get_user_balance(interaction_event.user_id)
+        user_balance = await user_balance_get(interaction_event.user_id)
         
         initial_sell_fee = calculate_initial_sell_fee(item, item_amount, duration_days, starting_sell_price)
         
         balance = user_balance.balance
-        allocated_balance = user_balance.get_cumulative_allocated_balance()
+        allocated_balance = user_balance_accumulate_allocated_balance(user_balance)
         available_balance = balance - allocated_balance
         if initial_sell_fee > available_balance:
             error_message = (
@@ -188,11 +191,11 @@ async def handle_sell_confirmation(
             initial_sell_fee,
         )
         inventory.modify_item_amount(item, -item_amount)
-        user_balance.modify_balance_by(-initial_sell_fee)
+        user_balance_modify_balance_by(user_balance, -initial_sell_fee)
         
         await insert_market_place_item(market_place_item)
         await save_inventory(inventory)
-        await save_user_balance(user_balance)
+        await user_balance_save(user_balance)
         
         # Respond
         await client.interaction_response_message_edit(interaction_event, '-# _ _ ')
@@ -408,7 +411,7 @@ async def handle_inbox_claim(
     )
     
     while True:
-        adventure = await get_active_adventure(user_id)
+        adventure = await adventure_get_active(user_id)
         if (adventure is not None):
             error_message = 'You cannot claim while on adventure.'
             break
@@ -458,9 +461,9 @@ async def handle_inbox_claim(
             if fee > 0:
                 reward_balance -= fee
             
-            user_balance = await get_user_balance(user_id)
-            user_balance.modify_balance_by(reward_balance)
-            await save_user_balance(user_balance)
+            user_balance = await user_balance_get(user_id)
+            user_balance_modify_balance_by(user_balance, reward_balance)
+            await user_balance_save(user_balance)
         
         await update_market_place_item(market_place_item)
         
@@ -470,7 +473,7 @@ async def handle_inbox_claim(
         
         if create_standalone_response:
             components = build_claim_success_components(
-                interaction_event.user,
+                interaction_event.user_id,
                 receive_items,
                 item,
                 item_amount,
@@ -553,7 +556,7 @@ async def handle_inbox_claim_page(
     )
     
     while True:
-        adventure = await get_active_adventure(user_id)
+        adventure = await adventure_get_active(user_id)
         if (adventure is not None):
             error_message = 'You cannot claim while on adventure.'
             break
@@ -610,9 +613,9 @@ async def handle_inbox_claim_page(
             
             reward_balance = sum(claim_element[3] for claim_element in claim_elements)
             if reward_balance:
-                user_balance = await get_user_balance(user_id)
-                user_balance.modify_balance_by(reward_balance)
-                await save_user_balance(user_balance)
+                user_balance = await user_balance_get(user_id)
+                user_balance_modify_balance_by(user_balance, reward_balance)
+                await user_balance_save(user_balance)
             
             if any(claim_element[0] for claim_element in claim_elements):
                 inventory = await get_inventory(user_id)
@@ -968,7 +971,7 @@ async def handle_bid_invocation(
         return
     
     while True:
-        adventure = await get_active_adventure(user_id)
+        adventure = await adventure_get_active(user_id)
         if (adventure is not None):
             error_message = 'You cannot bid while on adventure.'
             break
@@ -1086,7 +1089,7 @@ async def handle_bid_confirmation(
     )
     
     while True:
-        adventure = await get_active_adventure(user_id)
+        adventure = await adventure_get_active(user_id)
         if (adventure is not None):
             error_message = 'You cannot bid while on adventure.'
             break
@@ -1168,8 +1171,8 @@ async def handle_bid_confirmation(
                 break
         
         # Validate bid with balance
-        user_balance = await get_user_balance(user_id)
-        available = user_balance.balance - user_balance.get_cumulative_allocated_balance()
+        user_balance = await user_balance_get(user_id)
+        available = user_balance.balance - user_balance_accumulate_allocated_balance(user_balance)
         if user_id == purchaser_user_id:
             available += market_place_item.purchaser_balance_amount 
         
@@ -1184,11 +1187,11 @@ async def handle_bid_confirmation(
         other_user_balance = None
         
         if user_id == purchaser_user_id:
-            user_balance.remove_allocation(ALLOCATION_FEATURE_ID_MARKET_PLACE, entry_id)
+            user_balance_remove_allocation(user_balance, ALLOCATION_FEATURE_ID_MARKET_PLACE, entry_id)
         
         elif purchaser_user_id:
-            other_user_balance = await get_user_balance(purchaser_user_id)
-            other_user_balance.remove_allocation(ALLOCATION_FEATURE_ID_MARKET_PLACE, entry_id)
+            other_user_balance = await user_balance_get(purchaser_user_id)
+            user_balance_remove_allocation(other_user_balance, ALLOCATION_FEATURE_ID_MARKET_PLACE, entry_id)
         
         # To avoid sniping, set `finalises_at` to a minimum amount. This allows other users to rect.
         finalises_at = max(market_place_item.finalises_at, now + FINALISATION_DELAY_AFTER_BID)
@@ -1198,7 +1201,8 @@ async def handle_bid_confirmation(
         market_place_item.purchaser_user_id = user_id
         market_place_item.purchaser_balance_amount = bid_balance_amount
         
-        user_balance.add_allocation(
+        user_balance_add_allocation(
+            user_balance,
             ALLOCATION_FEATURE_ID_MARKET_PLACE,
             entry_id,
             bid_balance_amount,
@@ -1207,8 +1211,8 @@ async def handle_bid_confirmation(
         
         await update_market_place_item(market_place_item)
         if (other_user_balance is not None):
-            await save_user_balance(other_user_balance)
-        await save_user_balance(user_balance)
+            await user_balance_save(other_user_balance)
+        await user_balance_save(user_balance)
         
         # Respond
         await client.interaction_response_message_edit(

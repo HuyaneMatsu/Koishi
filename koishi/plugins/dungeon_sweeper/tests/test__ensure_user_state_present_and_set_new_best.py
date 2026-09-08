@@ -2,7 +2,7 @@ import vampytest
 
 from ....bot_utils.models import DB_ENGINE
 
-from ...user_balance import UserBalance
+from ...user_balance import user_balance_create
 
 from ..chapters import STAGE_DEFAULT, Stage
 from ..helpers import ensure_user_state_present_and_set_new_best
@@ -37,12 +37,12 @@ async def test__ensure_user_state_present_and_set_new_best():
     
     ensure_user_state_created_called = False
     save_stage_result_called = False
-    get_user_balance_called = False
+    user_balance_get_called = False
     
     user_id = 202506150000
     
     user_state = UserState(user_id)
-    user_balance = UserBalance(user_id)
+    user_balance = user_balance_create(user_id)
     
     
     async def ensure_user_state_created(input_user_state):
@@ -64,13 +64,13 @@ async def test__ensure_user_state_present_and_set_new_best():
         save_stage_result_called = True
     
     
-    async def get_user_balance(input_user_id):
+    async def user_balance_get(input_user_id):
         nonlocal user_id
-        nonlocal get_user_balance_called
+        nonlocal user_balance_get_called
         nonlocal user_balance
         
         vampytest.assert_eq(input_user_id, user_id)
-        get_user_balance_called = True
+        user_balance_get_called = True
         return user_balance
     
     
@@ -79,7 +79,7 @@ async def test__ensure_user_state_present_and_set_new_best():
         2,
         ensure_user_state_created = ensure_user_state_created,
         save_stage_result = save_stage_result,
-        get_user_balance = get_user_balance,
+        user_balance_get = user_balance_get,
         STAGES = {
             stage_id: stage,
         },
@@ -90,5 +90,5 @@ async def test__ensure_user_state_present_and_set_new_best():
     
     vampytest.assert_true(ensure_user_state_created_called)
     vampytest.assert_true(save_stage_result_called)
-    vampytest.assert_true(get_user_balance_called)
+    vampytest.assert_true(user_balance_get_called)
     vampytest.assert_eq(user_balance.balance, 400)

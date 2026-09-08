@@ -14,7 +14,9 @@ from ..relationships_core import (
     get_relationship_request_from, get_relationship_request_listing, get_root, get_square, save_relationship
 )
 from ..user_balance import (
-    ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST, get_user_balance, get_user_balances, save_user_balance
+    ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST, user_balance_get, user_balance_get_many, user_balance_save,
+    user_balance_remove_allocation, user_balance_modify_balance_by, user_balance_modify_relationship_value_by,
+    user_balance_set_relationship_value, user_balance_increment_relationship_divorces
 )
 from ..user_settings import (
     USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_PROPOSAL, get_one_user_settings, get_preferred_client_for_user
@@ -148,29 +150,31 @@ async def handle_break_up_confirmation(
         source_receives = source_investment - value_water_level
         target_receives = target_investment - value_water_level
         
-        user_balances = await get_user_balances((source_user_id, target_user_id))
+        user_balances = await user_balance_get_many((source_user_id, target_user_id))
         source_user_balance = user_balances[source_user_id]
         target_user_balance = user_balances[target_user_id]
         
         
         if source_receives > 0:
-            source_user_balance.modify_relationship_value_by(source_receives)
+            user_balance_modify_relationship_value_by(source_user_balance, source_receives)
         if target_receives > 0:
-            target_user_balance.modify_relationship_value_by(target_receives)
+            user_balance_modify_relationship_value_by(target_user_balance, target_receives)
         
-        source_user_balance.set_relationship_value(
+        user_balance_set_relationship_value(
+            source_user_balance,
             get_root(get_square(source_user_balance.relationship_value) + get_square(source_receives // 3)),
         )
-        source_user_balance.increment_relationship_divorces()
-        target_user_balance.set_relationship_value(
+        user_balance_increment_relationship_divorces(source_user_balance)
+        user_balance_set_relationship_value(
+            target_user_balance,
             get_root(get_square(target_user_balance.relationship_value) + get_square(target_receives // 3)),
         )
         
         # Save
         
         await delete_relationship(relationship)
-        await save_user_balance(source_user_balance)
-        await save_user_balance(target_user_balance)
+        await user_balance_save(source_user_balance)
+        await user_balance_save(target_user_balance)
         
         await client.interaction_response_message_edit(
             interaction_event,
@@ -407,7 +411,7 @@ async def handle_relationship_request_details_view(
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_REQUEST_ACCEPT_RP)
-async def hande_relationship_proposal_accept(
+async def handle_relationship_proposal_accept(
     client,
     interaction_event,
     user_id,
@@ -475,7 +479,7 @@ async def hande_relationship_proposal_accept(
         investment = relationship_request.investment
         
         # Queries
-        user_balances = await get_user_balances((source_user.id, target_user.id),)
+        user_balances = await user_balance_get_many((source_user.id, target_user.id),)
         source_user_balance = user_balances[source_user.id]
         target_user_balance = user_balances[target_user.id]
         
@@ -532,9 +536,11 @@ async def hande_relationship_proposal_accept(
             break
         
         # Everything is good
-        source_user_balance.remove_allocation(ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST, relationship_request.entry_id)
-        source_user_balance.modify_balance_by(-investment)
-        await save_user_balance(source_user_balance)
+        user_balance_remove_allocation(
+            source_user_balance, ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST, relationship_request.entry_id
+        )
+        user_balance_modify_balance_by(source_user_balance, -investment)
+        await user_balance_save(source_user_balance)
         
         if current_relationship is None:
             current_relationship = Relationship(
@@ -559,8 +565,8 @@ async def hande_relationship_proposal_accept(
         
         await delete_relationship_request(relationship_request)
         
-        target_user_balance.modify_balance_by(investment >> 1)
-        await save_user_balance(target_user_balance)
+        user_balance_modify_balance_by(target_user_balance, investment >> 1)
+        await user_balance_save(target_user_balance)
         
         # Respond
         await client.interaction_response_message_edit(
@@ -609,7 +615,7 @@ async def hande_relationship_proposal_accept(
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_REQUEST_REJECT_RP)
-async def hande_relationship_proposal_reject(
+async def handle_relationship_proposal_reject(
     client,
     interaction_event,
     user_id,
@@ -672,15 +678,15 @@ async def hande_relationship_proposal_reject(
             break
         
         source_user = await get_user(relationship_request.source_user_id)
-        source_user_balance = await get_user_balance(source_user.id)
+        source_user_balance = await user_balance_get(source_user.id)
         
         relationship_type = relationship_request.relationship_type
         investment = relationship_request.investment
         
-        source_user_balance.remove_allocation(
-            ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST, relationship_request.entry_id
+        user_balance_remove_allocation(
+            source_user_balance, ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST, relationship_request.entry_id
         )
-        await save_user_balance(source_user_balance)
+        await user_balance_save(source_user_balance)
         
         await delete_relationship_request(relationship_request)
         
@@ -730,7 +736,7 @@ async def hande_relationship_proposal_reject(
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_RELATIONSHIP_REQUEST_CANCEL_RP)
-async def hande_relationship_proposal_cancel(
+async def handle_relationship_proposal_cancel(
     client,
     interaction_event,
     user_id,
@@ -794,12 +800,12 @@ async def hande_relationship_proposal_cancel(
         
         target_user = await get_user(relationship_request.target_user_id)
         
-        source_user_balance = await get_user_balance(source_user.id)
+        source_user_balance = await user_balance_get(source_user.id)
         
-        source_user_balance.remove_allocation(
-            ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST, relationship_request.entry_id
+        user_balance_remove_allocation(
+            source_user_balance, ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST, relationship_request.entry_id
         )
-        await save_user_balance(source_user_balance)
+        await user_balance_save(source_user_balance)
         
         await delete_relationship_request(relationship_request)
         
@@ -901,7 +907,7 @@ async def _respond_relationships_view(
         target_user = await get_user(target_user_id)
     
     # Query
-    target_user_balance = await get_user_balance(target_user_id)
+    target_user_balance = await user_balance_get(target_user_id)
     target_relationship_extension_traces = await get_relationship_extension_traces(target_user_id)
     target_relationship_request_listing = await get_relationship_request_listing(target_user_id, True)
     

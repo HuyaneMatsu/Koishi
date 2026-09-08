@@ -6,7 +6,10 @@ from scarletio import Future, Task, TaskGroup, get_event_loop
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 from ...bots import FEATURE_CLIENTS
 
-from ..user_balance import ALLOCATION_FEATURE_ID_GAME_21, save_user_balance, get_user_balance
+from ..user_balance import (
+    ALLOCATION_FEATURE_ID_GAME_21, user_balance_save, user_balance_get, user_balance_accumulate_allocated_balance,
+    user_balance_add_allocation
+)
 
 from .constants import BET_MIN, GAME_21_JOIN_ROW_DISABLED, GAME_21_ROW_DISABLED
 from .helpers import (
@@ -69,9 +72,9 @@ async def game_21(
             error_message = f'You must bet at least {BET_MIN!s} {EMOJI__HEART_CURRENCY}'
             break
         
-        source_user_balance = await get_user_balance(interaction_event.user_id)
+        source_user_balance = await user_balance_get(interaction_event.user_id)
         
-        available = source_user_balance.balance - source_user_balance.get_cumulative_allocated_balance()
+        available = source_user_balance.balance - user_balance_accumulate_allocated_balance(source_user_balance)
         
         if amount > available:
             error_message = (
@@ -83,8 +86,8 @@ async def game_21(
         single_player_mode = (mode == 'single')
         
         if single_player_mode:
-            target_user_balance = await get_user_balance(client.id)
-            available = target_user_balance.balance - target_user_balance.get_cumulative_allocated_balance()
+            target_user_balance = await user_balance_get(client.id)
+            available = target_user_balance.balance - user_balance_accumulate_allocated_balance(target_user_balance)
             if amount > available:
                 error_message = (
                     f'I must have at least {amount!s} available {EMOJI__HEART_CURRENCY} to join.\n'
@@ -94,12 +97,12 @@ async def game_21(
         
         session_id = create_session_identifier()
         
-        source_user_balance.add_allocation(ALLOCATION_FEATURE_ID_GAME_21, session_id, amount, None)
-        await save_user_balance(source_user_balance)
+        user_balance_add_allocation(source_user_balance, ALLOCATION_FEATURE_ID_GAME_21, session_id, amount, None)
+        await user_balance_save(source_user_balance)
         
         if single_player_mode:
-            target_user_balance.add_allocation(ALLOCATION_FEATURE_ID_GAME_21, session_id, amount, None)
-            await save_user_balance(target_user_balance)
+            user_balance_add_allocation(target_user_balance, ALLOCATION_FEATURE_ID_GAME_21, session_id, amount, None)
+            await user_balance_save(target_user_balance)
         
         
         if single_player_mode:

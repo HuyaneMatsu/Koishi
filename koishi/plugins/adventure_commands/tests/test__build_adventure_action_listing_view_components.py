@@ -1,13 +1,11 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 from hata import Component, create_button, create_row, create_section, create_separator, create_text_display
 
 from ...adventure_core import (
     ACTION_ID_SYSTEM_CANCELLATION_NOW, ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
-    ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_FINALIZED, Adventure, AdventureAction,
-    LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS, LOOT_STATE_SUCCESS,
-    TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS, build_loot_data
+    ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_FINALIZED, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS,
+    LOOT_STATE_SUCCESS, TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS, adventure_action_create,
+    adventure_create, loot_data_build
 )
 from ...item_core import ITEM_ID_PEACH
 
@@ -20,10 +18,28 @@ def _iter_options():
     
     adventure_entry_id = 9999
     user_id = 202508060000
-    adventure_action_entry_id_0 = 8888
-    adventure_action_entry_id_1 = 8887
     
-    adventure = Adventure(
+    adventure_action_0 = adventure_action_create(
+        ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
+        1463184000,
+        None,
+        loot_data_build([
+            (LOOT_STATE_SUCCESS, ITEM_ID_PEACH, 5),
+        ]),
+        0,
+        10,
+    )
+    
+    adventure_action_1 = adventure_action_create(
+        ACTION_ID_SYSTEM_CANCELLATION_NOW,
+        1463270400,
+        None,
+        None,
+        0,
+        0,
+    )
+    
+    adventure = adventure_create(
         user_id,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
@@ -33,42 +49,14 @@ def _iter_options():
         100,
         100,
     )
-    adventure.created_at = DateTime(2016, 5, 13, tzinfo = TimeZone.utc)
-    adventure.updated_at = DateTime(2016, 5, 16, tzinfo = TimeZone.utc)
+    adventure.created_at = 1463097600
+    adventure.updated_at = 1463356800
     adventure.state = ADVENTURE_STATE_FINALIZED
-    adventure.action_count = 2
+    adventure.action_listing = [adventure_action_0, adventure_action_1]
     adventure.entry_id = adventure_entry_id
-    
-    adventure_action_0 = AdventureAction(
-        adventure_entry_id,
-        ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
-        DateTime(2016, 5, 14, tzinfo = TimeZone.utc),
-        None,
-        build_loot_data([
-            (LOOT_STATE_SUCCESS, ITEM_ID_PEACH, 5),
-        ]),
-        0,
-        10,
-    )
-    adventure_action_0.entry_id = adventure_action_entry_id_0
-    
-    adventure_action_1 = AdventureAction(
-        adventure_entry_id,
-        ACTION_ID_SYSTEM_CANCELLATION_NOW,
-        DateTime(2016, 5, 15, tzinfo = TimeZone.utc),
-        None,
-        None,
-        0,
-        0,
-    )
-    adventure_action_1.entry_id = adventure_action_entry_id_1
     
     yield (
         adventure,
-        [
-            adventure_action_0,
-            adventure_action_1,
-        ],
         True,
         5,
         0,
@@ -80,7 +68,7 @@ def _iter_options():
             create_separator(),
             create_section(
                 create_text_display(
-                    f'<t:{adventure.created_at.timestamp():.0f}:T> Depart'
+                    f'<t:{adventure.created_at}:T> Depart'
                 ),
                 thumbnail = create_button(
                     'View',
@@ -90,12 +78,12 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'<t:{adventure_action_0.created_at.timestamp():.0f}:T> Gardening'
+                    f'<t:{adventure_action_0.created_at}:T> Gardening'
                 ),
                 thumbnail = create_button(
                     'View',
                     custom_id = (
-                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{adventure_action_entry_id_0:x}.'
+                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{0:x}.'
                         f'{True:x}.{5:x}.{True:x}.{0:x}'
                     ),
                     enabled = True,
@@ -103,12 +91,12 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'<t:{adventure_action_1.created_at.timestamp():.0f}:T> Cancellation'
+                    f'<t:{adventure_action_1.created_at}:T> Cancellation'
                 ),
                 thumbnail = create_button(
                     'View',
                     custom_id = (
-                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{adventure_action_entry_id_1:x}.'
+                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{1:x}.'
                         f'{True:x}.{5:x}.{True:x}.{0:x}'
                     ),
                     enabled = False,
@@ -116,7 +104,7 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'<t:{adventure.updated_at.timestamp():.0f}:T> Return'
+                    f'<t:{adventure.updated_at}:T> Return'
                 ),
                 thumbnail = create_button(
                     'View',
@@ -149,7 +137,7 @@ def _iter_options():
     adventure_entry_id = 9998
     user_id = 202508060001
     
-    adventure = Adventure(
+    adventure = adventure_create(
         user_id,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
@@ -159,9 +147,9 @@ def _iter_options():
         100,
         100,
     )
-    adventure.created_at = DateTime(2016, 5, 13, tzinfo = TimeZone.utc)
+    adventure.created_at = 1463097600
     adventure.state = ADVENTURE_STATE_ACTIONING
-    adventure.action_count = 0
+    adventure.action_listing = []
     adventure.entry_id = adventure_entry_id
     
     # show depart, +0, no return
@@ -169,7 +157,6 @@ def _iter_options():
     
     yield (
         adventure,
-        None,
         False,
         0,
         0,
@@ -181,7 +168,7 @@ def _iter_options():
             create_separator(),
             create_section(
                 create_text_display(
-                    f'<t:{adventure.created_at.timestamp():.0f}:T> Depart'
+                    f'<t:{adventure.created_at}:T> Depart'
                 ),
                 thumbnail = create_button(
                     'View',
@@ -215,7 +202,6 @@ def _iter_options():
     
     yield (
         adventure,
-        None,
         False,
         0,
         2,
@@ -251,7 +237,21 @@ def _iter_options():
     adventure_entry_id = 9997
     user_id = 202508060002
     
-    adventure = Adventure(
+    adventure_action_listing = []
+    
+    for index in range(0, 8):
+        adventure_action = adventure_action_create(
+            ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
+            1463184000 + 3600 * (1 + index),
+            None,
+            None,
+            0,
+            1,
+        )
+        adventure_action_listing.append(adventure_action)
+        
+    
+    adventure = adventure_create(
         user_id,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
@@ -261,32 +261,15 @@ def _iter_options():
         100,
         100,
     )
-    adventure.created_at = DateTime(2016, 5, 13, tzinfo = TimeZone.utc)
-    adventure.updated_at = DateTime(2016, 5, 16, tzinfo = TimeZone.utc)
+    adventure.created_at = 1463097600
+    adventure.updated_at = 1463356800
     adventure.state = ADVENTURE_STATE_FINALIZED
-    adventure.action_count = 8
+    adventure.action_listing = adventure_action_listing
     adventure.entry_id = adventure_entry_id
     adventure.energy_exhausted = 8
     
-    adventure_action_listing = []
-    
-    for index in range(0, 8):
-        adventure_action = AdventureAction(
-            adventure_entry_id,
-            ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
-            DateTime(2016, 5, 14, 1 + index, tzinfo = TimeZone.utc),
-            None,
-            None,
-            0,
-            1,
-        )
-        adventure_action.entry_id = 100 + index
-        adventure_action_listing.append(adventure_action)
-        
-    
     yield (
         adventure,
-        adventure_action_listing,
         False,
         0,
         0,
@@ -298,7 +281,7 @@ def _iter_options():
             create_separator(),
             create_section(
                 create_text_display(
-                    f'<t:{adventure.created_at.timestamp():.0f}:T> Depart'
+                    f'<t:{adventure.created_at}:T> Depart'
                 ),
                 thumbnail = create_button(
                     'View',
@@ -309,12 +292,12 @@ def _iter_options():
             *(
                 create_section(
                     create_text_display(
-                        f'<t:{DateTime(2016, 5, 14, 1 + index, tzinfo = TimeZone.utc).timestamp():.0f}:T> Gardening'
+                        f'<t:{(1463184000 + 3600 * (1 + index))}:T> Gardening'
                     ),
                     thumbnail = create_button(
                         'View',
                         custom_id = (
-                            f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{(100 + index):x}.'
+                            f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{index:x}.'
                             f'{False:x}.{0:x}.{True:x}.{0:x}'
                         ),
                         enabled = True,
@@ -323,7 +306,7 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'<t:{adventure.updated_at.timestamp():.0f}:T> Return'
+                    f'<t:{adventure.updated_at}:T> Return'
                 ),
                 thumbnail = create_button(
                     'View',
@@ -358,7 +341,21 @@ def _iter_options():
     adventure_entry_id = 9996
     user_id = 202508060003
     
-    adventure = Adventure(
+    adventure_action_listing = []
+    
+    for index in range(0, 19):
+        adventure_action = adventure_action_create(
+            ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
+            1463184000 + 3600 * (1 + index),
+            None,
+            None,
+            0,
+            1,
+        )
+        adventure_action_listing.append(adventure_action)
+    
+    
+    adventure = adventure_create(
         user_id,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
@@ -368,31 +365,15 @@ def _iter_options():
         100,
         100,
     )
-    adventure.created_at = DateTime(2016, 5, 13, tzinfo = TimeZone.utc)
-    adventure.updated_at = DateTime(2016, 5, 16, tzinfo = TimeZone.utc)
+    adventure.created_at = 1463097600
+    adventure.updated_at = 1463356800
     adventure.state = ADVENTURE_STATE_FINALIZED
-    adventure.action_count = 19
+    adventure.action_listing = adventure_action_listing
     adventure.entry_id = adventure_entry_id
     adventure.energy_exhausted = 19
     
-    adventure_action_listing = []
-    
-    for index in range(0, 19):
-        adventure_action = AdventureAction(
-            adventure_entry_id,
-            ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
-            DateTime(2016, 5, 14, 1 + index, tzinfo = TimeZone.utc),
-            None,
-            None,
-            0,
-            1,
-        )
-        adventure_action.entry_id = 100 + index
-        adventure_action_listing.append(adventure_action)
-    
     yield (
         adventure,
-        adventure_action_listing,
         False,
         0,
         1,
@@ -405,12 +386,12 @@ def _iter_options():
             *(
                 create_section(
                     create_text_display(
-                        f'<t:{DateTime(2016, 5, 14, 1 + index, tzinfo = TimeZone.utc).timestamp():.0f}:T> Gardening'
+                        f'<t:{(1463184000 + 3600 * (1 + index))}:T> Gardening'
                     ),
                     thumbnail = create_button(
                         'View',
                         custom_id = (
-                            f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{(100 + index):x}.'
+                            f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{index:x}.'
                             f'{False:x}.{0:x}.{True:x}.{1:x}'
                         ),
                     ),
@@ -441,7 +422,6 @@ def _iter_options():
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__build_adventure_action_listing_view_components(
     adventure,
-    adventure_action_listing,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     adventure_action_listing_page_index,
@@ -453,9 +433,6 @@ def test__build_adventure_action_listing_view_components(
     ----------
     adventure : ``Adventure``
         The parent adventure.
-    
-    adventure_action_listing : ``None | list<AdventureActions>``
-        The adventure's actions.
     
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
@@ -472,7 +449,6 @@ def test__build_adventure_action_listing_view_components(
     """
     output = build_adventure_action_listing_view_components(
         adventure,
-        adventure_action_listing,
         allow_switching_to_adventure_listing_view,
         adventure_listing_page_index,
         adventure_action_listing_page_index,

@@ -3,7 +3,7 @@ __all__ = ()
 from math import ceil, floor
 from hata import ComponentType
 
-from ..user_balance import get_user_balance, save_user_balance
+from ..user_balance import user_balance_get, user_balance_save, user_balance_modify_balance_by
 
 from .chapters import STAGE_DEFAULT, set_new_best
 from .constants import NEW_RECORD_REWARD, RATINGS, RATING_MAX, RATING_REWARDS, STAGES
@@ -261,9 +261,9 @@ async def ensure_user_state_present_and_set_new_best(user_state, stage_id, steps
     await save_stage_result(user_state.user_id, stage_result)
     
     if reward:
-        user_balance = await get_user_balance(user_state.user_id)
-        user_balance.modify_balance_by(reward)
-        await save_user_balance(user_balance)
+        user_balance = await user_balance_get(user_state.user_id)
+        user_balance_modify_balance_by(user_balance, reward)
+        await user_balance_save(user_balance)
 
 
 def get_stage_id_at_position(chapter, stage_results, difficulty_id, in_difficulty_index):

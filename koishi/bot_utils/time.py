@@ -1,9 +1,13 @@
-__all__ = ('get_unix_time_nano_seconds',)
+__all__ = ('unix_time_nano_seconds_get', 'unix_time_seconds_get')
+
+from time import time
 
 try:
-    from time import time_ns as get_unix_time_nano_seconds
+    from time import time_ns as unix_time_nano_seconds_get
 except ImportError:
-    from time import time
-    
-    def get_unix_time_nano_seconds():
+    def unix_time_nano_seconds_get():
         return int(time() * 1000000000.0)
+
+
+def unix_time_seconds_get():
+    return int(time())

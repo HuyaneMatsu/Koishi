@@ -7,7 +7,7 @@ from ..item_core import ITEM_FLAG_COSTUME, ITEM_FLAG_HEAD, get_item_nullable
 from ..user_equip import ITEM_FLAGS_ALLOWED, ITEM_SLOTS, ITEM_SLOT_NAMES
 from ..user_inspect_item import produce_item_inspect_description
 
-from ..user_stats_core import get_user_stats
+from ..user_stats_core import user_stats_get
 
 
 async def command_user_inspect_equipment(
@@ -46,7 +46,7 @@ async def command_user_inspect_equipment(
     )
     
     while True:
-        user_stats = await get_user_stats(interaction_event.user_id)
+        user_stats = await user_stats_get(interaction_event.user_id)
         
         if item_slot == ITEM_FLAG_HEAD:
             item_id = user_stats.item_id_head

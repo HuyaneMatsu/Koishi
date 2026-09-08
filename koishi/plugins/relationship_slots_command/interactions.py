@@ -10,7 +10,10 @@ from ...bots import FEATURE_CLIENTS
 from ..gift_common import can_gift, produce_gift_requirements_unsatisfied_error_message
 from ..relationship_slots_core import CUSTOM_ID_BUY_RELATIONSHIP_SLOT_INVOKE_RP
 from ..relationships_core import deepen_and_boost_relationship, get_relationship_to_deepen
-from ..user_balance import get_user_balance
+from ..user_balance import (
+    user_balance_get, user_balance_accumulate_allocated_balance, user_balance_modify_balance_by,
+    user_balance_increment_relationship_slots
+)
 from ..user_settings import (
     USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_GIFT, get_one_user_settings, get_preferred_client_for_user
 )
@@ -47,12 +50,12 @@ async def relationship_increment_respond(client, interaction_event, target_user,
             error_message = ''.join([*produce_gift_requirements_unsatisfied_error_message()])
             break
         
-        source_user_balance = await get_user_balance(interaction_event.user_id)
+        source_user_balance = await user_balance_get(interaction_event.user_id)
         
         if target_user is None:
             relationship_slots = source_user_balance.relationship_slots
         else:
-            target_user_balance = await get_user_balance(target_user.id)
+            target_user_balance = await user_balance_get(target_user.id)
             relationship_slots = target_user_balance.relationship_slots
         
         if relationship_slots >= MAX_WAIFU_SLOTS:
@@ -64,7 +67,9 @@ async def relationship_increment_respond(client, interaction_event, target_user,
         
         new_relationship_slot_count = relationship_slots + 1
         required_balance = WAIFU_SLOT_COSTS.get(new_relationship_slot_count, WAIFU_SLOT_COST_DEFAULT)
-        available_balance = source_user_balance.balance - source_user_balance.get_cumulative_allocated_balance()
+        available_balance = (
+            source_user_balance.balance - user_balance_accumulate_allocated_balance(source_user_balance)
+        )
         
         if available_balance < required_balance:
             error_message = (
@@ -191,13 +196,13 @@ async def handle_buy_relationship_slot_confirmation(
             break
         
         
-        source_user_balance = await get_user_balance(interaction_event.user_id)
+        source_user_balance = await user_balance_get(interaction_event.user_id)
         
         if target_user is None:
             target_user_balance = None
             relationship_slots = source_user_balance.relationship_slots
         else:
-            target_user_balance = await get_user_balance(target_user.id)
+            target_user_balance = await user_balance_get(target_user.id)
             relationship_slots = target_user_balance.relationship_slots
         
         if relationship_slots >= MAX_WAIFU_SLOTS:
@@ -210,7 +215,7 @@ async def handle_buy_relationship_slot_confirmation(
         new_relationship_slot_count = relationship_slots + 1
         required_balance = WAIFU_SLOT_COSTS.get(new_relationship_slot_count, WAIFU_SLOT_COST_DEFAULT)
         current_balance = source_user_balance.balance
-        available_balance = current_balance - source_user_balance.get_cumulative_allocated_balance()
+        available_balance = current_balance - user_balance_accumulate_allocated_balance(source_user_balance)
         
         if available_balance < required_balance:
             error_message = (
@@ -219,11 +224,11 @@ async def handle_buy_relationship_slot_confirmation(
             )
             break
         
-        source_user_balance.modify_balance_by(-required_balance)
+        user_balance_modify_balance_by(source_user_balance, -required_balance)
         if target_user_balance is None:
-            source_user_balance.increment_relationship_slots()
+            user_balance_increment_relationship_slots(source_user_balance)
         else:
-            target_user_balance.increment_relationship_slots()
+           user_balance_increment_relationship_slots(target_user_balance)
         
         await deepen_and_boost_relationship(
             source_user_balance,

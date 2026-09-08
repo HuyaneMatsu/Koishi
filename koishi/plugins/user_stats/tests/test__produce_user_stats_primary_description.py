@@ -1,14 +1,14 @@
 import vampytest
 
 from ...item_core import ITEM_ID_FISHING_ROD
-from ...user_stats_core import UserStats
+from ...user_stats_core import user_stats_create
 
 from ..content_building import produce_user_stats_primary_description
 
 
 def _iter_options():
     user_id = 202512270002
-    user_stats = UserStats(
+    user_stats = user_stats_create(
         user_id,
     )
     user_stats.stat_housewife = 10

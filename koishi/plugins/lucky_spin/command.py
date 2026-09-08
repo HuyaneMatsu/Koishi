@@ -9,7 +9,9 @@ from hata import DiscordException, ERROR_CODES
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 from ...bots import FEATURE_CLIENTS
 
-from ..user_balance import get_user_balance, save_user_balance
+from ..user_balance import (
+    user_balance_get, user_balance_save, user_balance_accumulate_allocated_balance, user_balance_modify_balance_by
+)
 
 from .component_building import build_lucky_spin_response_components
 from .constants import BET_MIN, MULTIPLIERS
@@ -83,8 +85,8 @@ async def lucky_spin(
         
         return
     
-    user_balance = await get_user_balance(interaction_event.user_id)
-    available = user_balance.balance - user_balance.get_cumulative_allocated_balance()
+    user_balance = await user_balance_get(interaction_event.user_id)
+    available = user_balance.balance - user_balance_accumulate_allocated_balance(user_balance)
     
     if (bet > available):
         try:
@@ -109,8 +111,8 @@ async def lucky_spin(
     
     change = floor((MULTIPLIERS[index] - Decimal(1)) * bet)
     
-    user_balance.modify_balance_by(change)
-    await save_user_balance(user_balance)
+    user_balance_modify_balance_by(user_balance, change)
+    await user_balance_save(user_balance)
     
     try:
         await client.interaction_response_message_edit(interaction_event, '-# _ _')

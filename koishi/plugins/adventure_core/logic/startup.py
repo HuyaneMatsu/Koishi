@@ -7,7 +7,7 @@ from ..adventure import (
     ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_RETURNING
 )
 from ..constants import ADVENTURES_ACTIVE
-from ..queries import get_active_adventures
+from ..queries import adventure_listing_get_active
 
 from .adventure_stepping import LOOP, schedule_adventure_action, scheduled_adventure_arrival, schedule_adventure_return
 
@@ -18,7 +18,7 @@ async def resume_active_adventures():
     
     This function is a coroutine.
     """
-    adventures = await get_active_adventures()
+    adventures = await adventure_listing_get_active()
     
     for adventure in adventures:
         adventure_state = adventure.state

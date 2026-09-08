@@ -1,11 +1,9 @@
 __all__ = (
     'can_cancel_adventure_after', 'can_cancel_adventure_any', 'can_cancel_adventure_now', 'get_action_type_multiplier',
-    'get_duration_till_recovery_end', 'get_duration_till_recovery_end_of_energy_cost',
-    'get_location_distance_travel_duration',
+    'recovery_duration_seconds_get', 'recovery_duration_seconds_get_of_energy_cost',
+    'travel_duration_seconds_get',
 )
 
-
-from datetime import datetime as DateTime
 from math import ceil, floor, log
 from sys import modules
 
@@ -14,6 +12,7 @@ from scarletio import copy_docs
 from config import MARISA_MODE
 
 from ...item_core import get_item
+from ...user_stats_core import user_stats_calculate
 
 from ..action import (
     ACTION_TYPE_BUTCHERING, ACTION_TYPE_ENCOUNTER, ACTION_TYPE_FISHING, ACTION_TYPE_FORAGING, ACTION_TYPE_GARDENING,
@@ -31,7 +30,7 @@ from ..constants import (
 from ..return_ import RETURN_ID_BEFORE
 
 
-def get_location_distance_travel_duration(adventure, user_stats):
+def travel_duration_seconds_get(adventure, user_stats):
     """
     Gets how long traveling to the target location takes.
     
@@ -54,7 +53,7 @@ def get_location_distance_travel_duration(adventure, user_stats):
     else:
         distance = location.distance
     
-    extra_movement = user_stats.stats_calculated.extra_movement
+    extra_movement = user_stats_calculate(user_stats).extra_movement
     duration = distance * 1000
     if extra_movement:
         duration //= extra_movement
@@ -64,7 +63,7 @@ def get_location_distance_travel_duration(adventure, user_stats):
     return duration
 
 
-def get_duration_till_action_occurrence(base_duration, random, loot_accumulations, multiplier):
+def action_duration_seconds_get(base_duration, random, loot_accumulations, multiplier):
     """
     Gets duration till action occurrence.
     
@@ -87,10 +86,13 @@ def get_duration_till_action_occurrence(base_duration, random, loot_accumulation
     duration : `int`
     """
     # Set the required duration between 0.5 - 1.5 times of the action's duration.
-    duration = (base_duration >> 1) + (random.random() * (base_duration + 1))
-    duration = sum((loot_accumulation.duration_cost for loot_accumulation in loot_accumulations.values()), duration)
-    duration = ceil(duration / multiplier)
-    return duration
+    duration_seconds = (base_duration >> 1) + (random.random() * (base_duration + 1))
+    duration_seconds = sum(
+        (loot_accumulation.duration_cost for loot_accumulation in loot_accumulations.values()),
+        duration_seconds,
+    )
+    duration_seconds = ceil(duration_seconds / multiplier)
+    return duration_seconds
 
 
 def get_action_type_multiplier(action_type, user_stats):
@@ -109,7 +111,7 @@ def get_action_type_multiplier(action_type, user_stats):
     -------
     multiplier : `float`
     """
-    user_stats_calculated = user_stats.stats_calculated
+    user_stats_calculated = user_stats_calculate(user_stats)
     if action_type == ACTION_TYPE_GARDENING:
         stat = user_stats_calculated.extra_gardening
     
@@ -362,7 +364,7 @@ def accumulate_looted_items(adventure, user_stats, inventory, loot_accumulations
             break
         
         # Calculate how much inventory space we have available and reduce the loot amount as required.
-        available_inventory = user_stats.stats_calculated.extra_inventory - inventory.weight
+        available_inventory = user_stats_calculate(user_stats).extra_inventory - inventory.weight
         accumulate_looted_item_loss_due_to_low_inventory(
             loot_accumulations, looted_items, available_inventory
         )
@@ -380,8 +382,14 @@ def accumulate_looted_items(adventure, user_stats, inventory, loot_accumulations
     return looted_items, energy_exhausted
 
 
-def get_should_cancel_adventure(
-    adventure, user_stats, inventory, now, duration_till_next_occurrence, travel_duration, looted_items
+def should_cancel_adventure(
+    adventure,
+    user_stats,
+    inventory,
+    now_seconds,
+    action_duration_seconds,
+    travel_duration_seconds,
+    looted_items,
 ):
     """
     Gets whether the adventure should be cancelled.
@@ -397,13 +405,13 @@ def get_should_cancel_adventure(
     inventory : ``Inventory``
         The user's inventory.
     
-    now : `DateTime`
-        The current time.
+    now_seconds : `int`
+        The current time in seconds.
     
-    duration_till_next_occurrence : `int`
+    action_duration_seconds : `int`
         How much is the duration till the next occurrence.
     
-    travel_duration : `int`
+    travel_duration_seconds : `int`
         The duration to travel back.
     
     looted_items : `list<(int, int, int)>`
@@ -414,17 +422,17 @@ def get_should_cancel_adventure(
     should_cancel : `bool`
     """
     # If we are out of time, we always return.
-    available_duration = adventure.initial_duration - floor((now - adventure.created_at).total_seconds())
-    if available_duration <= 0:
+    available_duration_seconds = adventure.initial_duration_seconds - (now_seconds - adventure.created_at)
+    if available_duration_seconds <= 0:
         return True
     
     # If we want to return before timeout, then we also add the next occurrence time to it.
     if adventure.return_id == RETURN_ID_BEFORE:
-        added_duration = duration_till_next_occurrence
+        added_duration_seconds = action_duration_seconds
     else:
-        added_duration = 0
+        added_duration_seconds = 0
     
-    if available_duration < (added_duration + travel_duration):
+    if available_duration_seconds < (added_duration_seconds + travel_duration_seconds):
         return True
     
     # Check whether we should auto cancel the adventure.
@@ -435,7 +443,7 @@ def get_should_cancel_adventure(
     else:
         cancelled = check_auto_cancellation_conditions(
             auto_cancellation,
-            user_stats.stats_calculated.extra_inventory,
+            user_stats_calculate(user_stats).extra_inventory,
             inventory.weight,
             adventure.health_initial,
             adventure.health_exhausted,
@@ -445,12 +453,12 @@ def get_should_cancel_adventure(
         )
         if cancelled:
             return True
-        
+    
     # No more conditions
     return False
 
 
-def get_duration_till_recovery_end(adventure):
+def recovery_duration_seconds_get(adventure):
     """
     Gets the duration till the user recovery from its adventure.
     
@@ -466,14 +474,16 @@ def get_duration_till_recovery_end(adventure):
     health_exhausted = adventure.health_exhausted
     energy_exhausted = adventure.energy_exhausted
     
-    duration = health_exhausted * RECOVERY_DURATION_BY_LOST_HEALTH + energy_exhausted * RECOVERY_DURATION_BY_LOST_ENERGY
+    duration_seconds = (
+        health_exhausted * RECOVERY_DURATION_BY_LOST_HEALTH + energy_exhausted * RECOVERY_DURATION_BY_LOST_ENERGY
+    )
     if health_exhausted >= adventure.health_initial:
-        duration *= RECOVERY_DURATION_MULTIPLIER_FATALITY
+        duration_seconds *= RECOVERY_DURATION_MULTIPLIER_FATALITY
     
-    return duration
+    return duration_seconds
 
 
-def get_duration_till_recovery_end_of_energy_cost(energy_exhausted):
+def recovery_duration_seconds_get_of_energy_cost(energy_exhausted):
     """
     Gets the duration till the user recovery using energy.
     
@@ -548,30 +558,30 @@ def can_cancel_adventure_any(adventure):
 
 # Reduce the durations if the plugin is ran in test mode.
 if MARISA_MODE and ('vampytest' not in modules):
-    _get_location_distance_travel_duration = get_location_distance_travel_duration
+    _travel_duration_seconds_get = travel_duration_seconds_get
     
-    @copy_docs(get_location_distance_travel_duration)
-    def get_location_distance_travel_duration(adventure, user_stats):
-        return _get_location_distance_travel_duration(adventure, user_stats) // TEST_MODE_DURATION_DIVIDER
+    @copy_docs(travel_duration_seconds_get)
+    def travel_duration_seconds_get(adventure, user_stats):
+        return _travel_duration_seconds_get(adventure, user_stats) // TEST_MODE_DURATION_DIVIDER
     
     
-    _get_duration_till_action_occurrence = get_duration_till_action_occurrence
+    _action_duration_seconds_get = action_duration_seconds_get
     
-    @copy_docs(get_duration_till_action_occurrence)
-    def get_duration_till_action_occurrence(base_duration, random, loot_accumulations, multiplier):
-        return _get_duration_till_action_occurrence(
+    @copy_docs(action_duration_seconds_get)
+    def action_duration_seconds_get(base_duration, random, loot_accumulations, multiplier):
+        return _action_duration_seconds_get(
             base_duration, random, loot_accumulations, multiplier
         ) // TEST_MODE_DURATION_DIVIDER
     
     
-    _get_duration_till_recovery_end = get_duration_till_recovery_end
+    _recovery_duration_seconds_get = recovery_duration_seconds_get
     
-    @copy_docs(get_duration_till_recovery_end)
-    def get_duration_till_recovery_end(adventure):
-        return _get_duration_till_recovery_end(adventure) // TEST_MODE_DURATION_DIVIDER
+    @copy_docs(recovery_duration_seconds_get)
+    def recovery_duration_seconds_get(adventure):
+        return _recovery_duration_seconds_get(adventure) // TEST_MODE_DURATION_DIVIDER
     
-    _get_duration_till_recovery_end_of_energy_cost = get_duration_till_recovery_end_of_energy_cost
+    _recovery_duration_seconds_get_of_energy_cost = recovery_duration_seconds_get_of_energy_cost
     
-    @copy_docs(get_duration_till_recovery_end_of_energy_cost)
-    def get_duration_till_recovery_end_of_energy_cost(energy_exhausted):
-        return _get_duration_till_recovery_end_of_energy_cost(energy_exhausted) // TEST_MODE_DURATION_DIVIDER
+    @copy_docs(recovery_duration_seconds_get_of_energy_cost)
+    def recovery_duration_seconds_get_of_energy_cost(energy_exhausted):
+        return _recovery_duration_seconds_get_of_energy_cost(energy_exhausted) // TEST_MODE_DURATION_DIVIDER

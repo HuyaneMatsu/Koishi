@@ -9,12 +9,14 @@ from ...bots import FEATURE_CLIENTS
 
 from ..gift_common import can_gift, produce_gift_requirements_unsatisfied_error_message
 from ..relationships_core import deepen_and_boost_relationship, get_relationship_to_deepen
-from ..user_balance import get_user_balance
+from ..user_balance import user_balance_get, user_balance_accumulate_allocated_balance, user_balance_modify_balance_by
 from ..user_settings import (
     USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_GIFT, get_one_user_settings, get_preferred_client_for_user
 )
-from ..user_stats_core import get_user_stats, save_user_stats
-
+from ..user_stats_core import (
+    user_stats_get, user_stats_save, user_stats_modify_stat_bedroom_by, user_stats_modify_stat_charm_by,
+    user_stats_modify_stat_cuteness_by, user_stats_modify_stat_housewife_by, user_stats_modify_stat_loyalty_by
+)
 from .content_building import produce_stat_upgrade_success_description, produce_stat_upgraded_notification_description
 from .custom_ids import CUSTOM_ID_UPGRADE_STATS_CONFIRMATION_RP
 from .helpers import get_upgrade_cost_cumulative
@@ -90,7 +92,7 @@ async def handle_stat_upgrade_confirmation(
             error_message = ''.join([*produce_gift_requirements_unsatisfied_error_message()])
             break
         
-        user_stats = await get_user_stats(interaction_event.user_id if (target_user is None) else target_user.id)
+        user_stats = await user_stats_get(interaction_event.user_id if (target_user is None) else target_user_id)
         
         stat_housewife = user_stats.stat_housewife
         stat_cuteness = user_stats.stat_cuteness
@@ -111,9 +113,9 @@ async def handle_stat_upgrade_confirmation(
             modify_loyalty_by,
         )
         
-        source_user_balance = await get_user_balance(interaction_event.user_id)
+        source_user_balance = await user_balance_get(interaction_event.user_id)
         current_balance = source_user_balance.balance
-        available_balance = current_balance - source_user_balance.get_cumulative_allocated_balance()
+        available_balance = current_balance - user_balance_accumulate_allocated_balance(source_user_balance)
         
         if available_balance < required_balance:
             error_message = (
@@ -124,28 +126,28 @@ async def handle_stat_upgrade_confirmation(
         
         # Modify stats
         if modify_housewife_by:
-            user_stats.modify_stat_housewife_by(modify_housewife_by)
+            user_stats_modify_stat_housewife_by(user_stats, modify_housewife_by)
         
         if modify_cuteness_by:
-            user_stats.modify_stat_cuteness_by(modify_cuteness_by)
+            user_stats_modify_stat_cuteness_by(user_stats, modify_cuteness_by)
         
         if modify_bedroom_by:
-            user_stats.modify_stat_bedroom_by(modify_bedroom_by)
+            user_stats_modify_stat_bedroom_by(user_stats, modify_bedroom_by)
         
         if modify_charm_by:
-            user_stats.modify_stat_charm_by(modify_charm_by)
+            user_stats_modify_stat_charm_by(user_stats, modify_charm_by)
         
         if modify_loyalty_by:
-            user_stats.modify_stat_loyalty_by(modify_loyalty_by)
+            user_stats_modify_stat_loyalty_by(user_stats, modify_loyalty_by)
         
-        await save_user_stats(user_stats)
+        await user_stats_save(user_stats)
         
         # Apply payment
-        source_user_balance.modify_balance_by(-required_balance)
+        user_balance_modify_balance_by(source_user_balance, -required_balance)
         
         # Deepen
         if target_user_id:
-            target_user_balance = await get_user_balance(target_user_id)
+            target_user_balance = await user_balance_get(target_user_id)
         else:
             target_user_balance = None
         

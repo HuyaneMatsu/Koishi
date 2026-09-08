@@ -3,18 +3,19 @@ __all__ = (
     'set_adventure_return_notifier'
 )
 
-from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from random import Random
 from math import ceil
 
+from hata import unix_time_to_datetime
 from scarletio import Task, get_event_loop
 
 from config import MARISA_MODE
 
 from ....bot_utils.getter_setter_pair import getter_setter_pair_create
+from ....bot_utils.time import unix_time_seconds_get
 
 from ...inventory_core import get_inventory, save_inventory
-from ...user_stats_core import get_user_stats, save_user_stats
+from ...user_stats_core import user_stats_get, user_stats_save, user_stats_set_recovering_until
 from ...seeding import step_seed, step_seed_initial
 
 from ..action import (
@@ -23,14 +24,16 @@ from ..action import (
 )
 from ..adventure import (
     ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_ACTIONING_CANCEL_AFTER, ADVENTURE_STATE_CANCELLED,
-    ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_FINALIZED, ADVENTURE_STATE_RETURNING, AdventureAction, build_loot_data
+    ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_FINALIZED, ADVENTURE_STATE_RETURNING, adventure_action_create,
+    loot_data_build, adventure_set_state, adventure_set_updated_at, adventure_add_action,
+    adventure_count_actions_for_seeding, adventure_increase_energy_exhausted, adventure_increase_health_exhausted
 )
 from ..constants import ADVENTURES_ACTIVE
-from ..queries import store_adventure_action, update_adventure
+from ..queries import adventure_save
 
 from .helpers import (
-    accumulate_looted_items, get_action, get_action_type_multiplier, get_duration_till_action_occurrence,
-    get_duration_till_recovery_end, get_location_distance_travel_duration, get_should_cancel_adventure
+    accumulate_looted_items, get_action, get_action_type_multiplier, action_duration_seconds_get,
+    recovery_duration_seconds_get, travel_duration_seconds_get, should_cancel_adventure
 )
 from .loot_accumulation_logic import accumulate_action_loot
 
@@ -62,12 +65,12 @@ async def scheduled_adventure_arrival(adventure):
     adventure : ``Adventure``
         The adventure to depart.
     """
-    user_stats = await get_user_stats(adventure.user_id)
+    user_stats = await user_stats_get(adventure.user_id)
     
-    travel_duration = get_location_distance_travel_duration(adventure, user_stats)
+    travel_duration_seconds = travel_duration_seconds_get(adventure, user_stats)
     
     adventure.handle = LOOP.call_after(
-        (adventure.updated_at + TimeDelta(seconds = travel_duration) - DateTime.now(TimeZone.utc)).total_seconds(),
+        (adventure.updated_at + travel_duration_seconds - unix_time_seconds_get()),
         invoke_adventure_arrival,
         adventure,
     )
@@ -103,36 +106,36 @@ async def adventure_arrival(adventure):
         await adventure_unknown(adventure)
         return
     
-    user_stats = await get_user_stats(adventure.user_id)
+    user_stats = await user_stats_get(adventure.user_id)
     multiplier = get_action_type_multiplier(action.type, user_stats)
-    travel_duration = get_location_distance_travel_duration(adventure, user_stats)
+    travel_duration_seconds = travel_duration_seconds_get(adventure, user_stats)
     loot_accumulations = accumulate_action_loot(action, random, multiplier)
-    duration = get_duration_till_action_occurrence(action.duration, random, loot_accumulations, multiplier)
+    action_duration_seconds = action_duration_seconds_get(
+        action.duration, random, loot_accumulations, multiplier
+    )
     
-    arrival_date = adventure.updated_at + TimeDelta(seconds = travel_duration)
+    arrival_at = adventure.updated_at + travel_duration_seconds
     
     # Update the adventure.
-    adventure.state = ADVENTURE_STATE_ACTIONING
-    adventure.updated_at = arrival_date
-    adventure.action_count += 1
-    # Save
-    await update_adventure(adventure)
-    
-    adventure_action = AdventureAction(
-        adventure.entry_id,
-        ACTION_ID_SYSTEM_ARRIVAL,
-        arrival_date,
-        None,
-        None,
-        0,
-        0,
+    adventure_set_state(adventure, ADVENTURE_STATE_ACTIONING)
+    adventure_set_updated_at(adventure, arrival_at)
+    adventure_add_action(
+        adventure,
+        adventure_action_create(
+            ACTION_ID_SYSTEM_ARRIVAL,
+            arrival_at,
+            None,
+            None,
+            0,
+            0,
+        ),
     )
     # Save
-    await store_adventure_action(adventure_action)
+    await adventure_save(adventure)
     
     # Schedule new handle.
     adventure.handle = LOOP.call_after(
-        (arrival_date + TimeDelta(seconds = duration) - DateTime.now(TimeZone.utc)).total_seconds(),
+        (arrival_at + action_duration_seconds - unix_time_seconds_get()),
         invoke_adventure_action_step,
         adventure,
     )
@@ -149,24 +152,21 @@ async def schedule_adventure_action(adventure):
     adventure : ``Adventure``
         The adventure to update.
     """
-    initial_seed = step_seed_initial(
-        adventure.seed,
-        adventure.action_count - 1 - (adventure.state == ADVENTURE_STATE_ACTIONING_CANCEL_AFTER),
-    )
+    initial_seed = step_seed_initial(adventure.seed, adventure_count_actions_for_seeding(adventure))
     random = Random(initial_seed)
     action = get_action(adventure, random)
     if action is None:
         await adventure_unknown(adventure)
         return
     
-    user_stats = await get_user_stats(adventure.user_id)
+    user_stats = await user_stats_get(adventure.user_id)
     multiplier = get_action_type_multiplier(action.type, user_stats)
     loot_accumulations = accumulate_action_loot(action, random, multiplier)
-    duration = get_duration_till_action_occurrence(action.duration, random, loot_accumulations, multiplier)
+    duration_seconds = action_duration_seconds_get(action.duration, random, loot_accumulations, multiplier)
     
     # Schedule new handle.
     adventure.handle = LOOP.call_after(
-        (adventure.updated_at + TimeDelta(seconds = duration) - DateTime.now(TimeZone.utc)).total_seconds(),
+        (adventure.updated_at + duration_seconds - unix_time_seconds_get()),
         invoke_adventure_action_step,
         adventure,
     )
@@ -195,17 +195,14 @@ async def adventure_action_step(adventure):
     adventure : ``Adventure``
         The adventure to update.
     """
-    initial_seed = step_seed_initial(
-        adventure.seed,
-        adventure.action_count - 1 - (adventure.state == ADVENTURE_STATE_ACTIONING_CANCEL_AFTER),
-    )
+    initial_seed = step_seed_initial(adventure.seed, adventure_count_actions_for_seeding(adventure))
     random = Random(initial_seed)
     action = get_action(adventure, random)
     if action is None:
         await adventure_unknown(adventure)
         return
     
-    user_stats = await get_user_stats(adventure.user_id)
+    user_stats = await user_stats_get(adventure.user_id)
     inventory = await get_inventory(adventure.user_id)
     
     # We do not have battle system set up yet, so we ignore that step.
@@ -214,7 +211,7 @@ async def adventure_action_step(adventure):
     # Accumulate loot.
     multiplier = get_action_type_multiplier(action.type, user_stats)
     loot_accumulations = accumulate_action_loot(action, random, multiplier)
-    duration = get_duration_till_action_occurrence(action.duration, random, loot_accumulations, multiplier)
+    duration_seconds = action_duration_seconds_get(action.duration, random, loot_accumulations, multiplier)
     
     looted_items, energy_exhausted = accumulate_looted_items(adventure, user_stats, inventory, loot_accumulations)
     energy_exhausted = ceil(energy_exhausted / multiplier)
@@ -222,16 +219,15 @@ async def adventure_action_step(adventure):
     # Save inventory.
     await save_inventory(inventory)
     
-    action_date = adventure.updated_at + TimeDelta(seconds = duration)
+    action_at = adventure.updated_at + duration_seconds
     
     # Update adventure.
-    adventure.updated_at = action_date
-    adventure.action_count += 1
-    adventure.energy_exhausted += energy_exhausted
-    adventure.health_exhausted += health_exhausted
+    adventure_set_updated_at(adventure, action_at)
+    adventure_increase_energy_exhausted(adventure, energy_exhausted)
+    adventure_increase_health_exhausted(adventure, health_exhausted)
     
     # Calculate what we need for the next step.
-    travel_duration = get_location_distance_travel_duration(adventure, user_stats)
+    travel_duration_seconds = travel_duration_seconds_get(adventure, user_stats)
     
     next_initial_seed = step_seed(initial_seed)
     
@@ -244,68 +240,67 @@ async def adventure_action_step(adventure):
     
     if next_action is None:
         should_return = True
-        duration = travel_duration
+        duration_seconds = travel_duration_seconds
         callback = invoke_adventure_return
     
     else:
         next_multiplier = get_action_type_multiplier(next_action.type, user_stats)
         next_loot_accumulations = accumulate_action_loot(next_action, next_random, next_multiplier)
-        next_duration = get_duration_till_action_occurrence(
+        next_duration_seconds = action_duration_seconds_get(
             next_action.duration, next_random, next_loot_accumulations, next_multiplier
         )
         
-        should_return = get_should_cancel_adventure(
-            adventure, user_stats, inventory, action_date, next_duration, travel_duration, looted_items
+        should_return = should_cancel_adventure(
+            adventure,
+            user_stats,
+            inventory,
+            action_at,
+            next_duration_seconds,
+            travel_duration_seconds,
+            looted_items,
         )
         if should_return:
-            duration = travel_duration
+            duration_seconds = travel_duration_seconds
             callback = invoke_adventure_return
         else:
-            duration = next_duration
+            duration_seconds = next_duration_seconds
             callback = invoke_adventure_action_step
     
     # Finish modifying the adventure.
-    
-    # If next step is unknown we will insert +1 action
-    if (not cancelling_after) and (next_action is None):
-        adventure.action_count += 1
-    
     if should_return:
-        adventure.state = ADVENTURE_STATE_RETURNING
-    
-    # Save
-    await update_adventure(adventure)
+        adventure_set_state(adventure, ADVENTURE_STATE_RETURNING)
     
     # Create and insert the current action.
-    adventure_action = AdventureAction(
-        adventure.entry_id,
+    adventure_action = adventure_action_create(
         action.id,
-        action_date,
+        action_at,
         None,
-        build_loot_data(looted_items),
+        loot_data_build(looted_items),
         health_exhausted,
         energy_exhausted,
     )
-    # Save
-    await store_adventure_action(adventure_action)
+    adventure_add_action(adventure, adventure_action)
     
     # Insert a lost entry if we are lost.
     if (not cancelling_after) and (next_action is None):
-        adventure_action_lost = AdventureAction(
-            adventure.entry_id,
-            ACTION_ID_SYSTEM_UNKNOWN,
-            action_date,
-            None,
-            None,
-            0,
-            0,
+        adventure_add_action(
+            adventure,
+                adventure_action_create(
+                ACTION_ID_SYSTEM_UNKNOWN,
+                action_at,
+                None,
+                None,
+                0,
+                0,
+            ),
         )
-        # Save
-        await store_adventure_action(adventure_action_lost)
+    
+    # Save
+    await adventure_save(adventure)
     
     # Schedule new handle
     adventure.handle = LOOP.call_after(
-        (action_date + TimeDelta(seconds = duration) - DateTime.now(TimeZone.utc)).total_seconds(),
+        (action_at + duration_seconds - unix_time_seconds_get()),
         callback,
         adventure,
     )
@@ -327,7 +322,7 @@ async def adventure_cancel_now(adventure):
         The adventure to depart.
     """
     # Get user stats
-    user_stats = await get_user_stats(adventure.user_id)
+    user_stats = await user_stats_get(adventure.user_id)
     
     # Skip if the adventure is in an invalid state.
     adventure_state = adventure.state
@@ -343,34 +338,37 @@ async def adventure_cancel_now(adventure):
     if (handle is not None):
         handle.cancel()
     
-    now = DateTime.now(TimeZone.utc)
+    now_seconds = unix_time_seconds_get()
     
     # Update the adventure.
-    adventure.state = ADVENTURE_STATE_CANCELLED
-    adventure.updated_at = now
-    adventure.action_count += 1
-    await update_adventure(adventure)
+    adventure_set_state(adventure, ADVENTURE_STATE_CANCELLED)
+    adventure_set_updated_at(adventure, now_seconds)
+    
     
     # Create action for the cancellation.
-    adventure_action = AdventureAction(
-        adventure.entry_id,
-        ACTION_ID_SYSTEM_CANCELLATION_NOW,
-        now,
-        None,
-        None,
-        0,
-        0,
+    adventure_add_action(
+        adventure,
+        adventure_action_create(
+            ACTION_ID_SYSTEM_CANCELLATION_NOW,
+            now_seconds,
+            None,
+            None,
+            0,
+            0,
+        ),
     )
-    await store_adventure_action(adventure_action)
+    
+    # save
+    await adventure_save(adventure)
     
     # Schedule new handle.
-    duration = get_location_distance_travel_duration(adventure, user_stats)
+    duration_seconds = travel_duration_seconds_get(adventure, user_stats)
     if adventure_state == ADVENTURE_STATE_DEPARTING:
         # Take the lowest in case we accumulated offset.
-        duration = min(duration, (now - adventure.created_at).total_seconds())
+        duration_seconds = min(duration_seconds, (now_seconds - adventure.created_at))
     
     adventure.handle = LOOP.call_after(
-        duration,
+        duration_seconds,
         invoke_adventure_return,
         adventure,
     )
@@ -393,21 +391,19 @@ async def adventure_cancel_after(adventure):
         return
     
     # Update the adventure.
-    adventure.state = ADVENTURE_STATE_ACTIONING_CANCEL_AFTER
-    adventure.action_count += 1
-    await update_adventure(adventure)
-    
-    # Create action for the cancellation.
-    adventure_action = AdventureAction(
-        adventure.entry_id,
-        ACTION_ID_SYSTEM_CANCELLATION_AFTER,
-        DateTime.now(TimeZone.utc),
-        None,
-        None,
-        0,
-        0,
+    adventure_set_state(adventure, ADVENTURE_STATE_ACTIONING_CANCEL_AFTER)
+    adventure_add_action(
+        adventure,
+        adventure_action_create(
+            ACTION_ID_SYSTEM_CANCELLATION_AFTER,
+            unix_time_seconds_get(),
+            None,
+            None,
+            0,
+            0,
+        ),
     )
-    await store_adventure_action(adventure_action)
+    await adventure_save(adventure)
 
 
 def invoke_adventure_return(adventure):
@@ -433,18 +429,18 @@ async def adventure_return(adventure):
     adventure : ``Adventure``
         The adventure to update.
     """
-    user_stats = await get_user_stats(adventure.user_id)
-    duration = get_location_distance_travel_duration(adventure, user_stats)
+    user_stats = await user_stats_get(adventure.user_id)
+    duration_seconds = travel_duration_seconds_get(adventure, user_stats)
     
     # If the adventure is cancelled, we may have returned earlier
-    if (adventure.state == ADVENTURE_STATE_CANCELLED) and (adventure.action_count == 1):
-        duration = min(duration, (adventure.updated_at - adventure.created_at).total_seconds())
+    if (adventure.state == ADVENTURE_STATE_CANCELLED) and (not adventure_count_actions_for_seeding(adventure)):
+        duration_seconds = min(duration_seconds, (adventure.updated_at - adventure.created_at))
     
-    return_date = adventure.updated_at + TimeDelta(seconds = duration)
+    return_at = adventure.updated_at + duration_seconds
     
     # Update adventure.
-    adventure.state = ADVENTURE_STATE_FINALIZED
-    adventure.updated_at = return_date
+    adventure_set_state(adventure, ADVENTURE_STATE_FINALIZED)
+    adventure_set_updated_at(adventure, return_at)
     adventure.handle = None
     
     # Clear from cache.
@@ -454,15 +450,15 @@ async def adventure_return(adventure):
         pass
     
     # Save adventure
-    await update_adventure(adventure)
+    await adventure_save(adventure)
     
     # Calculate for how long the user is eeping after the adventure.
-    duration_till_recovery_end = get_duration_till_recovery_end(adventure)
-    if duration_till_recovery_end:
-        recovering_until = return_date + TimeDelta(seconds = duration_till_recovery_end)
-        user_stats.set_recovering_until(recovering_until)
-        await set_closest_adventure_recovery_over_reminder(user_stats, recovering_until)
-        await save_user_stats(user_stats)
+    recovery_duration_seconds = recovery_duration_seconds_get(adventure)
+    if recovery_duration_seconds:
+        recovering_until_date_time = unix_time_to_datetime((return_at + recovery_duration_seconds))
+        user_stats_set_recovering_until(user_stats, recovering_until_date_time)
+        await set_closest_adventure_recovery_over_reminder(user_stats, recovering_until_date_time)
+        await user_stats_save(user_stats)
     
     
     # Notify
@@ -482,15 +478,15 @@ async def schedule_adventure_return(adventure):
     adventure : ``Adventure``
         The adventure to update.
     """
-    user_stats = await get_user_stats(adventure.user_id)
-    duration = get_location_distance_travel_duration(adventure, user_stats)
+    user_stats = await user_stats_get(adventure.user_id)
+    duration_seconds = travel_duration_seconds_get(adventure, user_stats)
     
     # If the adventure is cancelled, we may have returned earlier
-    if (adventure.state == ADVENTURE_STATE_CANCELLED) and (adventure.action_count == 1):
-        duration = min(duration, (adventure.updated_at - adventure.created_at).total_seconds())
+    if (adventure.state == ADVENTURE_STATE_CANCELLED) and (not adventure_count_actions_for_seeding(adventure)):
+        duration_seconds = min(duration_seconds, (adventure.updated_at - adventure.created_at))
     
     adventure.handle = LOOP.call_after(
-        (adventure.updated_at + TimeDelta(seconds = duration) - DateTime.now(TimeZone.utc)).total_seconds(),
+        (adventure.updated_at + duration_seconds - unix_time_seconds_get()),
         invoke_adventure_return,
         adventure,
     )
@@ -520,33 +516,30 @@ async def adventure_unknown(adventure):
     adventure : ``Adventure``
         The adventure to update.
     """
-    user_stats = await get_user_stats(adventure.user_id)
-    now = DateTime.now(TimeZone.utc)
+    user_stats = await user_stats_get(adventure.user_id)
+    now_seconds = unix_time_seconds_get()
     
     # Update the adventure.
-    adventure.state = ADVENTURE_STATE_RETURNING
-    adventure.updated_at = now
-    adventure.action_count += 1
-    
-    # Save
-    await update_adventure(adventure)
-    
-    # Create action for being lost.
-    adventure_action = AdventureAction(
-        adventure.entry_id,
-        ACTION_ID_SYSTEM_UNKNOWN,
-        now,
-        None,
-        None,
-        0,
-        0,
+    adventure_set_state(adventure, ADVENTURE_STATE_RETURNING)
+    adventure_set_updated_at(adventure, now_seconds)
+    adventure_add_action(
+        adventure,
+        adventure_action_create(
+            ACTION_ID_SYSTEM_UNKNOWN,
+            now_seconds,
+            None,
+            None,
+            0,
+            0,
+        ),
     )
+    
     # Save
-    await store_adventure_action(adventure_action)
+    await adventure_save(adventure)
     
     # Schedule new handle.
     adventure.handle = LOOP.call_after(
-        get_location_distance_travel_duration(adventure, user_stats),
+        travel_duration_seconds_get(adventure, user_stats),
         invoke_adventure_return,
         adventure,
     )

@@ -1,15 +1,15 @@
 import vampytest
 
 from ...adventure_core import (
-    Adventure, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS,
-    TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS
+    LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS, TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS,
+    adventure_create
 )
 
 from ..content_building import produce_adventure_return_notification_header
 
 
 def _iter_options():
-    adventure = Adventure(
+    adventure = adventure_create(
         202508140000,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
@@ -28,7 +28,7 @@ def _iter_options():
         ),
     )
     
-    adventure = Adventure(
+    adventure = adventure_create(
         202508140001,
         9999,
         9999,

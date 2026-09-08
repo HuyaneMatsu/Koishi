@@ -1,16 +1,14 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 
 from ...adventure_core import (
-    Adventure, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION
+    LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, adventure_create
 )
 
 from ..content_building import produce_adventure_return_notification_description
 
 
 def _iter_options():
-    adventure = Adventure(
+    adventure = adventure_create(
         202509080000,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
@@ -21,13 +19,13 @@ def _iter_options():
         100,
     )
     
-    adventure.updated_at = DateTime(2016, 5, 14, 3, 20, 19, tzinfo = TimeZone.utc)
+    adventure.updated_at = 1463184000 + 3 * 3600 + 20 * 60 + 19
     adventure.energy_exhausted = 20
     
     yield (
         adventure,
         (
-            f'You are recovering for 40 minutes, until <t:{adventure.updated_at.timestamp() + 2400:.0f}:T>.'
+            f'You are recovering for 40 minutes, until <t:{adventure.updated_at + 2400}:T>.'
         ),
     )
 

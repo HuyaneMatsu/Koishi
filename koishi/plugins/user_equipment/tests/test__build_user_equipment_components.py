@@ -4,7 +4,7 @@ from hata import (
 )
 
 from ...item_core import ITEM_ID_FISHING_ROD, get_item
-from ...user_stats_core import UserStats
+from ...user_stats_core import user_stats_create, user_stats_set_item_id_weapon
 
 from ..component_building import build_user_equipment_components
 
@@ -12,8 +12,8 @@ from ..component_building import build_user_equipment_components
 def _iter_options():
     user_id = 202503310000
     user = User.precreate(user_id, avatar = Icon(IconType.static, 2), name = 'Koishi')
-    user_stats = UserStats(user_id)
-    user_stats.set_item_id_weapon(ITEM_ID_FISHING_ROD)
+    user_stats = user_stats_create(user_id)
+    user_stats_set_item_id_weapon(user_stats, ITEM_ID_FISHING_ROD)
     weapon = get_item(ITEM_ID_FISHING_ROD)
     
     yield (

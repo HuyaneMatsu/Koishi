@@ -2,15 +2,15 @@ import vampytest
 
 from ..helpers import do_reward_user
 
-from ...user_stats_core import UserStats
 from ...inventory_core import Inventory
 from ...item_core import ITEM_ID_STRAWBERRY, get_item_nullable
+from ...guild_stats_core import guild_stats_create
 from ...quest_core import (
     LinkedQuest, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QuestRewardSerialisableItemExact, QuestRewardSerialisableBalance,
     get_quest_template_nullable, get_user_adventurer_rank_info, QuestRewardSerialisableCredibility, linked_quest_create
 )
-from ...guild_stats import GuildStats
-from ...user_balance import UserBalance
+from ...user_balance import user_balance_create, user_balance_modify_balance_by
+from ...user_stats_core import user_stats_create, user_stats_modify_credibility_by
 
 
 def _iter_options():
@@ -212,11 +212,11 @@ def test__do_reward_user(
     output : ``(None | list<(int, int, int)>, list<(Item, int)>, int, int, int)``
     """
     inventory = Inventory(linked_quest.user_id)
-    user_stats = UserStats(linked_quest.user_id)
-    user_stats.modify_credibility_by(user_credibility)
-    user_balance = UserBalance(linked_quest.user_id)
-    user_balance.modify_balance_by(user_balance_amount)
-    guild_stats = GuildStats(linked_quest.guild_id)
+    user_stats = user_stats_create(linked_quest.user_id)
+    user_stats_modify_credibility_by(user_stats, user_credibility)
+    user_balance = user_balance_create(linked_quest.user_id)
+    user_balance_modify_balance_by(user_balance, user_balance_amount)
+    guild_stats = guild_stats_create(linked_quest.guild_id)
     guild_stats.credibility = guild_credibility
     quest_template = get_quest_template_nullable(linked_quest.template_id)
     assert quest_template is not None

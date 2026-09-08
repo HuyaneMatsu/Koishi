@@ -21,7 +21,7 @@ def _iter_options():
             '**Badges:** *none*\n'
             '**Others:** *none*\n'
             '\n'
-            '**Attachment size limit: 8MB**\n'
+            '**Attachment size limit: 20MB**\n'
             '**Bitrate limit: 96 kbps**\n'
             '**Concurrent activities: 2**\n'
             '**Emoji limit: 50**\n'

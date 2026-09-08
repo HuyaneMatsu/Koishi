@@ -13,7 +13,7 @@ from ...relationships_core import (
     RELATIONSHIP_TYPE_SISTER_BIG, RELATIONSHIP_TYPE_SISTER_LIL, RELATIONSHIP_TYPE_WAIFU, Relationship,
     RelationshipExtensionTrace, RelationshipRequest
 )
-from ...user_balance import UserBalance
+from ...user_balance import user_balance_create
 
 from ..component_building import build_relationship_listing_components
 from ..constants import EMOJI_CLOSE, EMOJI_PAGE_DECREMENT, EMOJI_PAGE_INCREMENT, RELATIONSHIP_LISTING_MODE_LEGACY
@@ -64,7 +64,7 @@ def _iter_options():
     
     # self-target & empty
     
-    user_balance_00 = UserBalance(user_id_00)
+    user_balance_00 = user_balance_create(user_id_00)
     user_balance_00.relationship_divorces = 0
     user_balance_00.relationship_slots = 1
     
@@ -137,7 +137,7 @@ def _iter_options():
     )
     
     # other target + value + relationships + indirect relationships + relationship requests
-    user_balance_01 = UserBalance(user_id_01)
+    user_balance_01 = user_balance_create(user_id_01)
     user_balance_01.relationship_divorces = 4
     user_balance_01.relationship_slots = 9
     user_balance_01.relationship_value = 9999
@@ -289,7 +289,7 @@ def test_build_relationship_listing_components(
     guild_id : `int`
         The respective guild's identifier.
     
-    target_user_balance : ``UserBalance``
+    target_user_balance : ``user_balance_create``
         The targeted user's user balance.
     
     relationship_extension_traces : ``None | dict<int, RelationshipExtensionTrace>``

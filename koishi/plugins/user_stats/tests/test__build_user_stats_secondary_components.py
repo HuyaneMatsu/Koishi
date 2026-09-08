@@ -4,7 +4,7 @@ from hata import (
     create_thumbnail_media
 )
 
-from ...user_stats_core import UserStats
+from ...user_stats_core import user_stats_create
 
 from ..component_building import build_user_stats_secondary_components
 
@@ -13,7 +13,7 @@ def _iter_options():
     user_id_0 = 202512270013
     user_id_1 = 202512270014
     
-    stats = UserStats(user_id_1)
+    stats = user_stats_create(user_id_1)
     stats.stat_housewife = 5
     stats.stat_cuteness = 6
     stats.stat_bedroom = 7

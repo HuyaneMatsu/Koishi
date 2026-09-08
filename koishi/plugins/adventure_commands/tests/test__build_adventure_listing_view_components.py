@@ -1,12 +1,10 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 
 from hata import Component, create_button, create_row, create_section, create_separator, create_text_display
 
 from ...adventure_core import (
-    Adventure, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS,
-    TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS
+    LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS, TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS,
+    adventure_create
 )
 
 from ..component_building import build_adventure_listing_view_components
@@ -41,7 +39,7 @@ def _iter_options():
     user_id = 202508060031
     adventure_entry_id_0 = 5555
     
-    adventure = Adventure(
+    adventure = adventure_create(
         user_id,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
@@ -51,7 +49,7 @@ def _iter_options():
         100,
         100,
     )
-    adventure.created_at = DateTime(2016, 5, 13, tzinfo = TimeZone.utc)
+    adventure.created_at = 1463097600
     adventure.entry_id = adventure_entry_id_0
     
     yield (

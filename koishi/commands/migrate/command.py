@@ -5,12 +5,18 @@ from hata.main import register
 from .relationships_rework_2026_01_29 import execute_migration as execute_migration_relationships_rework_2026_01_29
 from .quest_reword_2026_03_10 import execute_migration as execute_migration_quest_reword_2026_03_10
 from .notification_rework_2026_05_02 import execute_migration as execute_migration_notification_rework_2026_05_02
+from .adventure_rework_2026_09_04 import execute_migration as execute_migration_adventure_rework_2026_09_04
+from .linked_quest_creation_migration_2026_09_04 import (
+    execute_migration as execute_migration_linked_quest_creation_migration_2026_09_04
+)
 
 
 MIGRATIONS = (
     ('relationships_rework_2026_01_29', execute_migration_relationships_rework_2026_01_29),
     ('quest_reword_2026_03_10', execute_migration_quest_reword_2026_03_10),
     ('notification_rework_2026_05_02', execute_migration_notification_rework_2026_05_02),
+    ('adventure_rework_2026_09_04', execute_migration_adventure_rework_2026_09_04),
+    ('linked_quest_creation_migration_2026_09_04', execute_migration_linked_quest_creation_migration_2026_09_04)
 )
 
 

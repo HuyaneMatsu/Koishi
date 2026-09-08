@@ -29,13 +29,15 @@ except ImportError:
 
 
 try:
-    from ..user_stats_core import get_user_stats, save_user_stats
+    from ..user_stats_core import user_stats_get, user_stats_save, user_stats_set_recovering_until_notification_at
 except ImportError:
     if not MARISA_MODE:
         raise
     
-    get_user_stats = None
-    save_user_stats = None
+    user_stats_get = None
+    user_stats_save = None
+    def user_stats_set_recovering_until_notification_at(user_stats, date_time):
+        return
 
 
 LOOP = get_event_loop()    
@@ -58,7 +60,7 @@ async def set_closest_adventure_recovery_over_reminder(user_stats, date_time):
     user_settings = await get_one_user_settings(user_stats.user_id)
     if (user_settings.notification_flags >> USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_ADVENTURE_RECOVERY_OVER) & 1:
         ADVENTURE_RECOVERY_OVER_REMINDER_LOOPER.ensure_step_at_date_time(date_time)
-        user_stats.set_recovering_until_notification_at(date_time)
+        user_stats_set_recovering_until_notification_at(user_stats, date_time)
 
 
 if (get_one_user_settings is None) or (ADVENTURE_RECOVERY_OVER_REMINDER_LOOPER is None):
@@ -78,11 +80,11 @@ async def _adventure_recover_over_reminder_option_hook(user_id):
     user_id : `int`
         The user's identifier who enabled the hook.
     """
-    user_stats = await get_user_stats(user_id)
+    user_stats = await user_stats_get(user_id)
     recovering_until = user_stats.recovering_until
     if (recovering_until is not None) and (recovering_until > DateTime.now(TimeZone.utc)):
-        user_stats.set_recovering_until_notification_at(recovering_until)
-        await save_user_stats(user_stats)
+        user_stats_set_recovering_until_notification_at(user_stats, recovering_until)
+        await user_stats_save(user_stats)
         ADVENTURE_RECOVERY_OVER_REMINDER_LOOPER.ensure_step_at_date_time(recovering_until)
 
 
@@ -102,7 +104,7 @@ def adventure_recover_over_reminder_option_hook(user_settings, value):
         Task(LOOP, _adventure_recover_over_reminder_option_hook(user_settings.user_id))
 
 
-if (get_user_stats is None) or (save_user_stats is None) or (ADVENTURE_RECOVERY_OVER_REMINDER_LOOPER is None):
+if (user_stats_get is None) or (user_stats_save is None) or (ADVENTURE_RECOVERY_OVER_REMINDER_LOOPER is None):
     @copy_docs(_adventure_recover_over_reminder_option_hook)
     async def _adventure_recover_over_reminder_option_hook(user_id):
         return

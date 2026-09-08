@@ -2,6 +2,8 @@ __all__ = ()
 
 from hata import create_section, create_separator, create_text_display, create_thumbnail_media
 
+from ..user_stats_core import user_stats_calculate
+
 from .content_building import produce_equipped_item_description
 
 
@@ -36,25 +38,25 @@ def build_user_equipment_components(user, user_stats, guild_id):
     components.append(create_separator())
     
     # Equipment
-    stats_calculated = user_stats.stats_calculated
+    user_stats_calculated = user_stats_calculate(user_stats)
     
     components.append(create_text_display(
-        ''.join([*produce_equipped_item_description('Species', stats_calculated.item_species, None, 'Neet')])
+        ''.join([*produce_equipped_item_description('Species', user_stats_calculated.item_species, None, 'Neet')])
     ))
     components.append(create_separator())
     
     components.append(create_text_display(
-        ''.join([*produce_equipped_item_description('Costume', stats_calculated.item_costume, None, 'Tracksuit')])
+        ''.join([*produce_equipped_item_description('Costume', user_stats_calculated.item_costume, None, 'Tracksuit')])
     ))
     components.append(create_separator())
     
     components.append(create_text_display(
-        ''.join([*produce_equipped_item_description('Head accessory', stats_calculated.item_head, None, 'Hairband')])
+        ''.join([*produce_equipped_item_description('Head accessory', user_stats_calculated.item_head, None, 'Hairband')])
     ))
     components.append(create_separator())
     
     components.append(create_text_display(
-        ''.join([*produce_equipped_item_description('Weapon', stats_calculated.item_weapon, None, 'Bare hands')])
+        ''.join([*produce_equipped_item_description('Weapon', user_stats_calculated.item_weapon, None, 'Bare hands')])
     ))
     
     return components

@@ -1,6 +1,6 @@
 __all__ = ('command_user_allocations',)
 
-from ..user_balance import get_user_balance
+from ..user_balance import user_balance_get, user_balance_iter_allocations
 
 from .component_building import build_view_components
 from .constants import PAGE_SIZE
@@ -27,8 +27,8 @@ async def command_user_allocations(
         interaction_event,
     )
     
-    user_balance = await get_user_balance(interaction_event.user_id)
-    allocations = [*user_balance.iter_allocations()]
+    user_balance = await user_balance_get(interaction_event.user_id)
+    allocations = [*user_balance_iter_allocations(user_balance)]
     page_count = (len(allocations) + PAGE_SIZE - 1) // PAGE_SIZE
     allocations_page = allocations[0 : PAGE_SIZE]
     

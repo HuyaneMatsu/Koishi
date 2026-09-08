@@ -7,7 +7,7 @@ from ...bot_utils.constants import EMOJI__HEART_CURRENCY, GUILD__SUPPORT
 from ...bot_utils.utils import send_embed_to
 from ...bots import FEATURE_CLIENTS
 
-from ..user_balance import get_user_balance, save_user_balance
+from ..user_balance import user_balance_get, user_balance_save, user_balance_modify_balance_by
 from ..user_settings import get_one_user_settings, get_preferred_client_for_user
 
 from .embed_builders import build_notification_embed, build_success_embed
@@ -67,10 +67,10 @@ async def award(
         False,
     )
     
-    user_balance = await get_user_balance(target_user.id)
+    user_balance = await user_balance_get(target_user.id)
     balance = user_balance.balance
-    user_balance.modify_balance_by(amount)
-    await save_user_balance(user_balance)
+    user_balance_modify_balance_by(user_balance, amount)
+    await user_balance_save(user_balance)
     
     await client.interaction_response_message_edit(
         interaction_event,

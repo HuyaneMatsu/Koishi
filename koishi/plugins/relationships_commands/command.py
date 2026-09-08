@@ -19,7 +19,9 @@ from ..relationships_core import (
     save_relationship_request
 )
 from ..user_balance import (
-    ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST, get_user_balance, get_user_balances, save_user_balance
+    ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST, user_balance_get, user_balance_get_many, user_balance_save,
+    user_balance_accumulate_allocated_balance, user_balance_add_allocation,
+    user_balance_modify_balance_by
 )
 from ..user_settings import (
     USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_PROPOSAL, get_one_user_settings, get_preferred_client_for_user
@@ -103,7 +105,7 @@ async def info(
     await client.interaction_application_command_acknowledge(interaction_event, False)
     
     # Query
-    target_user_balance = await get_user_balance(target_user.id)
+    target_user_balance = await user_balance_get(target_user.id)
     target_relationship_extension_traces = await get_relationship_extension_traces(target_user.id)
     target_relationship_request_listing = await get_relationship_request_listing(target_user.id, True)
     
@@ -161,7 +163,7 @@ async def break_up(
         )
         if relationship_and_target_user is None:
             error_components = [
-                create_text_display('Cound not match anyone.')
+                create_text_display('Could not match anyone.')
             ]
             break
         
@@ -350,7 +352,7 @@ async def proposal_create(
             break
         
         # Query required data
-        user_balances = await get_user_balances((source_user.id, target_user.id),)
+        user_balances = await user_balance_get_many((source_user.id, target_user.id),)
         source_user_balance = user_balances[source_user.id]
         target_user_balance = user_balances[target_user.id]
         
@@ -397,7 +399,7 @@ async def proposal_create(
             break
         
         error_components = check_insufficient_available_balance(
-            source_user_balance.balance - source_user_balance.get_cumulative_allocated_balance(), investment
+            source_user_balance.balance - user_balance_accumulate_allocated_balance(source_user_balance), investment
         )
         if (error_components is not None):
             break
@@ -449,8 +451,8 @@ async def proposal_create(
         
         # Everything is good
         if target_user.bot:
-            target_user_balance.modify_balance_by(investment >> 1)
-            await save_user_balance(target_user_balance)
+            user_balance_modify_balance_by(target_user_balance, investment >> 1)
+            await user_balance_save(target_user_balance)
             
             if current_relationship is None:
                 current_relationship = Relationship(
@@ -473,17 +475,21 @@ async def proposal_create(
             
             await save_relationship(current_relationship)
             
-            source_user_balance.modify_balance_by(-investment)
-            await save_user_balance(source_user_balance)
+            user_balance_modify_balance_by(source_user_balance, -investment)
+            await user_balance_save(source_user_balance)
         
         else:
             relationship_request = RelationshipRequest(source_user.id, target_user.id, relationship_type, investment)
             await save_relationship_request(relationship_request)
             
-            source_user_balance.add_allocation(
-                ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST, relationship_request.entry_id, investment, None
+            user_balance_add_allocation(
+                source_user_balance,
+                ALLOCATION_FEATURE_ID_RELATIONSHIP_REQUEST,
+                relationship_request.entry_id,
+                investment,
+                None,
             )
-            await save_user_balance(source_user_balance)
+            await user_balance_save(source_user_balance)
         
         await client.interaction_response_message_edit(interaction_event, '-# _ _ ')
         await client.interaction_response_message_delete(interaction_event)

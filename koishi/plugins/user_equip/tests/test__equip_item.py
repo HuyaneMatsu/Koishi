@@ -4,7 +4,7 @@ from ....bot_utils.models import DB_ENGINE
 
 from ...inventory_core import Inventory
 from ...item_core import ITEM_FLAG_WEAPON, ITEM_ID_FISHING_ROD, ITEM_ID_PEACH, get_item
-from ...user_stats_core import UserStats
+from ...user_stats_core import user_stats_create, user_stats_set_item_id_weapon
 
 from ..actions import equip_item
 
@@ -90,8 +90,8 @@ async def test__equip_item(user_id, item_ids, equipped_item_id, item_flag, value
     item_ids__and_equipped_item_and_output : `(set<int>, int, (None | Item, None | Item)>)`
     """
     inventory = Inventory(user_id)
-    user_stats = UserStats(user_id)
-    user_stats.set_item_id_weapon(equipped_item_id)
+    user_stats = user_stats_create(user_id)
+    user_stats_set_item_id_weapon(user_stats, equipped_item_id)
     
     if (item_ids is not None):
         for item_id in item_ids:
@@ -103,7 +103,7 @@ async def test__equip_item(user_id, item_ids, equipped_item_id, item_flag, value
         vampytest.assert_eq(input_user_id, user_id)
         return inventory
     
-    async def mock_get_user_stats(input_user_id):
+    async def mock_user_stats_get(input_user_id):
         nonlocal user_stats
         nonlocal user_id
         vampytest.assert_eq(input_user_id, user_id)
@@ -112,7 +112,7 @@ async def test__equip_item(user_id, item_ids, equipped_item_id, item_flag, value
     mocked = vampytest.mock_globals(
         equip_item,
         get_inventory = mock_get_inventory,
-        get_user_stats = mock_get_user_stats,
+        user_stats_get = mock_user_stats_get,
     )
     
     output = await mocked(user_id, item_flag, value)

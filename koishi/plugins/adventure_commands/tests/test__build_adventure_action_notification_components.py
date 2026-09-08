@@ -1,11 +1,11 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
-
 from hata import Component, create_button, create_row, create_separator, create_text_display
 
-from ...adventure_core import ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, AdventureAction, LOOT_STATE_SUCCESS, build_loot_data, \
-    Adventure, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, LOCATIONS, TARGETS
+from ...adventure_core import (
+    ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, LOCATIONS, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
+    LOOT_STATE_SUCCESS, TARGETS, TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, adventure_action_create,
+    adventure_create, loot_data_build
+)
 from ...item_core import ITEM_ID_SCARLET_ONION, get_item_nullable
 
 from ..component_building import build_adventure_action_notification_components
@@ -17,9 +17,17 @@ def _iter_options():
     
     adventure_entry_id = 9998
     user_id = 202608190002
-    adventure_action_entry_id = 8889
     
-    adventure = Adventure(
+    adventure_action = adventure_action_create(
+        ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
+        1463184000,
+        None,
+        None,
+        0,
+        0,
+    )
+    
+    adventure = adventure_create(
         user_id,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
@@ -30,17 +38,7 @@ def _iter_options():
         0,
     )
     adventure.entry_id = adventure_entry_id
-    
-    adventure_action = AdventureAction(
-        adventure_entry_id,
-        ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
-        DateTime(2016, 5, 14, tzinfo = TimeZone.utc),
-        None,
-        None,
-        0,
-        0,
-    )
-    adventure_action.entry_id = adventure_action_entry_id
+    adventure.action_listing = [adventure_action]
     
     yield (
         adventure,
@@ -61,7 +59,7 @@ def _iter_options():
                     'View battle logs',
                     enabled = False,
                     custom_id = (
-                        f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{adventure_action_entry_id:x}'
+                        f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{0:x}'
                     ),
                 ),
                 create_button(
@@ -71,13 +69,23 @@ def _iter_options():
             ),
         ],
     )
-
+    
+    
     adventure_entry_id = 9999
     user_id = 202608190003
-    adventure_action_entry_id = 8881
     
+    adventure_action = adventure_action_create(
+        ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
+        1463184000,
+        None,
+        loot_data_build([
+            (LOOT_STATE_SUCCESS, ITEM_ID_SCARLET_ONION, 5),
+        ]),
+        5,
+        10,
+    )
     
-    adventure = Adventure(
+    adventure = adventure_create(
         user_id,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
@@ -88,19 +96,7 @@ def _iter_options():
         0,
     )
     adventure.entry_id = adventure_entry_id
-    
-    adventure_action = AdventureAction(
-        adventure_entry_id,
-        ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
-        DateTime(2016, 5, 14, tzinfo = TimeZone.utc),
-        None,
-        build_loot_data([
-            (LOOT_STATE_SUCCESS, ITEM_ID_SCARLET_ONION, 5),
-        ]),
-        5,
-        10,
-    )
-    adventure_action.entry_id = adventure_action_entry_id
+    adventure.action_listing = [adventure_action]
     
     yield (
         adventure,
@@ -126,7 +122,7 @@ def _iter_options():
                     'View battle logs',
                     enabled = False,
                     custom_id = (
-                        f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{adventure_action_entry_id:x}'
+                        f'adventure.action.battle.{user_id:x}.{adventure_entry_id:x}.{0:x}'
                     ),
                 ),
                 create_button(

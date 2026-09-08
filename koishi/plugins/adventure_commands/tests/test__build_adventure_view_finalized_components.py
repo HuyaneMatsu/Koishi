@@ -1,12 +1,11 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 from hata import Component, create_button, create_row, create_separator, create_text_display
 
 from ...adventure_core import (
-    ACTION_ID_SYSTEM_CANCELLATION_NOW, ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, ADVENTURE_STATE_FINALIZED,
-    Adventure, AdventureAction, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS, LOOT_STATE_SUCCESS,
-    TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS, build_loot_data
+    ACTION_ID_SYSTEM_CANCELLATION_NOW, ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
+    ADVENTURE_STATE_FINALIZED, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS, LOOT_STATE_SUCCESS,
+    TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS, adventure_action_create, adventure_create,
+    loot_data_build
 )
 from ...item_core import ITEM_ID_PEACH, get_item_nullable
 
@@ -16,13 +15,31 @@ from ..component_building import build_adventure_view_finalized_components
 def _iter_options():
     adventure_entry_id = 9999
     user_id = 202508040006
-    adventure_action_entry_id_0 = 8888
-    adventure_action_entry_id_1 = 8887
     
     item_peach = get_item_nullable(ITEM_ID_PEACH)
     assert item_peach is not None
     
-    adventure = Adventure(
+    adventure_action_0 = adventure_action_create(
+        ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
+        1463184000,
+        None,
+        loot_data_build([
+            (LOOT_STATE_SUCCESS, ITEM_ID_PEACH, 5),
+        ]),
+        0,
+        10,
+    )
+    
+    adventure_action_1 = adventure_action_create(
+        ACTION_ID_SYSTEM_CANCELLATION_NOW,
+        1463270400,
+        None,
+        None,
+        0,
+        0,
+    )
+    
+    adventure = adventure_create(
         user_id,
         LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
@@ -33,42 +50,14 @@ def _iter_options():
         100,
     )
     adventure.energy_exhausted = 10
-    adventure.created_at = DateTime(2016, 5, 13, tzinfo = TimeZone.utc)
-    adventure.updated_at = DateTime(2016, 5, 16, tzinfo = TimeZone.utc)
+    adventure.created_at = 1463097600
+    adventure.updated_at = 1463356800
     adventure.state = ADVENTURE_STATE_FINALIZED
-    adventure.action_count = 2
+    adventure.action_listing = [adventure_action_0, adventure_action_1]
     adventure.entry_id = adventure_entry_id
-    
-    adventure_action_0 = AdventureAction(
-        adventure_entry_id,
-        ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
-        DateTime(2016, 5, 14, tzinfo = TimeZone.utc),
-        None,
-        build_loot_data([
-            (LOOT_STATE_SUCCESS, ITEM_ID_PEACH, 5),
-        ]),
-        0,
-        10,
-    )
-    adventure_action_0.entry_id = adventure_action_entry_id_0
-    
-    adventure_action_1 = AdventureAction(
-        adventure_entry_id,
-        ACTION_ID_SYSTEM_CANCELLATION_NOW,
-        DateTime(2016, 5, 15, tzinfo = TimeZone.utc),
-        None,
-        None,
-        0,
-        0,
-    )
-    adventure_action_1.entry_id = adventure_action_entry_id_1
     
     yield (
         adventure,
-        [
-            adventure_action_0,
-            adventure_action_1,
-        ],
         True,
         4,
         [
@@ -119,7 +108,6 @@ def _iter_options():
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__build_adventure_view_finalized_components(
     adventure,
-    adventure_action_listing,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
 ):
@@ -130,9 +118,6 @@ def test__build_adventure_view_finalized_components(
     ----------
     adventure : ``Adventure``
         The parent adventure.
-    
-    adventure_action_listing : ``None | list<AdventureActions>``
-        The adventure's actions.
     
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
@@ -146,7 +131,6 @@ def test__build_adventure_view_finalized_components(
     """
     output = build_adventure_view_finalized_components(
         adventure,
-        adventure_action_listing,
         allow_switching_to_adventure_listing_view,
         adventure_listing_page_index,
     )

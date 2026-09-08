@@ -2,7 +2,10 @@ __all__ = ()
 
 from math import floor
 
-from ..user_balance import ALLOCATION_FEATURE_ID_GAME_21, get_user_balance, save_user_balance
+from ..user_balance import (
+    ALLOCATION_FEATURE_ID_GAME_21, user_balance_get, user_balance_save, user_balance_remove_allocation,
+    user_balance_modify_balance_by
+)
 
 
 async def modify_user_hearts(user_id, amount, multiplier, session_id):
@@ -25,15 +28,15 @@ async def modify_user_hearts(user_id, amount, multiplier, session_id):
     session_id : `int`
         The session's identifier to unallocate.
     """
-    user_balance = await get_user_balance(user_id)
+    user_balance = await user_balance_get(user_id)
     
     if multiplier:
-        user_balance.modify_balance_by(floor(amount * multiplier))
+        user_balance_modify_balance_by(user_balance, floor(amount * multiplier))
     
     if session_id:
-        user_balance.remove_allocation(ALLOCATION_FEATURE_ID_GAME_21, session_id)
+        user_balance_remove_allocation(user_balance, ALLOCATION_FEATURE_ID_GAME_21, session_id)
     
-    await save_user_balance(user_balance)
+    await user_balance_save(user_balance)
 
 
 async def batch_modify_user_hearts(items, session_id):

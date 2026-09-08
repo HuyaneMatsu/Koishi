@@ -1,4 +1,4 @@
-__all__ = ('build_loot_data', 'iter_loot_data')
+__all__ = ('loot_data_build', 'loot_data_iter')
 
 from struct import Struct
 
@@ -7,7 +7,7 @@ LOOT_STRUCT = Struct('<BIQ')
 LOOT_STRUCT_SIZE = LOOT_STRUCT.size
 
 
-def build_loot_data(looted_items):
+def loot_data_build(looted_items):
     """
     Packs loot into a binary string.
     
@@ -24,7 +24,7 @@ def build_loot_data(looted_items):
         return b''.join([LOOT_STRUCT.pack(*looted_item) for looted_item in looted_items])
 
 
-def iter_loot_data(loot_data):
+def loot_data_iter(loot_data):
     """
     Iterates over the given loot data.
     

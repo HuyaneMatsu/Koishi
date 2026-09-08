@@ -2,9 +2,9 @@ import vampytest
 
 from ....inventory_core import Inventory
 from ....item_core import ITEM_ID_PEACH, ITEM_ID_STRAWBERRY
-from ....user_stats_core import UserStats
+from ....user_stats_core import user_stats_create
 
-from ...adventure import Adventure, LOOT_STATE_SUCCESS
+from ...adventure import LOOT_STATE_SUCCESS, adventure_create
 
 from ..helpers import accumulate_looted_items
 from ..loot_accumulation import LootAccumulation
@@ -13,7 +13,7 @@ from ..loot_accumulation import LootAccumulation
 def _iter_options():
     user_id_0 = 202507310000
     
-    adventure_0 = Adventure(
+    adventure_0 = adventure_create(
         user_id_0,
         9999,
         0,
@@ -24,7 +24,7 @@ def _iter_options():
         100,
     )
     
-    user_stats_0 = UserStats(
+    user_stats_0 = user_stats_create(
         user_id_0,
     )
     user_stats_0.stat_housewife = 10

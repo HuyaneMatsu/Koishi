@@ -4,11 +4,26 @@ import vampytest
 from hata import DATETIME_FORMAT_CODE
 
 from ..allocation_feature_ids import ALLOCATION_FEATURE_ID_MARKET_PLACE
-from ..constants import USER_BALANCE_CACHE
-from ..user_balance import UserBalance
+from ..user_balance import (
+    USER_BALANCE_MODIFICATION_FLAG_ALLOCATIONS, USER_BALANCE_MODIFICATION_FLAG_BALANCE,
+    USER_BALANCE_MODIFICATION_FLAG_COUNT_DAILY_BY_RELATED, USER_BALANCE_MODIFICATION_FLAG_COUNT_DAILY_FOR_RELATED,
+    USER_BALANCE_MODIFICATION_FLAG_COUNT_DAILY_SELF, USER_BALANCE_MODIFICATION_FLAG_COUNT_TOP_GG_VOTE,
+    USER_BALANCE_MODIFICATION_FLAG_DAILY_CAN_CLAIM_AT, USER_BALANCE_MODIFICATION_FLAG_DAILY_REMINDED,
+    USER_BALANCE_MODIFICATION_FLAG_RELATIONSHIP_DIVORCES, USER_BALANCE_MODIFICATION_FLAG_RELATIONSHIP_SLOTS,
+    USER_BALANCE_MODIFICATION_FLAG_RELATIONSHIP_VALUE, USER_BALANCE_MODIFICATION_FLAG_STREAK,
+    USER_BALANCE_MODIFICATION_FLAG_TOP_GG_VOTED_AT, UserBalance, user_balance_accumulate_allocated_balance,
+    user_balance_add_allocation, user_balance_collect_modifications, user_balance_create,
+    user_balance_create_from_entry, user_balance_decrement_relationship_divorces,
+    user_balance_increment_count_daily_by_related, user_balance_increment_count_daily_for_related,
+    user_balance_increment_count_daily_self, user_balance_increment_count_top_gg_vote,
+    user_balance_increment_relationship_divorces, user_balance_increment_relationship_slots,
+    user_balance_iter_allocations, user_balance_modify_balance_by, user_balance_modify_relationship_value_by,
+    user_balance_remove_allocation, user_balance_set_daily_can_claim_at, user_balance_set_daily_reminded,
+    user_balance_set_relationship_value, user_balance_set_streak, user_balance_set_top_gg_voted_at
+)
 
 
-def _assert_fields_set(user_balance):
+def assert_user_balance_fields_set(user_balance):
     """
     Asserts whether every fields are set of the user balance.
     
@@ -26,6 +41,7 @@ def _assert_fields_set(user_balance):
     vampytest.assert_instance(user_balance.daily_can_claim_at, DateTime)
     vampytest.assert_instance(user_balance.daily_reminded, bool)
     vampytest.assert_instance(user_balance.entry_id, int)
+    vampytest.assert_instance(user_balance.modification_flags, int)
     vampytest.assert_instance(user_balance.relationship_value, int)
     vampytest.assert_instance(user_balance.relationship_divorces, int)
     vampytest.assert_instance(user_balance.relationship_slots, int)
@@ -34,28 +50,9 @@ def _assert_fields_set(user_balance):
     vampytest.assert_instance(user_balance.user_id, int)
 
 
-def test__UserBalance__new():
-    """
-    Tests whether ``UserBalance.__new__`` works as intended.
-    """
-    user_id = 202412070000
-    
-    try:
-        user_balance = UserBalance(user_id)
-        _assert_fields_set(user_balance)
-        
-        vampytest.assert_eq(user_balance.user_id, user_id)
-        
-        # Should not auto store in cache
-        vampytest.assert_is(USER_BALANCE_CACHE.get(user_balance.entry_id, None), None)
-        
-    finally:
-        USER_BALANCE_CACHE.clear()
-
-
 def test__UserBalance__repr():
     """
-    Tests whether ``user_balance.__repr__`` works as intended.
+    Tests whether ``UserBalance.__repr__`` works as intended.
     """
     allocations = b'\x00' * 18
     balance = 8
@@ -73,75 +70,61 @@ def test__UserBalance__repr():
     relationship_divorces = 15
     relationship_slots = 16
     
-    try:
-        
-        user_balance = UserBalance(user_id)
-        user_balance.allocations = allocations
-        user_balance.balance = balance
-        user_balance.count_daily_by_related = count_daily_by_related
-        user_balance.count_daily_for_related = count_daily_for_related
-        user_balance.count_daily_self = count_daily_self
-        user_balance.count_top_gg_vote = count_top_gg_vote
-        user_balance.daily_can_claim_at = daily_can_claim_at
-        user_balance.daily_reminded = daily_reminded
-        user_balance.streak = streak
-        user_balance.entry_id = entry_id
-        user_balance.top_gg_voted_at = top_gg_voted_at
-        user_balance.relationship_value = relationship_value
-        user_balance.relationship_divorces = relationship_divorces
-        user_balance.relationship_slots = relationship_slots
-        
-        user_balance.entry_id = entry_id
-        
-        output = repr(user_balance)
-        
-        vampytest.assert_instance(output, str)
-        
-        vampytest.assert_in(UserBalance.__name__, output)
-        vampytest.assert_in(f'allocations = {allocations!r}', output)
-        vampytest.assert_in(f'balance = {balance!r}', output)
-        vampytest.assert_in(f'count_daily_by_related = {count_daily_by_related!r}', output)
-        vampytest.assert_in(f'count_daily_for_related = {count_daily_for_related!r}', output)
-        vampytest.assert_in(f'count_daily_self = {count_daily_self!r}', output)
-        vampytest.assert_in(f'count_top_gg_vote = {count_top_gg_vote!r}', output)
-        vampytest.assert_in(f'daily_can_claim_at = {daily_can_claim_at:{DATETIME_FORMAT_CODE}}', output)
-        vampytest.assert_in(f'daily_reminded = {daily_reminded!r}', output)
-        vampytest.assert_in(f'streak = {streak!r}', output)
-        vampytest.assert_in(f'entry_id = {entry_id!r}', output)
-        vampytest.assert_in(f'user_id = {user_id!r}', output)
-        vampytest.assert_in(f'top_gg_voted_at = {top_gg_voted_at:{DATETIME_FORMAT_CODE}}', output)
-        vampytest.assert_in(f'relationship_value = {relationship_value!r}', output)
-        vampytest.assert_in(f'relationship_divorces = {relationship_divorces!r}', output)
-        vampytest.assert_in(f'relationship_slots = {relationship_slots!r}', output)
-        
-    finally:
-        USER_BALANCE_CACHE.clear()
-
-
-def test__UserBalance__bool():
-    """
-    Tests whether ``UserBalance.__bool__`` works as intended.
+    user_balance = user_balance_create(user_id)
+    user_balance.allocations = allocations
+    user_balance.balance = balance
+    user_balance.count_daily_by_related = count_daily_by_related
+    user_balance.count_daily_for_related = count_daily_for_related
+    user_balance.count_daily_self = count_daily_self
+    user_balance.count_top_gg_vote = count_top_gg_vote
+    user_balance.daily_can_claim_at = daily_can_claim_at
+    user_balance.daily_reminded = daily_reminded
+    user_balance.streak = streak
+    user_balance.entry_id = entry_id
+    user_balance.top_gg_voted_at = top_gg_voted_at
+    user_balance.relationship_value = relationship_value
+    user_balance.relationship_divorces = relationship_divorces
+    user_balance.relationship_slots = relationship_slots
     
-    Returns
-    -------
-    output : `bool`
-    """
-    user_id = 202412070004
+    user_balance.entry_id = entry_id
     
-    try:
-        user_balance = UserBalance(user_id)
-        
-        output = bool(user_balance)
-        vampytest.assert_instance(output, bool)
-        vampytest.assert_eq(output, True)
+    output = repr(user_balance)
     
-    finally:
-        USER_BALANCE_CACHE.clear()
+    vampytest.assert_instance(output, str)
+    
+    vampytest.assert_in(UserBalance.__name__, output)
+    vampytest.assert_in(f'allocations = {allocations!r}', output)
+    vampytest.assert_in(f'balance = {balance!r}', output)
+    vampytest.assert_in(f'count_daily_by_related = {count_daily_by_related!r}', output)
+    vampytest.assert_in(f'count_daily_for_related = {count_daily_for_related!r}', output)
+    vampytest.assert_in(f'count_daily_self = {count_daily_self!r}', output)
+    vampytest.assert_in(f'count_top_gg_vote = {count_top_gg_vote!r}', output)
+    vampytest.assert_in(f'daily_can_claim_at = {daily_can_claim_at:{DATETIME_FORMAT_CODE}}', output)
+    vampytest.assert_in(f'daily_reminded = {daily_reminded!r}', output)
+    vampytest.assert_in(f'streak = {streak!r}', output)
+    vampytest.assert_in(f'entry_id = {entry_id!r}', output)
+    vampytest.assert_in(f'user_id = {user_id!r}', output)
+    vampytest.assert_in(f'top_gg_voted_at = {top_gg_voted_at:{DATETIME_FORMAT_CODE}}', output)
+    vampytest.assert_in(f'relationship_value = {relationship_value!r}', output)
+    vampytest.assert_in(f'relationship_divorces = {relationship_divorces!r}', output)
+    vampytest.assert_in(f'relationship_slots = {relationship_slots!r}', output)
 
 
-def test__UserBalance__from_entry():
+def test__user_balance_create():
     """
-    Tests whether ``UserBalance.from_entry`` works as intended.
+    Tests whether ``user_balance_create`` works as intended.
+    """
+    user_id = 202412070000
+    
+    user_balance = user_balance_create(user_id)
+    assert_user_balance_fields_set(user_balance)
+    
+    vampytest.assert_eq(user_balance.user_id, user_id)
+
+
+def test__user_balance_create_from_entry():
+    """
+    Tests whether ``user_balance_create_from_entry`` works as intended.
     """
     allocations = b'\x00' * 18
     balance = 21
@@ -177,11 +160,8 @@ def test__UserBalance__from_entry():
         'relationship_slots': relationship_slots,
     }
     
-    user_balance = UserBalance.from_entry(entry)
-    _assert_fields_set(user_balance)
-    
-    # Should not auto store in cache
-    vampytest.assert_is(USER_BALANCE_CACHE.get(user_id, None), None)
+    user_balance = user_balance_create_from_entry(entry)
+    assert_user_balance_fields_set(user_balance)
     
     vampytest.assert_eq(user_balance.allocations, allocations)
     vampytest.assert_eq(user_balance.balance, balance)
@@ -200,9 +180,10 @@ def test__UserBalance__from_entry():
     vampytest.assert_eq(user_balance.relationship_slots, relationship_slots)
 
 
-def test__UserBalance__add_allocation__new():
+
+def test__user_balance_add_allocation__new():
     """
-    Tests whether ``UserBalance.add_allocation`` works as intended.
+    Tests whether ``user_balance_add_allocation`` works as intended.
     
     Case: new.
     """
@@ -213,25 +194,20 @@ def test__UserBalance__add_allocation__new():
         None,
     )
     
-    user_balance = UserBalance(202511200000)
-    user_balance.add_allocation(*allocation_0)
+    user_balance = user_balance_create(202511200000)
+    user_balance_add_allocation(user_balance, *allocation_0)
     vampytest.assert_eq(
-        [*user_balance.iter_allocations()],
+        [*user_balance_iter_allocations(user_balance)],
         [
             allocation_0,
         ],
     )
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'allocations': user_balance.allocations,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_ALLOCATIONS)
 
 
-def test__UserBalance__add_allocation__existing():
+def test__user_balance_add_allocation__existing():
     """
-    Tests whether ``UserBalance.add_allocation`` works as intended.
+    Tests whether ``user_balance_add_allocation`` works as intended.
     
     Case: existing.
     """
@@ -249,39 +225,34 @@ def test__UserBalance__add_allocation__existing():
         b'ayayayay',
     )
     
-    user_balance = UserBalance(202511200001)
-    user_balance.add_allocation(*allocation_0)
-    user_balance.add_allocation(*allocation_1)
+    user_balance = user_balance_create(202511200001)
+    user_balance_add_allocation(user_balance, *allocation_0)
+    user_balance_add_allocation(user_balance, *allocation_1)
     vampytest.assert_eq(
-        [*user_balance.iter_allocations()],
+        [*user_balance_iter_allocations(user_balance)],
         [
             allocation_0,
             allocation_1,
         ],
     )
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'allocations': user_balance.allocations,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_ALLOCATIONS)
 
 
-def test__UserBalance__get_cumulative_allocated_balance__empty():
+def test__user_balance_accumulate_allocated_balance__empty():
     """
-    Tests whether ``UserBalance.get_cumulative_allocated_balance`` works as intended.
+    Tests whether ``user_balance_accumulate_allocated_balance`` works as intended.
     
     Case: empty.
     """
-    user_balance = UserBalance(202511200002)
+    user_balance = user_balance_create(202511200002)
     
-    output = user_balance.get_cumulative_allocated_balance()
+    output = user_balance_accumulate_allocated_balance(user_balance)
     vampytest.assert_eq(output, 0)
 
 
-def test__UserBalance__get_cumulative_allocated_balance__filled():
+def test__user_balance_accumulate_allocated_balance__filled():
     """
-    Tests whether ``UserBalance.get_cumulative_allocated_balance`` works as intended.
+    Tests whether ``user_balance_accumulate_allocated_balance`` works as intended.
     
     Case: filled.
     """
@@ -299,16 +270,16 @@ def test__UserBalance__get_cumulative_allocated_balance__filled():
         None,
     )
     
-    user_balance = UserBalance(202511200003)
-    user_balance.add_allocation(*allocation_0)
-    user_balance.add_allocation(*allocation_1)
-    output = user_balance.get_cumulative_allocated_balance()
+    user_balance = user_balance_create(202511200003)
+    user_balance_add_allocation(user_balance, *allocation_0)
+    user_balance_add_allocation(user_balance, *allocation_1)
+    output = user_balance_accumulate_allocated_balance(user_balance)
     vampytest.assert_eq(output, allocation_0[2] + allocation_1[2])
 
 
-def test__UserBalance__remove_allocation__none():
+def test__user_balance_remove_allocation__none():
     """
-    Tests whether ``UserBalance.remove_allocation`` works as intended.
+    Tests whether ``user_balance_remove_allocation`` works as intended.
     
     Case: none.
     """
@@ -319,21 +290,18 @@ def test__UserBalance__remove_allocation__none():
         None,
     )
     
-    user_balance = UserBalance(202511200004)
-    user_balance.remove_allocation(allocation_0[0], allocation_0[1])
+    user_balance = user_balance_create(202511200004)
+    user_balance_remove_allocation(user_balance, allocation_0[0], allocation_0[1])
     vampytest.assert_eq(
-        [*user_balance.iter_allocations()],
+        [*user_balance_iter_allocations(user_balance)],
         [],
     )
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        None,
-    )
+    vampytest.assert_eq(user_balance.modification_flags, 0)
 
 
-def test__UserBalance__remove_allocation__existing():
+def test__user_balance_remove_allocation_existing():
     """
-    Tests whether ``UserBalance.remove_allocation`` works as intended.
+    Tests whether ``user_balance_remove_allocation`` works as intended.
     
     Case: existing.
     """
@@ -358,309 +326,243 @@ def test__UserBalance__remove_allocation__existing():
         None,
     )
     
-    user_balance = UserBalance(202511200005)
-    user_balance.add_allocation(*allocation_0)
-    user_balance.add_allocation(*allocation_1)
-    user_balance.add_allocation(*allocation_2)
-    user_balance.remove_allocation(allocation_1[0], allocation_1[1])
+    user_balance = user_balance_create(202511200005)
+    user_balance_add_allocation(user_balance, *allocation_0)
+    user_balance_add_allocation(user_balance, *allocation_1)
+    user_balance_add_allocation(user_balance, *allocation_2)
+    user_balance_remove_allocation(user_balance, allocation_1[0], allocation_1[1])
     vampytest.assert_eq(
-        [*user_balance.iter_allocations()],
+        [*user_balance_iter_allocations(user_balance)],
         [
             allocation_0,
             allocation_2,
         ],
     )
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'allocations': user_balance.allocations,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_ALLOCATIONS)
 
 
-def test__UserBalance__modify_balance_by():
+def test__user_balance_modify_balance_by():
     """
-    Tests whether ``UserBalance.modify_balance_by`` works as intended.
+    Tests whether ``user_balance_modify_balance_by`` works as intended.
     """
     current = 56
     amount = -2
     
-    user_balance = UserBalance(202511200006)
+    user_balance = user_balance_create(202511200006)
     user_balance.balance = current
-    user_balance.modify_balance_by(amount)
+    user_balance_modify_balance_by(user_balance, amount)
     
     vampytest.assert_eq(user_balance.balance, current + amount)
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'balance': user_balance.balance,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_BALANCE)
 
 
-def test__UserBalance__modify_relationship_value_by():
+def test__user_balance_modify_relationship_value_by():
     """
-    Tests whether ``UserBalance.modify_relationship_value_by`` works as intended.
+    Tests whether ``user_balance_modify_relationship_value_by`` works as intended.
     """
     current = 56
     amount = -2
     
-    user_balance = UserBalance(202511200007)
+    user_balance = user_balance_create(202511200007)
     user_balance.relationship_value = current
-    user_balance.modify_relationship_value_by(amount)
+    user_balance_modify_relationship_value_by(user_balance, amount)
     
     vampytest.assert_eq(user_balance.relationship_value, current + amount)
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'relationship_value': user_balance.relationship_value,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_RELATIONSHIP_VALUE)
 
 
-def test__UserBalance__set_relationship_value():
+
+def test__user_balance_set_relationship_value():
     """
-    Tests whether ``UserBalance.set_relationship_value`` works as intended.
+    Tests whether ``user_balance_set_relationship_value`` works as intended.
     """
     current = 56
     amount = 23
     
-    user_balance = UserBalance(202511200008)
+    user_balance = user_balance_create(202511200008)
     user_balance.relationship_value = current
-    user_balance.set_relationship_value(amount)
+    user_balance_set_relationship_value(user_balance, amount)
     
     vampytest.assert_eq(user_balance.relationship_value, amount)
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'relationship_value': user_balance.relationship_value,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_RELATIONSHIP_VALUE)
 
 
-def test__UserBalance__set_streak():
+def test__user_balance_set_streak():
     """
-    Tests whether ``UserBalance.set_streak`` works as intended.
+    Tests whether ``user_balance_set_streak`` works as intended.
     """
     current = 56
     amount = 23
     
-    user_balance = UserBalance(202511200009)
+    user_balance = user_balance_create(202511200009)
     user_balance.streak = current
-    user_balance.set_streak(amount)
+    user_balance_set_streak(user_balance, amount)
     
     vampytest.assert_eq(user_balance.streak, amount)
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'streak': user_balance.streak,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_STREAK)
 
 
-def test__UserBalance__set_daily_can_claim_at():
+def test__user_balance_set_daily_can_claim_at():
     """
-    Tests whether ``UserBalance.set_daily_can_claim_at`` works as intended.
+    Tests whether ``user_balance_set_daily_can_claim_at`` works as intended.
     """
     current = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
     amount = DateTime(2016, 5, 15, tzinfo = TimeZone.utc)
     
-    user_balance = UserBalance(202511200010)
+    user_balance = user_balance_create(202511200010)
     user_balance.daily_can_claim_at = current
-    user_balance.set_daily_can_claim_at(amount)
+    user_balance_set_daily_can_claim_at(user_balance, amount)
     
     vampytest.assert_eq(user_balance.daily_can_claim_at, amount)
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'daily_can_claim_at': user_balance.daily_can_claim_at,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_DAILY_CAN_CLAIM_AT)
 
 
-def test__UserBalance__set_top_gg_voted_at():
+def test__user_balance_set_top_gg_voted_at():
     """
-    Tests whether ``UserBalance.set_top_gg_voted_at`` works as intended.
+    Tests whether ``user_balance_set_top_gg_voted_at`` works as intended.
     """
     current = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
     amount = DateTime(2016, 5, 15, tzinfo = TimeZone.utc)
     
-    user_balance = UserBalance(202511200011)
+    user_balance = user_balance_create(202511200011)
     user_balance.top_gg_voted_at = current
-    user_balance.set_top_gg_voted_at(amount)
+    user_balance_set_top_gg_voted_at(user_balance, amount)
     
     vampytest.assert_eq(user_balance.top_gg_voted_at, amount)
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'top_gg_voted_at': user_balance.top_gg_voted_at,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_TOP_GG_VOTED_AT)
 
 
-def test__UserBalance__increment_count_daily_self():
+def test__user_balance_increment_count_daily_self():
     """
-    Tests whether ``UserBalance.increment_count_daily_self`` works as intended.
+    Tests whether ``user_balance_increment_count_daily_self`` works as intended.
     """
     current = 56
     
-    user_balance = UserBalance(202511200012)
+    user_balance = user_balance_create(202511200012)
     user_balance.count_daily_self = current
-    user_balance.increment_count_daily_self()
+    user_balance_increment_count_daily_self(user_balance)
     
     vampytest.assert_eq(user_balance.count_daily_self, current + 1)
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'count_daily_self': user_balance.count_daily_self,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_COUNT_DAILY_SELF)
 
 
-def test__UserBalance__increment_count_daily_for_related():
+def test__user_balance_increment_count_daily_for_related():
     """
-    Tests whether ``UserBalance.increment_count_daily_for_related`` works as intended.
+    Tests whether ``user_balance_increment_count_daily_for_related`` works as intended.
     """
     current = 56
     
-    user_balance = UserBalance(202511200013)
+    user_balance = user_balance_create(202511200013)
     user_balance.count_daily_for_related = current
-    user_balance.increment_count_daily_for_related()
+    user_balance_increment_count_daily_for_related(user_balance)
     
     vampytest.assert_eq(user_balance.count_daily_for_related, current + 1)
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'count_daily_for_related': user_balance.count_daily_for_related,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_COUNT_DAILY_FOR_RELATED)
 
 
-def test__UserBalance__increment_count_daily_by_related():
+def test__user_balance_increment_count_daily_by_related():
     """
-    Tests whether ``UserBalance.increment_count_daily_by_related`` works as intended.
+    Tests whether ``user_balance_increment_count_daily_by_related`` works as intended.
     """
     current = 56
     
-    user_balance = UserBalance(202511200014)
+    user_balance = user_balance_create(202511200014)
     user_balance.count_daily_by_related = current
-    user_balance.increment_count_daily_by_related()
+    user_balance_increment_count_daily_by_related(user_balance)
     
     vampytest.assert_eq(user_balance.count_daily_by_related, current + 1)
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'count_daily_by_related': user_balance.count_daily_by_related,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_COUNT_DAILY_BY_RELATED)
 
 
-def test__UserBalance__increment_count_top_gg_vote():
+def test__user_balance_increment_count_top_gg_vote():
     """
-    Tests whether ``UserBalance.increment_count_top_gg_vote`` works as intended.
+    Tests whether ``user_balance_increment_count_top_gg_vote`` works as intended.
     """
     current = 56
     
-    user_balance = UserBalance(202511200015)
+    user_balance = user_balance_create(202511200015)
     user_balance.count_top_gg_vote = current
-    user_balance.increment_count_top_gg_vote()
+    user_balance_increment_count_top_gg_vote(user_balance)
     
     vampytest.assert_eq(user_balance.count_top_gg_vote, current + 1)
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'count_top_gg_vote': user_balance.count_top_gg_vote,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_COUNT_TOP_GG_VOTE)
 
 
-def test__UserBalance__increment_relationship_slots():
+def test__user_balance_increment_relationship_slots():
     """
-    Tests whether ``UserBalance.increment_relationship_slots`` works as intended.
+    Tests whether ``user_balance_increment_relationship_slots`` works as intended.
     """
     current = 56
     
-    user_balance = UserBalance(202511200016)
+    user_balance = user_balance_create(202511200016)
     user_balance.relationship_slots = current
-    user_balance.increment_relationship_slots()
+    user_balance_increment_relationship_slots(user_balance)
     
     vampytest.assert_eq(user_balance.relationship_slots, current + 1)
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'relationship_slots': user_balance.relationship_slots,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_RELATIONSHIP_SLOTS)
 
 
-def test__UserBalance__increment_relationship_divorces():
+def test__user_balance_increment_relationship_divorces():
     """
-    Tests whether ``UserBalance.increment_relationship_divorces`` works as intended.
+    Tests whether ``user_balance_increment_relationship_divorces`` works as intended.
     """
     current = 56
     
-    user_balance = UserBalance(202511200016)
+    user_balance = user_balance_create(202511200016)
     user_balance.relationship_divorces = current
-    user_balance.increment_relationship_divorces()
+    user_balance_increment_relationship_divorces(user_balance)
     
     vampytest.assert_eq(user_balance.relationship_divorces, current + 1)
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'relationship_divorces': user_balance.relationship_divorces,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_RELATIONSHIP_DIVORCES)
 
 
-def test__UserBalance__decrement_relationship_divorces():
+def test__user_balance_decrement_relationship_divorces():
     """
-    Tests whether ``UserBalance.decrement_relationship_divorces`` works as intended.
+    Tests whether ``user_balance_decrement_relationship_divorces`` works as intended.
     """
     current = 56
     
-    user_balance = UserBalance(202511200017)
+    user_balance = user_balance_create(202511200017)
     user_balance.relationship_divorces = current
-    user_balance.decrement_relationship_divorces()
+    user_balance_decrement_relationship_divorces(user_balance)
     
     vampytest.assert_eq(user_balance.relationship_divorces, current - 1)
-    
-    vampytest.assert_eq(
-        user_balance.modified_fields,
-        {
-            'relationship_divorces': user_balance.relationship_divorces,
-        },
-    )
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_RELATIONSHIP_DIVORCES)
 
 
-def test__UserBalance__set_daily_reminded():
+def test__user_balance_set_daily_reminded():
     """
-    Tests whether ``UserBalance.set_daily_reminded`` works as intended.
+    Tests whether ``user_balance_set_daily_reminded`` works as intended.
     """
     current = True
     value = False
     
-    user_balance = UserBalance(202511200018)
+    user_balance = user_balance_create(202511200018)
     user_balance.daily_reminded = current
-    user_balance.set_daily_reminded(value)
+    user_balance_set_daily_reminded(user_balance, value)
     
     vampytest.assert_eq(user_balance.daily_reminded, value)
+    vampytest.assert_true(user_balance.modification_flags & USER_BALANCE_MODIFICATION_FLAG_DAILY_REMINDED)
+
+
+def test__user_balance_collect_modifications():
+    """
+    Tests whether ``user_balance_collect_modifications`` works 
+    """
+    balance = 20
+    relationship_value = 30
     
+    user_balance = user_balance_create(202511200019)
+    
+    user_balance_modify_balance_by(user_balance, balance)
+    user_balance_modify_relationship_value_by(user_balance, relationship_value)
+    
+    output = user_balance_collect_modifications(user_balance)
     vampytest.assert_eq(
-        user_balance.modified_fields,
+        output,
         {
-            'daily_reminded': user_balance.daily_reminded,
+            'balance': balance,
+            'relationship_value': relationship_value,
         },
     )
+    vampytest.assert_eq(user_balance.modification_flags, 0)

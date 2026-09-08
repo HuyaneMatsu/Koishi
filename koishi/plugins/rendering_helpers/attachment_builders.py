@@ -155,7 +155,7 @@ def _get_uploadable_attachment_count(guild, attachments):
     uploadable_attachment_count : `int`
     """
     if guild is None:
-        upload_limit = 8 * (1 << 20)
+        upload_limit = 20 * (1 << 20)
     else:
         upload_limit = guild.attachment_size_limit
     

@@ -1,4 +1,4 @@
-__all__ = ('get_user_stats', 'save_user_stats')
+__all__ = ('user_stats_get', 'user_stats_save')
 
 from functools import partial as partial_func
 from itertools import count
@@ -10,7 +10,7 @@ from ...bot_utils.models import DB_ENGINE, USER_STATS_TABLE, user_stats_model
 from .constants import (
     USER_STATS, USER_STATS_CACHE, USER_STATS_CACHE_SIZE, USER_STATS_QUERY_TASKS, USER_STATS_SAVE_TASKS
 )
-from .user_stats import UserStats
+from .user_stats import UserStats, user_stats_collect_modifications, user_stats_create, user_stats_create_from_entry
 
 
 if (DB_ENGINE is None):
@@ -19,7 +19,7 @@ if (DB_ENGINE is None):
 EVENT_LOOP = get_event_loop()
 
 
-async def get_user_stats(user_id):
+async def user_stats_get(user_id):
     """
     Gets the stats for the given user.
     
@@ -52,7 +52,7 @@ async def get_user_stats(user_id):
         task, waiters = USER_STATS_QUERY_TASKS[user_id]
     except KeyError:
         waiters = []
-        task = Task(EVENT_LOOP, execute_get_user_stats(user_id))
+        task = Task(EVENT_LOOP, execute_user_stats_get(user_id))
         task.add_done_callback(partial_func(_user_stats_query_done_callback, user_id, waiters))
         USER_STATS_QUERY_TASKS[user_id] = (task, waiters)
     
@@ -96,7 +96,7 @@ def _user_stats_query_done_callback(key, waiters, task):
         del USER_STATS_QUERY_TASKS[key]
 
 
-async def execute_get_user_stats(user_id):
+async def execute_user_stats_get(user_id):
     """
     Queries a user stats.
     
@@ -111,16 +111,16 @@ async def execute_get_user_stats(user_id):
     -------
     user_stats : ``UserStats``
     """
-    result = await query_get_user_stats(user_id)
+    result = await query_user_stats_get(user_id)
     if result is None:
-        user_stats = UserStats(user_id)
+        user_stats = user_stats_create(user_id)
     else:
-        user_stats = UserStats.from_entry(result)
+        user_stats = user_stats_create_from_entry(result)
     
     return user_stats
 
 
-async def query_get_user_stats(user_id):
+async def query_user_stats_get(user_id):
     """
     Queries the stats for the given user.
     
@@ -146,12 +146,12 @@ async def query_get_user_stats(user_id):
 
 
 if DB_ENGINE is None:
-    @copy_docs(query_get_user_stats)
-    async def query_get_user_stats(user_id):
+    @copy_docs(query_user_stats_get)
+    async def query_user_stats_get(user_id):
         return None
 
 
-async def save_user_stats(user_stats):
+async def user_stats_save(user_stats):
     """
     Saves the user stats.
     
@@ -165,12 +165,12 @@ async def save_user_stats(user_stats):
     try:
         task = USER_STATS_SAVE_TASKS[user_stats.user_id]
     except KeyError:
-        USER_STATS_SAVE_TASKS[user_stats.user_id] = task = Task(EVENT_LOOP, query_save_user_stats_loop(user_stats))
+        USER_STATS_SAVE_TASKS[user_stats.user_id] = task = Task(EVENT_LOOP, query_user_stats_save_loop(user_stats))
     
     await shield(task, EVENT_LOOP)
 
 
-async def query_save_user_stats_loop(user_stats):
+async def query_user_stats_save_loop(user_stats):
     """
     Runs the entry proxy saver.
     
@@ -186,7 +186,7 @@ async def query_save_user_stats_loop(user_stats):
             entry_id = user_stats.entry_id
             # If the entry is new, insert it.
             if (entry_id == 0):
-                user_stats.modified_fields = None
+                user_stats.modification_flags = 0
                 response = await connector.execute(
                     USER_STATS_TABLE.insert().values(
                         user_id = user_stats.user_id,
@@ -213,18 +213,18 @@ async def query_save_user_stats_loop(user_stats):
                 result = await response.fetchone()
                 user_stats.entry_id = result[0]
             
-            modified_fields = user_stats.modified_fields
-            while (modified_fields is not None):
-                user_stats.modified_fields = None
+            while True:
+                modifications = user_stats_collect_modifications(user_stats)
+                if (modifications is None):
+                    break
                 
                 await connector.execute(
                     USER_STATS_TABLE.update(
                         user_stats_model.id == entry_id,
                     ).values(
-                        **modified_fields
+                        **modifications
                     )
                 )
-                modified_fields = user_stats.modified_fields
                 continue
         
     finally:
@@ -235,8 +235,8 @@ async def query_save_user_stats_loop(user_stats):
 
 
 if (DB_ENGINE is None):
-    @copy_docs(query_save_user_stats_loop)
-    async def query_save_user_stats_loop(user_stats):
-        user_stats.modified_fields = None
+    @copy_docs(query_user_stats_save_loop)
+    async def query_user_stats_save_loop(user_stats):
+        user_stats.modification_flags = 0
         if not user_stats.entry_id:
             user_stats.entry_id = next(COUNTER)

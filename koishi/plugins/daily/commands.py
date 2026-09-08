@@ -15,7 +15,12 @@ from ...bots import FEATURE_CLIENTS
 from ..relationships_core import (
     deepen_and_boost_relationship, get_extender_relationship_and_relationship_and_user_like_at
 )
-from ..user_balance import get_user_balance, get_user_balances
+from ..user_balance import (
+    user_balance_get, user_balance_get_many, user_balance_modify_balance_by, user_balance_set_streak,
+    user_balance_set_daily_can_claim_at, user_balance_increment_count_daily_self,
+    user_balance_increment_count_daily_for_related, user_balance_increment_count_daily_by_related,
+    user_balance_set_daily_reminded
+)
 from ..user_settings import (
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_DAILY_BY_WAIFU_DISABLE, USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_DAILY_BY_WAIFU,
     get_one_user_settings, get_preferred_client_for_user
@@ -131,7 +136,7 @@ async def claim_daily_for_yourself(client, interaction_event):
     """
     user = interaction_event.user
     
-    user_balance = await get_user_balance(user.id)
+    user_balance = await user_balance_get(user.id)
     daily_can_claim_at = user_balance.daily_can_claim_at
     
     now = DateTime.now(TimeZone.utc)
@@ -150,11 +155,11 @@ async def claim_daily_for_yourself(client, interaction_event):
     streak_new += 1
     balance_new = user_balance.balance + received
     
-    user_balance.modify_balance_by(received)
-    user_balance.set_streak(streak_new)
-    user_balance.set_daily_can_claim_at(now + DAILY_INTERVAL)
-    user_balance.increment_count_daily_self()
-    user_balance.set_daily_reminded(False)
+    user_balance_modify_balance_by(user_balance, received)
+    user_balance_set_streak(user_balance, streak_new)
+    user_balance_set_daily_can_claim_at(user_balance, now + DAILY_INTERVAL)
+    user_balance_increment_count_daily_self(user_balance)
+    user_balance_set_daily_reminded(user_balance, False)
     
     send_response_task = Task(
         KOKORO,
@@ -221,7 +226,7 @@ async def claim_daily_for_other(client, interaction_event, extender_relationship
     """
     source_user = interaction_event.user
     
-    user_balances = await get_user_balances((source_user.id, target_user.id),)
+    user_balances = await user_balance_get_many((source_user.id, target_user.id),)
     source_user_balance = user_balances[source_user.id]
     target_user_balance = user_balances[target_user.id]
 
@@ -249,13 +254,13 @@ async def claim_daily_for_other(client, interaction_event, extender_relationship
     streak_new += 1
     relationship_value_increase = 1 + floor(received * 0.01)
     
-    source_user_balance.increment_count_daily_for_related()
+    user_balance_increment_count_daily_for_related(source_user_balance)
     
-    target_user_balance.modify_balance_by(received)
-    target_user_balance.set_streak(streak_new)
-    target_user_balance.set_daily_can_claim_at(now + DAILY_INTERVAL)
-    target_user_balance.increment_count_daily_by_related()
-    target_user_balance.set_daily_reminded(False)
+    user_balance_modify_balance_by(target_user_balance, received)
+    user_balance_set_streak(target_user_balance, streak_new)
+    user_balance_set_daily_can_claim_at(target_user_balance, now + DAILY_INTERVAL)
+    user_balance_increment_count_daily_by_related(target_user_balance)
+    user_balance_set_daily_reminded(target_user_balance, False)
     
     
     send_response_task = Task(

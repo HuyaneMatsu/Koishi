@@ -8,7 +8,7 @@ def _iter_options():
     yield (
         None,
         (
-            Attachment.precreate(202503060000, size = 7 * (1 << 20)),
+            Attachment.precreate(202503060000, size = 19 * (1 << 20)),
         ),
         1,
     )
@@ -16,7 +16,7 @@ def _iter_options():
     yield (
         None,
         (
-            Attachment.precreate(202503060001, size = 8 * (1 << 20)),
+            Attachment.precreate(202503060001, size = 20 * (1 << 20)),
         ),
         0,
     )
@@ -24,9 +24,9 @@ def _iter_options():
     yield (
         None,
         (
-            Attachment.precreate(202503060002, size = 3 * (1 << 20)),
-            Attachment.precreate(202503060003, size = 3 * (1 << 20)),
-            Attachment.precreate(202503060004, size = 3 * (1 << 20)),
+            Attachment.precreate(202503060002, size = 9 * (1 << 20)),
+            Attachment.precreate(202503060003, size = 9 * (1 << 20)),
+            Attachment.precreate(202503060004, size = 9 * (1 << 20)),
         ),
         2,
     )
@@ -34,7 +34,7 @@ def _iter_options():
     yield (
         Guild.precreate(202503060005, boost_level = 0),
         (
-            Attachment.precreate(202503060006, size = 8 * (1 << 20)),
+            Attachment.precreate(202503060006, size = 20 * (1 << 20)),
         ),
         0,
     )
@@ -42,7 +42,7 @@ def _iter_options():
     yield (
         Guild.precreate(202503060007, boost_level = 1),
         (
-            Attachment.precreate(202503060008, size = 8 * (1 << 20)),
+            Attachment.precreate(202503060008, size = 20 * (1 << 20)),
         ),
         1,
     )

@@ -6,7 +6,10 @@ from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 from ...bot_utils.daily import calculate_daily_new
 from ...bots import FEATURE_CLIENTS
 
-from ..user_balance import get_user_balance, save_user_balance
+from ..user_balance import (
+    user_balance_get, user_balance_save, user_balance_modify_balance_by, user_balance_set_streak,
+    user_balance_set_daily_can_claim_at
+)
 
 from .component_building import build_event_active_components
 from .constants import EVENT_MODE_HEART, EVENT_MODE_STREAK, SESSIONS
@@ -122,24 +125,24 @@ async def handle_click(
     await step_session(session, interaction_event)
     
     # Reward the user.
-    user_balance = await get_user_balance(user_id)
+    user_balance = await user_balance_get(user_id)
     event_mode = session.event_mode
     
     if event_mode == EVENT_MODE_HEART:
-        user_balance.modify_balance_by(session.amount)
+        user_balance_modify_balance_by(user_balance, session.amount)
     
     elif event_mode == EVENT_MODE_STREAK:
         streak, daily_can_claim_at = calculate_daily_new(
             user_balance.streak, user_balance.daily_can_claim_at, DateTime.now(TimeZone.utc)
         )
-        user_balance.set_streak(streak + session.amount)
-        user_balance.set_daily_can_claim_at(daily_can_claim_at)
+        user_balance_set_streak(user_balance, streak + session.amount)
+        user_balance_set_daily_can_claim_at(user_balance, daily_can_claim_at)
     
     else:
         # no other cases.
         pass
     
-    await save_user_balance(user_balance)
+    await user_balance_save(user_balance)
     
     # Respond
     await client.interaction_followup_message_create(

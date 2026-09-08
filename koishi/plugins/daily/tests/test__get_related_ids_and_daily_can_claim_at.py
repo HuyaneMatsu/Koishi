@@ -7,7 +7,7 @@ from ...relationships_core import (
     RELATIONSHIP_TYPE_RELATIONSHIPS, RELATIONSHIP_TYPE_NONE, RELATIONSHIP_TYPE_SISTER_LIL, Relationship,
     RelationshipExtensionTrace
 )
-from ...user_balance import UserBalance
+from ...user_balance import user_balance_create, user_balance_set_daily_can_claim_at
 
 from ..related_completion import get_related_users_with_name_and_next_daily
 
@@ -29,11 +29,11 @@ def _iter_options():
     user_1 = User.precreate(user_id_1, name = 'koishi')
     user_2 = User.precreate(user_id_2, name = 'remilia')
     
-    user_balance_1 = UserBalance(user_id_1)
-    user_balance_1.set_daily_can_claim_at(related_daily_can_claim_at_1)
+    user_balance_1 = user_balance_create(user_id_1)
+    user_balance_set_daily_can_claim_at(user_balance_1, related_daily_can_claim_at_1)
     
-    user_balance_2 = UserBalance(user_id_2)
-    user_balance_2.set_daily_can_claim_at(related_daily_can_claim_at_2)
+    user_balance_2 = user_balance_create(user_id_2)
+    user_balance_set_daily_can_claim_at(user_balance_2, related_daily_can_claim_at_2)
     
     
     yield (
@@ -135,7 +135,7 @@ async def test__get_related_users_with_name_and_next_daily(relationships, user_b
         return relationship_extension_traces
     
     
-    async def mock_get_user_balances(input_user_ids):
+    async def mock_user_balance_get_many(input_user_ids):
         nonlocal user_balances
         
         vampytest.assert_eq({*input_user_ids}, {user_balance.user_id for user_balance in user_balances})
@@ -155,7 +155,7 @@ async def test__get_related_users_with_name_and_next_daily(relationships, user_b
     mocked = vampytest.mock_globals(
         get_related_users_with_name_and_next_daily,
         get_relationship_extension_traces = mock_get_relationship_extension_traces,
-        get_user_balances = mock_get_user_balances,
+        user_balance_get_many = mock_user_balance_get_many,
         get_users_unordered = mock_get_users_unordered,
     )
     

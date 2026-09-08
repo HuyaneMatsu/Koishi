@@ -4,8 +4,8 @@ from datetime import datetime as DateTime, timezone as TimeZone
 
 from ...bots import FEATURE_CLIENTS
 
-from ..adventure_core import get_active_adventure
-from ..guild_stats import get_guild_stats
+from ..adventure_core import adventure_get_active
+from ..guild_stats_core import guild_stats_generate_quest_batch, guild_stats_get, guild_stats_save
 from ..inventory_core import get_inventory, save_inventory
 from ..quest_core import (
     LINKED_QUEST_COMPLETION_STATE_ACTIVE, LINKED_QUEST_COMPLETION_STATE_COMPLETED, LinkedQuest, add_linked_quest,
@@ -13,8 +13,8 @@ from ..quest_core import (
     get_linked_quest_completion_ratio, get_linked_quest_listing, get_quest_template_nullable,
     get_user_adventurer_rank_info, instantiate_quest, reset_linked_quest, update_linked_quest
 )
-from ..user_balance import get_user_balance, save_user_balance
-from ..user_stats_core import get_user_stats, save_user_stats
+from ..user_balance import user_balance_get, user_balance_save
+from ..user_stats_core import user_stats_get, user_stats_modify_credibility_by, user_stats_save
 
 from .component_building import (
     build_linked_quest_abandon_confirmation_form, build_linked_quest_abandon_success_components,
@@ -134,8 +134,8 @@ async def quest_board_quest_details(client, interaction_event, user_id, guild_id
     )
     
     while True:
-        guild_stats = await get_guild_stats(guild_id)
-        quest_batch = guild_stats.get_quest_batch()
+        guild_stats = await guild_stats_get(guild_id)
+        quest_batch = guild_stats_generate_quest_batch(guild_stats)
         
         quest = get_quest_with_template_id(quest_batch, quest_template_id)
         
@@ -143,7 +143,7 @@ async def quest_board_quest_details(client, interaction_event, user_id, guild_id
             error_message = 'This quest is no longer available.'
             break
         
-        user_stats = await get_user_stats(user_id)
+        user_stats = await user_stats_get(user_id)
         
         # Check whether the user already has a quest like this. If yes then redirect them to it.
         linked_quest_listing = await get_linked_quest_listing(user_id)
@@ -215,8 +215,8 @@ async def quest_board_quest_listing_page_index_navigate(client, interaction_even
             error_message = 'Only guilds have quest board.'
             break
         
-        guild_stats = await get_guild_stats(guild.id)
-        user_stats = await get_user_stats(user_id)
+        guild_stats = await guild_stats_get(guild.id)
+        user_stats = await user_stats_get(user_id)
         linked_quest_listing = await get_linked_quest_listing(user_id)
         
         await client.interaction_response_message_edit(
@@ -261,14 +261,14 @@ async def _check_quest_accept_conditions_common(
     error_message_or_fields : ``(None | str, None | (QuestBatch, Quest, None | LinkedQuest, QuestTemplate, UserStats))``
     """
     while True:
-        adventure = await get_active_adventure(user_id)
+        adventure = await adventure_get_active(user_id)
         if (adventure is not None):
             error_message = 'You cannot accept quests while adventuring.'
             break
         
         # Get the quest from the board.
-        guild_stats = await get_guild_stats(guild_id)
-        quest_batch = guild_stats.get_quest_batch()
+        guild_stats = await guild_stats_get(guild_id)
+        quest_batch = guild_stats_generate_quest_batch(guild_stats)
         
         quest = get_quest_with_template_id(quest_batch, quest_template_id)
         
@@ -286,7 +286,7 @@ async def _check_quest_accept_conditions_common(
             error_message = 'You already have this quest currently accepted.'
             break
         
-        user_stats = await get_user_stats(user_id)
+        user_stats = await user_stats_get(user_id)
         user_adventurer_rank_info = get_user_adventurer_rank_info(user_stats.credibility)
         # Check whether the user has enough slots.
         if (
@@ -509,7 +509,7 @@ async def page_linked_quest_listing_page_index_navigate(client, interaction_even
     
     linked_quest_listing = await get_linked_quest_listing(user_id)
     
-    user_stats = await get_user_stats(user_id)
+    user_stats = await user_stats_get(user_id)
     components = build_linked_quests_listing_components(
         interaction_event.user, interaction_event.guild, user_stats, linked_quest_listing, page_index
     )
@@ -567,7 +567,7 @@ async def linked_quest_details(client, interaction_event, user_id, page_index, l
             error_message = 'You do not have such a quest.'
             break
         
-        user_stats = await get_user_stats(user_id)
+        user_stats = await user_stats_get(user_id)
         
         await client.interaction_response_message_edit(
             interaction_event,
@@ -623,7 +623,7 @@ async def handle_linked_quest_submit_item_auto(client, interaction_event, user_i
     )
     
     while True:
-        adventure = await get_active_adventure(user_id)
+        adventure = await adventure_get_active(user_id)
         if (adventure is not None):
             error_message = 'You cannot submit items while on adventure.'
             break
@@ -680,19 +680,19 @@ async def handle_linked_quest_submit_item_auto(client, interaction_event, user_i
             )
         
         else:
-            user_stats = await get_user_stats(user_id)
-            user_balance = await get_user_balance(linked_quest.user_id)
-            guild_stats = await get_guild_stats(linked_quest.guild_id)
+            user_stats = await user_stats_get(user_id)
+            user_balance = await user_balance_get(linked_quest.user_id)
+            guild_stats = await guild_stats_get(linked_quest.guild_id)
             user_level = get_user_adventurer_rank_info(user_stats.credibility).level
             
             rewards_normalised = do_reward_user(
                 linked_quest, inventory, user_stats, user_balance, guild_stats, quest_template.level, user_level, 1
             )
             
-            await save_user_stats(user_stats)
-            await save_user_balance(user_balance)
+            await user_stats_save(user_stats)
+            await user_balance_save(user_balance)
             await save_inventory(inventory)
-            await guild_stats.save()
+            await guild_stats_save(guild_stats)
             
             if linked_quest.batch_id != get_current_batch_id():
                 await delete_linked_quest(linked_quest)
@@ -794,7 +794,7 @@ async def _handle_submit_item_common(
     )
     
     while True:
-        adventure = await get_active_adventure(user_id)
+        adventure = await adventure_get_active(user_id)
         if (adventure is not None):
             error_message = 'You cannot submit items while on adventure.'
             break
@@ -855,19 +855,19 @@ async def _handle_submit_item_common(
             )
         
         else:
-            user_stats = await get_user_stats(user_id)
-            user_balance = await get_user_balance(linked_quest.user_id)
-            guild_stats = await get_guild_stats(linked_quest.guild_id)
+            user_stats = await user_stats_get(user_id)
+            user_balance = await user_balance_get(linked_quest.user_id)
+            guild_stats = await guild_stats_get(linked_quest.guild_id)
             user_level = get_user_adventurer_rank_info(user_stats.credibility).level
             
             rewards_normalised = do_reward_user(
                 linked_quest, inventory, user_stats, user_balance, guild_stats, quest_template.level, user_level, 1
             )
             
-            await save_user_stats(user_stats)
-            await save_user_balance(user_balance)
+            await user_stats_save(user_stats)
+            await user_balance_save(user_balance)
             await save_inventory(inventory)
-            await guild_stats.save()
+            await guild_stats_save(guild_stats)
             
             if linked_quest.batch_id != get_current_batch_id():
                 await delete_linked_quest(linked_quest)
@@ -1157,9 +1157,9 @@ async def handle_quest_board_complete_execute(
                     )
         
         # Reward user
-        user_stats = await get_user_stats(user_id)
-        user_balance = await get_user_balance(linked_quest.user_id)
-        guild_stats = await get_guild_stats(linked_quest.guild_id)
+        user_stats = await user_stats_get(user_id)
+        user_balance = await user_balance_get(linked_quest.user_id)
+        guild_stats = await guild_stats_get(linked_quest.guild_id)
         user_level = get_user_adventurer_rank_info(user_stats.credibility).level
         
         rewards_normalised = do_reward_user(
@@ -1173,10 +1173,10 @@ async def handle_quest_board_complete_execute(
             allowed_completion_count,
         )
         
-        await save_user_stats(user_stats)
-        await save_user_balance(user_balance)
+        await user_stats_save(user_stats)
+        await user_balance_save(user_balance)
         await save_inventory(inventory)
-        await guild_stats.save()
+        await guild_stats_save(guild_stats)
         
         # Update quest.
         linked_quest.completion_count += allowed_completion_count
@@ -1245,8 +1245,8 @@ async def _linked_quest_abandon(linked_quest, user_stats, credibility_penalty):
         await update_linked_quest(linked_quest)
     
     if credibility_penalty:
-        user_stats.modify_credibility_by(- credibility_penalty)
-        await save_user_stats(user_stats)
+        user_stats_modify_credibility_by(user_stats, -credibility_penalty)
+        await user_stats_save(user_stats)
 
 
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN)
@@ -1291,7 +1291,7 @@ async def linked_quest_abandon_invoke(client, interaction_event, user_id, page_i
             error_message = 'You do not have such a quest.'
             break
         
-        user_stats = await get_user_stats(user_id)
+        user_stats = await user_stats_get(user_id)
         
         credibility_penalty = get_linked_quest_abandon_credibility_penalty(
             linked_quest,
@@ -1379,7 +1379,7 @@ async def handle_linked_quest_abandon_confirm(client, interaction_event, user_id
             error_message = 'You do not have such a quest.'
             break
         
-        user_stats = await get_user_stats(user_id)
+        user_stats = await user_stats_get(user_id)
         
         credibility_penalty = get_linked_quest_abandon_credibility_penalty(
             linked_quest,
@@ -2302,8 +2302,8 @@ async def handle_quest_board_select_requirement(
     )
     
     while True:
-        guild_stats = await get_guild_stats(guild_id)
-        quest_batch = guild_stats.get_quest_batch()
+        guild_stats = await guild_stats_get(guild_id)
+        quest_batch = guild_stats_generate_quest_batch(guild_stats)
         
         quest = get_quest_with_template_id(quest_batch, quest_template_id)
         

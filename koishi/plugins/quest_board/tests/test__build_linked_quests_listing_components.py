@@ -13,7 +13,7 @@ from ...quest_core import (
     QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
     QuestRewardSerialisableCredibility, get_quest_template_nullable, linked_quest_create
 )
-from ...user_stats_core import UserStats
+from ...user_stats_core import user_stats_create, user_stats_modify_credibility_by
 
 from ..component_building import build_linked_quests_listing_components
 from ..constants import EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS
@@ -329,8 +329,8 @@ def test__build_linked_quests_listing_components(
         if guild_id and ((user_nick is not None) or (user_guild_avatar is not None)):
             user.guild_profiles[guild_id] = GuildProfile(avatar = user_guild_avatar, nick = user_nick)
         
-        user_stats = UserStats(user_id)
-        user_stats.modify_credibility_by(user_credibility)
+        user_stats = user_stats_create(user_id)
+        user_stats_modify_credibility_by(user_stats, user_credibility)
         
         DateTimeMock.set_current(current_date_time)
         

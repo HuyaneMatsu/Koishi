@@ -10,7 +10,10 @@ from ...bot_utils.user_getter import get_user
 from ...bot_utils.utils import send_embed_to
 from ...bots import MAIN_CLIENT
 
-from ..user_balance import get_user_balance, save_user_balance
+from ..user_balance import (
+    user_balance_get, user_balance_save, user_balance_modify_balance_by, user_balance_set_streak,
+    user_balance_set_daily_can_claim_at, user_balance_set_top_gg_voted_at, user_balance_increment_count_top_gg_vote
+)
 from ..user_settings import (
     USER_SETTINGS_CUSTOM_ID_NOTIFICATION_VOTE_DISABLE, USER_SETTINGS_NOTIFICATION_FLAG_SHIFT_VOTE,
     get_one_user_settings, get_preferred_client_for_user
@@ -32,7 +35,7 @@ async def handle_top_gg_vote(external_event):
     """
     user = await get_user(external_event.user_id)
     
-    user_balance = await get_user_balance(external_event.user_id)
+    user_balance = await user_balance_get(external_event.user_id)
     now = DateTime.now(TimeZone.utc)
     
     if now - user_balance.top_gg_voted_at < DELTA_BETWEEN_VOTES_MIN:
@@ -43,12 +46,12 @@ async def handle_top_gg_vote(external_event):
     streak_new += 1
     balance_new = user_balance.balance + received
     
-    user_balance.modify_balance_by(received)
-    user_balance.set_streak(streak_new)
-    user_balance.set_daily_can_claim_at(max(daily_can_claim_at, now))
-    user_balance.increment_count_top_gg_vote()
-    user_balance.set_top_gg_voted_at(now)
-    await save_user_balance(user_balance)
+    user_balance_modify_balance_by(user_balance, received)
+    user_balance_set_streak(user_balance, streak_new)
+    user_balance_set_daily_can_claim_at(user_balance, max(daily_can_claim_at, now))
+    user_balance_increment_count_top_gg_vote(user_balance)
+    user_balance_set_top_gg_voted_at(user_balance, now)
+    await user_balance_save(user_balance)
     
 
     target_user_settings = await get_one_user_settings(external_event.user_id)

@@ -1,7 +1,7 @@
 __all__ = ('command_user_inventory',)
 
 from ..inventory_core import get_inventory
-from ..user_stats_core import get_user_stats
+from ..user_stats_core import user_stats_get, user_stats_calculate
 
 from .component_building import build_inventory_view_components
 from .constants import SORT_BY_DEFAULT, SORT_BYES, SORT_ORDER_DEFAULT, SORT_ORDERS
@@ -41,7 +41,7 @@ async def command_user_inventory(
     
     user = interaction_event.user
     
-    stats = await get_user_stats(user.id)
+    user_stats = await user_stats_get(user.id)
     inventory = await get_inventory(user.id)
     item_entries, page_count = get_inventory_page(inventory, sort_by, sort_order, 0)
     
@@ -56,6 +56,6 @@ async def command_user_inventory(
             0,
             page_count,
             inventory.weight,
-            stats.stats_calculated.extra_inventory,
+            user_stats_calculate(user_stats).extra_inventory,
         ),
     )

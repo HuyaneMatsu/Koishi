@@ -1,14 +1,12 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 
-from ...adventure_core import Adventure
+from ...adventure_core import adventure_create
 
 from ..content_building import produce_adventure_view_description_finalized
 
 
 def _iter_options():
-    adventure = Adventure(
+    adventure = adventure_create(
         202508030003,
         0,
         0,
@@ -18,8 +16,8 @@ def _iter_options():
         130,
         140,
     )
-    adventure.created_at = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
-    adventure.updated_at = DateTime(2016, 5, 14, 5, 30, 0, tzinfo = TimeZone.utc)
+    adventure.created_at = 1463184000
+    adventure.updated_at = 1463184000 + 5 * 3600 + 30 * 60
     adventure.health_exhausted = 20
     adventure.energy_exhausted = 30
     

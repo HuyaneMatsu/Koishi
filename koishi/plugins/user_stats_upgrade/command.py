@@ -7,10 +7,10 @@ from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ..gift_common import can_gift, identify_targeted_user, produce_gift_requirements_unsatisfied_error_message
 from ..relationships_core import autocomplete_relationship_extended_user_name
-from ..user_balance import get_user_balance
+from ..user_balance import user_balance_get, user_balance_accumulate_allocated_balance
 from ..user_stats_core import (
     USER_STAT_NAME_FULL_BEDROOM, USER_STAT_NAME_FULL_CHARM, USER_STAT_NAME_FULL_CUTENESS, USER_STAT_NAME_FULL_HOUSEWIFE,
-    USER_STAT_NAME_FULL_LOYALTY, get_user_stats
+    USER_STAT_NAME_FULL_LOYALTY, user_stats_get
 )
 
 from .component_building import build_confirmation_form
@@ -140,7 +140,7 @@ async def command_upgrade_stats(
             error_message = 'Nothing to upgrade.'
             break
         
-        user_stats = await get_user_stats(interaction_event.user_id if (target_user is None) else target_user.id)
+        user_stats = await user_stats_get(interaction_event.user_id if (target_user is None) else target_user.id)
         
         stat_housewife = user_stats.stat_housewife
         stat_cuteness = user_stats.stat_cuteness
@@ -161,8 +161,8 @@ async def command_upgrade_stats(
             modify_loyalty_by,
         )
         
-        user_balance = await get_user_balance(interaction_event.user_id)
-        available_balance = user_balance.balance - user_balance.get_cumulative_allocated_balance()
+        user_balance = await user_balance_get(interaction_event.user_id)
+        available_balance = user_balance.balance - user_balance_accumulate_allocated_balance(user_balance)
         
         if available_balance < required_balance:
             error_message = (

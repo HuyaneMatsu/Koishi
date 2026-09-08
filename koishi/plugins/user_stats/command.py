@@ -2,7 +2,7 @@ __all__ = ('command_user_stats',)
 
 from hata import ClientUserBase
 
-from ..user_stats_core import get_user_stats
+from ..user_stats_core import user_stats_get
 
 from .component_building import build_user_stats_primary_components
 
@@ -36,7 +36,7 @@ async def command_user_stats(
         False,
     )
     
-    user_stats = await get_user_stats(target_user.id)
+    user_stats = await user_stats_get(target_user.id)
     
     await client.interaction_response_message_edit(
         interaction_event,

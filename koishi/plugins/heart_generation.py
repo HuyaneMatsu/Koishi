@@ -6,7 +6,7 @@ from hata import InteractionType, KOKORO
 
 from ..bots import FEATURE_CLIENTS
 
-from .user_balance import get_user_balance, save_user_balance
+from .user_balance import user_balance_get, user_balance_save, user_balance_modify_balance_by
 
 
 HEART_GENERATOR_COOLDOWNS = set()
@@ -39,6 +39,6 @@ async def heart_generator(client, event):
         return
     
     KOKORO.call_after(HEART_GENERATOR_COOLDOWN, set.discard, HEART_GENERATOR_COOLDOWNS, user_id)
-    user_balance = await get_user_balance(user_id)
-    user_balance.modify_balance_by(HEART_GENERATION_AMOUNT)
-    await save_user_balance(user_balance)
+    user_balance = await user_balance_get(user_id)
+    user_balance_modify_balance_by(user_balance, HEART_GENERATION_AMOUNT)
+    await user_balance_save(user_balance)

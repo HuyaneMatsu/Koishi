@@ -1,9 +1,9 @@
 __all__ = ('command_guild_quest_board', 'command_user_quests')
 
 
-from ..guild_stats import get_guild_stats
+from ..guild_stats_core import guild_stats_get
 from ..quest_core import get_linked_quest_listing
-from ..user_stats_core import get_user_stats
+from ..user_stats_core import user_stats_get
 
 from .component_building import build_linked_quests_listing_components, build_quest_board_quest_listing_components
 
@@ -32,8 +32,8 @@ async def command_guild_quest_board(client, interaction_event):
     )
     user_id = interaction_event.user_id
     
-    guild_stats = await get_guild_stats(guild.id)
-    user_stats = await get_user_stats(user_id)
+    guild_stats = await guild_stats_get(guild.id)
+    user_stats = await user_stats_get(user_id)
     linked_quest_listing = await get_linked_quest_listing(user_id)
     
     await client.interaction_response_message_edit(
@@ -52,11 +52,11 @@ async def command_user_quests(client, interaction_event):
     
     Parameters
     ----------
-    user : ``ClientUserBase``
-        The respective user.
+    client : ``Client``
+        The client receiving this interaction.
     
-    guild_id : `int`
-        The guild identifier the command is called from.
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
     
     Returns
     -------
@@ -69,7 +69,7 @@ async def command_user_quests(client, interaction_event):
     
     user_id = interaction_event.user_id
     linked_quest_listing = await get_linked_quest_listing(user_id)
-    user_stats = await get_user_stats(user_id)
+    user_stats = await user_stats_get(user_id)
     
     await client.interaction_response_message_edit(
         interaction_event,

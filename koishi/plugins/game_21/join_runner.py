@@ -4,7 +4,10 @@ from scarletio import Lock, RichAttributeErrorBaseType, Task, get_event_loop
 
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ..user_balance import ALLOCATION_FEATURE_ID_GAME_21, get_user_balance, save_user_balance
+from ..user_balance import (
+    ALLOCATION_FEATURE_ID_GAME_21, user_balance_get, user_balance_save, user_balance_accumulate_allocated_balance,
+    user_balance_add_allocation
+)
 
 from .constants import (
     GAME_21_CUSTOM_ID_CANCEL, GAME_21_CUSTOM_ID_ENTER, GAME_21_CUSTOM_ID_START, GAME_21_JOINER_TIMEOUT,
@@ -198,10 +201,10 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
                 error_message = f'Max {PLAYERS_MAX!s} players are allowed.'
                 break
             
-            user_balance = await get_user_balance(interaction_event.user_id)
+            user_balance = await user_balance_get(interaction_event.user_id)
             
             amount = session.amount
-            available = user_balance.balance - user_balance.get_cumulative_allocated_balance()
+            available = user_balance.balance - user_balance_accumulate_allocated_balance(user_balance)
             if amount > available:
                 error_message = (
                     f'I must have at least {amount!s} available {EMOJI__HEART_CURRENCY} to join.\n'
@@ -209,8 +212,8 @@ class Game21JoinRunner(RichAttributeErrorBaseType):
                 )
                 break
             
-            user_balance.add_allocation(ALLOCATION_FEATURE_ID_GAME_21, session.id, amount, None)
-            await save_user_balance(user_balance)
+            user_balance_add_allocation(user_balance, ALLOCATION_FEATURE_ID_GAME_21, session.id, amount, None)
+            await user_balance_save(user_balance)
             
             player = Player(interaction_event.user, interaction_event)
             players.append(player)

@@ -1,3 +1,8 @@
+### 2026-09-08
+
+- Add `/elin-calculate-piety-bonuses` command. (Support guild only)
+- Fix `Marisa - Flykiller Amanita` quest was shadowed by `Marisa - Ramen`. (chaos3326)
+
 ### 2026-08-23
 
 - Fix `/top-list` was stuck on page 1. (pichu0357)

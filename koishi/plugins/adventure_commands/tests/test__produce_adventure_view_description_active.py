@@ -2,13 +2,13 @@ from datetime import datetime as DateTime, timezone as TimeZone
 
 import vampytest
 
-from ...adventure_core import ADVENTURE_STATE_ACTIONING, Adventure
+from ...adventure_core import ADVENTURE_STATE_ACTIONING, adventure_create
 
 from ..content_building import produce_adventure_view_description_active
 
 
 def _iter_options():
-    adventure = Adventure(
+    adventure = adventure_create(
         202508030002,
         0,
         0,
@@ -18,14 +18,15 @@ def _iter_options():
         130,
         140,
     )
-    adventure.created_at = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    adventure.created_at = 1463184000
     adventure.health_exhausted = 20
     adventure.energy_exhausted = 30
     adventure.state = ADVENTURE_STATE_ACTIONING
     
     yield (
         adventure,
-        DateTime(2016, 5, 14, 5, 30, tzinfo = TimeZone.utc),
+        #1463184000 + 5 * 3600 + 30 * 60,
+        DateTime(2016, 5, 14,  5, 30, 0, tzinfo = TimeZone.utc),
         45000,
         20000,
         (
@@ -49,7 +50,7 @@ def test__produce_adventure_view_description_active(adventure, now, inventory_to
     adventure : ``Adventure``
         Adventure to produce description for.
     
-    now : `DateTime`
+    now : `int`
         The current time.
     
     inventory_total : `int`
