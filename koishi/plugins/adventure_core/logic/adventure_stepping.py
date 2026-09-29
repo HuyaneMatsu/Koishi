@@ -24,7 +24,7 @@ from ..action import (
 )
 from ..adventure import (
     ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_ACTIONING_CANCEL_AFTER, ADVENTURE_STATE_CANCELLED,
-    ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_FINALIZED, ADVENTURE_STATE_RETURNING, adventure_action_create,
+    ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_FINALISED, ADVENTURE_STATE_RETURNING, adventure_action_create,
     loot_data_build, adventure_set_state, adventure_set_updated_at, adventure_add_action,
     adventure_count_actions_for_seeding, adventure_increase_energy_exhausted, adventure_increase_health_exhausted
 )
@@ -32,7 +32,7 @@ from ..constants import ADVENTURES_ACTIVE
 from ..queries import adventure_save
 
 from .helpers import (
-    accumulate_looted_items, get_action, get_action_type_multiplier, action_duration_seconds_get,
+    accumulate_looted_items, action_get, get_action_type_multiplier, action_duration_seconds_get,
     recovery_duration_seconds_get, travel_duration_seconds_get, should_cancel_adventure
 )
 from .loot_accumulation_logic import accumulate_action_loot
@@ -101,7 +101,7 @@ async def adventure_arrival(adventure):
     """
     initial_seed = step_seed_initial(adventure.seed, 0)
     random = Random(initial_seed)
-    action = get_action(adventure, random)
+    action = action_get(adventure, random)
     if action is None:
         await adventure_unknown(adventure)
         return
@@ -154,7 +154,7 @@ async def schedule_adventure_action(adventure):
     """
     initial_seed = step_seed_initial(adventure.seed, adventure_count_actions_for_seeding(adventure))
     random = Random(initial_seed)
-    action = get_action(adventure, random)
+    action = action_get(adventure, random)
     if action is None:
         await adventure_unknown(adventure)
         return
@@ -197,7 +197,7 @@ async def adventure_action_step(adventure):
     """
     initial_seed = step_seed_initial(adventure.seed, adventure_count_actions_for_seeding(adventure))
     random = Random(initial_seed)
-    action = get_action(adventure, random)
+    action = action_get(adventure, random)
     if action is None:
         await adventure_unknown(adventure)
         return
@@ -236,7 +236,7 @@ async def adventure_action_step(adventure):
         next_action = None
     else:
         next_random = Random(next_initial_seed)
-        next_action = get_action(adventure, next_random)
+        next_action = action_get(adventure, next_random)
     
     if next_action is None:
         should_return = True
@@ -439,7 +439,7 @@ async def adventure_return(adventure):
     return_at = adventure.updated_at + duration_seconds
     
     # Update adventure.
-    adventure_set_state(adventure, ADVENTURE_STATE_FINALIZED)
+    adventure_set_state(adventure, ADVENTURE_STATE_FINALISED)
     adventure_set_updated_at(adventure, return_at)
     adventure.handle = None
     

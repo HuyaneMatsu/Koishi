@@ -30,7 +30,7 @@ def _iter_options():
         [
             create_text_display(
                 f'Hey mister, you purchased {5} {item_peach.emoji} '
-                f'{item_peach.name} ({item_peach.weight * 5 / 1000:.03f} kg) for 1000 {EMOJI__HEART_CURRENCY}.'
+                f'{item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg) for 1000 {EMOJI__HEART_CURRENCY}.'
             ),
             create_row(
                 create_button(
@@ -59,7 +59,7 @@ def _iter_options():
         [
             create_text_display(
                 f'Nee-sama, you purchased {5} {item_peach.emoji} '
-                f'{item_peach.name} ({item_peach.weight * 5 / 1000:.03f} kg) for 1000 {EMOJI__HEART_CURRENCY}.'
+                f'{item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg) for 1000 {EMOJI__HEART_CURRENCY}.'
             ),
             create_row(
                 create_button(

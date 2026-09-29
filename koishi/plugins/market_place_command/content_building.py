@@ -36,8 +36,8 @@ def _produce_item_with_amount(item, item_amount):
     emoji = item.emoji
     if (emoji is not None):
         yield emoji.as_emoji
+        yield ' '
     
-    yield ' '
     yield item.name
     yield ' ('
     yield from produce_kilogram(item.weight * item_amount)

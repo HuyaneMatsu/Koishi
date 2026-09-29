@@ -4,26 +4,28 @@ from hata import Component, create_button, create_row, create_separator, create_
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...item_core import ITEM_ID_PEACH, get_item
+from ...item_core import ITEM_ID_PEACH, get_item_nullable
 
 from ..component_building import build_sell_success_components
 from ..constants import EMOJI_CLOSE
 
 
 def _iter_options():
-    item = get_item(ITEM_ID_PEACH)
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
+    
     user_id = 202512230007
     
     yield (
         user_id,
-        item,
+        item_peach,
         100,
         4,
         1000,
         30,
         [
             create_text_display(
-                f'You put 100 {item.emoji} {item.name} ({item.weight * 100 / 1000:.03f} kg) '
+                f'You put 100 {item_peach.emoji} {item_peach.name} ({100 * item_peach.weight / 1000:.01f} kg) '
                 f'on the market for 4 days, starting at 1000 {EMOJI__HEART_CURRENCY}.\n'
                 f'You payed 30 {EMOJI__HEART_CURRENCY} initial fee.'
             ),

@@ -1,19 +1,34 @@
 import vampytest
 
-from ...options import OptionBattle, OptionLoot
+from ...options import option_battle_create, option_loot_create
 
-from ..action import Action
+from ..action import Action, action_create
 from ..action_types import ACTION_TYPE_GARDENING
 
 
-def _assert_fields_set(action):
-    """
-    Asserts whether every fields are set of the given action.
+def test__action_create():
+    action_id = 9930
+    action_type = ACTION_TYPE_GARDENING
+    duration = 10000
+    weight = 2
+    battle = (
+        option_battle_create(False, 1, 1, False, 1, 1, 120, None),
+        option_battle_create(False, 1, 2, False, 0, 7, 126, None),
+    )
+    loot = (
+        option_loot_create(False, 1, 1, False, 1, 1, 130, 22, 2, 20, 1),
+        option_loot_create(False, 1, 2, False, 2, 4, 132, 22, 2, 20, 1),
+    )
     
-    Parameters
-    ----------
-    action : ``Action``
-    """
+    action = action_create(
+        action_id,
+        action_type,
+        duration,
+        weight,
+        battle,
+        loot,
+    )
+    
     vampytest.assert_instance(action, Action)
     vampytest.assert_instance(action.duration, int)
     vampytest.assert_instance(action.battle, tuple, nullable = True)
@@ -21,35 +36,6 @@ def _assert_fields_set(action):
     vampytest.assert_instance(action.id, int)
     vampytest.assert_instance(action.type, int)
     vampytest.assert_instance(action.weight, int)
-
-
-def test__Action__new():
-    """
-    Tests whether ``Action.__new__`` works as intended.
-    """
-    action_id = 9930
-    action_type = ACTION_TYPE_GARDENING
-    duration = 10000
-    weight = 2
-    battle = (
-        OptionBattle(False, 1, 1, False, 1, 1, 120, None),
-        OptionBattle(False, 1, 2, False, 0, 7, 126, None),
-    )
-    loot = (
-        OptionLoot(False, 1, 1, False, 1, 1, 130, 22, 2, 20, 1),
-        OptionLoot(False, 1, 2, False, 2, 4, 132, 22, 2, 20, 1),
-    )
-    
-    action = Action(
-        action_id,
-        action_type,
-        duration,
-        weight,
-        battle,
-        loot,
-    )
-    
-    _assert_fields_set(action)
     
     vampytest.assert_eq(action.id, action_id)
     vampytest.assert_eq(action.type, action_type)
@@ -57,33 +43,3 @@ def test__Action__new():
     vampytest.assert_eq(action.weight, weight)
     vampytest.assert_eq(action.battle, battle)
     vampytest.assert_eq(action.loot, loot)
-
-
-def test__Action__repr():
-    """
-    Tests whether ``Action.__repr__`` works as intended.
-    """
-    action_id = 9930
-    action_type = ACTION_TYPE_GARDENING
-    duration = 10000
-    weight = 2
-    battle = (
-        OptionBattle(False, 1, 1, True, 1, 1, 120, None),
-        OptionBattle(False, 1, 2, True, 0, 7, 126, None),
-    )
-    loot = (
-        OptionLoot(False, 1, 1, True, 1, 1, 130, 22, 2, 20, 1),
-        OptionLoot(False, 1, 2, True, 2, 4, 132, 22, 2, 20, 1),
-    )
-    
-    action = Action(
-        action_id,
-        action_type,
-        duration,
-        weight,
-        battle,
-        loot,
-    )
-    
-    output = repr(action)
-    vampytest.assert_instance(output, str)

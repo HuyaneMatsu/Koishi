@@ -3,6 +3,7 @@ from .constants import *
 from .content_building import *
 from .custom_ids import *
 from .duration_suggesting import *
+from .goal_item_suggesting import *
 from .interactions import *
 from .location_suggesting import *
 from .notifications import *
@@ -15,6 +16,7 @@ __all__ = (
     *content_building.__all__,
     *custom_ids.__all__,
     *duration_suggesting.__all__,
+    *goal_item_suggesting.__all__,
     *interactions.__all__,
     *location_suggesting.__all__,
     *notifications.__all__,

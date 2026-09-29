@@ -3,18 +3,20 @@ from hata import Component, create_button, create_row, create_section, create_se
 
 from ...adventure_core import (
     ACTION_ID_SYSTEM_CANCELLATION_NOW, ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
-    ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_FINALIZED, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS,
+    ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_FINALISED, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS, LOCATIONS,
     LOOT_STATE_SUCCESS, TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION, TARGETS, adventure_action_create,
     adventure_create, loot_data_build
 )
 from ...item_core import ITEM_ID_PEACH
 
 from ..component_building import build_adventure_action_listing_view_components
+from ..constants import ADVENTURE_VIEW_MODE_DEFAULT, ADVENTURE_VIEW_MODE_DETAILED
 
 
 def _iter_options():
     # show depart, +2, no return
     # page at index 0, disallow stepping.
+    # Detailed adventure view mode
     
     adventure_entry_id = 9999
     user_id = 202508060000
@@ -45,18 +47,20 @@ def _iter_options():
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
         0,
         0,
+        None,
         0,
         100,
         100,
     )
     adventure.created_at = 1463097600
     adventure.updated_at = 1463356800
-    adventure.state = ADVENTURE_STATE_FINALIZED
+    adventure.state = ADVENTURE_STATE_FINALISED
     adventure.action_listing = [adventure_action_0, adventure_action_1]
     adventure.entry_id = adventure_entry_id
     
     yield (
         adventure,
+        ADVENTURE_VIEW_MODE_DETAILED,
         True,
         5,
         0,
@@ -83,7 +87,7 @@ def _iter_options():
                 thumbnail = create_button(
                     'View',
                     custom_id = (
-                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{0:x}.'
+                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{0:x}.{ADVENTURE_VIEW_MODE_DETAILED:x}.'
                         f'{True:x}.{5:x}.{True:x}.{0:x}'
                     ),
                     enabled = True,
@@ -96,7 +100,7 @@ def _iter_options():
                 thumbnail = create_button(
                     'View',
                     custom_id = (
-                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{1:x}.'
+                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{1:x}.{ADVENTURE_VIEW_MODE_DETAILED:x}.'
                         f'{True:x}.{5:x}.{True:x}.{0:x}'
                     ),
                     enabled = False,
@@ -117,17 +121,26 @@ def _iter_options():
                 create_button(
                     'View adventure',
                     enabled = True,
-                    custom_id = f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{True:x}.{5:x}',
+                    custom_id = (
+                        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DETAILED:x}.'
+                        f'{True:x}.{5:x}'
+                    ),
                 ),
                 create_button(
                     'Page 0',
                     enabled = False,
-                    custom_id = f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{True:x}.{5:x}.{0:x}',
+                    custom_id = (
+                        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DETAILED:x}.'
+                        f'{True:x}.{5:x}.{0:x}'
+                    ),
                 ),
                 create_button(
                     'Page 2',
                     enabled = False,
-                    custom_id = f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{True:x}.{5:x}.{1:x}',
+                    custom_id = (
+                        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DETAILED:x}.'
+                        f'{True:x}.{5:x}.{1:x}'
+                    ),
                 ),
             ),
         ],
@@ -143,6 +156,7 @@ def _iter_options():
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
         0,
         0,
+        None,
         0,
         100,
         100,
@@ -157,6 +171,7 @@ def _iter_options():
     
     yield (
         adventure,
+        ADVENTURE_VIEW_MODE_DEFAULT,
         False,
         0,
         0,
@@ -181,17 +196,26 @@ def _iter_options():
                 create_button(
                     'View adventure',
                     enabled = True,
-                    custom_id = f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}',
+                    custom_id = (
+                        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}'
+                    ),
                 ),
                 create_button(
                     'Page 0',
                     enabled = False,
-                    custom_id = f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}.{0:x}',
+                    custom_id = (
+                        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}.{0:x}'
+                    ),
                 ),
                 create_button(
                     'Page 2',
                     enabled = False,
-                    custom_id = f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}.{1:x}',
+                    custom_id = (
+                        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}.{1:x}'
+                    ),
                 ),
             ),
         ],
@@ -202,6 +226,7 @@ def _iter_options():
     
     yield (
         adventure,
+        ADVENTURE_VIEW_MODE_DEFAULT,
         False,
         0,
         2,
@@ -215,17 +240,26 @@ def _iter_options():
                 create_button(
                     'View adventure',
                     enabled = True,
-                    custom_id = f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}',
+                    custom_id = (
+                        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}'
+                    ),
                 ),
                 create_button(
                     'Page 2',
                     enabled = True,
-                    custom_id = f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}.{1:x}',
+                    custom_id = (
+                        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}.{1:x}'
+                    ),
                 ),
                 create_button(
                     'Page 4',
                     enabled = False,
-                    custom_id = f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}.{3:x}',
+                    custom_id = (
+                        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}.{3:x}'
+                    ),
                 ),
             ),
         ],
@@ -257,19 +291,21 @@ def _iter_options():
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
         0,
         0,
+        None,
         0,
         100,
         100,
     )
     adventure.created_at = 1463097600
     adventure.updated_at = 1463356800
-    adventure.state = ADVENTURE_STATE_FINALIZED
+    adventure.state = ADVENTURE_STATE_FINALISED
     adventure.action_listing = adventure_action_listing
     adventure.entry_id = adventure_entry_id
     adventure.energy_exhausted = 8
     
     yield (
         adventure,
+        ADVENTURE_VIEW_MODE_DEFAULT,
         False,
         0,
         0,
@@ -297,7 +333,7 @@ def _iter_options():
                     thumbnail = create_button(
                         'View',
                         custom_id = (
-                            f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{index:x}.'
+                            f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{index:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
                             f'{False:x}.{0:x}.{True:x}.{0:x}'
                         ),
                         enabled = True,
@@ -319,17 +355,26 @@ def _iter_options():
                 create_button(
                     'View adventure',
                     enabled = True,
-                    custom_id = f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}',
+                    custom_id = (
+                        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}'
+                    ),
                 ),
                 create_button(
                     'Page 0',
                     enabled = False,
-                    custom_id = f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}.{0:x}',
+                    custom_id = (
+                        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}.{0:x}'
+                    ),
                 ),
                 create_button(
                     'Page 2',
                     enabled = False,
-                    custom_id = f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}.{1:x}',
+                    custom_id = (
+                        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}.{1:x}'
+                    ),
                 ),
             ),
         ],
@@ -361,19 +406,21 @@ def _iter_options():
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
         0,
         0,
+        None,
         0,
         100,
         100,
     )
     adventure.created_at = 1463097600
     adventure.updated_at = 1463356800
-    adventure.state = ADVENTURE_STATE_FINALIZED
+    adventure.state = ADVENTURE_STATE_FINALISED
     adventure.action_listing = adventure_action_listing
     adventure.entry_id = adventure_entry_id
     adventure.energy_exhausted = 19
     
     yield (
         adventure,
+        ADVENTURE_VIEW_MODE_DEFAULT,
         False,
         0,
         1,
@@ -391,7 +438,7 @@ def _iter_options():
                     thumbnail = create_button(
                         'View',
                         custom_id = (
-                            f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{index:x}.'
+                            f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{index:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
                             f'{False:x}.{0:x}.{True:x}.{1:x}'
                         ),
                     ),
@@ -402,17 +449,26 @@ def _iter_options():
                 create_button(
                     'View adventure',
                     enabled = True,
-                    custom_id = f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}',
+                    custom_id = (
+                        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}'
+                    ),
                 ),
                 create_button(
                     'Page 1',
                     enabled = True,
-                    custom_id = f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}.{0:x}',
+                    custom_id = (
+                        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}.{0:x}'
+                    ),
                 ),
                 create_button(
                     'Page 3',
                     enabled = True,
-                    custom_id = f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}.{2:x}',
+                    custom_id = (
+                        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}.{2:x}'
+                    ),
                 ),
             ),
         ],
@@ -422,6 +478,7 @@ def _iter_options():
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__build_adventure_action_listing_view_components(
     adventure,
+    adventure_view_mode,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     adventure_action_listing_page_index,
@@ -433,6 +490,9 @@ def test__build_adventure_action_listing_view_components(
     ----------
     adventure : ``Adventure``
         The parent adventure.
+    
+    adventure_view_mode : `int`
+        How to render the adventure.
     
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
@@ -449,6 +509,7 @@ def test__build_adventure_action_listing_view_components(
     """
     output = build_adventure_action_listing_view_components(
         adventure,
+        adventure_view_mode,
         allow_switching_to_adventure_listing_view,
         adventure_listing_page_index,
         adventure_action_listing_page_index,

@@ -1,6 +1,6 @@
 __all__ = ()
 
-from scarletio import RichAttributeErrorBaseType
+from scarletio import RICH_TYPE_FEATURE_FLAG_ATTRIBUTE_ERROR, RichType
 
 
 def check_parameter_omitted(attributes, type_attributes):
@@ -92,7 +92,7 @@ def create_attributes(slots, type_attributes):
     return tuple(attributes)
 
 
-class InstantiateInheritanceMeta(type):
+class InstantiateInheritanceMeta(RichType):
     """
     Meta type that intercepts inheritance with instantiation.
     """
@@ -143,4 +143,10 @@ class InstantiateInheritanceMeta(type):
         
         type_attributes['__attributes__'] = create_attributes(slots, type_attributes)
         
-        return type.__new__(cls, type_name, type_parents, type_attributes)
+        return RichType.__new__(
+            cls,
+            type_name,
+            type_parents,
+            type_attributes,
+            rich_type_feature_flags = RICH_TYPE_FEATURE_FLAG_ATTRIBUTE_ERROR,
+        )

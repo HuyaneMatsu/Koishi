@@ -10,7 +10,9 @@ Flandre = Client(
     client_id = config.FLANDRE_ID,
     activity = Activity('in the basement.'),
     should_request_users = False,
-    intents = IntentFlag().update_by_keys(), # no changes
+    intents = IntentFlag().update_by_keys(
+        guild_presences = False,
+    ),
     application_id = config.FLANDRE_ID,
     extensions = ('slash',),
 )

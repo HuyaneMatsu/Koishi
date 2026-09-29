@@ -10,7 +10,9 @@ Nue = Client(
     client_id = config.NUE_ID,
     status = Status.online,
     should_request_users = False,
-    intents = IntentFlag().update_by_keys(), # no changes
+    intents = IntentFlag().update_by_keys(
+        guild_presences = False,
+    ),
     application_id = config.NUE_ID,
     extensions = ('slash',),
 )

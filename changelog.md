@@ -1,3 +1,19 @@
+### 2026-09-30
+
+- Adventure done notification now instead of providing an option for the user to view the details about the adventure
+    itself, shows most of them by default. (ayahiya)
+- `/adventure depart` now supports defining the `goal` of the adventure. (ayahiya)
+- How weights are displayed are now standardized, always choosing a shorter version if available.
+- `adventure-action-notification` now shows total loot as well if the action did loot any. (ayahiya)
+- Fix `/mod kick` did never show orin easter on kicks. (Since the command has been updated).
+- `adventure`-s now can be viewed in detailed mode. (ayahiya)
+
+- Add new items:
+    - Sunflower
+
+- Add new quests:
+    - Koishi - Broom (chaos3326)
+
 ### 2026-09-08
 
 - Add `/elin-calculate-piety-bonuses` command. (Support guild only)
@@ -11,7 +27,7 @@
 - `/roll` now accepts more advanced patterns, like `2d7+2` (chaos3326)
 - `/roll` now shows the rolled dices. (2vio2vieevie)
 - `/roll` now has a new luck and re-roll options.
-- Add new `adventure-action` notification. It is disabled by default. (ayahiya)
+- Add new `adventure-action-notification`. It is disabled by default. (ayahiya)
 - Fix `/adventure view option:previous` did not actually shown the previous adventure.
 - Do not apply credibility penalty if a quest is abandoned within 30 minutes. (yumeirusynthesis)
 - Make `linked quest details`'s summary line highlight (bolds) only the missing requirements.

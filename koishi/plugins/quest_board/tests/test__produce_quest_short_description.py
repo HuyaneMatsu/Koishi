@@ -5,12 +5,12 @@ from hata import BUILTIN_EMOJIS
 
 from ...item_core import ITEM_ID_BLUEFRANKISH, ITEM_ID_PEACH, ITEM_ID_STRAWBERRY
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
-    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, Quest,
-    QuestRequirementInstantiableDuration, QuestRequirementInstantiableItemExact, QuestRequirementSerialisableDuration,
-    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, get_quest_template_nullable,
-    linked_quest_create
+    QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
+    quest_create, get_quest_template_nullable, linked_quest_create, quest_requirement_instantiable_create_duration,
+    quest_requirement_serialisable_create_duration, quest_requirement_serialisable_create_expiration,
+    quest_requirement_instantiable_create_item_exact, quest_requirement_serialisable_create_item_exact
 )
+from ...unit_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT
 
 from ..content_building import produce_quest_short_description
 
@@ -29,29 +29,29 @@ def _iter_options():
     guild_id = 202510130003
     batch_id = 5999
     
-    quest_0 = Quest(
+    quest_0 = quest_create(
         quest_template_id_0,
         (
-            QuestRequirementInstantiableDuration(3600 * 24),
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
+            quest_requirement_instantiable_create_duration(3600 * 24),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
         ),
         None,
     )
     
-    quest_1 = Quest(
+    quest_1 = quest_create(
         quest_template_id_1,
         (
-            QuestRequirementInstantiableDuration(3600 * 24),
-            QuestRequirementInstantiableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 500),
+            quest_requirement_instantiable_create_duration(3600 * 24),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 500),
         ),
         None,
     )
     
-    quest_2 = Quest(
+    quest_2 = quest_create(
         quest_template_id_2,
         (
-            QuestRequirementInstantiableDuration(3600 * 24),
-            QuestRequirementInstantiableItemExact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, 500),
+            quest_requirement_instantiable_create_duration(3600 * 24),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, 500),
         ),
         None,
     )
@@ -62,9 +62,9 @@ def _iter_options():
         batch_id,
         quest_template_id_1,
         (
-            QuestRequirementSerialisableDuration(3600 * 24),
-            QuestRequirementSerialisableExpiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600 * 24)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 500, 0),
+            quest_requirement_serialisable_create_duration(3600 * 24),
+            quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600 * 24)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 500, 0),
         ),
         None,
     )
@@ -76,9 +76,9 @@ def _iter_options():
         batch_id,
         quest_template_id_2,
         (
-            QuestRequirementSerialisableDuration(3600 * 24),
-            QuestRequirementSerialisableExpiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600 * 24)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, 500, 0),
+            quest_requirement_serialisable_create_duration(3600 * 24),
+            quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600 * 24)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, 500, 0),
         ),
         None,
     )

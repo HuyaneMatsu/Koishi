@@ -5,11 +5,13 @@ from hata import BUILTIN_EMOJIS
 
 from ...item_core import ITEM_ID_BLUEFRANKISH, ITEM_ID_PEACH
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED,
-    QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, QuestRequirementSerialisableDuration,
-    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
-    QuestRewardSerialisableCredibility, get_quest_template_nullable, linked_quest_create
+    LINKED_QUEST_COMPLETION_STATE_COMPLETED,
+    QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, get_quest_template_nullable,
+    linked_quest_create, quest_requirement_serialisable_create_duration,
+    quest_requirement_serialisable_create_expiration, quest_requirement_serialisable_create_item_exact,
+    quest_reward_serialisable_create_balance, quest_reward_serialisable_create_credibility
 )
+from ...unit_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT
 
 from ..content_building import produce_linked_quest_short_description
 
@@ -41,13 +43,13 @@ def _iter_options():
         batch_id,
         quest_template_id_0,
         (
-            QuestRequirementSerialisableDuration(duration),
-            QuestRequirementSerialisableExpiration(quest_accepted_at + TimeDelta(seconds = duration)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 2),
+            quest_requirement_serialisable_create_duration(duration),
+            quest_requirement_serialisable_create_expiration(quest_accepted_at + TimeDelta(seconds = duration)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 2),
         ),
         (
-            QuestRewardSerialisableBalance(reward_balance),
-            QuestRewardSerialisableCredibility(reward_credibility),
+            quest_reward_serialisable_create_balance(reward_balance),
+            quest_reward_serialisable_create_credibility(reward_credibility),
         ),
     )
     
@@ -67,13 +69,13 @@ def _iter_options():
         batch_id,
         quest_template_id_0,
         (
-            QuestRequirementSerialisableDuration(duration),
-            QuestRequirementSerialisableExpiration(quest_accepted_at + TimeDelta(seconds = duration)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 0),
+            quest_requirement_serialisable_create_duration(duration),
+            quest_requirement_serialisable_create_expiration(quest_accepted_at + TimeDelta(seconds = duration)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 0),
         ),
         (
-            QuestRewardSerialisableBalance(reward_balance),
-            QuestRewardSerialisableCredibility(reward_credibility),
+            quest_reward_serialisable_create_balance(reward_balance),
+            quest_reward_serialisable_create_credibility(reward_credibility),
         ),
     )
     linked_quest_1.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
@@ -95,13 +97,13 @@ def _iter_options():
         batch_id,
         quest_template_id_0,
         (
-            QuestRequirementSerialisableDuration(duration),
-            QuestRequirementSerialisableExpiration(quest_accepted_at + TimeDelta(seconds = duration)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 0),
+            quest_requirement_serialisable_create_duration(duration),
+            quest_requirement_serialisable_create_expiration(quest_accepted_at + TimeDelta(seconds = duration)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 0),
         ),
         (
-            QuestRewardSerialisableBalance(reward_balance),
-            QuestRewardSerialisableCredibility(reward_credibility),
+            quest_reward_serialisable_create_balance(reward_balance),
+            quest_reward_serialisable_create_credibility(reward_credibility),
         ),
     )
     linked_quest_2.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
@@ -123,13 +125,13 @@ def _iter_options():
         batch_id,
         quest_template_id_0,
         (
-            QuestRequirementSerialisableDuration(duration),
-            QuestRequirementSerialisableExpiration(quest_accepted_at),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 2),
+            quest_requirement_serialisable_create_duration(duration),
+            quest_requirement_serialisable_create_expiration(quest_accepted_at),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 2),
         ),
         (
-            QuestRewardSerialisableBalance(reward_balance),
-            QuestRewardSerialisableCredibility(reward_credibility),
+            quest_reward_serialisable_create_balance(reward_balance),
+            quest_reward_serialisable_create_credibility(reward_credibility),
         ),
     )
     
@@ -149,13 +151,13 @@ def _iter_options():
         batch_id,
         quest_template_id_0,
         (
-            QuestRequirementSerialisableDuration(duration),
-            QuestRequirementSerialisableExpiration(now + TimeDelta(seconds = duration)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, amount_required, 0),
+            quest_requirement_serialisable_create_duration(duration),
+            quest_requirement_serialisable_create_expiration(now + TimeDelta(seconds = duration)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, amount_required, 0),
         ),
         (
-            QuestRewardSerialisableBalance(reward_balance),
-            QuestRewardSerialisableCredibility(reward_credibility),
+            quest_reward_serialisable_create_balance(reward_balance),
+            quest_reward_serialisable_create_credibility(reward_credibility),
         ),
     )
     linked_quest_4.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED

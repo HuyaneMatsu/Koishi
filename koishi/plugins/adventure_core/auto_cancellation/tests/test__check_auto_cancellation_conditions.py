@@ -1,8 +1,8 @@
 import vampytest
 
-from ..auto_cancellation import AutoCancellation
-from ..auto_cancellation_condition import AutoCancellationCondition
-from ..auto_cancellation_condition_functional import AutoCancellationConditionFunctional
+from ..auto_cancellation import auto_cancellation_create
+from ..auto_cancellation_condition import auto_cancellation_condition_create
+from ..auto_cancellation_condition_functional import auto_cancellation_condition_functional_create
 from ..auto_cancellation_condition_ids import (
     AUTO_CANCELLATION_CONDITION_ID_EQUAL, AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL,
     AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, AUTO_CANCELLATION_CONDITION_ID_LESS_OR_EQUAL,
@@ -14,7 +14,7 @@ from ..utils import check_auto_cancellation_conditions
 def _iter_options():
     # none
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
@@ -38,10 +38,10 @@ def _iter_options():
     # by condition
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
+            auto_cancellation_condition_create(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
             None,
             None,
             None,
@@ -60,11 +60,11 @@ def _iter_options():
     )
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
+            auto_cancellation_condition_create(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
             None,
             None,
             None,
@@ -82,12 +82,12 @@ def _iter_options():
     )
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
+            auto_cancellation_condition_create(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
             None,
             None,
             None,
@@ -104,13 +104,13 @@ def _iter_options():
     )
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
+            auto_cancellation_condition_create(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
             None,
             None,
             None,
@@ -126,14 +126,14 @@ def _iter_options():
     )
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
+            auto_cancellation_condition_create(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
             None,
             None,
         ),
@@ -148,7 +148,7 @@ def _iter_options():
     )
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
@@ -156,7 +156,7 @@ def _iter_options():
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
+            auto_cancellation_condition_create(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
             None,
         ),
         100,
@@ -172,14 +172,14 @@ def _iter_options():
     # 2 conditions
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 20),
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
+            auto_cancellation_condition_create(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 20),
+            auto_cancellation_condition_create(AUTO_CANCELLATION_CONDITION_ID_GREATER_OR_EQUAL, 56),
             None,
             None,
         ),
@@ -196,13 +196,13 @@ def _iter_options():
     # different signs
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_EQUAL, 20),
+            auto_cancellation_condition_create(AUTO_CANCELLATION_CONDITION_ID_EQUAL, 20),
             None,
             None,
             None,
@@ -218,13 +218,13 @@ def _iter_options():
     )
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, 20),
+            auto_cancellation_condition_create(AUTO_CANCELLATION_CONDITION_ID_GREATER_THAN, 20),
             None,
             None,
             None,
@@ -240,13 +240,13 @@ def _iter_options():
     )
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_LESS_OR_EQUAL, 20),
+            auto_cancellation_condition_create(AUTO_CANCELLATION_CONDITION_ID_LESS_OR_EQUAL, 20),
             None,
             None,
             None,
@@ -262,13 +262,13 @@ def _iter_options():
     )
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_LESS_THAN, 20),
+            auto_cancellation_condition_create(AUTO_CANCELLATION_CONDITION_ID_LESS_THAN, 20),
             None,
             None,
             None,
@@ -284,13 +284,13 @@ def _iter_options():
     )
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
             None,
             None,
-            AutoCancellationCondition(AUTO_CANCELLATION_CONDITION_ID_NOT_EQUAL, 20),
+            auto_cancellation_condition_create(AUTO_CANCELLATION_CONDITION_ID_NOT_EQUAL, 20),
             None,
             None,
             None,
@@ -306,7 +306,7 @@ def _iter_options():
     )
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
@@ -315,7 +315,7 @@ def _iter_options():
             None,
             None,
             None,
-            AutoCancellationConditionFunctional('shrimp', lambda looted_items : (True if looted_items else False)),
+            auto_cancellation_condition_functional_create('shrimp', lambda looted_items : (True if looted_items else False)),
         ),
         100,
         0,
@@ -328,7 +328,7 @@ def _iter_options():
     )
     
     yield (
-        AutoCancellation(
+        auto_cancellation_create(
             9999,
             '',
             None,
@@ -337,7 +337,7 @@ def _iter_options():
             None,
             None,
             None,
-            AutoCancellationConditionFunctional('shrimp', lambda looted_items : (True if looted_items else False)),
+            auto_cancellation_condition_functional_create('shrimp', lambda looted_items : (True if looted_items else False)),
         ),
         100,
         0,

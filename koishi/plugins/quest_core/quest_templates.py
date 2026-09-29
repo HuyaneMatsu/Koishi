@@ -5,7 +5,7 @@ from ..item_core import (
     ITEM_GROUP_ID_HUMAN_CORPSE_FULL, ITEM_GROUP_ID_KNIFE, ITEM_GROUP_ID_LIVER_SAUSAGE_MEAT,
     ITEM_GROUP_ID_MEAT_SAUSAGE_MEAT, ITEM_GROUP_ID_SWEETS, ITEM_ID_ALICE, ITEM_ID_ANGELROOT, ITEM_ID_AYA,
     ITEM_ID_BAMBOO_SHOOT, ITEM_ID_BISHOPHAT, ITEM_ID_BLOOD_SAUSAGE, ITEM_ID_BLUEBERRY, ITEM_ID_BLUEFRANKISH,
-    ITEM_ID_CARROT, ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DANGO, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_EIRIN,
+    ITEM_ID_BROOM, ITEM_ID_CARROT, ITEM_ID_CHIRUNO, ITEM_ID_DAI, ITEM_ID_DANGO, ITEM_ID_DEVILCART_OYSTER, ITEM_ID_EIRIN,
     ITEM_ID_FISHING_ROD, ITEM_ID_FLANDRE, ITEM_ID_FLYKILLER_AMANITA, ITEM_ID_FROG, ITEM_ID_GARLIC, ITEM_ID_HUMAN_BLOOD,
     ITEM_ID_HUMAN_BODY_PART_SKULL, ITEM_ID_HUMAN_BODY_SHARD_CHEWED, ITEM_ID_HUMAN_BONE, ITEM_ID_HUMAN_BRAIN,
     ITEM_ID_HUMAN_EAR, ITEM_ID_HUMAN_EYE, ITEM_ID_HUMAN_FAT, ITEM_ID_HUMAN_INTESTINES, ITEM_ID_HUMAN_LIVER,
@@ -14,28 +14,31 @@ from ..item_core import (
     ITEM_ID_ORIN, ITEM_ID_PARSEE, ITEM_ID_PATCHOULI, ITEM_ID_PEACH, ITEM_ID_PEN, ITEM_ID_PLUSHIE_BEAR, ITEM_ID_PUDDING,
     ITEM_ID_RAMEN, ITEM_ID_REIMU, ITEM_ID_REMILIA, ITEM_ID_RIBBON_BOW, ITEM_ID_RICE, ITEM_ID_RULER, ITEM_ID_RUMIA,
     ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SATORI, ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_STRAWBERRY,
-    ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA, ITEM_ID_TEA_LEAVES, ITEM_ID_TEWI, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING,
-    ITEM_ID_YOUMU, ITEM_ID_YUKARI, ITEM_ID_YUUKA,
+    ITEM_ID_STRAW_HAT, ITEM_ID_SUIKA, ITEM_ID_SUNFLOWER, ITEM_ID_TEA_LEAVES, ITEM_ID_TEWI,
+    ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YOUMU, ITEM_ID_YUKARI, ITEM_ID_YUUKA,
 )
+from ..unit_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT
 
-from .amount_types import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT
 from .constants import DAY_IN_SECONDS, HOUR_IN_SECONDS, QUEST_TEMPLATES
 from .quest_requirement_generators import (
-    QuestRequirementGeneratorChoice, QuestRequirementGeneratorChoiceOption, QuestRequirementGeneratorDuration,
-    QuestRequirementGeneratorItemExact, QuestRequirementGeneratorItemGroup
+    quest_requirement_generator_create_choice, quest_requirement_generator_create_duration,
+    quest_requirement_generator_create_item_exact, quest_requirement_generator_create_item_group,
+    quest_requirement_generator_choice_option_create
 )
 from .quest_reward_generators import (
-    QuestRewardGeneratorBalance, QuestRewardGeneratorCredibility, QuestRewardGeneratorCredibilityFix,
-    QuestRewardGeneratorItemExact, QuestRewardGeneratorItemExactFix
+    quest_reward_generator_create_balance, quest_reward_generator_create_credibility,
+    quest_reward_generator_create_credibility_fix, quest_reward_generator_create_item_exact,
+    quest_reward_generator_create_item_exact_fix
 )
-from .quest_template import QuestTemplate
+from .quest_template import quest_template_create
 from .quest_template_ids import (
     QUEST_TEMPLATE_ID_ALICE_ANGELROOT, QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_ALICE_SKIN,
     QUEST_TEMPLATE_ID_AYA_HUMAN_CORPSE, QUEST_TEMPLATE_ID_CHIRUNO_FROG, QUEST_TEMPLATE_ID_DAI_FROG,
     QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT, QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW,
     QUEST_TEMPLATE_ID_FLANDRE_PLUSHIE_BEAR,
     QUEST_TEMPLATE_ID_JUNKO_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_ANGELROOT, QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT,
-    QUEST_TEMPLATE_ID_KOISHI_BRAIN, QUEST_TEMPLATE_ID_KOISHI_GARLIC, QUEST_TEMPLATE_ID_KOISHI_KNIFE,
+    QUEST_TEMPLATE_ID_KOISHI_BRAIN, QUEST_TEMPLATE_ID_KOISHI_BROOM, QUEST_TEMPLATE_ID_KOISHI_GARLIC,
+    QUEST_TEMPLATE_ID_KOISHI_KNIFE,
     QUEST_TEMPLATE_ID_KOISHI_PEN, QUEST_TEMPLATE_ID_KOISHI_PUDDING, QUEST_TEMPLATE_ID_KOISHI_RULER,
     QUEST_TEMPLATE_ID_KOKORO_SCISSORS, QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA, QUEST_TEMPLATE_ID_MARISA_RAMEN,
     QUEST_TEMPLATE_ID_MYSTIA_BAMBOO_SHOOT, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_DEVILCART_OYSTER,
@@ -58,7 +61,7 @@ from .quest_template_ids import (
 # - Sakuya +2 level
 # - Ruins +1 level
 # Reward is around 2.5x of the value
-QUEST_SAKUYA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY] = QuestTemplate(
+QUEST_SAKUYA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY] = quest_template_create(
     QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
     (
         # If the mistress is requesting some creamy mushroom soup (yummy), you probably would not surprise them with
@@ -76,12 +79,12 @@ QUEST_SAKUYA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY] =
     1,
     ITEM_ID_SAKUYA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 70, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 50, 75, 150),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 70, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 50, 75, 150),
     ),
     (
-        QuestRewardGeneratorBalance(2300, 100, 80, 120),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(2300, 100, 80, 120),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
@@ -90,7 +93,7 @@ QUEST_SAKUYA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY] =
 # - Balancing +1 level
 # - Hakugyokurou mansion +2 level
 # Reward is around 2.0x of the value
-QUEST_TEMPLATE_MYSTIA_PEACH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_PEACH] = QuestTemplate(
+QUEST_TEMPLATE_MYSTIA_PEACH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_PEACH] = quest_template_create(
     QUEST_TEMPLATE_ID_MYSTIA_PEACH,
     None,
     1,
@@ -104,12 +107,12 @@ QUEST_TEMPLATE_MYSTIA_PEACH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_PEACH] = 
     3,
     ITEM_ID_MYSTIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 70, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 5, 75, 150),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 70, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 5, 75, 150),
     ),
     (
-        QuestRewardGeneratorBalance(2400, 50, 80, 120),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(2400, 50, 80, 120),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
@@ -117,7 +120,7 @@ QUEST_TEMPLATE_MYSTIA_PEACH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_PEACH] = 
 # - Sakuya +2 level
 # - Moriya shrine +2 level
 # Reward is around 2.5x of the value
-QUEST_TEMPLATE_SAKUYA_BLUEBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY] = QuestTemplate(
+QUEST_TEMPLATE_SAKUYA_BLUEBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY] = quest_template_create(
     QUEST_TEMPLATE_ID_SAKUYA_BLUEBERRY,
     None,
     4, # Target: 1
@@ -131,12 +134,12 @@ QUEST_TEMPLATE_SAKUYA_BLUEBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BLUEB
     1,
     ITEM_ID_SAKUYA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 6, HOUR_IN_SECONDS, 70, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_BLUEBERRY, AMOUNT_TYPE_WEIGHT, 400, 20, 75, 125),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 6, HOUR_IN_SECONDS, 70, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_BLUEBERRY, AMOUNT_TYPE_WEIGHT, 400, 20, 75, 125),
     ),
     (
-        QuestRewardGeneratorBalance(1350, 50, 90, 120),
-        QuestRewardGeneratorCredibility(20),
+        quest_reward_generator_create_balance(1350, 50, 90, 120),
+        quest_reward_generator_create_credibility(20),
     ),
 )
 
@@ -144,7 +147,7 @@ QUEST_TEMPLATE_SAKUYA_BLUEBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BLUEB
 # - Mystia +0 level
 # - non-village collection +1 level
 # Reward is around 2.0x of the value
-QUEST_TEMPLATE_MYSTIA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_DEVILCART_OYSTER] = QuestTemplate(
+QUEST_TEMPLATE_MYSTIA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_DEVILCART_OYSTER] = quest_template_create(
     QUEST_TEMPLATE_ID_MYSTIA_DEVILCART_OYSTER,
     None,
     1,
@@ -158,12 +161,12 @@ QUEST_TEMPLATE_MYSTIA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTI
     3,
     ITEM_ID_MYSTIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 70, 140),
-        QuestRequirementGeneratorItemExact(ITEM_ID_DEVILCART_OYSTER, AMOUNT_TYPE_WEIGHT, 2000, 100, 75, 215),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 70, 140),
+        quest_requirement_generator_create_item_exact(ITEM_ID_DEVILCART_OYSTER, AMOUNT_TYPE_WEIGHT, 2000, 100, 75, 215),
     ),
     (
-        QuestRewardGeneratorBalance(2300, 100, 90, 110),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(2300, 100, 90, 110),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
@@ -173,7 +176,7 @@ QUEST_TEMPLATE_MYSTIA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTI
 # Reward is around 2.5x of the value
 #
 # This is a +1 version of the mystia one. Here the duration is lower, making it harder.
-QUEST_TEMPLATE_SAKUYA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER] = QuestTemplate(
+QUEST_TEMPLATE_SAKUYA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER] = quest_template_create(
     QUEST_TEMPLATE_ID_SAKUYA_DEVILCART_OYSTER,
     (
         # Exclude other sweet foods.
@@ -191,12 +194,12 @@ QUEST_TEMPLATE_SAKUYA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUY
     1,
     ITEM_ID_SAKUYA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 67, 133),
-        QuestRequirementGeneratorItemExact(ITEM_ID_DEVILCART_OYSTER, AMOUNT_TYPE_WEIGHT, 1400, 50, 75, 215),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 67, 133),
+        quest_requirement_generator_create_item_exact(ITEM_ID_DEVILCART_OYSTER, AMOUNT_TYPE_WEIGHT, 1400, 50, 75, 215),
     ),
     (
-        QuestRewardGeneratorBalance(2000, 100, 80, 110),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(2000, 100, 80, 110),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
@@ -204,7 +207,7 @@ QUEST_TEMPLATE_SAKUYA_DEVILCART_OYSTER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUY
 # - Marisa +2 level
 # - Magic forest +1 level
 # Reward is around 1.5x of the value
-QUEST_TEMPLATE_MARISA_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA] = QuestTemplate(
+QUEST_TEMPLATE_MARISA_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA] = quest_template_create(
     QUEST_TEMPLATE_ID_MARISA_FLYKILLER_AMANITA,
     None,
     4, # Target: 1
@@ -218,12 +221,12 @@ QUEST_TEMPLATE_MARISA_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARI
     0,
     ITEM_ID_MARISA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS, 100, 130),
-        QuestRequirementGeneratorItemExact(ITEM_ID_FLYKILLER_AMANITA, AMOUNT_TYPE_WEIGHT, 8000, 500, 85, 125),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS, 100, 130),
+        quest_requirement_generator_create_item_exact(ITEM_ID_FLYKILLER_AMANITA, AMOUNT_TYPE_WEIGHT, 8000, 500, 85, 125),
     ),
     (
-        QuestRewardGeneratorBalance(6300, 100, 90, 110),
-        QuestRewardGeneratorCredibility(30),
+        quest_reward_generator_create_balance(6300, 100, 90, 110),
+        quest_reward_generator_create_credibility(30),
     ),
 )
 
@@ -234,7 +237,7 @@ QUEST_TEMPLATE_MARISA_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARI
 # This quest requires a lot of grapes, making it great. 
 # Compared to the delivery it is not worth much tho.
 # A big advantage is that this quest can scale pretty well upwards.
-QUEST_TEMPLATE_SAKUYA_BLUEFRANKISH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH] = QuestTemplate(
+QUEST_TEMPLATE_SAKUYA_BLUEFRANKISH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH] = quest_template_create(
     QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH,
     None,
     4, # Target: 1
@@ -248,12 +251,12 @@ QUEST_TEMPLATE_SAKUYA_BLUEFRANKISH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BL
     0,
     ITEM_ID_SAKUYA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 10, DAY_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, 100000, 1000, 100, 250),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 10, DAY_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, 100000, 1000, 100, 250),
     ),
     (
-        QuestRewardGeneratorBalance(16000, 1000, 100, 120),
-        QuestRewardGeneratorCredibility(50),
+        quest_reward_generator_create_balance(16000, 1000, 100, 120),
+        quest_reward_generator_create_credibility(50),
     ),
 )
 
@@ -262,7 +265,7 @@ QUEST_TEMPLATE_SAKUYA_BLUEFRANKISH = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BL
 # Reward is around 2.0x of the value
 #
 # This is a pretty easy quest. Since carrots have low value this quest is not worth much.
-QUEST_TEMPLATE_MYSTIA_CARROT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_CARROT] = QuestTemplate(
+QUEST_TEMPLATE_MYSTIA_CARROT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_CARROT] = quest_template_create(
     QUEST_TEMPLATE_ID_MYSTIA_CARROT,
     None,
     1,
@@ -276,19 +279,19 @@ QUEST_TEMPLATE_MYSTIA_CARROT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_CARROT] 
     3,
     ITEM_ID_MYSTIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 6, HOUR_IN_SECONDS, 90, 110),
-        QuestRequirementGeneratorItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, 9000, 1000, 50, 120),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 6, HOUR_IN_SECONDS, 90, 110),
+        quest_requirement_generator_create_item_exact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, 9000, 1000, 50, 120),
     ),
     (
-        QuestRewardGeneratorBalance(2700, 50, 90, 110),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(2700, 50, 90, 110),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
 
 # - Mystia +0 level
 # Reward is around 2.0x of the value
-QUEST_TEMPLATE_MYSTIA_GARLIC = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_GARLIC] = QuestTemplate(
+QUEST_TEMPLATE_MYSTIA_GARLIC = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_GARLIC] = quest_template_create(
     QUEST_TEMPLATE_ID_MYSTIA_GARLIC,
     None,
     1,
@@ -302,19 +305,19 @@ QUEST_TEMPLATE_MYSTIA_GARLIC = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_GARLIC] 
     1,
     ITEM_ID_MYSTIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 100, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_GARLIC, AMOUNT_TYPE_WEIGHT, 1000, 100, 75, 125),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 100, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_GARLIC, AMOUNT_TYPE_WEIGHT, 1000, 100, 75, 125),
     ),
     (
-        QuestRewardGeneratorBalance(1050, 100, 90, 110),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(1050, 100, 90, 110),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
 
 # - Mystia +0 level
 # Reward is around 2.0x of the value
-QUEST_TEMPLATE_MYSTIA_SCARLET_ONION = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_SCARLET_ONION] = QuestTemplate(
+QUEST_TEMPLATE_MYSTIA_SCARLET_ONION = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_SCARLET_ONION] = quest_template_create(
     QUEST_TEMPLATE_ID_MYSTIA_SCARLET_ONION,
     None,
     1,
@@ -328,12 +331,12 @@ QUEST_TEMPLATE_MYSTIA_SCARLET_ONION = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_S
     3,
     ITEM_ID_MYSTIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 100, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_COUNT, 40, 1, 75, 125),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 100, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_COUNT, 40, 1, 75, 125),
     ),
     (
-        QuestRewardGeneratorBalance(1800, 100, 90, 110),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(1800, 100, 90, 110),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
@@ -342,7 +345,7 @@ QUEST_TEMPLATE_MYSTIA_SCARLET_ONION = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_S
 # - Magic forest +1 level
 # - Short duration +1 level
 # Reward is around 2.5x of the value
-QUEST_TEMPLATE_ALICE_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA] = QuestTemplate(
+QUEST_TEMPLATE_ALICE_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA] = quest_template_create(
     QUEST_TEMPLATE_ID_ALICE_FLYKILLER_AMANITA,
     None,
     4, # Target: 1
@@ -356,12 +359,12 @@ QUEST_TEMPLATE_ALICE_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE
     1,
     ITEM_ID_ALICE,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS, HOUR_IN_SECONDS, 100, 130),
-        QuestRequirementGeneratorItemExact(ITEM_ID_FLYKILLER_AMANITA, AMOUNT_TYPE_COUNT, 3, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS, HOUR_IN_SECONDS, 100, 130),
+        quest_requirement_generator_create_item_exact(ITEM_ID_FLYKILLER_AMANITA, AMOUNT_TYPE_COUNT, 3, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(1300, 50, 90, 110),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(1300, 50, 90, 110),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
@@ -370,7 +373,7 @@ QUEST_TEMPLATE_ALICE_FLYKILLER_AMANITA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE
 # - Misty lake +2 level
 # - equipment +1 level
 # Reward is around 2.0x of the value
-QUEST_TEMPLATE_SAKUYA_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD] = QuestTemplate(
+QUEST_TEMPLATE_SAKUYA_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD] = quest_template_create(
     QUEST_TEMPLATE_ID_SAKUYA_FISHING_ROD,
     None,
     4, # Target: 1
@@ -385,12 +388,12 @@ QUEST_TEMPLATE_SAKUYA_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_FIS
     1,
     ITEM_ID_SAKUYA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 14, DAY_IN_SECONDS, 100, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_FISHING_ROD, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 14, DAY_IN_SECONDS, 100, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_FISHING_ROD, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(6000, 1000, 100, 120),
-        QuestRewardGeneratorCredibilityFix(45),
+        quest_reward_generator_create_balance(6000, 1000, 100, 120),
+        quest_reward_generator_create_credibility_fix(45),
     ),
 )
 
@@ -398,7 +401,7 @@ QUEST_TEMPLATE_SAKUYA_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_FIS
 # - Chiruno +1 level
 # - Misty lake +2 level
 # Reward is around 2.5x of the value
-QUEST_TEMPLATE_CHIRUNO_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_CHIRUNO_FROG] = QuestTemplate(
+QUEST_TEMPLATE_CHIRUNO_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_CHIRUNO_FROG] = quest_template_create(
     QUEST_TEMPLATE_ID_CHIRUNO_FROG,
     (
         # Do not supply the same side of a war at a single day (2ve)
@@ -417,12 +420,12 @@ QUEST_TEMPLATE_CHIRUNO_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_CHIRUNO_FROG] = 
     3,
     ITEM_ID_CHIRUNO,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 100, 140),
-        QuestRequirementGeneratorItemExact(ITEM_ID_FROG, AMOUNT_TYPE_COUNT, 20, 1, 100, 150),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 100, 140),
+        quest_requirement_generator_create_item_exact(ITEM_ID_FROG, AMOUNT_TYPE_COUNT, 20, 1, 100, 150),
     ),
     (
-        QuestRewardGeneratorBalance(3400, 50, 80, 120),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(3400, 50, 80, 120),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
@@ -430,7 +433,7 @@ QUEST_TEMPLATE_CHIRUNO_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_CHIRUNO_FROG] = 
 # - Dai +3 level
 # - Misty lake +2 level
 # Reward is around 2.0x of the value
-QUEST_TEMPLATE_DAI_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_DAI_FROG] = QuestTemplate(
+QUEST_TEMPLATE_DAI_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_DAI_FROG] = quest_template_create(
     QUEST_TEMPLATE_ID_DAI_FROG,
     (
         # Do not supply the same side of a war at a single day (2ve)
@@ -450,12 +453,12 @@ QUEST_TEMPLATE_DAI_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_DAI_FROG] = QuestTem
     0,
     ITEM_ID_DAI,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_FROG, AMOUNT_TYPE_COUNT, 50, 10, 100, 200),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_FROG, AMOUNT_TYPE_COUNT, 50, 10, 100, 200),
     ),
     (
-        QuestRewardGeneratorBalance(6900, 100, 80, 120),
-        QuestRewardGeneratorCredibility(20),
+        quest_reward_generator_create_balance(6900, 100, 80, 120),
+        quest_reward_generator_create_credibility(20),
     ),
 )
 
@@ -463,7 +466,7 @@ QUEST_TEMPLATE_DAI_FROG = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_DAI_FROG] = QuestTem
 # - Tewi +3 level
 # - Bamboo forest +0 level
 # Reward is around 1.5x of the value
-QUEST_TEMPLATE_TEWI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_BISHOPHAT] = QuestTemplate(
+QUEST_TEMPLATE_TEWI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_BISHOPHAT] = quest_template_create(
     QUEST_TEMPLATE_ID_TEWI_BISHOPHAT,
     None,
     4, # Target: 1:ha
@@ -479,12 +482,12 @@ QUEST_TEMPLATE_TEWI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_BISHOPHAT
     9,
     ITEM_ID_TEWI,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 21, DAY_IN_SECONDS, 70, 150),
-        QuestRequirementGeneratorItemExact(ITEM_ID_BISHOPHAT, AMOUNT_TYPE_WEIGHT, 1000, 100, 70, 120),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 21, DAY_IN_SECONDS, 70, 150),
+        quest_requirement_generator_create_item_exact(ITEM_ID_BISHOPHAT, AMOUNT_TYPE_WEIGHT, 1000, 100, 70, 120),
     ),
     (
-        QuestRewardGeneratorBalance(4300, 100, 80, 130),
-        QuestRewardGeneratorCredibility(20),
+        quest_reward_generator_create_balance(4300, 100, 80, 130),
+        quest_reward_generator_create_credibility(20),
     ),
 )
 
@@ -492,7 +495,7 @@ QUEST_TEMPLATE_TEWI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_BISHOPHAT
 # - Junko +3 level
 # - Misty lake +2 level
 # Reward is around 2.5x of the value
-QUEST_TEMPLATE_JUNKO_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_JUNKO_ANGELROOT] = QuestTemplate(
+QUEST_TEMPLATE_JUNKO_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_JUNKO_ANGELROOT] = quest_template_create(
     QUEST_TEMPLATE_ID_JUNKO_ANGELROOT,
     None,
     4, # Target: 1
@@ -506,19 +509,19 @@ QUEST_TEMPLATE_JUNKO_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_JUNKO_ANGELRO
     1,
     ITEM_ID_JUNKO,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2 + HOUR_IN_SECONDS * 12, HOUR_IN_SECONDS, 70, 130),
-        QuestRequirementGeneratorItemExact(ITEM_ID_ANGELROOT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 2 + HOUR_IN_SECONDS * 12, HOUR_IN_SECONDS, 70, 130),
+        quest_requirement_generator_create_item_exact(ITEM_ID_ANGELROOT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(3050, 50, 90, 110),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(3050, 50, 90, 110),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
 # - Koishi +1 level
 # - Misty lake +2 level
 # Reward is around 2.0x of the value
-QUEST_TEMPLATE_KOISHI_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_ANGELROOT] = QuestTemplate(
+QUEST_TEMPLATE_KOISHI_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_ANGELROOT] = quest_template_create(
     QUEST_TEMPLATE_ID_KOISHI_ANGELROOT,
     None,
     4, # Target: 1
@@ -534,19 +537,19 @@ QUEST_TEMPLATE_KOISHI_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_ANGEL
     1,
     ITEM_ID_KOISHI,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 5, HOUR_IN_SECONDS, 70, 130),
-        QuestRequirementGeneratorItemExact(ITEM_ID_ANGELROOT, AMOUNT_TYPE_WEIGHT, 600, 100, 70, 120),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 5, HOUR_IN_SECONDS, 70, 130),
+        quest_requirement_generator_create_item_exact(ITEM_ID_ANGELROOT, AMOUNT_TYPE_WEIGHT, 600, 100, 70, 120),
     ),
     (
-        QuestRewardGeneratorBalance(1200, 50, 80, 110),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(1200, 50, 80, 110),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
 # - Kokoro +2 level
 # - Rare drop +3 level
 # Reward is around 2x of the value
-QUEST_TEMPLATE_KOKORO_SCISSORS = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOKORO_SCISSORS] = QuestTemplate(
+QUEST_TEMPLATE_KOKORO_SCISSORS = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOKORO_SCISSORS] = quest_template_create(
     QUEST_TEMPLATE_ID_KOKORO_SCISSORS,
     None,
     4, # Target: 1
@@ -561,19 +564,19 @@ QUEST_TEMPLATE_KOKORO_SCISSORS = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOKORO_SCISSO
     1,
     ITEM_ID_KOKORO,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 70, 130),
-        QuestRequirementGeneratorItemExact(ITEM_ID_SCISSORS, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 70, 130),
+        quest_requirement_generator_create_item_exact(ITEM_ID_SCISSORS, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(16000, 50, 90, 110),
-        QuestRewardGeneratorCredibilityFix(270),
+        quest_reward_generator_create_balance(16000, 50, 90, 110),
+        quest_reward_generator_create_credibility_fix(270),
     ),
 )
 
 # - Koishi +1 level
 # - Bamboo forest +0 level
 # Reward is around 2.5x of the value
-QUEST_TEMPLATE_KOISHI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT] = QuestTemplate(
+QUEST_TEMPLATE_KOISHI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT] = quest_template_create(
     QUEST_TEMPLATE_ID_KOISHI_BISHOPHAT,
     None,
     2, # Target: 1
@@ -590,12 +593,12 @@ QUEST_TEMPLATE_KOISHI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BISHO
     3,
     ITEM_ID_KOISHI,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_BISHOPHAT, AMOUNT_TYPE_WEIGHT, 200, 10, 70, 130),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_BISHOPHAT, AMOUNT_TYPE_WEIGHT, 200, 10, 70, 130),
     ),
     (
-        QuestRewardGeneratorBalance(1400, 50, 80, 120),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(1400, 50, 80, 120),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
@@ -604,7 +607,7 @@ QUEST_TEMPLATE_KOISHI_BISHOPHAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BISHO
 # - Magic forest + 1 level
 # - Rare drop +3 level
 # Reward is around 2.5x of the value
-QUEST_TEMPLATE_KOISHI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_RULER] = QuestTemplate(
+QUEST_TEMPLATE_KOISHI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_RULER] = quest_template_create(
     QUEST_TEMPLATE_ID_KOISHI_RULER,
     (
         QUEST_TEMPLATE_ID_KOISHI_KNIFE,
@@ -621,12 +624,12 @@ QUEST_TEMPLATE_KOISHI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_RULER] = 
     1,
     ITEM_ID_KOISHI,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_RULER, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_RULER, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(750, 100, 80, 120),
-        QuestRewardGeneratorCredibility(250),
+        quest_reward_generator_create_balance(750, 100, 80, 120),
+        quest_reward_generator_create_credibility(250),
     ),
 )
 
@@ -634,7 +637,7 @@ QUEST_TEMPLATE_KOISHI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_RULER] = 
 # - Yukari +3 level
 # - Rare drop +3 level
 # Reward is around 3x of the value
-QUEST_TEMPLATE_YUKARI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YUKARI_RULER] = QuestTemplate(
+QUEST_TEMPLATE_YUKARI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YUKARI_RULER] = quest_template_create(
     QUEST_TEMPLATE_ID_YUKARI_RULER,
     None,
     4, # Target: 1
@@ -657,19 +660,19 @@ QUEST_TEMPLATE_YUKARI_RULER = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YUKARI_RULER] = 
     1,
     ITEM_ID_YUKARI,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 14, DAY_IN_SECONDS, 90, 130),
-        QuestRequirementGeneratorItemExact(ITEM_ID_RULER, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 14, DAY_IN_SECONDS, 90, 130),
+        quest_requirement_generator_create_item_exact(ITEM_ID_RULER, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(900, 100, 80, 120),
-        QuestRewardGeneratorCredibilityFix(250),
+        quest_reward_generator_create_balance(900, 100, 80, 120),
+        quest_reward_generator_create_credibility_fix(250),
     ),
 )
 
 # - Yuuka +2 level
 # - Rare drop +3 level
 # Reward is around 2x of the value
-QUEST_TEMPLATE_YUUKA_STRAW_HAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT] = QuestTemplate(
+QUEST_TEMPLATE_YUUKA_STRAW_HAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT] = quest_template_create(
     QUEST_TEMPLATE_ID_YUUKA_STRAW_HAT,
     None,
     4, # Target: 1
@@ -682,12 +685,12 @@ QUEST_TEMPLATE_YUUKA_STRAW_HAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YUUKA_STRAW_H
     1,
     ITEM_ID_YUUKA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 70, 130),
-        QuestRequirementGeneratorItemExact(ITEM_ID_STRAW_HAT, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 70, 130),
+        quest_requirement_generator_create_item_exact(ITEM_ID_STRAW_HAT, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(1400, 100, 80, 120),
-        QuestRewardGeneratorCredibilityFix(240),
+        quest_reward_generator_create_balance(1400, 100, 80, 120),
+        quest_reward_generator_create_credibility_fix(240),
     ),
 )
 
@@ -695,7 +698,7 @@ QUEST_TEMPLATE_YUUKA_STRAW_HAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YUUKA_STRAW_H
 # - human village outskirts +0 level
 # - large quantity with short time +1
 # Reward is around 1.5x of the value
-QUEST_TEMPLATE_KOISHI_GARLIC = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_GARLIC] = QuestTemplate(
+QUEST_TEMPLATE_KOISHI_GARLIC = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_GARLIC] = quest_template_create(
     QUEST_TEMPLATE_ID_KOISHI_GARLIC,
     None,
     4, # Target: 1
@@ -715,19 +718,19 @@ QUEST_TEMPLATE_KOISHI_GARLIC = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_GARLIC] 
     1,
     ITEM_ID_KOISHI,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3 + HOUR_IN_SECONDS * 12, HOUR_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_GARLIC, AMOUNT_TYPE_WEIGHT, 8000, 500, 80, 130),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 3 + HOUR_IN_SECONDS * 12, HOUR_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_GARLIC, AMOUNT_TYPE_WEIGHT, 8000, 500, 80, 130),
     ),
     (
-        QuestRewardGeneratorBalance(6500, 500, 80, 120),
-        QuestRewardGeneratorCredibility(40),
+        quest_reward_generator_create_balance(6500, 500, 80, 120),
+        quest_reward_generator_create_credibility(40),
     ),
 )
 
 
 # - non-village collection +1 level
 # Reward is around 2.0x of the value
-QUEST_TEMPLATE_MYSTIA_BAMBOO_SHOOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_BAMBOO_SHOOT] = QuestTemplate(
+QUEST_TEMPLATE_MYSTIA_BAMBOO_SHOOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_BAMBOO_SHOOT] = quest_template_create(
     QUEST_TEMPLATE_ID_MYSTIA_BAMBOO_SHOOT,
     None,
     1,
@@ -741,12 +744,12 @@ QUEST_TEMPLATE_MYSTIA_BAMBOO_SHOOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_BA
     3,
     ITEM_ID_MYSTIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_BAMBOO_SHOOT, AMOUNT_TYPE_COUNT, 5, 1, 80, 120),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_BAMBOO_SHOOT, AMOUNT_TYPE_COUNT, 5, 1, 80, 120),
     ),
     (
-        QuestRewardGeneratorBalance(900, 50, 90, 110),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(900, 50, 90, 110),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
@@ -754,7 +757,7 @@ QUEST_TEMPLATE_MYSTIA_BAMBOO_SHOOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_BA
 # - Alice +2 level
 # - Misty lake +2 level
 # Reward is around 2.0x of the value
-QUEST_TEMPLATE_ALICE_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_ANGELROOT] = QuestTemplate(
+QUEST_TEMPLATE_ALICE_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_ANGELROOT] = quest_template_create(
     QUEST_TEMPLATE_ID_ALICE_ANGELROOT,
     None,
     4, # Target: 1
@@ -772,19 +775,19 @@ QUEST_TEMPLATE_ALICE_ANGELROOT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_ANGELRO
     1,
     ITEM_ID_ALICE,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 100, 130),
-        QuestRequirementGeneratorItemExact(ITEM_ID_ANGELROOT, AMOUNT_TYPE_COUNT, 8, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 2, HOUR_IN_SECONDS, 100, 130),
+        quest_requirement_generator_create_item_exact(ITEM_ID_ANGELROOT, AMOUNT_TYPE_COUNT, 8, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(2550, 50, 90, 110),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(2550, 50, 90, 110),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
 # - Nina +3 level
 # - Ruins +1 level
 # Reward is around 2.0x of the value
-QUEST_NINA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NINA_STRAWBERRY] = QuestTemplate(
+QUEST_NINA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NINA_STRAWBERRY] = quest_template_create(
     QUEST_TEMPLATE_ID_NINA_STRAWBERRY,
     None,
     8, # Target: 1
@@ -801,12 +804,12 @@ QUEST_NINA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NINA_STRAWBERRY] = Que
     1,
     ITEM_ID_NINA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 6, DAY_IN_SECONDS, 70, 130),
-        QuestRequirementGeneratorItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 8000, 500, 75, 175),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 6, DAY_IN_SECONDS, 70, 130),
+        quest_requirement_generator_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 8000, 500, 75, 175),
     ),
     (
-        QuestRewardGeneratorBalance(14000, 1000, 80, 120),
-        QuestRewardGeneratorCredibility(30),
+        quest_reward_generator_create_balance(14000, 1000, 80, 120),
+        quest_reward_generator_create_credibility(30),
     ),
 )
 
@@ -814,7 +817,7 @@ QUEST_NINA_STRAWBERRY = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NINA_STRAWBERRY] = Que
 # - Moriya shrine +2 level
 # - Rare drop +3 level
 # Reward is around 2x of the value
-QUEST_TEMPLATE_KOISHI_KNIFE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_KNIFE] = QuestTemplate(
+QUEST_TEMPLATE_KOISHI_KNIFE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_KNIFE] = quest_template_create(
     QUEST_TEMPLATE_ID_KOISHI_KNIFE,
     (
         QUEST_TEMPLATE_ID_KOISHI_RULER,
@@ -829,12 +832,12 @@ QUEST_TEMPLATE_KOISHI_KNIFE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_KNIFE] = 
     1,
     ITEM_ID_KOISHI,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 70, 130),
-        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 70, 130),
+        quest_requirement_generator_create_item_group(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(13000, 1000, 80, 120),
-        QuestRewardGeneratorCredibilityFix(250),
+        quest_reward_generator_create_balance(13000, 1000, 80, 120),
+        quest_reward_generator_create_credibility_fix(250),
     ),
 )
 
@@ -843,7 +846,7 @@ QUEST_TEMPLATE_KOISHI_KNIFE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_KNIFE] = 
 # - Magic forest +1 level
 # - Balance +1 level
 # Reward is around 1.0x of the value
-QUEST_TEMPLATE_MYSTIA_FIREWOOD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD] = QuestTemplate(
+QUEST_TEMPLATE_MYSTIA_FIREWOOD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD] = quest_template_create(
     QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD,
     (
         QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD,
@@ -860,11 +863,11 @@ QUEST_TEMPLATE_MYSTIA_FIREWOOD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FIREWO
     0,
     ITEM_ID_MYSTIA,
     (
-        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_FIREWOOD, AMOUNT_TYPE_VALUE, 1000, 1, 100, 100),
+        quest_requirement_generator_create_item_group(ITEM_GROUP_ID_FIREWOOD, AMOUNT_TYPE_VALUE, 1000, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(1000, 1, 100, 100),
-        QuestRewardGeneratorCredibilityFix(20),
+        quest_reward_generator_create_balance(1000, 1, 100, 100),
+        quest_reward_generator_create_credibility_fix(20),
     ),
 )
 
@@ -873,7 +876,7 @@ QUEST_TEMPLATE_MYSTIA_FIREWOOD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FIREWO
 # - Misty lake +2 level
 # Reward is around 2.0x of the value
 QUEST_TEMPLATE_EIRIN_ANGELROOT_AND_BISHOPHAT = \
-QUEST_TEMPLATES[QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT] = QuestTemplate(
+QUEST_TEMPLATES[QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT] = quest_template_create(
     QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT,
     None,
     4, # Target: 1
@@ -889,13 +892,13 @@ QUEST_TEMPLATES[QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT] = QuestTemplate
     1,
     ITEM_ID_EIRIN,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3 + HOUR_IN_SECONDS * 12, HOUR_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_ANGELROOT, AMOUNT_TYPE_WEIGHT, 1000, 50, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_BISHOPHAT, AMOUNT_TYPE_WEIGHT, 500, 10, 80, 120),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 3 + HOUR_IN_SECONDS * 12, HOUR_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_ANGELROOT, AMOUNT_TYPE_WEIGHT, 1000, 50, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_BISHOPHAT, AMOUNT_TYPE_WEIGHT, 500, 10, 80, 120),
     ),
     (
-        QuestRewardGeneratorBalance(5300, 100, 80, 120),
-        QuestRewardGeneratorCredibility(15),
+        quest_reward_generator_create_balance(5300, 100, 80, 120),
+        quest_reward_generator_create_credibility(15),
     ),
 )
 
@@ -903,7 +906,7 @@ QUEST_TEMPLATES[QUEST_TEMPLATE_ID_EIRIN_ANGELROOT_AND_BISHOPHAT] = QuestTemplate
 # - Reimu +1 level
 # - Balance +1 level
 # Reward around 2x the value in Sake
-QUEST_TEMPLATE_REIMU_BANQUET = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REIMU_BANQUET] = QuestTemplate(
+QUEST_TEMPLATE_REIMU_BANQUET = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REIMU_BANQUET] = quest_template_create(
     QUEST_TEMPLATE_ID_REIMU_BANQUET,
     None,
     4, # Target: 1
@@ -923,26 +926,26 @@ QUEST_TEMPLATE_REIMU_BANQUET = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REIMU_BANQUET] 
     1,
     ITEM_ID_REIMU,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 6, HOUR_IN_SECONDS * 12, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_DEVILCART_OYSTER, AMOUNT_TYPE_WEIGHT, 1800, 100, 65, 135),
-        QuestRequirementGeneratorItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, 6000, 500, 65, 135),
-        QuestRequirementGeneratorItemExact(ITEM_ID_BAMBOO_SHOOT, AMOUNT_TYPE_COUNT, 8, 1, 65, 135),
-        QuestRequirementGeneratorChoice(
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 6, HOUR_IN_SECONDS * 12, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_DEVILCART_OYSTER, AMOUNT_TYPE_WEIGHT, 1800, 100, 65, 135),
+        quest_requirement_generator_create_item_exact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, 6000, 500, 65, 135),
+        quest_requirement_generator_create_item_exact(ITEM_ID_BAMBOO_SHOOT, AMOUNT_TYPE_COUNT, 8, 1, 65, 135),
+        quest_requirement_generator_create_choice(
             (
-                QuestRequirementGeneratorChoiceOption(
-                    QuestRequirementGeneratorItemExact(ITEM_ID_GARLIC, AMOUNT_TYPE_WEIGHT, 600, 50, 65, 135),
+                quest_requirement_generator_choice_option_create(
+                    quest_requirement_generator_create_item_exact(ITEM_ID_GARLIC, AMOUNT_TYPE_WEIGHT, 600, 50, 65, 135),
                     1,
                 ),
-                QuestRequirementGeneratorChoiceOption(
-                    QuestRequirementGeneratorItemExact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_WEIGHT, 1600, 100, 65, 135),
+                quest_requirement_generator_choice_option_create(
+                    quest_requirement_generator_create_item_exact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_WEIGHT, 1600, 100, 65, 135),
                     1,
                 ),
             ),
         ),
     ),
     (
-        QuestRewardGeneratorItemExactFix(ITEM_ID_SAKE, 3),
-        QuestRewardGeneratorCredibility(30),
+        quest_reward_generator_create_item_exact_fix(ITEM_ID_SAKE, 3),
+        quest_reward_generator_create_credibility(30),
     ),
 )
 
@@ -950,7 +953,7 @@ QUEST_TEMPLATE_REIMU_BANQUET = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REIMU_BANQUET] 
 # - Suika +2 level
 # - Requires reward +1 level
 # Reward around 2x the value
-QUEST_TEMPLATE_SUIKA_SAKE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SUIKA_SAKE] = QuestTemplate(
+QUEST_TEMPLATE_SUIKA_SAKE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SUIKA_SAKE] = quest_template_create(
     QUEST_TEMPLATE_ID_SUIKA_SAKE,
     None,
     4, # Target: 1
@@ -968,12 +971,12 @@ QUEST_TEMPLATE_SUIKA_SAKE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SUIKA_SAKE] = Ques
     1,
     ITEM_ID_SUIKA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 5 + HOUR_IN_SECONDS * 12, HOUR_IN_SECONDS * 12, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_SAKE, AMOUNT_TYPE_COUNT, 4, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 5 + HOUR_IN_SECONDS * 12, HOUR_IN_SECONDS * 12, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_SAKE, AMOUNT_TYPE_COUNT, 4, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(13600, 400, 80, 120),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(13600, 400, 80, 120),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
@@ -981,7 +984,7 @@ QUEST_TEMPLATE_SUIKA_SAKE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SUIKA_SAKE] = Ques
 # - Flandre +4
 # - Ruins +1 level
 # - Rare drop +3 level
-QUEST_TEMPLATE_FLANDRE_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW] = QuestTemplate(
+QUEST_TEMPLATE_FLANDRE_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW] = quest_template_create(
     QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW,
     (
         QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW,
@@ -1001,12 +1004,12 @@ QUEST_TEMPLATE_FLANDRE_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_FLANDRE_RI
     1,
     ITEM_ID_FLANDRE,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 16, DAY_IN_SECONDS, 90, 110),
-        QuestRequirementGeneratorItemExact(ITEM_ID_RIBBON_BOW, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 16, DAY_IN_SECONDS, 90, 110),
+        quest_requirement_generator_create_item_exact(ITEM_ID_RIBBON_BOW, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorItemExactFix(ITEM_ID_PUDDING, 1),
-        QuestRewardGeneratorCredibilityFix(240),
+        quest_reward_generator_create_item_exact_fix(ITEM_ID_PUDDING, 1),
+        quest_reward_generator_create_credibility_fix(240),
     ),
 )
 
@@ -1014,7 +1017,7 @@ QUEST_TEMPLATE_FLANDRE_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_FLANDRE_RI
 # - Remilia +3
 # - Ruins +1 level
 # - Rare drop +3 level
-QUEST_TEMPLATE_REMILIA_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW] = QuestTemplate(
+QUEST_TEMPLATE_REMILIA_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW] = quest_template_create(
     QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW,
     (
         QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW,
@@ -1034,13 +1037,13 @@ QUEST_TEMPLATE_REMILIA_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REMILIA_RI
     1,
     ITEM_ID_REMILIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 32, DAY_IN_SECONDS, 90, 110),
-        QuestRequirementGeneratorItemExact(ITEM_ID_RIBBON_BOW, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 32, DAY_IN_SECONDS, 90, 110),
+        quest_requirement_generator_create_item_exact(ITEM_ID_RIBBON_BOW, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(1000, 100, 70, 130),
-        QuestRewardGeneratorItemExactFix(ITEM_ID_PUDDING, 4),
-        QuestRewardGeneratorCredibilityFix(160),
+        quest_reward_generator_create_balance(1000, 100, 70, 130),
+        quest_reward_generator_create_item_exact_fix(ITEM_ID_PUDDING, 4),
+        quest_reward_generator_create_credibility_fix(160),
     ),
 )
 
@@ -1048,7 +1051,7 @@ QUEST_TEMPLATE_REMILIA_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REMILIA_RI
 # - Koishi +1
 # - Requires reward of rare drop quest +4 level
 # - Gives unique items +2 level
-QUEST_TEMPLATE_KOISHI_PUDDING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_PUDDING] = QuestTemplate(
+QUEST_TEMPLATE_KOISHI_PUDDING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_PUDDING] = quest_template_create(
     QUEST_TEMPLATE_ID_KOISHI_PUDDING,
     (
         QUEST_TEMPLATE_ID_SATORI_PUDDING,
@@ -1066,19 +1069,19 @@ QUEST_TEMPLATE_KOISHI_PUDDING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_PUDDING
     1,
     ITEM_ID_KOISHI,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 38, DAY_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_PUDDING, AMOUNT_TYPE_COUNT, 2, 2, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 38, DAY_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_PUDDING, AMOUNT_TYPE_COUNT, 2, 2, 100, 100),
     ),
     (
-        QuestRewardGeneratorItemExactFix(ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, 1),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_item_exact_fix(ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, 1),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
 # - Satori +2
 # - Requires reward of rare drop quest +4 level
 # - Balance +1 level
-QUEST_TEMPLATE_SATORI_PUDDING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SATORI_PUDDING] = QuestTemplate(
+QUEST_TEMPLATE_SATORI_PUDDING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SATORI_PUDDING] = quest_template_create(
     QUEST_TEMPLATE_ID_SATORI_PUDDING,
     (
         QUEST_TEMPLATE_ID_KOISHI_PUDDING,
@@ -1098,20 +1101,20 @@ QUEST_TEMPLATE_SATORI_PUDDING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SATORI_PUDDING
     1,
     ITEM_ID_SATORI,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 16, DAY_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_PUDDING, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
-        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_SWEETS, AMOUNT_TYPE_WEIGHT, 200, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 16, DAY_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_PUDDING, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_item_group(ITEM_GROUP_ID_SWEETS, AMOUNT_TYPE_WEIGHT, 200, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorItemExact(ITEM_ID_TEA_LEAVES, 16, 1, 80, 120),
-        QuestRewardGeneratorCredibility(20),
+        quest_reward_generator_create_item_exact(ITEM_ID_TEA_LEAVES, 16, 1, 80, 120),
+        quest_reward_generator_create_credibility(20),
     ),
 )
 
 
 # - Remilia +3
 # - Requires reward of unique drop quest +5 level
-QUEST_TEMPLATE_REMILIA_FLANDRE_WING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING] = QuestTemplate(
+QUEST_TEMPLATE_REMILIA_FLANDRE_WING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING] = quest_template_create(
     QUEST_TEMPLATE_ID_REMILIA_FLANDRE_WING,
     (
         QUEST_TEMPLATE_ID_REMILIA_RIBBON_BOW,
@@ -1130,19 +1133,19 @@ QUEST_TEMPLATE_REMILIA_FLANDRE_WING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REMILIA_
     1,
     ITEM_ID_REMILIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 8, 1, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 8, 1, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(138000, 100, 90, 110),
-        QuestRewardGeneratorCredibilityFix(200),
+        quest_reward_generator_create_balance(138000, 100, 90, 110),
+        quest_reward_generator_create_credibility_fix(200),
     ),
 )
 
 
 # - Rumia +2
 # - Requires meat +3
-QUEST_TEMPLATE_RUMIA_LIVER_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_LIVER_SAUSAGE] = QuestTemplate(
+QUEST_TEMPLATE_RUMIA_LIVER_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_LIVER_SAUSAGE] = quest_template_create(
     QUEST_TEMPLATE_ID_RUMIA_LIVER_SAUSAGE,
     (
         QUEST_TEMPLATE_ID_RUMIA_BLOOD_SAUSAGE,
@@ -1160,27 +1163,27 @@ QUEST_TEMPLATE_RUMIA_LIVER_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_LIV
     1,
     ITEM_ID_RUMIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, DAY_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_LUNG, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_LIVER, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_FAT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
-        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_LIVER_SAUSAGE_MEAT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_MUSCLE, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_INTESTINES, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 7, DAY_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_LUNG, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_LIVER, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_FAT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+        quest_requirement_generator_create_item_group(ITEM_GROUP_ID_LIVER_SAUSAGE_MEAT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_MUSCLE, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_INTESTINES, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(5000, 100, 90, 110),
-        QuestRewardGeneratorItemExactFix(ITEM_ID_LIVER_SAUSAGE, 2),
-        QuestRewardGeneratorCredibility(20),
+        quest_reward_generator_create_balance(5000, 100, 90, 110),
+        quest_reward_generator_create_item_exact_fix(ITEM_ID_LIVER_SAUSAGE, 2),
+        quest_reward_generator_create_credibility(20),
     ),
 )
 
 
 # - Rumia +2
 # - Requires meat +3
-QUEST_TEMPLATE_RUMIA_BLOOD_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_BLOOD_SAUSAGE] = QuestTemplate(
+QUEST_TEMPLATE_RUMIA_BLOOD_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_BLOOD_SAUSAGE] = quest_template_create(
     QUEST_TEMPLATE_ID_RUMIA_BLOOD_SAUSAGE,
     (
         QUEST_TEMPLATE_ID_RUMIA_LIVER_SAUSAGE,
@@ -1198,28 +1201,28 @@ QUEST_TEMPLATE_RUMIA_BLOOD_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_BLO
     1,
     ITEM_ID_RUMIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, DAY_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_LUNG, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_BLOOD, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_FAT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
-        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_BLOOD_SAUSAGE_MEAT, AMOUNT_TYPE_WEIGHT, 1400, 1000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_MUSCLE, AMOUNT_TYPE_WEIGHT, 2000, 1000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_INTESTINES, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_WEIGHT, 1000, 2000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_GARLIC, AMOUNT_TYPE_WEIGHT, 400, 400, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 7, DAY_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_LUNG, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_BLOOD, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_FAT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+        quest_requirement_generator_create_item_group(ITEM_GROUP_ID_BLOOD_SAUSAGE_MEAT, AMOUNT_TYPE_WEIGHT, 1400, 1000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_MUSCLE, AMOUNT_TYPE_WEIGHT, 2000, 1000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_INTESTINES, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_WEIGHT, 1000, 2000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_GARLIC, AMOUNT_TYPE_WEIGHT, 400, 400, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(5000, 100, 90, 110),
-        QuestRewardGeneratorItemExactFix(ITEM_ID_BLOOD_SAUSAGE, 2),
-        QuestRewardGeneratorCredibility(20),
+        quest_reward_generator_create_balance(5000, 100, 90, 110),
+        quest_reward_generator_create_item_exact_fix(ITEM_ID_BLOOD_SAUSAGE, 2),
+        quest_reward_generator_create_credibility(20),
     ),
 )
 
 
 # - Rumia +2
 # - Requires meat +3
-QUEST_TEMPLATE_RUMIA_MEAT_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_MEAT_SAUSAGE] = QuestTemplate(
+QUEST_TEMPLATE_RUMIA_MEAT_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_MEAT_SAUSAGE] = quest_template_create(
     QUEST_TEMPLATE_ID_RUMIA_MEAT_SAUSAGE,
     (
         QUEST_TEMPLATE_ID_RUMIA_LIVER_SAUSAGE,
@@ -1237,18 +1240,18 @@ QUEST_TEMPLATE_RUMIA_MEAT_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_MEAT
     1,
     ITEM_ID_RUMIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, DAY_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_FAT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
-        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_MEAT_SAUSAGE_MEAT, AMOUNT_TYPE_WEIGHT, 2000, 1000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_MUSCLE, AMOUNT_TYPE_WEIGHT, 4000, 1000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_INTESTINES, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_WEIGHT, 1000, 2000, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 7, DAY_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_FAT, AMOUNT_TYPE_WEIGHT, 1000, 1000, 100, 100),
+        quest_requirement_generator_create_item_group(ITEM_GROUP_ID_MEAT_SAUSAGE_MEAT, AMOUNT_TYPE_WEIGHT, 2000, 1000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_MUSCLE, AMOUNT_TYPE_WEIGHT, 4000, 1000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_INTESTINES, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 2000, 2000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_WEIGHT, 1000, 2000, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(5000, 100, 90, 110),
-        QuestRewardGeneratorItemExactFix(ITEM_ID_MEAT_SAUSAGE, 2),
-        QuestRewardGeneratorCredibility(20),
+        quest_reward_generator_create_balance(5000, 100, 90, 110),
+        quest_reward_generator_create_item_exact_fix(ITEM_ID_MEAT_SAUSAGE, 2),
+        quest_reward_generator_create_credibility(20),
     ),
 )
 
@@ -1257,7 +1260,7 @@ QUEST_TEMPLATE_RUMIA_MEAT_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_MEAT
 # - Misty lake +2 level
 # - equipment +1 level
 # Reward is around 3x of the value
-QUEST_TEMPLATE_ORIN_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ORIN_FISHING_ROD] = QuestTemplate(
+QUEST_TEMPLATE_ORIN_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ORIN_FISHING_ROD] = quest_template_create(
     QUEST_TEMPLATE_ID_ORIN_FISHING_ROD,
     None,
     4, # Target: 1
@@ -1272,12 +1275,12 @@ QUEST_TEMPLATE_ORIN_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ORIN_FISHING
     1,
     ITEM_ID_ORIN,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 100, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_FISHING_ROD, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 28, DAY_IN_SECONDS, 100, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_FISHING_ROD, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(9000, 1000, 100, 120),
-        QuestRewardGeneratorCredibilityFix(25),
+        quest_reward_generator_create_balance(9000, 1000, 100, 120),
+        quest_reward_generator_create_credibility_fix(25),
     ),
 )
 
@@ -1285,7 +1288,7 @@ QUEST_TEMPLATE_ORIN_FISHING_ROD = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ORIN_FISHING
 # - Sakuya +2 level
 # - Requires meat +3 level
 # Reward around 2.5x the value in Sake
-QUEST_TEMPLATE_SAKUYA_BOILED_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BOILED_SAUSAGE] = QuestTemplate(
+QUEST_TEMPLATE_SAKUYA_BOILED_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_BOILED_SAUSAGE] = quest_template_create(
     QUEST_TEMPLATE_ID_SAKUYA_BOILED_SAUSAGE,
     None,
     2, # Target: 1
@@ -1299,12 +1302,12 @@ QUEST_TEMPLATE_SAKUYA_BOILED_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_
     1,
     ITEM_ID_SAKUYA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 12, HOUR_IN_SECONDS, 70, 120),
-        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_BOILED_SAUSAGE, AMOUNT_TYPE_WEIGHT, 2000, 2000, 65, 135),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 12, HOUR_IN_SECONDS, 70, 120),
+        quest_requirement_generator_create_item_group(ITEM_GROUP_ID_BOILED_SAUSAGE, AMOUNT_TYPE_WEIGHT, 2000, 2000, 65, 135),
     ),
     (
-        QuestRewardGeneratorBalance(2500, 100, 80, 120),
-        QuestRewardGeneratorCredibility(20),
+        quest_reward_generator_create_balance(2500, 100, 80, 120),
+        quest_reward_generator_create_credibility(20),
     ),
 )
 
@@ -1312,7 +1315,7 @@ QUEST_TEMPLATE_SAKUYA_BOILED_SAUSAGE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SAKUYA_
 # - Alice +2 level
 # - Requires meat +3 level
 # Reward around 2x the value in Sake
-QUEST_TEMPLATE_ALICE_SKIN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_SKIN] = QuestTemplate(
+QUEST_TEMPLATE_ALICE_SKIN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_SKIN] = quest_template_create(
     QUEST_TEMPLATE_ID_ALICE_SKIN,
     None,
     2, # Target: 1
@@ -1326,12 +1329,12 @@ QUEST_TEMPLATE_ALICE_SKIN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_SKIN] = Ques
     1,
     ITEM_ID_ALICE,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 6, HOUR_IN_SECONDS, 70, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_SKIN, AMOUNT_TYPE_COUNT, 16, 2, 50, 150),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 6, HOUR_IN_SECONDS, 70, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_SKIN, AMOUNT_TYPE_COUNT, 16, 2, 50, 150),
     ),
     (
-        QuestRewardGeneratorBalance(800, 100, 80, 120),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(800, 100, 80, 120),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
@@ -1339,7 +1342,7 @@ QUEST_TEMPLATE_ALICE_SKIN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_ALICE_SKIN] = Ques
 # - Mystia +0 level
 # - Requires meat +3 level
 # Reward around 2x the value in Sake
-QUEST_TEMPLATE_MYSTIA_MEAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_MEAT] = QuestTemplate(
+QUEST_TEMPLATE_MYSTIA_MEAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_MEAT] = quest_template_create(
     QUEST_TEMPLATE_ID_MYSTIA_MEAT,
     None,
     1,
@@ -1353,19 +1356,19 @@ QUEST_TEMPLATE_MYSTIA_MEAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_MEAT] = Qu
     3,
     ITEM_ID_MYSTIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 4, HOUR_IN_SECONDS, 70, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_MUSCLE, AMOUNT_TYPE_WEIGHT, 8000, 1000, 80, 120),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 4, HOUR_IN_SECONDS, 70, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_MUSCLE, AMOUNT_TYPE_WEIGHT, 8000, 1000, 80, 120),
     ),
     (
-        QuestRewardGeneratorBalance(8000, 1000, 80, 120),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(8000, 1000, 80, 120),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
 
 # - Mystia +0 level
 # - Requires meat +3 level
-QUEST_TEMPLATE_MYSTIA_FAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FAT] = QuestTemplate(
+QUEST_TEMPLATE_MYSTIA_FAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FAT] = quest_template_create(
     QUEST_TEMPLATE_ID_MYSTIA_FAT,
     None,
     1,
@@ -1379,12 +1382,12 @@ QUEST_TEMPLATE_MYSTIA_FAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FAT] = Ques
     1,
     ITEM_ID_MYSTIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2 + HOUR_IN_SECONDS * 6, HOUR_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_FAT, AMOUNT_TYPE_WEIGHT, 2000, 100, 80, 120),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 2 + HOUR_IN_SECONDS * 6, HOUR_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_FAT, AMOUNT_TYPE_WEIGHT, 2000, 100, 80, 120),
     ),
     (
-        QuestRewardGeneratorBalance(1150, 50, 80, 120),
-        QuestRewardGeneratorCredibility(20),
+        quest_reward_generator_create_balance(1150, 50, 80, 120),
+        quest_reward_generator_create_credibility(20),
     ),
 )
 
@@ -1392,7 +1395,7 @@ QUEST_TEMPLATE_MYSTIA_FAT = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_FAT] = Ques
 # - Patchouli +2 level
 # - Requires meat +3 level
 # Reward around 3x the value
-QUEST_TEMPLATE_PATCHOULI_EYE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_PATCHOULI_EYE] = QuestTemplate(
+QUEST_TEMPLATE_PATCHOULI_EYE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_PATCHOULI_EYE] = quest_template_create(
     QUEST_TEMPLATE_ID_PATCHOULI_EYE,
     None,
     4, # Target: 1
@@ -1406,12 +1409,12 @@ QUEST_TEMPLATE_PATCHOULI_EYE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_PATCHOULI_EYE] 
     1,
     ITEM_ID_PATCHOULI,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 32, DAY_IN_SECONDS, 90, 110),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_EYE, AMOUNT_TYPE_COUNT, 6, 6, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 32, DAY_IN_SECONDS, 90, 110),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_EYE, AMOUNT_TYPE_COUNT, 6, 6, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(100, 1, 100, 100),
-        QuestRewardGeneratorCredibility(30),
+        quest_reward_generator_create_balance(100, 1, 100, 100),
+        quest_reward_generator_create_credibility(30),
     ),
 )
 
@@ -1419,7 +1422,7 @@ QUEST_TEMPLATE_PATCHOULI_EYE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_PATCHOULI_EYE] 
 # - Patchouli +1 level
 # - Requires meat +3 level
 # Reward around 1x the value
-QUEST_TEMPLATE_ID_BRAIN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BRAIN] = QuestTemplate(
+QUEST_TEMPLATE_ID_BRAIN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BRAIN] = quest_template_create(
     QUEST_TEMPLATE_ID_KOISHI_BRAIN,
     None,
     4, # Target: 1
@@ -1434,11 +1437,11 @@ QUEST_TEMPLATE_ID_BRAIN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BRAIN] = Ques
     1,
     ITEM_ID_KOISHI,
     (
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_BRAIN, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_BRAIN, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(900, 1, 100, 100),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(900, 1, 100, 100),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
@@ -1447,7 +1450,7 @@ QUEST_TEMPLATE_ID_BRAIN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BRAIN] = Ques
 # - Requires meat +3 level
 # - Requires large amount +1 level
 # Reward is around 1.5x of the value
-QUEST_NINA_SKULL = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NINA_SKULL] = QuestTemplate(
+QUEST_NINA_SKULL = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NINA_SKULL] = quest_template_create(
     QUEST_TEMPLATE_ID_NINA_SKULL,
     None,
     2, # Target: 1
@@ -1464,12 +1467,12 @@ QUEST_NINA_SKULL = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NINA_SKULL] = QuestTemplate
     1,
     ITEM_ID_NINA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 120, DAY_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_BODY_PART_SKULL, AMOUNT_TYPE_COUNT, 60, 1, 90, 110),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 120, DAY_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_BODY_PART_SKULL, AMOUNT_TYPE_COUNT, 60, 1, 90, 110),
     ),
     (
-        QuestRewardGeneratorBalance(15000, 100, 90, 110),
-        QuestRewardGeneratorCredibility(90),
+        quest_reward_generator_create_balance(15000, 100, 90, 110),
+        quest_reward_generator_create_credibility(90),
     ),
 )
 
@@ -1477,7 +1480,7 @@ QUEST_NINA_SKULL = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NINA_SKULL] = QuestTemplate
 # - Reimu +1 level
 # - Requires meat +3 level
 # Reward is around 3x of the value
-QUEST_REIMU_EAR = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REIMU_EAR] = QuestTemplate(
+QUEST_REIMU_EAR = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REIMU_EAR] = quest_template_create(
     QUEST_TEMPLATE_ID_REIMU_EAR,
     None,
     4, # Target: 1
@@ -1490,12 +1493,12 @@ QUEST_REIMU_EAR = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REIMU_EAR] = QuestTemplate(
     1,
     ITEM_ID_REIMU,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS * 12, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_EAR, AMOUNT_TYPE_COUNT, 10, 1, 80, 120),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS * 12, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_EAR, AMOUNT_TYPE_COUNT, 10, 1, 80, 120),
     ),
     (
-        QuestRewardGeneratorItemExactFix(ITEM_ID_DANGO, 1),
-        QuestRewardGeneratorCredibility(20),
+        quest_reward_generator_create_item_exact_fix(ITEM_ID_DANGO, 1),
+        quest_reward_generator_create_credibility(20),
     ),
 )
 
@@ -1504,7 +1507,7 @@ QUEST_REIMU_EAR = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REIMU_EAR] = QuestTemplate(
 # - Human village outskirts +0 level
 # - Requires large amount.
 # Reward is around 2.0x of the value
-QUEST_TEMPLATE_MYSTIA_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_RICE] = QuestTemplate(
+QUEST_TEMPLATE_MYSTIA_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_RICE] = quest_template_create(
     QUEST_TEMPLATE_ID_MYSTIA_RICE,
     None,
     1,
@@ -1518,12 +1521,12 @@ QUEST_TEMPLATE_MYSTIA_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_RICE] = Qu
     2,
     ITEM_ID_MYSTIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS * 12, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 10000, 100, 80, 120),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS * 12, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 10000, 100, 80, 120),
     ),
     (
-        QuestRewardGeneratorBalance(11000, 100, 80, 120),
-        QuestRewardGeneratorCredibility(30),
+        quest_reward_generator_create_balance(11000, 100, 80, 120),
+        quest_reward_generator_create_credibility(30),
     ),
 )
 
@@ -1532,7 +1535,7 @@ QUEST_TEMPLATE_MYSTIA_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_RICE] = Qu
 # - Human village outskirts +0 level
 # - Requires large amount.
 # Reward is around 1.5x of the value
-QUEST_TEMPLATE_TEWI_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_RICE] = QuestTemplate(
+QUEST_TEMPLATE_TEWI_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_RICE] = quest_template_create(
     QUEST_TEMPLATE_ID_TEWI_RICE,
     None,
     4, # target 1
@@ -1550,13 +1553,13 @@ QUEST_TEMPLATE_TEWI_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_RICE] = QuestT
     1,
     ITEM_ID_TEWI,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 10, DAY_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 32000, 1000, 80, 120),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 10, DAY_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 32000, 1000, 80, 120),
     ),
     (
-        QuestRewardGeneratorBalance(26000, 1000, 80, 120),
-        QuestRewardGeneratorItemExactFix(ITEM_ID_DANGO, 3),
-        QuestRewardGeneratorCredibility(60),
+        quest_reward_generator_create_balance(26000, 1000, 80, 120),
+        quest_reward_generator_create_item_exact_fix(ITEM_ID_DANGO, 3),
+        quest_reward_generator_create_credibility(60),
     ),
 )
 
@@ -1564,7 +1567,7 @@ QUEST_TEMPLATE_TEWI_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_RICE] = QuestT
 # - Rumia +2
 # - Requires quest reward +1
 # Reward is around 2x of the value
-QUEST_TEMPLATE_RUMIA_SWEETS = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_SWEETS] = QuestTemplate(
+QUEST_TEMPLATE_RUMIA_SWEETS = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_SWEETS] = quest_template_create(
     QUEST_TEMPLATE_ID_RUMIA_SWEETS,
     None,
     2, # Target: 1
@@ -1577,12 +1580,12 @@ QUEST_TEMPLATE_RUMIA_SWEETS = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_SWEETS] = 
     1,
     ITEM_ID_RUMIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 5, HOUR_IN_SECONDS * 6, 80, 120),
-        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_SWEETS, AMOUNT_TYPE_WEIGHT, 200, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 5, HOUR_IN_SECONDS * 6, 80, 120),
+        quest_requirement_generator_create_item_group(ITEM_GROUP_ID_SWEETS, AMOUNT_TYPE_WEIGHT, 200, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(1200, 100, 90, 110),
-        QuestRewardGeneratorCredibility(20),
+        quest_reward_generator_create_balance(1200, 100, 90, 110),
+        quest_reward_generator_create_credibility(20),
     ),
 )
 
@@ -1590,7 +1593,7 @@ QUEST_TEMPLATE_RUMIA_SWEETS = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_SWEETS] = 
 # - Requires meat +3
 # - Rare drop +3 level
 # reward is 1.5x the requirement.
-QUEST_TEMPLATE_AYA_HUMAN_CORPSE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_AYA_HUMAN_CORPSE] = QuestTemplate(
+QUEST_TEMPLATE_AYA_HUMAN_CORPSE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_AYA_HUMAN_CORPSE] = quest_template_create(
     QUEST_TEMPLATE_ID_AYA_HUMAN_CORPSE,
     None,
     2, # Target: 1
@@ -1603,20 +1606,20 @@ QUEST_TEMPLATE_AYA_HUMAN_CORPSE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_AYA_HUMAN_CO
     1,
     ITEM_ID_AYA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 72, DAY_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemGroup(ITEM_GROUP_ID_HUMAN_CORPSE_FULL, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 72, DAY_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_group(ITEM_GROUP_ID_HUMAN_CORPSE_FULL, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(27000, 1000, 90, 110),
-        QuestRewardGeneratorItemExactFix(ITEM_ID_PEN, 1),
-        QuestRewardGeneratorCredibility(60),
+        quest_reward_generator_create_balance(27000, 1000, 90, 110),
+        quest_reward_generator_create_item_exact_fix(ITEM_ID_PEN, 1),
+        quest_reward_generator_create_credibility(60),
     ),
 )
 
 # - Youmu +0
 # - Requires quest reward + meat +4
 # Reward is around 2.5x the value.
-QUEST_TEMPLATE_YOUMU_RAMEN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YOUMU_RAMEN] = QuestTemplate(
+QUEST_TEMPLATE_YOUMU_RAMEN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YOUMU_RAMEN] = quest_template_create(
     QUEST_TEMPLATE_ID_YOUMU_RAMEN,
     (
         QUEST_TEMPLATE_ID_YOUMU_DANGO_TEA,
@@ -1631,19 +1634,19 @@ QUEST_TEMPLATE_YOUMU_RAMEN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YOUMU_RAMEN] = Qu
     2,
     ITEM_ID_YOUMU,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 4, HOUR_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_RAMEN, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 4, HOUR_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_RAMEN, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(930, 10, 80, 120),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(930, 10, 80, 120),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
 # - Youmu +0
 # - Requires item reward of quest level 7 +8
 # Reward is around 33x the requirements.
-QUEST_TEMPLATE_YOUMU_DANGO_TEA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YOUMU_DANGO_TEA] = QuestTemplate(
+QUEST_TEMPLATE_YOUMU_DANGO_TEA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YOUMU_DANGO_TEA] = quest_template_create(
     QUEST_TEMPLATE_ID_YOUMU_DANGO_TEA,
     (
         QUEST_TEMPLATE_ID_YOUMU_RAMEN,
@@ -1658,14 +1661,14 @@ QUEST_TEMPLATE_YOUMU_DANGO_TEA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YOUMU_DANGO_T
     2,
     ITEM_ID_YOUMU,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 2, 1, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_DANGO, AMOUNT_TYPE_COUNT, 3, 1, 100, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_TEA_LEAVES, AMOUNT_TYPE_COUNT, 4, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 2, 1, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_DANGO, AMOUNT_TYPE_COUNT, 3, 1, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_TEA_LEAVES, AMOUNT_TYPE_COUNT, 4, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorItemExact(ITEM_ID_PEACH, 8, 1, 100, 100),
-        QuestRewardGeneratorBalance(400, 10, 80, 120),
-        QuestRewardGeneratorCredibility(30),
+        quest_reward_generator_create_item_exact(ITEM_ID_PEACH, 8, 1, 100, 100),
+        quest_reward_generator_create_balance(400, 10, 80, 120),
+        quest_reward_generator_create_credibility(30),
     ),
 )
 
@@ -1673,9 +1676,11 @@ QUEST_TEMPLATE_YOUMU_DANGO_TEA = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_YOUMU_DANGO_T
 # - Koishi +1
 # - Requires reward of rare drop quest + meat +7 level
 # Reward is around 2x the value.
-QUEST_TEMPLATE_KOISHI_PEN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_PEN] = QuestTemplate(
+QUEST_TEMPLATE_KOISHI_PEN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_PEN] = quest_template_create(
     QUEST_TEMPLATE_ID_KOISHI_PEN,
-    None,
+    (
+        QUEST_TEMPLATE_ID_KOISHI_BROOM,
+    ),
     2, # Target: 1
     70,
     (
@@ -1687,12 +1692,12 @@ QUEST_TEMPLATE_KOISHI_PEN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_PEN] = Ques
     1,
     ITEM_ID_KOISHI,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 72, DAY_IN_SECONDS, 80, 100),
-        QuestRequirementGeneratorItemExact(ITEM_ID_PEN, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 72, DAY_IN_SECONDS, 80, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_PEN, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(5000, 10, 80, 120),
-        QuestRewardGeneratorCredibility(80),
+        quest_reward_generator_create_balance(5000, 10, 80, 120),
+        quest_reward_generator_create_credibility(80),
     ),
 )
 
@@ -1700,7 +1705,7 @@ QUEST_TEMPLATE_KOISHI_PEN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_PEN] = Ques
 # - Nitori +0
 # - Requires meat +3
 # Reward is around 1.7x the value.
-QUEST_TEMPLATE_NITORI_HUMAN_BONE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NITORI_HUMAN_BONE] = QuestTemplate(
+QUEST_TEMPLATE_NITORI_HUMAN_BONE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NITORI_HUMAN_BONE] = quest_template_create(
     QUEST_TEMPLATE_ID_NITORI_HUMAN_BONE,
     None,
     2, # Target: 1
@@ -1717,11 +1722,11 @@ QUEST_TEMPLATE_NITORI_HUMAN_BONE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NITORI_HUMA
     0,
     ITEM_ID_NITORI,
     (
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_BONE, AMOUNT_TYPE_WEIGHT, 10000, 10000, 100, 100),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_BONE, AMOUNT_TYPE_WEIGHT, 10000, 10000, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(2200, 1, 100, 100),
-        QuestRewardGeneratorCredibilityFix(15),
+        quest_reward_generator_create_balance(2200, 1, 100, 100),
+        quest_reward_generator_create_credibility_fix(15),
     ),
 )
 
@@ -1729,7 +1734,7 @@ QUEST_TEMPLATE_NITORI_HUMAN_BONE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_NITORI_HUMA
 # - Parsee +2
 # - Ruins +1 level
 # - Rare drop +3 level
-QUEST_TEMPLATE_PARSEE_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_PARSEE_RIBBON_BOW] = QuestTemplate(
+QUEST_TEMPLATE_PARSEE_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_PARSEE_RIBBON_BOW] = quest_template_create(
     QUEST_TEMPLATE_ID_PARSEE_RIBBON_BOW,
     (
         QUEST_TEMPLATE_ID_FLANDRE_RIBBON_BOW,
@@ -1746,18 +1751,18 @@ QUEST_TEMPLATE_PARSEE_RIBBON_BOW = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_PARSEE_RIBB
     1,
     ITEM_ID_PARSEE,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 32, DAY_IN_SECONDS, 90, 110),
-        QuestRequirementGeneratorItemExact(ITEM_ID_RIBBON_BOW, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 32, DAY_IN_SECONDS, 90, 110),
+        quest_requirement_generator_create_item_exact(ITEM_ID_RIBBON_BOW, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorCredibilityFix(240),
+        quest_reward_generator_create_credibility_fix(240),
     ),
 )
 
 
 # - Requires meat +3
 # Reward is around 2x the requirements
-QUEST_TEMPLATE_MYSTIA_HUMAN_BONE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_HUMAN_BONE] = QuestTemplate(
+QUEST_TEMPLATE_MYSTIA_HUMAN_BONE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_HUMAN_BONE] = quest_template_create(
     QUEST_TEMPLATE_ID_MYSTIA_HUMAN_BONE,
     None,
     1,
@@ -1771,13 +1776,13 @@ QUEST_TEMPLATE_MYSTIA_HUMAN_BONE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_HUMA
     1,
     ITEM_ID_MYSTIA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_HUMAN_BONE, AMOUNT_TYPE_WEIGHT, 2000, 100, 80, 120),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 3, HOUR_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_HUMAN_BONE, AMOUNT_TYPE_WEIGHT, 2000, 100, 80, 120),
     ),
     (
-        QuestRewardGeneratorItemExact(ITEM_ID_RAMEN, 1, 1, 100, 100),
-        QuestRewardGeneratorBalance(150, 10, 100, 100),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_item_exact(ITEM_ID_RAMEN, 1, 1, 100, 100),
+        quest_reward_generator_create_balance(150, 10, 100, 100),
+        quest_reward_generator_create_credibility(10),
     ),
 )
 
@@ -1785,7 +1790,7 @@ QUEST_TEMPLATE_MYSTIA_HUMAN_BONE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MYSTIA_HUMA
 # - Flandre +4
 # - Ruins +1 level
 # - Rare drop +3 level
-QUEST_TEMPLATE_FLANDRE_PLUSHIE_BEAR = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_FLANDRE_PLUSHIE_BEAR] = QuestTemplate(
+QUEST_TEMPLATE_FLANDRE_PLUSHIE_BEAR = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_FLANDRE_PLUSHIE_BEAR] = quest_template_create(
     QUEST_TEMPLATE_ID_FLANDRE_PLUSHIE_BEAR,
     (
         QUEST_TEMPLATE_FLANDRE_RIBBON_BOW,
@@ -1807,12 +1812,12 @@ QUEST_TEMPLATE_FLANDRE_PLUSHIE_BEAR = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_FLANDRE_
     1,
     ITEM_ID_FLANDRE,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 72, DAY_IN_SECONDS, 90, 110),
-        QuestRequirementGeneratorItemExact(ITEM_ID_PLUSHIE_BEAR, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 72, DAY_IN_SECONDS, 90, 110),
+        quest_requirement_generator_create_item_exact(ITEM_ID_PLUSHIE_BEAR, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorItemExactFix(ITEM_ID_HUMAN_BODY_SHARD_CHEWED, 1),
-        QuestRewardGeneratorCredibilityFix(120),
+        quest_reward_generator_create_item_exact_fix(ITEM_ID_HUMAN_BODY_SHARD_CHEWED, 1),
+        quest_reward_generator_create_credibility_fix(120),
     ),
 )
 
@@ -1820,7 +1825,7 @@ QUEST_TEMPLATE_FLANDRE_PLUSHIE_BEAR = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_FLANDRE_
 # - Marisa +2 level
 # - Requires quest reward + meat +4
 # Reward is around 2x of the value
-QUEST_TEMPLATE_MARISA_RAMEN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARISA_RAMEN] = QuestTemplate(
+QUEST_TEMPLATE_MARISA_RAMEN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARISA_RAMEN] = quest_template_create(
     QUEST_TEMPLATE_ID_MARISA_RAMEN,
     None,
     1,
@@ -1836,14 +1841,45 @@ QUEST_TEMPLATE_MARISA_RAMEN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARISA_RAMEN] = 
     1,
     ITEM_ID_MARISA,
     (
-        QuestRequirementGeneratorDuration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS, 80, 130),
-        QuestRequirementGeneratorItemExact(ITEM_ID_RAMEN, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 7, HOUR_IN_SECONDS, 80, 130),
+        quest_requirement_generator_create_item_exact(ITEM_ID_RAMEN, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        QuestRewardGeneratorBalance(700, 50, 80, 120),
-        QuestRewardGeneratorCredibility(10),
+        quest_reward_generator_create_balance(700, 50, 80, 120),
+        quest_reward_generator_create_credibility(10),
     ),
 )
+
+# - Koishi +1
+# - Rare drop +3 level
+# - Hakugyokurou mansion +2 level
+# Reward is around 2.0x of the value
+QUEST_TEMPLATE_KOISHI_BROOM = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_KOISHI_BROOM] = quest_template_create(
+    QUEST_TEMPLATE_ID_KOISHI_BROOM,
+    (
+        QUEST_TEMPLATE_ID_KOISHI_PEN,
+    ),
+    2, # Target: 1
+    56,
+    (
+        'In order to have a wedding, you need a groom thingy. '
+        'I don\'t understand what it is, but it all makes sense now after seeing Marisa wearing bridal clothes."'
+    ),
+    6,
+    1,
+    ITEM_ID_KOISHI,
+    (
+        quest_requirement_generator_create_duration(DAY_IN_SECONDS * 126, DAY_IN_SECONDS, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_BROOM, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
+    ),
+    (
+        quest_reward_generator_create_balance(1400, 50, 80, 120),
+        quest_reward_generator_create_item_exact_fix(ITEM_ID_SUNFLOWER, 1),
+        quest_reward_generator_create_credibility_fix(120),
+    ),
+)
+
+
 
 # Idea:
 # Yuyuko's stomach is crawling like she is starving to death habitually. Would you please feed a morsel to this beast?
@@ -1881,5 +1917,3 @@ QUEST_TEMPLATE_MARISA_RAMEN = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_MARISA_RAMEN] = 
 # Sakuya, bring remi tea & blood?
 # Bring suwako a bunch of random things.
 # Bring reimu a ramen, because they are fucking broke as shit.
-
-

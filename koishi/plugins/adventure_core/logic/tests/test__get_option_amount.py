@@ -2,7 +2,7 @@ import vampytest
 
 from random import Random
 
-from ...options import OptionBase
+from ...options import OptionBase, option_base_create
 
 from ..loot_accumulation_logic import get_option_amount
 
@@ -10,7 +10,7 @@ from ..loot_accumulation_logic import get_option_amount
 def _iter_options():
     yield (
         '100% chance hit',
-        OptionBase(
+        option_base_create(
             False,
             1,
             1,
@@ -25,7 +25,7 @@ def _iter_options():
     
     yield (
         '100% chance hit with multiplier',
-        OptionBase(
+        option_base_create(
             False,
             1,
             1,
@@ -40,7 +40,7 @@ def _iter_options():
     
     yield (
         '90% chance miss',
-        OptionBase(
+        option_base_create(
             False,
             9,
             10,
@@ -55,7 +55,7 @@ def _iter_options():
     
     yield (
         '50% chance, miss.',
-        OptionBase(
+        option_base_create(
             False,
             1,
             2,
@@ -70,7 +70,7 @@ def _iter_options():
     
     yield (
         '50% chance, hit due to multiplier.',
-        OptionBase(
+        option_base_create(
             True,
             1,
             2,
@@ -85,7 +85,7 @@ def _iter_options():
     
     yield (
         '50% chance, hit',
-        OptionBase(
+        option_base_create(
             False,
             1,
             2,

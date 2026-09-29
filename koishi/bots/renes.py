@@ -1,6 +1,6 @@
 __all__ = ('Renes',)
 
-from hata import APPLICATIONS, ActivityType, Client, Embed, InviteTargetType, is_media_url
+from hata import APPLICATIONS, ActivityType, Client, Embed, InviteTargetType, IntentFlag, is_media_url
 from scarletio import LOOP_TIME
 
 import config
@@ -15,6 +15,9 @@ Renes = Client(
     config.RENES_TOKEN,
     client_id = config.RENES_ID,
     application_id = config.RENES_ID,
+    intents = IntentFlag().update_by_keys(
+        guild_presences = False,
+    ),
     extensions = 'slash',
 )
 

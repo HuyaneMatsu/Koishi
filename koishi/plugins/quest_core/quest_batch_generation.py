@@ -1,12 +1,12 @@
-__all__ = ('quest_batch_create',)
+__all__ = ('quest_batch_generate',)
 
 from random import Random
 from math import floor
 
 from .constants import QUEST_TEMPLATES
 from .helpers import get_quest_template_nullable
-from .quest import Quest
-from .quest_batch import QuestBatch
+from .quest import quest_create
+from .quest_batch import quest_batch_create
 from .quest_reward_types import QUEST_REWARD_TYPE_CREDIBILITY
 
 
@@ -36,8 +36,8 @@ def create_quest_from_template(random_number_generator, quest_template):
         requirement_instantiables = []
         
         for requirement_generator in requirement_generators:
-            requirement_instantiable, diversion = requirement_generator.generate(
-                random_number_generator
+            requirement_instantiable, diversion = requirement_generator.behaviour.generate(
+                requirement_generator.configuration, random_number_generator
             )
             requirement_instantiables.append(requirement_instantiable)
             accumulated_diversion *= diversion
@@ -53,8 +53,8 @@ def create_quest_from_template(random_number_generator, quest_template):
         reward_instantiables = []
         
         for reward_generator in reward_generators:
-            reward_instantiable, diversion = reward_generator.generate_with_diversion(
-                random_number_generator, accumulated_diversion
+            reward_instantiable, diversion = reward_generator.behaviour.generate_with_diversion(
+                reward_generator.configuration, random_number_generator, accumulated_diversion
             )
             reward_instantiables.append(reward_instantiable)
             accumulated_diversion *= diversion
@@ -62,7 +62,7 @@ def create_quest_from_template(random_number_generator, quest_template):
         reward_instantiables = tuple(reward_instantiables)
     
     # Construct
-    return Quest(
+    return quest_create(
         quest_template.id,
         requirement_instantiables,
         reward_instantiables,
@@ -133,14 +133,14 @@ def _quest_sort_key_getter(quest):
     rewards = quest.rewards
     if (rewards is not None):
         for reward in rewards:
-            if reward.TYPE == QUEST_REWARD_TYPE_CREDIBILITY:
-                reward_credibility = reward.credibility
+            if reward.behaviour.type == QUEST_REWARD_TYPE_CREDIBILITY:
+                reward_credibility = reward.configuration.credibility
                 break
     
     return (quest_template.level, reward_credibility, quest_template.id)
 
 
-def quest_batch_create(guild_id, batch_id, level_limit, amount):
+def quest_batch_generate(guild_id, batch_id, level_limit, amount):
     """
     Generates a quest batch.
     
@@ -206,4 +206,4 @@ def quest_batch_create(guild_id, batch_id, level_limit, amount):
     
     
     quests.sort(key = _quest_sort_key_getter)
-    return QuestBatch(batch_id, tuple(quests))
+    return quest_batch_create(batch_id, tuple(quests))

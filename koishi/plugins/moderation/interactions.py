@@ -685,7 +685,7 @@ async def handle_mod_other_common(
             # HUHH
             pass
         
-        if (action_type == ACTION_TYPE_BAN) or (action_type == ACTION_TYPE_BAN):
+        if (action_type == ACTION_TYPE_BAN) or (action_type == ACTION_TYPE_KICK):
             selected_client = select_client_with_permission(client, guild, PERMISSIONS_MASK_VIEW_AUDIT_LOGS)
             if selected_client is None:
                 easter_egg_mode = False

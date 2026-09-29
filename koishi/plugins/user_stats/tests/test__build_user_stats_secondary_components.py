@@ -38,7 +38,7 @@ def _iter_options():
                     'Health: 176\n'
                     'Energy: 166\n'
                     'Movement: 1.1 (m/s)\n'
-                    'Inventory: 41.250 (kg)\n'
+                    'Inventory: 41.25 (kg)\n'
                     '\n'
                     'Butchering: 15 (+18%)\n'
                     'Fishing: 17 (+23%)\n'

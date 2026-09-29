@@ -2,6 +2,7 @@ from .action import *
 from .adventure import *
 from .auto_cancellation import *
 from .duration_suggestion_set import *
+from .goal import *
 from .location import *
 from .logic import *
 from .options import *
@@ -17,6 +18,7 @@ __all__ = (
     *adventure.__all__,
     *auto_cancellation.__all__,
     *duration_suggestion_set.__all__,
+    *goal.__all__,
     *location.__all__,
     *logic.__all__,
     *options.__all__,

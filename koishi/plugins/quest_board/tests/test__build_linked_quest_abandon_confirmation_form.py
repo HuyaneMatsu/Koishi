@@ -7,10 +7,11 @@ from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ...item_core import ITEM_ID_CARROT
 from ...quest_core import (
-    AMOUNT_TYPE_WEIGHT, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QuestRequirementSerialisableDuration,
-    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
-    QuestRewardSerialisableCredibility, linked_quest_create
+    QUEST_TEMPLATE_ID_MYSTIA_CARROT, linked_quest_create, quest_requirement_serialisable_create_duration,
+    quest_requirement_serialisable_create_expiration, quest_requirement_serialisable_create_item_exact,
+    quest_reward_serialisable_create_balance, quest_reward_serialisable_create_credibility
 )
+from ...unit_core import AMOUNT_TYPE_WEIGHT
 from ...user_stats_core import user_stats_create, user_stats_modify_credibility_by
 
 from ..component_building import build_linked_quest_abandon_confirmation_form
@@ -28,13 +29,13 @@ def _iter_options():
         5666,
         QUEST_TEMPLATE_ID_MYSTIA_CARROT,
         (
-            QuestRequirementSerialisableDuration(3600),
-            QuestRequirementSerialisableExpiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0, 0),
+            quest_requirement_serialisable_create_duration(3600),
+            quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0, 0),
         ),
         (
-            QuestRewardSerialisableBalance(1000),
-            QuestRewardSerialisableCredibility(10),
+            quest_reward_serialisable_create_balance(1000),
+            quest_reward_serialisable_create_credibility(10),
         ),
     )
     linked_quest_entry_id_0 = 123
@@ -52,7 +53,7 @@ def _iter_options():
             'Please confirm abandoning',
             [
                 create_text_display(
-                    f'**Task: Submit 0.00 / {quest_amount_0 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.**\n'
+                    f'**Task: Submit 0 / {quest_amount_0 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.**\n'
                     f'\n'
                     f'I am running low on some vegetables for soups.\n'
                     f'\nRequesting a basketful of Carrot.\n'

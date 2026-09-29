@@ -1,12 +1,10 @@
 __all__ = ('EntryProxy',)
 
-from scarletio import RichAttributeErrorBaseType
-
 from .entry_proxy_saver import EntryProxySaver
 from .entry_proxy_type import EntryProxyType
 
 
-class EntryProxy(RichAttributeErrorBaseType, metaclass = EntryProxyType):
+class EntryProxy(metaclass = EntryProxyType):
     """
     Entry proxy.
     

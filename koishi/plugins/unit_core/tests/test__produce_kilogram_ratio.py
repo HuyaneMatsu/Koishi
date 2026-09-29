@@ -4,7 +4,7 @@ from ..content_building import produce_kilogram_ratio
 
 
 def _iter_options():
-    yield 10, 20, '0.010 / 0.020 kg'
+    yield 10, 20, '0.01 / 0.02 kg'
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())

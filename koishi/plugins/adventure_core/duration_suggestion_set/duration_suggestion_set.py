@@ -1,9 +1,9 @@
-__all__ = ('DurationSuggestionSet',)
+__all__ = ('DurationSuggestionSet', 'duration_suggestion_set_create')
 
-from scarletio import RichAttributeErrorBaseType
+from scarletio import RichType
 
 
-class DurationSuggestionSet(RichAttributeErrorBaseType):
+class DurationSuggestionSet(metaclass = RichType, rich_type_feature_flags = ~0):
     """
     Represents a duration suggestion set.
     
@@ -16,36 +16,25 @@ class DurationSuggestionSet(RichAttributeErrorBaseType):
         The identifier of the duration suggestion set.
     """
     __slots__ = ('durations', 'id')
+
+
+def duration_suggestion_set_create(duration_suggestion_set_id, durations):
+    """
+    Creates a new duration suggestion set.
     
-    def __new__(cls, duration_suggestion_set_id, durations):
-        """
-        Creates a new target.
-        
-        Parameters
-        ----------
-        duration_suggestion_set_id : `int`
-            The identifier of the target.
-        
-        durations : `tuple<int>`
-            The suggested durations.
-        """
-        self = object.__new__(cls)
-        self.durations = durations
-        self.id = duration_suggestion_set_id
-        return self
+    Parameters
+    ----------
+    duration_suggestion_set_id : `int`
+        The identifier of the target.
     
+    durations : `tuple<int>`
+        The suggested durations.
     
-    def __repr__(self):
-        """Returns repr(self)."""
-        repr_parts = ['<', type(self).__name__]
-        
-        # id
-        repr_parts.append(' id = ')
-        repr_parts.append(repr(self.id))
-        
-        # durations
-        repr_parts.append(', durations = ')
-        repr_parts.append(repr(self.durations))
-        
-        repr_parts.append('>')
-        return ''.join(repr_parts)
+    Returns
+    -------
+    duration_suggestion_set : ``DurationSuggestionSet``
+    """
+    duration_suggestion_set = object.__new__(DurationSuggestionSet)
+    duration_suggestion_set.durations = durations
+    duration_suggestion_set.id = duration_suggestion_set_id
+    return duration_suggestion_set

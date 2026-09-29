@@ -5,10 +5,12 @@ from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ...item_core import ITEM_ID_PEACH, ITEM_ID_SCARLET_ONION, ITEM_ID_STRAWBERRY, get_item_nullable
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QuestRequirementSerialisableDuration,
-    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
-    QuestRewardSerialisableCredibility, get_quest_template_nullable, linked_quest_create
+    QUEST_TEMPLATE_ID_MYSTIA_PEACH, get_quest_template_nullable, linked_quest_create,
+    quest_requirement_serialisable_create_duration, quest_requirement_serialisable_create_expiration,
+    quest_requirement_serialisable_create_item_exact, quest_reward_serialisable_create_balance,
+    quest_reward_serialisable_create_credibility
 )
+from ...unit_core import AMOUNT_TYPE_COUNT
 
 from ..content_building import produce_linked_quest_detailed_description
 
@@ -37,13 +39,13 @@ def _iter_options():
             batch_id,
             QUEST_TEMPLATE_ID_MYSTIA_PEACH,
             (
-                QuestRequirementSerialisableDuration(3600 * 24),
-                QuestRequirementSerialisableExpiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600 * 24)),
-                QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20, 0),
+                quest_requirement_serialisable_create_duration(3600 * 24),
+                quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600 * 24)),
+                quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20, 0),
             ),
             (
-                QuestRewardSerialisableBalance(1000),
-                QuestRewardSerialisableCredibility(10),
+                quest_reward_serialisable_create_balance(1000),
+                quest_reward_serialisable_create_credibility(10),
             ),
         ),
         quest_template,
@@ -73,9 +75,9 @@ def _iter_options():
             batch_id,
             QUEST_TEMPLATE_ID_MYSTIA_PEACH,
             (
-                QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20, 0),
-                QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 19, 0),
-                QuestRequirementSerialisableItemExact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_COUNT, 18, 2),
+                quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20, 0),
+                quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 19, 0),
+                quest_requirement_serialisable_create_item_exact(ITEM_ID_SCARLET_ONION, AMOUNT_TYPE_COUNT, 18, 2),
             ),
             None,
         ),

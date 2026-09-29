@@ -44,7 +44,7 @@ def duration_to_string(duration):
     return string
 
 
-def get_behavior_string(player):
+def get_behaviour_string(player):
     if player.is_repeating_queue():
         if player.is_shuffling():
             string = 'Repeating and shuffling the queue.'
@@ -64,7 +64,7 @@ def get_behavior_string(player):
     return string
 
 
-def get_behavior_representation(player):
+def get_behaviour_representation(player):
     if player.is_repeating_queue():
         if player.is_shuffling():
             representation = 'repeat queue | shuffle'

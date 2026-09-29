@@ -2,34 +2,36 @@ import vampytest
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...item_core import ITEM_ID_PEACH, get_item
+from ...item_core import ITEM_ID_PEACH, get_item_nullable
 
 from ..content_building import produce_sell_success_description
 
 
 def _iter_options():
-    item = get_item(ITEM_ID_PEACH)
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
+    
     yield (
-        item,
+        item_peach,
         100,
         4,
         1000,
         30,
         (
-            f'You put 100 {item.emoji} {item.name} ({item.weight * 100 / 1000:.03f} kg) '
+            f'You put 100 {item_peach.emoji} {item_peach.name} ({100 * item_peach.weight / 1000:.01f} kg) '
             f'on the market for 4 days, starting at 1000 {EMOJI__HEART_CURRENCY}.\n'
             f'You payed 30 {EMOJI__HEART_CURRENCY} initial fee.'
         )
     )
     
     yield (
-        item,
+        item_peach,
         100,
         4,
         0,
         30,
         (
-            f'You put 100 {item.emoji} {item.name} ({item.weight * 100 / 1000:.03f} kg) '
+            f'You put 100 {item_peach.emoji} {item_peach.name} ({100 * item_peach.weight / 1000:.01f} kg) '
             f'on the market for 4 days.\n'
             f'You payed 30 {EMOJI__HEART_CURRENCY} initial fee.'
         )

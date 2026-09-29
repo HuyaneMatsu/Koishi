@@ -1,8 +1,6 @@
 import vampytest
 
-from ..quest import Quest
-from ..quest_batch import QuestBatch
-from ..quest_template_ids import QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
+from ..quest_batch import QuestBatch, quest_batch_create
 
 from .helpers import _create_quest
 
@@ -21,24 +19,6 @@ def _assert_fields_set(quest_batch):
     vampytest.assert_instance(quest_batch.quests, tuple)
 
 
-def test__QuestBatch__new():
-    """
-    Tests whether ``QuestBatch.__new__`` works as intended.
-    """
-    quest = _create_quest()
-    
-    quest_batch_id = 26663
-    
-    quest_batch = QuestBatch(
-        quest_batch_id,
-        (quest,),
-    )
-    _assert_fields_set(quest_batch)
-    
-    vampytest.assert_eq(quest_batch.id, quest_batch_id)
-    vampytest.assert_eq(quest_batch.quests, (quest,))
-
-
 def test__QuestBatch__repr():
     """
     Tests whether ``QuestBatch.__repr__`` works as intended.
@@ -47,10 +27,25 @@ def test__QuestBatch__repr():
     
     quest_batch_id = 26663
     
-    quest_batch = QuestBatch(
+    quest_batch = quest_batch_create(
         quest_batch_id,
         (quest,),
     )
     
     output = repr(quest_batch)
     vampytest.assert_instance(output, str)
+
+
+def test__quest_batch_create():
+    quest = _create_quest()
+    
+    quest_batch_id = 26663
+    
+    quest_batch = quest_batch_create(
+        quest_batch_id,
+        (quest,),
+    )
+    _assert_fields_set(quest_batch)
+    
+    vampytest.assert_eq(quest_batch.id, quest_batch_id)
+    vampytest.assert_eq(quest_batch.quests, (quest,))

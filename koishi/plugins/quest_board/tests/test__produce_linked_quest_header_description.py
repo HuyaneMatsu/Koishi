@@ -1,7 +1,7 @@
 import vampytest
 from hata import GuildProfile, User
 
-from ...quest_core import AdventurerRankInfo
+from ...quest_core import adventure_rank_info_create
 
 from ..content_building import produce_linked_quest_header_description
 
@@ -13,7 +13,7 @@ def _iter_options():
         202505230002,
         'Koi',
         300,
-        AdventurerRankInfo(1, 1),
+        adventure_rank_info_create(1, 1),
         1,
         (
             '# Koi\'s quests\n'
@@ -29,7 +29,7 @@ def _iter_options():
         0,
         None,
         300,
-        AdventurerRankInfo(1, 1),
+        adventure_rank_info_create(1, 1),
         0,
         (
             '# Koishi\'s quests\n'

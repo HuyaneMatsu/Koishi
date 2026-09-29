@@ -6,7 +6,7 @@ from hata import (
     create_thumbnail_media
 )
 
-from ...item_core import ITEM_ID_PEACH, get_item
+from ...item_core import ITEM_ID_PEACH, get_item_nullable
 from ...market_place_core import MarketPlaceItem
 
 from ..component_building import build_own_offers_view_components
@@ -23,11 +23,11 @@ def _iter_options():
         name = 'Nue',
     )
     
-    item = get_item(ITEM_ID_PEACH)
-    
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
     
     market_place_item_0 = MarketPlaceItem(
-        item,
+        item_peach,
         5,
         user_id,
         0,
@@ -101,7 +101,7 @@ def _iter_options():
             create_separator(),
             create_text_display
             (
-                f'5 {item.emoji} {item.name} ({item.weight * 5 / 1000:.3f} kg)\n'
+                f'5 {item_peach.emoji} {item_peach.name} ({5 * item_peach.weight / 1000:.2f} kg)\n'
                 f'Time left: 1 day\n'
                 f'No bids yet...'
             ),

@@ -28,14 +28,14 @@ class DateTimeMock(DateTime):
 def _iter_options():
     user_id_0 = 202512280000
     user_id_1 = 202512280001
-    item = get_item(ITEM_ID_PEACH)
+    item_peach = get_item(ITEM_ID_PEACH)
     finalises_at = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
     entry_id = 1233
     balance_amount = 200
     page_index = 1
     
     market_place_item = MarketPlaceItem(
-        item,
+        item_peach,
         30,
         user_id_0,
         0,
@@ -61,7 +61,7 @@ def _iter_options():
                 '# `/market-place` allocating 200'
             ),
             create_text_display(
-                f'Purchasing: 30 {item.emoji} {item.name} ({item.weight * 30 / 1000 :.03f} kg)\n'
+                f'Purchasing: 30 {item_peach.emoji} {item_peach.name} ({item_peach.weight * 30 / 1000 :.02f} kg)\n'
                 f'Time left: 1 day'
             ),
             create_separator(),

@@ -4,18 +4,18 @@ import vampytest
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...item_core import ITEM_ID_PEACH, get_item
+from ...item_core import ITEM_ID_PEACH, get_item_nullable
 from ...market_place_core import MarketPlaceItem
 
 from ..content_building import produce_offer_market_place_item_description
 
 
 def _iter_options():
-    item = get_item(ITEM_ID_PEACH)
-    
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
     
     market_place_item_0 = MarketPlaceItem(
-        item,
+        item_peach,
         5,
         202512230003,
         0,
@@ -29,7 +29,7 @@ def _iter_options():
         market_place_item_0,
         DateTime(2016, 5, 14, tzinfo = TimeZone.utc),
         (
-            f'5 {item.emoji} {item.name} ({item.weight * 5 / 1000:.3f} kg)\n'
+            f'5 {item_peach.emoji} {item_peach.name} ({5 * item_peach.weight / 1000:.2f} kg)\n'
             f'Time left: 1 day\n'
             f'Highest bid: {200!s} {EMOJI__HEART_CURRENCY}'
         ),
@@ -37,7 +37,7 @@ def _iter_options():
     
     
     market_place_item_1 = MarketPlaceItem(
-        item,
+        item_peach,
         5,
         202512230005,
         50,
@@ -49,7 +49,7 @@ def _iter_options():
         market_place_item_1,
         DateTime(2016, 5, 14, tzinfo = TimeZone.utc),
         (
-            f'5 {item.emoji} {item.name} ({item.weight * 5 / 1000:.3f} kg)\n'
+            f'5 {item_peach.emoji} {item_peach.name} ({5 * item_peach.weight / 1000:.2f} kg)\n'
             f'Time left: 1 day\n'
             f'Starting price: {50!s} {EMOJI__HEART_CURRENCY}'
         ),
@@ -57,7 +57,7 @@ def _iter_options():
     
     
     market_place_item_2 = MarketPlaceItem(
-        item,
+        item_peach,
         5,
         202512230006,
         0,
@@ -69,7 +69,7 @@ def _iter_options():
         market_place_item_2,
         DateTime(2016, 5, 14, tzinfo = TimeZone.utc),
         (
-            f'5 {item.emoji} {item.name} ({item.weight * 5 / 1000:.3f} kg)\n'
+            f'5 {item_peach.emoji} {item_peach.name} ({5 * item_peach.weight / 1000:.2f} kg)\n'
             f'Time left: 1 day\n'
             f'No bids yet...'
         ),

@@ -2,10 +2,11 @@ import vampytest
 
 from ...item_core import ITEM_GROUP_ID_KNIFE, ITEM_ID_STRAWBERRY
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, linked_quest_create,
-    QUEST_REQUIREMENT_TYPE_ITEM_EXACT, QUEST_REQUIREMENT_TYPE_ITEM_GROUP, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
-    QuestRequirementSerialisableBase, QuestRequirementSerialisableItemExact, QuestRequirementSerialisableItemGroup
+    LINKED_QUEST_COMPLETION_STATE_COMPLETED, linked_quest_create, QUEST_REQUIREMENT_TYPE_ITEM_EXACT,
+    QUEST_REQUIREMENT_TYPE_ITEM_GROUP, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, quest_sub_type_serialisable_create_base,
+    quest_requirement_serialisable_create_item_exact, quest_requirement_serialisable_create_item_group
 )
+from ...unit_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT
 
 from ..helpers import get_linked_quest_submission_requirements_normalised
 
@@ -30,7 +31,7 @@ def _iter_options():
             0,
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             (
-                QuestRequirementSerialisableBase(),
+                quest_sub_type_serialisable_create_base(),
             ),
             None,
         ),
@@ -44,8 +45,8 @@ def _iter_options():
             0,
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             (
-                QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 500, 200),
-                QuestRequirementSerialisableItemGroup(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 1, 0),
+                quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 500, 200),
+                quest_requirement_serialisable_create_item_group(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 1, 0),
             ),
             None,
         ),
@@ -62,8 +63,8 @@ def _iter_options():
             0,
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             (
-                QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 500, 200),
-                QuestRequirementSerialisableBase(),
+                quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 500, 200),
+                quest_sub_type_serialisable_create_base(),
             ),
             None,
         ),
@@ -78,7 +79,7 @@ def _iter_options():
         0,
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         (
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 500, 560),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 500, 560),
         ),
         None,
     )

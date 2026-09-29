@@ -5,11 +5,11 @@ from re import I as re_ignore_case, compile as re_compile, escape as re_escape
 
 def _item_match_sort_key(item):
     """
-    Sort key used inside of ``Guild.get_items_like`` to sort items based on their match rate.
+    Sort key.
     
     Parameters
     ----------
-    item : ``tuple<Emoji, (int, int, str)>``
+    item : ``tuple<Item, (int, int, str)>``
         The item and it's match rate.
     
     Returns

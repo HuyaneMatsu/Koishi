@@ -6,9 +6,10 @@ from ...item_core import (
     get_item_nullable
 )
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, QUEST_REQUIREMENT_TYPE_NONE, QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY,
+    QUEST_REQUIREMENT_TYPE_NONE, QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY,
     QUEST_REQUIREMENT_TYPE_ITEM_EXACT, QUEST_REQUIREMENT_TYPE_ITEM_GROUP
 )
+from ...unit_core import AMOUNT_TYPE_COUNT
 
 from ..helpers import iter_submission_requirement_item_entries_of_normalised
 

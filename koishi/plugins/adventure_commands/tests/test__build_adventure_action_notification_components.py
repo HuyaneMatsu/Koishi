@@ -9,6 +9,7 @@ from ...adventure_core import (
 from ...item_core import ITEM_ID_SCARLET_ONION, get_item_nullable
 
 from ..component_building import build_adventure_action_notification_components
+from ..constants import ADVENTURE_VIEW_MODE_DEFAULT
 
 
 def _iter_options():
@@ -33,6 +34,7 @@ def _iter_options():
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
         0,
         0,
+        None,
         0,
         0,
         0,
@@ -53,7 +55,10 @@ def _iter_options():
                 create_button(
                     'View adventure',
                     enabled = True,
-                    custom_id = f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}',
+                    custom_id = (
+                        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}'
+                    ),
                 ),
                 create_button(
                     'View battle logs',
@@ -91,6 +96,7 @@ def _iter_options():
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
         0,
         0,
+        None,
         0,
         0,
         0,
@@ -108,15 +114,23 @@ def _iter_options():
             ),
             create_separator(),
             create_text_display(
-                f'### Loot:\n'
-                f'- {item_peach.emoji} {item_peach.name} x5 ({item_peach.weight * 5 / 1000:.03f} kg)'
+                f'### Loot (this step):\n'
+                f'- {item_peach.emoji} {item_peach.name} x5 ({5 * item_peach.weight / 1000:.02f} kg)'
+            ),
+            create_separator(),
+            create_text_display(
+                f'### Total loot:\n'
+                f'- {item_peach.emoji} {item_peach.name} x5 ({5 * item_peach.weight / 1000:.02f} kg)'
             ),
             create_separator(),
             create_row(
                 create_button(
                     'View adventure',
                     enabled = True,
-                    custom_id = f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}',
+                    custom_id = (
+                        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}'
+                    ),
                 ),
                 create_button(
                     'View battle logs',

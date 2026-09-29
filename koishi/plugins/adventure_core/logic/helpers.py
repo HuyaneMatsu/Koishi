@@ -147,7 +147,7 @@ def get_action_type_multiplier(action_type, user_stats):
     return multiplier
 
 
-def get_action(adventure, random):
+def action_get(adventure, random):
     """
     Gets action for adventure stepping.
     
@@ -421,6 +421,11 @@ def should_cancel_adventure(
     -------
     should_cancel : `bool`
     """
+    # If the adventure's goal is reached, return.
+    goal_listing = adventure.goal_listing
+    if (goal_listing is not None) and any(goal.behaviour.check(goal.configuration, adventure) for goal in goal_listing):
+        return True
+    
     # If we are out of time, we always return.
     available_duration_seconds = adventure.initial_duration_seconds - (now_seconds - adventure.created_at)
     if available_duration_seconds <= 0:

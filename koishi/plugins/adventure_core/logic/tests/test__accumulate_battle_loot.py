@@ -2,7 +2,7 @@ from random import Random
 
 import vampytest
 
-from ...options import OptionBattle, OptionLoot
+from ...options import option_battle_create, option_loot_create
 
 from ..loot_accumulation import LootAccumulation
 from ..loot_accumulation_logic import accumulate_battle_loot
@@ -20,7 +20,7 @@ def _iter_options():
     # 1 battle that is always selected (x2 enemy), but no loot -> duration stays
     yield (
         (
-            OptionBattle(
+            option_battle_create(
                 False,
                 1,
                 1,
@@ -40,7 +40,7 @@ def _iter_options():
     
     yield (
         (
-            OptionBattle(
+            option_battle_create(
                 False,
                 1,
                 1,
@@ -49,7 +49,7 @@ def _iter_options():
                 2,
                 999,
                 (
-                    OptionLoot(False, 1, 1, False, 10, 20, 9999, 100, 20, 10, 2),
+                    option_loot_create(False, 1, 1, False, 10, 20, 9999, 100, 20, 10, 2),
                 ),
             ),
         ),

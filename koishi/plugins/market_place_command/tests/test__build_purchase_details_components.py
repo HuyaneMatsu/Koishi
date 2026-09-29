@@ -5,7 +5,7 @@ from hata import ButtonStyle, Component, create_button, create_row, create_separ
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...item_core import ITEM_ID_PEACH, get_item
+from ...item_core import ITEM_ID_PEACH, get_item_nullable
 from ...market_place_core import MarketPlaceItem
 
 from ..component_building import build_purchase_details_components
@@ -18,12 +18,13 @@ def _iter_options():
     user_id_0 = 202512290000
     user_id_1 = 202512290001
     
-    item_0 = get_item(ITEM_ID_PEACH)
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
     
     entry_id_0 = 120
     
     market_place_item_0 = MarketPlaceItem(
-        item_0,
+        item_peach,
         5,
         user_id_0,
         0,
@@ -36,7 +37,7 @@ def _iter_options():
     yield (
         user_id_0,
         None,
-        item_0.flags,
+        item_peach.flags,
         now,
         1,
         10,
@@ -44,7 +45,7 @@ def _iter_options():
         market_place_item_0,
         [
             create_text_display(
-                f'### 5 {item_0.emoji} {item_0.name} ({item_0.weight * 5 / 1000:.03f} kg)\n'
+                f'### 5 {item_peach.emoji} {item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg)\n'
                 f'Time left: 1 day\n'
                 f'No bids yet...'
             ),
@@ -67,7 +68,7 @@ def _iter_options():
             create_row(
                 create_button(
                     'Back to offers',
-                    custom_id = f'market_place.purchase.view.{user_id_0:x}.{0:x}.{item_0.flags:x}.{1:x}.{10:x}'
+                    custom_id = f'market_place.purchase.view.{user_id_0:x}.{0:x}.{item_peach.flags:x}.{1:x}.{10:x}'
                 ),
                 create_button(
                     'Bid',
@@ -95,7 +96,7 @@ def _iter_options():
         market_place_item_0,
         [
             create_text_display(
-                f'### 5 {item_0.emoji} {item_0.name} ({item_0.weight * 5 / 1000:.03f} kg)\n'
+                f'### 5 {item_peach.emoji} {item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg)\n'
                 f'Time left: 1 day\n'
                 f'No bids yet...'
             ),
@@ -118,12 +119,12 @@ def _iter_options():
             create_row(
                 create_button(
                     'View other offers',
-                    custom_id = f'market_place.purchase.view.{user_id_1:x}.{item_0.id:x}.{0:x}.{0:x}.{10:x}'
+                    custom_id = f'market_place.purchase.view.{user_id_1:x}.{item_peach.id:x}.{0:x}.{0:x}.{10:x}'
                 ),
                 create_button(
                     'Bid',
                     custom_id = (
-                        f'market_place.bid.{user_id_1:x}.{item_0.id:x}.{0:x}.{0:x}.{10:x}.{False:x}.{entry_id_0:x}'
+                        f'market_place.bid.{user_id_1:x}.{item_peach.id:x}.{0:x}.{0:x}.{10:x}.{False:x}.{entry_id_0:x}'
                     ),
                     enabled = True,
                     style = ButtonStyle.blue,

@@ -14,7 +14,7 @@ from .constants import UNIX_EPOCH
 from .helpers import get_quest_template_nullable
 from .linked_quest import linked_quest_create
 from .linked_quest_completion_states import LINKED_QUEST_COMPLETION_STATE_ACTIVE
-from .quest_requirement_serialisables import QuestRequirementSerialisableExpiration
+from .quest_requirement_serialisables import quest_requirement_serialisable_create_expiration
 from .quest_requirement_types import (
     QUEST_REQUIREMENT_TYPE_DURATION, QUEST_REQUIREMENT_TYPE_EXPIRATION, QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY,
     QUEST_REQUIREMENT_TYPE_ITEM_EXACT, QUEST_REQUIREMENT_TYPE_ITEM_GROUP
@@ -113,20 +113,20 @@ def get_linked_quest_completion_ratio(linked_quest):
     requirements = linked_quest.requirements
     if (requirements is not None):
         for requirement in requirements:
-            requirement_type = requirement.TYPE
+            requirement_type = requirement.behaviour.type
             
             # Since they have different structure, check them separately.
             if requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY:
-                amount_submitted = requirement.amount_submitted
-                amount_required = requirement.amount_required
+                amount_submitted = requirement.configuration.amount_submitted
+                amount_required = requirement.configuration.amount_required
             
             elif requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_EXACT:
-                amount_submitted = requirement.amount_submitted
-                amount_required = requirement.amount_required
+                amount_submitted = requirement.configuration.amount_submitted
+                amount_required = requirement.configuration.amount_required
             
             elif requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_GROUP:
-                amount_submitted = requirement.amount_submitted
-                amount_required = requirement.amount_required
+                amount_submitted = requirement.configuration.amount_submitted
+                amount_required = requirement.configuration.amount_required
             
             else:
                 # No other cases.
@@ -199,7 +199,7 @@ def get_linked_quest_abandon_credibility_penalty(linked_quest, entity_rank):
             break
         
         for reward in rewards:
-            if reward.TYPE == QUEST_REWARD_TYPE_CREDIBILITY:
+            if reward.behaviour.type == QUEST_REWARD_TYPE_CREDIBILITY:
                 break
         else:
             credibility_penalty = 0
@@ -207,7 +207,7 @@ def get_linked_quest_abandon_credibility_penalty(linked_quest, entity_rank):
         
         quest_template = get_quest_template_nullable(linked_quest.template_id)
         credibility_penalty = calculate_linked_quest_abandon_credibility_penalty(
-            reward.credibility,
+            reward.configuration.credibility,
             (0 if quest_template is None else quest_template.level),
             entity_rank,
             get_linked_quest_completion_ratio(linked_quest),
@@ -247,13 +247,15 @@ def instantiate_quest(user_id, guild_id, batch_id, quest):
         requirement_serialisables = []
         
         for requirement_instantiable in requirement_instantiables:
-            requirement_serialisables.append(requirement_instantiable.instantiate())
+            requirement_serialisables.append(
+                requirement_instantiable.behaviour.instantiate(requirement_instantiable.configuration)
+            )
             
-            if requirement_instantiable.TYPE != QUEST_REQUIREMENT_TYPE_DURATION:
+            if requirement_instantiable.behaviour.type != QUEST_REQUIREMENT_TYPE_DURATION:
                 continue
             
-            requirement_serialisables.append(QuestRequirementSerialisableExpiration(
-                DateTime.now(TimeZone.utc) + TimeDelta(seconds = requirement_instantiable.duration)
+            requirement_serialisables.append(quest_requirement_serialisable_create_expiration(
+                DateTime.now(TimeZone.utc) + TimeDelta(seconds = requirement_instantiable.configuration.duration)
             ))
             continue
         
@@ -267,13 +269,15 @@ def instantiate_quest(user_id, guild_id, batch_id, quest):
         reward_serialisables = []
         
         for reward_instantiable in reward_instantiables:
-            reward_serialisables.append(reward_instantiable.instantiate())
+            reward_serialisables.append(
+                reward_instantiable.behaviour.instantiate(reward_instantiable.configuration)
+            )
             
-            if reward_instantiable.TYPE != QUEST_REQUIREMENT_TYPE_DURATION:
+            if reward_instantiable.behaviour.type != QUEST_REQUIREMENT_TYPE_DURATION:
                 continue
             
-            reward_serialisables.append(QuestRequirementSerialisableExpiration(
-                DateTime.now(TimeZone.utc) + TimeDelta(seconds = reward_instantiable.duration)
+            reward_serialisables.append(quest_requirement_serialisable_create_expiration(
+                DateTime.now(TimeZone.utc) + TimeDelta(seconds = reward_instantiable.configuration.duration)
             ))
             continue
         
@@ -300,14 +304,14 @@ def reset_linked_quest(linked_quest):
     requirements = linked_quest.requirements
     if (requirements is not None):
         for requirement in requirements:
-            requirement_type = requirement.TYPE
+            requirement_type = requirement.behaviour.type
             if requirement_type == QUEST_REQUIREMENT_TYPE_DURATION:
-                duration = requirement.duration
+                duration = requirement.configuration.duration
                 continue
             
             if requirement_type == QUEST_REQUIREMENT_TYPE_EXPIRATION:
                 if duration != -1:
-                    requirement.expiration = DateTime.now(TimeZone.utc) + TimeDelta(seconds = duration)
+                    requirement.configuration.expiration = DateTime.now(TimeZone.utc) + TimeDelta(seconds = duration)
                 continue
             
             if requirement_type in (
@@ -317,7 +321,9 @@ def reset_linked_quest(linked_quest):
             ):
                 # At the case of over-submit, keep the extra.
                 # Never go under 0 in case the requirement in fact was not fulfilled.
-                requirement.amount_submitted = max(0, requirement.amount_submitted - requirement.amount_required)
+                requirement.configuration.amount_submitted = max(
+                    0, requirement.configuration.amount_submitted - requirement.configuration.amount_required
+                )
                 continue
             
             # No other cases

@@ -3,12 +3,12 @@ __all__ = ()
 
 from ..constants import DURATION_SUGGESTION_SETS
 
-from .duration_suggestion_set import DurationSuggestionSet
+from .duration_suggestion_set import duration_suggestion_set_create
 from .duration_suggestion_set_ids import DURATION_SUGGESTION_SET_ID_MEDIUM, DURATION_SUGGESTION_SET_ID_NEARBY
 
 
 DURATION_SUGGESTION_SET_NEARBY = \
-DURATION_SUGGESTION_SETS[DURATION_SUGGESTION_SET_ID_NEARBY] = DurationSuggestionSet(
+DURATION_SUGGESTION_SETS[DURATION_SUGGESTION_SET_ID_NEARBY] = duration_suggestion_set_create(
     DURATION_SUGGESTION_SET_ID_NEARBY,
     (
         4 * 3600,
@@ -23,7 +23,7 @@ DURATION_SUGGESTION_SETS[DURATION_SUGGESTION_SET_ID_NEARBY] = DurationSuggestion
 
 
 DURATION_SUGGESTION_SET_MEDIUM = \
-DURATION_SUGGESTION_SETS[DURATION_SUGGESTION_SET_ID_MEDIUM] = DurationSuggestionSet(
+DURATION_SUGGESTION_SETS[DURATION_SUGGESTION_SET_ID_MEDIUM] = duration_suggestion_set_create(
     DURATION_SUGGESTION_SET_ID_MEDIUM,
     (
         12 * 3600,

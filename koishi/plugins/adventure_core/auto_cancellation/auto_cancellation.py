@@ -1,9 +1,9 @@
-__all__ = ('AutoCancellation',)
+__all__ = ('AutoCancellation', 'auto_cancellation_create')
 
-from scarletio import RichAttributeErrorBaseType
+from scarletio import RichType
 
 
-class AutoCancellation(RichAttributeErrorBaseType):
+class AutoCancellation(metaclass = RichType, rich_type_feature_flags = ~0):
     """
     Represents the condition to cancel an event.
     
@@ -40,117 +40,63 @@ class AutoCancellation(RichAttributeErrorBaseType):
         'energy_flat', 'energy_percentage', 'health_flat', 'health_percentage', 'id', 'inventory_flat',
         'inventory_percentage', 'looted_items', 'name',
     )
+
+
+def auto_cancellation_create(
+    auto_cancellation_id,
+    name,
+    inventory_flat,
+    inventory_percentage,
+    health_flat,
+    health_percentage,
+    energy_flat,
+    energy_percentage,
+    looted_items,
+):
+    """
+    Creates a new auto cancellation.
     
-    def __new__(
-        cls,
-        auto_cancellation_id,
-        name,
-        inventory_flat,
-        inventory_percentage,
-        health_flat,
-        health_percentage,
-        energy_flat,
-        energy_percentage,
-        looted_items,
-    ):
-        """
-        Creates a new auto cancellation.
-        
-        Parameters
-        ----------
-        auto_cancellation_id : `int`
-            The identifier for the auto cancellation.
-        
-        name : `int`
-            The name of the auto cancellation.
+    Parameters
+    ----------
+    auto_cancellation_id : `int`
+        The identifier for the auto cancellation.
     
-        inventory_flat : ``None | AutoCancellationCondition``
-            Condition for flat inventory based cancellation.
-        
-        inventory_percentage : ``None | AutoCancellationCondition``
-            Condition for percentage inventory based cancellation.
-        
-        health_flat : ``None | AutoCancellationCondition``
-            Condition for flat health based cancellation.
-        
-        health_percentage : ``None | AutoCancellationCondition``
-            Condition for percentage health based cancellation.
-        
-        energy_flat : ``None | AutoCancellationCondition``
-            Condition for flat energy based cancellation.
-        
-        energy_percentage : ``None | AutoCancellationCondition``
-            Condition for percentage energy based cancellation.
-        
-        looted_items : ``None | AutoCancellationConditionFunctional``
-            Condition for looted items based cancellation.
-        """
-        self = object.__new__(cls)
-        self.energy_flat = energy_flat
-        self.energy_percentage = energy_percentage
-        self.health_flat = health_flat
-        self.health_percentage = health_percentage
-        self.id = auto_cancellation_id
-        self.inventory_flat = inventory_flat
-        self.inventory_percentage = inventory_percentage
-        self.looted_items = looted_items
-        self.name = name
-        return self
+    name : `int`
+        The name of the auto cancellation.
+
+    inventory_flat : ``None | AutoCancellationCondition``
+        Condition for flat inventory based cancellation.
     
+    inventory_percentage : ``None | AutoCancellationCondition``
+        Condition for percentage inventory based cancellation.
     
-    def __repr__(self):
-        """Returns repr(self)."""
-        repr_parts = ['<', type(self).__name__]
-        
-        # id
-        repr_parts.append(' id = ')
-        repr_parts.append(repr(self.id))
-        
-        # name
-        repr_parts.append(', name = ')
-        repr_parts.append(repr(self.name))
-        
-        # inventory_flat
-        inventory_flat = self.inventory_flat
-        if (inventory_flat is not None):
-            repr_parts.append(', inventory_flat = ')
-            repr_parts.append(repr(inventory_flat))
-        
-        # inventory_percentage
-        inventory_percentage = self.inventory_percentage
-        if (inventory_percentage is not None):
-            repr_parts.append(', inventory_percentage = ')
-            repr_parts.append(repr(inventory_percentage))
-        
-        # health_flat
-        health_flat = self.health_flat
-        if (health_flat is not None):
-            repr_parts.append(', health_flat = ')
-            repr_parts.append(repr(health_flat))
-        
-        # health_percentage
-        health_percentage = self.health_percentage
-        if (health_percentage is not None):
-            repr_parts.append(', health_percentage = ')
-            repr_parts.append(repr(health_percentage))
-        
-        # inventory_flat
-        inventory_flat = self.inventory_flat
-        if (inventory_flat is not None):
-            repr_parts.append(', inventory_flat = ')
-            repr_parts.append(repr(inventory_flat))
-        
-        # inventory_percentage
-        inventory_percentage = self.inventory_percentage
-        if (inventory_percentage is not None):
-            repr_parts.append(', inventory_percentage = ')
-            repr_parts.append(repr(inventory_percentage))
-        
-        # looted_items
-        looted_items = self.looted_items
-        if (looted_items is not None):
-            repr_parts.append(', looted_items = ')
-            repr_parts.append(repr(looted_items))
-        
-        repr_parts.append('>')
-        return ''.join(repr_parts)
+    health_flat : ``None | AutoCancellationCondition``
+        Condition for flat health based cancellation.
+    
+    health_percentage : ``None | AutoCancellationCondition``
+        Condition for percentage health based cancellation.
+    
+    energy_flat : ``None | AutoCancellationCondition``
+        Condition for flat energy based cancellation.
+    
+    energy_percentage : ``None | AutoCancellationCondition``
+        Condition for percentage energy based cancellation.
+    
+    looted_items : ``None | AutoCancellationConditionFunctional``
+        Condition for looted items based cancellation.
+    
+    Returns
+    -------
+    auto_cancellation : ``AutoCancellation``
+    """
+    auto_cancellation = object.__new__(AutoCancellation)
+    auto_cancellation.energy_flat = energy_flat
+    auto_cancellation.energy_percentage = energy_percentage
+    auto_cancellation.health_flat = health_flat
+    auto_cancellation.health_percentage = health_percentage
+    auto_cancellation.id = auto_cancellation_id
+    auto_cancellation.inventory_flat = inventory_flat
+    auto_cancellation.inventory_percentage = inventory_percentage
+    auto_cancellation.looted_items = looted_items
+    auto_cancellation.name = name
+    return auto_cancellation

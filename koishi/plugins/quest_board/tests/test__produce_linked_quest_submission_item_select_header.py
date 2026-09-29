@@ -1,7 +1,8 @@
 import vampytest
 
 from ...item_core import ITEM_ID_PEACH, get_item_nullable
-from ...quest_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, QUEST_REQUIREMENT_TYPE_ITEM_EXACT
+from ...quest_core import QUEST_REQUIREMENT_TYPE_ITEM_EXACT
+from ...unit_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT
 
 from ..content_building import produce_linked_quest_submission_item_select_header
 

@@ -3,7 +3,7 @@ __all__ = ()
 from hata import ChannelType, Client, DiscordException, ERROR_CODES, Permission, create_button
 from scarletio import CancelledError
 
-from ...bots import MAIN_CLIENT
+from ...bots import COMMAND_CLIENT
 
 from ..automation_core import (
     clear_satori_channel, clear_satori_channels, discover_satori_channels, get_log_satori_channel,
@@ -34,7 +34,7 @@ def setup(module):
     module : ``ModuleType``
         This module.
     """
-    if MAIN_CLIENT.running:
+    if COMMAND_CLIENT.running:
         discover_satori_channels()
 
 
@@ -50,7 +50,7 @@ def teardown(module):
     clear_satori_channels()
 
 
-@MAIN_CLIENT.events
+@COMMAND_CLIENT.events
 async def ready(client):
     """
     Handles a ready event. Resets all satori channels.
@@ -65,7 +65,7 @@ async def ready(client):
     reset_satori_channels()
 
 
-@MAIN_CLIENT.events
+@COMMAND_CLIENT.events
 async def guild_delete(client, guild, guild_profile):
     """
     Handles a guild delete event. Removes all of it
@@ -90,7 +90,7 @@ async def guild_delete(client, guild, guild_profile):
         clear_satori_channel(satori_channel)
 
 
-@MAIN_CLIENT.events
+@COMMAND_CLIENT.events
 async def channel_delete(client, channel):
     """
     Handles a channel delete event. Removes the channel from watchers if present.
@@ -115,7 +115,7 @@ async def channel_delete(client, channel):
         remove_watcher_channel(channel.id, user_id)
 
 
-@MAIN_CLIENT.events
+@COMMAND_CLIENT.events
 async def channel_create(client, channel):
     """
     Handles a channel create event. Registers the channel as a watchers if applicable.
@@ -148,7 +148,7 @@ async def channel_create(client, channel):
     await create_initial_message(client, channel, user_id)
 
 
-@MAIN_CLIENT.events
+@COMMAND_CLIENT.events
 async def channel_edit(client, channel, old_attributes):
     """
     Handles a channel edition event.
@@ -223,7 +223,7 @@ async def channel_edit(client, channel, old_attributes):
             await create_initial_message(client, channel, user_id)
 
 
-@MAIN_CLIENT.events
+@COMMAND_CLIENT.events
 async def user_presence_update(client, user, old_attributes):
     """
     Handles a user presence update event. If the user is watched sends a message to every watching channel.
@@ -277,7 +277,7 @@ async def user_presence_update(client, user, old_attributes):
             continue
 
 
-@MAIN_CLIENT.events
+@COMMAND_CLIENT.events
 async def guild_user_add(client, guild, user):
     """ 
     Handles a user guild add event. If the guild has satori channel set with auto start then creates a new channel for
@@ -398,7 +398,7 @@ async def create_initial_message(client, channel, user_id):
         return
 
 
-@MAIN_CLIENT.events
+@COMMAND_CLIENT.events
 async def guild_user_update(client, guild, user, old_attributes):
     """
     Handles a user guild profile update event. If the user is watched sends a message to every watching channel.
@@ -462,8 +462,8 @@ async def guild_user_update(client, guild, user, old_attributes):
             continue
 
 
-@MAIN_CLIENT.events(name = 'reaction_add')
-@MAIN_CLIENT.events(name = 'reaction_delete')
+@COMMAND_CLIENT.events(name = 'reaction_add')
+@COMMAND_CLIENT.events(name = 'reaction_delete')
 async def reaction_event(client, event):
     """
     Handles a reaction add event.

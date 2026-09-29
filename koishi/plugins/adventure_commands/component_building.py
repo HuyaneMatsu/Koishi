@@ -8,14 +8,16 @@ from hata import (
 )
 
 from ..adventure_core import (
-    ADVENTURE_STATE_FINALIZED, can_cancel_adventure_after, can_cancel_adventure_now, loot_data_iter
+    ADVENTURE_STATE_FINALISED, adventure_action_group_loot_by_state, adventure_action_listing_group_loot_by_state,
+    can_cancel_adventure_after, can_cancel_adventure_any, can_cancel_adventure_now
 )
 from ..item_core import butcher_estimate_energy_cost, butcher_estimate_loot_chance_and_amounts
 from ..user_settings import USER_SETTINGS_CUSTOM_ID_NOTIFICATION_ADVENTURE_ACTION_DISABLE
 
 from .constants import (
     ACTIVE_ADVENTURE_ACTION_LIMIT, ADVENTURE_ACTION_LISTING_PAGE_SIZE, ADVENTURE_CANCELLATION_MODE_AFTER,
-    ADVENTURE_CANCELLATION_MODE_NOW,
+    ADVENTURE_CANCELLATION_MODE_NOW, ADVENTURE_LOOT_LISTING_MODE_DEFAULT, ADVENTURE_LOOT_LISTING_MODE_THIS_STEP,
+    ADVENTURE_LOOT_LISTING_MODE_TOTAL, ADVENTURE_VIEW_MODE_DEFAULT, ADVENTURE_VIEW_MODE_DETAILED
 )
 from .content_building import (
     produce_adventure_action_listing_view_header, produce_adventure_action_notification_header,
@@ -23,24 +25,24 @@ from .content_building import (
     produce_adventure_action_view_header, produce_adventure_cancellation_confirmation_description,
     produce_adventure_initial_representation, produce_adventure_listing_view_header,
     produce_adventure_return_notification_description, produce_adventure_return_notification_header,
-    produce_adventure_short_representation, produce_adventure_view_description_active,
-    produce_adventure_view_description_finalized, produce_adventure_view_header, produce_butcher_done_description,
-    produce_butcher_header, produce_butcher_item_description, produce_butcher_recovering_until_footer,
-    produce_butcher_step_description, produce_loot_listing
+    produce_adventure_short_representation, produce_adventure_view_description,
+    produce_adventure_view_description_detailed_listing, produce_adventure_view_header,
+    produce_butcher_done_description, produce_butcher_header, produce_butcher_item_description,
+    produce_butcher_recovering_until_footer, produce_butcher_step_description, produce_loot_listing
 )
 from .custom_ids import (
     CUSTOM_ID_ADVENTURE_ACTION_BATTLE_LOGS_BUILDER, CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER,
     CUSTOM_ID_ADVENTURE_ACTION_VIEW_BUILDER, CUSTOM_ID_ADVENTURE_ACTION_VIEW_DEPART,
     CUSTOM_ID_ADVENTURE_ACTION_VIEW_RETURN, CUSTOM_ID_ADVENTURE_BUTCHER_CONTINUOUS_BUILDER,
     CUSTOM_ID_ADVENTURE_BUTCHER_DISABLED_BUILDER, CUSTOM_ID_ADVENTURE_BUTCHER_INITIAL_BUILDER,
-    CUSTOM_ID_ADVENTURE_CANCEL_BUILDER, CUSTOM_ID_ADVENTURE_CANCELLATION_MODE,
+    CUSTOM_ID_ADVENTURE_CANCELLATION_MODE, CUSTOM_ID_ADVENTURE_CANCEL_BUILDER,
     CUSTOM_ID_ADVENTURE_CREATE_CONFIRM_BUILDER, CUSTOM_ID_ADVENTURE_LISTING_VIEW_BUILDER,
     CUSTOM_ID_ADVENTURE_VIEW_BUILDER
 )
 
 
 def build_adventure_create_confirmation_form(
-    user_id, location, target, duration, return_, auto_cancellation, enable_interactive_components,
+    user_id, location, target, duration, return_, auto_cancellation, goal
 ):
     """
     Builds adventure create confirmation components.
@@ -65,8 +67,8 @@ def build_adventure_create_confirmation_form(
     auto_cancellation : ``AutoCancellation``
         Auto cancellation.
     
-    enable_interactive_components : `bool`
-        Whether interaction components should be enabled.
+    goal : ``None | Goal``
+        The goal of the adventure.
     
     Returns
     -------
@@ -76,17 +78,17 @@ def build_adventure_create_confirmation_form(
         'Confirm your adventure',
         [
             create_text_display(''.join([*
-                produce_adventure_initial_representation(location, target, duration, return_, auto_cancellation),
+                produce_adventure_initial_representation(location, target, duration, return_, auto_cancellation, goal),
             ])),
         ],
         CUSTOM_ID_ADVENTURE_CREATE_CONFIRM_BUILDER(
-            user_id, location.id, target.id, duration, return_.id, auto_cancellation.id
+            user_id, location.id, target.id, duration, return_.id, auto_cancellation.id, goal
         ),
     )
 
 
 def build_adventure_create_confirm_components(
-    user_id, adventure_entry_id, location, target, duration, return_, auto_cancellation
+    user_id, adventure_entry_id, location, target, duration, return_, auto_cancellation, goal
 ):
     """
     Builds adventure create approval components.
@@ -114,6 +116,9 @@ def build_adventure_create_confirm_components(
     auto_cancellation : ``AutoCancellation``
         Auto cancellation.
     
+    goal : ``None | Goal``
+        The goal of the adventure.
+    
     Returns
     -------
     components : ``list<Component>``
@@ -122,7 +127,7 @@ def build_adventure_create_confirm_components(
         create_text_display('### You began your adventure, best of luck brave adventurer!'),
         create_separator(),
         create_text_display(''.join([*
-            produce_adventure_initial_representation(location, target, duration, return_, auto_cancellation),
+            produce_adventure_initial_representation(location, target, duration, return_, auto_cancellation, goal),
         ])),
         create_separator(),
         create_row(
@@ -130,7 +135,8 @@ def build_adventure_create_confirm_components(
                 'View adventure',
                 custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
                     user_id,
-                    adventure_entry_id, 
+                    adventure_entry_id,
+                    ADVENTURE_VIEW_MODE_DEFAULT,
                     False,
                     0,
                 ),
@@ -202,76 +208,13 @@ def build_adventure_cancellation_components(cancellation_mode):
     ]
 
 
-def _accumulate_group_adventure_action_loot(adventure_action, grouped_loot):
-    """
-    Helper function to accumulate group a single adventure action's loot.
-    
-    Parameters
-    ----------
-    adventure_action : ``AdventureAction``
-        Adventure action to group its loot of.
-    
-    grouped_loot : `dict<int, dict<int, int>>`
-        Already accumulated loot.
-    """
-    for loot_state, item_id, amount in loot_data_iter(adventure_action.loot_data):
-        try:
-            group = grouped_loot[loot_state]
-        except KeyError:
-            group = {}
-            grouped_loot[loot_state] = group
-        else:
-            amount += group.get(item_id, 0)
-        
-        group[item_id] = amount
-
-
-def group_adventure_action_listing_loot_by_state(adventure_action_listing):
-    """
-    Groups looted items by state.
-    
-    Parameters
-    ----------
-    adventure_action_listing : ``None | list<AdventureAction>``
-        Adventure action listing to group its loot of.
-    
-    Returns
-    -------
-    grouped_loot : `dict<int, dict<int, int>>`
-    """
-    grouped_loot = {}
-    
-    if (adventure_action_listing is not None):
-        for adventure_action in adventure_action_listing:
-            _accumulate_group_adventure_action_loot(adventure_action, grouped_loot)
-    
-    return grouped_loot
-
-
-def group_adventure_action_loot_by_state(adventure_action):
-    """
-    Groups looted items by state.
-    
-    Parameters
-    ----------
-    adventure_action : ``AdventureAction``
-        Adventure action to group its loot of.
-    
-    Returns
-    -------
-    grouped_loot : `dict<int, dict<int, int>>`
-    """
-    grouped_loot = {}
-    _accumulate_group_adventure_action_loot(adventure_action, grouped_loot)
-    return grouped_loot
-
-
 def iter_build_adventure_action_components(
     adventure,
     adventure_action_listing_start,
     adventure_action_listing_end,
     produce_depart,
     produce_return,
+    adventure_view_mode,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     allow_switching_to_adventure_action_listing_view,
@@ -298,6 +241,9 @@ def iter_build_adventure_action_components(
     
     produce_return : `bool`
         Whether to produce return component.
+    
+    adventure_view_mode : `int`
+        How to render the adventure.
     
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
@@ -343,6 +289,7 @@ def iter_build_adventure_action_components(
                         adventure.user_id,
                         adventure.entry_id,
                         index,
+                        adventure_view_mode,
                         allow_switching_to_adventure_listing_view,
                         adventure_listing_page_index,
                         allow_switching_to_adventure_action_listing_view,
@@ -370,11 +317,124 @@ def iter_build_adventure_action_components(
         )
 
 
-def build_adventure_view_active_components(
+def _build_adventure_finalised_control_components(
     adventure,
+    adventure_view_mode,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
-    now,
+):
+    """
+    Parameters
+    ----------
+    adventure : ``Adventure``
+        Adventure to build for.
+    
+    adventure_view_mode : `int`
+        How to render the adventure.
+    
+    allow_switching_to_adventure_listing_view : `bool`
+        Whether switching to adventure listing is allowed from adventure view.
+    
+    adventure_listing_page_index : `int`
+        Adventure listing page index to direct to from adventure view.
+    
+    Returns
+    -------
+    component : ``Component``
+    """
+    finalised = adventure.state == ADVENTURE_STATE_FINALISED
+    
+    component_refresh = create_button(
+        'Refresh',
+        enabled = (not finalised),
+        custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
+            adventure.user_id,
+            adventure.entry_id,
+            adventure_view_mode,
+            allow_switching_to_adventure_listing_view,
+            adventure_listing_page_index,
+        ),
+    )
+    
+    component_view_adventure_listing = create_button(
+        'Back to adventures',
+        enabled = allow_switching_to_adventure_listing_view,
+        custom_id = CUSTOM_ID_ADVENTURE_LISTING_VIEW_BUILDER(
+            adventure.user_id,
+            adventure_listing_page_index,
+        ),
+    )
+    
+    if finalised:
+        view_action_listing_enable = True
+    else:
+        adventure_action_listing = adventure.action_listing
+        if (adventure_action_listing is None):
+            view_action_listing_enable = False
+        else:
+            view_action_listing_enable = len(adventure_action_listing) >= ACTIVE_ADVENTURE_ACTION_LIMIT
+    
+    component_view_action_listing = create_button(
+        'View all action',
+        enabled = view_action_listing_enable,
+        custom_id = CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
+            adventure.user_id,
+            adventure.entry_id,
+            adventure_view_mode,
+            allow_switching_to_adventure_listing_view,
+            adventure_listing_page_index,
+            0,
+        ),
+    )
+    
+    if finalised:
+        cancel_enabled = False
+    else:
+        cancel_enabled = can_cancel_adventure_any(adventure)
+    
+    component_cancel = create_button(
+        'Cancel',
+        enabled = cancel_enabled,
+        custom_id = CUSTOM_ID_ADVENTURE_CANCEL_BUILDER(adventure.user_id, adventure.entry_id),
+    )
+    
+    while True:
+        if adventure_view_mode != ADVENTURE_VIEW_MODE_DEFAULT:
+            if adventure_view_mode == ADVENTURE_VIEW_MODE_DETAILED:
+                component = create_row(
+                    component_refresh,
+                    component_view_adventure_listing,
+                    component_view_action_listing,
+                    component_cancel,
+                )
+                break
+        
+        component = create_row(
+            component_refresh,
+            component_view_adventure_listing,
+            component_view_action_listing,
+            component_cancel,
+            create_button(
+                'Detailed',
+                custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
+                    adventure.user_id,
+                    adventure.entry_id,
+                    ADVENTURE_VIEW_MODE_DETAILED,
+                    allow_switching_to_adventure_listing_view,
+                    adventure_listing_page_index,
+                ),
+            ),
+        )
+        break
+    
+    return component
+
+
+def build_adventure_view_components(
+    adventure,
+    adventure_view_mode,
+    allow_switching_to_adventure_listing_view,
+    adventure_listing_page_index,
     inventory_total,
     inventory_exhausted,
 ):
@@ -386,14 +446,14 @@ def build_adventure_view_active_components(
     adventure : ``Adventure``
         The parent adventure.
     
+    adventure_view_mode : `int`
+        How to render the adventure.
+    
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
     
     adventure_listing_page_index : `int`
         Adventure listing page index to direct to from adventure view.
-    
-    now : `DateTime`
-        The current time.
     
     inventory_total : `int`
         The user's total inventory.
@@ -417,11 +477,20 @@ def build_adventure_view_active_components(
     
     # ---- Description ---
     
-    components.append(
-        create_text_display(''.join([*produce_adventure_view_description_active(
-            adventure, now, inventory_total, inventory_exhausted
-        )])),
-    )
+    while True:
+        if adventure_view_mode != ADVENTURE_VIEW_MODE_DEFAULT:
+            if adventure_view_mode == ADVENTURE_VIEW_MODE_DETAILED:
+                producer_function = produce_adventure_view_description_detailed_listing
+                break
+            
+            # No other cases
+        
+        producer_function = produce_adventure_view_description
+        break
+    
+    components.append(create_text_display(
+        ''.join([*producer_function(adventure, inventory_total, inventory_exhausted)])
+    ),)
     
     components.append(create_separator())
     
@@ -432,192 +501,79 @@ def build_adventure_view_active_components(
         (adventure_action_listing is not None) and
         any((adventure_action.loot_data is not None) for adventure_action in adventure_action_listing)
     ):
-        components.append(
-            create_text_display(''.join([*produce_loot_listing(
-                group_adventure_action_listing_loot_by_state(adventure_action_listing)
-            )])),
-        )
+        loot_by_state = adventure_action_listing_group_loot_by_state(adventure_action_listing)
+    
+        if (adventure_view_mode != ADVENTURE_VIEW_MODE_DETAILED) or (adventure.state == ADVENTURE_STATE_FINALISED):
+            components.append(create_text_display(''.join([*produce_loot_listing(
+                loot_by_state, ADVENTURE_LOOT_LISTING_MODE_DEFAULT,
+            )])))
+        
+        else:
+            adventure_action_latest = adventure_action_listing[-1]
+            if (adventure_action_latest.loot_data is not None):
+                
+                components.append(create_text_display(''.join([*produce_loot_listing(
+                    adventure_action_group_loot_by_state(adventure_action_latest),
+                    ADVENTURE_LOOT_LISTING_MODE_THIS_STEP,
+                )])))
+                components.append(create_separator())
+            
+            components.append(create_text_display(''.join([*produce_loot_listing(
+                loot_by_state, ADVENTURE_LOOT_LISTING_MODE_TOTAL,
+            )])))
+        
         components.append(create_separator())
     
     # ---- Adventure actions ----
     
-    if (adventure_action_listing is None):
-        truncated_count = 0
-        produce_depart = True
-        adventure_action_listing_start = 0
-        adventure_action_listing_end = 0
-    else:
-        adventure_action_listing_length = len(adventure_action_listing)
-        if adventure_action_listing_length < ACTIVE_ADVENTURE_ACTION_LIMIT:
-            truncated_count = 0
+    if adventure.state != ADVENTURE_STATE_FINALISED:
+        if (adventure_action_listing is None):
             produce_depart = True
             adventure_action_listing_start = 0
-            adventure_action_listing_end = len(adventure_action_listing)
+            adventure_action_listing_end = 0
         else:
-            truncated_count = adventure_action_listing_length + 1 - ACTIVE_ADVENTURE_ACTION_LIMIT
-            produce_depart = False
-            adventure_action_listing_start = adventure_action_listing_length - ACTIVE_ADVENTURE_ACTION_LIMIT
-            adventure_action_listing_end = adventure_action_listing_length
+            adventure_action_listing_length = len(adventure_action_listing)
+            if adventure_action_listing_length < ACTIVE_ADVENTURE_ACTION_LIMIT:
+                produce_depart = True
+                adventure_action_listing_start = 0
+                adventure_action_listing_end = len(adventure_action_listing)
+            else:
+                produce_depart = False
+                adventure_action_listing_start = adventure_action_listing_length - ACTIVE_ADVENTURE_ACTION_LIMIT
+                adventure_action_listing_end = adventure_action_listing_length
+                
+                truncated_count = adventure_action_listing_length + 1 - ACTIVE_ADVENTURE_ACTION_LIMIT
+                if truncated_count:
+                    components.append(
+                        create_text_display(
+                            f'+ {truncated_count} truncated (showing latest {ACTIVE_ADVENTURE_ACTION_LIMIT})'
+                    )
+                )
         
-        if truncated_count:
-            components.append(
-                create_text_display(
-                    f'+ {truncated_count} truncated (showing latest {ACTIVE_ADVENTURE_ACTION_LIMIT})'
+        components.extend(
+            iter_build_adventure_action_components(
+                adventure,
+                adventure_action_listing_start,
+                adventure_action_listing_end,
+                produce_depart,
+                False,
+                adventure_view_mode,
+                allow_switching_to_adventure_listing_view,
+                adventure_listing_page_index,
+                False,
+                0,
             )
-        )
-    
-    components.extend(
-        iter_build_adventure_action_components(
-            adventure,
-            adventure_action_listing_start,
-            adventure_action_listing_end,
-            produce_depart,
-            False, 
-            allow_switching_to_adventure_listing_view,
-            adventure_listing_page_index,
-            False,
-            0,
-        )
-    )
-    components.append(create_separator())
-    
-    # ---- Controls ----
-    
-    components.append(
-        create_row(
-            create_button(
-                'Refresh',
-                custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
-                    adventure.user_id,
-                    adventure.entry_id, 
-                    allow_switching_to_adventure_listing_view,
-                    adventure_listing_page_index,
-                ),
-            ),
-            create_button(
-                'Back to adventures',
-                enabled = allow_switching_to_adventure_listing_view,
-                custom_id = CUSTOM_ID_ADVENTURE_LISTING_VIEW_BUILDER(
-                    adventure.user_id,
-                    adventure_listing_page_index,
-                ),
-            ),
-            create_button(
-                'View all action',
-                enabled = (True if truncated_count else False),
-                custom_id = CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
-                    adventure.user_id,
-                    adventure.entry_id,
-                    allow_switching_to_adventure_listing_view,
-                    adventure_listing_page_index,
-                    0,
-                ),
-            ),
-            create_button(
-                'Cancel',
-                enabled = (can_cancel_adventure_now(adventure) or can_cancel_adventure_after(adventure)),
-                custom_id = CUSTOM_ID_ADVENTURE_CANCEL_BUILDER(adventure.user_id, adventure.entry_id),
-            ),
-        )
-    )
-    
-    return components
-
-
-def build_adventure_view_finalized_components(
-    adventure,
-    allow_switching_to_adventure_listing_view,
-    adventure_listing_page_index,
-):
-    """
-    Builds components for a finalized adventure describing it.
-    
-    Parameters
-    ----------
-    adventure : ``Adventure``
-        The parent adventure.
-    
-    allow_switching_to_adventure_listing_view : `bool`
-        Whether switching to adventure listing is allowed from adventure view.
-    
-    adventure_listing_page_index : `int`
-        Adventure listing page index to direct to from adventure view.
-    
-    Returns
-    -------
-    components : ``list<Component>``
-    """
-    components = []
-    
-    # ---- Header ---
-    
-    components.append(
-        create_text_display(''.join([*produce_adventure_view_header(adventure)])),
-    )
-    
-    components.append(create_separator())
-    
-    # ---- Description ---
-    
-    components.append(
-        create_text_display(''.join([*produce_adventure_view_description_finalized(adventure)])),
-    )
-    
-    components.append(create_separator())
-    
-    # ---- Loot ----
-    
-    adventure_action_listing = adventure.action_listing
-    if (
-        (adventure_action_listing is not None) and
-        any((adventure_action.loot_data is not None) for adventure_action in adventure_action_listing)
-    ):
-        components.append(
-            create_text_display(''.join([*produce_loot_listing(
-                group_adventure_action_listing_loot_by_state(adventure_action_listing)
-            )])),
         )
         components.append(create_separator())
     
     # ---- Controls ----
     
-    components.append(
-        create_row(
-            create_button(
-                'Refresh',
-                enabled = False,
-                custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
-                    adventure.user_id,
-                    adventure.entry_id, 
-                    allow_switching_to_adventure_listing_view,
-                    adventure_listing_page_index,
-                ),
-            ),
-            create_button(
-                'Back to adventures',
-                enabled = allow_switching_to_adventure_listing_view,
-                custom_id = CUSTOM_ID_ADVENTURE_LISTING_VIEW_BUILDER(
-                    adventure.user_id,
-                    adventure_listing_page_index,
-                ),
-            ),
-            create_button(
-                'View all action',
-                custom_id = CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
-                    adventure.user_id,
-                    adventure.entry_id, 
-                    allow_switching_to_adventure_listing_view,
-                    adventure_listing_page_index,
-                    0,
-                ),
-            ),
-            create_button(
-                'Cancel',
-                enabled = False,
-                custom_id = CUSTOM_ID_ADVENTURE_CANCEL_BUILDER(adventure.user_id, adventure.entry_id),
-            ),
-        )
-    )
+    components.append(_build_adventure_finalised_control_components(
+        adventure,
+        adventure_view_mode,
+        allow_switching_to_adventure_listing_view,
+        adventure_listing_page_index,
+    ))
     
     return components
 
@@ -627,6 +583,7 @@ def build_adventure_action_view_components(
     adventure_entry_id,
     adventure_action,
     adventure_action_index,
+    adventure_view_mode,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     allow_switching_to_adventure_action_listing_view,
@@ -648,6 +605,9 @@ def build_adventure_action_view_components(
     
     adventure_action_index : `int`
         The adventure action's index.
+    
+    adventure_view_mode : `int`
+        How to render the adventure.
     
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
@@ -690,7 +650,8 @@ def build_adventure_action_view_components(
     if (adventure_action.loot_data is not None):
         components.append(
             create_text_display(''.join([*produce_loot_listing(
-                group_adventure_action_loot_by_state(adventure_action)
+                adventure_action_group_loot_by_state(adventure_action),
+                ADVENTURE_LOOT_LISTING_MODE_DEFAULT,
             )])),
         )
         components.append(create_separator())
@@ -704,6 +665,7 @@ def build_adventure_action_view_components(
                 custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
                     user_id,
                     adventure_entry_id,
+                    adventure_view_mode,
                     allow_switching_to_adventure_listing_view,
                     adventure_listing_page_index,
                 ),
@@ -713,7 +675,8 @@ def build_adventure_action_view_components(
                 enabled = allow_switching_to_adventure_action_listing_view,
                 custom_id = CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
                     user_id,
-                    adventure_entry_id, 
+                    adventure_entry_id,
+                    adventure_view_mode,
                     allow_switching_to_adventure_listing_view,
                     adventure_listing_page_index,
                     adventure_action_listing_page_index,
@@ -734,6 +697,7 @@ def build_adventure_action_view_components(
 
 def build_adventure_action_listing_view_components(
     adventure,
+    adventure_view_mode,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     adventure_action_listing_page_index,
@@ -745,6 +709,9 @@ def build_adventure_action_listing_view_components(
     ----------
     adventure : ``Adventure``
         The parent adventure.
+    
+    adventure_view_mode : `int`
+        How to render the adventure.
     
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
@@ -759,11 +726,10 @@ def build_adventure_action_listing_view_components(
     -------
     components : ``list<Component>``
     """
-    adventure_finalized = (adventure.state == ADVENTURE_STATE_FINALIZED)
-    
+    adventure_finalised = (adventure.state == ADVENTURE_STATE_FINALISED)
     
     adventure_action_listing = adventure.action_listing
-    action_count = (0 if adventure_action_listing is None else len(adventure_action_listing)) + 1 + adventure_finalized
+    action_count = (0 if adventure_action_listing is None else len(adventure_action_listing)) + 1 + adventure_finalised
     page_count = (action_count + ADVENTURE_ACTION_LISTING_PAGE_SIZE - 1) // ADVENTURE_ACTION_LISTING_PAGE_SIZE
     
     components = []
@@ -781,7 +747,7 @@ def build_adventure_action_listing_view_components(
     
     if (adventure_action_listing_page_index > -1) and (adventure_action_listing_page_index < page_count):
         produce_depart = (adventure_action_listing_page_index == 0)
-        produce_return = adventure_finalized and (page_count - adventure_action_listing_page_index == 1)
+        produce_return = adventure_finalised and (page_count - adventure_action_listing_page_index == 1)
         
         if adventure_action_listing is None:
             adventure_action_listing_start = 0
@@ -810,6 +776,7 @@ def build_adventure_action_listing_view_components(
                 adventure_action_listing_end,
                 produce_depart,
                 produce_return,
+                adventure_view_mode,
                 allow_switching_to_adventure_listing_view,
                 adventure_listing_page_index,
                 True,
@@ -827,6 +794,7 @@ def build_adventure_action_listing_view_components(
                 custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
                     adventure.user_id,
                     adventure.entry_id,
+                    adventure_view_mode,
                     allow_switching_to_adventure_listing_view,
                     adventure_listing_page_index,
                 ),
@@ -836,6 +804,7 @@ def build_adventure_action_listing_view_components(
                 custom_id = CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
                     adventure.user_id,
                     adventure.entry_id,
+                    adventure_view_mode,
                     allow_switching_to_adventure_listing_view,
                     adventure_listing_page_index,
                     max(0, adventure_action_listing_page_index - 1),
@@ -847,6 +816,7 @@ def build_adventure_action_listing_view_components(
                 custom_id = CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER(
                     adventure.user_id,
                     adventure.entry_id,
+                    adventure_view_mode,
                     allow_switching_to_adventure_listing_view,
                     adventure_listing_page_index,
                     adventure_action_listing_page_index + 1,
@@ -902,6 +872,7 @@ def build_adventure_listing_view_components(user_id, adventure_listing, adventur
                         custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
                             user_id,
                             adventure.entry_id,
+                            ADVENTURE_VIEW_MODE_DEFAULT,
                             True,
                             adventure_listing_page_index,
                         ),
@@ -956,34 +927,33 @@ def build_adventure_return_notification_components(adventure):
         create_text_display(''.join([*produce_adventure_return_notification_header(adventure)])),
     )
     
+    components.append(create_separator()
+    )
+    
     # ---- description ----
     
     if adventure.health_exhausted or adventure.energy_exhausted:
         components.append(
-            create_separator(),
-        )
-        components.append(
             create_text_display(''.join([*produce_adventure_return_notification_description(adventure)])),
         )
+        components.append(create_separator())
     
-    # ---- Control ----
+    # ---- Loot ----
     
-    components.append(
-        create_separator(),
-    )
-    components.append(
-        create_row(
-            create_button(
-                'View adventure',
-                custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
-                    adventure.user_id,
-                    adventure.entry_id,
-                    False,
-                    0,
-                ),
-            ),
-        ),
-    )
+    adventure_action_listing = adventure.action_listing
+    if (
+        (adventure_action_listing is not None) and
+        any((adventure_action.loot_data is not None) for adventure_action in adventure_action_listing)
+    ):
+        components.append(create_text_display(''.join([*produce_loot_listing(
+            adventure_action_listing_group_loot_by_state(adventure_action_listing),
+            ADVENTURE_LOOT_LISTING_MODE_DEFAULT,
+        )])))
+        components.append(create_separator())
+    
+    # ---- Controls ----
+    
+    components.append(_build_adventure_finalised_control_components(adventure, ADVENTURE_VIEW_MODE_DEFAULT, False, 0))
     
     return components
 
@@ -1022,9 +992,16 @@ def build_adventure_action_notification_components(adventure, adventure_action):
     if (adventure_action.loot_data is not None):
         components.append(
             create_text_display(''.join([*produce_loot_listing(
-                group_adventure_action_loot_by_state(adventure_action)
+                adventure_action_group_loot_by_state(adventure_action),
+                ADVENTURE_LOOT_LISTING_MODE_THIS_STEP,
             )])),
         )
+        components.append(create_separator())
+        
+        components.append(create_text_display(''.join([*produce_loot_listing(
+            adventure_action_listing_group_loot_by_state(adventure.action_listing),
+            ADVENTURE_LOOT_LISTING_MODE_TOTAL,
+        )])))
         components.append(create_separator())
     
     # ---- Controls ----
@@ -1046,7 +1023,7 @@ def build_adventure_action_notification_components(adventure, adventure_action):
             create_button(
                 'View adventure',
                 custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
-                    adventure.user_id, adventure.entry_id, False, 0,
+                    adventure.user_id, adventure.entry_id, ADVENTURE_VIEW_MODE_DEFAULT, False, 0,
                 ),
             ),
             create_button(

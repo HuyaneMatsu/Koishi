@@ -16,8 +16,8 @@ def _iter_options():
             ItemEntry(item_strawberry, 5),
         ],
         (
-            f'{item_peach.emoji} {item_peach.name} x4 (0.{4 * item_peach.weight:0>3} kg)\n'
-            f'{item_strawberry.emoji} {item_strawberry.name} x5 (0.{5 * item_strawberry.weight:0>3} kg)'
+            f'{item_peach.emoji} {item_peach.name} x4 ({4 * item_peach.weight / 1000:.03f} kg)\n'
+            f'{item_strawberry.emoji} {item_strawberry.name} x5 ({5 * item_strawberry.weight / 1000:.02f} kg)'
         ),
     )
 

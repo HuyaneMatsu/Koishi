@@ -14,9 +14,9 @@ from ...item_core import (
 )
 
 from ..constants import ACTIONS
-from ..options import OptionLoot
+from ..options import option_loot_create
 
-from .action import Action
+from .action import action_create
 from .action_ids import (
     ACTION_ID_BAMBOO_FOREST_FORAGING_BAMBOO, ACTION_ID_BAMBOO_FOREST_FORAGING_CATEGORY_MUSHROOM,
     ACTION_ID_BAMBOO_FOREST_TRAP_RABBIT, ACTION_ID_EIENTEI_MANSION_GARDENING_CARROT,
@@ -38,7 +38,7 @@ from .action_types import (
 
 
 ACTION_SYSTEM_CANCELLATION_NOW = \
-ACTIONS[ACTION_ID_SYSTEM_CANCELLATION_NOW] = Action(
+ACTIONS[ACTION_ID_SYSTEM_CANCELLATION_NOW] = action_create(
     ACTION_ID_SYSTEM_CANCELLATION_NOW,
     ACTION_TYPE_CANCELLATION,
     0,
@@ -49,7 +49,7 @@ ACTIONS[ACTION_ID_SYSTEM_CANCELLATION_NOW] = Action(
 
 
 ACTION_SYSTEM_ARRIVAL = \
-ACTIONS[ACTION_ID_SYSTEM_ARRIVAL] = Action(
+ACTIONS[ACTION_ID_SYSTEM_ARRIVAL] = action_create(
     ACTION_ID_SYSTEM_ARRIVAL,
     ACTION_TYPE_ARRIVAL,
     0,
@@ -60,7 +60,7 @@ ACTIONS[ACTION_ID_SYSTEM_ARRIVAL] = Action(
 
 
 ACTION_SYSTEM_FATALITY = \
-ACTIONS[ACTION_ID_SYSTEM_FATALITY] = Action(
+ACTIONS[ACTION_ID_SYSTEM_FATALITY] = action_create(
     ACTION_ID_SYSTEM_FATALITY,
     ACTION_TYPE_FATALITY,
     0,
@@ -71,7 +71,7 @@ ACTIONS[ACTION_ID_SYSTEM_FATALITY] = Action(
 
 
 ACTION_SYSTEM_UNKNOWN = \
-ACTIONS[ACTION_ID_SYSTEM_UNKNOWN] = Action(
+ACTIONS[ACTION_ID_SYSTEM_UNKNOWN] = action_create(
     ACTION_ID_SYSTEM_UNKNOWN,
     ACTION_TYPE_UNKNOWN,
     0,
@@ -82,7 +82,7 @@ ACTIONS[ACTION_ID_SYSTEM_UNKNOWN] = Action(
 
 
 ACTION_SYSTEM_CANCELLATION_AFTER = \
-ACTIONS[ACTION_ID_SYSTEM_CANCELLATION_AFTER] = Action(
+ACTIONS[ACTION_ID_SYSTEM_CANCELLATION_AFTER] = action_create(
     ACTION_ID_SYSTEM_CANCELLATION_AFTER,
     ACTION_TYPE_CANCELLATION,
     0,
@@ -93,92 +93,92 @@ ACTIONS[ACTION_ID_SYSTEM_CANCELLATION_AFTER] = Action(
 
 
 ACTION_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION = \
-ACTIONS[ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION] = Action(
+ACTIONS[ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION] = action_create(
     ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
     ACTION_TYPE_GARDENING,
     3600,
     1,
     None,
     (
-        OptionLoot(False, 1, 1, True, 5, 20, ITEM_ID_SCARLET_ONION, 300, 40, 10, 2),
-        OptionLoot(False, 1, 100, True, 50, 75, ITEM_ID_SCARLET_ONION, 0, 20, 0, 1),
-        OptionLoot(True, 1, 230, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
-        OptionLoot(True, 1, 2000, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
+        option_loot_create(False, 1, 1, True, 5, 20, ITEM_ID_SCARLET_ONION, 300, 40, 10, 2),
+        option_loot_create(False, 1, 100, True, 50, 75, ITEM_ID_SCARLET_ONION, 0, 20, 0, 1),
+        option_loot_create(True, 1, 230, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
+        option_loot_create(True, 1, 2000, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION__HUMAN_VILLAGE_VINEYARDS_GARDENING_BLUEFRANKISH = \
-ACTIONS[ACTION_ID_HUMAN_VILLAGE_VINEYARDS_GARDENING_BLUEFRANKISH] = Action(
+ACTIONS[ACTION_ID_HUMAN_VILLAGE_VINEYARDS_GARDENING_BLUEFRANKISH] = action_create(
     ACTION_ID_HUMAN_VILLAGE_VINEYARDS_GARDENING_BLUEFRANKISH,
     ACTION_TYPE_GARDENING,
     1600,
     19,
     None,
     (
-        OptionLoot(False, 1, 1, True, 10, 20, ITEM_ID_BLUEFRANKISH, 2400, 20, 10, 1),
-        OptionLoot(False, 1, 100, True, 10, 40, ITEM_ID_BLUEFRANKISH, 300, 10, 10, 1),
-        OptionLoot(True, 1, 500, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
-        OptionLoot(True, 1, 2000, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
+        option_loot_create(False, 1, 1, True, 10, 20, ITEM_ID_BLUEFRANKISH, 2400, 20, 10, 1),
+        option_loot_create(False, 1, 100, True, 10, 40, ITEM_ID_BLUEFRANKISH, 300, 10, 10, 1),
+        option_loot_create(True, 1, 500, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
+        option_loot_create(True, 1, 2000, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_CARROT = \
-ACTIONS[ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_CARROT] = Action(
+ACTIONS[ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_CARROT] = action_create(
     ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_CARROT,
     ACTION_TYPE_GARDENING,
     3000,
     1,
     None,
     (
-        OptionLoot(False, 1, 1, True, 5, 10, ITEM_ID_CARROT, 100, 60, 10, 2),
-        OptionLoot(False, 1, 100, True, 25, 40, ITEM_ID_CARROT, 0, 60, 0, 2),
-        OptionLoot(True, 1, 230, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
-        OptionLoot(True, 1, 2000, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
+        option_loot_create(False, 1, 1, True, 5, 10, ITEM_ID_CARROT, 100, 60, 10, 2),
+        option_loot_create(False, 1, 100, True, 25, 40, ITEM_ID_CARROT, 0, 60, 0, 2),
+        option_loot_create(True, 1, 230, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
+        option_loot_create(True, 1, 2000, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_GARLIC = \
-ACTIONS[ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_GARLIC] = Action(
+ACTIONS[ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_GARLIC] = action_create(
     ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_GARLIC,
     ACTION_TYPE_GARDENING,
     3600,
     1,
     None,
     (
-        OptionLoot(False, 1, 1, True, 5, 10, ITEM_ID_GARLIC, 100, 50, 10, 1),
-        OptionLoot(False, 1, 100, True, 25, 30, ITEM_ID_GARLIC, 0, 25, 0, 1),
-        OptionLoot(True, 1, 230, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
-        OptionLoot(True, 1, 2800, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
+        option_loot_create(False, 1, 1, True, 5, 10, ITEM_ID_GARLIC, 100, 50, 10, 1),
+        option_loot_create(False, 1, 100, True, 25, 30, ITEM_ID_GARLIC, 0, 25, 0, 1),
+        option_loot_create(True, 1, 230, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
+        option_loot_create(True, 1, 2800, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_HUMAN_RUIN_FORAGING_STRAWBERRY = \
-ACTIONS[ACTION_ID_RUINS_FORAGING_STRAWBERRY] = Action(
+ACTIONS[ACTION_ID_RUINS_FORAGING_STRAWBERRY] = action_create(
     ACTION_ID_RUINS_FORAGING_STRAWBERRY,
     ACTION_TYPE_FORAGING,
     1800,
     1,
     None,
     (
-        OptionLoot(False, 3, 4, True, 5, 25, ITEM_ID_STRAWBERRY, 600, 15, 1, 1),
-        OptionLoot(False, 1, 40, True, 1, 4, ITEM_ID_BISHOPHAT, 100, 300, 1, 5),
-        OptionLoot(True, 1, 1800, False, 1, 1, ITEM_ID_RIBBON_BOW, 300, 0, 1, 0),
-        OptionLoot(True, 1, 2700, False, 1, 1, ITEM_ID_PLUSHIE_BEAR, 300, 0, 1, 0),
-        OptionLoot(True, 1, 3600, False, 1, 1, ITEM_ID_GOTHIC_ATTIRE, 300, 0, 1, 0),
+        option_loot_create(False, 3, 4, True, 5, 25, ITEM_ID_STRAWBERRY, 600, 15, 1, 1),
+        option_loot_create(False, 1, 40, True, 1, 4, ITEM_ID_BISHOPHAT, 100, 300, 1, 5),
+        option_loot_create(True, 1, 1800, False, 1, 1, ITEM_ID_RIBBON_BOW, 300, 0, 1, 0),
+        option_loot_create(True, 1, 2700, False, 1, 1, ITEM_ID_PLUSHIE_BEAR, 300, 0, 1, 0),
+        option_loot_create(True, 1, 3600, False, 1, 1, ITEM_ID_GOTHIC_ATTIRE, 300, 0, 1, 0),
         # Allow a few body parts to be found.
-        OptionLoot(True, 1, 3000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_ARM, 300, 0, 1, 0),
-        OptionLoot(True, 1, 3000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_LEG, 300, 0, 1, 0),
-        OptionLoot(False, 1, 1600, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_CHEWED, 300, 0, 1, 0),
+        option_loot_create(True, 1, 3000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_ARM, 300, 0, 1, 0),
+        option_loot_create(True, 1, 3000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_LEG, 300, 0, 1, 0),
+        option_loot_create(False, 1, 1600, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_CHEWED, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_EIENTEI_MANSION_TRAP_RABBIT = \
-ACTIONS[ACTION_ID_EIENTEI_MANSION_TRAP_RABBIT] = Action(
+ACTIONS[ACTION_ID_EIENTEI_MANSION_TRAP_RABBIT] = action_create(
     ACTION_ID_EIENTEI_MANSION_TRAP_RABBIT,
     ACTION_TYPE_TRAP,
     5400,
@@ -189,23 +189,23 @@ ACTIONS[ACTION_ID_EIENTEI_MANSION_TRAP_RABBIT] = Action(
 
 
 ACTION_EIENTEI_MANSION_GARDENING_CARROT = \
-ACTIONS[ACTION_ID_EIENTEI_MANSION_GARDENING_CARROT] = Action(
+ACTIONS[ACTION_ID_EIENTEI_MANSION_GARDENING_CARROT] = action_create(
     ACTION_ID_EIENTEI_MANSION_GARDENING_CARROT,
     ACTION_TYPE_GARDENING,
     3600,
     19,
     None,
     (
-        OptionLoot(False, 1, 1, True, 10, 15, ITEM_ID_CARROT, 0, 90, 15, 2),
-        OptionLoot(True, 1, 230, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
+        option_loot_create(False, 1, 1, True, 10, 15, ITEM_ID_CARROT, 0, 90, 15, 2),
+        option_loot_create(True, 1, 230, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
         # Since nobody comes here, set Kimono chance to high. Normally would have set it to 1 in 3000.
-        OptionLoot(True, 1, 1000, False, 1, 1, ITEM_ID_KIMONO, 300, 0, 1, 0),
+        option_loot_create(True, 1, 1000, False, 1, 1, ITEM_ID_KIMONO, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_BAMBOO_FOREST_TRAP_RABBIT = \
-ACTIONS[ACTION_ID_BAMBOO_FOREST_TRAP_RABBIT] = Action(
+ACTIONS[ACTION_ID_BAMBOO_FOREST_TRAP_RABBIT] = action_create(
     ACTION_ID_BAMBOO_FOREST_TRAP_RABBIT,
     ACTION_TYPE_TRAP,
     7200,
@@ -216,219 +216,219 @@ ACTIONS[ACTION_ID_BAMBOO_FOREST_TRAP_RABBIT] = Action(
 
 
 ACTION_BAMBOO_FOREST_FORAGING_CATEGORY_MUSHROOM = \
-ACTIONS[ACTION_ID_BAMBOO_FOREST_FORAGING_CATEGORY_MUSHROOM] = Action(
+ACTIONS[ACTION_ID_BAMBOO_FOREST_FORAGING_CATEGORY_MUSHROOM] = action_create(
     ACTION_ID_BAMBOO_FOREST_FORAGING_CATEGORY_MUSHROOM,
     ACTION_TYPE_FORAGING,
     4200,
     3,
     None,
     (
-        OptionLoot(False, 3, 5, True, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
-        OptionLoot(False, 1, 5, True, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
-        OptionLoot(False, 1, 10, True, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
-        OptionLoot(True, 1, 800, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
+        option_loot_create(False, 3, 5, True, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
+        option_loot_create(False, 1, 5, True, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
+        option_loot_create(False, 1, 10, True, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
+        option_loot_create(True, 1, 800, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_BAMBOO_FOREST_FORAGING_BAMBOO = \
-ACTIONS[ACTION_ID_BAMBOO_FOREST_FORAGING_BAMBOO] = Action(
+ACTIONS[ACTION_ID_BAMBOO_FOREST_FORAGING_BAMBOO] = action_create(
     ACTION_ID_BAMBOO_FOREST_FORAGING_BAMBOO,
     ACTION_TYPE_FORAGING,
     3600,
     16,
     None,
     (
-        OptionLoot(False, 1, 1, True, 1, 3, ITEM_ID_BAMBOO_SHOOT, 0, 300, 0, 3),
-        OptionLoot(False, 1, 10, True, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
-        OptionLoot(True, 1, 1200, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
+        option_loot_create(False, 1, 1, True, 1, 3, ITEM_ID_BAMBOO_SHOOT, 0, 300, 0, 3),
+        option_loot_create(False, 1, 10, True, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
+        option_loot_create(True, 1, 1200, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_HUMAN_VILLAGE_OUTSKIRTS_FORAGING_BLUEBERRY = \
-ACTIONS[ACTION_ID_MORIYA_SHRINE_FORAGING_BLUEBERRY] = Action(
+ACTIONS[ACTION_ID_MORIYA_SHRINE_FORAGING_BLUEBERRY] = action_create(
     ACTION_ID_MORIYA_SHRINE_FORAGING_BLUEBERRY,
     ACTION_TYPE_FORAGING,
     1800,
     1,
     None,
     (
-        OptionLoot(False, 3, 4, True, 4, 20, ITEM_ID_BLUEBERRY, 600, 15, 1, 1),
-        OptionLoot(True, 1, 1200, False, 1, 1, ITEM_ID_KITCHEN_KNIFE, 300, 0, 1, 0),
-        OptionLoot(True, 1, 1200, False, 1, 1, ITEM_ID_POKING_KNIFE, 300, 0, 1, 0),
-        OptionLoot(True, 1, 2000, False, 1, 1, ITEM_ID_BROOM, 300, 0, 1, 0),
+        option_loot_create(False, 3, 4, True, 4, 20, ITEM_ID_BLUEBERRY, 600, 15, 1, 1),
+        option_loot_create(True, 1, 1200, False, 1, 1, ITEM_ID_KITCHEN_KNIFE, 300, 0, 1, 0),
+        option_loot_create(True, 1, 1200, False, 1, 1, ITEM_ID_POKING_KNIFE, 300, 0, 1, 0),
+        option_loot_create(True, 1, 2000, False, 1, 1, ITEM_ID_BROOM, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_HAKUGYOKUROU_MANSION_GARDENING_PEACH = \
-ACTIONS[ACTION_ID_HAKUGYOKUROU_MANSION_GARDENING_PEACH] = Action(
+ACTIONS[ACTION_ID_HAKUGYOKUROU_MANSION_GARDENING_PEACH] = action_create(
     ACTION_ID_HAKUGYOKUROU_MANSION_GARDENING_PEACH,
     ACTION_TYPE_GARDENING,
     2700,
     1,
     None,
     (
-        OptionLoot(False, 1, 2, True, 8, 22, ITEM_ID_PEACH, 200, 40, 6, 1),
-        OptionLoot(False, 1, 200, True, 20, 34, ITEM_ID_PEACH, 0, 20, 0, 1),
-        OptionLoot(True, 1, 800, False, 1, 1, ITEM_ID_HAND_FAN, 300, 0, 1, 0),
-        OptionLoot(True, 1, 2400, False, 1, 1, ITEM_ID_PARASOL, 300, 0, 1, 0),
+        option_loot_create(False, 1, 2, True, 8, 22, ITEM_ID_PEACH, 200, 40, 6, 1),
+        option_loot_create(False, 1, 200, True, 20, 34, ITEM_ID_PEACH, 0, 20, 0, 1),
+        option_loot_create(True, 1, 800, False, 1, 1, ITEM_ID_HAND_FAN, 300, 0, 1, 0),
+        option_loot_create(True, 1, 2400, False, 1, 1, ITEM_ID_PARASOL, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_MISTY_LAKE_FORAGING = \
-ACTIONS[ACTION_ID_MISTY_LAKE_FORAGING] = Action(
+ACTIONS[ACTION_ID_MISTY_LAKE_FORAGING] = action_create(
     ACTION_ID_MISTY_LAKE_FORAGING,
     ACTION_TYPE_FORAGING,
     3600,
     1,
     None,
     (
-        OptionLoot(False, 4, 7, True, 1, 4, ITEM_ID_FROG, 60, 300, 1, 2),
-        OptionLoot(False, 2, 5, True, 1, 4, ITEM_ID_ANGELROOT, 100, 200, 2, 3),
-        OptionLoot(True, 1, 200, False, 1, 1, ITEM_ID_FISHING_ROD, 300, 10, 1, 0),
-        OptionLoot(True, 1, 1600, False, 1, 1, ITEM_ID_HIKING_SET, 300, 10, 1, 0),
+        option_loot_create(False, 4, 7, True, 1, 4, ITEM_ID_FROG, 60, 300, 1, 2),
+        option_loot_create(False, 2, 5, True, 1, 4, ITEM_ID_ANGELROOT, 100, 200, 2, 3),
+        option_loot_create(True, 1, 200, False, 1, 1, ITEM_ID_FISHING_ROD, 300, 10, 1, 0),
+        option_loot_create(True, 1, 1600, False, 1, 1, ITEM_ID_HIKING_SET, 300, 10, 1, 0),
         # Allow a few body parts to be found.
-        OptionLoot(True, 1, 100, False, 1, 10, ITEM_ID_HUMAN_BONE, 300, 0, 1, 0),
-        OptionLoot(True, 1, 2000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_SKULL, 300, 0, 1, 0),
-        OptionLoot(True, 1, 3000, False, 1, 1, ITEM_ID_HUMAN_BODY, 300, 0, 1, 0),
-        OptionLoot(True, 1, 3000, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_BOTTOM_HALF, 600, 0, 2, 0),
-        OptionLoot(True, 1, 3000, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_TOP_HALF, 600, 0, 2, 0),
-        OptionLoot(True, 1, 3000, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_CHEWED, 300, 0, 1, 0),
-        OptionLoot(True, 1, 4000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_ARM, 300, 0, 1, 0),
-        OptionLoot(True, 1, 4000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_LEG, 300, 0, 1, 0),
-        OptionLoot(True, 1, 4500, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_HEAD, 300, 0, 1, 0),
-        OptionLoot(True, 1, 5000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_HAND, 300, 0, 1, 0),
-        OptionLoot(True, 1, 5000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_FOOT, 300, 0, 1, 0),
+        option_loot_create(True, 1, 100, False, 1, 10, ITEM_ID_HUMAN_BONE, 300, 0, 1, 0),
+        option_loot_create(True, 1, 2000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_SKULL, 300, 0, 1, 0),
+        option_loot_create(True, 1, 3000, False, 1, 1, ITEM_ID_HUMAN_BODY, 300, 0, 1, 0),
+        option_loot_create(True, 1, 3000, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_BOTTOM_HALF, 600, 0, 2, 0),
+        option_loot_create(True, 1, 3000, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_TOP_HALF, 600, 0, 2, 0),
+        option_loot_create(True, 1, 3000, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_CHEWED, 300, 0, 1, 0),
+        option_loot_create(True, 1, 4000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_ARM, 300, 0, 1, 0),
+        option_loot_create(True, 1, 4000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_LEG, 300, 0, 1, 0),
+        option_loot_create(True, 1, 4500, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_HEAD, 300, 0, 1, 0),
+        option_loot_create(True, 1, 5000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_HAND, 300, 0, 1, 0),
+        option_loot_create(True, 1, 5000, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_FOOT, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_MAGIC_FOREST_FORAGING_MUSHROOM = \
-ACTIONS[ACTION_ID_MAGIC_FOREST_FORAGING_MUSHROOMS] = Action(
+ACTIONS[ACTION_ID_MAGIC_FOREST_FORAGING_MUSHROOMS] = action_create(
     ACTION_ID_MAGIC_FOREST_FORAGING_MUSHROOMS,
     ACTION_TYPE_FORAGING,
     6400,
     1,
     None,
     (
-        OptionLoot(False, 7, 10, True, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
-        OptionLoot(False, 4, 10, True, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
-        OptionLoot(False, 1, 20, True, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
-        OptionLoot(True, 1, 600, False, 1, 1, ITEM_ID_RULER, 300, 0, 1, 0),
-        OptionLoot(True, 1, 1600, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
+        option_loot_create(False, 7, 10, True, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
+        option_loot_create(False, 4, 10, True, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
+        option_loot_create(False, 1, 20, True, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
+        option_loot_create(True, 1, 600, False, 1, 1, ITEM_ID_RULER, 300, 0, 1, 0),
+        option_loot_create(True, 1, 1600, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_MAGIC_FOREST_FORAGING_FIREWOOD_CATEGORY_FIREWOOD = \
-ACTIONS[ACTION_ID_MAGIC_FOREST_FORAGING_FIREWOOD_CATEGORY_FIREWOOD] = Action(
+ACTIONS[ACTION_ID_MAGIC_FOREST_FORAGING_FIREWOOD_CATEGORY_FIREWOOD] = action_create(
     ACTION_ID_MAGIC_FOREST_FORAGING_FIREWOOD_CATEGORY_FIREWOOD,
     ACTION_TYPE_FORAGING,
     3600,
     8,
     None,
     (
-        OptionLoot(False, 4, 5, True, 2, 12, ITEM_ID_TWIGS, 0, 300, 0, 1),
-        OptionLoot(False, 4, 5, True, 1, 12, ITEM_ID_BOUGH, 120, 480, 0, 2),
-        OptionLoot(True, 1, 1200, False, 1, 1, ITEM_ID_RULER, 300, 0, 1, 0),
-        OptionLoot(True, 1, 3200, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
+        option_loot_create(False, 4, 5, True, 2, 12, ITEM_ID_TWIGS, 0, 300, 0, 1),
+        option_loot_create(False, 4, 5, True, 1, 12, ITEM_ID_BOUGH, 120, 480, 0, 2),
+        option_loot_create(True, 1, 1200, False, 1, 1, ITEM_ID_RULER, 300, 0, 1, 0),
+        option_loot_create(True, 1, 3200, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_MAGIC_FOREST_FORAGING_FIREWOOD_CATEGORY_MUSHROOMS = \
-ACTIONS[ACTION_ID_MAGIC_FOREST_FORAGING_FIREWOOD_CATEGORY_MUSHROOMS] = Action(
+ACTIONS[ACTION_ID_MAGIC_FOREST_FORAGING_FIREWOOD_CATEGORY_MUSHROOMS] = action_create(
     ACTION_ID_MAGIC_FOREST_FORAGING_FIREWOOD_CATEGORY_MUSHROOMS,
     ACTION_TYPE_FORAGING,
     3600,
     1,
     None,
     (
-        OptionLoot(False, 7, 10, True, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
-        OptionLoot(False, 4, 10, True, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
-        OptionLoot(False, 1, 20, True, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
-        OptionLoot(True, 1, 1200, False, 1, 1, ITEM_ID_RULER, 300, 0, 1, 0),
-        OptionLoot(True, 1, 3200, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
+        option_loot_create(False, 7, 10, True, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
+        option_loot_create(False, 4, 10, True, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
+        option_loot_create(False, 1, 20, True, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
+        option_loot_create(True, 1, 1200, False, 1, 1, ITEM_ID_RULER, 300, 0, 1, 0),
+        option_loot_create(True, 1, 3200, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_HUMAN_VILLAGE_VINEYARDS_GARDENING_GRAPE_PRUNING = \
-ACTIONS[ACTION_ID_HUMAN_VILLAGE_VINEYARDS_GARDENING_GRAPE_PRUNING] = Action(
+ACTIONS[ACTION_ID_HUMAN_VILLAGE_VINEYARDS_GARDENING_GRAPE_PRUNING] = action_create(
     ACTION_ID_HUMAN_VILLAGE_VINEYARDS_GARDENING_GRAPE_PRUNING,
     ACTION_TYPE_GARDENING,
     1200,
     1,
     None,
     (
-        OptionLoot(False, 1, 1, True, 5, 20, ITEM_ID_TWIGS, 0, 300, 0, 3),
-        OptionLoot(False, 1, 36, False, 1, 1, ITEM_ID_BOUGH, 120, 480, 2, 3),
-        OptionLoot(True, 1, 1000, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
+        option_loot_create(False, 1, 1, True, 5, 20, ITEM_ID_TWIGS, 0, 300, 0, 3),
+        option_loot_create(False, 1, 36, False, 1, 1, ITEM_ID_BOUGH, 120, 480, 2, 3),
+        option_loot_create(True, 1, 1000, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_HAKUGYOKUROU_MANSION_GARDENING_TREE_PRUNING = \
-ACTIONS[ACTION_ID_HAKUGYOKUROU_MANSION_GARDENING_TREE_PRUNING] = Action(
+ACTIONS[ACTION_ID_HAKUGYOKUROU_MANSION_GARDENING_TREE_PRUNING] = action_create(
     ACTION_ID_HAKUGYOKUROU_MANSION_GARDENING_TREE_PRUNING,
     ACTION_TYPE_GARDENING,
     1200,
     1,
     None,
     (
-        OptionLoot(False, 1, 2, True, 4, 20, ITEM_ID_TWIGS, 0, 300, 0, 3),
-        OptionLoot(False, 1, 12, True, 1, 3, ITEM_ID_BOUGH, 120, 480, 2, 3),
-        OptionLoot(True, 1, 1000, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
+        option_loot_create(False, 1, 2, True, 4, 20, ITEM_ID_TWIGS, 0, 300, 0, 3),
+        option_loot_create(False, 1, 12, True, 1, 3, ITEM_ID_BOUGH, 120, 480, 2, 3),
+        option_loot_create(True, 1, 1000, False, 1, 1, ITEM_ID_SCISSORS, 300, 0, 1, 0),
     ),
 )
 
 
 ACTION_YOUKAI_FOREST_FORAGING_FIREWOOD = \
-ACTIONS[ACTION_ID_YOUKAI_FOREST_FORAGING_FIREWOOD] = Action(
+ACTIONS[ACTION_ID_YOUKAI_FOREST_FORAGING_FIREWOOD] = action_create(
     ACTION_ID_YOUKAI_FOREST_FORAGING_FIREWOOD,
     ACTION_TYPE_FORAGING,
     3600,
     8,
     None,
     (
-        OptionLoot(False, 3, 5, True, 2, 12, ITEM_ID_TWIGS, 0, 300, 0, 1),
-        OptionLoot(False, 3, 5, True, 1, 12, ITEM_ID_BOUGH, 120, 480, 0, 2),
-        OptionLoot(False, 1, 17, True, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
-        OptionLoot(False, 1, 17, True, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
-        OptionLoot(False, 1, 43, True, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
-        OptionLoot(True, 1, 2700, False, 1, 1, ITEM_ID_RIBBON_BOW, 300, 0, 1, 0),
+        option_loot_create(False, 3, 5, True, 2, 12, ITEM_ID_TWIGS, 0, 300, 0, 1),
+        option_loot_create(False, 3, 5, True, 1, 12, ITEM_ID_BOUGH, 120, 480, 0, 2),
+        option_loot_create(False, 1, 17, True, 2, 7, ITEM_ID_DEVILCART_OYSTER, 120, 10, 2, 1),
+        option_loot_create(False, 1, 17, True, 1, 4, ITEM_ID_FLYKILLER_AMANITA, 600, 10, 6, 3),
+        option_loot_create(False, 1, 43, True, 1, 3, ITEM_ID_BISHOPHAT, 200, 10, 1, 5),
+        option_loot_create(True, 1, 2700, False, 1, 1, ITEM_ID_RIBBON_BOW, 300, 0, 1, 0),
         # Many, many body parts
-        OptionLoot(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY, 300, 0, 1, 0),
-        OptionLoot(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_BOTTOM_HALF, 600, 0, 2, 0),
-        OptionLoot(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_TOP_HALF, 600, 0, 2, 0),
-        OptionLoot(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_CHEWED, 300, 0, 1, 0),
-        OptionLoot(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_ARM, 300, 0, 1, 0),
-        OptionLoot(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_LEG, 300, 0, 1, 0),
-        OptionLoot(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_HEAD, 300, 0, 1, 0),
-        OptionLoot(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_HAND, 300, 0, 1, 0),
-        OptionLoot(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_FOOT, 300, 0, 1, 0),
-        OptionLoot(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_SKULL, 300, 0, 1, 0),
-        OptionLoot(True, 1, 700, False, 1, 10, ITEM_ID_HUMAN_BONE, 300, 0, 1, 0),
-        OptionLoot(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_TORSO, 600, 0, 1, 0),
-        OptionLoot(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_DIGESTIVE_ORGANS, 600, 0, 2, 0),
-        OptionLoot(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_INTERNALS, 600, 0, 2, 0),
+        option_loot_create(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY, 300, 0, 1, 0),
+        option_loot_create(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_BOTTOM_HALF, 600, 0, 2, 0),
+        option_loot_create(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_TOP_HALF, 600, 0, 2, 0),
+        option_loot_create(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_SHARD_CHEWED, 300, 0, 1, 0),
+        option_loot_create(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_ARM, 300, 0, 1, 0),
+        option_loot_create(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_LEG, 300, 0, 1, 0),
+        option_loot_create(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_HEAD, 300, 0, 1, 0),
+        option_loot_create(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_HAND, 300, 0, 1, 0),
+        option_loot_create(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_FOOT, 300, 0, 1, 0),
+        option_loot_create(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_SKULL, 300, 0, 1, 0),
+        option_loot_create(True, 1, 700, False, 1, 10, ITEM_ID_HUMAN_BONE, 300, 0, 1, 0),
+        option_loot_create(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_TORSO, 600, 0, 1, 0),
+        option_loot_create(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_DIGESTIVE_ORGANS, 600, 0, 2, 0),
+        option_loot_create(True, 1, 700, False, 1, 1, ITEM_ID_HUMAN_BODY_PART_INTERNALS, 600, 0, 2, 0),
     ),
 )
 
 
 ACTION_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_RICE = \
-ACTIONS[ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_RICE] = Action(
+ACTIONS[ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_RICE] = action_create(
     ACTION_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_RICE,
     ACTION_TYPE_GARDENING,
     6600,
     1,
     None,
     (
-        OptionLoot(False, 1, 1, True, 4, 12, ITEM_ID_RICE, 1200, 600, 12, 6),
-        OptionLoot(True, 1, 30, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
-        OptionLoot(True, 1, 1250, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
+        option_loot_create(False, 1, 1, True, 4, 12, ITEM_ID_RICE, 1200, 600, 12, 6),
+        option_loot_create(True, 1, 30, False, 1, 1, ITEM_ID_FROG, 0, 120, 0, 1),
+        option_loot_create(True, 1, 1250, False, 1, 1, ITEM_ID_STRAW_HAT, 300, 0, 1, 0),
     ),
 )

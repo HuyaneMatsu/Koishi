@@ -6,11 +6,12 @@ from ..item_core import get_item, get_item_group_nullable, get_item_nullable
 
 from ..guild_stats_core import guild_stats_modify_credibility_by
 from ..quest_core import (
-    AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_REQUIREMENT_TYPE_DURATION,
+    LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_REQUIREMENT_TYPE_DURATION,
     QUEST_REQUIREMENT_TYPE_EXPIRATION, QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY, QUEST_REQUIREMENT_TYPE_ITEM_EXACT,
     QUEST_REQUIREMENT_TYPE_ITEM_GROUP, QUEST_REWARD_TYPE_BALANCE, QUEST_REWARD_TYPE_CREDIBILITY,
     QUEST_REWARD_TYPE_ITEM_EXACT, calculate_received_reward_credibility, get_guild_adventurer_rank_info
 )
+from ..unit_core import AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT
 from ..user_balance import user_balance_modify_balance_by
 from ..user_stats_core import user_stats_modify_credibility_by
 
@@ -154,21 +155,21 @@ def get_quest_submission_requirements_normalised(quest):
     normalised = None
     
     for requirement in requirements:
-        requirement_type = requirement.TYPE
+        requirement_type = requirement.behaviour.type
         if requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_EXACT:
-            required_identifier = requirement.item_id
+            required_identifier = requirement.configuration.item_id
             
         elif requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_GROUP:
-            required_identifier = requirement.item_group_id
+            required_identifier = requirement.configuration.item_group_id
             
         elif requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY:
-            required_identifier = requirement.item_flags
+            required_identifier = requirement.configuration.item_flags
             
         else:
             continue
         
-        amount_type = requirement.amount_type
-        amount_required = requirement.amount_required
+        amount_type = requirement.configuration.amount_type
+        amount_required = requirement.configuration.amount_required
         
         if normalised is None:
             normalised = []
@@ -205,26 +206,26 @@ def get_linked_quest_submission_requirements_normalised(linked_quest):
     completed = linked_quest.completion_state == LINKED_QUEST_COMPLETION_STATE_COMPLETED
     
     for requirement in requirements:
-        requirement_type = requirement.TYPE
+        requirement_type = requirement.behaviour.type
         if requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_EXACT:
-            required_identifier = requirement.item_id
+            required_identifier = requirement.configuration.item_id
             
         elif requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_GROUP:
-            required_identifier = requirement.item_group_id
+            required_identifier = requirement.configuration.item_group_id
             
         elif requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY:
-            required_identifier = requirement.item_flags
+            required_identifier = requirement.configuration.item_flags
             
         else:
             continue
         
-        amount_type = requirement.amount_type
-        amount_required = requirement.amount_required
+        amount_type = requirement.configuration.amount_type
+        amount_required = requirement.configuration.amount_required
         
         if completed:
             amount_submitted = -1
         else:
-            amount_submitted = requirement.amount_submitted
+            amount_submitted = requirement.configuration.amount_submitted
         
         if normalised is None:
             normalised = []
@@ -266,18 +267,20 @@ def get_quest_rewards_normalised(quest, quest_level, user_level):
     normalised = None
     
     for reward in rewards:
-        reward_type = reward.TYPE
+        reward_type = reward.behaviour.type
         if reward_type == QUEST_REWARD_TYPE_BALANCE:
             reward_identifier = 0
-            amount_given = reward.balance
+            amount_given = reward.configuration.balance
             
         elif reward_type == QUEST_REWARD_TYPE_CREDIBILITY:
             reward_identifier = 0
-            amount_given = calculate_received_reward_credibility(reward.credibility, quest_level, user_level)
+            amount_given = calculate_received_reward_credibility(
+                reward.configuration.credibility, quest_level, user_level
+            )
             
         elif reward_type == QUEST_REWARD_TYPE_ITEM_EXACT:
-            reward_identifier = reward.item_id
-            amount_given = reward.amount_given
+            reward_identifier = reward.configuration.item_id
+            amount_given = reward.configuration.amount_given
             
         else:
             continue
@@ -320,18 +323,20 @@ def get_linked_quest_rewards_normalised(linked_quest, quest_level, user_level):
     normalised = None
     
     for reward in rewards:
-        reward_type = reward.TYPE
+        reward_type = reward.behaviour.type
         if reward_type == QUEST_REWARD_TYPE_BALANCE:
             reward_identifier = 0
-            amount_given = reward.balance
+            amount_given = reward.configuration.balance
             
         elif reward_type == QUEST_REWARD_TYPE_CREDIBILITY:
             reward_identifier = 0
-            amount_given = calculate_received_reward_credibility(reward.credibility, quest_level, user_level)
+            amount_given = calculate_received_reward_credibility(
+                reward.configuration.credibility, quest_level, user_level
+            )
             
         elif reward_type == QUEST_REWARD_TYPE_ITEM_EXACT:
-            reward_identifier = reward.item_id
-            amount_given = reward.amount_given
+            reward_identifier = reward.configuration.item_id
+            amount_given = reward.configuration.amount_given
             
         else:
             continue
@@ -364,8 +369,8 @@ def get_quest_expiration(quest):
     requirements = quest.requirements
     if (requirements is not None):
         for requirement in requirements:
-            if requirement.TYPE == QUEST_REQUIREMENT_TYPE_EXPIRATION:
-                return requirement.expiration
+            if requirement.behaviour.type == QUEST_REQUIREMENT_TYPE_EXPIRATION:
+                return requirement.configuration.expiration
 
 
 def get_linked_quest_expiration(linked_quest):
@@ -384,8 +389,8 @@ def get_linked_quest_expiration(linked_quest):
     requirements = linked_quest.requirements
     if (requirements is not None):
         for requirement in requirements:
-            if requirement.TYPE == QUEST_REQUIREMENT_TYPE_EXPIRATION:
-                return requirement.expiration
+            if requirement.behaviour.type == QUEST_REQUIREMENT_TYPE_EXPIRATION:
+                return requirement.configuration.expiration
 
 
 def get_quest_duration_delta(quest):
@@ -404,8 +409,8 @@ def get_quest_duration_delta(quest):
     requirements = quest.requirements
     if (requirements is not None):
         for requirement in requirements:
-            if requirement.TYPE == QUEST_REQUIREMENT_TYPE_DURATION:
-                return RelativeDelta(seconds = requirement.duration)
+            if requirement.behaviour.type == QUEST_REQUIREMENT_TYPE_DURATION:
+                return RelativeDelta(seconds = requirement.configuration.duration)
 
 
 def get_linked_quest_duration_delta(linked_quest):
@@ -424,8 +429,8 @@ def get_linked_quest_duration_delta(linked_quest):
     requirements = linked_quest.requirements
     if (requirements is not None):
         for requirement in requirements:
-            if requirement.TYPE == QUEST_REQUIREMENT_TYPE_DURATION:
-                return RelativeDelta(seconds = requirement.duration)
+            if requirement.behaviour.type == QUEST_REQUIREMENT_TYPE_DURATION:
+                return RelativeDelta(seconds = requirement.configuration.duration)
 
 
 def get_linked_quest_submission_requirement_at_index(linked_quest, requirement_index):
@@ -442,13 +447,13 @@ def get_linked_quest_submission_requirement_at_index(linked_quest, requirement_i
     
     Returns
     -------
-    requirement : ``None | QuestRequirementSerialisableBase``
+    requirement : ``None | QuestSubTypeSerialisable``
     """
     requirements = linked_quest.requirements
     if (requirements is not None):
         index = 0
         for requirement in requirements:
-            if requirement.TYPE not in (
+            if requirement.behaviour.type not in (
                 QUEST_REQUIREMENT_TYPE_ITEM_EXACT,
                 QUEST_REQUIREMENT_TYPE_ITEM_GROUP,
                 QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY,
@@ -558,24 +563,24 @@ def iter_submission_requirement_item_entries_of_requirement(inventory, requireme
     inventory : ``Inventory``
         Inventory to filter from.
     
-    requirement : ``QuestRequirementSerialisableBase``
+    requirement : ``QuestSubTypeSerialisable``
         Requirement to match items for.
     
     Yields
     ------
     item_entry : ``ItemEntry``
     """
-    requirement_type = requirement.TYPE
+    requirement_type = requirement.behaviour.type
     if requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_EXACT:
-        required_identifier = requirement.item_id
+        required_identifier = requirement.configuration.item_id
         iterator_function = _iter_submission_requirement_item_exact_item_entries
     
     elif requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_GROUP:
-        required_identifier = requirement.item_group_id
+        required_identifier = requirement.configuration.item_group_id
         iterator_function = _iter_submission_requirement_item_exact_item_group
     
     elif requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY:
-        required_identifier = requirement.item_flags
+        required_identifier = requirement.configuration.item_flags
         iterator_function = _iter_submission_requirement_item_exact_item_category
     
     else:
@@ -639,7 +644,7 @@ def get_quest_in_possession_count(quest, inventory):
     requirements = quest.requirements
     if (requirements is not None):
         for requirement in requirements:
-            requirement_type = requirement.TYPE
+            requirement_type = requirement.behaviour.type
             
             # If we require category or group, disable
             if (
@@ -651,11 +656,11 @@ def get_quest_in_possession_count(quest, inventory):
             
             # If we require an  exact item, try to process it
             if requirement_type == QUEST_REQUIREMENT_TYPE_ITEM_EXACT:
-                item = get_item_nullable(requirement.item_id)
+                item = get_item_nullable(requirement.configuration.item_id)
                 if item is None:
                     continue
                 
-                amount_type = requirement.amount_type
+                amount_type = requirement.configuration.amount_type
                 if (amount_type == AMOUNT_TYPE_WEIGHT) or (amount_type == AMOUNT_TYPE_VALUE):
                     if amount_type == AMOUNT_TYPE_WEIGHT:
                         multiplier = item.weight
@@ -670,7 +675,7 @@ def get_quest_in_possession_count(quest, inventory):
                 
                 # Do not calculate it by completion to allow the user submitting it multiple times.
                 amount_owned = inventory.get_item_amount(item) * multiplier
-                amount_required = requirement.amount_required
+                amount_required = requirement.configuration.amount_required
                 
                 completable_count = amount_owned // amount_required
                 if not completable_count:
@@ -726,7 +731,7 @@ def try_submit_item(requirement, inventory, item_entry, submissions_normalised):
     
     Parameters
     ----------
-    requirement : ``QuestRequirementSerialisableItemExact | QuestRequirementSerialisableItemGroup | QuestRequirementSerialisable``
+    requirement : ``QuestRSubTypeSerialisable``
         Requirement to submit to.
     
     inventory : ``Inventory``
@@ -742,19 +747,19 @@ def try_submit_item(requirement, inventory, item_entry, submissions_normalised):
     -------
     submissions_normalised : ``None | list<(Item, int, int, int, int)>``
     """
-    amount_required = requirement.amount_required
-    amount_submitted = requirement.amount_submitted
+    amount_required = requirement.configuration.amount_required
+    amount_submitted = requirement.configuration.amount_submitted
     
     # Do not submit 0 if all is already submitted
     if (amount_submitted >= amount_required):
         return submissions_normalised
     
     item = item_entry.item
-    amount_type = requirement.amount_type
+    amount_type = requirement.configuration.amount_type
     amount_used, amount_used_count = get_submit_amount(
         item, amount_type, amount_required - amount_submitted, item_entry.amount
     )
-    requirement.amount_submitted = amount_submitted + amount_used
+    requirement.configuration.amount_submitted = amount_submitted + amount_used
     inventory.modify_item_amount(item, -amount_used_count)
     
     if (submissions_normalised is None):
@@ -773,7 +778,7 @@ def do_submit_complete_item(requirement, inventory, item_entry, submissions_norm
     
     Parameters
     ----------
-    requirement : ``QuestRequirementSerialisableItemExact | QuestRequirementSerialisableItemGroup | QuestRequirementSerialisable``
+    requirement : ``QuestRSubTypeSerialisable``
         Requirement to submit to.
     
     inventory : ``Inventory``
@@ -792,15 +797,15 @@ def do_submit_complete_item(requirement, inventory, item_entry, submissions_norm
     -------
     submissions_normalised : ``None | list<(Item, int, int, int, int)>``
     """
-    amount_required = requirement.amount_required
-    amount_submitted = requirement.amount_submitted
+    amount_required = requirement.configuration.amount_required
+    amount_submitted = requirement.configuration.amount_submitted
     
     amount_required_total = amount_required * submission_count
     if (amount_submitted >= amount_required_total):
         return submissions_normalised
     
     item = item_entry.item
-    amount_type = requirement.amount_type
+    amount_type = requirement.configuration.amount_type
     amount_used, amount_used_count = get_submit_amount(
         item, amount_type, amount_required_total - amount_submitted, item_entry.amount
     )
@@ -808,7 +813,7 @@ def do_submit_complete_item(requirement, inventory, item_entry, submissions_norm
     
     # If you submit extra items, keep the extra in `.amount_submitted`.
     # If you submitted less for whatever reason, do not point out that you indeed submitted less.
-    requirement.amount_submitted = max(
+    requirement.configuration.amount_submitted = max(
         amount_required,
         amount_submitted + amount_required + amount_used - amount_required_total
     )
@@ -863,9 +868,9 @@ def do_reward_user(
     rewards = linked_quest.rewards
     if (rewards is not None):
         for reward in rewards:
-            reward_type = reward.TYPE
+            reward_type = reward.behaviour.type
             if reward_type == QUEST_REWARD_TYPE_BALANCE:
-                balance_given = reward.balance * reward_count
+                balance_given = reward.configuration.balance * reward_count
                 
                 user_balance_modify_balance_by(user_balance, balance_given)
                 
@@ -875,7 +880,7 @@ def do_reward_user(
                 rewards_normalised.append((QUEST_REWARD_TYPE_BALANCE, 0, balance_given))
             
             elif reward_type == QUEST_REWARD_TYPE_CREDIBILITY:
-                credibility_given = reward.credibility * reward_count
+                credibility_given = reward.configuration.credibility * reward_count
                 
                 user_reward_credibility = calculate_received_reward_credibility(
                     credibility_given, quest_level, user_level
@@ -894,8 +899,8 @@ def do_reward_user(
                 rewards_normalised.append((QUEST_REWARD_TYPE_CREDIBILITY, 0, user_reward_credibility))
             
             elif reward_type == QUEST_REWARD_TYPE_ITEM_EXACT:
-                amount_given = reward.amount_given * reward_count
-                item_id = reward.item_id
+                amount_given = reward.configuration.amount_given * reward_count
+                item_id = reward.configuration.item_id
                 inventory.modify_item_amount(get_item(item_id), amount_given)
                 
                 if (rewards_normalised is None):

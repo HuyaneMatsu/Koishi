@@ -2,34 +2,35 @@ import vampytest
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...item_core import ITEM_ID_PEACH, get_item
+from ...item_core import ITEM_ID_PEACH, get_item_nullable
 
 from ..content_building import produce_claim_sold_description
 
 
 def _iter_options():
-    item = get_item(ITEM_ID_PEACH)
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
     
     yield (
-        item,
+        item_peach,
         5,
         1000,
         0,
         (
             f'You received 1000 {EMOJI__HEART_CURRENCY}, '
-            f'for selling 5 {item.emoji} {item.name} ({item.weight * 5 / 1000:.03f} kg).'
+            f'for selling 5 {item_peach.emoji} {item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg).'
         ),
     )
     
     yield (
-        item,
+        item_peach,
         5,
         1000,
         10,
         (
             f'You received 1000 {EMOJI__HEART_CURRENCY}, '
             f'after paying additional 10 {EMOJI__HEART_CURRENCY} fee, '
-            f'for selling 5 {item.emoji} {item.name} ({item.weight * 5 / 1000:.03f} kg).'
+            f'for selling 5 {item_peach.emoji} {item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg).'
         ),
     )
 

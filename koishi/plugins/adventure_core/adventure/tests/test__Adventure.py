@@ -1,6 +1,10 @@
 import vampytest
 from scarletio import TimerHandle
 
+from ....unit_core import AMOUNT_TYPE_COUNT
+
+from ...goal import goal_create_default, goal_create_item_exact, goal_listing_serialise
+
 from ..adventure import (
     ADVENTURE_MODIFICATION_FLAG_ACTION_LISTING, ADVENTURE_MODIFICATION_FLAG_ENERGY_EXHAUSTED,
     ADVENTURE_MODIFICATION_FLAG_HEALTH_EXHAUSTED, ADVENTURE_MODIFICATION_FLAG_STATE,
@@ -32,6 +36,7 @@ def assert_adventure_fields_set(adventure):
     vampytest.assert_instance(adventure.handle, TimerHandle, nullable = True)
     vampytest.assert_instance(adventure.health_exhausted, int)
     vampytest.assert_instance(adventure.health_initial, int)
+    vampytest.assert_instance(adventure.goal_listing, list, nullable = True)
     vampytest.assert_instance(adventure.initial_duration_seconds, int)
     vampytest.assert_instance(adventure.location_id, int)
     vampytest.assert_instance(adventure.modification_flags, int)
@@ -52,6 +57,9 @@ def test__Adventure__repr():
     target_id = 4566
     return_id = 1222
     auto_cancellation_id = 5666
+    goal_listing = [
+        goal_create_default(),
+    ]
     initial_duration_seconds = 3600 * 8
     health_initial = 150
     energy_initial = 200
@@ -64,6 +72,7 @@ def test__Adventure__repr():
         target_id,
         return_id,
         auto_cancellation_id,
+        goal_listing,
         
         initial_duration_seconds,
         health_initial,
@@ -77,6 +86,7 @@ def test__Adventure__repr():
     vampytest.assert_eq(adventure.target_id, target_id)
     vampytest.assert_eq(adventure.return_id, return_id)
     vampytest.assert_eq(adventure.auto_cancellation_id, auto_cancellation_id)
+    vampytest.assert_eq(adventure.goal_listing, goal_listing)
     vampytest.assert_eq(adventure.initial_duration_seconds, initial_duration_seconds)
     vampytest.assert_eq(adventure.health_initial, health_initial)
     vampytest.assert_eq(adventure.energy_initial, energy_initial)
@@ -91,6 +101,9 @@ def test__adventure_create():
     target_id = 4566
     return_id = 1222
     auto_cancellation_id = 5666
+    goal_listing = [
+        goal_create_default(),
+    ]
     initial_duration_seconds = 3600 * 8
     health_initial = 150
     energy_initial = 200
@@ -103,6 +116,7 @@ def test__adventure_create():
         target_id,
         return_id,
         auto_cancellation_id,
+        goal_listing,
         
         initial_duration_seconds,
         health_initial,
@@ -116,6 +130,7 @@ def test__adventure_create():
     vampytest.assert_eq(adventure.target_id, target_id)
     vampytest.assert_eq(adventure.return_id, return_id)
     vampytest.assert_eq(adventure.auto_cancellation_id, auto_cancellation_id)
+    vampytest.assert_eq(adventure.goal_listing, goal_listing)
     vampytest.assert_eq(adventure.initial_duration_seconds, initial_duration_seconds)
     vampytest.assert_eq(adventure.health_initial, health_initial)
     vampytest.assert_eq(adventure.energy_initial, energy_initial)
@@ -131,6 +146,9 @@ def test__adventure_create_from_entry():
     target_id = 4566
     return_id = 1222
     auto_cancellation_id = 5666
+    goal_listing = [
+        goal_create_item_exact(5, AMOUNT_TYPE_COUNT, 20),
+    ]
     initial_duration_seconds = 3600 * 8
     health_initial = 150
     energy_initial = 200
@@ -152,6 +170,7 @@ def test__adventure_create_from_entry():
         'target_id': target_id,
         'return_id': return_id,
         'auto_cancellation_id': auto_cancellation_id,
+        'goal_listing_data': goal_listing_serialise(goal_listing),
         
         'initial_duration_seconds': initial_duration_seconds,
         'health_initial': health_initial,
@@ -176,6 +195,7 @@ def test__adventure_create_from_entry():
     vampytest.assert_eq(adventure.target_id, target_id)
     vampytest.assert_eq(adventure.return_id, return_id)
     vampytest.assert_eq(adventure.auto_cancellation_id, auto_cancellation_id)
+    vampytest.assert_eq(adventure.goal_listing, goal_listing)
     vampytest.assert_eq(adventure.initial_duration_seconds, initial_duration_seconds)
     vampytest.assert_eq(adventure.health_initial, health_initial)
     vampytest.assert_eq(adventure.energy_initial, energy_initial)
@@ -203,7 +223,6 @@ def test__adventure_set_state():
     health_initial = 150
     energy_initial = 200
     
-    
     adventure = adventure_create(
         user_id,
         
@@ -211,6 +230,7 @@ def test__adventure_set_state():
         target_id,
         return_id,
         auto_cancellation_id,
+        None,
         
         initial_duration_seconds,
         health_initial,
@@ -245,6 +265,7 @@ def test__adventure_set_updated_at():
         target_id,
         return_id,
         auto_cancellation_id,
+        None,
         
         initial_duration_seconds,
         health_initial,
@@ -279,6 +300,7 @@ def test__adventure_add_action():
         target_id,
         return_id,
         auto_cancellation_id,
+        None,
         
         initial_duration_seconds,
         health_initial,
@@ -328,6 +350,7 @@ def test__adventure_increase_energy_exhausted():
         target_id,
         return_id,
         auto_cancellation_id,
+        None,
         
         initial_duration_seconds,
         health_initial,
@@ -366,6 +389,7 @@ def test__adventure_increase_health_exhausted():
         target_id,
         return_id,
         auto_cancellation_id,
+        None,
         
         initial_duration_seconds,
         health_initial,
@@ -404,6 +428,7 @@ def test__adventure_collect_modifications():
         target_id,
         return_id,
         auto_cancellation_id,
+        None,
         
         initial_duration_seconds,
         health_initial,
@@ -455,6 +480,7 @@ def test__adventure_count_actions_for_seeding():
         target_id,
         return_id,
         auto_cancellation_id,
+        None,
         
         initial_duration_seconds,
         health_initial,

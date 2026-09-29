@@ -8,11 +8,12 @@ from hata import (
 
 from ...item_core import ITEM_ID_CARROT, ITEM_ID_PEACH
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED,
-    QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QuestRequirementSerialisableDuration,
-    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance,
-    QuestRewardSerialisableCredibility, get_quest_template_nullable, linked_quest_create
+    LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
+    get_quest_template_nullable, linked_quest_create, quest_requirement_serialisable_create_duration,
+    quest_requirement_serialisable_create_expiration, quest_requirement_serialisable_create_item_exact,
+    quest_reward_serialisable_create_balance, quest_reward_serialisable_create_credibility
 )
+from ...unit_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT
 from ...user_stats_core import user_stats_create, user_stats_modify_credibility_by
 
 from ..component_building import build_linked_quests_listing_components
@@ -48,13 +49,13 @@ def _iter_options():
         5666,
         quest_template_id_0,
         (
-            QuestRequirementSerialisableDuration(quest_duration),
-            QuestRequirementSerialisableExpiration(quests_began_at + TimeDelta(seconds = quest_duration)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0, 0),
+            quest_requirement_serialisable_create_duration(quest_duration),
+            quest_requirement_serialisable_create_expiration(quests_began_at + TimeDelta(seconds = quest_duration)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0, 0),
         ),
         (
-            QuestRewardSerialisableBalance(1000),
-            QuestRewardSerialisableCredibility(2),
+            quest_reward_serialisable_create_balance(1000),
+            quest_reward_serialisable_create_credibility(2),
         ),
     )
     linked_quest_entry_id_0 = 123
@@ -66,13 +67,13 @@ def _iter_options():
         57777,
         quest_template_id_1,
         (
-            QuestRequirementSerialisableDuration(quest_duration),
-            QuestRequirementSerialisableExpiration(quests_began_at + TimeDelta(seconds = quest_duration)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
+            quest_requirement_serialisable_create_duration(quest_duration),
+            quest_requirement_serialisable_create_expiration(quests_began_at + TimeDelta(seconds = quest_duration)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
         ),
         (
-            QuestRewardSerialisableBalance(1000),
-            QuestRewardSerialisableCredibility(2),
+            quest_reward_serialisable_create_balance(1000),
+            quest_reward_serialisable_create_credibility(2),
         ),
     )
     linked_quest_entry_id_1 = 124
@@ -84,13 +85,13 @@ def _iter_options():
         57774,
         quest_template_id_1,
         (
-            QuestRequirementSerialisableDuration(quest_duration),
-            QuestRequirementSerialisableExpiration(quests_began_at + TimeDelta(seconds = quest_duration)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
+            quest_requirement_serialisable_create_duration(quest_duration),
+            quest_requirement_serialisable_create_expiration(quests_began_at + TimeDelta(seconds = quest_duration)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
         ),
         (
-            QuestRewardSerialisableBalance(1000),
-            QuestRewardSerialisableCredibility(2),
+            quest_reward_serialisable_create_balance(1000),
+            quest_reward_serialisable_create_credibility(2),
         ),
     )
     
@@ -105,13 +106,13 @@ def _iter_options():
         57775,
         quest_template_id_1,
         (
-            QuestRequirementSerialisableDuration(quest_duration),
-            QuestRequirementSerialisableExpiration(quests_began_at + TimeDelta(seconds = quest_duration)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
+            quest_requirement_serialisable_create_duration(quest_duration),
+            quest_requirement_serialisable_create_expiration(quests_began_at + TimeDelta(seconds = quest_duration)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
         ),
         (
-            QuestRewardSerialisableBalance(1000),
-            QuestRewardSerialisableCredibility(3),
+            quest_reward_serialisable_create_balance(1000),
+            quest_reward_serialisable_create_credibility(3),
         ),
     )
     linked_quest_entry_id_3 = 135
@@ -125,13 +126,13 @@ def _iter_options():
         57125,
         quest_template_id_1,
         (
-            QuestRequirementSerialisableDuration(quest_duration),
-            QuestRequirementSerialisableExpiration(quests_began_at),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
+            quest_requirement_serialisable_create_duration(quest_duration),
+            quest_requirement_serialisable_create_expiration(quests_began_at),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
         ),
         (
-            QuestRewardSerialisableBalance(1000),
-            QuestRewardSerialisableCredibility(3),
+            quest_reward_serialisable_create_balance(1000),
+            quest_reward_serialisable_create_credibility(3),
         ),
     )
     linked_quest_entry_id_4 = 149
@@ -187,7 +188,7 @@ def _iter_options():
             create_section(
                 create_text_display(
                     f'Time left: 59 minutes, 40 seconds\n'
-                    f'Submit 0.00 / {quest_amount_0 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.'
+                    f'Submit 0 / {quest_amount_0 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.'
                 ),
                 thumbnail = create_button(
                     'Details',

@@ -19,12 +19,28 @@ def produce_weight(weight):
     ------
     part : `str`
     """
-    kilo_grams, grams = divmod(weight, 1000)
-    yield str(kilo_grams)
-    yield '.'
-    grams_string = str(grams)
-    yield '0' * (3 - len(grams_string))
-    yield grams_string
+    while True:
+        kilo_grams, grams = divmod(weight, 1000)
+        yield str(kilo_grams)
+        
+        if not grams:
+            break
+        
+        yield '.'
+        split, grams = divmod(grams, 100)
+        yield str(split)
+        
+        if not grams:
+            break
+        
+        split, grams = divmod(grams, 10)
+        yield str(split)
+        
+        if not grams:
+            break
+        
+        yield str(grams)
+        break
 
 
 def produce_kilogram(weight):

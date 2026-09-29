@@ -1,10 +1,10 @@
-__all__ = ('Location',)
+__all__ = ('Location', 'location_create')
 
 
-from scarletio import RichAttributeErrorBaseType
+from scarletio import RichType
 
 
-class Location(RichAttributeErrorBaseType):
+class Location(metaclass = RichType, rich_type_feature_flags = ~0):
     """
     Represents a location to adventure at.
     
@@ -26,60 +26,37 @@ class Location(RichAttributeErrorBaseType):
         The level requirement for suggesting the location.
     """
     __slots__ = ('distance', 'id', 'level', 'name', 'target_ids')
+
+
+def location_create(location_id, name, distance, target_ids, level):
+    """
+    Creates a new location.
     
-    def __new__(cls, location_id, name, distance, target_ids, level):
-        """
-        Creates a new location.
-        
-        Parameters
-        ----------
-        location_id : `int`
-            The identifier of the location.
-        
-        name : `str`
-            The location's name.
-        
-        distance : `int`
-            The distance to the location in meters.
-        
-        target_ids : `tuple<int>`
-            The available target actions at the location.
-        
-        level : `int`
-            The level requirement for suggesting the location.
-        """
-        self = object.__new__(cls)
-        self.distance = distance
-        self.id = location_id
-        self.level = level
-        self.name = name
-        self.target_ids = target_ids
-        return self
+    Parameters
+    ----------
+    location_id : `int`
+        The identifier of the location.
     
+    name : `str`
+        The location's name.
     
-    def __repr__(self):
-        """Returns repr(self)."""
-        repr_parts = ['<', type(self).__name__]
-        
-        # id
-        repr_parts.append(' id = ')
-        repr_parts.append(repr(self.id))
-        
-        # name
-        repr_parts.append(', name = ')
-        repr_parts.append(repr(self.name))
-        
-        # distance
-        repr_parts.append(', distance = ')
-        repr_parts.append(repr(self.distance))
-        
-        # target_ids
-        repr_parts.append(', target_ids = ')
-        repr_parts.append(repr(self.target_ids))
-        
-        # level
-        repr_parts.append(', level = ')
-        repr_parts.append(repr(self.level))
-        
-        repr_parts.append('>')
-        return ''.join(repr_parts)
+    distance : `int`
+        The distance to the location in meters.
+    
+    target_ids : `tuple<int>`
+        The available target actions at the location.
+    
+    level : `int`
+        The level requirement for suggesting the location.
+    
+    Returns
+    -------
+    location : ``Location``
+    """
+    location = object.__new__(Location)
+    location.distance = distance
+    location.id = location_id
+    location.level = level
+    location.name = name
+    location.target_ids = target_ids
+    return location

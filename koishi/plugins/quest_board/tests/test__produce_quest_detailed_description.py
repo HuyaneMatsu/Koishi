@@ -4,10 +4,12 @@ from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ...item_core import ITEM_GROUP_ID_FIREWOOD, ITEM_ID_PEACH, get_item_nullable, get_item_group_nullable
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD, QUEST_TEMPLATE_ID_MYSTIA_PEACH, Quest,
-    QuestRequirementInstantiableDuration, QuestRequirementInstantiableItemExact, QuestRequirementInstantiableItemGroup,
-    QuestRewardInstantiableBalance, QuestRewardInstantiableCredibility, get_quest_template_nullable
+    QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD, QUEST_TEMPLATE_ID_MYSTIA_PEACH, quest_create,
+    get_quest_template_nullable, quest_requirement_instantiable_create_duration,
+    quest_requirement_instantiable_create_item_exact, quest_requirement_instantiable_create_item_group,
+    quest_reward_instantiable_create_balance, quest_reward_instantiable_create_credibility
 )
+from ...unit_core import AMOUNT_TYPE_COUNT
 
 from ..content_building import produce_quest_detailed_description
 
@@ -27,15 +29,15 @@ def _iter_options():
     
     yield (
         'Default, 3 times',
-        Quest(
+        quest_create(
             QUEST_TEMPLATE_ID_MYSTIA_PEACH,
             (
-                QuestRequirementInstantiableDuration(3600 * 24),
-                QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
+                quest_requirement_instantiable_create_duration(3600 * 24),
+                quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
             ),
             (
-                QuestRewardInstantiableBalance(1000),
-                QuestRewardInstantiableCredibility(10),
+                quest_reward_instantiable_create_balance(1000),
+                quest_reward_instantiable_create_credibility(10),
             ),
         ),
         quest_template_mystia_peach,
@@ -59,7 +61,7 @@ def _iter_options():
     
     yield (
         'Bland',
-        Quest(
+        quest_create(
             QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD,
             None,
             None,
@@ -80,10 +82,10 @@ def _iter_options():
     
     yield (
         'Completed 2 / 3 times',
-        Quest(
+        quest_create(
             QUEST_TEMPLATE_ID_MYSTIA_PEACH,
             (
-                QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
+                quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
             ),
             None,
         ),
@@ -105,10 +107,10 @@ def _iter_options():
     
     yield (
         'Completed 2 / unlimited times',
-        Quest(
+        quest_create(
             QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD,
             (
-                QuestRequirementInstantiableItemGroup(ITEM_GROUP_ID_FIREWOOD, AMOUNT_TYPE_COUNT, 20),
+                quest_requirement_instantiable_create_item_group(ITEM_GROUP_ID_FIREWOOD, AMOUNT_TYPE_COUNT, 20),
             ),
             None,
         ),
@@ -130,10 +132,10 @@ def _iter_options():
     
     yield (
         'Completed 2 / 3 times; 6 times in possession',
-        Quest(
+        quest_create(
             QUEST_TEMPLATE_ID_MYSTIA_PEACH,
             (
-                QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
+                quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
             ),
             None,
         ),
@@ -155,10 +157,10 @@ def _iter_options():
     
     yield (
         'Completed 2 / unlimited times; 6 times in possession',
-        Quest(
+        quest_create(
             QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD,
             (
-                QuestRequirementInstantiableItemGroup(ITEM_GROUP_ID_FIREWOOD, AMOUNT_TYPE_COUNT, 20),
+                quest_requirement_instantiable_create_item_group(ITEM_GROUP_ID_FIREWOOD, AMOUNT_TYPE_COUNT, 20),
             ),
             None,
         ),

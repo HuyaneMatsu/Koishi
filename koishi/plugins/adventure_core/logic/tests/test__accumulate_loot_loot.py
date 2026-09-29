@@ -2,7 +2,7 @@ import vampytest
 
 from random import Random
 
-from ...options import OptionLoot
+from ...options import option_loot_create
 
 from ..loot_accumulation import LootAccumulation
 from ..loot_accumulation_logic import accumulate_loot_loot
@@ -20,7 +20,7 @@ def _iter_options():
     # 1 loot with hit -> increase duration
     yield (
         (
-            OptionLoot(False, 1, 1, False, 10, 20, 9999, 100, 20, 10, 2),
+            option_loot_create(False, 1, 1, False, 10, 20, 9999, 100, 20, 10, 2),
         ),
         Random(23),
         1.0,

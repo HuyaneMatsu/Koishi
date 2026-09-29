@@ -9,6 +9,7 @@ from ...adventure_core import (
 from ...item_core import ITEM_ID_PEACH, get_item_nullable
 
 from ..component_building import build_adventure_action_view_components
+from ..constants import ADVENTURE_VIEW_MODE_DEFAULT, ADVENTURE_VIEW_MODE_DETAILED
 
 
 def _iter_options():
@@ -33,6 +34,7 @@ def _iter_options():
         adventure_entry_id,
         adventure_action,
         adventure_action_index,
+        ADVENTURE_VIEW_MODE_DETAILED,
         True,
         5,
         False,
@@ -50,12 +52,18 @@ def _iter_options():
                 create_button(
                     'View adventure',
                     enabled = True,
-                    custom_id = f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{True:x}.{5:x}',
+                    custom_id = (
+                        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DETAILED:x}.'
+                        f'{True:x}.{5:x}'
+                    ),
                 ),
                 create_button(
                     'Back to actions',
                     enabled = False,
-                    custom_id = f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{True:x}.{5:x}.{0:x}',
+                    custom_id = (
+                        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DETAILED:x}.'
+                        f'{True:x}.{5:x}.{0:x}'
+                    ),
                 ),
                 create_button(
                     'View battle logs',
@@ -87,6 +95,7 @@ def _iter_options():
         adventure_entry_id,
         adventure_action,
         adventure_action_index,
+        ADVENTURE_VIEW_MODE_DEFAULT,
         False,
         0,
         True,
@@ -102,19 +111,25 @@ def _iter_options():
             create_separator(),
             create_text_display(
                 f'### Loot:\n'
-                f'- {item_peach.emoji} {item_peach.name} x5 ({item_peach.weight * 5 / 1000:.03f} kg)'
+                f'- {item_peach.emoji} {item_peach.name} x5 ({5 * item_peach.weight / 1000:.02f} kg)'
             ),
             create_separator(),
             create_row(
                 create_button(
                     'View adventure',
                     enabled = True,
-                    custom_id = f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}',
+                    custom_id = (
+                        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}'
+                    ),
                 ),
                 create_button(
                     'Back to actions',
                     enabled = True,
-                    custom_id = f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}.{5:x}',
+                    custom_id = (
+                        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}.{5:x}'
+                    ),
                 ),
                 create_button(
                     'View battle logs',
@@ -134,6 +149,7 @@ def test__build_adventure_action_view_components(
     adventure_entry_id,
     adventure_action,
     adventure_action_index,
+    adventure_view_mode,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     allow_switching_to_adventure_action_listing_view,
@@ -152,6 +168,9 @@ def test__build_adventure_action_view_components(
     
     adventure_action : ``AdventureAction``
         The adventure action to display.
+    
+    adventure_action_index : `int`
+        The adventure action's index.
     
     adventure_action_index : `int`
         The adventure action's index.
@@ -177,6 +196,7 @@ def test__build_adventure_action_view_components(
         adventure_entry_id,
         adventure_action,
         adventure_action_index,
+        adventure_view_mode,
         allow_switching_to_adventure_listing_view,
         adventure_listing_page_index,
         allow_switching_to_adventure_action_listing_view,

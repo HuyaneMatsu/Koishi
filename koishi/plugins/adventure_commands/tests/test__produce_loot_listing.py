@@ -6,6 +6,9 @@ from ...adventure_core import (
 from ...item_core import ITEM_ID_PEACH, ITEM_ID_STRAWBERRY, get_item_nullable
 
 from ..component_building import produce_loot_listing
+from ..constants import (
+    ADVENTURE_LOOT_LISTING_MODE_DEFAULT, ADVENTURE_LOOT_LISTING_MODE_THIS_STEP, ADVENTURE_LOOT_LISTING_MODE_TOTAL
+)
 
 
 def _iter_options():
@@ -16,6 +19,7 @@ def _iter_options():
     
     yield (
         {},
+        ADVENTURE_LOOT_LISTING_MODE_DEFAULT,
         '',
     )
     
@@ -25,6 +29,7 @@ def _iter_options():
                 ITEM_ID_PEACH : 11,
             },
         },
+        ADVENTURE_LOOT_LISTING_MODE_DEFAULT,
         (
             f'### Loot:\n'
             f'- {item_peach.emoji} {item_peach.name} x11 ({item_peach.weight * 11 / 1000:.03f} kg)'
@@ -44,6 +49,7 @@ def _iter_options():
                 ITEM_ID_PEACH : 3,
             },
         },
+        ADVENTURE_LOOT_LISTING_MODE_DEFAULT,
         (
             f'### Loot:\n'
             f'- {item_peach.emoji} {item_peach.name} x11 ({item_peach.weight * 11 / 1000:.03f} kg)\n'
@@ -54,10 +60,38 @@ def _iter_options():
             f'- {item_strawberry.emoji} {item_strawberry.name} x7 ({item_strawberry.weight * 7 / 1000:.03f} kg)'
         ),
     )
+    
+    # Different modes
+    
+    yield (
+        {
+            LOOT_STATE_SUCCESS : {
+                ITEM_ID_PEACH : 11,
+            },
+        },
+        ADVENTURE_LOOT_LISTING_MODE_TOTAL,
+        (
+            f'### Total loot:\n'
+            f'- {item_peach.emoji} {item_peach.name} x11 ({item_peach.weight * 11 / 1000:.03f} kg)'
+        ),
+    )
+    
+    yield (
+        {
+            LOOT_STATE_SUCCESS : {
+                ITEM_ID_PEACH : 11,
+            },
+        },
+        ADVENTURE_LOOT_LISTING_MODE_THIS_STEP,
+        (
+            f'### Loot (this step):\n'
+            f'- {item_peach.emoji} {item_peach.name} x11 ({item_peach.weight * 11 / 1000:.03f} kg)'
+        ),
+    )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__produce_loot_listing(grouped_loot):
+def test__produce_loot_listing(grouped_loot, loot_listing_mode):
     """
     Tests whether ``produce_loot_listing`` works as intended.
     
@@ -66,11 +100,14 @@ def test__produce_loot_listing(grouped_loot):
     grouped_loot : `dict<int, dict<int, int>>`
         Grouped loot by state.
     
+    loot_listing_mode : `int`
+        How to list the loot.
+    
     Returns
     -------
     output : `str`
     """
-    output = [*produce_loot_listing(grouped_loot)]
+    output = [*produce_loot_listing(grouped_loot, loot_listing_mode)]
     
     for element in output:
         vampytest.assert_instance(element, str)

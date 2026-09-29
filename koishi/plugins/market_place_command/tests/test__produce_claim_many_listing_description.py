@@ -8,29 +8,29 @@ from ..content_building import produce_claim_many_listing_description
 
 
 def _iter_options():
-    item = get_item_nullable(ITEM_ID_PEACH)
-    assert item is not None
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
     
     yield (
         [
-            (True, item, 56, 1000, 0),
+            (True, item_peach, 56, 1000, 0),
         ],
         (
-            f'You received the 56 {item.emoji} {item.name} ({item.weight * 56 / 1000:.03f} kg), '
+            f'You received the 56 {item_peach.emoji} {item_peach.name} ({56 * item_peach.weight / 1000:.03f} kg), '
             f'that you purchased for 1000 {EMOJI__HEART_CURRENCY}.'
         ),
     )
     
     yield (
         [
-            (True, item, 56, 1000, 0),
-            (False, item, 5, 1000, 0),
+            (True, item_peach, 56, 1000, 0),
+            (False, item_peach, 5, 1000, 0),
         ],
         (
-            f'You received the 56 {item.emoji} {item.name} ({item.weight * 56 / 1000:.03f} kg), '
+            f'You received the 56 {item_peach.emoji} {item_peach.name} ({56 * item_peach.weight / 1000:.03f} kg), '
             f'that you purchased for 1000 {EMOJI__HEART_CURRENCY}.\n'
             f'You received 1000 {EMOJI__HEART_CURRENCY}, '
-            f'for selling 5 {item.emoji} {item.name} ({item.weight * 5 / 1000:.03f} kg).'
+            f'for selling 5 {item_peach.emoji} {item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg).'
         ),
     )
 

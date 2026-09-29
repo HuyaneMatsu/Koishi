@@ -1,4 +1,4 @@
-__all__ = ('AutoCancellationCondition',)
+__all__ = ('AutoCancellationCondition', 'auto_cancellation_condition_create')
 
 from scarletio import RichAttributeErrorBaseType
 
@@ -16,65 +16,25 @@ class AutoCancellationCondition(RichAttributeErrorBaseType):
         Threshold value.
     """
     __slots__ = ('condition', 'threshold')
+
+
+def auto_cancellation_condition_create(condition, threshold):
+    """
+    Creates a new auto cancellation condition.
     
-    def __new__(cls, condition, threshold):
-        """
-        Creates a new condition.
-        
-        Parameters
-        ----------
-        condition : `int`
-            Condition identifier.
-        
-        threshold : `int`
-            Threshold value.
-        """
-        self = object.__new__(cls)
-        self.condition = condition
-        self.threshold = threshold
-        return self
+    Parameters
+    ----------
+    condition : `int`
+        Condition identifier.
     
+    threshold : `int`
+        Threshold value.
     
-    def __repr__(self):
-        """Return repr(self)."""
-        repr_parts = ['<', type(self).__name__]
-        
-        # condition
-        repr_parts.append(', condition = ')
-        repr_parts.append(repr(self.condition))
-        
-        # threshold
-        repr_parts.append(', threshold = ')
-        repr_parts.append(repr(self.threshold))
-        
-        repr_parts.append('>')
-        return ''.join(repr_parts)
-    
-    
-    def __eq__(self, other):
-        """Returns self == other."""
-        if type(self) is not type(other):
-            return NotImplemented
-        
-        # condition
-        if self.condition != other.condition:
-            return False
-        
-        # threshold
-        if self.threshold != other.threshold:
-            return False
-        
-        return True
-    
-    
-    def __hash__(self):
-        """Returns hash(self)."""
-        hash_value = 0
-        
-        # condition
-        hash_value ^= self.condition << 16
-        
-        # threshold
-        hash_value ^= self.threshold
-        
-        return hash_value
+    Returns
+    -------
+    auto_cancellation_condition : ``AutoCancellationCondition``
+    """
+    auto_cancellation_condition = object.__new__(AutoCancellationCondition)
+    auto_cancellation_condition.condition = condition
+    auto_cancellation_condition.threshold = threshold
+    return auto_cancellation_condition

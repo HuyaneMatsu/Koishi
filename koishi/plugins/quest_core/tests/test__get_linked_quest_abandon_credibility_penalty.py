@@ -1,7 +1,8 @@
 import vampytest
 
 from ..linked_quest import LinkedQuest, linked_quest_create
-from ..quest_reward_serialisables import QuestRewardSerialisableBase, QuestRewardSerialisableCredibility
+from ..quest_reward_serialisables import quest_reward_serialisable_create_credibility
+from ..quest_sub_type_serialisable_bases import quest_sub_type_serialisable_create_base
 from ..quest_template_ids import QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
 from ..utils import get_linked_quest_abandon_credibility_penalty
 
@@ -39,7 +40,7 @@ def _iter_options():
         quest_template_id,
         None,
         (
-            QuestRewardSerialisableBase(),
+            quest_sub_type_serialisable_create_base(),
         ),
     )
     linked_quest_1.created_at = 5000
@@ -59,7 +60,7 @@ def _iter_options():
         quest_template_id,
         None,
         (
-            QuestRewardSerialisableCredibility(20),
+            quest_reward_serialisable_create_credibility(20),
         ),
     )
     linked_quest_2.created_at = 5000
@@ -79,7 +80,7 @@ def _iter_options():
         quest_template_id,
         None,
         (
-            QuestRewardSerialisableCredibility(20),
+            quest_reward_serialisable_create_credibility(20),
         ),
     )
     linked_quest_2.created_at = current_unix_time_seconds

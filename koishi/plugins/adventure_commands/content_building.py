@@ -4,18 +4,26 @@ from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import (
     DATETIME_FORMAT_CODE, TIMESTAMP_STYLES, elapsed_time, format_datetime, format_unix_time, unix_time_to_datetime
 )
+
+from ...bot_utils.time import unix_time_seconds_get
+
 from ..adventure_core import (
     ACTIONS, ACTION_TYPE_ARRIVAL, ACTION_TYPE_BUTCHERING, ACTION_TYPE_CANCELLATION, ACTION_TYPE_ENCOUNTER,
     ACTION_TYPE_FATALITY, ACTION_TYPE_FISHING, ACTION_TYPE_FORAGING, ACTION_TYPE_GARDENING, ACTION_TYPE_HUNT,
     ACTION_TYPE_NONE, ACTION_TYPE_TRAP, ACTION_TYPE_UNKNOWN, ADVENTURE_STATE_ACTIONING,
     ADVENTURE_STATE_ACTIONING_CANCEL_AFTER, ADVENTURE_STATE_CANCELLED, ADVENTURE_STATE_DEPARTING,
-    ADVENTURE_STATE_RETURNING, LOCATIONS, LOOT_STATE_LOST_DUE_FULL_INVENTORY, LOOT_STATE_LOST_DUE_LOW_ENERGY,
-    LOOT_STATE_SUCCESS, TARGETS, recovery_duration_seconds_get, produce_auto_cancellation_conditions
+    ADVENTURE_STATE_FINALISED, ADVENTURE_STATE_RETURNING, AUTO_CANCELLATIONS, LOCATIONS,
+    LOOT_STATE_LOST_DUE_FULL_INVENTORY, LOOT_STATE_LOST_DUE_LOW_ENERGY, LOOT_STATE_SUCCESS, RETURNS, TARGETS,
+    produce_auto_cancellation_conditions, produce_auto_cancellation_conditions_listing, produce_goal,
+    recovery_duration_seconds_get
 )
 from ..item_core import get_item
 from ..unit_core import produce_duration_sophisticated, produce_kilogram, produce_kilogram_ratio
 
-from .constants import ADVENTURE_CANCELLATION_MODE_AFTER, ADVENTURE_CANCELLATION_MODE_NOW
+from .constants import (
+    ADVENTURE_CANCELLATION_MODE_AFTER, ADVENTURE_CANCELLATION_MODE_NOW, ADVENTURE_LOOT_LISTING_MODE_DEFAULT,
+    ADVENTURE_LOOT_LISTING_MODE_THIS_STEP, ADVENTURE_LOOT_LISTING_MODE_TOTAL
+)
 
 
 ACTION_TYPE_NAME_DEFAULT = 'Unknown'
@@ -39,7 +47,7 @@ ACTION_TYPE_TO_NAME = {
 }
 
 
-def produce_adventure_initial_representation(location, target, duration, return_, auto_cancellation):
+def produce_adventure_initial_representation(location, target, duration, return_, auto_cancellation, goal):
     """
     Produces an adventure's initial representation.
     
@@ -62,6 +70,9 @@ def produce_adventure_initial_representation(location, target, duration, return_
     auto_cancellation : ``AutoCancellation``
         Auto cancellation.
     
+    goal : ``None | Goal``
+        The goal of the adventure.
+    
     Yields
     ------
     part : `str`
@@ -83,7 +94,10 @@ def produce_adventure_initial_representation(location, target, duration, return_
     yield ' ('
     yield from produce_auto_cancellation_conditions(auto_cancellation)
     yield ')'
-
+    
+    if (goal is not None):
+        yield '\nGoal: '
+        yield from produce_goal(goal)
 
 
 def _produce_adventure_location_for_headers(adventure):
@@ -316,71 +330,19 @@ def produce_adventure_short_representation(adventure):
     yield from _produce_adventure_location_for_headers(adventure)
 
 
-def produce_used(name, initial, exhausted):
+def _produce_adventure_in_progress_state_description(adventure_state):
     """
-    Produces a generic used value without unit.
-    
-    This function is an iterable generator.
+    Produces adventure in-progress state description.
     
     Parameters
     ----------
-    name : `str`
-        The name of the used value.
-    
-    initial : `int`
-        Initial value.
-    
-    exhausted : `int`
-        The exhausted amount.
+    adventure_state : `int`
+        The adventure's state.
     
     Yields
     ------
     part : `str`
     """
-    yield 'Used '
-    yield name
-    yield ': '
-    yield str(exhausted)
-    yield ' / '
-    yield str(initial)
-
-
-def produce_adventure_view_description_active(adventure, now, inventory_total, inventory_exhausted):
-    """
-    Produces adventure description for an active adventure.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    adventure : ``Adventure``
-        Adventure to produce description for.
-    
-    now : `DateTime`
-        The current time.
-    
-    inventory_total : `int`
-        The user's total inventory.
-    
-    inventory_exhausted : `int`
-        The user's used inventory.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    yield 'Departed at: '
-    yield format(unix_time_to_datetime(adventure.created_at), DATETIME_FORMAT_CODE)
-    yield ' UTC\n'
-    yield from produce_used('health', adventure.health_initial, adventure.health_exhausted)
-    yield '\n'
-    yield from produce_used('energy', adventure.energy_initial, adventure.energy_exhausted)
-    yield '\nUsed inventory: '
-    yield from produce_kilogram_ratio(inventory_exhausted, inventory_total)
-    yield '\nElapsed time: '
-    yield elapsed_time(RelativeDelta(now, unix_time_to_datetime(adventure.created_at)))
-    
-    adventure_state = adventure.state
     if adventure_state == ADVENTURE_STATE_DEPARTING:
         next_step_description = 'departing to the location'
     
@@ -402,9 +364,9 @@ def produce_adventure_view_description_active(adventure, now, inventory_total, i
         yield '.'
 
 
-def produce_adventure_view_description_finalized(adventure):
+def produce_adventure_view_description(adventure, inventory_total, inventory_exhausted):
     """
-    Produces adventure description for an active adventure.
+    Produces adventure description.
     
     This function is an iterable generator.
     
@@ -413,23 +375,127 @@ def produce_adventure_view_description_finalized(adventure):
     adventure : ``Adventure``
         Adventure to produce description for.
     
+    inventory_total : `int`
+        The user's total inventory.
+    
+    inventory_exhausted : `int`
+        The user's used inventory.
+    
     Yields
     ------
     part : `str`
     """
     yield 'Departed at: '
     yield format(unix_time_to_datetime(adventure.created_at), DATETIME_FORMAT_CODE)
-    yield ' UTC\n'
-    yield from produce_used('health', adventure.health_initial, adventure.health_exhausted)
-    yield '\n'
-    yield from produce_used('energy', adventure.energy_initial, adventure.energy_exhausted)
-    yield '\nTotal duration: '
-    yield elapsed_time(RelativeDelta(
-        unix_time_to_datetime(adventure.updated_at),
-        unix_time_to_datetime(adventure.created_at),
-    ))
-    yield '\nRecovery time: '
-    yield elapsed_time(RelativeDelta(seconds = recovery_duration_seconds_get(adventure)))
+    yield ' UTC\nUsed health: '
+    yield str(adventure.health_exhausted)
+    yield ' / '
+    yield str(adventure.health_initial)
+    yield '\nUsed energy: '
+    yield str(adventure.energy_exhausted)
+    yield ' / '
+    yield str(adventure.energy_initial)
+    
+    if adventure.state == ADVENTURE_STATE_FINALISED:
+        yield '\nTotal duration: '
+        yield elapsed_time(RelativeDelta(
+            unix_time_to_datetime(adventure.updated_at),
+            unix_time_to_datetime(adventure.created_at),
+        ))
+        yield '\nRecovery time: '
+        yield elapsed_time(RelativeDelta(seconds = recovery_duration_seconds_get(adventure)))
+    
+    else:
+        yield '\nUsed inventory: '
+        yield from produce_kilogram_ratio(inventory_exhausted, inventory_total)
+        yield '\nElapsed time: '
+        yield elapsed_time(RelativeDelta(
+            unix_time_to_datetime(unix_time_seconds_get()),
+            unix_time_to_datetime(adventure.created_at),
+        ))
+        
+        yield from _produce_adventure_in_progress_state_description(adventure.state)
+
+
+def produce_adventure_view_description_detailed_listing(adventure, inventory_total, inventory_exhausted):
+    """
+    Produces adventure description detailed in a listing format.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    -----------
+    adventure : ``Adventure``
+        Adventure to produce description for.
+    
+    inventory_total : `int`
+        The user's total inventory.
+    
+    inventory_exhausted : `int`
+        The user's used inventory.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    yield '- Departed at\n  - '
+    yield format(unix_time_to_datetime(adventure.created_at), DATETIME_FORMAT_CODE)
+    yield ' UTC\n- Used health\n  - '
+    yield str(adventure.health_exhausted)
+    yield ' / '
+    yield str(adventure.health_initial)
+    yield '\n- Used energy\n  - '
+    yield str(adventure.energy_exhausted)
+    yield ' / '
+    yield str(adventure.energy_initial)
+    
+    if adventure.state == ADVENTURE_STATE_FINALISED:
+        yield '\n- Total duration\n  - '
+        yield elapsed_time(RelativeDelta(
+            unix_time_to_datetime(adventure.updated_at),
+            unix_time_to_datetime(adventure.created_at),
+        ))
+        yield '\n- Recovery time\n  - '
+        yield elapsed_time(RelativeDelta(seconds = recovery_duration_seconds_get(adventure)))
+    
+    else:
+        yield '\n- Used inventory\n  - '
+        yield from produce_kilogram_ratio(inventory_exhausted, inventory_total)
+        yield '\n- Elapsed time\n  - '
+        yield elapsed_time(RelativeDelta(
+            unix_time_to_datetime(unix_time_seconds_get()),
+            unix_time_to_datetime(adventure.created_at),
+        ))
+    
+    yield '\n- Adventure settings\n  - Duration\n    - '
+    
+    yield from produce_duration_sophisticated(adventure.initial_duration_seconds)
+    yield ', return '
+    try:
+        return_ = RETURNS[adventure.return_id]
+    except KeyError:
+        return_name = 'unknown'
+    else:
+        return_name = return_.name.lower()
+    yield return_name
+    
+    auto_cancellation_id = adventure.auto_cancellation_id
+    
+    try:
+        auto_cancellation = AUTO_CANCELLATIONS[auto_cancellation_id]
+    except KeyError:
+        pass
+    else:
+        yield '\n  - Auto cancellation\n'
+        yield from produce_auto_cancellation_conditions_listing(auto_cancellation, '    ')
+    
+    goal_listing = adventure.goal_listing
+    if (goal_listing is not None):
+        yield '\n  - Goal\n    - '
+        yield from produce_goal(goal_listing[0])
+    
+    if adventure.state != ADVENTURE_STATE_FINALISED:
+        yield from _produce_adventure_in_progress_state_description(adventure.state)
 
 
 def _produce_adventure_action_type_for_headers(adventure_action):
@@ -535,7 +601,7 @@ def _item_and_amount_pair_sort_key_getter(item):
     return item[0].name
 
 
-def produce_loot_listing(grouped_loot):
+def produce_loot_listing(grouped_loot, loot_listing_mode):
     """
     Produces loot listing.
     
@@ -546,16 +612,46 @@ def produce_loot_listing(grouped_loot):
     grouped_loot : `dict<int, dict<int, int>>`
         Grouped loot by state.
     
+    loot_listing_mode : `int`
+        How to list the loot.
+    
     Yields
     ------
     part : `str`
     """
     group_added = False
     
-    for loot_state, title in (
-        (LOOT_STATE_SUCCESS, 'Loot'),
-        (LOOT_STATE_LOST_DUE_LOW_ENERGY, 'Loot lost due to low energy'),
-        (LOOT_STATE_LOST_DUE_FULL_INVENTORY, 'Loot lost due to full inventory'),
+    while True:
+        if loot_listing_mode != ADVENTURE_LOOT_LISTING_MODE_DEFAULT:
+            if loot_listing_mode == ADVENTURE_LOOT_LISTING_MODE_TOTAL:
+                titles = (
+                    'Total loot',
+                    'Total loot lost due to low energy',
+                    'Total loot lost due to full inventory',
+                )
+                break
+            
+            if loot_listing_mode == ADVENTURE_LOOT_LISTING_MODE_THIS_STEP:
+                titles = (
+                    'Loot (this step)',
+                    'Loot lost due to low energy (this step)',
+                    'Loot lost due to full inventory (this step)',
+                )
+                break
+            
+            # No other cases:
+            
+        titles = (
+            'Loot',
+            'Loot lost due to low energy',
+            'Loot lost due to full inventory',
+        )
+        break
+    
+    
+    for loot_state, title in zip(
+        (LOOT_STATE_SUCCESS, LOOT_STATE_LOST_DUE_LOW_ENERGY, LOOT_STATE_LOST_DUE_FULL_INVENTORY),
+        titles,
     ):
         try:
             group = grouped_loot[loot_state]

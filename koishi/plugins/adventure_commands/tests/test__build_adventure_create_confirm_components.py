@@ -7,6 +7,7 @@ from ...adventure_core import (
 )
 
 from ..component_building import build_adventure_create_confirm_components
+from ..constants import ADVENTURE_VIEW_MODE_DEFAULT
 
 
 def _iter_options():
@@ -26,6 +27,7 @@ def _iter_options():
         duration,
         RETURNS[return_id],
         AUTO_CANCELLATIONS[auto_cancellation_id],
+        None,
         [
             create_text_display('### You began your adventure, best of luck brave adventurer!'),
             create_separator(),
@@ -41,7 +43,10 @@ def _iter_options():
                 create_button(
                     'View adventure',
                     enabled = True,
-                    custom_id = f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{False:x}.{0:x}',
+                    custom_id = (
+                        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}'
+                    ),
                 ),
             ),
         ],
@@ -50,7 +55,7 @@ def _iter_options():
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__build_adventure_create_confirm_components(
-    user_id, adventure_entry_id, location, target, duration, return_, auto_cancellation
+    user_id, adventure_entry_id, location, target, duration, return_, auto_cancellation, goal
 ):
     """
     Tests whether ``build_adventure_create_confirm_components`` works as intended.
@@ -78,12 +83,15 @@ def test__build_adventure_create_confirm_components(
     auto_cancellation : ``AutoCancellation``
         Auto cancellation.
     
+    goal : ``None | Goal``
+        The goal of the adventure.
+    
     Returns
     -------
     components : ``list<Component>``
     """
     output = build_adventure_create_confirm_components(
-        user_id, adventure_entry_id, location, target, duration, return_, auto_cancellation
+        user_id, adventure_entry_id, location, target, duration, return_, auto_cancellation, goal
     )
     
     vampytest.assert_instance(output, list)

@@ -9,6 +9,7 @@ from ...adventure_core import (
 from ...item_core import ITEM_ID_PEACH
 
 from ..component_building import iter_build_adventure_action_components
+from ..constants import ADVENTURE_VIEW_MODE_DEFAULT, ADVENTURE_VIEW_MODE_DETAILED
 
 
 def _iter_options():
@@ -21,6 +22,7 @@ def _iter_options():
         0,
         0,
         0,
+        None,
         0,
         0,
         0,
@@ -35,6 +37,7 @@ def _iter_options():
         0,
         True,
         False,
+        ADVENTURE_VIEW_MODE_DEFAULT,
         False,
         0,
         False,
@@ -62,6 +65,7 @@ def _iter_options():
         0,
         0,
         0,
+        None,
         0,
         0,
         0,
@@ -76,6 +80,7 @@ def _iter_options():
         0,
         False,
         True,
+        ADVENTURE_VIEW_MODE_DEFAULT,
         False,
         0,
         False,
@@ -123,6 +128,7 @@ def _iter_options():
         0,
         0,
         0,
+        None,
         0,
         0,
         0,
@@ -137,6 +143,7 @@ def _iter_options():
         2,
         False,
         False,
+        ADVENTURE_VIEW_MODE_DETAILED,
         False,
         0,
         False,
@@ -149,7 +156,7 @@ def _iter_options():
                 thumbnail = create_button(
                     'View',
                     custom_id = (
-                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{0:x}.'
+                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{0:x}.{ADVENTURE_VIEW_MODE_DETAILED:x}.'
                         f'{False:x}.{0:x}.{False:x}.{0:x}'
                     ),
                     enabled = True,
@@ -162,7 +169,7 @@ def _iter_options():
                 thumbnail = create_button(
                     'View',
                     custom_id = (
-                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{1:x}.'
+                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{1:x}.{ADVENTURE_VIEW_MODE_DETAILED:x}.'
                         f'{False:x}.{0:x}.{False:x}.{0:x}'
                     ),
                     enabled = False,
@@ -177,6 +184,7 @@ def _iter_options():
         1,
         False,
         False,
+        ADVENTURE_VIEW_MODE_DEFAULT,
         True,
         4,
         True,
@@ -189,7 +197,7 @@ def _iter_options():
                 thumbnail = create_button(
                     'View',
                     custom_id = (
-                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{0:x}.'
+                        f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{0:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
                         f'{True:x}.{4:x}.{True:x}.{5:x}'
                     ),
                 ),
@@ -205,6 +213,7 @@ def test__iter_build_adventure_action_components(
     adventure_action_listing_send,
     produce_depart,
     produce_return,
+    adventure_view_mode,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     allow_switching_to_adventure_action_listing_view,
@@ -230,6 +239,9 @@ def test__iter_build_adventure_action_components(
     produce_return : `bool`
         Whether to produce return component.
     
+    adventure_view_mode : `int`
+        How to render the adventure.
+    
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
     
@@ -252,6 +264,7 @@ def test__iter_build_adventure_action_components(
         adventure_action_listing_send,
         produce_depart,
         produce_return,
+        adventure_view_mode,
         allow_switching_to_adventure_listing_view,
         adventure_listing_page_index,
         allow_switching_to_adventure_action_listing_view,

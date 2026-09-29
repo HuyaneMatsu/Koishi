@@ -8,6 +8,7 @@ from ...adventure_core import (
 )
 
 from ..component_building import build_adventure_listing_view_components
+from ..constants import ADVENTURE_VIEW_MODE_DEFAULT
 
 
 def _iter_options():
@@ -45,6 +46,7 @@ def _iter_options():
         TARGET_ID_HUMAN_VILLAGE_OUTSKIRTS_GARDENING_SCARLET_ONION,
         0,
         0,
+        None,
         0,
         100,
         100,
@@ -69,7 +71,10 @@ def _iter_options():
                 ),
                 thumbnail = create_button(
                     'View',
-                    custom_id = f'adventure.view.{user_id:x}.{adventure_entry_id_0:x}.{True:x}.{1:x}',
+                    custom_id = (
+                        f'adventure.view.{user_id:x}.{adventure_entry_id_0:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{True:x}.{1:x}'
+                    ),
                 ),
             ),
             create_separator(),

@@ -7,11 +7,12 @@ from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ...item_core import ITEM_ID_FROG, get_item_nullable
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_REWARD_TYPE_BALANCE,
-    QUEST_TEMPLATE_ID_CHIRUNO_FROG, QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration,
-    QuestRequirementSerialisableItemExact, QuestRewardSerialisableBalance, get_quest_template_nullable,
-    linked_quest_create
+    LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_REWARD_TYPE_BALANCE, QUEST_TEMPLATE_ID_CHIRUNO_FROG,
+    get_quest_template_nullable, linked_quest_create, quest_requirement_serialisable_create_duration,
+    quest_requirement_serialisable_create_expiration, quest_requirement_serialisable_create_item_exact,
+    quest_reward_serialisable_create_balance
 )
+from ...unit_core import AMOUNT_TYPE_COUNT
 from ...user_stats_core import user_stats_create, user_stats_modify_credibility_by
 
 from ..component_building import build_linked_quest_submit_success_completed_components
@@ -37,12 +38,12 @@ def _iter_options():
         batch_id,
         QUEST_TEMPLATE_ID_CHIRUNO_FROG,
         (
-            QuestRequirementSerialisableDuration(duration),
-            QuestRequirementSerialisableExpiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = duration)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_FROG, AMOUNT_TYPE_COUNT, 50, 50),
+            quest_requirement_serialisable_create_duration(duration),
+            quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = duration)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_FROG, AMOUNT_TYPE_COUNT, 50, 50),
         ),
         (
-            QuestRewardSerialisableBalance(2600),
+            quest_reward_serialisable_create_balance(2600),
         ),
     )
     linked_quest_0.entry_id = 5

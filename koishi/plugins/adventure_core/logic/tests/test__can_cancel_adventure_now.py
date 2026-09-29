@@ -2,7 +2,7 @@ import vampytest
 
 from ...adventure import (
     ADVENTURE_STATE_ACTIONING, ADVENTURE_STATE_ACTIONING_CANCEL_AFTER, ADVENTURE_STATE_CANCELLED,
-    ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_RETURNING, ADVENTURE_STATE_FINALIZED, adventure_create
+    ADVENTURE_STATE_DEPARTING, ADVENTURE_STATE_RETURNING, ADVENTURE_STATE_FINALISED, adventure_create
 )
 
 from ..helpers import can_cancel_adventure_now
@@ -15,6 +15,7 @@ def _iter_options():
         0,
         0,
         0,
+        None,
         0,
         0,
         0,
@@ -32,6 +33,7 @@ def _iter_options():
         0,
         0,
         0,
+        None,
         0,
         0,
         0,
@@ -49,6 +51,7 @@ def _iter_options():
         0,
         0,
         0,
+        None,
         0,
         0,
         0,
@@ -66,11 +69,12 @@ def _iter_options():
         0,
         0,
         0,
+        None,
         0,
         0,
         0,
     )
-    adventure.state = ADVENTURE_STATE_FINALIZED
+    adventure.state = ADVENTURE_STATE_FINALISED
     
     yield (
         adventure,
@@ -83,6 +87,7 @@ def _iter_options():
         0,
         0,
         0,
+        None,
         0,
         0,
         0,
@@ -100,6 +105,7 @@ def _iter_options():
         0,
         0,
         0,
+        None,
         0,
         0,
         0,

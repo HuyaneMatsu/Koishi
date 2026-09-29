@@ -1,11 +1,9 @@
 __all__ = ('Reward',)
 
-from scarletio import RichAttributeErrorBaseType
-
 from ..instantiate_inheritance import InstantiateInheritanceMeta
 
 
-class Reward(RichAttributeErrorBaseType, metaclass = InstantiateInheritanceMeta):
+class Reward(metaclass = InstantiateInheritanceMeta):
     """
     Represents a reward.
     

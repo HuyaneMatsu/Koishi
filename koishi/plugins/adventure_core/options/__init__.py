@@ -1,10 +1,6 @@
-from .base import *
-from .battle import *
-from .loot import *
+from .option import *
 
 
 __all__ = (
-    *base.__all__,
-    *battle.__all__,
-    *loot.__all__,
+    *option.__all__,
 )

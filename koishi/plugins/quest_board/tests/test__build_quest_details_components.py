@@ -9,12 +9,14 @@ from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 from ...inventory_core import Inventory
 from ...item_core import ITEM_ID_CARROT, get_item_nullable
 from ...quest_core import (
-    AMOUNT_TYPE_WEIGHT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_TEMPLATE_ID_MYSTIA_CARROT, Quest,
-    QuestRequirementInstantiableDuration, QuestRequirementInstantiableItemExact, QuestRequirementSerialisableDuration,
-    QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact, QuestRewardInstantiableBalance,
-    QuestRewardInstantiableCredibility, QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility,
-    get_quest_template_nullable, linked_quest_create
+    LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_TEMPLATE_ID_MYSTIA_CARROT, quest_create,
+    get_quest_template_nullable, linked_quest_create, quest_requirement_instantiable_create_duration,
+    quest_requirement_instantiable_create_item_exact, quest_requirement_serialisable_create_duration,
+    quest_requirement_serialisable_create_expiration, quest_requirement_serialisable_create_item_exact,
+    quest_reward_instantiable_create_balance, quest_reward_instantiable_create_credibility,
+    quest_reward_serialisable_create_balance, quest_reward_serialisable_create_credibility
 )
+from ...unit_core import AMOUNT_TYPE_WEIGHT
 from ...user_stats_core import user_stats_create, user_stats_modify_credibility_by
 
 from ..component_building import build_quest_details_components
@@ -36,15 +38,15 @@ def _iter_options():
     assert quest_template_0 is not None
     quest_amount_0 = 3600
     
-    quest = Quest(
+    quest = quest_create(
         quest_template_id_0,
         (
-            QuestRequirementInstantiableDuration(3600),
-            QuestRequirementInstantiableItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0),
+            quest_requirement_instantiable_create_duration(3600),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0),
         ),
         (
-            QuestRewardInstantiableBalance(1000),
-            QuestRewardInstantiableCredibility(10),
+            quest_reward_instantiable_create_balance(1000),
+            quest_reward_instantiable_create_credibility(10),
         ),
     )
     
@@ -54,13 +56,13 @@ def _iter_options():
         batch_id,
         quest_template_id_0,
         (
-            QuestRequirementSerialisableDuration(3600),
-            QuestRequirementSerialisableExpiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0, 0),
+            quest_requirement_serialisable_create_duration(3600),
+            quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0, 0),
         ),
         (
-            QuestRewardSerialisableBalance(1000),
-            QuestRewardSerialisableCredibility(10),
+            quest_reward_serialisable_create_balance(1000),
+            quest_reward_serialisable_create_credibility(10),
         ),
     )
     linked_quest.completion_count = 3

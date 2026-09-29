@@ -9,13 +9,15 @@ from hata import (
 from ...guild_stats_core import guild_stats_create, guild_stats_modify_credibility_by
 from ...item_core import ITEM_ID_BLUEFRANKISH, ITEM_ID_CARROT, ITEM_ID_PEACH
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
-    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, Quest, QuestBatch, QuestRequirementInstantiableDuration,
-    QuestRequirementInstantiableItemExact, QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration,
-    QuestRequirementSerialisableItemExact, QuestRewardInstantiableBalance, QuestRewardInstantiableCredibility,
-    QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility, get_quest_template_nullable,
-    linked_quest_create
+    QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH,
+    QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, quest_batch_create, quest_create, get_quest_template_nullable,
+    linked_quest_create, quest_requirement_instantiable_create_duration,
+    quest_requirement_instantiable_create_item_exact, quest_requirement_serialisable_create_duration,
+    quest_requirement_serialisable_create_expiration, quest_requirement_serialisable_create_item_exact,
+    quest_reward_instantiable_create_balance, quest_reward_instantiable_create_credibility,
+    quest_reward_serialisable_create_balance, quest_reward_serialisable_create_credibility
 )
+from ...unit_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT
 from ...user_stats_core import user_stats_create, user_stats_modify_credibility_by
 
 from ..component_building import build_quest_board_quest_listing_components
@@ -44,39 +46,39 @@ def _iter_options():
     
     linked_quest_entry_id_0 = 111
     
-    quest_0 = Quest(
+    quest_0 = quest_create(
         quest_template_id_0,
         (
-            QuestRequirementInstantiableDuration(3600),
-            QuestRequirementInstantiableItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0),
+            quest_requirement_instantiable_create_duration(3600),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0),
         ),
         (
-            QuestRewardInstantiableBalance(1000),
-            QuestRewardInstantiableCredibility(2),
+            quest_reward_instantiable_create_balance(1000),
+            quest_reward_instantiable_create_credibility(2),
         ),
     )
     
-    quest_1 = Quest(
+    quest_1 = quest_create(
         quest_template_id_1,
         (
-            QuestRequirementInstantiableDuration(3600),
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1),
+            quest_requirement_instantiable_create_duration(3600),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1),
         ),
         (
-            QuestRewardInstantiableBalance(1000),
-            QuestRewardInstantiableCredibility(2),
+            quest_reward_instantiable_create_balance(1000),
+            quest_reward_instantiable_create_credibility(2),
         ),
     )
     
-    quest_2 = Quest(
+    quest_2 = quest_create(
         quest_template_id_2,
         (
-            QuestRequirementInstantiableDuration(3600),
-            QuestRequirementInstantiableItemExact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, quest_amount_2),
+            quest_requirement_instantiable_create_duration(3600),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, quest_amount_2),
         ),
         (
-            QuestRewardInstantiableBalance(1000),
-            QuestRewardInstantiableCredibility(2),
+            quest_reward_instantiable_create_balance(1000),
+            quest_reward_instantiable_create_credibility(2),
         ),
     )
     
@@ -86,13 +88,13 @@ def _iter_options():
         batch_id,
         quest_template_id_1,
         (
-            QuestRequirementSerialisableDuration(3600),
-            QuestRequirementSerialisableExpiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_0, 0),
+            quest_requirement_serialisable_create_duration(3600),
+            quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_0, 0),
         ),
         (
-            QuestRewardSerialisableBalance(1000),
-            QuestRewardSerialisableCredibility(2),
+            quest_reward_serialisable_create_balance(1000),
+            quest_reward_serialisable_create_credibility(2),
         ),
     )
     linked_quest_0.entry_id = linked_quest_entry_id_0
@@ -109,7 +111,7 @@ def _iter_options():
             linked_quest_0,
         ],
         0,
-        QuestBatch(
+        quest_batch_create(
             batch_id,
             (
                 quest_0,
@@ -195,7 +197,7 @@ def _iter_options():
         1 << 10,
         None,
         0,
-        QuestBatch(
+        quest_batch_create(
             batch_id,
             (),
         ),

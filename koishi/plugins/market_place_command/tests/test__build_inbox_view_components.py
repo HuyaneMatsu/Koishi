@@ -27,11 +27,11 @@ def _iter_options():
         name = 'Nue',
     )
     
-    item = get_item_nullable(ITEM_ID_PEACH)
-    assert item is not None
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
     
     market_place_item_0 = MarketPlaceItem(
-        item,
+        item_peach,
         5,
         user_id_0,
         0,
@@ -41,7 +41,7 @@ def _iter_options():
     market_place_item_0.entry_id = 20
     
     market_place_item_1 = MarketPlaceItem(
-        item,
+        item_peach,
         6,
         user_id_0,
         0,
@@ -53,7 +53,7 @@ def _iter_options():
     market_place_item_1.entry_id = 21
     
     market_place_item_2 = MarketPlaceItem(
-        item,
+        item_peach,
         7,
         user_id_1,
         0,
@@ -66,7 +66,7 @@ def _iter_options():
     
     
     market_place_item_3 = MarketPlaceItem(
-        item,
+        item_peach,
         8,
         user_id_0,
         0,
@@ -78,7 +78,7 @@ def _iter_options():
     market_place_item_3.entry_id = 23
     
     market_place_item_4 = MarketPlaceItem(
-        item,
+        item_peach,
         9,
         user_id_0,
         0,
@@ -91,7 +91,7 @@ def _iter_options():
     market_place_item_4.entry_id = 24
     
     market_place_item_5 = MarketPlaceItem(
-        item,
+        item_peach,
         10,
         user_id_1,
         0,
@@ -169,7 +169,7 @@ def _iter_options():
         ],
         True,
         [
-            (True, item, 56, 1000, 0),
+            (True, item_peach, 56, 1000, 0),
         ],
         [
             create_section(
@@ -184,13 +184,13 @@ def _iter_options():
             ),
             create_separator(),
             create_text_display(
-                f'You received the 56 {item.emoji} {item.name} ({item.weight * 56 / 1000:.03f} kg), '
+                f'You received the 56 {item_peach.emoji} {item_peach.name} ({56 * item_peach.weight / 1000:.03f} kg), '
                 f'that you purchased for 1000 {EMOJI__HEART_CURRENCY}.'
             ),
             create_separator(),
             create_section(
                 create_text_display(
-                    f'Your 5 {item.emoji} {item.name} ({item.weight * 5 / 1000:.03f} kg) offer\n'
+                    f'Your 5 {item_peach.emoji} {item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg) offer\n'
                     f'Finalised: 1 day ago\n'
                     f'Was not sold D:'
                 ),
@@ -203,7 +203,7 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'Your 6 {item.emoji} {item.name} ({item.weight * 6 / 1000:.03f} kg) offer\n'
+                    f'Your 6 {item_peach.emoji} {item_peach.name} ({6 * item_peach.weight / 1000:.03f} kg) offer\n'
                     f'Finalised: 1 day ago\n'
                     f'Was sold for 529 {EMOJI__HEART_CURRENCY} :D'
                 ),
@@ -216,7 +216,7 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'You purchased 7 {item.emoji} {item.name} ({item.weight * 7 / 1000:.03f} kg)\n'
+                    f'You purchased 7 {item_peach.emoji} {item_peach.name} ({7 * item_peach.weight / 1000:.03f} kg)\n'
                     f'Finalised: 1 day ago\n'
                     f'For 530 {EMOJI__HEART_CURRENCY} :3'
                 ),
@@ -229,7 +229,7 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'Your 8 {item.emoji} {item.name} ({item.weight * 8 / 1000:.03f} kg) offer\n'
+                    f'Your 8 {item_peach.emoji} {item_peach.name} ({8 * item_peach.weight / 1000:.03f} kg) offer\n'
                     f'Finalised: 1 day ago\n'
                     f'Was not sold D:'
                 ),
@@ -242,7 +242,7 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'Your 9 {item.emoji} {item.name} ({item.weight * 9 / 1000:.03f} kg) offer\n'
+                    f'Your 9 {item_peach.emoji} {item_peach.name} ({9 * item_peach.weight / 1000:.03f} kg) offer\n'
                     f'Finalised: 1 day ago\n'
                     f'Was sold for 532 {EMOJI__HEART_CURRENCY} :D'
                 ),
@@ -255,7 +255,7 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'You purchased 10 {item.emoji} {item.name} ({item.weight * 10 / 1000:.03f} kg)\n'
+                    f'You purchased 10 {item_peach.emoji} {item_peach.name} ({10 * item_peach.weight / 1000:.02f} kg)\n'
                     f'Finalised: 1 day ago\n'
                     f'For 533 {EMOJI__HEART_CURRENCY} :3'
                 ),

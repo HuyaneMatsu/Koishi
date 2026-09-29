@@ -2,9 +2,8 @@ import vampytest
 
 from ...inventory_core import Inventory
 from ...item_core import ITEM_ID_STRAWBERRY, Item, get_item_nullable
-from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, QuestRequirementSerialisableItemExact, QuestRequirementSerialisableItemGroup
-)
+from ...quest_core import quest_requirement_serialisable_create_item_exact
+from ...unit_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT
 
 from ..helpers import try_submit_item
 
@@ -15,14 +14,14 @@ def _iter_options():
     
     yield (
         'requirement full',
-        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 20),
+        quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 20),
         [
             (item_strawberry, 24)
         ],
         item_strawberry,
         (
             None,
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 20),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 20),
             [
                 (item_strawberry, 24)
             ],
@@ -31,7 +30,7 @@ def _iter_options():
     
     yield (
         'none -> full submit',
-        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 0),
+        quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 0),
         [
             (item_strawberry, 24)
         ],
@@ -40,7 +39,7 @@ def _iter_options():
             [
                 (item_strawberry, AMOUNT_TYPE_COUNT, 20, 0, 20)
             ],
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 20),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 20),
             [
                 (item_strawberry, 4)
             ],
@@ -49,7 +48,7 @@ def _iter_options():
     
     yield (
         'none -> full submit, no item left',
-        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 0),
+        quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 0),
         [
             (item_strawberry, 20)
         ],
@@ -58,14 +57,14 @@ def _iter_options():
             [
                 (item_strawberry, AMOUNT_TYPE_COUNT, 20, 0, 20)
             ],
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 20),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 20),
             [],
         ),
     )
     
     yield (
         'none -> partial submit',
-        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 0),
+        quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 0),
         [
             (item_strawberry, 14)
         ],
@@ -74,14 +73,14 @@ def _iter_options():
             [
                 (item_strawberry, AMOUNT_TYPE_COUNT, 20, 0, 14)
             ],
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 14),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 14),
             [],
         ),
     )
     
     yield (
         'some -> full submit',
-        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 4),
+        quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 4),
         [
             (item_strawberry, 24)
         ],
@@ -90,7 +89,7 @@ def _iter_options():
             [
                 (item_strawberry, AMOUNT_TYPE_COUNT, 20, 4, 16)
             ],
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 20),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 20),
             [
                 (item_strawberry, 8)
             ],
@@ -99,7 +98,7 @@ def _iter_options():
     
     yield (
         'some -> partial submit',
-        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 4),
+        quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 4),
         [
             (item_strawberry, 14)
         ],
@@ -108,14 +107,14 @@ def _iter_options():
             [
                 (item_strawberry, AMOUNT_TYPE_COUNT, 20, 4, 14)
             ],
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 18),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_COUNT, 20, 18),
             [],
         ),
     )
     
     yield (
         'none -> full submit (weight)',
-        QuestRequirementSerialisableItemExact(
+        quest_requirement_serialisable_create_item_exact(
             ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 20 * item_strawberry.weight + 1, 0
         ),
         [
@@ -126,7 +125,7 @@ def _iter_options():
             [
                 (item_strawberry, AMOUNT_TYPE_WEIGHT, 20 * item_strawberry.weight + 1, 0, 21 * item_strawberry.weight)
             ],
-            QuestRequirementSerialisableItemExact(
+            quest_requirement_serialisable_create_item_exact(
                 ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 20 * item_strawberry.weight + 1, 21 * item_strawberry.weight
             ),
             [
@@ -143,7 +142,7 @@ def test__try_submit_item(requirement, item_amount_pairs, submitted_item):
     
     Parameters
     ----------
-    requirement : ``QuestRequirementSerialisableItemExact | QuestRequirementSerialisableItemGroup | QuestRequirementSerialisable``
+    requirement : ``QuestSubTypeSerialisable``
         Requirement to submit to.
     
     item_amount_pairs : ``list<(Item, int)>``
@@ -154,9 +153,12 @@ def test__try_submit_item(requirement, item_amount_pairs, submitted_item):
     
     Returns
     -------
-    output : ``(list<(Item, int, int, int, int)>, QuestRequirementSerialisableItemExact | QuestRequirementSerialisableItemGroup | QuestRequirementSerialisable, list<(Item, int)>)``
+    output : ``(list<(Item, int, int, int, int)>, QuestSubTypeSerialisable, list<(Item, int)>)``
     """
-    requirement, index = type(requirement).deserialise(b''.join([*requirement.serialise()]), 0)
+    requirement, index = requirement.behaviour.deserialise(
+        b''.join([*requirement.behaviour.serialise(requirement.configuration)]),
+        0
+    )
     assert requirement is not None
     
     inventory = Inventory(0)

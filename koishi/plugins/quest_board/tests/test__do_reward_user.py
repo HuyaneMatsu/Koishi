@@ -6,8 +6,9 @@ from ...inventory_core import Inventory
 from ...item_core import ITEM_ID_STRAWBERRY, get_item_nullable
 from ...guild_stats_core import guild_stats_create
 from ...quest_core import (
-    LinkedQuest, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QuestRewardSerialisableItemExact, QuestRewardSerialisableBalance,
-    get_quest_template_nullable, get_user_adventurer_rank_info, QuestRewardSerialisableCredibility, linked_quest_create
+    LinkedQuest, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, quest_reward_serialisable_create_item_exact,
+    quest_reward_serialisable_create_balance, get_quest_template_nullable, get_user_adventurer_rank_info,
+    linked_quest_create, quest_reward_serialisable_create_credibility
 )
 from ...user_balance import user_balance_create, user_balance_modify_balance_by
 from ...user_stats_core import user_stats_create, user_stats_modify_credibility_by
@@ -45,6 +46,8 @@ def _iter_options():
         ),
     )
     
+    reward = quest_reward_serialisable_create_item_exact(item_strawberry.id, 20)
+    
     yield (
         'give item x1',
         linked_quest_create(
@@ -54,7 +57,7 @@ def _iter_options():
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             None,
             (
-                QuestRewardSerialisableItemExact(item_strawberry.id, 20),
+                reward,
             ),
         ),
         1000,
@@ -63,7 +66,7 @@ def _iter_options():
         1,
         (
             [
-                (QuestRewardSerialisableItemExact.TYPE, item_strawberry.id, 20),
+                (reward.behaviour.type, reward.configuration.item_id, reward.configuration.amount_given),
             ],
             [
                 (item_strawberry, 20),
@@ -74,6 +77,8 @@ def _iter_options():
         ),
     )
     
+    reward = quest_reward_serialisable_create_credibility(20)
+    
     yield (
         'give credibility x1',
         linked_quest_create(
@@ -83,7 +88,7 @@ def _iter_options():
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             None,
             (
-                QuestRewardSerialisableCredibility(20),
+                reward,
             ),
         ),
         1000,
@@ -92,7 +97,7 @@ def _iter_options():
         1,
         (
             [
-                (QuestRewardSerialisableCredibility.TYPE, 0, 20),
+                (reward.behaviour.type, 0, reward.configuration.credibility),
             ],
             [],
             1020,
@@ -100,6 +105,8 @@ def _iter_options():
             1020,
         ),
     )
+    
+    reward = quest_reward_serialisable_create_balance(20)
     
     yield (
         'give balance x1',
@@ -110,7 +117,7 @@ def _iter_options():
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             None,
             (
-                QuestRewardSerialisableBalance(20),
+                reward,
             ),
         ),
         1000,
@@ -119,7 +126,7 @@ def _iter_options():
         1,
         (
             [
-                (QuestRewardSerialisableBalance.TYPE, 0, 20),
+                (reward.behaviour.type, 0, reward.configuration.balance),
             ],
             [],
             1000,
@@ -127,6 +134,8 @@ def _iter_options():
             1000,
         ),
     )
+    
+    reward = quest_reward_serialisable_create_credibility(20)
     
     yield (
         'give credibility x1 (high level)',
@@ -137,7 +146,7 @@ def _iter_options():
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             None,
             (
-                QuestRewardSerialisableCredibility(20),
+                reward,
             ),
         ),
         10000,
@@ -146,7 +155,7 @@ def _iter_options():
         1,
         (
             [
-                (QuestRewardSerialisableCredibility.TYPE, 0, 10),
+                (reward.behaviour.type, 0, reward.configuration.credibility // 2),
             ],
             [],
             10010,
@@ -154,6 +163,8 @@ def _iter_options():
             20012,
         ),
     )
+    
+    reward = quest_reward_serialisable_create_credibility(19)
     
     yield (
         'give credibility x10 (high level)',
@@ -164,7 +175,7 @@ def _iter_options():
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             None,
             (
-                QuestRewardSerialisableCredibility(19),
+                reward,
             ),
         ),
         10000,
@@ -173,7 +184,7 @@ def _iter_options():
         10,
         (
             [
-                (QuestRewardSerialisableCredibility.TYPE, 0, 95),
+                (reward.behaviour.type, 0, reward.configuration.credibility * 5),
             ],
             [],
             10095,

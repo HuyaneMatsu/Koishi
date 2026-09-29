@@ -6,10 +6,11 @@ from ...item_core import (
     ITEM_FLAG_EDIBLE, ITEM_GROUP_ID_KNIFE, ITEM_ID_PEACH, get_item_group_nullable, get_item_nullable
 )
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, Quest, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QuestRequirementInstantiableBase,
-    QuestRequirementInstantiableItemCategory, QuestRequirementInstantiableItemExact,
-    QuestRequirementInstantiableItemGroup
+    quest_create, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, quest_requirement_instantiable_create_item_category,
+    quest_requirement_instantiable_create_item_exact, quest_requirement_instantiable_create_item_group,
+    quest_sub_type_instantiable_create_base
 )
+from ...unit_core import AMOUNT_TYPE_COUNT
 
 from ..component_building import build_quest_select_requirement_components
 from ..constants import EMOJI_BACK, EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS
@@ -26,7 +27,7 @@ def _iter_options():
     guild_id = 202603290001
     
     
-    quest_0 = Quest(
+    quest_0 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         None,
         None,
@@ -68,23 +69,23 @@ def _iter_options():
         ],
     )
     
-    quest_1 = Quest(
+    quest_1 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30),
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 31),
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 32),
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 33),
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 37),
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 35),
-            QuestRequirementInstantiableBase(),
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 36),
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 37),
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 38),
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 39),
-            QuestRequirementInstantiableItemGroup(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 1),
-            QuestRequirementInstantiableItemCategory(ITEM_FLAG_EDIBLE, AMOUNT_TYPE_COUNT, 60),
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 40),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 31),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 32),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 33),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 37),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 35),
+            quest_sub_type_instantiable_create_base(),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 36),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 37),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 38),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 39),
+            quest_requirement_instantiable_create_item_group(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 1),
+            quest_requirement_instantiable_create_item_category(ITEM_FLAG_EDIBLE, AMOUNT_TYPE_COUNT, 60),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 40),
         ],
         None,
     )

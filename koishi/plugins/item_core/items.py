@@ -37,8 +37,8 @@ from .item_ids import (
     ITEM_ID_PUDDING, ITEM_ID_RAMEN, ITEM_ID_RED_EYED_KASHA_S_FIERY_CHARIOT, ITEM_ID_REIMU, ITEM_ID_REMILIA,
     ITEM_ID_RIBBON_BOW, ITEM_ID_RICE, ITEM_ID_RULER, ITEM_ID_RUMIA, ITEM_ID_SAKE, ITEM_ID_SAKUYA, ITEM_ID_SATORI,
     ITEM_ID_SCARLET_ONION, ITEM_ID_SCISSORS, ITEM_ID_SEIRAN, ITEM_ID_SEKIBANKI, ITEM_ID_STRAWBERRY, ITEM_ID_STRAW_HAT,
-    ITEM_ID_SUIKA, ITEM_ID_TEA_LEAVES, ITEM_ID_TEWI, ITEM_ID_TWIGS, ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YOUMU,
-    ITEM_ID_YUKARI, ITEM_ID_YUUKA
+    ITEM_ID_SUIKA, ITEM_ID_SUNFLOWER, ITEM_ID_TEA_LEAVES, ITEM_ID_TEWI, ITEM_ID_TWIGS,
+    ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, ITEM_ID_YOUMU, ITEM_ID_YUKARI, ITEM_ID_YUUKA
 )
 from .option_butcher import OptionButcher
 
@@ -2257,6 +2257,34 @@ ITEM_PARSEE = ITEMS[ITEM_ID_PARSEE] = Item(
     ITEM_FLAG_NPC,
     0, # value (hearts)
     0, # weight (grams)
+    None,
+    None,
+)
+
+
+ITEM_SUNFLOWER = ITEMS[ITEM_ID_SUNFLOWER] = Item(
+    ITEM_ID_SUNFLOWER,
+    'Sunflower',
+    BUILTIN_EMOJIS['sunflower'],
+    (
+        'Sunflowers grow 1 - 3 meters tall, herbaceous plant. Its stem is sponge like. '
+        'There are types which grow 2.5 - 3.2 meters tall and their stem splits, holding multiple plates; '
+        'Although the farmed varieties are short 1 - 2 meters tall, without branching.\n'
+        '\n'
+        'Its roots are advanced, copious secondary roots are growing out of taproot, which  penetrates deep into the '
+        'soil. '
+        'Its leaves are big, heart shaped, which connect to the stem with their shaft. '
+        'Its nest inflorescence is surrounded by its side with nest scales. '
+        'At the side of its plate are tongued flowers which serve as a connecting point for insects. '
+        'Moving towards the middle of the plate, it holds hermaphroditic flowers, which mature their stamen before '
+        'their stigma.\n'
+        '\n'
+        'Sunflower is one of the arable crop plats. '
+        'Since its oil has favourable life physiological benefits, it counts as a medical herb.'
+    ),
+    ITEM_FLAG_EDIBLE,
+    40, # value (hearts)
+    4160, # weight (grams)
     None,
     None,
 )

@@ -4,33 +4,32 @@ __all__ = (
 )
 
 from .quest_requirement_serialisables import (
-    QuestRequirementSerialisableBase, QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration,
-    QuestRequirementSerialisableItemCategory, QuestRequirementSerialisableItemExact,
-    QuestRequirementSerialisableItemGroup
+    QUEST_REQUIREMENT_SERIALISABLE_BEHAVIOUR_DURATION, QUEST_REQUIREMENT_SERIALISABLE_BEHAVIOUR_EXPIRATION,
+    QUEST_REQUIREMENT_SERIALISABLE_BEHAVIOUR_ITEM_CATEGORY, QUEST_REQUIREMENT_SERIALISABLE_BEHAVIOUR_ITEM_EXACT,
+    QUEST_REQUIREMENT_SERIALISABLE_BEHAVIOUR_ITEM_GROUP
 )
 from .quest_reward_serialisables import (
-    QuestRewardSerialisableBalance, QuestRewardSerialisableBase, QuestRewardSerialisableCredibility,
-    QuestRewardSerialisableItemExact
+    QUEST_REWARD_SERIALISABLE_BEHAVIOUR_BALANCE, QUEST_REWARD_SERIALISABLE_BEHAVIOUR_CREDIBILITY,
+    QUEST_REWARD_SERIALISABLE_BEHAVIOUR_ITEM_EXACT
 )
 
 
-QUEST_REWARD_SERIALISATION_RESOLUTION = {
-    reward_type.TYPE : reward_type for reward_type in (
-        QuestRewardSerialisableBalance,
-        QuestRewardSerialisableBase,
-        QuestRewardSerialisableCredibility,
-        QuestRewardSerialisableItemExact,
+QUEST_REQUIREMENT_SERIALISATION_RESOLUTION = {
+    behaviour.type : behaviour for behaviour in (
+        QUEST_REQUIREMENT_SERIALISABLE_BEHAVIOUR_DURATION,
+        QUEST_REQUIREMENT_SERIALISABLE_BEHAVIOUR_EXPIRATION,
+        QUEST_REQUIREMENT_SERIALISABLE_BEHAVIOUR_ITEM_CATEGORY,
+        QUEST_REQUIREMENT_SERIALISABLE_BEHAVIOUR_ITEM_EXACT,
+        QUEST_REQUIREMENT_SERIALISABLE_BEHAVIOUR_ITEM_GROUP,
     )
 }
 
-QUEST_REQUIREMENT_SERIALISATION_RESOLUTION = {
-    reward_type.TYPE : reward_type for reward_type in (
-        QuestRequirementSerialisableBase,
-        QuestRequirementSerialisableDuration,
-        QuestRequirementSerialisableExpiration,
-        QuestRequirementSerialisableItemCategory,
-        QuestRequirementSerialisableItemExact,
-        QuestRequirementSerialisableItemGroup,
+
+QUEST_REWARD_SERIALISATION_RESOLUTION = {
+    behaviour.type : behaviour for behaviour in (
+        QUEST_REWARD_SERIALISABLE_BEHAVIOUR_BALANCE,
+        QUEST_REWARD_SERIALISABLE_BEHAVIOUR_CREDIBILITY,
+        QUEST_REWARD_SERIALISABLE_BEHAVIOUR_ITEM_EXACT,
     )
 }
 
@@ -54,8 +53,9 @@ def quest_serialisable_serialise(serialisable_listing):
     parts = []
     
     for serialisable in serialisable_listing:
-        parts.append(serialisable.TYPE.to_bytes(1, 'little'))
-        parts.extend(serialisable.serialise())
+        behaviour = serialisable.behaviour
+        parts.append(behaviour.type.to_bytes(1, 'little'))
+        parts.extend(behaviour.serialise(serialisable.configuration))
     
     return b''.join(parts)
 
@@ -66,7 +66,7 @@ def quest_serialisable_deserialise(resolution, data):
     
     Parameters
     ----------
-    resolution : ``dict<int, type<QuestSubTypeSerialisable>>``
+    resolution : ``dict<int, QuestSubTypeSerialisableBehaviour>``
         Type identifier to type mapping.
     
     data : `None | bytes`
@@ -90,12 +90,12 @@ def quest_serialisable_deserialise(resolution, data):
         index += 1
         
         try:
-            serialisable_type = resolution[serialisable_type_identifier]
+            behaviour = resolution[serialisable_type_identifier]
         except KeyError:
             success = False
             break
         
-        serialisable_and_end_index = serialisable_type.deserialise(data, index)
+        serialisable_and_end_index = behaviour.deserialise(data, index)
         if (serialisable_and_end_index is None):
             success = False
             break

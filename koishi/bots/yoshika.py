@@ -11,6 +11,8 @@ Yoshika = Client(
     application_id = config.YOSHIKA_ID,
     client_id = config.YOSHIKA_ID,
     extensions = ('slash',),
-    intents = IntentFlag().update_by_keys(), # no changes
+    intents = IntentFlag().update_by_keys(
+        guild_presences = False,
+    ),
     should_request_users = False,
 )

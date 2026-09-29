@@ -1,4 +1,4 @@
-__all__ = ('Quest',)
+__all__ = ('Quest', 'quest_create',)
 
 from scarletio import RichAttributeErrorBaseType
 
@@ -23,32 +23,6 @@ class Quest(RichAttributeErrorBaseType):
         The identifier of the quest's template.
     """
     __slots__ = ('requirements', 'rewards', 'template_id')
-    
-    def __new__(
-        cls,
-        quest_template_id,
-        requirements,
-        rewards,
-    ):
-        """
-        Creates a new quest with the given parameters.
-        
-        Parameters
-        ----------
-        quest_template_id : `int`
-            The identifier of the quest's template.
-        
-        requirements : ``None | tuple<QuestRequirementInstantiable>``
-            Requirements.
-        
-        rewards : ``None | tuple<QuestRewardInstantiable>``
-            Rewards.
-        """
-        self = object.__new__(cls)
-        self.requirements = requirements
-        self.rewards = rewards
-        self.template_id = quest_template_id
-        return self
     
     
     def __repr__(self):
@@ -94,3 +68,33 @@ class Quest(RichAttributeErrorBaseType):
         
         repr_parts.append('>')
         return ''.join(repr_parts)
+
+
+def quest_create(
+    quest_template_id,
+    requirements,
+    rewards,
+):
+    """
+    Creates a new quest with the given parameters.
+    
+    Parameters
+    ----------
+    quest_template_id : `int`
+        The identifier of the quest's template.
+    
+    requirements : ``None | tuple<QuestRequirementInstantiable>``
+        Requirements.
+    
+    rewards : ``None | tuple<QuestRewardInstantiable>``
+        Rewards.
+    
+    Returns
+    -------
+    quest : ``Quest``
+    """
+    quest = object.__new__(Quest)
+    quest.requirements = requirements
+    quest.rewards = rewards
+    quest.template_id = quest_template_id
+    return quest

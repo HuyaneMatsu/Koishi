@@ -6455,7 +6455,7 @@ TOUHOU_ACTION_ALL.add(
 TOUHOU_ACTION_ALL.add(
     'https://cdn.discordapp.com/attachments/568837922288173058/1275129462673113139/maribel-renko-tickle-0000.png',
 ).with_action(
-    ACTION_TAG_POKE, USAMI_RENKO, HEARN_MARIBEL,
+    ACTION_TAG_TICKLE, USAMI_RENKO, HEARN_MARIBEL,
 ).with_creator(
     'e.o.',
 )

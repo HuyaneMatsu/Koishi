@@ -3,7 +3,7 @@ from datetime import datetime as DateTime, timezone as TimeZone
 import vampytest
 from hata import Component, create_button, create_row, create_separator, create_text_display
 
-from ...item_core import ITEM_ID_PEACH, get_item
+from ...item_core import ITEM_ID_PEACH, get_item_nullable
 from ...market_place_core import MarketPlaceItem
 
 from ..component_building import build_bid_success_components
@@ -13,12 +13,13 @@ from ..constants import EMOJI_CLOSE
 def _iter_options():
     user_id_0 = 202512300002
     
-    item_0 = get_item(ITEM_ID_PEACH)
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
     
     entry_id_0 = 120
     
     market_place_item_0 = MarketPlaceItem(
-        item_0,
+        item_peach,
         5,
         user_id_0,
         0,
@@ -30,8 +31,8 @@ def _iter_options():
     
     yield (
         user_id_0,
-        item_0.id,
-        item_0.flags,
+        item_peach.id,
+        item_peach.flags,
         1,
         10,
         True,
@@ -46,7 +47,7 @@ def _iter_options():
             create_row(
                 create_button(
                     'Back to offers',
-                    custom_id = f'market_place.purchase.view.{user_id_0:x}.{item_0.id:x}.{item_0.flags:x}.{1:x}.{10:x}'
+                    custom_id = f'market_place.purchase.view.{user_id_0:x}.{item_peach.id:x}.{item_peach.flags:x}.{1:x}.{10:x}'
                 ),
                 create_button(
                     'Close',

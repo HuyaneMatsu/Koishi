@@ -3,11 +3,12 @@ from datetime import datetime as DateTime, timezone as TimeZone, timedelta as Ti
 import vampytest
 
 from ...item_core import ITEM_ID_STRAWBERRY
+from ...unit_core import AMOUNT_TYPE_WEIGHT
 
-from ..amount_types import AMOUNT_TYPE_WEIGHT
 from ..linked_quest import LinkedQuest, linked_quest_create
 from ..quest_requirement_serialisables import (
-    QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact
+    quest_requirement_serialisable_create_duration, quest_requirement_serialisable_create_expiration,
+    quest_requirement_serialisable_create_item_exact
 )
 from ..quest_template_ids import QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
 from ..utils import get_linked_quest_completion_ratio
@@ -26,11 +27,11 @@ def _iter_options():
         batch_id_0,
         quest_template_id,
         (
-            QuestRequirementSerialisableDuration(3600 * 24 * 3),
-            QuestRequirementSerialisableExpiration(
+            quest_requirement_serialisable_create_duration(3600 * 24 * 3),
+            quest_requirement_serialisable_create_expiration(
                 DateTime(2016, 5, 14, tzinfo = TimeZone.utc) + TimeDelta(seconds = 3600 * 24 * 3)
             ),
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
         ),
         None,
     )
@@ -50,7 +51,7 @@ def _iter_options():
         batch_id_1,
         quest_template_id,
         (
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 500),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 500),
         ),
         None,
     )
@@ -70,11 +71,11 @@ def _iter_options():
         batch_id_2,
         quest_template_id,
         (
-            QuestRequirementSerialisableDuration(3600 * 24 * 3),
-            QuestRequirementSerialisableExpiration(
+            quest_requirement_serialisable_create_duration(3600 * 24 * 3),
+            quest_requirement_serialisable_create_expiration(
                 DateTime(2016, 5, 14, tzinfo = TimeZone.utc) + TimeDelta(seconds = 3600 * 24 * 3)
             ),
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 1200),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 1200),
         ),
         None,
     )
@@ -94,8 +95,8 @@ def _iter_options():
         batch_id_3,
         quest_template_id,
         (
-            QuestRequirementSerialisableDuration(3600 * 24 * 3),
-            QuestRequirementSerialisableExpiration(
+            quest_requirement_serialisable_create_duration(3600 * 24 * 3),
+            quest_requirement_serialisable_create_expiration(
                 DateTime(2016, 5, 14, tzinfo = TimeZone.utc) + TimeDelta(seconds = 3600 * 24 * 3)
             ),
         ),
@@ -117,8 +118,8 @@ def _iter_options():
         batch_id_4,
         quest_template_id,
         (
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 1200),
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 500),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 1200),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 500),
         ),
         None,
     )

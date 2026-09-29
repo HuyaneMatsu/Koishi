@@ -1,7 +1,9 @@
 __all__ = ('EntryProxyType',)
 
+from scarletio import RICH_TYPE_FEATURE_FLAG_ATTRIBUTE_ERROR, RichType
 
-class EntryProxyType(type):
+
+class EntryProxyType(RichType):
     """
     The entry proxy type.
     """
@@ -52,7 +54,13 @@ class EntryProxyType(type):
         
         type_attributes['field_setters'] = aggregated_field_setters
         
-        built_type = type.__new__(cls, type_name, base_types, type_attributes, **keyword_parameters)
+        built_type = RichType.__new__(
+            cls,
+            type_name,
+            base_types,
+            type_attributes,
+            rich_type_feature_flags = RICH_TYPE_FEATURE_FLAG_ATTRIBUTE_ERROR,
+        )
         
         # Aggregate new field setters
         if not custom_field_setters_present:

@@ -2,8 +2,9 @@ import vampytest
 
 from ...item_core import ITEM_ID_STRAWBERRY
 from ...quest_core import (
-    QUEST_REWARD_TYPE_CREDIBILITY, QUEST_REWARD_TYPE_ITEM_EXACT, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, Quest,
-    QuestRewardInstantiableBase, QuestRewardInstantiableCredibility, QuestRewardInstantiableItemExact
+    QUEST_REWARD_TYPE_CREDIBILITY, QUEST_REWARD_TYPE_ITEM_EXACT, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, quest_create,
+    quest_reward_instantiable_create_credibility, quest_reward_instantiable_create_item_exact,
+    quest_sub_type_instantiable_create_base
 )
 
 from ..helpers import get_quest_rewards_normalised
@@ -11,7 +12,7 @@ from ..helpers import get_quest_rewards_normalised
 
 def _iter_options():
     yield (
-        Quest(
+        quest_create(
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             None,
             None,
@@ -22,11 +23,11 @@ def _iter_options():
     )
     
     yield (
-        Quest(
+        quest_create(
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             None,
             (
-                QuestRewardInstantiableBase(),
+                quest_sub_type_instantiable_create_base(),
             ),
         ),
         0,
@@ -35,12 +36,12 @@ def _iter_options():
     )
     
     yield (
-        Quest(
+        quest_create(
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             None,
             (
-                QuestRewardInstantiableItemExact(ITEM_ID_STRAWBERRY, 100),
-                QuestRewardInstantiableCredibility(20),
+                quest_reward_instantiable_create_item_exact(ITEM_ID_STRAWBERRY, 100),
+                quest_reward_instantiable_create_credibility(20),
             ),
         ),
         0,
@@ -52,12 +53,12 @@ def _iter_options():
     )
     
     yield (
-        Quest(
+        quest_create(
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             None,
             (
-                QuestRewardInstantiableItemExact(ITEM_ID_STRAWBERRY, 500),
-                QuestRewardInstantiableBase(),
+                quest_reward_instantiable_create_item_exact(ITEM_ID_STRAWBERRY, 500),
+                quest_sub_type_instantiable_create_base(),
             ),
         ),
         0,
@@ -68,11 +69,11 @@ def _iter_options():
     )
     
     yield (
-        Quest(
+        quest_create(
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             None,
             (
-                QuestRewardInstantiableCredibility(20),
+                quest_reward_instantiable_create_credibility(20),
             ),
         ),
         0,

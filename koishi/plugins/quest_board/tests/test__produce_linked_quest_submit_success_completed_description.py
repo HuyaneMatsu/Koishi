@@ -3,7 +3,8 @@ import vampytest
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ...item_core import ITEM_ID_PEACH, get_item_nullable
-from ...quest_core import AMOUNT_TYPE_COUNT, QUEST_REWARD_TYPE_BALANCE, QUEST_REWARD_TYPE_CREDIBILITY
+from ...quest_core import QUEST_REWARD_TYPE_BALANCE, QUEST_REWARD_TYPE_CREDIBILITY
+from ...unit_core import AMOUNT_TYPE_COUNT
 
 from ..content_building import produce_linked_quest_submit_success_completed_description
 

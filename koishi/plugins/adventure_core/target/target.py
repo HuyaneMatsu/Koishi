@@ -1,10 +1,10 @@
-__all__ = ('Target',)
+__all__ = ('Target', 'target_create')
 
 
-from scarletio import RichAttributeErrorBaseType
+from scarletio import RichType
 
 
-class Target(RichAttributeErrorBaseType):
+class Target(metaclass = RichType, rich_type_feature_flags = ~0):
     """
     Represents a target action of a location.
     
@@ -23,52 +23,33 @@ class Target(RichAttributeErrorBaseType):
         The target's name.
     """
     __slots__ = ('action_ids', 'duration_suggestion_set_id', 'id', 'name')
+
+
+def target_create(target_id, name, duration_suggestion_set_id, action_ids):
+    """
+    Creates a new target.
     
-    def __new__(cls, target_id, name, duration_suggestion_set_id, action_ids):
-        """
-        Creates a new target.
-        
-        Parameters
-        ----------
-        target_id : `int`
-            The identifier of the target.
-        
-        name : `str`
-            The target's name.
-        
-        duration_suggestion_set_id : `int`
-            identifier for duration suggestions.
-        
-        action_ids : `tuple<int>`
-            The possible actions.
-        """
-        self = object.__new__(cls)
-        self.action_ids = action_ids
-        self.id = target_id
-        self.duration_suggestion_set_id = duration_suggestion_set_id
-        self.name = name
-        return self
+    Parameters
+    ----------
+    target_id : `int`
+        The identifier of the target.
     
+    name : `str`
+        The target's name.
     
-    def __repr__(self):
-        """Returns repr(self)."""
-        repr_parts = ['<', type(self).__name__]
-        
-        # id
-        repr_parts.append(' id = ')
-        repr_parts.append(repr(self.id))
-        
-        # name
-        repr_parts.append(', name = ')
-        repr_parts.append(repr(self.name))
-        
-        # duration_suggestion_set_id
-        repr_parts.append(', duration_suggestion_set_id = ')
-        repr_parts.append(repr(self.duration_suggestion_set_id))
-        
-        # action_ids
-        repr_parts.append(', action_ids = ')
-        repr_parts.append(repr(self.action_ids))
-        
-        repr_parts.append('>')
-        return ''.join(repr_parts)
+    duration_suggestion_set_id : `int`
+        identifier for duration suggestions.
+    
+    action_ids : `tuple<int>`
+        The possible actions.
+    
+    Returns
+    -------
+    target : ``Target``
+    """
+    target = object.__new__(Target)
+    target.action_ids = action_ids
+    target.id = target_id
+    target.duration_suggestion_set_id = duration_suggestion_set_id
+    target.name = name
+    return target

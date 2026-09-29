@@ -240,8 +240,8 @@ async def claim_daily_for_other(client, interaction_event, extender_relationship
             interaction_event,
             None,
             build_embed_already_claimed_other(
-                    target_daily_can_claim_at, target_user, interaction_event.guild_id
-                ),
+                target_daily_can_claim_at, target_user, interaction_event.guild_id
+            ),
         )
         return
     

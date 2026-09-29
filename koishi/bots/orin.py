@@ -10,7 +10,9 @@ Orin = Client(
     client_id = config.ORIN_ID,
     status = Status.dnd,
     should_request_users = False,
-    intents = IntentFlag().update_by_keys(), # no changes
+    intents = IntentFlag().update_by_keys(
+        guild_presences = False,
+    ),
     application_id = config.ORIN_ID,
     extensions = ('slash',),
 )

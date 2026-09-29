@@ -3,8 +3,8 @@ from datetime import datetime as DateTime, timezone as TimeZone
 import vampytest
 
 from ...quest_core import (
-    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QuestRequirementSerialisableBase, QuestRequirementSerialisableExpiration,
-    linked_quest_create
+    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, linked_quest_create, quest_requirement_serialisable_create_expiration,
+    quest_sub_type_serialisable_create_base
 )
 
 from ..helpers import get_linked_quest_expiration
@@ -30,7 +30,7 @@ def _iter_options():
             0,
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             (
-                QuestRequirementSerialisableBase(),
+                quest_sub_type_serialisable_create_base(),
             ),
             None,
         ),
@@ -44,7 +44,7 @@ def _iter_options():
             0,
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             (
-                QuestRequirementSerialisableExpiration(DateTime(2016, 5, 14, tzinfo = TimeZone.utc)),
+                quest_requirement_serialisable_create_expiration(DateTime(2016, 5, 14, tzinfo = TimeZone.utc)),
             ),
             None,
         ),

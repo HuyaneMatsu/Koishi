@@ -10,6 +10,8 @@ from ....bot_utils.time import unix_time_seconds_get
 
 from ...seeding import create_seed
 
+from ..goal import goal_listing_deserialise
+
 from .adventure_action import adventure_action_listing_deserialise, adventure_action_listing_serialise
 from .adventure_states import ADVENTURE_STATE_DEPARTING
 
@@ -54,6 +56,9 @@ class Adventure(RichAttributeErrorBaseType):
     health_initial : `int`
         The user's starting health.
     
+    goal_listing : ``None | list<Goal>``
+        The goals of the adventure.
+    
     initial_duration_seconds : `int`
         The duration with what the user initialized the adventure with.
     
@@ -83,7 +88,7 @@ class Adventure(RichAttributeErrorBaseType):
     """
     __slots__ = (
         '__weakref__', 'action_listing', 'auto_cancellation_id', 'created_at', 'energy_exhausted', 'energy_initial',
-        'entry_id', 'handle', 'health_exhausted', 'health_initial', 'initial_duration_seconds', 'location_id',
+        'entry_id', 'handle', 'health_exhausted', 'health_initial', 'goal_listing', 'initial_duration_seconds', 'location_id',
         'modification_flags', 'return_id', 'seed', 'state', 'target_id', 'updated_at', 'user_id', 
     )
     
@@ -110,6 +115,7 @@ def adventure_create(
     target_id,
     return_id,
     auto_cancellation_id,
+    goal_listing,
     
     initial_duration_seconds,
     health_initial,
@@ -135,6 +141,9 @@ def adventure_create(
     auto_cancellation_id : `int`
         Auto cancellation logic identifier.
     
+    goal_listing : ``None | list<Goal>``
+        The goals of the adventure.
+    
     initial_duration_seconds : `int`
         The duration with what the user initialized the adventure with.
     
@@ -158,6 +167,7 @@ def adventure_create(
     adventure.target_id = target_id
     adventure.return_id = return_id
     adventure.auto_cancellation_id = auto_cancellation_id
+    adventure.goal_listing = goal_listing
     adventure.state = ADVENTURE_STATE_DEPARTING
     
     adventure.initial_duration_seconds = initial_duration_seconds
@@ -193,6 +203,12 @@ def adventure_create_from_entry(entry):
     else:
         action_listing = adventure_action_listing_deserialise(action_listing_data)
     
+    goal_listing_data = entry['goal_listing_data']
+    if goal_listing_data is None:
+        goal_listing = None
+    else:
+        goal_listing = goal_listing_deserialise(goal_listing_data)
+    
     adventure = object.__new__(Adventure)
     adventure.entry_id = entry['id']
     adventure.user_id = entry['user_id']
@@ -203,13 +219,15 @@ def adventure_create_from_entry(entry):
     adventure.target_id = entry['target_id']
     adventure.return_id = entry['return_id']
     adventure.auto_cancellation_id = entry['auto_cancellation_id']
-    adventure.state = entry['state']
+    adventure.goal_listing = goal_listing
     
     adventure.initial_duration_seconds = entry['initial_duration_seconds']
     adventure.created_at = entry['created_at']
     adventure.updated_at = entry['updated_at']
+    
     adventure.action_listing = action_listing
     adventure.seed = entry['seed']
+    adventure.state = entry['state']
     
     adventure.health_initial = entry['health_initial']
     adventure.health_exhausted = entry['health_exhausted']

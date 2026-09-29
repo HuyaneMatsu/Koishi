@@ -8,10 +8,11 @@ from ...item_core import (
     ITEM_ID_SCARLET_ONION, ITEM_ID_STRAWBERRY, get_item_nullable
 )
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, QuestRequirementSerialisableBase,
-    QuestRequirementSerialisableItemCategory, QuestRequirementSerialisableItemExact,
-    QuestRequirementSerialisableItemGroup, linked_quest_create
+    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, quest_requirement_serialisable_create_item_category,
+    linked_quest_create, quest_requirement_serialisable_create_item_exact,
+    quest_requirement_serialisable_create_item_group, quest_sub_type_serialisable_create_base
 )
+from ...unit_core import AMOUNT_TYPE_COUNT
 
 from ..component_building import build_linked_quest_submit_select_item_components
 from ..constants import EMOJI_BACK, EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS, EMOJI_REFRESH
@@ -119,20 +120,20 @@ def _iter_options():
         batch_id,
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 0),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 1),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 2),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 3),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 4),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 5),
-            QuestRequirementSerialisableBase(),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 0),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 1),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 2),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 30),
-            QuestRequirementSerialisableItemGroup(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 1, 0),
-            QuestRequirementSerialisableItemCategory(ITEM_FLAG_EDIBLE, AMOUNT_TYPE_COUNT, 60, 0),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 0),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 0),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 1),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 2),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 3),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 4),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 5),
+            quest_sub_type_serialisable_create_base(),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 0),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 1),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 2),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 30),
+            quest_requirement_serialisable_create_item_group(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 1, 0),
+            quest_requirement_serialisable_create_item_category(ITEM_FLAG_EDIBLE, AMOUNT_TYPE_COUNT, 60, 0),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30, 0),
         ],
         None,
     )
@@ -346,7 +347,7 @@ def _iter_options():
         batch_id,
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementSerialisableItemCategory(ITEM_FLAG_EDIBLE, AMOUNT_TYPE_COUNT, 60, 0),
+            quest_requirement_serialisable_create_item_category(ITEM_FLAG_EDIBLE, AMOUNT_TYPE_COUNT, 60, 0),
         ],
         None,
     )

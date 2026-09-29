@@ -272,7 +272,7 @@ def build_quest_details_components(
     requirements = quest.requirements
     if (requirements is not None):
         for requirement in requirements:
-            if requirement.TYPE in (
+            if requirement.behaviour.type in (
                 QUEST_REQUIREMENT_TYPE_ITEM_EXACT,
                 QUEST_REQUIREMENT_TYPE_ITEM_GROUP,
                 QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY,
@@ -648,7 +648,7 @@ def build_linked_quest_details_components(linked_quest, user_stats, page_index):
     requirements = linked_quest.requirements
     if (requirements is not None):
         for requirement in requirements:
-            if requirement.TYPE in (
+            if requirement.behaviour.type in (
                 QUEST_REQUIREMENT_TYPE_ITEM_EXACT,
                 QUEST_REQUIREMENT_TYPE_ITEM_GROUP,
                 QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY,

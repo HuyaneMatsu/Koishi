@@ -1,6 +1,6 @@
 import vampytest
 
-from ..quest_reward_serialisables import QuestRewardSerialisableBalance
+from ..quest_reward_serialisables import quest_reward_serialisable_create_balance
 from ..serialisation import quest_serialisable_serialise
 
 
@@ -10,11 +10,11 @@ def _iter_options():
         None,
     )
     
-    serialisable_0 = QuestRewardSerialisableBalance(
+    serialisable_0 = quest_reward_serialisable_create_balance(
         566,
     )
     
-    serialisable_1 = QuestRewardSerialisableBalance(
+    serialisable_1 = quest_reward_serialisable_create_balance(
         526,
     )
     
@@ -24,10 +24,10 @@ def _iter_options():
             serialisable_1,
         ),
         b''.join([
-            serialisable_0.TYPE.to_bytes(1, 'little'),
-            *serialisable_0.serialise(),
-            serialisable_1.TYPE.to_bytes(1, 'little'),
-            *serialisable_1.serialise(),
+            serialisable_0.behaviour.type.to_bytes(1, 'little'),
+            *serialisable_0.behaviour.serialise(serialisable_0.configuration),
+            serialisable_1.behaviour.type.to_bytes(1, 'little'),
+            *serialisable_1.behaviour.serialise(serialisable_1.configuration),
         ]),
     )
 

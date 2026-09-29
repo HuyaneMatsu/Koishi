@@ -1,9 +1,9 @@
-__all__ = ('Return',)
+__all__ = ('Return', 'return_create')
 
-from scarletio import RichAttributeErrorBaseType
+from scarletio import RichType
 
 
-class Return(RichAttributeErrorBaseType):
+class Return(metaclass = RichType, rich_type_feature_flags = ~0):
     """
     Represents a return.
     
@@ -15,37 +15,26 @@ class Return(RichAttributeErrorBaseType):
     name : `str`
         The return's name.
     """
-    __slots__ =( 'id', 'name')
+    __slots__ = ('id', 'name')
+
+
+def return_create(return_id, name):
+    """
+    Creates a new return.
     
-    def __new__(cls, return_id, name):
-        """
-        Creates a new return.
-        
-        Parameters
-        ----------
-        return_id : `int`
-            The identifier of the return.
-        
-        name : `str`
-            The return's name.
-        """
-        self = object.__new__(cls)
-        self.id = return_id
-        self.name = name
-        return self
+    Parameters
+    ----------
+    return_id : `int`
+        The identifier of the return.
     
+    name : `str`
+        The return's name.
     
-    def __repr__(self):
-        """Returns repr(self)."""
-        repr_parts = ['<', type(self).__name__]
-        
-        # id
-        repr_parts.append(' id = ')
-        repr_parts.append(repr(self.id))
-        
-        # name
-        repr_parts.append(', name = ')
-        repr_parts.append(repr(self.name))
-        
-        repr_parts.append('>')
-        return ''.join(repr_parts)
+    Returns
+    -------
+    return_ : ``Return``
+    """
+    return_ = object.__new__(Return)
+    return_.id = return_id
+    return_.name = name
+    return return_

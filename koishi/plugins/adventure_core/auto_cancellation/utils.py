@@ -1,4 +1,7 @@
-__all__ = ('check_auto_cancellation_conditions', 'produce_auto_cancellation_conditions',)
+__all__ = (
+    'check_auto_cancellation_conditions', 'produce_auto_cancellation_conditions',
+    'produce_auto_cancellation_conditions_listing'
+)
 
 from math import floor
 
@@ -11,7 +14,7 @@ from .auto_cancellation_condition_ids import (
 )
 
 
-def _produce_single_condition(auto_cancellation_condition, field_added, value_name, percentage, value_producer):
+def _produce_single_condition(auto_cancellation_condition, value_name, percentage, value_producer):
     """
     Produces a single condition.
     
@@ -19,11 +22,8 @@ def _produce_single_condition(auto_cancellation_condition, field_added, value_na
     
     Parameters
     ----------
-    auto_cancellation_condition : ``None | AutoCancellationCondition``
+    auto_cancellation_condition : ``AutoCancellationCondition``
         The condition to produce.
-    
-    field_added : `bool`
-        Whether a field was already added.
     
     value_name : `str`
         The name of the value.
@@ -37,17 +37,7 @@ def _produce_single_condition(auto_cancellation_condition, field_added, value_na
     Yields
     ------
     part : `str`
-    
-    Returns
-    -------
-    field_added : `bool`
     """
-    if auto_cancellation_condition is None:
-        return field_added
-    
-    if field_added:
-        yield ' or '
-    
     yield value_name
     yield ' '
     
@@ -78,11 +68,9 @@ def _produce_single_condition(auto_cancellation_condition, field_added, value_na
     
     if percentage:
         yield ' %'
-    
-    return True
 
 
-def _produce_single_condition_functional(auto_cancellation_condition_functional, field_added, value_name):
+def _produce_single_condition_functional(auto_cancellation_condition_functional, value_name):
     """
     Produces a single condition.
     
@@ -93,30 +81,16 @@ def _produce_single_condition_functional(auto_cancellation_condition_functional,
     auto_cancellation_condition_functional : ``None | AutoCancellationConditionFunctional``
         The condition to produce.
     
-    field_added : `bool`
-        Whether a field was already added.
-    
     value_name : `str`
         The name of the value.
     
     Yields
     ------
     part : `str`
-    
-    Returns
-    -------
-    field_added : `bool`
     """
-    if auto_cancellation_condition_functional is None:
-        return field_added
-
-    if field_added:
-        yield ' or '
-    
     yield value_name
     yield ': '
     yield auto_cancellation_condition_functional.name
-    return True
 
 
 def produce_auto_cancellation_conditions(auto_cancellation):
@@ -136,30 +110,148 @@ def produce_auto_cancellation_conditions(auto_cancellation):
     """
     field_added = False
     
-    field_added = yield from _produce_single_condition(
-        auto_cancellation.inventory_flat, field_added, 'inventory', False, produce_kilogram
-    )
-    field_added = yield from _produce_single_condition(
-        auto_cancellation.inventory_percentage, field_added, 'inventory', True, None
-    )
-    field_added = yield from _produce_single_condition(
-        auto_cancellation.health_flat, field_added, 'health', False, None
-    )
-    field_added = yield from _produce_single_condition(
-        auto_cancellation.health_percentage, field_added, 'health', True, None
-    )
-    field_added = yield from _produce_single_condition(
-        auto_cancellation.energy_flat, field_added, 'energy', False, None
-    )
-    field_added = yield from _produce_single_condition(
-        auto_cancellation.energy_percentage, field_added, 'energy', True, None
-    )
-    field_added = yield from _produce_single_condition_functional(
-        auto_cancellation.looted_items, field_added, 'looted items'
-    )
+    condition = auto_cancellation.inventory_flat
+    if (condition is not None):
+        field_added = True
+        
+        yield from _produce_single_condition(condition, 'inventory', False, produce_kilogram)
+    
+    condition = auto_cancellation.inventory_percentage
+    if (condition is not None):
+        if field_added:
+            yield ' or '
+        else:
+            field_added = True
+        
+        yield from _produce_single_condition(condition, 'inventory', True, None)
+    
+    condition = auto_cancellation.health_flat
+    if (condition is not None):
+        if field_added:
+            yield ' or '
+        else:
+            field_added = True
+        
+        yield from _produce_single_condition(condition, 'health', False, None)
+    
+    condition = auto_cancellation.health_percentage
+    if (condition is not None):
+        if field_added:
+            yield ' or '
+        else:
+            field_added = True
+        
+        yield from _produce_single_condition(condition, 'health', True, None)
+    
+    condition = auto_cancellation.energy_flat
+    if (condition is not None):
+        if field_added:
+            yield ' or '
+        else:
+            field_added = True
+        
+        yield from _produce_single_condition(condition, 'energy', False, None)
+    
+    condition = auto_cancellation.energy_percentage
+    if (condition is not None):
+        if field_added:
+            yield ' or '
+        else:
+            field_added = True
+        
+        yield from _produce_single_condition(condition, 'energy', True, None)
+    
+    condition = auto_cancellation.looted_items
+    if (condition is not None):
+        if field_added:
+            yield ' or '
+        else:
+            field_added = True
+        
+        yield from _produce_single_condition_functional(condition, 'looted items')
     
     if not field_added:
         yield 'none'
+
+
+def produce_auto_cancellation_conditions_listing(auto_cancellation, indent_prefix):
+    """
+    Produces the auto cancellation's conditions in a listing form.
+    
+    This function is an iterable generator.
+    
+    Parameters
+    ----------
+    auto_cancellation : ``AutoCancellation``
+        Auto cancellation to produce its conditions.
+    
+    indent_prefix : `None | str`
+        Prefix to add before every line.
+    
+    Yields
+    ------
+    part : `str`
+    """
+    if (indent_prefix is not None):
+        yield indent_prefix
+    yield '- name: '
+    yield auto_cancellation.name
+    
+    condition = auto_cancellation.inventory_flat
+    if (condition is not None):
+        yield '\n'
+        if (indent_prefix is not None):
+            yield indent_prefix
+        yield '- '
+        yield from _produce_single_condition(condition, 'inventory', False, produce_kilogram)
+    
+    condition = auto_cancellation.inventory_percentage
+    if (condition is not None):
+        yield '\n'
+        if (indent_prefix is not None):
+            yield indent_prefix
+        yield '- '
+        yield from _produce_single_condition(condition, 'inventory', True, None)
+    
+    condition = auto_cancellation.health_flat
+    if (condition is not None):
+        yield '\n'
+        if (indent_prefix is not None):
+            yield indent_prefix
+        yield '- '
+        yield from _produce_single_condition(condition, 'health', False, None)
+    
+    condition = auto_cancellation.health_percentage
+    if (condition is not None):
+        yield '\n'
+        if (indent_prefix is not None):
+            yield indent_prefix
+        yield '- '
+        yield from _produce_single_condition(condition, 'health', True, None)
+    
+    condition = auto_cancellation.energy_flat
+    if (condition is not None):
+        yield '\n'
+        if (indent_prefix is not None):
+            yield indent_prefix
+        yield '- '
+        yield from _produce_single_condition(condition, 'energy', False, None)
+    
+    condition = auto_cancellation.energy_percentage
+    if (condition is not None):
+        yield '\n'
+        if (indent_prefix is not None):
+            yield indent_prefix
+        yield '- '
+        yield from _produce_single_condition(condition, 'energy', True, None)
+    
+    condition = auto_cancellation.looted_items
+    if (condition is not None):
+        yield '\n'
+        if (indent_prefix is not None):
+            yield indent_prefix
+        yield '- '
+        yield from _produce_single_condition_functional(condition, 'looted items')
 
 
 def _check_condition_flat_succeeds(auto_cancellation_condition, total, exhausted):

@@ -1,4 +1,4 @@
-__all__ = ('QuestTemplate',)
+__all__ = ('QuestTemplate', 'quest_template_create')
 
 from scarletio import RichAttributeErrorBaseType
 
@@ -45,67 +45,6 @@ class QuestTemplate(RichAttributeErrorBaseType):
         'chance_in', 'chance_out', 'description', 'id', 'level', 'mutually_exclusive_with_ids',
         'repeat_count', 'requester_id', 'requirements', 'rewards',
     )
-    
-    def __new__(
-        cls,
-        quest_template_id,
-        mutually_exclusive_with_ids,
-        chance_in,
-        chance_out,
-        description,
-        level,
-        repeat_count,
-        requester_id,
-        requirements,
-        rewards,
-    ):
-        """
-        Creates a new quest with the given parameters.
-        
-        Parameters
-        ----------
-        quest_template_id : `int`
-            The quest template's identifier.
-        
-        mutually_exclusive_with_ids : `None | tuple<int>`
-            An tuple of quest template identifiers that this one is mutually exclusive with.
-        
-        chance_in : `int`
-            The chance to be chosen in.
-        
-        chance_out : `int`
-            The chance to be chosen out of.
-        
-        description : `None | str`
-            Flavour text.
-        
-        level : `int`
-            The quest's level.
-    
-        repeat_count : `int`
-            The amount of times this quest can be repeated.
-        
-        requester_id : `int`
-            Who requested the action.
-        
-        requirements : ``None | tuple<QuestRequirementGeneratorBase>``
-            Quest requirements.
-        
-        rewards : ``None | tuple<QuestRewardGeneratorBase>``
-            Quest rewards.
-        """
-        self = object.__new__(cls)
-        self.chance_in = chance_in
-        self.chance_out = chance_out
-        self.description = description
-        self.id = quest_template_id
-        self.level = level
-        self.mutually_exclusive_with_ids = mutually_exclusive_with_ids
-        self.repeat_count = repeat_count
-        self.requester_id = requester_id
-        self.requirements = requirements
-        self.rewards = rewards
-        return self
     
     
     def __repr__(self):
@@ -157,3 +96,68 @@ class QuestTemplate(RichAttributeErrorBaseType):
         
         repr_parts.append('>')
         return ''.join(repr_parts)
+
+
+def quest_template_create(
+    quest_template_id,
+    mutually_exclusive_with_ids,
+    chance_in,
+    chance_out,
+    description,
+    level,
+    repeat_count,
+    requester_id,
+    requirements,
+    rewards,
+):
+    """
+    Creates a new quest template with the given parameters.
+    
+    Parameters
+    ----------
+    quest_template_id : `int`
+        The quest template's identifier.
+    
+    mutually_exclusive_with_ids : `None | tuple<int>`
+        An tuple of quest template identifiers that this one is mutually exclusive with.
+    
+    chance_in : `int`
+        The chance to be chosen in.
+    
+    chance_out : `int`
+        The chance to be chosen out of.
+    
+    description : `None | str`
+        Flavour text.
+    
+    level : `int`
+        The quest's level.
+
+    repeat_count : `int`
+        The amount of times this quest can be repeated.
+    
+    requester_id : `int`
+        Who requested the action.
+    
+    requirements : ``None | tuple<QuestRequirementGeneratorBase>``
+        Quest requirements.
+    
+    rewards : ``None | tuple<QuestRewardGeneratorBase>``
+        Quest rewards.
+    
+    Returns
+    -------
+    quest_template : ``QuestTemplate``
+    """
+    linked_quest = object.__new__(QuestTemplate)
+    linked_quest.chance_in = chance_in
+    linked_quest.chance_out = chance_out
+    linked_quest.description = description
+    linked_quest.id = quest_template_id
+    linked_quest.level = level
+    linked_quest.mutually_exclusive_with_ids = mutually_exclusive_with_ids
+    linked_quest.repeat_count = repeat_count
+    linked_quest.requester_id = requester_id
+    linked_quest.requirements = requirements
+    linked_quest.rewards = rewards
+    return linked_quest

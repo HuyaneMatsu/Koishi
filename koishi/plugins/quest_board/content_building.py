@@ -9,13 +9,14 @@ from ...bot_utils.constants import EMOJI__HEART_CURRENCY
 
 from ..item_core import ITEM_NAME_DEFAULT, get_item_group, get_item, get_item_name, produce_item_flags_names
 from ..quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_NAME_DEFAULT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT,
     LINKED_QUEST_COMPLETION_STATE_ACTIVE, QUEST_REQUIREMENT_TYPE_ITEM_CATEGORY, QUEST_REQUIREMENT_TYPE_ITEM_EXACT,
     QUEST_REQUIREMENT_TYPE_ITEM_GROUP, QUEST_REWARD_TYPE_BALANCE, QUEST_REWARD_TYPE_CREDIBILITY,
     QUEST_REWARD_TYPE_ITEM_EXACT, get_adventurer_level_name, get_current_batch_id, get_quest_board_resets_at,
     get_user_adventurer_rank_up_credibility, get_guild_adventurer_rank_up_credibility
 )
-
+from ..unit_core import (
+    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_NAME_DEFAULT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT, produce_weight
+)
 from .constants import BROKEN_QUEST_DESCRIPTION
 from .helpers import (
     get_linked_quest_duration_delta, get_linked_quest_expiration, get_linked_quest_rewards_normalised,
@@ -164,37 +165,6 @@ def _produce_nullable_item_group_parts(item_group):
         yield item_group.name
 
 
-def _produce_amount_kg(amount):
-    """
-    Produces amount of grams in kilogram.
-    
-    This function is an iterable generator.
-    
-    Parameters
-    ----------
-    amount : `int`
-        The amount to produce.
-    
-    Yields
-    ------
-    part : `str`
-    """
-    amount_string = str(amount)
-    amount_string_length = len(amount_string)
-    if amount_string_length > 3:
-        yield amount_string[:-3]
-        if not amount_string.endswith('000'):
-            yield '.'
-            yield amount_string[-3:].rstrip('0')
-    
-    else:
-        yield '0.'
-        if amount_string_length < 3:
-            yield '0' * (3 - amount_string_length)
-        
-        yield amount_string.rstrip('0')
-
-
 def _produce_amount_completion(amount_required, amount_submitted):
     """
     Produces the given amount.
@@ -243,10 +213,10 @@ def _produce_amount_completion_kg(amount_required, amount_submitted):
     part : `str`
     """
     if amount_submitted != -1:
-        yield from _produce_amount_kg(amount_submitted)
+        yield from produce_weight(amount_submitted)
         yield ' / '
     
-    yield from _produce_amount_kg(amount_required)
+    yield from produce_weight(amount_required)
     yield ' kg'
 
 
@@ -1018,7 +988,7 @@ def _produce_amount_typed_bold(amount_type, amount):
         yield str(amount)
     
     else:
-        yield from _produce_amount_kg(amount)
+        yield from produce_weight(amount)
         yield ' kg'
     
     yield '**'
@@ -1237,7 +1207,7 @@ def _produce_owned_amount_extra(amount_type, accumulated_weight, accumulated_val
     
     yield ' ('
     if amount_type == AMOUNT_TYPE_WEIGHT:
-        yield from _produce_amount_kg(accumulated_weight)
+        yield from produce_weight(accumulated_weight)
         yield ' kg'
     else:
         yield str(accumulated_value)

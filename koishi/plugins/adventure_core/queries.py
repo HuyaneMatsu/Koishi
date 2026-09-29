@@ -12,13 +12,14 @@ from sqlalchemy.sql import asc, select
 from ...bot_utils.models import ADVENTURE_TABLE, DB_ENGINE, adventure_model
 
 from .adventure import (
-    ADVENTURE_STATE_FINALIZED, adventure_action_listing_serialise, adventure_collect_modifications,
+    ADVENTURE_STATE_FINALISED, adventure_action_listing_serialise, adventure_collect_modifications,
     adventure_create_from_entry
 )
 from .constants import (
     ADVENTURES, ADVENTURES_ACTIVE, ADVENTURE_CACHE, ADVENTURE_CACHE_SIZE_MAX, ADVENTURE_LISTING_CACHE,
     ADVENTURE_LISTING_CACHE_SIZE_MAX, ADVENTURE_QUERY_CACHE
 )
+from .goal import goal_listing_serialise
 
 
 EVENT_LOOP = get_event_loop()
@@ -76,7 +77,7 @@ async def query_adventure_listing_get_active():
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
             ADVENTURE_TABLE.select().where(
-                adventure_model.state != ADVENTURE_STATE_FINALIZED,
+                adventure_model.state != ADVENTURE_STATE_FINALISED,
             ),
         )
         
@@ -183,6 +184,13 @@ async def query_adventure_save_new(adventure):
             action_listing_data = None
         else:
             action_listing_data = adventure_action_listing_serialise(action_listing)
+        
+        goal_listing = adventure.goal_listing
+        if goal_listing is None:
+            goal_listing_data = None
+        else:
+            goal_listing_data = goal_listing_serialise(goal_listing)
+        
         adventure.modification_flags = 0
         
         response = await connector.execute(
@@ -193,13 +201,14 @@ async def query_adventure_save_new(adventure):
                 target_id = adventure.target_id,
                 return_id = adventure.return_id,
                 auto_cancellation_id = adventure.auto_cancellation_id,
-                state = adventure.state,
+                goal_listing_data = goal_listing_data,
                 
                 initial_duration_seconds = adventure.initial_duration_seconds,
                 created_at = adventure.created_at,
                 updated_at = adventure.updated_at,
                 action_listing_data = action_listing_data,
                 seed = adventure.seed,
+                state = adventure.state,
                 
                 energy_exhausted = adventure.energy_exhausted,
                 energy_initial = adventure.energy_initial,

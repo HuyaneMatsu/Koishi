@@ -6,10 +6,10 @@ from ...item_core import (
     get_item_nullable
 )
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT, QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, Quest,
-    QuestRequirementInstantiableItemCategory, QuestRequirementInstantiableItemExact,
-    QuestRequirementInstantiableItemGroup
+    QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY, quest_create, quest_requirement_instantiable_create_item_category,
+    quest_requirement_instantiable_create_item_exact, quest_requirement_instantiable_create_item_group, 
 )
+from ...unit_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT
 
 from ..helpers import get_quest_in_possession_count
 
@@ -33,10 +33,10 @@ def _iter_options():
     inventory.modify_item_amount(item_poking_knife, 8)
     inventory.modify_item_amount(item_carrot, 9)
     
-    quest_00 = Quest(
+    quest_00 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 30),
         ],
         None,
     )
@@ -49,10 +49,10 @@ def _iter_options():
     )
     
     
-    quest_01 = Quest(
+    quest_01 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_WEIGHT, 30 * item_peach.weight),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_WEIGHT, 30 * item_peach.weight),
         ],
         None,
     )
@@ -65,10 +65,10 @@ def _iter_options():
     )
     
     
-    quest_02 = Quest(
+    quest_02 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemGroup(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 1),
+            quest_requirement_instantiable_create_item_group(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 1),
         ],
         None,
     )
@@ -81,10 +81,10 @@ def _iter_options():
     )
     
     
-    quest_03 = Quest(
+    quest_03 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemGroup(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_WEIGHT, 1 * item_poking_knife.weight),
+            quest_requirement_instantiable_create_item_group(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_WEIGHT, 1 * item_poking_knife.weight),
         ],
         None,
     )
@@ -97,10 +97,10 @@ def _iter_options():
     )
     
     
-    quest_04 = Quest(
+    quest_04 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
         ],
         None,
     )
@@ -113,10 +113,10 @@ def _iter_options():
     )
     
     
-    quest_05 = Quest(
+    quest_05 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_WEIGHT, 20 * item_peach.weight),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_WEIGHT, 20 * item_peach.weight),
         ],
         None,
     )
@@ -130,10 +130,10 @@ def _iter_options():
     )
     
     
-    quest_06 = Quest(
+    quest_06 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 5),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 5),
         ],
         None,
     )
@@ -146,10 +146,10 @@ def _iter_options():
     )
     
     
-    quest_07 = Quest(
+    quest_07 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_WEIGHT, 5 * item_peach.weight),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_WEIGHT, 5 * item_peach.weight),
         ],
         None,
     )
@@ -162,10 +162,10 @@ def _iter_options():
     )
     
     # Note that if we did not allow stacked completion, this would be just 5.
-    quest_08 = Quest(
+    quest_08 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_WEIGHT, 3 * item_peach.weight + 1),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_WEIGHT, 3 * item_peach.weight + 1),
         ],
         None,
     )
@@ -178,11 +178,11 @@ def _iter_options():
     )
     
     
-    quest_09 = Quest(
+    quest_09 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 5),
-            QuestRequirementInstantiableItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_COUNT, 10),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 5),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_CARROT, AMOUNT_TYPE_COUNT, 10),
         ],
         None,
     )
@@ -195,11 +195,11 @@ def _iter_options():
     )
     
     
-    quest_10 = Quest(
+    quest_10 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 5),
-            QuestRequirementInstantiableItemExact(ITEM_ID_CARROT, AMOUNT_TYPE_COUNT, 4),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 5),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_CARROT, AMOUNT_TYPE_COUNT, 4),
         ],
         None,
     )
@@ -212,11 +212,11 @@ def _iter_options():
     )
     
     
-    quest_11 = Quest(
+    quest_11 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 5),
-            QuestRequirementInstantiableItemGroup(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 1),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 5),
+            quest_requirement_instantiable_create_item_group(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 1),
         ],
         None,
     )
@@ -229,10 +229,10 @@ def _iter_options():
     )
     
     
-    quest_12 = Quest(
+    quest_12 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemCategory(ITEM_FLAG_EDIBLE, AMOUNT_TYPE_COUNT, 1),
+            quest_requirement_instantiable_create_item_category(ITEM_FLAG_EDIBLE, AMOUNT_TYPE_COUNT, 1),
         ],
         None,
     )
@@ -245,10 +245,10 @@ def _iter_options():
     )
     
     
-    quest_13 = Quest(
+    quest_13 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemCategory(ITEM_FLAG_EDIBLE, AMOUNT_TYPE_WEIGHT, 1 * item_carrot.weight),
+            quest_requirement_instantiable_create_item_category(ITEM_FLAG_EDIBLE, AMOUNT_TYPE_WEIGHT, 1 * item_carrot.weight),
         ],
         None,
     )
@@ -261,11 +261,11 @@ def _iter_options():
     )
     
     
-    quest_14 = Quest(
+    quest_14 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 5),
-            QuestRequirementInstantiableItemCategory(ITEM_FLAG_EDIBLE, AMOUNT_TYPE_COUNT, 1),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 5),
+            quest_requirement_instantiable_create_item_category(ITEM_FLAG_EDIBLE, AMOUNT_TYPE_COUNT, 1),
         ],
         None,
     )
@@ -278,11 +278,11 @@ def _iter_options():
     )
     
     
-    quest_15 = Quest(
+    quest_15 = quest_create(
         QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
         [
-            QuestRequirementInstantiableItemExact(ITEM_ID_FISHING_ROD, AMOUNT_TYPE_COUNT, 100),
-            QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 1),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_FISHING_ROD, AMOUNT_TYPE_COUNT, 100),
+            quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 1),
         ],
         None,
     )

@@ -3,7 +3,7 @@ __all__ = (
     'get_user_adventurer_rank_up_credibility'
 )
 
-from .adventurer_rank_info import AdventurerRankInfo
+from .adventurer_rank_info import adventure_rank_info_create
 
 
 def get_user_adventurer_rank_info(credibility):
@@ -30,7 +30,7 @@ def get_user_adventurer_rank_info(credibility):
         credibility >>= 1
         continue
     
-    return AdventurerRankInfo(rank, ((rank + 3) >> 1))
+    return adventure_rank_info_create(rank, ((rank + 3) >> 1))
 
 
 def get_guild_adventurer_rank_info(credibility):
@@ -57,7 +57,7 @@ def get_guild_adventurer_rank_info(credibility):
         credibility >>= 1
         continue
     
-    return AdventurerRankInfo(rank, rank + ((rank + 6) >> 1))
+    return adventure_rank_info_create(rank, rank + ((rank + 6) >> 1))
 
 
 def get_user_adventurer_rank_up_credibility(level):

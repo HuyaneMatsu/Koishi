@@ -6,9 +6,10 @@ from ...item_core import (
     get_item_nullable
 )
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, QuestRequirementSerialisableBase, QuestRequirementSerialisableItemCategory,
-    QuestRequirementSerialisableItemExact, QuestRequirementSerialisableItemGroup
+    quest_requirement_serialisable_create_item_category, quest_requirement_serialisable_create_item_exact,
+    quest_requirement_serialisable_create_item_group, quest_sub_type_serialisable_create_base
 )
+from ...unit_core import AMOUNT_TYPE_COUNT
 
 from ..helpers import iter_submission_requirement_item_entries_of_requirement
 
@@ -35,13 +36,13 @@ def _iter_options():
     
     yield (
         inventory,
-        QuestRequirementSerialisableBase(),
+        quest_sub_type_serialisable_create_base(),
         [],
     )
     
     yield (
         inventory,
-        QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 200, 0),
+        quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 200, 0),
         [
             ItemEntry(item_peach, 6),
         ],
@@ -49,7 +50,7 @@ def _iter_options():
     
     yield (
         inventory,
-        QuestRequirementSerialisableItemGroup(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 200, 0),
+        quest_requirement_serialisable_create_item_group(ITEM_GROUP_ID_KNIFE, AMOUNT_TYPE_COUNT, 200, 0),
         [
             ItemEntry(item_poking_knife, 8),
         ],
@@ -57,7 +58,7 @@ def _iter_options():
     
     yield (
         inventory,
-        QuestRequirementSerialisableItemCategory(ITEM_FLAG_WEAPON, AMOUNT_TYPE_COUNT, 200, 0),
+        quest_requirement_serialisable_create_item_category(ITEM_FLAG_WEAPON, AMOUNT_TYPE_COUNT, 200, 0),
         [
             ItemEntry(item_fishing_rod, 7),
             ItemEntry(item_poking_knife, 8),
@@ -75,7 +76,7 @@ def test__iter_submission_requirement_item_entries_of_requirement(inventory, req
     inventory : ``Inventory``
         Inventory to filter from.
     
-    requirement : ``QuestRequirementSerialisableBase``
+    requirement : ``QuestSubTypeSerialisable``
         Requirement to match items for.
     
     Returns

@@ -1,8 +1,8 @@
 import vampytest
 
 from ...quest_core import (
-    QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH, Quest,
-    QuestBatch, get_quest_template_nullable
+    QUEST_TEMPLATE_ID_MYSTIA_CARROT, QUEST_TEMPLATE_ID_MYSTIA_PEACH, QUEST_TEMPLATE_ID_SAKUYA_BLUEFRANKISH,
+    Quest, get_quest_template_nullable, quest_batch_create, quest_create
 )
 
 from ..helpers import get_quest_with_template_id
@@ -13,7 +13,7 @@ def _iter_options():
     quest_template_0 = get_quest_template_nullable(quest_template_id_0)
     assert quest_template_0 is not None
     
-    quest_0 = Quest(
+    quest_0 = quest_create(
         quest_template_id_0,
         None,
         None,
@@ -23,7 +23,7 @@ def _iter_options():
     quest_template_1 = get_quest_template_nullable(quest_template_id_1)
     assert quest_template_1 is not None
     
-    quest_1 = Quest(
+    quest_1 = quest_create(
         quest_template_id_1,
         None,
         None,
@@ -33,14 +33,14 @@ def _iter_options():
     quest_template_2 = get_quest_template_nullable(quest_template_id_2)
     assert quest_template_2 is not None
     
-    quest_2 = Quest(
+    quest_2 = quest_create(
         quest_template_id_2,
         None,
         None,
     )
     
     yield (
-        QuestBatch(
+        quest_batch_create(
             123,
             (
                 quest_0,
@@ -53,7 +53,7 @@ def _iter_options():
     )
     
     yield (
-        QuestBatch(
+        quest_batch_create(
             124,
             (
                 quest_0,
@@ -65,7 +65,7 @@ def _iter_options():
     )
     
     yield (
-        QuestBatch(
+        quest_batch_create(
             125,
             (),
         ),

@@ -3,7 +3,7 @@ import vampytest
 from ....user_stats_core import user_stats_create, user_stats_calculate
 
 from ...adventure import adventure_create
-from ...location import Location
+from ...location import location_create
 
 from ..helpers import travel_duration_seconds_get
 
@@ -18,6 +18,7 @@ def _iter_options():
         0,
         0,
         0,
+        None,
         0,
         0,
         0,
@@ -34,7 +35,7 @@ def _iter_options():
     user_stats_0.stat_loyalty = 10
     
     # Set distance to 1200 meters, like this, it will take us 1000 seconds to complete it.
-    location = Location(
+    location = location_create(
         location_id,
         'Pudding land',
         1_200,
@@ -67,6 +68,7 @@ def _iter_options():
         0,
         0,
         0,
+        None,
         0,
         0,
         0,

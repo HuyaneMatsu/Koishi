@@ -7,7 +7,7 @@ from time import perf_counter
 
 from hata import (
     BUILTIN_EMOJIS, ButtonStyle, Channel, Client, Color, DATETIME_FORMAT_CODE, DiscordException, ERROR_CODES, Embed,
-    Emoji, InteractionForm, Permission, Role, SeparatorSpacingSize, StringSelectOption, TextInputStyle,
+    Emoji, InteractionForm, IntentFlag, Permission, Role, SeparatorSpacingSize, StringSelectOption, TextInputStyle,
     attachment_request_create_regular_create, create_attachment_media, create_button, create_container, create_label,
     create_media_gallery, create_row, create_section, create_separator, create_string_select, create_text_display,
     create_text_input, create_thumbnail_media, create_user_select, elapsed_time, id_to_datetime, parse_emoji
@@ -29,6 +29,9 @@ Nitori = Client(
     client_id = config.NITORI_ID,
     application_id = config.NITORI_ID,
     extensions = 'slash',
+    intents = IntentFlag().update_by_keys(
+        guild_presences = False,
+    ),
     random_error_message_getter = random_error_message_getter,
 )
 

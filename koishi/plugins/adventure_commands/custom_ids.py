@@ -5,6 +5,8 @@ from re import compile as re_compile
 
 from .constants import FLOAT_STRUCT
 
+from ..adventure_core import goal_serialise
+
 
 BASE_64_CHARACTERS = '[A-Za-z0-9\\+\\/]+\\=*'
 
@@ -12,29 +14,33 @@ CUSTOM_ID_ADVENTURE_CANCELLATION_MODE = 'cancellation_mode'
 
 
 CUSTOM_ID_ADVENTURE_CREATE_CONFIRM_PATTERN = re_compile(
-    'adventure\\.create\\.1\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)'
+    f'adventure\\.create\\.1\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.'
+    f'({BASE_64_CHARACTERS})?'
 )
 CUSTOM_ID_ADVENTURE_CREATE_CONFIRM_BUILDER = (
-    lambda user_id, location_id, target_id, duration, return_id, auto_cancellation_id :
-    f'adventure.create.1.{user_id:x}.{location_id:x}.{target_id:x}.{duration:x}.{return_id:x}.{auto_cancellation_id:x}'
+    lambda user_id, location_id, target_id, duration, return_id, auto_cancellation_id, goal :
+    f'adventure.create.1.{user_id:x}.{location_id:x}.{target_id:x}.{duration:x}.{return_id:x}.'
+    f'{auto_cancellation_id:x}.{"" if goal is None else base_64_encode(goal_serialise(goal)).decode("ascii")!s}'
 )
 
 
 CUSTOM_ID_ADVENTURE_ACTION_VIEW_PATTERN = re_compile(
-    'adventure\\.action\\.view\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)'
+    'adventure\\.action\\.view\\.([0-9a-f]+)\\.([0-9a-f]+)\\.'
+    '([0-9a-f]+)\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)'
 )
 CUSTOM_ID_ADVENTURE_ACTION_VIEW_BUILDER = (
     lambda
         user_id,
         adventure_entry_id,
         adventure_action_index,
+        adventure_view_mode,
         allow_switching_to_adventure_listing_view,
         adventure_page_index,
         allow_switching_to_adventure_action_listing_view,
         adventure_action_page_index,
     : (
         f'adventure.action.view.{user_id:x}.{adventure_entry_id:x}.{adventure_action_index:x}.'
-        f'{allow_switching_to_adventure_listing_view:x}.{adventure_page_index:x}.'
+        f'{adventure_view_mode:x}.{allow_switching_to_adventure_listing_view:x}.{adventure_page_index:x}.'
         f'{allow_switching_to_adventure_action_listing_view:x}.{adventure_action_page_index:x}'
     )
 )
@@ -45,17 +51,18 @@ CUSTOM_ID_ADVENTURE_ACTION_VIEW_RETURN = 'adventure.action.view.return'
 
 
 CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_PATTERN = re_compile(
-    f'adventure\\.action_listing\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)\\.([0-9a-f]+)'
+    f'adventure\\.action_listing\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)\\.([0-9a-f]+)'
 )
 CUSTOM_ID_ADVENTURE_ACTION_LISTING_VIEW_BUILDER = (
     lambda
         user_id,
         adventure_entry_id,
+        adventure_view_mode,
         allow_switching_to_adventure_listing_view,
         adventure_listing_page_index,
         adventure_action_listing_page_index,
     : (
-        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.'
+        f'adventure.action_listing.{user_id:x}.{adventure_entry_id:x}.{adventure_view_mode:x}.'
         f'{allow_switching_to_adventure_listing_view:x}.{adventure_listing_page_index:x}.'
         f'{adventure_action_listing_page_index:x}'
     )
@@ -72,16 +79,17 @@ CUSTOM_ID_ADVENTURE_CANCEL_BUILDER = (
 
 
 CUSTOM_ID_ADVENTURE_VIEW_PATTERN = re_compile(
-    'adventure\\.view\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)'
+    'adventure\\.view\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([0-9a-f]+)\\.([01])\\.([0-9a-f]+)'
 )
 CUSTOM_ID_ADVENTURE_VIEW_BUILDER = (
     lambda
         user_id,
         adventure_entry_id,
+        adventure_view_mode,
         allow_switching_to_adventure_listing_view,
         adventure_listing_page_index,
     : (
-        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.'
+        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{adventure_view_mode:x}.'
         f'{allow_switching_to_adventure_listing_view:x}.{adventure_listing_page_index:x}'
     )
 )

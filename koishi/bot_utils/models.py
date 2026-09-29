@@ -371,6 +371,7 @@ if (DB_ENGINE is not None):
         target_id       = Column(Int32, nullable = False)
         return_id       = Column(Int32, nullable = False)
         auto_cancellation_id = Column(Int32, nullable = False)
+        goal_listing_data = Column(Binary(), nullable = True)
         state           = Column(Int32, nullable = False)
         
         initial_duration_seconds = Column(Int64, nullable = False)

@@ -26,7 +26,7 @@ def _iter_options():
         'Hey mister',
         (
             f'Hey mister, you purchased {5} {item_peach.emoji} '
-            f'{item_peach.name} ({item_peach.weight * 5 / 1000:.03f} kg) for 1000 {EMOJI__HEART_CURRENCY}.'
+            f'{item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg) for 1000 {EMOJI__HEART_CURRENCY}.'
         ),
     )
     
@@ -42,7 +42,7 @@ def _iter_options():
         'Hey mister',
         (
             f'Hey mister, your offer {5} {item_peach.emoji} '
-            f'{item_peach.name} ({item_peach.weight * 5 / 1000:.03f} kg) was sold for 1000 {EMOJI__HEART_CURRENCY}.'
+            f'{item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg) was sold for 1000 {EMOJI__HEART_CURRENCY}.'
         ),
     )
     
@@ -58,7 +58,7 @@ def _iter_options():
         'Hey mister',
         (
             f'Hey mister, your offer {5} {item_peach.emoji} '
-            f'{item_peach.name} ({item_peach.weight * 5 / 1000:.03f} kg) was not sold.'
+            f'{item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg) was not sold.'
         ),
     )
     
@@ -74,7 +74,7 @@ def _iter_options():
         'Hey mister',
         (
             f'Hey mister, your offer {5} {item_peach.emoji} '
-            f'{item_peach.name} ({item_peach.weight * 5 / 1000:.03f} kg) starting at 1000 {EMOJI__HEART_CURRENCY} '
+            f'{item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg) starting at 1000 {EMOJI__HEART_CURRENCY} '
             f'was not sold.'
         ),
     )

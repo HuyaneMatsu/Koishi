@@ -3,14 +3,15 @@ from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as T
 import vampytest
 
 from ...item_core import ITEM_ID_STRAWBERRY
+from ...unit_core import AMOUNT_TYPE_WEIGHT
 
-from ..amount_types import AMOUNT_TYPE_WEIGHT
 from ..linked_quest import LinkedQuest, linked_quest_create
 from ..linked_quest_completion_states import (
     LINKED_QUEST_COMPLETION_STATE_ACTIVE, LINKED_QUEST_COMPLETION_STATE_COMPLETED
 )
 from ..quest_requirement_serialisables import (
-    QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact
+    quest_requirement_serialisable_create_duration, quest_requirement_serialisable_create_expiration,
+    quest_requirement_serialisable_create_item_exact
 )
 from ..utils import reset_linked_quest
 
@@ -60,9 +61,9 @@ def test__reset_linked_quest__never_under_zero():
     vampytest.assert_eq(
         linked_quest.requirements,
         (
-            QuestRequirementSerialisableDuration(3600 * 24 * 3),
-            QuestRequirementSerialisableExpiration(now + TimeDelta(seconds = 3600 * 24 * 3)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
+            quest_requirement_serialisable_create_duration(3600 * 24 * 3),
+            quest_requirement_serialisable_create_expiration(now + TimeDelta(seconds = 3600 * 24 * 3)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
         ),
     )
 
@@ -87,7 +88,7 @@ def test__reset_linked_quest__over_submitted():
     )
     linked_quest.completion_count = 1
     linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
-    linked_quest.requirements[2].amount_submitted = 1200
+    linked_quest.requirements[2].configuration.amount_submitted = 1200
     
     
     DateTimeMock.set_current(now)
@@ -104,8 +105,8 @@ def test__reset_linked_quest__over_submitted():
     vampytest.assert_eq(
         linked_quest.requirements,
         (
-            QuestRequirementSerialisableDuration(3600 * 24 * 3),
-            QuestRequirementSerialisableExpiration(now + TimeDelta(seconds = 3600 * 24 * 3)),
-            QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 200),
+            quest_requirement_serialisable_create_duration(3600 * 24 * 3),
+            quest_requirement_serialisable_create_expiration(now + TimeDelta(seconds = 3600 * 24 * 3)),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 200),
         ),
     )

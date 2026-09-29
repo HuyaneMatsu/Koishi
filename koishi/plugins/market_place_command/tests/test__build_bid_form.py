@@ -5,7 +5,7 @@ from hata import Component, InteractionForm, create_label, create_text_display, 
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...item_core import ITEM_ID_PEACH, get_item
+from ...item_core import ITEM_ID_PEACH, get_item_nullable
 from ...market_place_core import MarketPlaceItem
 
 from ..component_building import build_bid_form
@@ -17,13 +17,14 @@ def _iter_options():
     user_id_0 = 202512300000
     user_id_1 = 202512310001
     
-    item_0 = get_item(ITEM_ID_PEACH)
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
     
     entry_id_0 = 120
     entry_id_1 = 121
     
     market_place_item_0 = MarketPlaceItem(
-        item_0,
+        item_peach,
         5,
         user_id_0,
         0,
@@ -33,7 +34,7 @@ def _iter_options():
     market_place_item_0.entry_id = entry_id_0
     
     market_place_item_1 = MarketPlaceItem(
-        item_0,
+        item_peach,
         5,
         user_id_0,
         0,
@@ -48,7 +49,7 @@ def _iter_options():
     yield (
         user_id_0,
         0,
-        item_0.flags,
+        item_peach.flags,
         now,
         1,
         10,
@@ -58,7 +59,7 @@ def _iter_options():
             'Specify your bid amount',
             [
                 create_text_display(
-                    f'### 5 {item_0.emoji} {item_0.name} ({item_0.weight * 5 / 1000:.03f} kg)\n'
+                    f'### 5 {item_peach.emoji} {item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg)\n'
                     f'Time left: 1 day\n'
                     f'No bids yet...'
                 ),
@@ -71,14 +72,14 @@ def _iter_options():
                     ),
                 ),
             ],
-            f'market_place.bid.{user_id_0:x}.{0:x}.{item_0.flags:x}.{1:x}.{10:x}.{True:x}.{entry_id_0:x}',
+            f'market_place.bid.{user_id_0:x}.{0:x}.{item_peach.flags:x}.{1:x}.{10:x}.{True:x}.{entry_id_0:x}',
         ),
     )
     
     
     yield (
         user_id_1,
-        item_0.id,
+        item_peach.id,
         0,
         now,
         0,
@@ -89,7 +90,7 @@ def _iter_options():
             'Specify your bid amount',
             [
                 create_text_display(
-                    f'### 5 {item_0.emoji} {item_0.name} ({item_0.weight * 5 / 1000:.03f} kg)\n'
+                    f'### 5 {item_peach.emoji} {item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg)\n'
                     f'Time left: 1 day\n'
                     f'Highest bid: 200 {EMOJI__HEART_CURRENCY}'
                 ),
@@ -102,7 +103,7 @@ def _iter_options():
                     ),
                 ),
             ],
-            f'market_place.bid.{user_id_1:x}.{item_0.id:x}.{0:x}.{0:x}.{10:x}.{False:x}.{entry_id_1:x}',
+            f'market_place.bid.{user_id_1:x}.{item_peach.id:x}.{0:x}.{0:x}.{10:x}.{False:x}.{entry_id_1:x}',
         ),
     )
 

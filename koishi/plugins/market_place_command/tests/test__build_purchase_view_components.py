@@ -7,7 +7,7 @@ from hata import (
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...item_core import ITEM_ID_GARLIC, ITEM_ID_PEACH, get_item
+from ...item_core import ITEM_ID_GARLIC, ITEM_ID_PEACH, get_item_nullable
 from ...market_place_core import MarketPlaceItem
 
 from ..component_building import build_purchase_view_components
@@ -20,8 +20,10 @@ def _iter_options():
     user_id_0 = 202512260011
     user_id_1 = 202512260012
     
-    item_0 = get_item(ITEM_ID_PEACH)
-    item_1 = get_item(ITEM_ID_GARLIC)
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
+    item_garlic = get_item_nullable(ITEM_ID_GARLIC)
+    assert item_garlic is not None
     
     entry_id_0 = 120
     entry_id_1 = 121
@@ -29,7 +31,7 @@ def _iter_options():
     entry_id_3 = 123
     
     market_place_item_0 = MarketPlaceItem(
-        item_0,
+        item_peach,
         5,
         user_id_0,
         0,
@@ -40,7 +42,7 @@ def _iter_options():
     
     
     market_place_item_1 = MarketPlaceItem(
-        item_1,
+        item_garlic,
         6,
         user_id_0,
         0,
@@ -52,7 +54,7 @@ def _iter_options():
     market_place_item_1.purchaser_balance_amount = 1000
     
     market_place_item_2 = MarketPlaceItem(
-        item_0,
+        item_peach,
         7,
         user_id_1,
         0,
@@ -62,7 +64,7 @@ def _iter_options():
     market_place_item_2.entry_id = entry_id_2
     
     market_place_item_3 = MarketPlaceItem(
-        item_1,
+        item_garlic,
         8,
         user_id_1,
         0,
@@ -113,7 +115,7 @@ def _iter_options():
     yield (
         user_id_0,
         None,
-        item_0.flags,
+        item_peach.flags,
         now,
         0,
         10,
@@ -132,56 +134,56 @@ def _iter_options():
             create_separator(),
             create_section(
                 create_text_display(
-                    f'5 {item_0.emoji} {item_0.name} ({item_0.weight * 5 / 1000:.03f} kg)\n'
+                    f'5 {item_peach.emoji} {item_peach.name} ({5 * item_peach.weight / 1000:.02f} kg)\n'
                     f'Time left: 1 day\n'
                     f'No bids yet...'
                 ),
                 thumbnail = create_button(
                     'Details',
                     custom_id = (
-                        f'market_place.purchase.details.{user_id_0:x}.{0:x}.{item_0.flags:x}.{0:x}.{10:x}.{entry_id_0:x}'
+                        f'market_place.purchase.details.{user_id_0:x}.{0:x}.{item_peach.flags:x}.{0:x}.{10:x}.{entry_id_0:x}'
                     ),
                     style = ButtonStyle.gray,
                 )
             ),
             create_section(
                 create_text_display(
-                    f'6 {item_1.emoji} {item_1.name} ({item_1.weight * 6 / 1000:.03f} kg)\n'
+                    f'6 {item_garlic.emoji} {item_garlic.name} ({6 * item_garlic.weight / 1000:.02f} kg)\n'
                     f'Time left: 1 day\n'
                     f'Highest bid: 1000 {EMOJI__HEART_CURRENCY}'
                 ),
                 thumbnail = create_button(
                     'Details',
                     custom_id = (
-                        f'market_place.purchase.details.{user_id_0:x}.{0:x}.{item_0.flags:x}.{0:x}.{10:x}.{entry_id_1:x}'
+                        f'market_place.purchase.details.{user_id_0:x}.{0:x}.{item_peach.flags:x}.{0:x}.{10:x}.{entry_id_1:x}'
                     ),
                     style = ButtonStyle.gray,
                 )
             ),
             create_section(
                 create_text_display(
-                    f'7 {item_0.emoji} {item_0.name} ({item_0.weight * 7 / 1000:.03f} kg)\n'
+                    f'7 {item_peach.emoji} {item_peach.name} ({7 * item_peach.weight / 1000:.03f} kg)\n'
                     f'Time left: 1 day\n'
                     f'No bids yet...'
                 ),
                 thumbnail = create_button(
                     'Details',
                     custom_id = (
-                        f'market_place.purchase.details.{user_id_0:x}.{0:x}.{item_0.flags:x}.{0:x}.{10:x}.{entry_id_2:x}'
+                        f'market_place.purchase.details.{user_id_0:x}.{0:x}.{item_peach.flags:x}.{0:x}.{10:x}.{entry_id_2:x}'
                     ),
                     style = ButtonStyle.blue,
                 )
             ),
             create_section(
                 create_text_display(
-                    f'8 {item_1.emoji} {item_1.name} ({item_1.weight * 8 / 1000:.03f} kg)\n'
+                    f'8 {item_garlic.emoji} {item_garlic.name} ({8 * item_garlic.weight / 1000:.02f} kg)\n'
                     f'Time left: 1 day\n'
                     f'Highest bid: 1000 {EMOJI__HEART_CURRENCY}'
                 ),
                 thumbnail = create_button(
                     'Details',
                     custom_id = (
-                        f'market_place.purchase.details.{user_id_0:x}.{0:x}.{item_0.flags:x}.{0:x}.{10:x}.{entry_id_3:x}'
+                        f'market_place.purchase.details.{user_id_0:x}.{0:x}.{item_peach.flags:x}.{0:x}.{10:x}.{entry_id_3:x}'
                     ),
                     style = ButtonStyle.green,
                 )
@@ -197,7 +199,7 @@ def _iter_options():
                 create_button(
                     'Page 2',
                     EMOJI_RIGHT,
-                    custom_id = f'market_place.purchase.view.{user_id_0:x}.{0:x}.{item_0.flags:x}.{1:x}.{10:x}',
+                    custom_id = f'market_place.purchase.view.{user_id_0:x}.{0:x}.{item_peach.flags:x}.{1:x}.{10:x}',
                     enabled = True,
                 ),
                 create_button(

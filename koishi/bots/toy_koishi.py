@@ -10,7 +10,9 @@ ToyKoishi = Client(
     client_id = config.TOY_KOISHI_ID,
     activity = Activity('All Max Mode....', activity_type = ActivityType.competing),
     should_request_users = False,
-    intents = IntentFlag().update_by_keys(), # no changes
+    intents = IntentFlag().update_by_keys(
+        guild_presences = False,
+    ),
     application_id = config.TOY_KOISHI_ID,
     extensions = ('slash',),
 )

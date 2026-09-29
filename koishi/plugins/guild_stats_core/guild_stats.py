@@ -5,7 +5,7 @@ __all__ = (
 
 from scarletio import RichAttributeErrorBaseType
 
-from ..quest_core import get_guild_adventurer_rank_info, quest_batch_create, get_current_batch_id
+from ..quest_core import get_guild_adventurer_rank_info, quest_batch_generate, get_current_batch_id
 
 
 GUILD_STATS_MODIFICATION_FLAG_CREDIBILITY = 1 << 0
@@ -122,7 +122,7 @@ def guild_stats_generate_quest_batch(guild_stats):
     
     if (quest_batch is None) or (quest_batch.id != batch_id):
         adventurer_rank_info = get_guild_adventurer_rank_info(guild_stats.credibility)
-        quest_batch = quest_batch_create(
+        quest_batch = quest_batch_generate(
             guild_stats.guild_id, batch_id, adventurer_rank_info.level, adventurer_rank_info.quest_limit
         )
         guild_stats._cache_quest_batch = quest_batch

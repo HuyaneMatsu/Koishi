@@ -3,7 +3,7 @@ from hata import Component, create_button, create_row, create_separator, create_
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...item_core import ITEM_ID_PEACH, get_item
+from ...item_core import ITEM_ID_PEACH, get_item_nullable
 
 from ..component_building import build_claim_success_components
 from ..constants import EMOJI_CLOSE
@@ -11,12 +11,13 @@ from ..constants import EMOJI_CLOSE
 
 def _iter_options():
     user_id = 202512260004
-    item = get_item(ITEM_ID_PEACH)
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
     
     yield (
         user_id,
         True,
-        item,
+        item_peach,
         56,
         1000,
         0,
@@ -24,7 +25,7 @@ def _iter_options():
         10,
         [
             create_text_display(
-                f'You received the 56 {item.emoji} {item.name} ({item.weight * 56 / 1000:.03f} kg), '
+                f'You received the 56 {item_peach.emoji} {item_peach.name} ({56 * item_peach.weight / 1000:.03f} kg), '
                 f'that you purchased for 1000 {EMOJI__HEART_CURRENCY}.'
             ),
             create_separator(),

@@ -4,18 +4,20 @@ import vampytest
 
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
-from ...item_core import ITEM_ID_PEACH, get_item
+from ...item_core import ITEM_ID_PEACH, get_item_nullable
 from ...market_place_core import MarketPlaceItem
 
 from ..content_building import produce_inbox_unsold_market_place_item_description
 
 
 def _iter_options():
-    item = get_item(ITEM_ID_PEACH)
+    item_peach = get_item_nullable(ITEM_ID_PEACH)
+    assert item_peach is not None
+    
     user_id = 202512250000
     
     market_place_item_0 = MarketPlaceItem(
-        item,
+        item_peach,
         100,
         user_id,
         500,
@@ -27,14 +29,14 @@ def _iter_options():
         market_place_item_0,
         DateTime(2016, 5, 14, tzinfo = TimeZone.utc),
         (
-            f'Your 100 {item.emoji} {item.name} ({item.weight * 100 / 1000:.03f} kg) offer\n'
+            f'Your 100 {item_peach.emoji} {item_peach.name} ({100 * item_peach.weight / 1000:.01f} kg) offer\n'
             f'Finalised: 1 day ago\n'
             f'Starting at 500 {EMOJI__HEART_CURRENCY} was not sold D:'
         )
     )
     
     market_place_item_1 = MarketPlaceItem(
-        item,
+        item_peach,
         100,
         user_id,
         0,
@@ -46,7 +48,7 @@ def _iter_options():
         market_place_item_1,
         DateTime(2016, 5, 14, tzinfo = TimeZone.utc),
         (
-            f'Your 100 {item.emoji} {item.name} ({item.weight * 100 / 1000:.03f} kg) offer\n'
+            f'Your 100 {item_peach.emoji} {item_peach.name} ({100 * item_peach.weight / 1000:.01f} kg) offer\n'
             f'Finalised: 1 day ago\n'
             f'Was not sold D:'
         ),

@@ -2,19 +2,19 @@ __all__ = ()
 
 from base64 import b64decode as base_64_decode
 from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
-from math import isnan as is_nan
+from math import inf, isnan as is_nan
 
 from hata import Client, InteractionType
 
 from ...bots import FEATURE_CLIENTS
 
 from ..adventure_core import (
-    ACTION_TYPE_BUTCHERING, ADVENTURE_STATE_FINALIZED, AUTO_CANCELLATIONS, AUTO_CANCELLATIONS_ALLOWED,
-    AUTO_CANCELLATION_ID_DEFAULT, Adventure, DURATION_MAX, DURATION_MIN, DURATION_SUGGESTION_SETS, LOCATIONS, RETURNS,
-    RETURNS_ALLOWED, RETURN_ID_AFTER, TARGETS, adventure_cancel_after, adventure_create, can_cancel_adventure_any,
-    adventure_cancel_now, can_cancel_adventure_after, can_cancel_adventure_now, get_action_type_multiplier,
-    adventure_get_active, adventure_get, adventure_listing_get_page, recovery_duration_seconds_get_of_energy_cost,
-    scheduled_adventure_arrival, adventure_save
+    ACTION_TYPE_BUTCHERING, ADVENTURE_STATE_FINALISED, AUTO_CANCELLATIONS, AUTO_CANCELLATIONS_ALLOWED,
+    AUTO_CANCELLATION_ID_DEFAULT, Adventure, DURATION_MAX, DURATION_MIN, DURATION_SUGGESTION_SETS, GOAL_TYPE_ITEM_EXACT,
+    LOCATIONS, RETURNS, RETURNS_ALLOWED, RETURN_ID_AFTER, TARGETS, adventure_cancel_after, adventure_cancel_now,
+    adventure_create, adventure_get, adventure_get_active, adventure_listing_get_page, adventure_save,
+    can_cancel_adventure_after, can_cancel_adventure_any, can_cancel_adventure_now, get_action_type_multiplier,
+    goal_create_item_exact, goal_deserialise, recovery_duration_seconds_get_of_energy_cost, scheduled_adventure_arrival
 )
 from ..inventory_core import create_item_suggestions, get_inventory, save_inventory, select_item
 from ..item_core import (
@@ -23,7 +23,7 @@ from ..item_core import (
 )
 from ..quest_core import get_user_adventurer_rank_info
 from ..seeding import create_seed
-from ..unit_core import parse_duration, produce_duration
+from ..unit_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT, parse_duration, produce_duration
 from ..user_stats_core import (
     user_stats_calculate, user_stats_get, user_stats_save, user_stats_set_recovering_until,
     user_stats_set_recovering_until_notification_at
@@ -33,14 +33,13 @@ from .component_building import (
     build_adventure_action_listing_view_components, build_adventure_action_view_components,
     build_adventure_cancellation_components, build_adventure_cancellation_confirmation_form,
     build_adventure_create_confirm_components, build_adventure_create_confirmation_form,
-    build_adventure_listing_view_components, build_adventure_view_active_components,
-    build_adventure_view_finalized_components, build_butcher_components
+    build_adventure_listing_view_components, build_adventure_view_components, build_butcher_components
 )
 from .constants import (
     ADVENTURE_CANCELLATION_MODE_AFTER, ADVENTURE_CANCELLATION_MODE_NONE, ADVENTURE_CANCELLATION_MODE_NOW,
-    ADVENTURE_LISTING_PAGE_SIZE, ERROR_MESSAGE_ADVENTURE_DEPART_ALREADY_ON_ADVENTURE,
+    ADVENTURE_LISTING_PAGE_SIZE, ADVENTURE_VIEW_MODE_DEFAULT, ERROR_MESSAGE_ADVENTURE_DEPART_ALREADY_ON_ADVENTURE,
     ERROR_MESSAGE_ADVENTURE_DEPART_INVENTORY_OVERLOADED, ERROR_MESSAGE_ADVENTURE_NOT_ON_ADVENTURE,
-    ERROR_MESSAGE_ADVENTURE_UNKNOWN_ADVENTURE, FLOAT_STRUCT
+    ERROR_MESSAGE_ADVENTURE_RECONSTRUCT_FAILURE, ERROR_MESSAGE_ADVENTURE_UNKNOWN_ADVENTURE, FLOAT_STRUCT
 )
 from .content_building import (
     produce_error_message_adventure_cannot_cancel, produce_error_message_adventure_depart_on_recovery,
@@ -56,6 +55,7 @@ from .custom_ids import (
     CUSTOM_ID_ADVENTURE_VIEW_PATTERN
 )
 from .duration_suggesting import get_duration_suggestions
+from .goal_item_suggesting import get_best_matching_goal_item, get_goal_item_suggestions
 from .location_suggesting import get_best_matching_location, get_location_suggestions
 from .target_suggesting import get_best_matching_target, get_target_suggestions
 
@@ -97,6 +97,32 @@ async def depart(
         'Do you want to arrive back if full or low on energy / health?',
         'auto-cancellation',
     ) = None,
+    goal_type_hexadecimal : (
+        [
+            ('Item (exact)', format(GOAL_TYPE_ITEM_EXACT, 'x')),
+        ],
+        'The adventure\'s goal\'s type.',
+        'goal-type',
+    ) = None,
+    goal_item_name : (
+        str,
+        'Target item of the goal.',
+        'goal-item',
+    ) = None,
+    goal_amount_type_hexadecimal : (
+        [
+            ('count', format(AMOUNT_TYPE_COUNT, 'x')),
+            ('weight (kg)', format(AMOUNT_TYPE_WEIGHT, 'x')),
+            ('value', format(AMOUNT_TYPE_VALUE, 'x')),
+        ],
+        'The unit of the goal.',
+        'goal-unit',
+    ) = None,
+    goal_amount_required : (
+        'expression',
+        'The required amount of the goal.',
+        'goal-amount-required',
+    ) = None,
 ):
     """
     Depart to an adventure!
@@ -120,11 +146,23 @@ async def depart(
     duration_string : `str`
         The duration  to depart to in string.
     
-    return_id_hexadecimal : `str`
+    return_id_hexadecimal : `str` = `None`, Optional
         The return_ logic's identifier in hexadecimal.
     
-    auto_cancellation_id_hexadecimal : `None | str`
+    auto_cancellation_id_hexadecimal : `None | str` = `None`, Optional
         The auto-cancellation logic's identifier in hexadecimal.
+    
+    goal_type_hexadecimal : `None | str` = `None`, Optional
+        The adventure's goal's type's identifier as hexadecimal.
+    
+    goal_item_name : `None | str` = `None`, Optional
+        The goal's item's name.
+    
+    goal_amount_type_hexadecimal : `None | str` = `None`, Optional
+        The goal's amount type's identifier as hexadecimal.
+    
+    goal_amount_required : `None | str` = `None`, Optional
+        The goal's required amount.
     """
     while True:
         adventure = await adventure_get_active(interaction_event.user_id)
@@ -212,10 +250,77 @@ async def depart(
             error_message = f'Unknown auto-cancellation: {auto_cancellation_id_hexadecimal}.'
             break
         
+        # Validate goal
+        if (goal_type_hexadecimal is None):
+            goal = None
+        
+        else:
+            try:
+                goal_type = int(goal_type_hexadecimal, 16)
+            except ValueError:
+                error_message = f'Not recognised goal type: {goal_type_hexadecimal!r}'
+                break
+            
+            if goal_type == GOAL_TYPE_ITEM_EXACT:
+                if (goal_item_name is None) or (goal_amount_type_hexadecimal is None) or (goal_amount_required is None):
+                    error_message = (
+                        'If `goal-type` is `Item (exact)`, then `goal-item`, `goal-unit` and `oal-amount-required` '
+                        'are also all required.'
+                    )
+                    break
+                
+                goal_item = get_best_matching_goal_item(target.action_ids, goal_item_name)
+                if (goal_item is None):
+                    error_message = f'Not recognised goal item: {goal_item_name!r}' 
+                    break
+                
+                try:
+                    goal_amount_type = int(goal_amount_type_hexadecimal, 16)
+                except KeyError:
+                    error_message = f'Not recognised goal unit type: {goal_amount_type_hexadecimal!r}'
+                    break
+                
+                if(
+                    (goal_amount_type != AMOUNT_TYPE_COUNT) and
+                    (goal_amount_type != AMOUNT_TYPE_WEIGHT) and
+                    (goal_amount_type != AMOUNT_TYPE_VALUE)
+                ):
+                    error_message = f'Not recognised goal unit type: {goal_amount_type_hexadecimal!r}'
+                    break
+                
+                if isinstance(goal_amount_required, float):
+                    if is_nan(goal_amount_required):
+                        error_message = f'`goal-amount-required` must be a number; got {goal_amount_required!r}'
+                        break
+                    
+                    if (goal_amount_required == - inf) or (goal_amount_required == inf):
+                        error_message = f'`goal-amount-required` Cannot be infinity, got {goal_amount_required!r}'
+                        break
+                    
+                    if (goal_amount_type == AMOUNT_TYPE_WEIGHT):
+                        goal_amount_required *= 1000.0
+                    
+                    goal_amount_required = int(goal_amount_required)
+                
+                else:
+                    if (goal_amount_type == AMOUNT_TYPE_WEIGHT):
+                        goal_amount_required *= 1000
+                
+                if goal_amount_required <= 0:
+                    error_message = f'`goal-amount-required` cannot be non-positive, got {goal_amount_required!r}'
+                    break
+                
+                goal = goal_create_item_exact(goal_item.id, goal_amount_type, goal_amount_required)
+            
+            else:
+                # No other goal types are available currently.
+                error_message = f'Not recognised goal type: {goal_type!r}'
+                break
+        
         await client.interaction_form_send(
             interaction_event,
             build_adventure_create_confirmation_form(
-                interaction_event.user_id, location, target, duration, return_, auto_cancellation, True
+                interaction_event.user_id, location, target, duration, return_, auto_cancellation, goal
             ),
         )
         return
@@ -291,7 +396,7 @@ async def autocomplete_depart_target(interaction_event, target_name):
 @depart.autocomplete('duration')
 async def autocomplete_depart_duration(interaction_event, duration_string):
     """
-    Auto completes depart target.
+    Auto completes depart duration.
     
     This function is a coroutine.
     
@@ -339,6 +444,45 @@ async def autocomplete_depart_duration(interaction_event, duration_string):
     return get_duration_suggestions(duration_suggestion_set.durations, duration_string)
 
 
+@depart.autocomplete('goal-item')
+async def autocomplete_depart_goal_item(interaction_event, goal_item_string):
+    """
+    Auto completes depart goal item.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    interaction_event : ``InteractionEvent``
+        The received interaction event.
+    
+    goal_item_string : `None | str`
+        Goal item string to auto complete.
+    
+    Returns
+    -------
+    suggestions : `None | list<(str, str)>`
+    """
+    location_name = interaction_event.get_value_of('depart', 'location')
+    if location_name is None:
+        return
+    
+    user_stats = await user_stats_get(interaction_event.user_id)
+    location = get_best_matching_location(
+        location_name,
+        get_user_adventurer_rank_info(user_stats.credibility).level,
+    )
+    if location is None:
+        return
+    
+    target_name = interaction_event.get_value_of('depart', 'target')
+    target = get_best_matching_target(location.target_ids, target_name)
+    if target is None:
+        return
+    
+    return get_goal_item_suggestions(target.action_ids, goal_item_string)
+
+
 @FEATURE_CLIENTS.interactions(custom_id = CUSTOM_ID_ADVENTURE_CREATE_CONFIRM_PATTERN, target = 'form')
 async def handle_adventure_create_confirm(
     client,
@@ -349,6 +493,7 @@ async def handle_adventure_create_confirm(
     duration,
     return_id,
     auto_cancellation_id,
+    goal_data_base_64,
 ):
     """
     Handles an adventure create confirm interaction.
@@ -380,6 +525,9 @@ async def handle_adventure_create_confirm(
     
     auto_cancellation_id : `str`
         The selected auto-cancellation's identifier in hexadecimal. Later converted to int.
+    
+    goal_data_base_64 : `None | str`
+        Serialised goal encoded as 64.
     """
     user_id = int(user_id, 16)
     location_id = int(location_id, 16)
@@ -387,6 +535,7 @@ async def handle_adventure_create_confirm(
     duration = int(duration, 16)
     return_id = int(return_id, 16)
     auto_cancellation_id = int(auto_cancellation_id, 16)
+    
     
     await client.interaction_application_command_acknowledge(
         interaction_event,
@@ -405,8 +554,22 @@ async def handle_adventure_create_confirm(
             return_ = RETURNS[return_id]
             auto_cancellation = AUTO_CANCELLATIONS[auto_cancellation_id]
         except KeyError:
-            error_message = 'Could not restore the adventure data. Please depart to a new one.'
+            error_message = ERROR_MESSAGE_ADVENTURE_RECONSTRUCT_FAILURE
             break
+        
+        if goal_data_base_64 is None:
+            goal = None
+        else:
+            try:
+                goal_data = base_64_decode(goal_data_base_64)
+            except ValueError:
+                error_message = ERROR_MESSAGE_ADVENTURE_RECONSTRUCT_FAILURE
+                break
+                
+            goal = goal_deserialise(goal_data)
+            if goal is None:
+                error_message = ERROR_MESSAGE_ADVENTURE_RECONSTRUCT_FAILURE
+                break
         
         user_stats = await user_stats_get(user_id)
         recovering_until = user_stats.recovering_until
@@ -440,6 +603,7 @@ async def handle_adventure_create_confirm(
             target_id,
             return_id,
             auto_cancellation_id,
+            (None if goal is None else [goal]),
             
             duration,
             user_stats_calculated.extra_health,
@@ -455,7 +619,14 @@ async def handle_adventure_create_confirm(
         await client.interaction_followup_message_create(
             interaction_event,
             components = build_adventure_create_confirm_components(
-                interaction_event.user_id, adventure.entry_id, location, target, duration, return_, auto_cancellation,
+                interaction_event.user_id,
+                adventure.entry_id,
+                location,
+                target,
+                duration,
+                return_,
+                auto_cancellation,
+                goal
             ),
         )
         return
@@ -511,7 +682,7 @@ async def cancel(
 
 
 async def _build_adventure_components_common(
-    adventure, allow_switching_to_adventure_listing_view, adventure_listing_page_index
+    adventure, adventure_view_mode, allow_switching_to_adventure_listing_view, adventure_listing_page_index
 ):
     """
     Generic function to build adventure components.
@@ -523,6 +694,9 @@ async def _build_adventure_components_common(
     adventure : ``Adventure``
         Adventure to build components for.
     
+    adventure_view_mode : `int`
+        How to render the adventure.
+    
     allow_switching_to_adventure_listing_view : `bool`
         Whether switching to adventure listing is allowed from adventure view.
     
@@ -533,24 +707,24 @@ async def _build_adventure_components_common(
     -------
     components : ``list<Component>``
     """
-    if adventure.state == ADVENTURE_STATE_FINALIZED:
-        components = build_adventure_view_finalized_components(
-            adventure,
-            allow_switching_to_adventure_listing_view,
-            adventure_listing_page_index,
-        )
+    if adventure.state == ADVENTURE_STATE_FINALISED:
+        inventory_total = 0
+        inventory_exhausted = 0
     else:
         user_stats = await user_stats_get(adventure.user_id)
         inventory = await get_inventory(adventure.user_id)
         
-        components = build_adventure_view_active_components(
-            adventure,
-            allow_switching_to_adventure_listing_view,
-            adventure_listing_page_index,
-            DateTime.now(TimeZone.utc),
-            user_stats_calculate(user_stats).extra_inventory,
-            inventory.weight,
-        )
+        inventory_total = user_stats_calculate(user_stats).extra_inventory
+        inventory_exhausted = inventory.weight
+    
+    return build_adventure_view_components(
+        adventure,
+        adventure_view_mode,
+        allow_switching_to_adventure_listing_view,
+        adventure_listing_page_index,
+        inventory_total,
+        inventory_exhausted,
+    )
     
     return components
 
@@ -636,7 +810,7 @@ async def view(
         if (error_message is not None):
             break
         
-        components = await _build_adventure_components_common(adventure, False, 0)
+        components = await _build_adventure_components_common(adventure, ADVENTURE_VIEW_MODE_DEFAULT, False, 0)
         
         await client.interaction_response_message_edit(interaction_event, '-# _ _ ')
         await client.interaction_response_message_delete(interaction_event)
@@ -848,6 +1022,7 @@ async def handle_adventure_view(
     interaction_event,
     user_id,
     adventure_entry_id,
+    adventure_view_mode,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
 ):
@@ -870,18 +1045,24 @@ async def handle_adventure_view(
     adventure_entry_id : `str`
         The adventure's entry's identifier as hexadecimal. Later converted back to integer.
     
+    adventure_view_mode : `str`
+        How to render the adventure as hexadecimal.
+    
     allow_switching_to_adventure_listing_view : `str`
         Whether switching to adventure listing is allowed from adventure view as hexadecimal.
-        Later converted back to integer.
     
     adventure_listing_page_index : `str`
         Adventure listing page index to direct to from adventure view as hexadecimal.
         Later converted to integer.
     """
-    user_id = int(user_id, 16)
-    adventure_entry_id = int(adventure_entry_id, 16)
-    allow_switching_to_adventure_listing_view = True if int(allow_switching_to_adventure_listing_view, 16) else False
-    adventure_listing_page_index = int(adventure_listing_page_index, 16)
+    try:
+        user_id = int(user_id, 16)
+        adventure_entry_id = int(adventure_entry_id, 16)
+        adventure_view_mode = int(adventure_view_mode, 16)
+        allow_switching_to_adventure_listing_view = True if int(allow_switching_to_adventure_listing_view, 16) else False
+        adventure_listing_page_index = int(adventure_listing_page_index, 16)
+    except ValueError:
+        return
     
     await client.interaction_component_acknowledge(
         interaction_event,
@@ -898,7 +1079,7 @@ async def handle_adventure_view(
             break
         
         components = await _build_adventure_components_common(
-            adventure, allow_switching_to_adventure_listing_view, adventure_listing_page_index
+            adventure, adventure_view_mode, allow_switching_to_adventure_listing_view, adventure_listing_page_index
         )
         
         await client.interaction_response_message_edit(
@@ -937,6 +1118,7 @@ async def handle_adventure_action_view(
     user_id,
     adventure_entry_id,
     adventure_action_index,
+    adventure_view_mode,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     allow_switching_to_adventure_action_listing_view,
@@ -964,9 +1146,11 @@ async def handle_adventure_action_view(
     adventure_action_index : `str`
         The adventure's action's index as hexadecimal. Later converted back to integer.
     
+    adventure_view_mode : `str`
+        How to render the adventure as hexadecimal.
+    
     allow_switching_to_adventure_listing_view : `str`
         Whether switching to adventure listing is allowed from adventure view as hexadecimal.
-        Later converted back to integer.
     
     adventure_listing_page_index : `str`
         Adventure listing page index to direct to from adventure view as hexadecimal.
@@ -978,15 +1162,18 @@ async def handle_adventure_action_view(
     
     adventure_action_listing_page_index : `str`
         adventure action listing age index to direct to from action view as hexadecimal.
-        Later converted back to integer.
     """
-    user_id = int(user_id, 16)
-    adventure_entry_id = int(adventure_entry_id, 16)
-    adventure_action_index = int(adventure_action_index, 16)
-    allow_switching_to_adventure_listing_view = True if int(allow_switching_to_adventure_listing_view, 16) else False
-    adventure_listing_page_index = int(adventure_listing_page_index, 16)
-    allow_switching_to_adventure_action_listing_view = True if int(allow_switching_to_adventure_action_listing_view, 16) else False
-    adventure_action_listing_page_index = int(adventure_action_listing_page_index, 16)
+    try:
+        user_id = int(user_id, 16)
+        adventure_entry_id = int(adventure_entry_id, 16)
+        adventure_action_index = int(adventure_action_index, 16)
+        adventure_view_mode = int(adventure_view_mode, 16)
+        allow_switching_to_adventure_listing_view = True if int(allow_switching_to_adventure_listing_view, 16) else False
+        adventure_listing_page_index = int(adventure_listing_page_index, 16)
+        allow_switching_to_adventure_action_listing_view = True if int(allow_switching_to_adventure_action_listing_view, 16) else False
+        adventure_action_listing_page_index = int(adventure_action_listing_page_index, 16)
+    except ValueError:
+        return
     
     await client.interaction_component_acknowledge(
         interaction_event,
@@ -1028,6 +1215,7 @@ async def handle_adventure_action_view(
                 adventure_entry_id,
                 adventure_action,
                 adventure_action_index,
+                adventure_view_mode,
                 allow_switching_to_adventure_listing_view,
                 adventure_listing_page_index,
                 allow_switching_to_adventure_action_listing_view,
@@ -1092,6 +1280,7 @@ async def handle_adventure_action_listing_view(
     interaction_event,
     user_id,
     adventure_entry_id,
+    adventure_view_mode,
     allow_switching_to_adventure_listing_view,
     adventure_listing_page_index,
     adventure_action_listing_page_index,
@@ -1111,26 +1300,32 @@ async def handle_adventure_action_listing_view(
     
     user_id : `str`
         The owner user's identifier as hexadecimal. Later converted back to integer.
+    
+    adventure_entry_id : `str`
+        The adventure's entry's identifier as hexadecimal. Later converted back to integer.
+    
+    adventure_view_mode : `str`
+        How to render the adventure as hexadecimal.
         
     allow_switching_to_adventure_listing_view : `str`
         Whether switching to adventure listing is allowed from adventure view as hexadecimal.
-        Later converted back to integer.
     
     adventure_listing_page_index : `str`
         Adventure listing page index to direct to from adventure view as hexadecimal.
         Later converted to integer.
     
-    adventure_entry_id : `str`
-        The adventure's entry's identifier as hexadecimal. Later converted back to integer.
-    
     adventure_action_listing_page_index : `str`
         Page index to show in hexadecimal. Later converted back to integer.
     """
-    user_id = int(user_id, 16)
-    adventure_entry_id = int(adventure_entry_id, 16)
-    allow_switching_to_adventure_listing_view = True if int(allow_switching_to_adventure_listing_view, 16) else False
-    adventure_listing_page_index = int(adventure_listing_page_index, 16)
-    adventure_action_listing_page_index = int(adventure_action_listing_page_index, 16)
+    try:
+        user_id = int(user_id, 16)
+        adventure_entry_id = int(adventure_entry_id, 16)
+        adventure_view_mode = int(adventure_view_mode, 16)
+        allow_switching_to_adventure_listing_view = True if int(allow_switching_to_adventure_listing_view, 16) else False
+        adventure_listing_page_index = int(adventure_listing_page_index, 16)
+        adventure_action_listing_page_index = int(adventure_action_listing_page_index, 16)
+    except ValueError:
+        return
     
     await client.interaction_component_acknowledge(
         interaction_event,
@@ -1150,6 +1345,7 @@ async def handle_adventure_action_listing_view(
             interaction_event,
             components = build_adventure_action_listing_view_components(
                 adventure,
+                adventure_view_mode,
                 allow_switching_to_adventure_listing_view,
                 adventure_listing_page_index,
                 adventure_action_listing_page_index,

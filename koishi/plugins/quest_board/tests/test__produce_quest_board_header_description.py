@@ -1,7 +1,7 @@
 import vampytest
 from hata import Guild
 
-from ...quest_core import AdventurerRankInfo
+from ...quest_core import adventure_rank_info_create
 
 from ..content_building import produce_quest_board_header_description
 
@@ -11,7 +11,7 @@ def _iter_options():
         202505230000,
         'Orin\'s dance house',
         3000,
-        AdventurerRankInfo(2, 6),
+        adventure_rank_info_create(2, 6),
         6,
         (
             '# Orin\'s dance house\'s quest board\n'
@@ -25,7 +25,7 @@ def _iter_options():
         202505240040,
         'Orin\'s dance house',
         3000,
-        AdventurerRankInfo(2, 6),
+        adventure_rank_info_create(2, 6),
         4,
         (
             '# Orin\'s dance house\'s quest board\n'

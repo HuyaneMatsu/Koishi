@@ -5,7 +5,7 @@ from warnings import warn
 from ....bot_utils.constants import GUILD__SUPPORT
 from ....bots import FEATURE_CLIENTS
 
-from .behavior import *
+from .behaviour import *
 from .filter_add import *
 from .filter_list import *
 from .filter_remove import *
@@ -33,7 +33,7 @@ COMMAND = FEATURE_CLIENTS.interactions(
 
 
 for sub_module in (
-    behavior, filter_add, filter_list, filter_remove, leave, move, pause, play, queue, remove, restart, resume,
+    behaviour, filter_add, filter_list, filter_remove, leave, move, pause, play, queue, remove, restart, resume,
     seek, skip, stop, volume
 ):
     sub_module_attributes = sub_module.__all__

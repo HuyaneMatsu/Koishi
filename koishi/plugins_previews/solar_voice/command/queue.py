@@ -8,7 +8,7 @@ from ..constants import (
     EMBED_COLOR, EMOJI_BEHAVIOR, EMOJI_CHANNEL, EMOJI_QUEUE_LENGTH, EMOJI_QUEUE_TIME, EMOJI_VOLUME, TRACK_PER_PAGE
 )
 from ..helpers import (
-    add_current_track_field_with_bar, add_track_short_description_to, duration_to_string, get_behavior_representation
+    add_current_track_field_with_bar, add_track_short_description_to, duration_to_string, get_behaviour_representation
 )
 
 
@@ -103,7 +103,7 @@ async def queue_(client, event,
             f'{EMOJI_BEHAVIOR} Behavior',
             (
                 f'```\n'
-                f'{get_behavior_representation(player)}\n'
+                f'{get_behaviour_representation(player)}\n'
                 f'```'
             ),
             inline = True

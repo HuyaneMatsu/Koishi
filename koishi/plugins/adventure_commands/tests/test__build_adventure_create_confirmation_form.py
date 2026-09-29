@@ -1,5 +1,5 @@
 import vampytest
-from hata import ButtonStyle, InteractionForm, create_button, create_row, create_separator, create_text_display
+from hata import InteractionForm, create_text_display
 
 from ...adventure_core import (
     AUTO_CANCELLATIONS, AUTO_CANCELLATION_ID_NEVER, LOCATIONS, LOCATION_ID_HUMAN_VILLAGE_OUTSKIRTS,
@@ -24,7 +24,7 @@ def _iter_options():
         duration,
         RETURNS[return__id],
         AUTO_CANCELLATIONS[auto_cancellation_id],
-        True,
+        None,
         InteractionForm(
             'Confirm your adventure',
             [
@@ -38,7 +38,7 @@ def _iter_options():
             ],
             (
                 f'adventure.create.1.{user_id:x}.{location_id:x}.{target_id:x}.'
-                f'{duration:x}.{return__id:x}.{auto_cancellation_id:x}'
+                f'{duration:x}.{return__id:x}.{auto_cancellation_id:x}.'
             ),
         ),
     )
@@ -46,7 +46,7 @@ def _iter_options():
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__build_adventure_create_confirmation_form(
-    user_id, location, target, duration, return_, auto_cancellation, enable_interactive_components
+    user_id, location, target, duration, return_, auto_cancellation, goal
 ):
     """
     Tests whether ``build_adventure_create_confirmation_form`` works as intended.
@@ -71,15 +71,15 @@ def test__build_adventure_create_confirmation_form(
     auto_cancellation : ``AutoCancellation``
         Auto cancellation.
     
-    enable_interactive_components : `bool`
-        Whether interaction components should be enabled.
+    goal : ``None | Goal``
+        The goal of the adventure.
     
     Returns
     -------
     form : ``InteractionForm``
     """
     output = build_adventure_create_confirmation_form(
-        user_id, location, target, duration, return_, auto_cancellation, enable_interactive_components
+        user_id, location, target, duration, return_, auto_cancellation, goal
     )
     vampytest.assert_instance(output, InteractionForm)
     return output

@@ -1,7 +1,7 @@
 import vampytest
 
 from ...item_core import ITEM_ID_CARROT, get_item_nullable
-from ...quest_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT
+from ...unit_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT
 
 from ..helpers import get_submit_amount
 

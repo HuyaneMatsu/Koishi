@@ -4,17 +4,18 @@ import vampytest
 
 
 from ...item_core import ITEM_ID_STRAWBERRY
+from ...unit_core import AMOUNT_TYPE_WEIGHT
 
-from ..amount_types import AMOUNT_TYPE_WEIGHT
 from ..linked_quest import LinkedQuest, linked_quest_create, linked_quest_create_from_entry
 from ..linked_quest_completion_states import (
     LINKED_QUEST_COMPLETION_STATE_ACTIVE, LINKED_QUEST_COMPLETION_STATE_COMPLETED
 )
 from ..quest_requirement_serialisables import (
-    QuestRequirementSerialisableDuration, QuestRequirementSerialisableExpiration, QuestRequirementSerialisableItemExact
+    quest_requirement_serialisable_create_duration, quest_requirement_serialisable_create_expiration,
+    quest_requirement_serialisable_create_item_exact
 )
 from ..quest_reward_serialisables import (
-    QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility
+    quest_reward_serialisable_create_balance, quest_reward_serialisable_create_credibility
 )
 from ..quest_template_ids import QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
 from ..serialisation import quest_serialisable_serialise
@@ -53,13 +54,13 @@ def test__LinkedQuest__repr():
     template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
     
     requirements = (
-        QuestRequirementSerialisableDuration(3600 * 24 * 3),
-        QuestRequirementSerialisableExpiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
-        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
+        quest_requirement_serialisable_create_duration(3600 * 24 * 3),
+        quest_requirement_serialisable_create_expiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
+        quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
     )
     rewards = (
-        QuestRewardSerialisableBalance(2600),
-        QuestRewardSerialisableCredibility(4),
+        quest_reward_serialisable_create_balance(2600),
+        quest_reward_serialisable_create_credibility(4),
     )
     
     linked_quest = linked_quest_create(
@@ -85,13 +86,13 @@ def test__linked_quest_create():
     template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
     
     requirements = (
-        QuestRequirementSerialisableDuration(3600 * 24 * 3),
-        QuestRequirementSerialisableExpiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
-        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
+        quest_requirement_serialisable_create_duration(3600 * 24 * 3),
+        quest_requirement_serialisable_create_expiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
+        quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
     )
     rewards = (
-        QuestRewardSerialisableBalance(2600),
-        QuestRewardSerialisableCredibility(4),
+        quest_reward_serialisable_create_balance(2600),
+        quest_reward_serialisable_create_credibility(4),
     )
     
     linked_quest = linked_quest_create(
@@ -127,13 +128,13 @@ def test__linked_quest_create_from_entry():
     template_id = QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY
     
     requirements = (
-        QuestRequirementSerialisableDuration(3600 * 24 * 3),
-        QuestRequirementSerialisableExpiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
-        QuestRequirementSerialisableItemExact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
+        quest_requirement_serialisable_create_duration(3600 * 24 * 3),
+        quest_requirement_serialisable_create_expiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
+        quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
     )
     rewards = (
-        QuestRewardSerialisableBalance(2600),
-        QuestRewardSerialisableCredibility(4),
+        quest_reward_serialisable_create_balance(2600),
+        quest_reward_serialisable_create_credibility(4),
     )
     
     completion_count = 1

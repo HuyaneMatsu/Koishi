@@ -1,11 +1,15 @@
 import vampytest
 
 from ...item_core import ITEM_ID_GARLIC, ITEM_ID_MYSTIA
+from ...unit_core import AMOUNT_TYPE_COUNT
 
-from ..amount_types import AMOUNT_TYPE_COUNT
-from ..quest_requirement_generators import QuestRequirementGeneratorDuration, QuestRequirementGeneratorItemExact
-from ..quest_reward_generators import QuestRewardGeneratorBalance, QuestRewardGeneratorCredibility
-from ..quest_template import QuestTemplate
+from ..quest_requirement_generators import (
+    quest_requirement_generator_create_duration, quest_requirement_generator_create_item_exact
+)
+from ..quest_reward_generators import (
+    quest_reward_generator_create_balance, quest_reward_generator_create_credibility
+)
+from ..quest_template import QuestTemplate, quest_template_create
 
 
 def _assert_fields_set(quest_template):
@@ -30,9 +34,9 @@ def _assert_fields_set(quest_template):
     vampytest.assert_instance(quest_template.rewards, tuple, nullable = True)
 
 
-def test__QuestTemplate__new():
+def test__QuestTemplate__repr():
     """
-    Tests whether ``QuestTemplate.__new__`` works as intended.
+    Tests whether ``QuestTemplate.__repr__`` works as intended.
     """
     chance_in = 1
     chance_out = 2
@@ -46,15 +50,53 @@ def test__QuestTemplate__new():
     repeat_count = 3
     requester_id = ITEM_ID_MYSTIA
     requirements = (
-        QuestRequirementGeneratorDuration(3600, 60, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_GARLIC, AMOUNT_TYPE_COUNT, 1000, 100, 75, 125),
+        quest_requirement_generator_create_duration(3600, 60, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_GARLIC, AMOUNT_TYPE_COUNT, 1000, 100, 75, 125),
     )
     rewards = (
-        QuestRewardGeneratorBalance(2000, 50, 99, 101),
-        QuestRewardGeneratorCredibility(2),
+        quest_reward_generator_create_balance(2000, 50, 99, 101),
+        quest_reward_generator_create_credibility(2),
+    )
+    
+    quest_template = quest_template_create(
+        quest_template_id,
+        mutually_exclusive_with_ids,
+        chance_in,
+        chance_out,
+        description,
+        level,
+        repeat_count,
+        requester_id,
+        requirements,
+        rewards,
+    )
+    
+    output = repr(quest_template)
+    vampytest.assert_instance(output, str)
+
+
+def test__quest_template_create():
+    chance_in = 1
+    chance_out = 2
+    description = 'Orin carted.'
+    quest_template_id = 9999
+    level = 2
+    mutually_exclusive_with_ids = (
+        9998,
+        9997,
+    )
+    repeat_count = 3
+    requester_id = ITEM_ID_MYSTIA
+    requirements = (
+        quest_requirement_generator_create_duration(3600, 60, 80, 120),
+        quest_requirement_generator_create_item_exact(ITEM_ID_GARLIC, AMOUNT_TYPE_COUNT, 1000, 100, 75, 125),
+    )
+    rewards = (
+        quest_reward_generator_create_balance(2000, 50, 99, 101),
+        quest_reward_generator_create_credibility(2),
     )
 
-    quest_template = QuestTemplate(
+    quest_template = quest_template_create(
         quest_template_id,
         mutually_exclusive_with_ids,
         chance_in,
@@ -78,44 +120,3 @@ def test__QuestTemplate__new():
     vampytest.assert_eq(quest_template.requester_id, requester_id)
     vampytest.assert_eq(quest_template.requirements, requirements)
     vampytest.assert_eq(quest_template.rewards, rewards)
-
-
-def test__QuestTemplate__repr():
-    """
-    Tests whether ``QuestTemplate.__repr__`` works as intended.
-    """
-    chance_in = 1
-    chance_out = 2
-    description = 'Orin carted.'
-    quest_template_id = 9999
-    level = 2
-    mutually_exclusive_with_ids = (
-        9998,
-        9997,
-    )
-    repeat_count = 3
-    requester_id = ITEM_ID_MYSTIA
-    requirements = (
-        QuestRequirementGeneratorDuration(3600, 60, 80, 120),
-        QuestRequirementGeneratorItemExact(ITEM_ID_GARLIC, AMOUNT_TYPE_COUNT, 1000, 100, 75, 125),
-    )
-    rewards = (
-        QuestRewardGeneratorBalance(2000, 50, 99, 101),
-        QuestRewardGeneratorCredibility(2),
-    )
-    
-    quest_template = QuestTemplate(
-        quest_template_id,
-        mutually_exclusive_with_ids,
-        chance_in,
-        chance_out,
-        description,
-        level,
-        repeat_count,
-        requester_id,
-        requirements,
-        rewards,
-    )
-    
-    output = repr(quest_template)
-    vampytest.assert_instance(output, str)

@@ -3,7 +3,7 @@ import vampytest
 from hata import Component, create_button, create_row, create_separator, create_text_display
 
 from ...item_core import ITEM_ID_PEACH, get_item_nullable
-from ...quest_core import AMOUNT_TYPE_COUNT
+from ...unit_core import AMOUNT_TYPE_COUNT
 
 from ..component_building import build_linked_quest_submit_success
 from ..constants import (

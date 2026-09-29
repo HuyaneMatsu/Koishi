@@ -8,12 +8,14 @@ from ...item_core import (
     get_item_nullable
 )
 from ...quest_core import (
-    AMOUNT_TYPE_COUNT, LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD,
-    QUEST_TEMPLATE_ID_MYSTIA_PEACH, Quest, QuestRequirementInstantiableDuration, QuestRequirementInstantiableItemExact,
-    QuestRequirementSerialisableDuration, QuestRequirementSerialisableItemExact, QuestRewardInstantiableBalance,
-    QuestRewardInstantiableCredibility, QuestRewardSerialisableBalance, QuestRewardSerialisableCredibility,
-    get_quest_template_nullable, linked_quest_create
+    LINKED_QUEST_COMPLETION_STATE_COMPLETED, QUEST_TEMPLATE_ID_MYSTIA_FIREWOOD,
+    QUEST_TEMPLATE_ID_MYSTIA_PEACH, quest_create, get_quest_template_nullable, linked_quest_create,
+    quest_requirement_instantiable_create_duration, quest_requirement_serialisable_create_duration,
+    quest_requirement_instantiable_create_item_exact, quest_requirement_serialisable_create_item_exact,
+    quest_reward_instantiable_create_balance, quest_reward_instantiable_create_credibility,
+    quest_reward_serialisable_create_balance, quest_reward_serialisable_create_credibility
 )
+from ...unit_core import AMOUNT_TYPE_COUNT
 from ...user_stats_core import user_stats_create, user_stats_modify_credibility_by
 
 from ..component_building import build_quest_complete_confirmation_form
@@ -49,15 +51,15 @@ def _iter_options():
         user_id,
         guild_id,
         0,
-        Quest(
+        quest_create(
             QUEST_TEMPLATE_ID_MYSTIA_PEACH,
             (
-                QuestRequirementInstantiableDuration(3600 * 24),
-                QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
+                quest_requirement_instantiable_create_duration(3600 * 24),
+                quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
             ),
             (
-                QuestRewardInstantiableBalance(1000),
-                QuestRewardInstantiableCredibility(10),
+                quest_reward_instantiable_create_balance(1000),
+                quest_reward_instantiable_create_credibility(10),
             ),
         ),
         None,
@@ -99,12 +101,12 @@ def _iter_options():
         batch_id,
         QUEST_TEMPLATE_ID_MYSTIA_PEACH,
         (
-            QuestRequirementSerialisableDuration(3600 * 24),
-            QuestRequirementSerialisableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20, 0),
+            quest_requirement_serialisable_create_duration(3600 * 24),
+            quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20, 0),
         ),
         (
-            QuestRewardSerialisableBalance(1000),
-            QuestRewardSerialisableCredibility(10),
+            quest_reward_serialisable_create_balance(1000),
+            quest_reward_serialisable_create_credibility(10),
         ),
     )
     linked_quest.completion_count = 1
@@ -115,15 +117,15 @@ def _iter_options():
         user_id,
         guild_id,
         0,
-        Quest(
+        quest_create(
             QUEST_TEMPLATE_ID_MYSTIA_PEACH,
             (
-                QuestRequirementInstantiableDuration(3600 * 24),
-                QuestRequirementInstantiableItemExact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
+                quest_requirement_instantiable_create_duration(3600 * 24),
+                quest_requirement_instantiable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20),
             ),
             (
-                QuestRewardInstantiableBalance(1000),
-                QuestRewardInstantiableCredibility(10),
+                quest_reward_instantiable_create_balance(1000),
+                quest_reward_instantiable_create_credibility(10),
             ),
         ),
         linked_quest,

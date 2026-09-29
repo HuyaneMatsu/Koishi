@@ -1,9 +1,9 @@
-__all__ = ('AutoCancellationConditionFunctional',)
+__all__ = ('AutoCancellationConditionFunctional', 'auto_cancellation_condition_functional_create')
 
-from scarletio import RichAttributeErrorBaseType
+from scarletio import RichType
 
 
-class AutoCancellationConditionFunctional(RichAttributeErrorBaseType):
+class AutoCancellationConditionFunctional(metaclass = RichType, rich_type_feature_flags = ~0):
     """
     A functional condition of an auto cancellation rule.
     
@@ -16,65 +16,25 @@ class AutoCancellationConditionFunctional(RichAttributeErrorBaseType):
         The name of the condition.
     """
     __slots__ = ('function', 'name')
+
+
+def auto_cancellation_condition_functional_create(name, function):
+    """
+    Creates a new auto cancellation condition functional.
     
-    def __new__(cls, name, function):
-        """
-        Creates a new condition.
-        
-        Parameters
-        ----------
-        name : `str`
-            The name of the condition.
-        
-        function : `(object) : bool`
-            Function to execute.
-        """
-        self = object.__new__(cls)
-        self.function = function
-        self.name = name
-        return self
+    Parameters
+    ----------
+    name : `str`
+        The name of the condition.
     
+    function : `(object) : bool`
+        Function to execute.
     
-    def __repr__(self):
-        """Return repr(self)."""
-        repr_parts = ['<', type(self).__name__]
-        
-        # condition
-        repr_parts.append(', name = ')
-        repr_parts.append(repr(self.name))
-        
-        # threshold
-        repr_parts.append(', function = ')
-        repr_parts.append(repr(self.function))
-        
-        repr_parts.append('>')
-        return ''.join(repr_parts)
-    
-    
-    def __eq__(self, other):
-        """Returns self == other."""
-        if type(self) is not type(other):
-            return NotImplemented
-        
-        # condition
-        if self.name != other.name:
-            return False
-        
-        # threshold
-        if self.function is not other.function:
-            return False
-        
-        return True
-    
-    
-    def __hash__(self):
-        """Returns hash(self)."""
-        hash_value = 0
-        
-        # name
-        hash_value ^= hash(self.name)
-        
-        # function
-        hash_value ^= hash(self.function)
-        
-        return hash_value
+    Returns
+    -------
+    auto_cancellation_condition_functional : ``AutoCancellationConditionFunctional``
+    """
+    auto_cancellation_condition_functional = object.__new__(AutoCancellationConditionFunctional)
+    auto_cancellation_condition_functional.function = function
+    auto_cancellation_condition_functional.name = name
+    return auto_cancellation_condition_functional
