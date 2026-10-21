@@ -1,4 +1,3 @@
-from datetime import datetime as DateTime, timezone as TimeZone
 from random import Random
 
 import vampytest
@@ -147,7 +146,7 @@ def test__generate_duration():
 
 
 def test__quest_requirement_generator_create_expiration():
-    expiration = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    expiration = 1000000
     
     generator = quest_requirement_generator_create_expiration(
         expiration,
@@ -163,7 +162,7 @@ def test__quest_requirement_generator_create_expiration():
 
 
 def test__generate_expiration():
-    expiration = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    expiration = 1000000
     
     generator = quest_requirement_generator_create_expiration(
         expiration,

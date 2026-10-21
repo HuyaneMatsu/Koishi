@@ -1,5 +1,3 @@
-from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
-
 import vampytest
 from ....bot_utils.constants import EMOJI__HEART_CURRENCY
 
@@ -40,7 +38,7 @@ def _iter_options():
             QUEST_TEMPLATE_ID_MYSTIA_PEACH,
             (
                 quest_requirement_serialisable_create_duration(3600 * 24),
-                quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600 * 24)),
+                quest_requirement_serialisable_create_expiration(1000000 + 3600 * 24),
                 quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, 20, 0),
             ),
             (
@@ -62,7 +60,7 @@ def _iter_options():
             f'**Time available:**\n'
             f'- **1 day**\n'
             f'**Time left:**\n'
-            f'- **23 hours, 59 minutes, 59 seconds**\n'
+            f'- **1 day**\n'
             f'**Completed:**\n'
             f'- **0 / 3** times, cannot be re-accepted anymore'
         ),
@@ -126,7 +124,16 @@ def test__produce_linked_quest_detailed_description(
     -------
     output : `str`
     """
-    output = [*produce_linked_quest_detailed_description(
+    def unix_time_seconds_get():
+        return 1000000
+    
+    mocked = vampytest.mock_globals(
+        produce_linked_quest_detailed_description,
+        2,
+        unix_time_seconds_get = unix_time_seconds_get,
+    )
+    
+    output = [*mocked(
         linked_quest, quest_template, user_level, highlight_only_missing_requirements
     )]
     

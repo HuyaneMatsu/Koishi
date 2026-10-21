@@ -212,7 +212,7 @@ def _iter_options():
         guild_id = soundboard_sound_guild_id,
         emoji = soundboard_sound_emoji,
         name = soundboard_sound_name,
-        user = user,
+        user_id = user.id,
         volume = soundboard_sound_volume,
     )
     

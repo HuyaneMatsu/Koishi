@@ -1,11 +1,9 @@
 __all__ = ()
 
-from datetime import datetime as DateTime, timezone as TimeZone
-
-from dateutil.relativedelta import relativedelta as RelativeDelta
-from hata import DATETIME_FORMAT_CODE, elapsed_time
+from hata import DATETIME_FORMAT_CODE, unix_time_to_datetime
 
 from ...bot_utils.constants import EMOJI__HEART_CURRENCY
+from ...bot_utils.time import unix_time_seconds_get
 
 from ..item_core import ITEM_NAME_DEFAULT, get_item_group, get_item, get_item_name, produce_item_flags_names
 from ..quest_core import (
@@ -15,12 +13,13 @@ from ..quest_core import (
     get_user_adventurer_rank_up_credibility, get_guild_adventurer_rank_up_credibility
 )
 from ..unit_core import (
-    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_NAME_DEFAULT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT, produce_weight
+    AMOUNT_TYPE_COUNT, AMOUNT_TYPE_NAME_DEFAULT, AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT, produce_weight,
+    produce_duration_sophisticated
 )
-from .constants import BROKEN_QUEST_DESCRIPTION
+from .constants import BROKEN_QUEST_DESCRIPTION, EXPIRATION_DEFAULT
 from .helpers import (
-    get_linked_quest_duration_delta, get_linked_quest_expiration, get_linked_quest_rewards_normalised,
-    get_linked_quest_submission_requirements_normalised, get_quest_duration_delta, get_quest_expiration,
+    get_linked_quest_duration, get_linked_quest_expiration, get_linked_quest_rewards_normalised,
+    get_linked_quest_submission_requirements_normalised, get_quest_duration, get_quest_expiration,
     get_quest_rewards_normalised, get_quest_submission_requirements_normalised
 )
 
@@ -518,18 +517,18 @@ def produce_linked_quest_short_description(linked_quest, quest_template):
         yield BROKEN_QUEST_DESCRIPTION
         return
     
-    now = DateTime.now(TimeZone.utc)
+    now = unix_time_seconds_get()
     
     completion_state = linked_quest.completion_state
     if completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE:
         expiration = get_linked_quest_expiration(linked_quest)
         yield 'Time left: '
-        if (expiration is None):
+        if (expiration == EXPIRATION_DEFAULT):
             yield 'unlimited'
         elif expiration <= now:
             yield 'expired'
         else:
-            yield elapsed_time(RelativeDelta(expiration, now))
+            yield from produce_duration_sophisticated(expiration - now)
     
     else:
         repeat_count = quest_template.repeat_count
@@ -543,7 +542,7 @@ def produce_linked_quest_short_description(linked_quest, quest_template):
         
         if (not repeat_count) or (repeat_count > completion_count):
             yield 're-acceptable for '
-            yield elapsed_time(RelativeDelta(get_quest_board_resets_at(), now))
+            yield from produce_duration_sophisticated(get_quest_board_resets_at() - now)
         
         else:
             yield 'cannot be re-accepted anymore'
@@ -681,7 +680,7 @@ def produce_quest_details_base_section(
     return field_added
 
 
-def _produce_time_available(duration_delta, expiration):
+def _produce_time_available(duration, expiration):
     """
     Produces available time section.
     
@@ -689,10 +688,10 @@ def _produce_time_available(duration_delta, expiration):
     
     Parameters
     ----------
-    duration_delta : `None | RelativeDelta`
+    duration : `int`
         The quest's duration in relative delta.
     
-    expiration : `None | DateTime`
+    expiration : `int`
         When the quest expires.
     
     Yields
@@ -700,11 +699,11 @@ def _produce_time_available(duration_delta, expiration):
     part : `str`
     """
     yield '**Time available:**\n- **'
-    if (duration_delta is not None):
-        yield elapsed_time(duration_delta)
-    elif (expiration is not None):
+    if duration:
+        yield from produce_duration_sophisticated(duration)
+    elif (expiration != EXPIRATION_DEFAULT):
         yield 'until '
-        yield format(expiration, DATETIME_FORMAT_CODE)
+        yield format(unix_time_to_datetime(expiration), DATETIME_FORMAT_CODE)
         yield ' UTC'
     else:
         yield 'unlimited'
@@ -720,7 +719,7 @@ def _produce_time_left(expiration):
     
     Parameters
     ----------
-    expiration : `None | DateTime`
+    expiration : `int`
         When the quest expires.
     
     Yields
@@ -728,12 +727,12 @@ def _produce_time_left(expiration):
     part : `str`
     """
     yield '**Time left:**\n- **'
-    if expiration is None:
+    if expiration == EXPIRATION_DEFAULT:
         yield 'unlimited'
     else:
-        now = DateTime.now(TimeZone.utc)
+        now = unix_time_seconds_get()
         if expiration > now:
-            yield elapsed_time(RelativeDelta(expiration, now))
+            yield from produce_duration_sophisticated(expiration - now)
         else:
             yield 'expired'
     yield '**'
@@ -782,13 +781,13 @@ def produce_quest_detailed_description(quest, quest_template, user_level, comple
     
     yield '\n'
     
-    duration_delta = get_quest_duration_delta(quest)
-    if (duration_delta is None):
+    duration = get_quest_duration(quest)
+    if duration:
         expiration = get_quest_expiration(quest)
     else:
-        expiration = None
+        expiration = EXPIRATION_DEFAULT
     
-    yield from _produce_time_available(duration_delta, expiration)
+    yield from _produce_time_available(duration, expiration)
     
     yield '\n**Completable:**\n- '
     repeat_count = quest_template.repeat_count
@@ -865,10 +864,10 @@ def produce_linked_quest_detailed_description(
     
     yield '\n'
     
-    duration_delta = get_linked_quest_duration_delta(linked_quest)
+    duration = get_linked_quest_duration(linked_quest)
     expiration = get_linked_quest_expiration(linked_quest)
     
-    yield from _produce_time_available(duration_delta, expiration)
+    yield from _produce_time_available(duration, expiration)
     yield '\n'
     yield from _produce_time_left(expiration)
     yield '\n'
@@ -885,7 +884,7 @@ def produce_linked_quest_detailed_description(
         yield ', '
         if (linked_quest.batch_id == get_current_batch_id()):
             yield 're-acceptable if completed within '
-            yield elapsed_time(RelativeDelta(get_quest_board_resets_at(), DateTime.now(TimeZone.utc)))
+            yield from produce_duration_sophisticated(get_quest_board_resets_at() - unix_time_seconds_get())
         
         else:
             yield 'cannot be re-accepted anymore'

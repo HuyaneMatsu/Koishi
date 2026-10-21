@@ -1,18 +1,16 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 
 from ..linked_quest import LinkedQuest
 from ..utils import instantiate_quest
 
-from .helpers import DateTimeMock, _create_linked_quest_additional_input_fields, _create_quest
+from .helpers import _create_linked_quest_additional_input_fields, _create_quest
 
 
 def test__instantiate_quest():
     """
     Tests whether ``instantiate_quest`` works as intended.
     """
-    now = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    now = 1000000
     
     user_id = 202602230000
     guild_id = 202602230001
@@ -20,11 +18,13 @@ def test__instantiate_quest():
     
     quest = _create_quest()
     
-    DateTimeMock.set_current(now)
+    def unix_time_seconds_get():
+        nonlocal now
+        return now
     
     mocked = vampytest.mock_globals(
         instantiate_quest,
-        DateTime = DateTimeMock,
+        unix_time_seconds_get = unix_time_seconds_get,
     )
     
     output = mocked(

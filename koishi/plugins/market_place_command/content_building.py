@@ -135,7 +135,7 @@ def produce_sell_success_description(item, item_amount, duration_days, starting_
         yield ' '
         yield EMOJI__HEART_CURRENCY.as_emoji
     
-    yield '.\nYou payed '
+    yield '.\nYou paid '
     yield str(initial_sell_fee)
     yield ' '
     yield EMOJI__HEART_CURRENCY.as_emoji
@@ -335,7 +335,7 @@ def produce_claim_unsold_description(
         The reward balance.
     
     fee : `int`
-        Fee payed.
+        Fee paid.
     
     Yields
     ------
@@ -367,7 +367,7 @@ def produce_claim_purchased_description(
         The reward balance.
     
     fee : `int`
-        Fee payed.
+        Fee paid.
     
     Yields
     ------
@@ -403,7 +403,7 @@ def produce_claim_sold_description(
         The reward balance.
     
     fee : `int`
-        Fee payed.
+        Fee paid.
     
     Yields
     ------

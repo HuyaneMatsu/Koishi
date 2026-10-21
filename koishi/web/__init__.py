@@ -205,10 +205,20 @@ BOT_NAMES = [
     'scrapy',
     
     # backlinkbot
-    'serankingbacklinksbot'
+    'serankingbacklinksbot',
     
     # webatla
-    'webatlanot'
+    'webatlanot',
+    
+    # more scam, ayyy
+    'reflection.ai',
+    'apcosys',
+    'aionbot'
+    
+    
+    '.ai',
+    'llm',
+    'bot',
 ]
 
 
@@ -618,6 +628,25 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('79.143.176.0'), 12), # France - Contabo GmbH
     IPFilterRule(*parse_ip('89.167.0.0'), 15), # Finland - Hetzner Online GmbH
     IPFilterRule(*parse_ip('98.80.0.0'), 20), # United States - Amazon.com, Inc.
+    IPFilterRule(*parse_ip('1.92.192.0'), 14), # Beijing - Huawei Software Technologies Ltd.Co
+    IPFilterRule(*parse_ip('101.32.64.0'), 12), # Hongkong - ACEVILLE PTE.LTD.
+    IPFilterRule(*parse_ip('113.44.96.0'), 13), # Beijing - Huawei Software Technologies Ltd.Co
+    IPFilterRule(*parse_ip('116.204.64.0'), 14), # Beijing - Huawei Software Technologies Ltd.Co
+    IPFilterRule(*parse_ip('116.204.0.0'), 14), # Beijing - Huawei Software Technologies Ltd.Co
+    IPFilterRule(*parse_ip('118.211.48.0'), 11), # Canberra - iiNet Limited
+    IPFilterRule(*parse_ip('140.206.0.0'), 16), # Shanghai - CHINA UNICOM Shanghai city network
+    IPFilterRule(*parse_ip('149.232.128.0'), 12), # Mexicocity - Huawei-Cloud-MX
+    IPFilterRule(*parse_ip('150.40.160.0'), 12), # Hongkong - Huawei-Cloud-MX
+    IPFilterRule(*parse_ip('159.138.48.0'), 12), # Hongkong - Huawei Hongkong Clouds
+    IPFilterRule(*parse_ip('16.216.88.0'), 11), # Councilbluffs - ReflectionAI Inc
+    IPFilterRule(*parse_ip('170.231.236.0'), 10), # Lugano - GRUPO PANAGLOBAL 15 S.A
+    IPFilterRule(*parse_ip('180.153.196.0'), 9), # Shanghai - CHINANET SHANGHAI PROVINCE NETWORK
+    IPFilterRule(*parse_ip('34.44.0.0'), 16), # Councilbluffs - Google LLC
+    IPFilterRule(*parse_ip('52.80.0.0'), 16), # Beijing - Beijing Sinnet Technology Co., Ltd.
+    IPFilterRule(*parse_ip('54.76.0.0'), 17), # Dublin - Amazon Technologies Inc.
+    
+    
+    
     
     # sitemap_index.xml
     # sitemap.xml
@@ -5599,7 +5628,162 @@ IP_MATCHER_STRUCTURE = build_ip_matcher_structure([
     IPFilterRule(*parse_ip('99.224.0.0'), 21), # Canada - Rogers Communications Canada Inc.
     IPFilterRule(*parse_ip('99.24.0.0'), 19), # United States - AT&T Enterprises, LLC
     IPFilterRule(*parse_ip('99.64.0.0'), 19), # United States - AT&T Enterprises, LLC
-
+    IPFilterRule(*parse_ip('1.14.0.0'), 17), # China - Shenzhen Tencent Computer Systems Company Limited
+    IPFilterRule(*parse_ip('100.48.0.0'), 20), # United States - Amazon.com, Inc.
+    IPFilterRule(*parse_ip('104.0.0.0'), 20), # United States - AT&T Enterprises, LLC
+    IPFilterRule(*parse_ip('104.164.101.0'), 8), # Japan - Datacamp Limited
+    IPFilterRule(*parse_ip('104.164.118.0'), 8), # France - Datacamp Limited
+    IPFilterRule(*parse_ip('104.164.177.0'), 8), # United States - RCN
+    IPFilterRule(*parse_ip('104.164.250.0'), 9), # France - Datacamp Limited
+    IPFilterRule(*parse_ip('104.165.161.0'), 8), # Japan - Datacamp Limited
+    IPFilterRule(*parse_ip('104.165.186.0'), 9), # United States - EGIHosting
+    IPFilterRule(*parse_ip('104.165.210.0'), 8), # France - Datacamp Limited
+    IPFilterRule(*parse_ip('104.165.94.0'), 8), # United States - Wave Broadband
+    IPFilterRule(*parse_ip('104.196.0.0'), 17), # United States - Google LLC
+    IPFilterRule(*parse_ip('104.200.76.0'), 10), # United States - Web2Objects LLC
+    IPFilterRule(*parse_ip('104.252.209.0'), 8), # United Kingdom - Datacamp Limited
+    IPFilterRule(*parse_ip('104.252.38.0'), 8), # United Kingdom - Datacamp Limited
+    IPFilterRule(*parse_ip('104.252.7.0'), 8), # United Kingdom - Datacamp Limited
+    IPFilterRule(*parse_ip('104.252.94.0'), 8), # United Kingdom - Datacamp Limited
+    IPFilterRule(*parse_ip('104.253.129.0'), 8), # Germany - M247 Europe SRL
+    IPFilterRule(*parse_ip('104.253.130.0'), 8), # Germany - M247 Europe SRL
+    IPFilterRule(*parse_ip('104.253.135.0'), 8), # Germany - M247 Europe SRL
+    IPFilterRule(*parse_ip('104.253.160.0'), 8), # Germany - M247 Europe SRL
+    IPFilterRule(*parse_ip('104.30.167.164'), 2), # United States - Cloudflare, Inc.
+    IPFilterRule(*parse_ip('107.172.64.0'), 14), # United States - HostPapa
+    IPFilterRule(*parse_ip('107.172.176.0'), 11), # United States - HostPapa
+    IPFilterRule(*parse_ip('107.173.80.0'), 12), # United States - HostPapa
+    IPFilterRule(*parse_ip('107.174.80.0'), 12), # United States - HostPapa
+    IPFilterRule(*parse_ip('108.48.0.0'), 19), # United States - Verizon Business
+    IPFilterRule(*parse_ip('119.8.160.0'), 13), # Singapore - HUAWEI CLOUDS
+    IPFilterRule(*parse_ip('120.37.160.0'), 13), # China - CHINANET BACKBONE
+    IPFilterRule(*parse_ip('129.153.192.0'), 13), # United States - Oracle Corporation
+    IPFilterRule(*parse_ip('129.212.224.0'), 12), # Singapore - DigitalOcean, LLC
+    IPFilterRule(*parse_ip('129.226.160.0'), 13), # Hong Kong - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('13.232.0.0'), 18), # India - Amazon.com, Inc.
+    IPFilterRule(*parse_ip('136.0.50.0'), 8), # United States - Ace Data Centers, Inc.
+    IPFilterRule(*parse_ip('141.94.64.0'), 12), # France - OVH SAS
+    IPFilterRule(*parse_ip('141.94.88.0'), 11), # France - OVH SAS
+    IPFilterRule(*parse_ip('142.252.186.0'), 8), # United States - M247 Europe SRL
+    IPFilterRule(*parse_ip('146.12.128.0'), 13), # United States - Central Access, Inc.
+    IPFilterRule(*parse_ip('146.148.176.0'), 12), # United States - HT
+    IPFilterRule(*parse_ip('146.70.82.0'), 8), # Germany - M247 Europe SRL
+    IPFilterRule(*parse_ip('147.136.76.0'), 8), # South Africa - Datacamp Limited
+    IPFilterRule(*parse_ip('150.109.96.0'), 13), # Hong Kong - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('151.196.0.0'), 18), # United States - Verizon Business
+    IPFilterRule(*parse_ip('151.241.184.0'), 11), # United Kingdom - British Telecommunications Limited
+    IPFilterRule(*parse_ip('151.241.192.0'), 11), # United Kingdom - British Telecommunications Limited
+    IPFilterRule(*parse_ip('151.80.128.0'), 13), # France - OVH SAS
+    IPFilterRule(*parse_ip('152.163.164.0'), 10), # United States - Leaseweb USA, Inc.
+    IPFilterRule(*parse_ip('154.17.118.0'), 8), # United States - M247 Europe SRL
+    IPFilterRule(*parse_ip('154.193.16.0'), 12), # United States - Liasail Global Hongkong Limited
+    IPFilterRule(*parse_ip('154.222.96.0'), 12), # United States - Wave Broadband
+    IPFilterRule(*parse_ip('154.7.233.0'), 8), # United States - Datacamp Limited
+    IPFilterRule(*parse_ip('155.212.36.32'), 4), # Finland - Fast Servers (Pty) Ltd
+    IPFilterRule(*parse_ip('159.138.96.0'), 12), # Singapore - HUAWEI CLOUDS
+    IPFilterRule(*parse_ip('159.138.0.0'), 14), # Hong Kong - HUAWEI CLOUDS
+    IPFilterRule(*parse_ip('161.0.0.0'), 12), # United States - Corporacion Laceibanetsociety
+    IPFilterRule(*parse_ip('161.153.0.0'), 15), # United States - Oracle Corporation
+    IPFilterRule(*parse_ip('162.14.64.0'), 14), # China - Shenzhen Tencent Computer Systems Company Limited
+    IPFilterRule(*parse_ip('162.200.0.0'), 19), # United States - AT&T Enterprises, LLC
+    IPFilterRule(*parse_ip('168.107.64.0'), 13), # Singapore - Oracle Corporation
+    IPFilterRule(*parse_ip('170.246.120.0'), 10), # Brazil - Net Flex Ltda ME
+    IPFilterRule(*parse_ip('172.245.199.0'), 8), # United States - HostPapa
+    IPFilterRule(*parse_ip('172.252.120.0'), 9), # United States - EGIHosting
+    IPFilterRule(*parse_ip('172.252.129.0'), 8), # United States - EGIHosting
+    IPFilterRule(*parse_ip('172.252.248.0'), 9), # United States - EGIHosting
+    IPFilterRule(*parse_ip('172.59.128.0'), 15), # United States - T-Mobile USA, Inc.
+    IPFilterRule(*parse_ip('172.59.24.0'), 11), # United States - T-Mobile USA, Inc.
+    IPFilterRule(*parse_ip('172.59.64.0'), 14), # United States - T-Mobile USA, Inc.
+    IPFilterRule(*parse_ip('173.23.160.0'), 12), # United States - Mediacom Communications Corp
+    IPFilterRule(*parse_ip('173.67.192.0'), 12), # United States - Verizon Business
+    IPFilterRule(*parse_ip('174.140.216.0'), 11), # United States - Colocation America Corporation
+    IPFilterRule(*parse_ip('175.178.0.0'), 16), # China - Shenzhen Tencent Computer Systems Company Limited
+    IPFilterRule(*parse_ip('18.132.0.0'), 18), # United Kingdom - Amazon.com, Inc.
+    IPFilterRule(*parse_ip('181.214.187.0'), 8), # Singapore - Datacamp Limited
+    IPFilterRule(*parse_ip('184.192.0.0'), 20), # United States - Amazon.com, Inc.
+    IPFilterRule(*parse_ip('184.96.0.0'), 16), # United States - CenturyLink Communications, LLC
+    IPFilterRule(*parse_ip('185.191.236.0'), 10), # Switzerland - GRUPO PANAGLOBAL 15 S.A
+    IPFilterRule(*parse_ip('185.98.168.0'), 9), # United States - Datacamp Limited
+    IPFilterRule(*parse_ip('189.104.128.0'), 9), # Singapore - Level 3 Parent, LLC
+    IPFilterRule(*parse_ip('189.104.204.0'), 9), # United States - FDCservers.net
+    IPFilterRule(*parse_ip('189.104.240.0'), 9), # United States - trafficforce, UAB
+    IPFilterRule(*parse_ip('189.104.34.0'), 9), # United States - Web2Objects LLC
+    IPFilterRule(*parse_ip('189.81.234.0'), 9), # United States - FDCservers.net
+    IPFilterRule(*parse_ip('189.81.4.0'), 9), # United States - Web2Objects LLC
+    IPFilterRule(*parse_ip('189.81.70.0'), 9), # United States - FDCservers.net
+    IPFilterRule(*parse_ip('192.177.101.0'), 8), # United States - EGIHosting
+    IPFilterRule(*parse_ip('192.177.104.0'), 9), # United States - EGIHosting
+    IPFilterRule(*parse_ip('192.177.122.0'), 9), # United States - EGIHosting
+    IPFilterRule(*parse_ip('192.24.128.0'), 15), # United States - Cincinnati Bell Telephone Company LLC
+    IPFilterRule(*parse_ip('193.202.80.0'), 9), # United States - PureVoltage Hosting Inc.
+    IPFilterRule(*parse_ip('199.115.144.0'), 10), # United States - Telcom Systems LLC
+    IPFilterRule(*parse_ip('205.188.148.0'), 10), # Japan - Level 3 Parent, LLC
+    IPFilterRule(*parse_ip('205.188.152.0'), 10), # Japan - Level 3 Parent, LLC
+    IPFilterRule(*parse_ip('206.68.0.0'), 17), # United Kingdom - Glide Student & Residential Limited
+    IPFilterRule(*parse_ip('207.168.16.0'), 11), # United States - Wave Broadband
+    IPFilterRule(*parse_ip('212.108.112.0'), 9), # United States - RCN
+    IPFilterRule(*parse_ip('213.201.171.0'), 8), # United States - M247 Europe SRL
+    IPFilterRule(*parse_ip('213.32.64.0'), 12), # France - OVH SAS
+    IPFilterRule(*parse_ip('216.150.96.0'), 13), # United States - MBO Video, LLC
+    IPFilterRule(*parse_ip('217.182.72.0'), 11), # Poland - OVH SAS
+    IPFilterRule(*parse_ip('23.26.153.0'), 8), # United States - Ace Data Centers, Inc.
+    IPFilterRule(*parse_ip('23.27.31.0'), 8), # United States - Wave Broadband
+    IPFilterRule(*parse_ip('24.129.0.0'), 15), # United States - Comcast Cable Communications, LLC
+    IPFilterRule(*parse_ip('24.170.0.0'), 15), # United States - Charter Communications Inc
+    IPFilterRule(*parse_ip('24.53.160.0'), 13), # United States - Buckeye Cablevision, Inc.
+    IPFilterRule(*parse_ip('31.59.0.0'), 11), # United Kingdom - M247 Europe SRL
+    IPFilterRule(*parse_ip('31.76.190.0'), 9), # Singapore - Level 3 Parent, LLC
+    IPFilterRule(*parse_ip('35.229.0.0'), 15), # United States - Google LLC
+    IPFilterRule(*parse_ip('36.138.0.0'), 14), # China - China Mobile Communications Group Co., Ltd.
+    IPFilterRule(*parse_ip('38.237.0.0'), 16), # Hong Kong - Rackdog LLC
+    IPFilterRule(*parse_ip('43.133.32.0'), 13), # Singapore - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('43.165.0.0'), 14), # Germany - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('45.112.248.0'), 10), # United States - OCULUS NETWORKS INC
+    IPFilterRule(*parse_ip('45.204.112.0'), 12), # United States - Wave Broadband
+    IPFilterRule(*parse_ip('45.38.238.0'), 8), # United States - Wave Broadband
+    IPFilterRule(*parse_ip('46.202.248.0'), 8), # United States - Leaseweb USA, Inc.
+    IPFilterRule(*parse_ip('48.47.30.0'), 9), # United States - Comcast Cable Communications, LLC
+    IPFilterRule(*parse_ip('49.232.0.0'), 18), # China - Shenzhen Tencent Computer Systems Company Limited
+    IPFilterRule(*parse_ip('49.51.52.0'), 9), # United States - Tencent Building, Kejizhongyi Avenue
+    IPFilterRule(*parse_ip('50.117.49.0'), 8), # United States - Wave Broadband
+    IPFilterRule(*parse_ip('51.38.112.0'), 10), # Germany - OVH SAS
+    IPFilterRule(*parse_ip('51.75.0.0'), 13), # France - OVH SAS
+    IPFilterRule(*parse_ip('51.77.192.0'), 13), # France - OVH SAS
+    IPFilterRule(*parse_ip('51.91.240.0'), 12), # France - OVH SAS
+    IPFilterRule(*parse_ip('57.129.81.128'), 7), # Germany - OVH SAS
+    IPFilterRule(*parse_ip('61.9.0.0'), 13), # Philippines - Converge ICT Solutions Inc.
+    IPFilterRule(*parse_ip('63.160.224.0'), 13), # Hong Kong - Cogent Communications, LLC
+    IPFilterRule(*parse_ip('64.127.136.0'), 10), # United States - Connect 2 First Internet, LLC
+    IPFilterRule(*parse_ip('65.187.0.0'), 16), # United States - Charter Communications Inc
+    IPFilterRule(*parse_ip('65.24.0.0'), 17), # United States - Charter Communications Inc
+    IPFilterRule(*parse_ip('66.169.0.0'), 15), # United States - Charter Communications LLC
+    IPFilterRule(*parse_ip('67.20.0.0'), 12), # United States - C Spire Fiber
+    IPFilterRule(*parse_ip('68.165.212.0'), 10), # Spain - M247 Europe SRL
+    IPFilterRule(*parse_ip('68.224.0.0'), 15), # United States - Cox Communications Inc.
+    IPFilterRule(*parse_ip('69.218.128.0'), 15), # United States - AT&T Enterprises, LLC
+    IPFilterRule(*parse_ip('70.190.0.0'), 16), # United States - Cox Communications Inc.
+    IPFilterRule(*parse_ip('71.7.0.0'), 15), # United States - Windstream Communications LLC
+    IPFilterRule(*parse_ip('72.216.0.0'), 17), # United States - Cox Communications Inc.
+    IPFilterRule(*parse_ip('72.59.228.0'), 10), # United States - Vexus Fiber
+    IPFilterRule(*parse_ip('72.63.188.0'), 10), # United States - RCN
+    IPFilterRule(*parse_ip('76.128.0.0'), 21), # United States - Comcast Cable Communications, LLC
+    IPFilterRule(*parse_ip('76.39.64.0'), 14), # United States - Charter Communications Inc
+    IPFilterRule(*parse_ip('78.130.0.0'), 15), # Portugal - NOS COMUNICACOES, S.A.
+    IPFilterRule(*parse_ip('82.21.210.0'), 8), # Singapore - Level 3 Parent, LLC
+    IPFilterRule(*parse_ip('82.23.1.0'), 8), # United States - unknown
+    IPFilterRule(*parse_ip('84.37.141.0'), 8), # United States - M247 Europe SRL
+    IPFilterRule(*parse_ip('85.137.96.0'), 13), # United Kingdom - NetActuate, Inc
+    IPFilterRule(*parse_ip('87.232.144.0'), 12), # United States - OCULUS NETWORKS INC
+    IPFilterRule(*parse_ip('87.232.226.0'), 9), # United States - OCULUS NETWORKS INC
+    IPFilterRule(*parse_ip('87.58.197.0'), 8), # United States - Heymman Servers Corporation
+    IPFilterRule(*parse_ip('89.117.45.0'), 8), # United States - Cyberzone S.A.
+    IPFilterRule(*parse_ip('94.228.16.0'), 12), # United States - OCULUS NETWORKS INC
+    IPFilterRule(*parse_ip('96.40.0.0'), 17), # United States - Charter Communications LLC
+    IPFilterRule(*parse_ip('97.225.0.0'), 15), # United States - Verizon Business
+    IPFilterRule(*parse_ip('98.14.0.0'), 17), # United States - Charter Communications Inc
+    IPFilterRule(*parse_ip('98.192.0.0'), 22), # United States - Comcast Cable Communications, LLC
+    IPFilterRule(*parse_ip('98.97.16.0'), 12), # United States - Space Exploration Technologies Corporation
 ])
 
 

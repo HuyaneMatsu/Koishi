@@ -13,7 +13,7 @@ from ...market_place_core import (
     MARKET_PLACE_ITEM_FLAG_PURCHASER_RETRIEVED, MARKET_PLACE_ITEM_FLAG_SELLER_RETRIEVED, MarketPlaceItem
 )
 from ..component_building import build_inbox_view_components
-from ..constants import EMOJI_CLOSE, EMOJI_LEFT, EMOJI_RIGHT
+from ..constants import EMOJI_CLOSE, EMOJI_LEFT, EMOJI_REFRESH, EMOJI_RIGHT
 
 
 def _iter_options():
@@ -125,6 +125,11 @@ def _iter_options():
             ),
             create_separator(),
             create_row(
+                create_button(
+                    'Refresh',
+                    EMOJI_REFRESH,
+                    custom_id = f'market_place.inbox.view.{user_id_0:x}.{1:x}.{10:x}',
+                ),
                 create_button(
                     'Page 1',
                     EMOJI_LEFT,
@@ -268,6 +273,11 @@ def _iter_options():
             ),
             create_separator(),
             create_row(
+                create_button(
+                    'Refresh',
+                    EMOJI_REFRESH,
+                    custom_id = f'market_place.inbox.view.{user_id_0:x}.{0:x}.{10:x}',
+                ),
                 create_button(
                     'Page 0',
                     EMOJI_LEFT,

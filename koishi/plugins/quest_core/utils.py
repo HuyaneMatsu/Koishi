@@ -5,12 +5,11 @@ __all__ = (
     'reset_linked_quest'
 )
 
-from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from math import floor
+from time import gmtime as unix_time_to_utc_time
 
 from ...bot_utils.time import unix_time_seconds_get
 
-from .constants import UNIX_EPOCH
 from .helpers import get_quest_template_nullable
 from .linked_quest import linked_quest_create
 from .linked_quest_completion_states import LINKED_QUEST_COMPLETION_STATE_ACTIVE
@@ -22,6 +21,38 @@ from .quest_requirement_types import (
 from .quest_reward_types import QUEST_REWARD_TYPE_CREDIBILITY
 
 
+def _year_month_day_to_days(year, month, day):
+    """
+    Returns a days number from some epoch. Increments 1 every day.
+    
+    Parameters
+    ----------
+    year : `int`
+        Year to convert.
+    
+    month : `int`
+        Year to convert.
+    
+    day : `int`
+        Year to convert.
+    
+    Returns
+    -------
+    days : `int`
+    """
+    days = day + (0, 28, 59, 89, 120, 150, 181, 212, 242, 273, 303)[month - 1]
+    if (month > 2) and (not (year & 3)) and ((year % 100) or (not (year % 400))):
+        days += 1
+    
+    year -= 1
+    days += (year * 365) + (year >> 2) - (year // 100) + (year // 400)
+    
+    return days
+
+
+UNIX_EPOCH_DAYS = _year_month_day_to_days(1970, 1, 1)
+
+
 def get_current_batch_id():
     """
     Returns the current batch identifier.
@@ -30,7 +61,8 @@ def get_current_batch_id():
     -------
     batch_id : `int`
     """
-    return floor((DateTime.now(TimeZone.utc) - UNIX_EPOCH).total_seconds()) // 86400
+    utc_time = unix_time_to_utc_time(unix_time_seconds_get())
+    return _year_month_day_to_days(utc_time.tm_year, utc_time.tm_mon, utc_time.tm_mday) - UNIX_EPOCH_DAYS
 
 
 def get_adventurer_level_name(level):
@@ -89,9 +121,16 @@ def get_quest_board_resets_at():
     
     returns
     -------
-    quest_board_resets_at : ``DateTime``
+    quest_board_resets_at : `int`
     """
-    return DateTime.now(TimeZone.utc).replace(hour = 0, minute = 0, second = 0, microsecond = 0) + TimeDelta(days = 1)
+    now = unix_time_seconds_get()
+    utc_time = unix_time_to_utc_time(now)
+    
+    hour = utc_time.tm_hour
+    minute = utc_time.tm_min
+    second = utc_time.tm_sec
+    
+    return now - (hour * 3600) - (minute * 60) - second + 86400
 
 
 def get_linked_quest_completion_ratio(linked_quest):
@@ -255,7 +294,7 @@ def instantiate_quest(user_id, guild_id, batch_id, quest):
                 continue
             
             requirement_serialisables.append(quest_requirement_serialisable_create_expiration(
-                DateTime.now(TimeZone.utc) + TimeDelta(seconds = requirement_instantiable.configuration.duration)
+                unix_time_seconds_get() + requirement_instantiable.configuration.duration
             ))
             continue
         
@@ -277,7 +316,7 @@ def instantiate_quest(user_id, guild_id, batch_id, quest):
                 continue
             
             reward_serialisables.append(quest_requirement_serialisable_create_expiration(
-                DateTime.now(TimeZone.utc) + TimeDelta(seconds = reward_instantiable.configuration.duration)
+                unix_time_seconds_get() + reward_instantiable.configuration.duration
             ))
             continue
         
@@ -298,7 +337,7 @@ def reset_linked_quest(linked_quest):
         Linked quest to reset.
     """
     linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_ACTIVE
-    linked_quest.created_at = unix_time_seconds_get()
+    linked_quest.created_at = now = unix_time_seconds_get()
     duration = -1
     
     requirements = linked_quest.requirements
@@ -311,7 +350,7 @@ def reset_linked_quest(linked_quest):
             
             if requirement_type == QUEST_REQUIREMENT_TYPE_EXPIRATION:
                 if duration != -1:
-                    requirement.configuration.expiration = DateTime.now(TimeZone.utc) + TimeDelta(seconds = duration)
+                    requirement.configuration.expiration = now + duration
                 continue
             
             if requirement_type in (

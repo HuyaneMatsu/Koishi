@@ -1,11 +1,11 @@
 __all__ = ()
 
-from datetime import datetime as DateTime, timezone as TimeZone
-
 from hata import (
     ButtonStyle, InteractionForm, create_button, create_label, create_row, create_section, create_separator,
     create_text_display, create_text_input, create_thumbnail_media
 )
+
+from ...bot_utils.time import unix_time_seconds_get
 
 from ..guild_stats_core import guild_stats_generate_quest_batch
 from ..item_core import get_item_group_nullable, get_item_nullable
@@ -17,8 +17,8 @@ from ..quest_core import (
 
 from .constants import (
     BACK_DIRECT_LOCATION_QUEST, BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED, BACK_DIRECT_LOCATION_SELECT_ITEM_TOP,
-    BACK_DIRECT_LOCATION_SELECT_REQUIREMENT, EMOJI_BACK, EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS, EMOJI_REFRESH, PAGE_SIZE,
-    REQUIREMENT_PAGE_SIZE
+    BACK_DIRECT_LOCATION_SELECT_REQUIREMENT, EMOJI_BACK, EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS, EMOJI_REFRESH,
+    EXPIRATION_DEFAULT, PAGE_SIZE, REQUIREMENT_PAGE_SIZE
 )
 from .content_building import (
     produce_linked_quest_detailed_description, produce_linked_quest_header_description,
@@ -413,8 +413,8 @@ def _linked_quest_sort_key_getter(linked_quest):
     # Second sort: when the quest expires
     # - active with expiration
     # - other
-    if (completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE) and (expiration is not None):
-        expiration_weight = int(expiration.timestamp())
+    if (completion_state == LINKED_QUEST_COMPLETION_STATE_ACTIVE) and (expiration != EXPIRATION_DEFAULT):
+        expiration_weight = expiration
     else:
         expiration_weight = (1 << 63) - 1
     
@@ -510,14 +510,14 @@ def build_linked_quests_listing_components(user, guild, user_stats, linked_quest
     if (linked_quest_listing is not None):
         linked_quest_slice = linked_quest_listing_sorted[page_index * PAGE_SIZE : (page_index + 1) * PAGE_SIZE]
         if linked_quest_slice:
-            now = DateTime.now(TimeZone.utc)
+            now = unix_time_seconds_get()
             
             for linked_quest in linked_quest_slice:
                 quest_template = get_quest_template_nullable(linked_quest.template_id)
                 
                 while True:
                     expiration = get_linked_quest_expiration(linked_quest)
-                    if (expiration is not None) and (expiration <= now):
+                    if (expiration != EXPIRATION_DEFAULT) and (expiration <= now):
                         style = ButtonStyle.red
                         break
                     

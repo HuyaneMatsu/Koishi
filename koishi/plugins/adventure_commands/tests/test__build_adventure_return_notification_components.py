@@ -9,7 +9,7 @@ from ...adventure_core import (
 from ...item_core import ITEM_ID_PEACH, get_item_nullable
 
 from ..component_building import build_adventure_return_notification_components
-from ..constants import ADVENTURE_VIEW_MODE_DEFAULT, ADVENTURE_VIEW_MODE_DETAILED
+from ..constants import ADVENTURE_VIEW_MODE_DEFAULT, ADVENTURE_VIEW_MODE_DETAILED, EMOJI_REFRESH
 
 
 def _iter_options():
@@ -67,6 +67,7 @@ def _iter_options():
             create_row(
                 create_button(
                     'Refresh',
+                    EMOJI_REFRESH,
                     enabled = False,
                     custom_id = (
                         f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'

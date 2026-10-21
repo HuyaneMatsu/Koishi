@@ -149,7 +149,7 @@ async def bypass_request(client, method, url, data = None, query = None, reason 
                 continue
             
             elif status == 500 or status == 502:
-                await sleep(10.0 / try_again + 1.0, KOKORO)
+                await sleep(10.0 / (try_again + 1.0), KOKORO)
                 continue
             
             raise DiscordException(response, response_data, data, None)
@@ -3801,6 +3801,57 @@ async def invite_allowed_user_ids_get_status(client, invite_code):
         client,
         METHOD_GET,
         f'{API_ENDPOINT}/invites/{invite_code}/target-users/job-status',
+    )
+
+
+async def invite_allowed_user_id_add(client, invite_code, allowed_user_id):
+    return await bypass_request(
+        client,
+        METHOD_PUT,
+        f'{API_ENDPOINT}/invites/{invite_code}/target-users/{allowed_user_id}',
+    )
+
+
+async def invite_allowed_user_id_delete(client, invite_code, allowed_user_id):
+    return await bypass_request(
+        client,
+        METHOD_DELETE,
+        f'{API_ENDPOINT}/invites/{invite_code}/target-users/{allowed_user_id}',
+    )
+
+
+async def invite_allowed_user_id_add_many(client, invite_code, allowed_user_ids):
+    return await bypass_request(
+        client,
+        METHOD_POST,
+        f'{API_ENDPOINT}/invites/{invite_code}/target-users/bulk-add',
+        {'user_ids': allowed_user_ids},
+    )
+
+
+async def invite_allowed_user_id_delete_many(client, invite_code, allowed_user_ids):
+    return await bypass_request(
+        client,
+        METHOD_POST,
+        f'{API_ENDPOINT}/invites/{invite_code}/target-users/bulk-delete',
+        {'user_ids': allowed_user_ids},
+    )
+
+
+async def guild_join_request_get_chunk(client, guild_id):
+    return await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/requests',
+    )
+
+
+async def guild_join_request_action(client, guild_id, guild_join_request_id):
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
+        f'{API_ENDPOINT}/guilds/{guild_id}/requests/{guild_join_request_id}',
+        query = {'action': 'APPROVED'}
     )
 
 
@@ -9671,3 +9722,286 @@ async def rate_limit_test_0257(client, message):
         await task_1
         
         await client.invite_delete(invite)
+
+
+# limit: 10, reset: 5 second
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0258(client, message):
+    """
+    invite_allowed_user_id_add
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0258') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        invite = await client.invite_create(
+            channel,
+            unique = True,
+        )
+        
+        await sleep(2.0, KOKORO)
+        
+        await invite_allowed_user_id_add(client, invite.code, client.id)
+        
+        await client.invite_delete(invite)
+
+
+# limit: 10, reset: 5 second
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0259(client, message):
+    """
+    invite_allowed_user_id_delete
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0259') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        invite = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        
+        await sleep(2.0, KOKORO)
+        
+        await invite_allowed_user_id_delete(client, invite.code, client.id)
+        
+        await client.invite_delete(invite)
+
+
+# separate
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0260(client, message):
+    """
+    invite_allowed_user_id_delete & invite_allowed_user_id_add
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0260') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        invite = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        
+        await sleep(2.0, KOKORO)
+        
+        task_0 = Task(
+            KOKORO,
+            invite_allowed_user_id_delete(client, invite.code, client.id),
+        )
+        task_1 = Task(
+            KOKORO,
+            invite_allowed_user_id_add(client, invite.code, message.author.id),
+        )
+        
+        await task_0
+        await task_1
+        
+        await client.invite_delete(invite)
+
+
+# limit: 3, reset: 5 second
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0261(client, message):
+    """
+    invite_allowed_user_id_add_many
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0261') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        invite = await client.invite_create(
+            channel,
+            unique = True,
+        )
+        
+        await sleep(2.0, KOKORO)
+        
+        await invite_allowed_user_id_add_many(client, invite.code, [client.id])
+        
+        await client.invite_delete(invite)
+
+
+# limit: 3, reset: 5 second
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0262(client, message):
+    """
+    invite_allowed_user_id_delete_many
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0262') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        invite = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        
+        await sleep(3.0, KOKORO)
+        
+        await invite_allowed_user_id_delete_many(client, invite.code, [client.id])
+        
+        await client.invite_delete(invite)
+
+
+# shared
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0263(client, message):
+    """
+    invite_allowed_user_id_delete_many & invite_allowed_user_id_add_many
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0263') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        invite = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        
+        await sleep(2.0, KOKORO)
+        
+        task_0 = Task(
+            KOKORO,
+            invite_allowed_user_id_delete_many(client, invite.code, [client.id]),
+        )
+        task_1 = Task(
+            KOKORO,
+            invite_allowed_user_id_add_many(client, invite.code, [message.author.id]),
+        )
+        
+        await task_0
+        await task_1
+        
+        await client.invite_delete(invite)
+
+
+# same limit
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0264(client, message):
+    """
+    invite_allowed_user_id_delete_many twice
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0264') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        invite_0 = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        
+        invite_1 = await client.invite_create(
+            channel,
+            allowed_user_ids = [client.id],
+            unique = True,
+        )
+        
+        await sleep(2.0, KOKORO)
+        
+        task_0 = Task(
+            KOKORO,
+            invite_allowed_user_id_delete_many(client, invite_0.code, [client.id]),
+        )
+        task_1 = Task(
+            KOKORO,
+            invite_allowed_user_id_delete_many(client, invite_0.code, [client.id]),
+        )
+        
+        await task_0
+        await task_1
+        
+        await client.invite_delete(invite_0)
+        await client.invite_delete(invite_1)
+
+
+# limit: 6; reset after: 5 seconds
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0265(client, message):
+    """
+    guild_join_request_get_chunk
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0265') as RLT:
+        guild_0 = message.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        task_0 = Task(
+            KOKORO,
+            guild_join_request_get_chunk(client, guild_0.id),
+        )
+        
+        await task_0.wait_for_completion()
+
+
+# shared
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0266(client, message, guild_id : str = ''):
+    """
+    guild_join_request_get_chunk x2 guild
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0265') as RLT:
+        guild_0 = message.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        try:
+            guild_1 = GUILDS[int(guild_id)]
+        except (KeyError, ValueError):
+            await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        
+        task_0 = Task(
+            KOKORO,
+            guild_join_request_get_chunk(client, guild_0.id),
+        )
+        task_1 = Task(
+            KOKORO,
+            guild_join_request_get_chunk(client, guild_1.id),
+        )
+        
+        await task_0.wait_for_completion()
+        await task_1.wait_for_completion()
+
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0267(client, message):
+    """
+    guild_join_request_action
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0267') as RLT:
+        guild_0 = message.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        task_0 = Task(
+            KOKORO,
+            guild_join_request_action(client, guild_0.id, 1 << 23 - 1),
+        )
+        
+        await task_0.wait_for_completion()
+
+

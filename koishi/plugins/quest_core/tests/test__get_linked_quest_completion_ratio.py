@@ -1,5 +1,3 @@
-from datetime import datetime as DateTime, timezone as TimeZone, timedelta as TimeDelta
-
 import vampytest
 
 from ...item_core import ITEM_ID_STRAWBERRY
@@ -28,9 +26,7 @@ def _iter_options():
         quest_template_id,
         (
             quest_requirement_serialisable_create_duration(3600 * 24 * 3),
-            quest_requirement_serialisable_create_expiration(
-                DateTime(2016, 5, 14, tzinfo = TimeZone.utc) + TimeDelta(seconds = 3600 * 24 * 3)
-            ),
+            quest_requirement_serialisable_create_expiration(1000000 + 3600 * 24 * 3),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
         ),
         None,
@@ -72,9 +68,7 @@ def _iter_options():
         quest_template_id,
         (
             quest_requirement_serialisable_create_duration(3600 * 24 * 3),
-            quest_requirement_serialisable_create_expiration(
-                DateTime(2016, 5, 14, tzinfo = TimeZone.utc) + TimeDelta(seconds = 3600 * 24 * 3)
-            ),
+            quest_requirement_serialisable_create_expiration(1000000 + 3600 * 24 * 3),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 1200),
         ),
         None,
@@ -96,9 +90,7 @@ def _iter_options():
         quest_template_id,
         (
             quest_requirement_serialisable_create_duration(3600 * 24 * 3),
-            quest_requirement_serialisable_create_expiration(
-                DateTime(2016, 5, 14, tzinfo = TimeZone.utc) + TimeDelta(seconds = 3600 * 24 * 3)
-            ),
+            quest_requirement_serialisable_create_expiration(1000000 + 3600 * 24 * 3),
         ),
         None,
     )

@@ -102,9 +102,6 @@ Although here is a "short" description for all of her commands by category:
 - `safebooru` - Pulls an image from a booru disallowing all nsfw tags.
 - `touhou-calendar` - When your touhous are celebrated.
 - `touhou-character` - Shows an image of the selected touhou.
-- `vocaloid` - Shows a vocaloid image.
-- `waifu-sfw` - Shows an image from the waifu.pics website.
-- `waifu-nsfw`- Shows an nsfw image from the waifu.pics website. Nsfw channel only.
 
 ### Utility
 

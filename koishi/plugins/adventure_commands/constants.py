@@ -2,6 +2,8 @@ __all__ = ()
 
 from struct import Struct
 
+from hata import BUILTIN_EMOJIS
+
 
 ACTIVE_ADVENTURE_ACTION_LIMIT = 5
 ADVENTURE_ACTION_LISTING_PAGE_SIZE = 10
@@ -21,8 +23,12 @@ ADVENTURE_LOOT_LISTING_MODE_THIS_STEP = 3
 FLOAT_STRUCT = Struct('d')
 
 
+EMOJI_REFRESH = BUILTIN_EMOJIS['arrows_counterclockwise']
+
+
 ERROR_MESSAGE_ADVENTURE_DEPART_INVENTORY_OVERLOADED = 'Your inventory is overloaded, cannot go on an adventure like this.'
 ERROR_MESSAGE_ADVENTURE_UNKNOWN_ADVENTURE = 'Could not resolve adventure.'
 ERROR_MESSAGE_ADVENTURE_DEPART_ALREADY_ON_ADVENTURE = 'You are already on an adventure.'
 ERROR_MESSAGE_ADVENTURE_NOT_ON_ADVENTURE = 'You are not on an adventure.'
 ERROR_MESSAGE_ADVENTURE_RECONSTRUCT_FAILURE = 'Could not reconstruct the adventure data. Please depart to a new one.'
+

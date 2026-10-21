@@ -1,12 +1,11 @@
 __all__ = ('Satori',)
 
-import signal, sys
+import sys
 from itertools import chain, cycle
 from random import randint
-from threading import main_thread
 
 from hata import (
-    Activity, BUILTIN_EMOJIS, CLIENTS, Client, DiscordException, ERROR_CODES, Embed, Emoji, KOKORO, Permission
+    Activity, BUILTIN_EMOJIS, Client, DiscordException, ERROR_CODES, Embed, Emoji, Permission
 )
 from hata.ext.commands_v2 import checks
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
@@ -14,13 +13,11 @@ from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 import config
 
 from ..bot_utils.constants import CHANNEL__SYSTEM__SYNC, COLOR__SATORI_HELP, DEFAULT_CATEGORY_NAME, PREFIX__SATORI
-from ..bot_utils.interpreter_v2 import Interpreter
 from ..bot_utils.syncer import sync_request_waiter
 from ..bot_utils.tools import (
     ChannelCreateWaitfor, ChannelDeleteWaitfor, ChannelUpdateWaitfor, MessageDeleteWaitfor, MessageUpdateWaitfor
 )
 from ..bot_utils.utils import category_name_rule
-
 
 
 Satori = Client(
@@ -30,7 +27,7 @@ Satori = Client(
     activity = Activity('with Koishi'),
     status = 'dnd',
     application_id = config.SATORI_ID,
-    extensions = ('command_utils', 'commands_v2', 'slash',),
+    extensions = ('command_utils', 'commands_v2', 'slash'),
     prefix = PREFIX__SATORI,
     category_name_rule = category_name_rule,
     default_category_name = DEFAULT_CATEGORY_NAME,
@@ -262,63 +259,6 @@ async def auto_pyramid_u(client, message, emoji:Emoji, size:int):
             wait = True,
         )
 
-
-async def shutdown_description(command_context):
-    return Embed(
-        'shutdown',
-        (
-            'Shuts the clients down, then stops the process.'
-            f'Usage  `{command_context.prefix}shutdown`'
-        ),
-        color = COLOR__SATORI_HELP,
-    ).add_footer(
-        'Owner only!',
-    )
-@Satori.commands(
-    category = 'UTILITY',
-    checks = checks.owner_only(),
-)
-async def shutdown(client, message):
-    
-    for client_ in CLIENTS.values():
-        await client_.disconnect()
-    
-    await client.message_create(message.channel, 'Clients stopped, stopping process.')
-    KOKORO.stop()
-    signal.pthread_kill(main_thread().ident, signal.SIGKILL)
-    
-
-async def execute_description(command_context):
-    return Embed(
-        'execute',
-        (
-            'Use an interpreter trough me :3\n'
-            'Usages:\n'
-            f'{command_context.prefix}execute # code goes here\n'
-            '# code goes here\n'
-            '# code goes here\n'
-            '\n'
-            f'{command_context.prefix}execute\n'
-            '```\n'
-            '# code goes here\n'
-            '# code goes here\n'
-            '```\n'
-            '*not code*\n'
-            '\n'
-            '... and many more ways.'
-        ),
-        color = COLOR__SATORI_HELP,
-    ).add_footer(
-        'Owner only!',
-    )
-
-Satori.commands(
-    Interpreter(locals().copy()),
-    name = 'execute',
-    description = execute_description,
-    category = 'UTILITY',
-    checks = [checks.owner_only()],
-)
 
 @Satori.events
 async def shutdown(client):

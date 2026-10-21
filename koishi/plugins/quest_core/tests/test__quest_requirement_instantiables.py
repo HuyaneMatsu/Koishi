@@ -1,5 +1,3 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 
 from ...unit_core import AMOUNT_TYPE_VALUE
@@ -54,7 +52,7 @@ def test__instantiate_duration():
 
 
 def test__quest_requirement_instantiable_create_expiration():
-    expiration = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    expiration = 1000000
     
     instantiable = quest_requirement_instantiable_create_expiration(
         expiration,
@@ -71,7 +69,7 @@ def test__quest_requirement_instantiable_create_expiration():
 
 
 def test__instantiate_expiration():
-    expiration = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    expiration = 1000000
     
     instantiable = quest_requirement_instantiable_create_expiration(
         expiration,

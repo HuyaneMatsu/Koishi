@@ -1,7 +1,6 @@
 __all__ = ()
 
-from datetime import datetime as DateTime, timezone as TimeZone
-
+from ...bot_utils.time import unix_time_seconds_get
 from ...bots import FEATURE_CLIENTS
 
 from ..adventure_core import adventure_get_active
@@ -28,7 +27,7 @@ from .component_building import (
 )
 from .constants import (
     BACK_DIRECT_LOCATION_QUEST, BACK_DIRECT_LOCATION_SELECT_ITEM_NESTED, BACK_DIRECT_LOCATION_SELECT_ITEM_TOP,
-    BACK_DIRECT_LOCATION_SELECT_REQUIREMENT, BROKEN_QUEST_DESCRIPTION
+    BACK_DIRECT_LOCATION_SELECT_REQUIREMENT, BROKEN_QUEST_DESCRIPTION, EXPIRATION_DEFAULT
 )
 from .custom_ids import (
     CUSTOM_ID_COMPLETION_COUNT, CUSTOM_ID_LINKED_QUEST_ABANDON_PATTERN, CUSTOM_ID_LINKED_QUEST_INFO_ITEM_DISABLED,
@@ -640,7 +639,7 @@ async def handle_linked_quest_submit_item_auto(client, interaction_event, user_i
             break
         
         expiration = get_linked_quest_expiration(linked_quest)
-        if (expiration is not None) and (expiration < DateTime.now(TimeZone.utc)):
+        if (expiration != EXPIRATION_DEFAULT) and (expiration < unix_time_seconds_get()):
             error_message = 'The quest expired, you cannot interact with it anymore.'
             break
         
@@ -811,7 +810,7 @@ async def _handle_submit_item_common(
             break
         
         expiration = get_linked_quest_expiration(linked_quest)
-        if (expiration is not None) and (expiration < DateTime.now(TimeZone.utc)):
+        if (expiration != EXPIRATION_DEFAULT) and (expiration < unix_time_seconds_get()):
             error_message = 'The quest expired, you cannot interact with it anymore.'
             break
         
@@ -1300,7 +1299,7 @@ async def linked_quest_abandon_invoke(client, interaction_event, user_id, page_i
         
         # Ask the user for confirmation if the quest is still alive.
         expiration = get_linked_quest_expiration(linked_quest)
-        if (expiration is None) or (expiration > DateTime.now(TimeZone.utc)):
+        if (expiration == EXPIRATION_DEFAULT) or (expiration > unix_time_seconds_get()):
             await client.interaction_form_send(
                 interaction_event,
                 build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_index, credibility_penalty),

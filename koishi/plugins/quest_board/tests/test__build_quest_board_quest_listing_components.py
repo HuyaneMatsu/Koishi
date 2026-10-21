@@ -1,5 +1,3 @@
-from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
-
 import vampytest
 from hata import (
     BUILTIN_EMOJIS, ButtonStyle, CDN_ENDPOINT, Component, Guild, Icon, IconType, create_button, create_row,
@@ -89,7 +87,7 @@ def _iter_options():
         quest_template_id_1,
         (
             quest_requirement_serialisable_create_duration(3600),
-            quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600)),
+            quest_requirement_serialisable_create_expiration(1000000 + 3600),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_0, 0),
         ),
         (

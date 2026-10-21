@@ -1,5 +1,3 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 
 from ...quest_core import (
@@ -7,6 +5,7 @@ from ...quest_core import (
     quest_sub_type_instantiable_create_base
 )
 
+from ..constants import EXPIRATION_DEFAULT
 from ..helpers import get_quest_expiration
 
 
@@ -17,7 +16,7 @@ def _iter_options():
             None,
             None,
         ),
-        None,
+        EXPIRATION_DEFAULT,
     )
     
     yield (
@@ -28,35 +27,23 @@ def _iter_options():
             ),
             None,
         ),
-        None,
+        EXPIRATION_DEFAULT,
     )
     
     yield (
         quest_create(
             QUEST_TEMPLATE_ID_SAKUYA_STRAWBERRY,
             (
-                quest_requirement_instantiable_create_expiration(DateTime(2016, 5, 14, tzinfo = TimeZone.utc)),
+                quest_requirement_instantiable_create_expiration(1000000),
             ),
             None,
         ),
-        DateTime(2016, 5, 14, tzinfo = TimeZone.utc),
+        1000000,
     )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
 def test__get_quest_submission_requirements_normalised(quest):
-    """
-    Tests whether ``get_quest_expiration`` works as intended.
-    
-    Parameters
-    ----------
-    quest : ``Quest``
-        Quest to work with.
-    
-    Returns
-    -------
-    output : `None | DateTime`
-    """
     output = get_quest_expiration(quest)
-    vampytest.assert_instance(output, DateTime, nullable = True)
+    vampytest.assert_instance(output, int)
     return output

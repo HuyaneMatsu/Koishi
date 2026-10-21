@@ -1,5 +1,3 @@
-from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
-
 import vampytest
 from hata import BUILTIN_EMOJIS, InteractionForm, create_text_display
 
@@ -30,7 +28,7 @@ def _iter_options():
         QUEST_TEMPLATE_ID_MYSTIA_CARROT,
         (
             quest_requirement_serialisable_create_duration(3600),
-            quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600)),
+            quest_requirement_serialisable_create_expiration(1000000 + 3600),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0, 0),
         ),
         (
@@ -64,7 +62,7 @@ def _iter_options():
                     f'**Time available:**\n'
                     f'- **1 hour**\n'
                     f'**Time left:**\n'
-                    f'- **59 minutes, 59 seconds**\n'
+                    f'- **1 hour**\n'
                     f'**Completed:**\n'
                     f'- **0 / 3** times, cannot be re-accepted anymore'
                 ),
@@ -102,10 +100,19 @@ def test__build_linked_quest_abandon_confirmation_form(
     -------
     output : ``InteractionForm``
     """
+    def unix_time_seconds_get():
+        return 1000000
+    
+    mocked = vampytest.mock_globals(
+        build_linked_quest_abandon_confirmation_form,
+        3,
+        unix_time_seconds_get = unix_time_seconds_get,
+    )
+    
     user_stats = user_stats_create(user_id)
     user_stats_modify_credibility_by(user_stats, credibility)
 
-    output = build_linked_quest_abandon_confirmation_form(linked_quest, user_stats, page_index, credibility_penalty)
+    output = mocked(linked_quest, user_stats, page_index, credibility_penalty)
     
     vampytest.assert_instance(output, InteractionForm)
     

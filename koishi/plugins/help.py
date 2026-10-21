@@ -104,8 +104,7 @@ CATEGORIES = (
         'Waifus',
         EMOJI_WAIFU,
         (
-            'nsfwbooru', 'safebooru', 'touhou-calendar', 'touhou-character', 'vocaloid', 'waifu-safe',
-            'waifu-nsfw'
+            'nsfwbooru', 'safebooru', 'touhou-calendar', 'touhou-character'
         ),
         (),
     ),

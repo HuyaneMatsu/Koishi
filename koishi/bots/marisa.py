@@ -20,7 +20,6 @@ import config
 from ..bot_utils.constants import (
     COLOR__MARISA_HELP, DEFAULT_CATEGORY_NAME, GUILD__SUPPORT, PREFIX__MARISA, ROLE__SUPPORT__TESTER
 )
-from ..bot_utils.interpreter_v2 import Interpreter
 from ..bot_utils.syncer import sync_request_command
 from ..bot_utils.utils import category_name_rule, command_error
 
@@ -215,41 +214,6 @@ async def ready(client):
         f'channel count: {len(CHANNELS)}\n'
     )
 
-
-async def execute_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
-    return Embed(
-        'execute',
-        (
-            'Use an interpreter trough me :3\n'
-            'Usages:\n'
-            f'{prefix}execute # code goes here\n'
-            '# code goes here\n'
-            '# code goes here\n'
-            '\n'
-            f'{prefix}execute\n'
-            '```\n'
-            '# code goes here\n'
-            '# code goes here\n'
-            '```\n'
-            '*not code*\n'
-            '\n'
-            '... and many more ways.'
-        ),
-        color = COLOR__MARISA_HELP,
-    ).add_footer(
-        'Owner only!'
-    )
-
-Marisa.commands(
-    Interpreter(locals().copy()),
-    name = 'execute',
-    description = execute_description,
-    category = 'UTILITY',
-    checks = [
-        checks.owner_only(),
-    ],
-)
 
 Marisa.commands(sync_request_command, name = 'sync', category = 'UTILITY', checks = [checks.owner_only()])
 

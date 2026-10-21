@@ -3,8 +3,8 @@ __all__ = ('SAFE_TAGS_BANNED', 'NSFW_TAGS_BANNED', 'SOLO_REQUIRED_TAGS', 'TOUHOU
 
 SHARED_TAGS_BANNED = (
     'huge_filesize',
-    'ai-generated',
     'smoking',
+    'cigarette',
     'halloween',
     'trick-or-treating',
     'cross_necklace',
@@ -39,6 +39,7 @@ SAFE_TAGS_BANNED = frozenset((
     'bikini',
     'middle_finger',
     'shorts_pull',
+    'playboy_bunny',
 ))
 
 

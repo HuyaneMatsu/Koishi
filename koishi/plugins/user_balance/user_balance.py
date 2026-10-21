@@ -706,6 +706,6 @@ def user_balance_collect_modifications(user_balance):
         modifications['top_gg_voted_at'] = user_balance.top_gg_voted_at
     
     if modification_flags & USER_BALANCE_MODIFICATION_FLAG_ALLOCATIONS:
-        modifications['user_id'] = user_balance.user_id
+        modifications['allocations'] = user_balance.allocations
     
     return modifications

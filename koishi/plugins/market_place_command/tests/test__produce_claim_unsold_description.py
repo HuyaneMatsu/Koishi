@@ -43,7 +43,7 @@ def test__produce_claim_unsold_description(
         The reward balance.
     
     fee : `int`
-        Fee payed.
+        Fee paid.
     
     Returns
     -------

@@ -22,7 +22,7 @@ class MarketPlaceItem(RichAttributeErrorBaseType):
         Additional bitwise flags describing the entry.
     
     initial_sell_fee : `int`
-        The amount of balance the user initially payed to create the item.
+        The amount of balance the user initially paid to create the item.
     
     item_flags : `int`
         The item's flags to simplify the query process.
@@ -72,7 +72,7 @@ class MarketPlaceItem(RichAttributeErrorBaseType):
             When the bet ends.
         
         initial_sell_fee : `int`
-            The amount of balance the user initially payed to create the item.
+            The amount of balance the user initially paid to create the item.
         """ 
         self = object.__new__(cls)
         self.finalises_at = finalises_at

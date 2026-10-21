@@ -1,7 +1,5 @@
 __all__ = ()
 
-from dateutil.relativedelta import relativedelta as RelativeDelta
-
 from ..item_core import get_item, get_item_group_nullable, get_item_nullable
 
 from ..guild_stats_core import guild_stats_modify_credibility_by
@@ -14,6 +12,8 @@ from ..quest_core import (
 from ..unit_core import AMOUNT_TYPE_VALUE, AMOUNT_TYPE_WEIGHT
 from ..user_balance import user_balance_modify_balance_by
 from ..user_stats_core import user_stats_modify_credibility_by
+
+from .constants import EXPIRATION_DEFAULT
 
 
 def get_quest_with_template_id(quest_batch, quest_template_id):
@@ -364,13 +364,15 @@ def get_quest_expiration(quest):
     
     Returns
     -------
-    expiration : ``None | Datetime``
+    expiration : `int`
     """
     requirements = quest.requirements
     if (requirements is not None):
         for requirement in requirements:
             if requirement.behaviour.type == QUEST_REQUIREMENT_TYPE_EXPIRATION:
                 return requirement.configuration.expiration
+    
+    return EXPIRATION_DEFAULT
 
 
 def get_linked_quest_expiration(linked_quest):
@@ -384,16 +386,18 @@ def get_linked_quest_expiration(linked_quest):
     
     Returns
     -------
-    expiration : ``None | Datetime``
+    expiration : `int`
     """
     requirements = linked_quest.requirements
     if (requirements is not None):
         for requirement in requirements:
             if requirement.behaviour.type == QUEST_REQUIREMENT_TYPE_EXPIRATION:
                 return requirement.configuration.expiration
+    
+    return EXPIRATION_DEFAULT
 
 
-def get_quest_duration_delta(quest):
+def get_quest_duration(quest):
     """
     Gets a quest's duration.
     
@@ -404,16 +408,18 @@ def get_quest_duration_delta(quest):
     
     Returns
     -------
-    duration_delta : ``None | RelativeDelta``
+    duration_delta : `int`
     """
     requirements = quest.requirements
     if (requirements is not None):
         for requirement in requirements:
             if requirement.behaviour.type == QUEST_REQUIREMENT_TYPE_DURATION:
-                return RelativeDelta(seconds = requirement.configuration.duration)
+                return requirement.configuration.duration
+    
+    return 0
 
 
-def get_linked_quest_duration_delta(linked_quest):
+def get_linked_quest_duration(linked_quest):
     """
     Gets a quest's duration.
     
@@ -424,14 +430,16 @@ def get_linked_quest_duration_delta(linked_quest):
     
     Returns
     -------
-    duration_delta : ``None | RelativeDelta``
+    duration_delta : `int`
     """
     requirements = linked_quest.requirements
     if (requirements is not None):
         for requirement in requirements:
             if requirement.behaviour.type == QUEST_REQUIREMENT_TYPE_DURATION:
-                return RelativeDelta(seconds = requirement.configuration.duration)
-
+                return requirement.configuration.duration
+    
+    return 0
+    
 
 def get_linked_quest_submission_requirement_at_index(linked_quest, requirement_index):
     """

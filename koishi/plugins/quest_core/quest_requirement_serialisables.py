@@ -4,7 +4,6 @@ __all__ = (
     'quest_requirement_serialisable_create_item_group'
 )
 
-from datetime import datetime as DateTime, timezone as TimeZone
 from struct import Struct
 
 from scarletio import copy_docs
@@ -53,7 +52,7 @@ def deserialise_expiration(data, start_index):
     
     return (
         quest_requirement_serialisable_create_expiration(
-            DateTime.fromtimestamp(int.from_bytes(data[start_index : end_index], 'little'), tz = TimeZone.utc),
+            int.from_bytes(data[start_index : end_index], 'little'),
         ),
         end_index,
     )
@@ -61,7 +60,7 @@ def deserialise_expiration(data, start_index):
 
 @copy_docs(serialise_base)
 def serialise_expiration(configuration):
-    yield int(configuration.expiration.timestamp()).to_bytes(8, 'little')
+    yield configuration.expiration.to_bytes(8, 'little')
 
 
 @copy_docs(deserialise_base)
@@ -188,7 +187,7 @@ class QuestRequirementSerialisableConfigurationExpiration(QuestSubTypeSerialisab
     
     Attributes
     ----------
-    expiration : `DateTime`
+    expiration : `int`
         When the quest expires.
     """
     __slots__ = ('expiration',)

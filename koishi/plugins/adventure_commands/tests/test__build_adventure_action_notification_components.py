@@ -9,7 +9,7 @@ from ...adventure_core import (
 from ...item_core import ITEM_ID_SCARLET_ONION, get_item_nullable
 
 from ..component_building import build_adventure_action_notification_components
-from ..constants import ADVENTURE_VIEW_MODE_DEFAULT
+from ..constants import ADVENTURE_VIEW_MODE_DEFAULT, ADVENTURE_VIEW_MODE_DETAILED
 
 
 def _iter_options():
@@ -57,6 +57,14 @@ def _iter_options():
                     enabled = True,
                     custom_id = (
                         f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}'
+                    ),
+                ),
+                create_button(
+                    'View adventure (detailed)',
+                    enabled = True,
+                    custom_id = (
+                        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DETAILED:x}.'
                         f'{False:x}.{0:x}'
                     ),
                 ),
@@ -129,6 +137,14 @@ def _iter_options():
                     enabled = True,
                     custom_id = (
                         f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DEFAULT:x}.'
+                        f'{False:x}.{0:x}'
+                    ),
+                ),
+                create_button(
+                    'View adventure (detailed)',
+                    enabled = True,
+                    custom_id = (
+                        f'adventure.view.{user_id:x}.{adventure_entry_id:x}.{ADVENTURE_VIEW_MODE_DETAILED:x}.'
                         f'{False:x}.{0:x}'
                     ),
                 ),

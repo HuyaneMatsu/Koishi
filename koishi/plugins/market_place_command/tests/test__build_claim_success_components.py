@@ -76,7 +76,7 @@ def test__build_claim_success_components(
         The reward balance.
     
     fee : `int`
-        Fee payed.
+        Fee paid.
     
     page_index : `int`
         Page identifier to redirect back to.

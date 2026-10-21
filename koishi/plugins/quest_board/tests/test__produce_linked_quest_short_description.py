@@ -1,5 +1,3 @@
-from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
-
 import vampytest
 from hata import BUILTIN_EMOJIS
 
@@ -15,12 +13,10 @@ from ...unit_core import AMOUNT_TYPE_COUNT, AMOUNT_TYPE_WEIGHT
 
 from ..content_building import produce_linked_quest_short_description
 
-from .helpers import DateTimeMock
-
 
 def _iter_options():
-    quest_accepted_at = DateTime(2016, 5, 14, 0, 0, 0, tzinfo = TimeZone.utc)
-    now = DateTime(2016, 5, 14, 0, 0, 20, tzinfo = TimeZone.utc)
+    quest_accepted_at = 1463184000
+    now = 1463184000
     
     quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_PEACH
     quest_template_0 = get_quest_template_nullable(quest_template_id_0)
@@ -44,7 +40,7 @@ def _iter_options():
         quest_template_id_0,
         (
             quest_requirement_serialisable_create_duration(duration),
-            quest_requirement_serialisable_create_expiration(quest_accepted_at + TimeDelta(seconds = duration)),
+            quest_requirement_serialisable_create_expiration(quest_accepted_at + duration),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 2),
         ),
         (
@@ -58,7 +54,7 @@ def _iter_options():
         quest_template_0,
         now,
         (
-            f'Time left: 2 days, 23 hours, 59 minutes\n'
+            f'Time left: 3 days\n'
             f'Submit 2 / 20 {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
         ),
     )
@@ -70,7 +66,7 @@ def _iter_options():
         quest_template_id_0,
         (
             quest_requirement_serialisable_create_duration(duration),
-            quest_requirement_serialisable_create_expiration(quest_accepted_at + TimeDelta(seconds = duration)),
+            quest_requirement_serialisable_create_expiration(quest_accepted_at + duration),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 0),
         ),
         (
@@ -86,7 +82,7 @@ def _iter_options():
         quest_template_0,
         now,
         (
-            f'Completed: 1 / 3 times, re-acceptable for 23 hours, 59 minutes, 40 seconds\n'
+            f'Completed: 1 / 3 times, re-acceptable for 1 day\n'
             f'Submit 20 {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
         ),
     )
@@ -98,7 +94,7 @@ def _iter_options():
         quest_template_id_0,
         (
             quest_requirement_serialisable_create_duration(duration),
-            quest_requirement_serialisable_create_expiration(quest_accepted_at + TimeDelta(seconds = duration)),
+            quest_requirement_serialisable_create_expiration(quest_accepted_at + duration),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, amount_required, 0),
         ),
         (
@@ -152,7 +148,7 @@ def _iter_options():
         quest_template_id_0,
         (
             quest_requirement_serialisable_create_duration(duration),
-            quest_requirement_serialisable_create_expiration(now + TimeDelta(seconds = duration)),
+            quest_requirement_serialisable_create_expiration(now + duration),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, amount_required, 0),
         ),
         (
@@ -168,14 +164,14 @@ def _iter_options():
         quest_template_1,
         now,
         (
-            f'Completed: 1 / unlimited times, re-acceptable for 23 hours, 59 minutes, 40 seconds\n'
+            f'Completed: 1 / unlimited times, re-acceptable for 1 day\n'
             f'Submit 0.02 kg {BUILTIN_EMOJIS["grapes"]} Bluefrankish to Sakuya.'
         ),
     )
 
 
 @vampytest._(vampytest.call_from(_iter_options()).returning_last())
-def test__produce_linked_quest_short_description(linked_quest, quest_template, current_date):
+def test__produce_linked_quest_short_description(linked_quest, quest_template, current_unix_time_seconds):
     """
     Tests whether ``produce_linked_quest_short_description`` works as intended.
     
@@ -187,17 +183,20 @@ def test__produce_linked_quest_short_description(linked_quest, quest_template, c
     quest_template : ``QuestTemplate``
         The quest's template.
     
-    current_date : `Datetime`
+    current_unix_time_seconds : `int`
         The current date.
     
     Returns
     -------
     output : `str`
     """
-    DateTimeMock.set_current(current_date)
+    def unix_time_seconds_get():
+        nonlocal current_unix_time_seconds
+        return current_unix_time_seconds
+    
     mocked = vampytest.mock_globals(
         produce_linked_quest_short_description,
-        DateTime = DateTimeMock,
+        unix_time_seconds_get = unix_time_seconds_get,
         recursion = 2,
     )
     output = [*mocked(linked_quest, quest_template)]

@@ -1,7 +1,4 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
-
 
 from ...item_core import ITEM_ID_STRAWBERRY
 from ...unit_core import AMOUNT_TYPE_WEIGHT
@@ -55,7 +52,7 @@ def test__LinkedQuest__repr():
     
     requirements = (
         quest_requirement_serialisable_create_duration(3600 * 24 * 3),
-        quest_requirement_serialisable_create_expiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
+        quest_requirement_serialisable_create_expiration(1000000),
         quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
     )
     rewards = (
@@ -87,7 +84,7 @@ def test__linked_quest_create():
     
     requirements = (
         quest_requirement_serialisable_create_duration(3600 * 24 * 3),
-        quest_requirement_serialisable_create_expiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
+        quest_requirement_serialisable_create_expiration(1000000),
         quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
     )
     rewards = (
@@ -129,7 +126,7 @@ def test__linked_quest_create_from_entry():
     
     requirements = (
         quest_requirement_serialisable_create_duration(3600 * 24 * 3),
-        quest_requirement_serialisable_create_expiration(DateTime(2016, 10, 28, tzinfo = TimeZone.utc)),
+        quest_requirement_serialisable_create_expiration(1000000),
         quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
     )
     rewards = (

@@ -1,5 +1,3 @@
-from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
-
 import vampytest
 from hata import ButtonStyle, Component, create_button, create_row, create_separator, create_text_display
 
@@ -39,7 +37,7 @@ def _iter_options():
         QUEST_TEMPLATE_ID_CHIRUNO_FROG,
         (
             quest_requirement_serialisable_create_duration(duration),
-            quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = duration)),
+            quest_requirement_serialisable_create_expiration(1000000 + duration),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_FROG, AMOUNT_TYPE_COUNT, 50, 50),
         ),
         (

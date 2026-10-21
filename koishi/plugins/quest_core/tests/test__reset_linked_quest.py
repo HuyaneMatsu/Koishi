@@ -1,5 +1,3 @@
-from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
-
 import vampytest
 
 from ...item_core import ITEM_ID_STRAWBERRY
@@ -15,7 +13,7 @@ from ..quest_requirement_serialisables import (
 )
 from ..utils import reset_linked_quest
 
-from .helpers import DateTimeMock, _create_linked_quest_additional_input_fields
+from .helpers import _create_linked_quest_additional_input_fields
 
 
 def test__reset_linked_quest__never_under_zero():
@@ -24,8 +22,7 @@ def test__reset_linked_quest__never_under_zero():
     
     Case: do not go under 0.
     """
-    now = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
-    current_unix_time_seconds = 10000
+    now = 1000000
     
     user_id = 202602230003
     guild_id = 202602230004
@@ -40,16 +37,13 @@ def test__reset_linked_quest__never_under_zero():
     linked_quest.completion_count = 1
     linked_quest.completion_state = LINKED_QUEST_COMPLETION_STATE_COMPLETED
     
-    DateTimeMock.set_current(now)
     
-    # Also test get unix time here too.
     def unix_time_seconds_get():
-        nonlocal current_unix_time_seconds
-        return current_unix_time_seconds
+        nonlocal now
+        return now
     
     mocked = vampytest.mock_globals(
         reset_linked_quest,
-        DateTime = DateTimeMock,
         unix_time_seconds_get = unix_time_seconds_get,
     )
     
@@ -57,12 +51,12 @@ def test__reset_linked_quest__never_under_zero():
     
     vampytest.assert_instance(linked_quest, LinkedQuest)
     vampytest.assert_eq(linked_quest.completion_state, LINKED_QUEST_COMPLETION_STATE_ACTIVE)
-    vampytest.assert_eq(linked_quest.created_at, current_unix_time_seconds)
+    vampytest.assert_eq(linked_quest.created_at, now)
     vampytest.assert_eq(
         linked_quest.requirements,
         (
             quest_requirement_serialisable_create_duration(3600 * 24 * 3),
-            quest_requirement_serialisable_create_expiration(now + TimeDelta(seconds = 3600 * 24 * 3)),
+            quest_requirement_serialisable_create_expiration(now + 3600 * 24 * 3),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 0),
         ),
     )
@@ -74,7 +68,7 @@ def test__reset_linked_quest__over_submitted():
     
     Case: over submitted.
     """
-    now = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    now = 1000000
     
     user_id = 202604160000
     guild_id = 202604160001
@@ -91,11 +85,13 @@ def test__reset_linked_quest__over_submitted():
     linked_quest.requirements[2].configuration.amount_submitted = 1200
     
     
-    DateTimeMock.set_current(now)
+    def unix_time_seconds_get():
+        nonlocal now
+        return now
     
     mocked = vampytest.mock_globals(
         reset_linked_quest,
-        DateTime = DateTimeMock,
+        unix_time_seconds_get = unix_time_seconds_get,
     )
     
     mocked(linked_quest)
@@ -106,7 +102,7 @@ def test__reset_linked_quest__over_submitted():
         linked_quest.requirements,
         (
             quest_requirement_serialisable_create_duration(3600 * 24 * 3),
-            quest_requirement_serialisable_create_expiration(now + TimeDelta(seconds = 3600 * 24 * 3)),
+            quest_requirement_serialisable_create_expiration(now + 3600 * 24 * 3),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 1000, 200),
         ),
     )

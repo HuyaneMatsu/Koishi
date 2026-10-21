@@ -1,4 +1,3 @@
-from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
 from math import ceil
 
 import vampytest
@@ -57,7 +56,7 @@ def _iter_options():
         quest_template_id_0,
         (
             quest_requirement_serialisable_create_duration(3600),
-            quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600)),
+            quest_requirement_serialisable_create_expiration(1000000 + 3600),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0, 0),
         ),
         (

@@ -27,7 +27,7 @@ def _iter_options():
             create_text_display(
                 f'You put 100 {item_peach.emoji} {item_peach.name} ({100 * item_peach.weight / 1000:.01f} kg) '
                 f'on the market for 4 days, starting at 1000 {EMOJI__HEART_CURRENCY}.\n'
-                f'You payed 30 {EMOJI__HEART_CURRENCY} initial fee.'
+                f'You paid 30 {EMOJI__HEART_CURRENCY} initial fee.'
             ),
             create_separator(),
             create_row(

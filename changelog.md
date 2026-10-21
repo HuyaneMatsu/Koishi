@@ -1,3 +1,19 @@
+### 2026-10-20
+
+- Fix `adventure goal` triggered 1 step after intended due to bad ordering in logic. (ayahiya)
+- Add `Refresh` button(s) to `/market-place` sub-command outputs. (billforchip)
+- Add `View adventure (detailed)` button to `adventure action notification`. (ayahiya)
+- Fix `payed` -> `paid`. (nishida_satono)
+- Remove `/vocaloid` command.
+- Make `shutdown` a slash command (owner only).
+- Make `execute` a message context command (owner only).
+
+- Balance quests (chaos3326):
+    - Satori - Sweets - Credibility 20 -> 40
+    - Rumia - Sweets - Credibility 20 -> 40
+    - Tewi - Rice -> Credibility 60 -> 80, Balance 26000 -> 25000, Dango 3 -> 6
+    - Remilia - Flandre wing - Balance 138000 -> 69000
+
 ### 2026-09-30
 
 - Adventure done notification now instead of providing an option for the user to view the details about the adventure
@@ -33,7 +49,7 @@
 - Make `linked quest details`'s summary line highlight (bolds) only the missing requirements.
 
 - Update tooltip:
-    - `rice` item now tells where it is found.
+    - `rice` item now tells where it is found.a
 
 - Add new items:
     - Ramen

@@ -1107,7 +1107,7 @@ QUEST_TEMPLATE_SATORI_PUDDING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_SATORI_PUDDING
     ),
     (
         quest_reward_generator_create_item_exact(ITEM_ID_TEA_LEAVES, 16, 1, 80, 120),
-        quest_reward_generator_create_credibility(20),
+        quest_reward_generator_create_credibility(40),
     ),
 )
 
@@ -1137,7 +1137,7 @@ QUEST_TEMPLATE_REMILIA_FLANDRE_WING = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_REMILIA_
         quest_requirement_generator_create_item_exact(ITEM_ID_UNKNOWN_OVEN_S_TORN_OUT_WING, AMOUNT_TYPE_COUNT, 1, 1, 100, 100),
     ),
     (
-        quest_reward_generator_create_balance(138000, 100, 90, 110),
+        quest_reward_generator_create_balance(69000, 100, 90, 110),
         quest_reward_generator_create_credibility_fix(200),
     ),
 )
@@ -1557,9 +1557,9 @@ QUEST_TEMPLATE_TEWI_RICE = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_TEWI_RICE] = quest_
         quest_requirement_generator_create_item_exact(ITEM_ID_RICE, AMOUNT_TYPE_WEIGHT, 32000, 1000, 80, 120),
     ),
     (
-        quest_reward_generator_create_balance(26000, 1000, 80, 120),
-        quest_reward_generator_create_item_exact_fix(ITEM_ID_DANGO, 3),
-        quest_reward_generator_create_credibility(60),
+        quest_reward_generator_create_balance(25000, 1000, 80, 120),
+        quest_reward_generator_create_item_exact_fix(ITEM_ID_DANGO, 6),
+        quest_reward_generator_create_credibility(80),
     ),
 )
 
@@ -1585,7 +1585,7 @@ QUEST_TEMPLATE_RUMIA_SWEETS = QUEST_TEMPLATES[QUEST_TEMPLATE_ID_RUMIA_SWEETS] = 
     ),
     (
         quest_reward_generator_create_balance(1200, 100, 90, 110),
-        quest_reward_generator_create_credibility(20),
+        quest_reward_generator_create_credibility(40),
     ),
 )
 

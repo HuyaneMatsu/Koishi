@@ -1,5 +1,3 @@
-from datetime import datetime as DateTime, timezone as TimeZone
-
 import vampytest
 
 from ...unit_core import AMOUNT_TYPE_VALUE
@@ -75,7 +73,7 @@ def test__serialise_duration():
 
 
 def test__quest_requirement_serialisable_create_expiration():
-    expiration = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    expiration = 1000000
     
     serialisable = quest_requirement_serialisable_create_expiration(
         expiration,
@@ -92,9 +90,9 @@ def test__quest_requirement_serialisable_create_expiration():
 
 
 def test__deserialise_expiration():
-    expiration = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    expiration = 1000000
     
-    data = int(expiration.timestamp()).to_bytes(8, 'little')
+    data = expiration.to_bytes(8, 'little')
     start_index = 0
     
     serialisable, end_index = QUEST_REQUIREMENT_SERIALISABLE_BEHAVIOUR_EXPIRATION.deserialise(
@@ -114,7 +112,7 @@ def test__deserialise_expiration():
 
 
 def test__serialise_expiration():
-    expiration = DateTime(2016, 5, 14, tzinfo = TimeZone.utc)
+    expiration = 1000000
     
     serialisable = quest_requirement_serialisable_create_expiration(
         expiration,
@@ -126,7 +124,7 @@ def test__serialise_expiration():
     
     vampytest.assert_eq(
         output,
-        int(expiration.timestamp()).to_bytes(8, 'little'),
+        expiration.to_bytes(8, 'little'),
     )
 
 

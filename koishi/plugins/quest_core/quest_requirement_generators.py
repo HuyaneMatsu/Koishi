@@ -197,7 +197,7 @@ class QuestRequirementGeneratorConfigurationExpiration(QuestSubTypeGeneratorConf
     
     Attributes
     ----------
-    expiration : `DateTime`
+    expiration : `int`
         When the quest expires.
     """
     __slots__ = ('expiration',)
@@ -395,7 +395,7 @@ def quest_requirement_generator_create_expiration(
     
     Parameters
     ----------
-    expiration : `DateTime`
+    expiration : `int`
         When the quest expires.
     
     Returns

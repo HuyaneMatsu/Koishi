@@ -1,5 +1,3 @@
-from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
-
 import vampytest
 from hata import (
     BUILTIN_EMOJIS, ButtonStyle, CDN_ENDPOINT, Client, Component, Guild, GuildProfile, Icon, IconType, User,
@@ -19,8 +17,6 @@ from ...user_stats_core import user_stats_create, user_stats_modify_credibility_
 from ..component_building import build_linked_quests_listing_components
 from ..constants import EMOJI_PAGE_NEXT, EMOJI_PAGE_PREVIOUS
 
-from .helpers import DateTimeMock
-
 
 def _iter_options():
     user_id = 202505240010
@@ -29,8 +25,8 @@ def _iter_options():
     guild_id_1 = 202510130010
     user_nick = 'You must be new here'
     quest_duration = 3600
-    quests_began_at = DateTime(2016, 5, 14, 0, 0, 0, tzinfo = TimeZone.utc)
-    now = DateTime(2016, 5, 14, 0, 0, 20, tzinfo = TimeZone.utc)
+    quests_began_at = 1463184000
+    now = 1463184000
     
     quest_template_id_0 = QUEST_TEMPLATE_ID_MYSTIA_CARROT
     quest_template_0 = get_quest_template_nullable(quest_template_id_0)
@@ -50,7 +46,7 @@ def _iter_options():
         quest_template_id_0,
         (
             quest_requirement_serialisable_create_duration(quest_duration),
-            quest_requirement_serialisable_create_expiration(quests_began_at + TimeDelta(seconds = quest_duration)),
+            quest_requirement_serialisable_create_expiration(quests_began_at + quest_duration),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_CARROT, AMOUNT_TYPE_WEIGHT, quest_amount_0, 0),
         ),
         (
@@ -68,7 +64,7 @@ def _iter_options():
         quest_template_id_1,
         (
             quest_requirement_serialisable_create_duration(quest_duration),
-            quest_requirement_serialisable_create_expiration(quests_began_at + TimeDelta(seconds = quest_duration)),
+            quest_requirement_serialisable_create_expiration(quests_began_at + quest_duration),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
         ),
         (
@@ -86,7 +82,7 @@ def _iter_options():
         quest_template_id_1,
         (
             quest_requirement_serialisable_create_duration(quest_duration),
-            quest_requirement_serialisable_create_expiration(quests_began_at + TimeDelta(seconds = quest_duration)),
+            quest_requirement_serialisable_create_expiration(quests_began_at + quest_duration),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
         ),
         (
@@ -107,7 +103,7 @@ def _iter_options():
         quest_template_id_1,
         (
             quest_requirement_serialisable_create_duration(quest_duration),
-            quest_requirement_serialisable_create_expiration(quests_began_at + TimeDelta(seconds = quest_duration)),
+            quest_requirement_serialisable_create_expiration(quests_began_at + quest_duration),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_PEACH, AMOUNT_TYPE_COUNT, quest_amount_1, 0),
         ),
         (
@@ -187,7 +183,7 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'Time left: 59 minutes, 40 seconds\n'
+                    f'Time left: 1 hour\n'
                     f'Submit 0 / {quest_amount_0 / 1000} kg {BUILTIN_EMOJIS["carrot"]} Carrot to Mystia.'
                 ),
                 thumbnail = create_button(
@@ -201,7 +197,7 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'Time left: 59 minutes, 40 seconds\n'
+                    f'Time left: 1 hour\n'
                     f'Submit 0 / {quest_amount_1} {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
                 ),
                 thumbnail = create_button(
@@ -215,7 +211,7 @@ def _iter_options():
             ),
             create_section(
                 create_text_display(
-                    f'Completed: 1 / 3 times, re-acceptable for 23 hours, 59 minutes, 40 seconds\n'
+                    f'Completed: 1 / 3 times, re-acceptable for 1 day\n'
                     f'Submit {quest_amount_1} {BUILTIN_EMOJIS["peach"]} Peach to Mystia.'
                 ),
                 thumbnail = create_button(
@@ -270,7 +266,7 @@ def test__build_linked_quests_listing_components(
     user_credibility,
     linked_quest_listing,
     page_index,
-    current_date_time,
+    current_unix_time_seconds,
     client_id,
 ):
     """
@@ -305,7 +301,7 @@ def test__build_linked_quests_listing_components(
     page_index : `int`
         The page's index to show.
     
-    current_date_time : `DateTime`
+    current_unix_time_seconds : `int`
         Current time use.
     
     Returns
@@ -333,11 +329,13 @@ def test__build_linked_quests_listing_components(
         user_stats = user_stats_create(user_id)
         user_stats_modify_credibility_by(user_stats, user_credibility)
         
-        DateTimeMock.set_current(current_date_time)
+        def unix_time_seconds_get():
+            nonlocal current_unix_time_seconds
+            return current_unix_time_seconds
         
         mocked = vampytest.mock_globals(
             build_linked_quests_listing_components,
-            DateTime = DateTimeMock,
+            unix_time_seconds_get = unix_time_seconds_get,
             recursion = 3,
         )
         

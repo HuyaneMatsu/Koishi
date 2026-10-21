@@ -10,7 +10,7 @@ from ..market_place_core import (
     MARKET_PLACE_OWN_OFFERS_PAGE_SIZE_DEFAULT, CUSTOM_ID_MARKET_PLACE_INBOX_CLAIM_ONE_BUILDER
 )
 
-from .constants import BID_INCREASE_LOWER_THRESHOLD, EMOJI_CLOSE, EMOJI_LEFT, EMOJI_RIGHT
+from .constants import BID_INCREASE_LOWER_THRESHOLD, EMOJI_CLOSE, EMOJI_LEFT, EMOJI_REFRESH, EMOJI_RIGHT
 from .content_building import (
     produce_claim_purchased_description, produce_claim_sold_description, produce_claim_unsold_description,
     produce_inbox_purchased_market_place_item_description, produce_inbox_sold_market_place_item_description,
@@ -234,6 +234,13 @@ def build_own_offers_view_components(
     
     components.append(create_row(
         create_button(
+            'Refresh',
+            EMOJI_REFRESH,
+            custom_id = CUSTOM_ID_MARKET_PLACE_OWN_OFFERS_VIEW_BUILDER(
+                user.id, page_index, page_size
+            ),
+        ),
+        create_button(
             f'Page {page_index!s}',
             EMOJI_LEFT,
             custom_id = page_index_decrement_custom_id,
@@ -385,6 +392,13 @@ def build_inbox_view_components(
     
     components.append(create_row(
         create_button(
+            'Refresh',
+            EMOJI_REFRESH,
+            custom_id = CUSTOM_ID_MARKET_PLACE_INBOX_VIEW_BUILDER(
+                user.id, page_index, page_size
+            ),
+        ),
+        create_button(
             f'Page {page_index!s}',
             EMOJI_LEFT,
             custom_id = page_index_decrement_custom_id,
@@ -443,7 +457,7 @@ def build_claim_success_components(
         The reward balance.
     
     fee : `int`
-        Fee payed.
+        Fee paid.
     
     page_index : `int`
         Page identifier to redirect back to.
@@ -608,6 +622,17 @@ def build_purchase_view_components(
         page_index_increment_enabled = False
     
     components.append(create_row(
+        create_button(
+            'Refresh',
+            EMOJI_REFRESH,
+            custom_id = CUSTOM_ID_MARKET_PLACE_PURCHASE_VIEW_BUILDER(
+                user_id,
+                (0 if item is None else item.id),
+                required_flags,
+                page_index,
+                page_size,
+            ),
+        ),
         create_button(
             f'Page {page_index!s}',
             EMOJI_LEFT,

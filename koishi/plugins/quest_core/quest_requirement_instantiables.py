@@ -110,7 +110,7 @@ class QuestRequirementInstantiableConfigurationExpiration(QuestSubTypeInstantiab
     
     Attributes
     ----------
-    expiration : `DateTime`
+    expiration : `int`
         When the quest expires.
     """
     __slots__ = ('expiration',)

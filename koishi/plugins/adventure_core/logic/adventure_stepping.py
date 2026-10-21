@@ -238,6 +238,17 @@ async def adventure_action_step(adventure):
         next_random = Random(next_initial_seed)
         next_action = action_get(adventure, next_random)
     
+    # Create and insert the current action.
+    adventure_action = adventure_action_create(
+        action.id,
+        action_at,
+        None,
+        loot_data_build(looted_items),
+        health_exhausted,
+        energy_exhausted,
+    )
+    adventure_add_action(adventure, adventure_action)
+    
     if next_action is None:
         should_return = True
         duration_seconds = travel_duration_seconds
@@ -249,7 +260,6 @@ async def adventure_action_step(adventure):
         next_duration_seconds = action_duration_seconds_get(
             next_action.duration, next_random, next_loot_accumulations, next_multiplier
         )
-        
         should_return = should_cancel_adventure(
             adventure,
             user_stats,
@@ -269,17 +279,6 @@ async def adventure_action_step(adventure):
     # Finish modifying the adventure.
     if should_return:
         adventure_set_state(adventure, ADVENTURE_STATE_RETURNING)
-    
-    # Create and insert the current action.
-    adventure_action = adventure_action_create(
-        action.id,
-        action_at,
-        None,
-        loot_data_build(looted_items),
-        health_exhausted,
-        energy_exhausted,
-    )
-    adventure_add_action(adventure, adventure_action)
     
     # Insert a lost entry if we are lost.
     if (not cancelling_after) and (next_action is None):

@@ -17,7 +17,7 @@ from ..user_settings import USER_SETTINGS_CUSTOM_ID_NOTIFICATION_ADVENTURE_ACTIO
 from .constants import (
     ACTIVE_ADVENTURE_ACTION_LIMIT, ADVENTURE_ACTION_LISTING_PAGE_SIZE, ADVENTURE_CANCELLATION_MODE_AFTER,
     ADVENTURE_CANCELLATION_MODE_NOW, ADVENTURE_LOOT_LISTING_MODE_DEFAULT, ADVENTURE_LOOT_LISTING_MODE_THIS_STEP,
-    ADVENTURE_LOOT_LISTING_MODE_TOTAL, ADVENTURE_VIEW_MODE_DEFAULT, ADVENTURE_VIEW_MODE_DETAILED
+    ADVENTURE_LOOT_LISTING_MODE_TOTAL, ADVENTURE_VIEW_MODE_DEFAULT, ADVENTURE_VIEW_MODE_DETAILED, EMOJI_REFRESH
 )
 from .content_building import (
     produce_adventure_action_listing_view_header, produce_adventure_action_notification_header,
@@ -346,6 +346,7 @@ def _build_adventure_finalised_control_components(
     
     component_refresh = create_button(
         'Refresh',
+        EMOJI_REFRESH,
         enabled = (not finalised),
         custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
             adventure.user_id,
@@ -1024,6 +1025,12 @@ def build_adventure_action_notification_components(adventure, adventure_action):
                 'View adventure',
                 custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
                     adventure.user_id, adventure.entry_id, ADVENTURE_VIEW_MODE_DEFAULT, False, 0,
+                ),
+            ),
+            create_button(
+                'View adventure (detailed)',
+                custom_id = CUSTOM_ID_ADVENTURE_VIEW_BUILDER(
+                    adventure.user_id, adventure.entry_id, ADVENTURE_VIEW_MODE_DETAILED, False, 0,
                 ),
             ),
             create_button(

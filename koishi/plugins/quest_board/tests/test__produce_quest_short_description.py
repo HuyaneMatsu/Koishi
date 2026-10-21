@@ -1,5 +1,3 @@
-from datetime import datetime as DateTime, timedelta as TimeDelta, timezone as TimeZone
-
 import vampytest
 from hata import BUILTIN_EMOJIS
 
@@ -63,7 +61,7 @@ def _iter_options():
         quest_template_id_1,
         (
             quest_requirement_serialisable_create_duration(3600 * 24),
-            quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600 * 24)),
+            quest_requirement_serialisable_create_expiration(1000000 + 3600 * 24),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_STRAWBERRY, AMOUNT_TYPE_WEIGHT, 500, 0),
         ),
         None,
@@ -77,7 +75,7 @@ def _iter_options():
         quest_template_id_2,
         (
             quest_requirement_serialisable_create_duration(3600 * 24),
-            quest_requirement_serialisable_create_expiration(DateTime.now(TimeZone.utc) + TimeDelta(seconds = 3600 * 24)),
+            quest_requirement_serialisable_create_expiration(1000000 + 3600 * 24),
             quest_requirement_serialisable_create_item_exact(ITEM_ID_BLUEFRANKISH, AMOUNT_TYPE_WEIGHT, 500, 0),
         ),
         None,
